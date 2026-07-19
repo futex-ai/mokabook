@@ -10,9 +10,16 @@ import { MokabookError } from "../errors.js";
 import { MANIFEST_NAME, parseManifest } from "../registry/manifest.js";
 import type { ManifestScreen, ManifestV3 } from "../registry/types.js";
 import type { GitClient } from "./git.js";
+import {
+  copySnapshotDependencies,
+  FileSystemReviewAssetReader,
+  type ReviewAssetReader,
+} from "./assets.js";
 import { normalizeReviewPair, normalizeSingleDocument } from "./ignore.js";
+import { addArtifactFile, snapshotPath } from "./paths.js";
 import type {
   ReviewArtifact,
+  ReviewArtifactContent,
   ReviewResult,
   ReviewState,
   ScreenReview,
@@ -25,6 +32,7 @@ export async function compareReview(
   config: ResolvedConfig,
   git: GitClient,
   baseRef: string,
+  assetReader: ReviewAssetReader = new FileSystemReviewAssetReader(config),
 ): Promise<ReviewArtifact> {
   const baseCommit = await git.resolveRef(baseRef);
   const baseManifest = await readBaseManifest(git, baseCommit, config);
@@ -32,7 +40,9 @@ export async function compareReview(
   const mockupsPrefix = toPosixPath(
     path.relative(config.repoRoot, config.mockupsDir),
   );
-  const files = new Map<string, string>();
+  const files = new Map<string, ReviewArtifactContent>();
+  const baseSeeds = new Set<string>();
+  const headSeeds = new Set<string>();
   const baseByRoute = screenMap(baseManifest);
   const headByRoute = screenMap(compilation.manifest);
   const routes = [
@@ -58,9 +68,21 @@ export async function compareReview(
         sharedImpact,
         git,
         files,
+        baseSeeds,
+        headSeeds,
       ),
     );
   }
+  await copySnapshotDependencies(files, "before", baseSeeds, async (route) => {
+    const repoPath = joinGit(mockupsPrefix, route);
+    return git.readFileBytes
+      ? git.readFileBytes(baseCommit, repoPath)
+      : Buffer.from(await git.readFile(baseCommit, repoPath), "utf8");
+  });
+  await copySnapshotDependencies(files, "after", headSeeds, async (route) => {
+    const generated = compilation.outputs.get(route);
+    return generated ?? assetReader.read(route);
+  });
   const result: ReviewResult = {
     baseCommit,
     baseRef,
@@ -82,32 +104,53 @@ async function compareScreen(
   changedPaths: readonly string[],
   sharedImpact: readonly string[],
   git: GitClient,
-  files: Map<string, string>,
+  files: Map<string, ReviewArtifactContent>,
+  baseSeeds: Set<string>,
+  headSeeds: Set<string>,
 ): Promise<ScreenReview> {
   const entry = head ?? base;
   if (!entry)
     throw new MokabookError("review-invalid", "comparison route has no screen");
   const viewports: ViewportReview[] = [];
   for (const viewport of ["mobile", "desktop"] as const) {
-    const before = base
-      ? await git.readFile(
-          commit,
-          joinGit(mockupsPrefix, base.fragments[viewport]),
-        )
+    const baseFragment = base?.fragments[viewport];
+    const headFragment = head?.fragments[viewport];
+    const before = baseFragment
+      ? await git.readFile(commit, joinGit(mockupsPrefix, baseFragment))
       : undefined;
-    const after = head
-      ? compilation.outputs.get(head.fragments[viewport])
+    const after = headFragment
+      ? compilation.outputs.get(headFragment)
       : undefined;
     if (head && after === undefined) {
       throw new MokabookError(
         "review-invalid",
-        `head fragment is missing: ${head.fragments[viewport]}`,
+        `head fragment is missing: ${headFragment ?? viewport}`,
       );
     }
-    const stem = artifactStem(entry.route, viewport);
-    if (before !== undefined) files.set(`${stem}/before.html`, before);
-    if (after !== undefined) files.set(`${stem}/after.html`, after);
-    viewports.push(compareViewport(before, after, entry.route, viewport, stem));
+    const beforePath = baseFragment
+      ? snapshotPath("before", baseFragment)
+      : undefined;
+    const afterPath = headFragment
+      ? snapshotPath("after", headFragment)
+      : undefined;
+    if (before !== undefined && beforePath && baseFragment) {
+      addArtifactFile(files, beforePath, before);
+      baseSeeds.add(baseFragment);
+    }
+    if (after !== undefined && afterPath && headFragment) {
+      addArtifactFile(files, afterPath, after);
+      headSeeds.add(headFragment);
+    }
+    viewports.push(
+      compareViewport(
+        before,
+        after,
+        entry.route,
+        viewport,
+        beforePath,
+        afterPath,
+      ),
+    );
   }
   const dependencies = [
     ...new Set([...(base?.dependencies ?? []), ...(head?.dependencies ?? [])]),
@@ -131,18 +174,19 @@ function compareViewport(
   after: string | undefined,
   route: string,
   viewport: "desktop" | "mobile",
-  stem: string,
+  beforePath: string | undefined,
+  afterPath: string | undefined,
 ): ViewportReview {
   if (before === undefined)
     return {
-      afterPath: `${stem}/after.html`,
+      ...(afterPath ? { afterPath } : {}),
       ignoredIds: [],
       state: "added",
       viewport,
     };
   if (after === undefined)
     return {
-      beforePath: `${stem}/before.html`,
+      ...(beforePath ? { beforePath } : {}),
       ignoredIds: [],
       state: "removed",
       viewport,
@@ -157,8 +201,8 @@ function compareViewport(
     digest(normalizeSingleDocument(before, route)) ===
     digest(normalizeSingleDocument(after, route));
   return {
-    afterPath: `${stem}/after.html`,
-    beforePath: `${stem}/before.html`,
+    ...(afterPath ? { afterPath } : {}),
+    ...(beforePath ? { beforePath } : {}),
     ignoredIds: normalized.ignoredIds,
     state: rawEqual
       ? "unchanged"
@@ -232,10 +276,6 @@ function aggregateIgnored(screens: readonly ScreenReview[]) {
         viewport: viewport as "desktop" | "mobile",
       };
     });
-}
-
-function artifactStem(route: string, viewport: string): string {
-  return `screens/${route.replace(/\.html$/, "").replace(/[^a-zA-Z0-9/_-]/g, "-")}/${viewport}`;
 }
 
 function joinGit(prefix: string, route: string): string {

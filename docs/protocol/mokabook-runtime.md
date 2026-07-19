@@ -70,6 +70,8 @@ device frames. A use case renders ordered steps that reference those same
 fragments and link back to their standalone screens. A legacy page embeds the
 whole generated document. Details may show description, rationale, source and
 fragment paths, related docs, dependencies, use cases, and comparison context.
+Consumer fragments and legacy documents are sandboxed without script permission
+so they cannot alter the same-origin Browse shell.
 
 Browse is server rendered first and progressively enhanced. Direct URLs,
 refresh, missing routes, and JavaScript-disabled use remain functional. For an
@@ -101,8 +103,8 @@ Package source under `node_modules` or an npx cache is never treated as consumer
 source. Development of Mokabook itself uses repository tooling rather than a
 hidden consumer-specific self-reload path.
 
-Watchers attach before the initial child is announced healthy. Notifications
-during startup are buffered. A child validates the catalogue and binds before
+Watchers become ready before initial generation begins. Notifications during
+generation and child startup are buffered. A child validates the catalogue and binds before
 readiness. Port `0` resolves once and the resolved port remains stable across
 child restarts. Initial validation/bind failure exits non-zero without leaking
 watchers.
@@ -147,6 +149,13 @@ Review emits a static, self-contained directory with:
 - before/head artifacts kept complete and unmodified;
 - aggregate shared-impact and ignored-region evidence;
 - deterministic `review.json` for CI summaries.
+
+Base and head panes live under separate route-preserving snapshot roots. Local
+resources referenced by pane HTML or CSS are copied transitively, including
+binary fonts and images, while explicit HTTP(S)/data resources remain external.
+Pane documents remain byte-unmodified and run in script-disabled sandboxes.
+Comparison-page routes use bounded route hashes and fail on any artifact-path
+collision rather than overwriting an earlier screen.
 
 Visual differences are review information, not a failing check. Invalid input,
 missing base data, unsafe Git paths, malformed ignore markers, or artifact

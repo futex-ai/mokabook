@@ -21,15 +21,15 @@ export function viewPage(entry: ManifestEntry | ManifestLegacyPage): string {
   if (!("kind" in entry)) {
     return document(
       `Legacy · ${entry.route}`,
-      `<h1>${escape(entry.route)}</h1><iframe title="Legacy mockup" src="/static/${encodePath(entry.route)}"></iframe>`,
+      `<h1>${escape(entry.route)}</h1><iframe sandbox="" title="Legacy mockup" src="/static/${encodePath(entry.route)}"></iframe>`,
     );
   }
   if (entry.kind === "screen") {
     return document(
       entry.title,
       `<h1>${escape(entry.title)}</h1><p>${escape(entry.description)}</p>` +
-        `<h2>Mobile</h2><iframe title="Mobile" src="/static/${encodePath(entry.fragments.mobile)}"></iframe>` +
-        `<h2>Desktop</h2><iframe title="Desktop" src="/static/${encodePath(entry.fragments.desktop)}"></iframe>`,
+        `<h2>Mobile</h2><iframe sandbox="" title="Mobile" src="/static/${encodePath(entry.fragments.mobile)}"></iframe>` +
+        `<h2>Desktop</h2><iframe sandbox="" title="Desktop" src="/static/${encodePath(entry.fragments.desktop)}"></iframe>`,
     );
   }
   if (entry.kind === "use-case") {

@@ -1,0 +1,89 @@
+import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
+import { promisify } from "node:util";
+
+import { compileCatalogue } from "../dist/build/compile.js";
+import { writeCompilation } from "../dist/build/transaction.js";
+import { loadConfig } from "../dist/config/load.js";
+import {
+  NodeGitCommandRunner,
+  RepositoryGitClient,
+} from "../dist/review/git.js";
+import { runReview } from "../dist/review/run.js";
+import {
+  createFixture,
+  removeFixture,
+  validEntrySource,
+} from "./helpers/fixture.js";
+
+const execFileAsync = promisify(execFile);
+
+test("Review copies local stylesheet dependencies for both snapshots", async (context) => {
+  const fixture = await createFixture(
+    validEntrySource({
+      body: '<img alt="Inline" srcSet="data:image/png;base64,AA== 1x" />',
+    }),
+  );
+  context.after(() => removeFixture(fixture));
+  const stylesheet = path.join(fixture.mockupsDir, "styles.css");
+  const image = path.join(fixture.mockupsDir, "pixel.png");
+  await fs.promises.writeFile(
+    stylesheet,
+    'body { background: url("./pixel.png"); }\n',
+  );
+  await fs.promises.writeFile(image, Uint8Array.from([0, 1, 2, 255]));
+  await fs.promises.writeFile(
+    fixture.configPath,
+    `import { defineConfig } from "mokabook";
+export default defineConfig({
+  entriesDir: "entries",
+  mockupsDir: "mockups",
+  repoRoot: ".",
+  review: { outDir: ".review" },
+  stylesheets: [{ match: "**/*.html", stylesheets: ["styles.css"] }]
+});
+`,
+  );
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  await git(fixture.root, ["init", "-q"]);
+  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
+  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["add", "."]);
+  await git(fixture.root, ["commit", "-qm", "test: base"]);
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    validEntrySource({ firstTitle: "Changed" }),
+  );
+  await writeCompilation(await compileCatalogue(config), config);
+
+  await runReview(
+    config,
+    "HEAD",
+    config.review.outDir,
+    new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+  );
+
+  for (const side of ["before", "after"]) {
+    assert.equal(
+      await fs.promises.readFile(
+        path.join(config.review.outDir, "snapshots", side, "styles.css"),
+        "utf8",
+      ),
+      'body { background: url("./pixel.png"); }\n',
+    );
+    assert.deepEqual(
+      await fs.promises.readFile(
+        path.join(config.review.outDir, "snapshots", side, "pixel.png"),
+      ),
+      Buffer.from([0, 1, 2, 255]),
+    );
+  }
+});
+
+async function git(cwd: string, arguments_: readonly string[]): Promise<void> {
+  await execFileAsync("git", [...arguments_], { cwd });
+}

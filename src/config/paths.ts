@@ -49,6 +49,20 @@ export function validateRelativeRoute(value: string, label: string): string {
   return normalized.replace(/^\.\//, "");
 }
 
+/** Return whether a value is a canonical, portable repository-relative path. */
+export function isSafeRepositoryPath(value: string): boolean {
+  return (
+    value.length > 0 &&
+    !value.startsWith("/") &&
+    !value.includes("\\") &&
+    !value.includes(":") &&
+    !value.includes("\0") &&
+    !value
+      .split("/")
+      .some((part) => part === "" || part === "." || part === "..")
+  );
+}
+
 /** Return whether a candidate path is contained by a configured root. */
 export function isInside(root: string, candidate: string): boolean {
   const relative = path.relative(root, candidate);

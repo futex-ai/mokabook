@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
-import { isInside } from "../config/paths.js";
+import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import type { RegistryViolation } from "./types.js";
 
@@ -179,6 +179,16 @@ function validatePaths(
 ): void {
   if (!validateTextList(entry, field, values, true, violations)) return;
   for (const value of values) {
+    if (!isSafeRepositoryPath(value)) {
+      violations.push(
+        problem(
+          entry,
+          `invalid-${field}`,
+          `${field} path must be a safe repository-relative path: ${value}`,
+        ),
+      );
+      continue;
+    }
     const candidate = path.resolve(config.repoRoot, value);
     if (!isInside(config.repoRoot, candidate) || !fs.existsSync(candidate)) {
       violations.push(

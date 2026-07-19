@@ -2,7 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { ResolvedConfig } from "../config/types.js";
-import { isInside, toPosixPath } from "../config/paths.js";
+import {
+  isInside,
+  isSafeRepositoryPath,
+  toPosixPath,
+} from "../config/paths.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
 import { walkFiles } from "./discovery.js";
 import { GENERATED_HEADER } from "./render.js";
@@ -20,6 +24,7 @@ export function ownedGeneratedRoutes(config: ResolvedConfig): string[] {
 /** Determine whether an existing target may be replaced safely. */
 export function isOwned(candidate: string, config: ResolvedConfig): boolean {
   if (
+    !isInside(config.mockupsDir, candidate) ||
     isInside(config.entriesDir, candidate) ||
     Boolean(config.legacy && isInside(config.legacy.pagesDir, candidate))
   ) {
@@ -29,18 +34,33 @@ export function isOwned(candidate: string, config: ResolvedConfig): boolean {
   if (relative === MANIFEST_NAME) return true;
   if (!candidate.endsWith(".html")) return false;
   try {
+    if (!fs.lstatSync(candidate).isFile()) return false;
     const handle = fs.openSync(candidate, "r");
     try {
-      const buffer = Buffer.alloc(128);
+      const buffer = Buffer.alloc(8_192);
       const length = fs.readSync(handle, buffer, 0, buffer.length, 0);
-      return buffer
-        .subarray(0, length)
-        .toString("utf8")
-        .startsWith(GENERATED_HEADER);
+      const source = generatedSource(
+        buffer.subarray(0, length).toString("utf8"),
+      );
+      if (!source || !isSafeRepositoryPath(source)) return false;
+      const absoluteSource = path.resolve(config.repoRoot, source);
+      return (
+        isInside(config.entriesDir, absoluteSource) ||
+        Boolean(
+          config.legacy && isInside(config.legacy.pagesDir, absoluteSource),
+        )
+      );
     } finally {
       fs.closeSync(handle);
     }
   } catch {
     return false;
   }
+}
+
+function generatedSource(content: string): string | undefined {
+  const escaped = GENERATED_HEADER.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return content.match(
+    new RegExp(`^${escaped} from (.+)\\. Do not edit\\. -->\\r?\\n`),
+  )?.[1];
 }

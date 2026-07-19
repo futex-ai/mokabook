@@ -27,10 +27,6 @@ export async function runReview(
   const compilation = await compileCatalogue(config);
   outputStore.check(compilation, config);
   const artifact = await compareReview(compilation, config, git, baseRef);
-  await writeReviewArtifact(
-    renderReviewArtifact(artifact),
-    outDir,
-    config.repoRoot,
-  );
+  await writeReviewArtifact(renderReviewArtifact(artifact), outDir, config);
   return artifact.result;
 }

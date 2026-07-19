@@ -82,13 +82,12 @@ export function resolveConfig(
     input.review?.outDir ?? ".context/mokabook-review",
     "review.outDir",
   );
-  validateReviewOut(
-    reviewOut,
-    repoRoot,
-    mockupsDir,
+  validateReviewOut(reviewOut, {
     entriesDir,
-    legacy?.pagesDir,
-  );
+    ...(legacy ? { legacy } : {}),
+    mockupsDir,
+    repoRoot,
+  });
   return {
     compatibility: {
       readManifestV2: input.compatibility?.readManifestV2 ?? false,

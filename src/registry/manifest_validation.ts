@@ -1,4 +1,5 @@
 import { MokabookError } from "../errors.js";
+import { isSafeRepositoryPath } from "../config/paths.js";
 import { validateManifestRelationships } from "./manifest_relationships.js";
 import type { ManifestV3 } from "./types.js";
 
@@ -271,13 +272,7 @@ function nonEmptyString(value: unknown): value is string {
 }
 
 function validateRepoPath(value: string, label: string): void {
-  if (
-    value.startsWith("/") ||
-    value.includes("\\") ||
-    value
-      .split("/")
-      .some((part) => part === "" || part === "." || part === "..")
-  ) {
+  if (!isSafeRepositoryPath(value)) {
     throw new MokabookError(
       "manifest-invalid",
       `${label} must be a safe repository-relative path`,

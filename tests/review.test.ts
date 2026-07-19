@@ -194,12 +194,12 @@ test("Review compares Git base without checkout and writes deterministic artifac
 test("Review writer will not replace an unowned directory or repository root", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
   const out = path.join(fixture.root, "existing");
   await fs.promises.mkdir(out);
   await fs.promises.writeFile(path.join(out, "keep.txt"), "keep\n");
   await assert.rejects(
-    () =>
-      writeReviewArtifact(new Map([["index.html", "safe"]]), out, fixture.root),
+    () => writeReviewArtifact(new Map([["index.html", "safe"]]), out, config),
     /unowned Review directory/,
   );
   await assert.rejects(
@@ -207,9 +207,9 @@ test("Review writer will not replace an unowned directory or repository root", a
       writeReviewArtifact(
         new Map([["index.html", "safe"]]),
         fixture.root,
-        fixture.root,
+        config,
       ),
-    /must be a subdirectory/,
+    /must not overlap/,
   );
 });
 

@@ -87,6 +87,7 @@ changes. All expected bytes are held in memory. `check` compares those bytes
 with disk and reports grouped missing, stale, and proven-orphan paths.
 
 `build` writes a same-filesystem staging tree, backs up only files identified by
-Mokabook's generated header or reserved manifest name, installs staged files by
-rename, and restores backups on error. It refuses to overwrite an unknown HTML
+Mokabook's generated header and a source path beneath this config's authored
+roots, or by the reserved manifest name. It installs staged files by rename and
+restores backups on error. It refuses to overwrite an unknown or foreign HTML
 file and never recursively replaces the consumer's mixed source/asset root.

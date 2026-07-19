@@ -32,7 +32,7 @@ impl CheckRunner for DefaultCheckRunner {
     }
 }
 
-fn commands() -> [CommandSpec; 9] {
+fn commands() -> [CommandSpec; 10] {
     [
         npm(&["run", "format:check"]),
         npm(&["run", "lint"]),
@@ -50,6 +50,7 @@ fn commands() -> [CommandSpec; 9] {
             "warnings",
         ]),
         cargo(&["test", "--workspace"]),
+        cargo(&["xtask", "rust-file-length-lint", "--all"]),
     ]
 }
 

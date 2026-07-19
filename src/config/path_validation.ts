@@ -1,8 +1,15 @@
 import fs from "node:fs";
 
-import { MokabookError } from "../errors.js";
+import { MokabookError, type MokabookErrorCode } from "../errors.js";
 import { isInside, resolveInside } from "./paths.js";
 import { requireString } from "./rules.js";
+
+interface ReviewOutBoundary {
+  entriesDir: string;
+  legacy?: { pagesDir: string };
+  mockupsDir: string;
+  repoRoot: string;
+}
 
 /** Resolve an optional consumer module and require a regular file. */
 export function optionalModule(
@@ -61,11 +68,12 @@ export function validateSourceRoots(
 /** Keep destructive Review replacement away from source and output roots. */
 export function validateReviewOut(
   reviewOut: string,
-  repoRoot: string,
-  mockupsDir: string,
-  entriesDir: string,
-  legacyDir?: string,
+  boundary: ReviewOutBoundary,
+  label = "review.outDir",
+  code: MokabookErrorCode = "config-invalid",
 ): void {
+  const { entriesDir, mockupsDir, repoRoot } = boundary;
+  const legacyDir = boundary.legacy?.pagesDir;
   const protectedRoots = [
     mockupsDir,
     entriesDir,
@@ -73,6 +81,7 @@ export function validateReviewOut(
   ];
   if (
     reviewOut === repoRoot ||
+    !isInside(repoRoot, reviewOut) ||
     protectedRoots.some(
       (root) =>
         reviewOut === root ||
@@ -81,8 +90,8 @@ export function validateReviewOut(
     )
   ) {
     throw new MokabookError(
-      "config-invalid",
-      "review.outDir must not overlap repository, mockup, or source roots",
+      code,
+      `${label} must not overlap repository, mockup, or source roots`,
     );
   }
 }

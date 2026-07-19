@@ -20,23 +20,31 @@ dependencies.
 
 ## Local Verification
 
-`cargo xtask check` is the single complete gate. It delegates to deterministic
-npm scripts and includes:
+During the pre-release engine milestones, `cargo xtask check` is the complete
+source-level gate. It delegates to deterministic npm scripts and currently
+includes:
 
 - formatting and lint checks;
 - TypeScript typechecking with no unexplained source exclusions;
 - unit and integration tests with a 100% pass rate;
 - production build and declaration generation;
-- example `build` then byte-stable `check`;
+- a byte-stable example `check` against committed generated output;
 - package-file inspection with `npm pack --dry-run --json`;
+- source-tree ESM, declaration, CLI, workspace-resolution, server, Review, and
+  watch regressions;
+- Rust formatting, Clippy, tests, and file-length audits for `xtask`.
+
+This source-level gate is not the release-complete gate. Before publication,
+milestones 7–9 expand it (or required CI jobs invoked alongside it) to include:
+
 - packed-tarball installs in clean temporary consumers;
-- ESM, NodeNext declaration, CLI, local-npx, and workspace-resolution smokes;
-- Playwright Browse/Review/watch regressions;
-- Rust formatting, Clippy, tests, file-length, and source audits for `xtask`.
+- local-npx and clean-cache execution from the packed artifact;
+- Playwright Browse, Review, and watched-runtime regressions;
+- the Accounting- and Juno-shaped cross-repository parity fixtures.
 
 Tests that mutate files use isolated temporary directories and clean up child
-processes. A package smoke test must execute the packed artifact, not the source
-tree or a workspace symlink.
+processes. Release-gate package smokes must execute the packed artifact, not the
+source tree or a workspace symlink.
 
 ## Continuous Integration
 

@@ -65,7 +65,6 @@ export async function loadConfig(
       format: "esm",
       logLevel: "silent",
       outfile: outputPath,
-      packages: "external",
       platform: "node",
       plugins: [configApiPlugin()],
       target: "node22",

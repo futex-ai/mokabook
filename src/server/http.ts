@@ -148,7 +148,10 @@ function serveStatic(
       return send(response, 404, "text/plain", "Not found", method);
     const realRoot = fs.realpathSync(config.mockupsDir);
     const realCandidate = fs.realpathSync(candidate);
-    if (!isInside(realRoot, realCandidate))
+    if (
+      !isInside(realRoot, realCandidate) ||
+      isRealAuthoredSource(realCandidate, config)
+    )
       return send(response, 404, "text/plain", "Not found", method);
     content = fs.readFileSync(candidate);
   } catch {
@@ -160,6 +163,17 @@ function serveStatic(
   });
   if (method !== "HEAD") response.end(content);
   else response.end();
+}
+
+function isRealAuthoredSource(
+  realCandidate: string,
+  config: ResolvedConfig,
+): boolean {
+  const roots = [
+    fs.realpathSync(config.entriesDir),
+    ...(config.legacy ? [fs.realpathSync(config.legacy.pagesDir)] : []),
+  ];
+  return roots.some((root) => isInside(root, realCandidate));
 }
 
 function isAuthoredSource(candidate: string, config: ResolvedConfig): boolean {

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { compileCatalogue } from "../build/compile.js";
 import { FileSystemGeneratedOutputStore } from "../build/output_store.js";
 import { loadConfig } from "../config/load.js";
-import { isInside } from "../config/paths.js";
+import { validateReviewOut } from "../config/path_validation.js";
 import { MokabookError } from "../errors.js";
 import { runReview } from "../review/run.js";
 import { runServerChild } from "../server/child.js";
@@ -51,12 +51,7 @@ export async function run(
     const outDir = arguments_.out
       ? path.resolve(config.repoRoot, arguments_.out)
       : config.review.outDir;
-    if (!isInside(config.repoRoot, outDir) || outDir === config.repoRoot) {
-      throw new MokabookError(
-        "cli-invalid",
-        "--out must be a repository subdirectory",
-      );
-    }
+    validateReviewOut(outDir, config, "--out", "cli-invalid");
     const result = await runReview(config, base, outDir);
     process.stdout.write(
       `Review compared ${result.screens.length} screens in ${outDir}.\n`,

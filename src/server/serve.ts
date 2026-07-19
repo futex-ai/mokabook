@@ -19,6 +19,7 @@ import {
 } from "./supervisor.js";
 import {
   ChokidarWatcherFactory,
+  type ConsumerWatcher,
   type ConsumerWatcherFactory,
 } from "./watcher.js";
 import {
@@ -64,8 +65,11 @@ export async function serve(
   options: ServeOptions,
   dependencies: ServeDependencies = DEFAULT_DEPENDENCIES,
 ): Promise<RunningServe> {
-  await dependencies.outputStore.write(await compileCatalogue(config), config);
   if (!options.watch) {
+    await dependencies.outputStore.write(
+      await compileCatalogue(config),
+      config,
+    );
     const server = await dependencies.serverFactory.start(config, options);
     return serverLifecycle(server);
   }
@@ -87,36 +91,41 @@ async function serveWatched(
 ): Promise<RunningServe> {
   const gate = new NotificationGate<string>();
   const watcher = watcherFactory.create(watchTargets(config));
-  watcher.onChange((candidate) => gate.notify(candidate));
-  watcher.onError((error) => process.stderr.write(`${errorMessage(error)}\n`));
-  await watcher.ready();
-  const binPath = fileURLToPath(new URL("../cli/bin.js", import.meta.url));
-  const baseArguments = [
-    "__serve-child",
-    "--config",
-    config.configPath,
-    "--base",
-    options.base,
-  ];
-  const supervisor = processSupervisorFactory.create(
-    binPath,
-    baseArguments,
-    options.port,
-  );
+  let supervisor: ProcessSupervisor | undefined;
   let port: number;
   try {
+    watcher.onChange((candidate) => gate.notify(candidate));
+    watcher.onError((error) =>
+      process.stderr.write(`${errorMessage(error)}\n`),
+    );
+    await watcher.ready();
+    await outputStore.write(await compileCatalogue(config), config);
+    const binPath = fileURLToPath(new URL("../cli/bin.js", import.meta.url));
+    const baseArguments = [
+      "__serve-child",
+      "--config",
+      config.configPath,
+      "--base",
+      options.base,
+    ];
+    supervisor = processSupervisorFactory.create(
+      binPath,
+      baseArguments,
+      options.port,
+    );
     port = await supervisor.start();
   } catch (error) {
-    await watcher.close();
+    await Promise.allSettled([watcher.close(), supervisor?.close()]);
     throw error;
   }
+  const runningSupervisor = supervisor;
   let closed = false;
   const processAction = async (action: WatchAction): Promise<void> => {
     if (closed) return;
     if (action === "rebuild")
       await outputStore.write(await compileCatalogue(config), config);
-    if (action === "reload") supervisor.notifyUpdate();
-    else await restartWithRecovery(supervisor);
+    if (action === "reload") runningSupervisor.notifyUpdate();
+    else await restartWithRecovery(runningSupervisor);
   };
   const actionQueue = new WatchActionQueue(processAction, (error) =>
     process.stderr.write(`${errorMessage(error)}\n`),
@@ -132,13 +141,31 @@ async function serveWatched(
       if (closed) return;
       closed = true;
       debouncer.close();
-      await watcher.close();
-      await actionQueue.close();
-      await supervisor.close();
+      await closeWatched(watcher, actionQueue, runningSupervisor);
     },
     port,
     url: `http://127.0.0.1:${port}`,
   };
+}
+
+async function closeWatched(
+  watcher: ConsumerWatcher,
+  actionQueue: WatchActionQueue,
+  supervisor: ProcessSupervisor,
+): Promise<void> {
+  let firstError: unknown;
+  for (const close of [
+    () => watcher.close(),
+    () => actionQueue.close(),
+    () => supervisor.close(),
+  ]) {
+    try {
+      await close();
+    } catch (error) {
+      firstError ??= error;
+    }
+  }
+  if (firstError !== undefined) throw firstError;
 }
 
 /** Restore a child after a failed restart while still reporting the failure. */

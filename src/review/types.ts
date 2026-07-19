@@ -1,5 +1,8 @@
 import type { Viewport } from "../authoring/types.js";
 
+/** Text or binary bytes retained in one static Review artifact. */
+export type ReviewArtifactContent = string | Uint8Array;
+
 /** Classification for one viewport or aggregate screen. */
 export type ReviewState =
   "added" | "changed" | "ignored-only" | "removed" | "unchanged";
@@ -37,6 +40,6 @@ export interface ReviewResult {
 
 /** Complete artifact file map plus summary model. */
 export interface ReviewArtifact {
-  files: ReadonlyMap<string, string>;
+  files: ReadonlyMap<string, ReviewArtifactContent>;
   result: ReviewResult;
 }

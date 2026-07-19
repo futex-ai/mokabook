@@ -6,12 +6,14 @@ import { MokabookError, errorMessage } from "../errors.js";
 export interface GitClient {
   changedPaths(commit: string): Promise<readonly string[]>;
   readFile(commit: string, repoRelativePath: string): Promise<string>;
+  readFileBytes?(commit: string, repoRelativePath: string): Promise<Uint8Array>;
   resolveRef(reference: string): Promise<string>;
 }
 
 /** Injected subprocess runner for Git commands. */
 export interface GitCommandRunner {
   run(arguments_: readonly string[]): Promise<string>;
+  runBytes?(arguments_: readonly string[]): Promise<Uint8Array>;
 }
 
 /** Operating-system Git subprocess implementation. */
@@ -27,6 +29,20 @@ export class NodeGitCommandRunner implements GitCommandRunner {
         (error, stdout) => {
           if (error) reject(error);
           else resolve(stdout);
+        },
+      );
+    });
+  }
+
+  runBytes(arguments_: readonly string[]): Promise<Uint8Array> {
+    return new Promise((resolve, reject) => {
+      execFile(
+        "git",
+        [...arguments_],
+        { cwd: this.cwd, encoding: "buffer", maxBuffer: 64 * 1024 * 1024 },
+        (error, stdout) => {
+          if (error) reject(error);
+          else resolve(Buffer.from(stdout));
         },
       );
     });
@@ -60,6 +76,17 @@ export class RepositoryGitClient implements GitClient {
     );
   }
 
+  async readFileBytes(
+    commit: string,
+    repoRelativePath: string,
+  ): Promise<Uint8Array> {
+    assertGitPath(repoRelativePath);
+    return this.runBytes(
+      ["show", `${commit}:${repoRelativePath}`],
+      `read ${repoRelativePath} at ${commit}`,
+    );
+  }
+
   async changedPaths(commit: string): Promise<readonly string[]> {
     const tracked = await this.run(
       ["diff", "--name-only", commit, "--"],
@@ -85,6 +112,22 @@ export class RepositoryGitClient implements GitClient {
   ): Promise<string> {
     try {
       return await this.runner.run(arguments_);
+    } catch (error) {
+      throw new MokabookError(
+        "git-failed",
+        `${context}: ${errorMessage(error)}`,
+        { cause: error },
+      );
+    }
+  }
+
+  private async runBytes(
+    arguments_: readonly string[],
+    context: string,
+  ): Promise<Uint8Array> {
+    try {
+      if (this.runner.runBytes) return await this.runner.runBytes(arguments_);
+      return Buffer.from(await this.runner.run(arguments_), "utf8");
     } catch (error) {
       throw new MokabookError(
         "git-failed",

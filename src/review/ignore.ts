@@ -46,17 +46,24 @@ export function normalizeReviewPair(
   const paired = new Set(
     [...base.regions.keys()].filter((id) => head.regions.has(id)),
   );
-  for (const id of paired) {
-    if (base.materials.has(id) !== head.materials.has(id)) paired.delete(id);
-  }
+  const materialIds = new Set([
+    ...base.materials.keys(),
+    ...head.materials.keys(),
+  ]);
+  const oneSidedMaterial = new Set(
+    [...materialIds].filter(
+      (id) => base.materials.has(id) !== head.materials.has(id),
+    ),
+  );
+  for (const id of oneSidedMaterial) paired.delete(id);
   const baseOnly = [...base.regions.keys()]
     .filter((id) => !head.regions.has(id))
     .sort();
   const headOnly = [...head.regions.keys()]
     .filter((id) => !base.regions.has(id))
     .sort();
-  let normalizedBase = render(base, paired);
-  let normalizedHead = render(head, paired);
+  let normalizedBase = render(base, paired, oneSidedMaterial);
+  let normalizedHead = render(head, paired, oneSidedMaterial);
   if (baseOnly.length > 0 && headOnly.length > 0) {
     normalizedBase += contractToken(baseOnly);
     normalizedHead += contractToken(headOnly);
@@ -165,14 +172,19 @@ function parseMaterials(
 function render(
   document: ParsedDocument,
   ignored: ReadonlySet<string>,
+  strippedMaterial: ReadonlySet<string> = new Set(),
 ): string {
-  return document.segments
+  const rendered = document.segments
     .map((segment) =>
       segment.kind === "region" && ignored.has(segment.id)
         ? `<!--mokabook-review-ignore:${segment.id}-->`
         : segment.content,
     )
     .join("");
+  return rendered.replace(MATERIAL_SCAN, (candidate) => {
+    const id = candidate.match(MATERIAL)?.[1];
+    return id && strippedMaterial.has(id) ? "" : candidate;
+  });
 }
 
 function contractToken(ids: readonly string[]): string {

@@ -7,6 +7,7 @@ import {
   createManifest,
   fragmentRoute,
   MANIFEST_NAME,
+  parseManifest,
   serializeManifest,
 } from "../registry/manifest.js";
 import { prepareRegistry } from "../registry/prepare.js";
@@ -71,6 +72,7 @@ export async function compileCatalogue(
     sourcePath: page.sourceRelativePath,
   }));
   const manifest = createManifest(registry.entries, legacyManifest);
+  parseManifest(manifest);
   outputs.set(MANIFEST_NAME, serializeManifest(manifest));
   validateOutputPaths(outputs, config);
   return { manifest, outputs };

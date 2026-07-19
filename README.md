@@ -78,6 +78,9 @@ npx mokabook review --base origin/main
 `mockupsDir`. `check` calculates those bytes without writing and reports
 missing, stale, or orphan generated files. Browse currently uses a deliberately
 plain diagnostic shell while the package-owned responsive UI is developed.
+Consumer documents run in sandboxed frames. Review keeps unmodified base/head
+documents in separate snapshot trees and copies their referenced local CSS,
+fonts, and images so comparison artifacts do not depend on the live workspace.
 
 ## Rendering Boundary
 
@@ -91,6 +94,10 @@ build-time graph. React and React DOM resolve from the consumer config location,
 which prevents duplicate React instances even when the executable came from an
 npx cache. See [the build pipeline](./docs/architecture/build-pipeline.md) for
 the complete raw-React-to-static-HTML flow.
+
+The configuration module itself is also bundled from its own directory, so
+imports of consumer workspace packages resolve before the temporary config
+module is evaluated.
 
 ## Developer Setup
 

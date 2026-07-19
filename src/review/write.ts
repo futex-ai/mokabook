@@ -1,16 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { isInside } from "../config/paths.js";
+import { validateReviewOut } from "../config/path_validation.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
+import type { ReviewArtifactContent } from "./types.js";
 
 /** Replace an owned Review artifact directory as one filesystem transaction. */
 export async function writeReviewArtifact(
-  files: ReadonlyMap<string, string>,
+  files: ReadonlyMap<string, ReviewArtifactContent>,
   outDir: string,
-  repoRoot: string,
+  config: ResolvedConfig,
 ): Promise<void> {
-  validateOutDir(outDir, repoRoot);
+  validateReviewOut(outDir, config, "Review output", "review-invalid");
   if (
     fs.existsSync(outDir) &&
     !fs.existsSync(path.join(outDir, ".mokabook-review-artifact"))
@@ -35,7 +37,11 @@ export async function writeReviewArtifact(
       validateArtifactPath(relative);
       const target = path.join(stage, relative);
       await fs.promises.mkdir(path.dirname(target), { recursive: true });
-      await fs.promises.writeFile(target, content, "utf8");
+      if (typeof content === "string") {
+        await fs.promises.writeFile(target, content, "utf8");
+      } else {
+        await fs.promises.writeFile(target, Buffer.from(content));
+      }
     }
     if (fs.existsSync(outDir)) {
       await fs.promises.rename(outDir, backup);
@@ -56,16 +62,6 @@ export async function writeReviewArtifact(
     );
   } finally {
     await fs.promises.rm(temporary, { force: true, recursive: true });
-  }
-}
-
-/** Require Review output to be a non-root repository subdirectory. */
-export function validateOutDir(outDir: string, repoRoot: string): void {
-  if (outDir === repoRoot || !isInside(repoRoot, outDir)) {
-    throw new MokabookError(
-      "review-invalid",
-      "Review output must be a subdirectory of repoRoot",
-    );
   }
 }
 

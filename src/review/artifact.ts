@@ -2,25 +2,35 @@ import path from "node:path";
 
 import type {
   ReviewArtifact,
+  ReviewArtifactContent,
   ReviewResult,
   ScreenReview,
   ViewportReview,
 } from "./types.js";
+import { addArtifactFile, comparisonPagePath } from "./paths.js";
 
 /** Add self-contained diagnostic pages, JSON, and CI summary to pane artifacts. */
 export function renderReviewArtifact(
   artifact: ReviewArtifact,
-): ReadonlyMap<string, string> {
+): ReadonlyMap<string, ReviewArtifactContent> {
   const files = new Map(artifact.files);
-  files.set("review.json", `${JSON.stringify(artifact.result, null, 2)}\n`);
-  files.set("summary.md", summaryMarkdown(artifact.result));
-  files.set("index.html", indexPage(artifact.result));
+  addArtifactFile(
+    files,
+    "review.json",
+    `${JSON.stringify(artifact.result, null, 2)}\n`,
+  );
+  addArtifactFile(files, "summary.md", summaryMarkdown(artifact.result));
+  addArtifactFile(files, "index.html", indexPage(artifact.result));
   for (const screen of artifact.result.screens) {
     for (const viewport of screen.viewports) {
-      files.set(comparePagePath(viewport), comparePage(screen, viewport));
+      addArtifactFile(
+        files,
+        comparisonPagePath(screen.route, viewport.viewport),
+        comparePage(screen, viewport),
+      );
     }
   }
-  files.set(".mokabook-review-artifact", "schemaVersion=1\n");
+  addArtifactFile(files, ".mokabook-review-artifact", "schemaVersion=1\n");
   return files;
 }
 
@@ -55,7 +65,7 @@ function indexPage(result: ReviewResult): string {
       const links = screen.viewports
         .map(
           (viewport) =>
-            `<a href="${escape(comparePagePath(viewport))}">${viewport.viewport}</a>`,
+            `<a href="${escape(comparisonPagePath(screen.route, viewport.viewport))}">${viewport.viewport}</a>`,
         )
         .join(" · ");
       return `<tr><td>${escape(screen.state)}</td><td>${escape(screen.title)}</td><td><code>${escape(screen.route)}</code></td><td>${links}</td></tr>`;
@@ -68,32 +78,31 @@ function indexPage(result: ReviewResult): string {
 }
 
 function comparePage(screen: ScreenReview, viewport: ViewportReview): string {
-  const before = viewport.beforePath ? "before.html" : undefined;
-  const after = viewport.afterPath ? "after.html" : undefined;
+  const pagePath = comparisonPagePath(screen.route, viewport.viewport);
+  const before = viewport.beforePath
+    ? relativeLink(pagePath, viewport.beforePath)
+    : undefined;
+  const after = viewport.afterPath
+    ? relativeLink(pagePath, viewport.afterPath)
+    : undefined;
   const panes = [
     before
-      ? `<section class="before"><h2>Before</h2><iframe title="Before" src="${before}"></iframe></section>`
+      ? `<section class="before"><h2>Before</h2><iframe sandbox="" title="Before" src="${escape(before)}"></iframe></section>`
       : "",
     after
-      ? `<section class="after"><h2>After</h2><iframe title="After" src="${after}"></iframe></section>`
+      ? `<section class="after"><h2>After</h2><iframe sandbox="" title="After" src="${escape(after)}"></iframe></section>`
       : "",
   ].join("");
-  const pagePath = comparePagePath(viewport);
-  const rootLink = path.posix.relative(
-    path.posix.dirname(pagePath),
-    "index.html",
-  );
+  const rootLink = relativeLink(pagePath, "index.html");
   return page(
     `${screen.title} · ${viewport.viewport}`,
     `<p><a href="${escape(rootLink)}">Review</a></p><h1>${escape(screen.title)}</h1><p>${escape(viewport.viewport)} · ${escape(viewport.state)}</p><div class="modes"><button data-mode="side">Side by side</button><button data-mode="overlay">Overlay</button><button data-mode="difference">Difference</button></div><div class="panes" data-compare-mode="side">${panes}</div><script>for(const button of document.querySelectorAll('[data-mode]'))button.addEventListener('click',()=>document.querySelector('.panes').dataset.compareMode=button.dataset.mode)</script>`,
   );
 }
 
-function comparePagePath(viewport: ViewportReview): string {
-  const pane = viewport.afterPath ?? viewport.beforePath;
-  return pane
-    ? pane.replace(/(?:after|before)\.html$/, "index.html")
-    : "index.html";
+function relativeLink(from: string, to: string): string {
+  const relative = path.posix.relative(path.posix.dirname(from), to);
+  return relative.startsWith(".") ? relative : `./${relative}`;
 }
 
 function page(title: string, body: string): string {

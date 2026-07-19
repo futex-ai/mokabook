@@ -6,7 +6,7 @@ crates.io.
 
 ## Responsibilities
 
-- Run the complete TypeScript, package, example, and Rust verification suite.
+- Run the current source-level TypeScript, package, example, and Rust suite.
 - Enforce the Rust file-length limit.
 - Start the required read-only post-push AI review.
 
@@ -35,7 +35,8 @@ cargo test --package xtask
 
 - `src/cli.rs` parses and dispatches commands.
 - `src/command.rs` defines the injected command-runner boundary.
-- `src/check.rs` defines the complete local verification sequence.
+- `src/check.rs` defines the current source-level verification sequence; packed
+  consumer and browser release gates are added in later plan milestones.
 - `src/review.rs` creates the read-only review prompt and process.
 
 ### Related Docs

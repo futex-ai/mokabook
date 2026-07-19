@@ -4,10 +4,10 @@
 
 ## Status
 
-Active. Milestones 2–5 are implemented and their focused verification passes.
-The GitHub repository rename in milestone 2 remains an external maintainer
-action. Repository checks pass; commit, push, and post-push review are in
-progress for this delivery.
+Active. Milestones 2–5 and the milestone-5A review hardening are implemented;
+repository checks pass. The GitHub repository rename in milestone 2 remains an
+external maintainer action. Commit, push, and the remaining post-push review
+loop are in progress for this delivery.
 
 ## Summary
 
@@ -303,6 +303,29 @@ shell UI.
 
 At this milestone the server/runtime engines and static Review model work via
 integration tests and simple diagnostic responses, without landing the final UI.
+
+## Milestone 5A: Engine Review Hardening
+
+Summary: resolve independently validated post-push findings without mixing in
+the deferred Browse/Review UI.
+
+- [x] Centralize Review output overlap validation for config, CLI overrides, and
+      transactional artifact writes.
+- [x] Make Review paths collision-free, preserve complete pane documents, and
+      copy referenced local CSS/binary assets into isolated base/head snapshots.
+- [x] Sandbox consumer documents in Browse and Review and reject realpath-based
+      source exposure through static symlinks.
+- [x] Resolve config imports from the consumer graph, strengthen generated-file
+      ownership, and align authored/manifest repository-path validation.
+- [x] Attach and clean up watched inputs before initial generation so startup
+      changes cannot be lost and readiness failures leak no watcher.
+- [x] Restore one-sided Review material-signal behavior, narrow verification
+      documentation to the implemented gate, and add regression coverage.
+- [ ] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
+      `cargo xtask review` under the invoked review loop.
+
+At this milestone the milestone-5 engines satisfy their safety and lifecycle
+contracts and have no remaining valid post-push review findings.
 
 ## Milestone 6: Neutral Mokabook And Fixture Design
 
