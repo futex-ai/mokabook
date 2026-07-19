@@ -47,9 +47,10 @@ subpaths, `react-dom`, and React DOM subpaths. Imports of `mokabook` resolve to
 the executing package. The result is one React runtime even when Mokabook itself
 lives in npm's transient npx directory.
 
-An attribution transform announces each `.mockup` module before its definitions
-run. `defineScreen`, `defineCollection`, and `defineUseCase` therefore retain a
-repo-relative authored source path without embedding the absolute checkout.
+Every module beneath `entriesDir` imports a module-bound Mokabook authoring
+facade. Each definition or nested marker is therefore attributed at the helper
+call itself, including calls made later through a shared helper factory, without
+sticky process-global state or an absolute checkout path.
 
 ## 3. Rendering
 
@@ -84,10 +85,11 @@ the completed HTML string.
 ## 4. Validation And Commit
 
 Registry ids, routes, relationships, files, output collisions, stylesheets,
-links, anchors, Review-ignore/material markers, legacy policies, and manifest
-data are validated before output changes. All expected bytes are held in
-memory. `check` compares those bytes with disk and reports grouped missing,
-stale, and proven-orphan paths.
+links, anchors, local HTML resource attributes, `srcset`, inline/style-block
+CSS, transitive CSS imports/URLs, Review-ignore/material markers, legacy
+policies, and manifest data are validated before output changes. All expected
+bytes are held in memory. `check` compares those bytes with disk and reports
+grouped missing, stale, and proven-orphan paths.
 
 Catalogue routes use portable URL-unreserved segments, reject Windows device
 filename stems, and end in `.html`. Framework-generated links and redirects

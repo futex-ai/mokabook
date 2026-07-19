@@ -1,46 +1,76 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { parse } from "parse5";
-
-import type { ResolvedConfig } from "../config/types.js";
 import { isPublicStaticFile } from "../config/public_files.js";
+import { isSafeRepositoryPath } from "../config/paths.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
+import {
+  extractCssReferences,
+  extractHtmlReferences,
+  type HtmlReferences,
+} from "../html_references.js";
 
-interface HtmlAttribute {
-  name: string;
+interface ParsedResource {
+  anchors: ReadonlySet<string>;
+  references: readonly ResourceReference[];
+}
+
+interface ResourceReference {
+  checkFragment: boolean;
   value: string;
 }
 
-interface HtmlNode {
-  attrs?: HtmlAttribute[];
-  childNodes?: HtmlNode[];
+interface ReferenceResult {
+  target?: string;
+  violation?: string;
 }
 
-interface DocumentLinks {
-  anchors: ReadonlySet<string>;
-  hrefs: readonly string[];
-}
-
-/** Validate relative document links and anchors across generated output. */
+/** Validate navigation links and transitive local resources in generated HTML. */
 export function validateHtmlLinks(
   outputs: ReadonlyMap<string, string>,
   config: ResolvedConfig,
 ): void {
-  const parsed = new Map(
-    [...outputs].map(([route, content]) => [route, documentLinks(content)]),
-  );
+  const parsed = new Map<string, ParsedResource>();
+  for (const [route, content] of outputs) {
+    parsed.set(route, htmlResource(extractHtmlReferences(content)));
+  }
+  const pending = [...outputs.keys()].sort();
+  const visited = new Set<string>();
   const violations: string[] = [];
-  for (const [route, links] of parsed) {
-    for (const href of links.hrefs) {
-      const violation = validateHref(href, route, links, parsed, config);
-      if (violation) violations.push(`${route}: ${violation}`);
+  while (pending.length > 0) {
+    const route = pending.shift();
+    if (!route || visited.has(route)) continue;
+    visited.add(route);
+    const resource = parsed.get(route);
+    if (!resource) continue;
+    for (const reference of resource.references) {
+      const result = validateReference(
+        reference,
+        route,
+        resource,
+        parsed,
+        config,
+      );
+      if (result.violation) violations.push(`${route}: ${result.violation}`);
+      if (
+        result.target &&
+        !visited.has(result.target) &&
+        !pending.includes(result.target)
+      ) {
+        const targetResource = loadResource(result.target, outputs, config);
+        if (targetResource) {
+          parsed.set(result.target, targetResource);
+          pending.push(result.target);
+          pending.sort();
+        }
+      }
     }
   }
   if (violations.length > 0) {
     throw new MokabookError(
       "build-invalid",
-      `document links are invalid:\n${violations
+      `document links and resources are invalid:\n${violations
         .sort()
         .map((item) => `- ${item}`)
         .join("\n")}`,
@@ -48,77 +78,136 @@ export function validateHtmlLinks(
   }
 }
 
-function validateHref(
-  href: string,
+function validateReference(
+  item: ResourceReference,
   sourceRoute: string,
-  source: DocumentLinks,
-  parsed: ReadonlyMap<string, DocumentLinks>,
+  source: ParsedResource,
+  parsed: Map<string, ParsedResource>,
   config: ResolvedConfig,
-): string | undefined {
+): ReferenceResult {
+  const reference = item.value;
   if (
-    href === "" ||
-    href.startsWith("?") ||
-    /^(?:https?:|mailto:|tel:|data:)/i.test(href)
-  )
-    return undefined;
-  if (href.startsWith("mock:")) return `unresolved id link ${href}`;
-  if (href.startsWith("/"))
-    return `root-absolute link is not portable: ${href}`;
-  if (href.startsWith("#")) {
-    return source.anchors.has(decodeURIComponent(href.slice(1)))
-      ? undefined
-      : `missing anchor ${href}`;
+    reference === "" ||
+    reference.startsWith("?") ||
+    /^(?:https?:|mailto:|tel:|data:)/i.test(reference)
+  ) {
+    return {};
   }
-  const [withoutHash, rawHash] = href.split("#", 2);
+  if (reference.startsWith("mock:")) {
+    return { violation: `unresolved id link ${reference}` };
+  }
+  if (reference.startsWith("/")) {
+    return { violation: `root-absolute link is not portable: ${reference}` };
+  }
+  if (reference.startsWith("#")) {
+    return item.checkFragment ? fragmentResult(reference, source) : {};
+  }
+  const [withoutHash, rawHash] = reference.split("#", 2);
   const rawPath = (withoutHash ?? "").split("?", 1)[0] ?? "";
-  const rawTarget = path.posix.normalize(
-    path.posix.join(
-      path.posix.dirname(sourceRoute),
-      decodeURIComponent(rawPath),
-    ),
-  );
-  if (rawTarget === ".." || rawTarget.startsWith("../"))
-    return `link escapes mockupsDir: ${href}`;
-  const target = rawTarget.replace(/^\.\//, "");
-  const generated = parsed.get(target);
-  if (!generated) {
-    const absolute = path.resolve(config.mockupsDir, target);
-    if (!isPublicStaticFile(absolute, config)) return `missing target ${href}`;
+  let decodedPath: string;
+  try {
+    decodedPath = decodeURIComponent(rawPath);
+  } catch {
+    return { violation: `invalid URL encoding: ${reference}` };
   }
-  if (rawHash) {
-    const targetLinks = generated ?? readAuthoredLinks(config, target);
-    if (!targetLinks?.anchors.has(decodeURIComponent(rawHash))) {
-      return `missing target anchor ${href}`;
+  if (decodedPath.startsWith("/") || decodedPath.startsWith("\\")) {
+    return { violation: `root-absolute link is not portable: ${reference}` };
+  }
+  const rawTarget = path.posix.normalize(
+    path.posix.join(path.posix.dirname(sourceRoute), decodedPath),
+  );
+  if (
+    rawTarget === ".." ||
+    rawTarget.startsWith("../") ||
+    !isSafeRepositoryPath(rawTarget)
+  ) {
+    return { violation: `link escapes mockupsDir: ${reference}` };
+  }
+  const target = rawTarget.replace(/^\.\//, "");
+  let targetResource = parsed.get(target);
+  if (!targetResource) {
+    targetResource = loadResource(target, new Map(), config);
+    if (!targetResource) return { violation: `missing target ${reference}` };
+    parsed.set(target, targetResource);
+  }
+  if (rawHash && item.checkFragment) {
+    let fragment: string;
+    try {
+      fragment = decodeURIComponent(rawHash);
+    } catch {
+      return { violation: `invalid URL encoding: ${reference}` };
+    }
+    if (!targetResource.anchors.has(fragment)) {
+      return { violation: `missing target anchor ${reference}` };
     }
   }
-  return undefined;
+  return { target };
 }
 
-function readAuthoredLinks(
-  config: ResolvedConfig,
+function fragmentResult(
+  reference: string,
+  source: ParsedResource,
+): ReferenceResult {
+  let fragment: string;
+  try {
+    fragment = decodeURIComponent(reference.slice(1));
+  } catch {
+    return { violation: `invalid URL encoding: ${reference}` };
+  }
+  return source.anchors.has(fragment)
+    ? {}
+    : { violation: `missing anchor ${reference}` };
+}
+
+function loadResource(
   route: string,
-): DocumentLinks | undefined {
+  outputs: ReadonlyMap<string, string>,
+  config: ResolvedConfig,
+): ParsedResource | undefined {
+  const generated = outputs.get(route);
+  if (generated !== undefined)
+    return htmlResource(extractHtmlReferences(generated));
   const candidate = path.resolve(config.mockupsDir, route);
   if (!isPublicStaticFile(candidate, config)) return undefined;
-  return documentLinks(fs.readFileSync(candidate, "utf8"));
+  const extension = path.posix.extname(route).toLowerCase();
+  if (extension !== ".css" && extension !== ".html" && extension !== ".htm") {
+    return { anchors: new Set(), references: [] };
+  }
+  const content = fs.readFileSync(candidate, "utf8");
+  return extension === ".css"
+    ? {
+        anchors: new Set(),
+        references: extractCssReferences(content).map((value) => ({
+          checkFragment: false,
+          value,
+        })),
+      }
+    : htmlResource(extractHtmlReferences(content));
 }
 
-function documentLinks(html: string): DocumentLinks {
-  const anchors = new Set<string>();
-  const hrefs: string[] = [];
-  visit(parse(html) as unknown as HtmlNode, (attributes) => {
-    for (const attribute of attributes) {
-      if (attribute.name === "id") anchors.add(attribute.value);
-      if (attribute.name === "href") hrefs.push(attribute.value);
-    }
+function htmlResource(references: HtmlReferences): ParsedResource {
+  const navigation = references.hrefs.map((value) => ({
+    checkFragment: true,
+    value,
+  }));
+  const resources = references.resources.map((value) => ({
+    checkFragment: false,
+    value,
+  }));
+  return {
+    anchors: references.anchors,
+    references: distinctReferences([...navigation, ...resources]),
+  };
+}
+
+function distinctReferences(
+  references: readonly ResourceReference[],
+): ResourceReference[] {
+  const seen = new Set<string>();
+  return references.filter((reference) => {
+    const key = `${reference.checkFragment}:${reference.value}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
   });
-  return { anchors, hrefs };
-}
-
-function visit(
-  node: HtmlNode,
-  callback: (attributes: readonly HtmlAttribute[]) => void,
-): void {
-  if (node.attrs) callback(node.attrs);
-  for (const child of node.childNodes ?? []) visit(child, callback);
 }

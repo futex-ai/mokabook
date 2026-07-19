@@ -156,6 +156,11 @@ route; use cases live under `user-flows/`. Screens may provide an address-bar
 label and use-case membership. Nested definitions inherit declared metadata,
 but ids never derive from tree position.
 
+Imports of `mokabook` from modules beneath `entriesDir` bind the authoring
+helpers to that importing module. Definitions created at module evaluation or
+later through a shared helper factory therefore retain the helper module's
+repo-relative source path without process-global attribution state.
+
 Every catalogue-route segment starts with an ASCII letter or digit and then
 uses only URL-unreserved ASCII letters, digits, `.`, `_`, `~`, or `-`. A
 segment's filename stem must not be a Windows device name, and the complete
@@ -167,6 +172,9 @@ Logical screen and use-case routes are catalogue identifiers, not generated
 documents. Fragment links must target a generated fragment or public static
 asset with a relative URL; root-absolute links are rejected as non-portable.
 Authors use `MockLink` for id-addressed catalogue navigation.
+Local resource URLs in HTML source attributes, `srcset`, inline/style-block
+CSS, and transitively referenced HTML/CSS must likewise resolve to public
+static files beneath `mockupsDir`.
 
 All public exports ship ESM JavaScript and declarations usable by NodeNext and
 bundler TypeScript resolution. The package export map and packed-tarball tests

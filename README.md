@@ -79,16 +79,20 @@ npx mokabook review --base origin/main
 missing, stale, or orphan generated files. Browse and Review currently use
 deliberately plain diagnostic pages while the package-owned responsive UI is
 developed.
+
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.
 Base resources must be regular Git files outside configured source roots.
 Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and
-logical screen routes are not portable links in generated static files.
+logical screen routes are not portable links in generated static files. Build
+and check also validate local HTML resource attributes and transitive CSS URLs.
 Watched Serve keeps its resolved port, transactionally reloads a changed
 consumer config with a ready replacement watcher, and serially replaces a child
-that exits unexpectedly after readiness. A rejected config or failed candidate
-build leaves the last-good watcher, output, and child active.
+that exits unexpectedly after readiness. Open diagnostic pages connect to its
+versioned event stream and reload after a newer build or asset version arrives.
+A rejected config or failed candidate build leaves the last-good watcher,
+output, and child active.
 
 ## Rendering Boundary
 

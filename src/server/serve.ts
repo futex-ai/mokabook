@@ -142,7 +142,15 @@ async function serveWatched(
     let transferred = false;
     try {
       await replacement.ready();
+      if (closed) {
+        await replacement.close();
+        return;
+      }
       await outputStore.write(await compileCatalogue(nextConfig), nextConfig);
+      if (closed) {
+        await replacement.close();
+        return;
+      }
       const previous = watcher;
       activeConfig = nextConfig;
       watcher = replacement;
@@ -158,7 +166,7 @@ async function serveWatched(
       } catch (error) {
         closeError = error;
       }
-      await restartWithRecovery(runningSupervisor);
+      if (!closed) await restartWithRecovery(runningSupervisor);
       if (closeError !== undefined) throw closeError;
     } catch (error) {
       if (!transferred) await replacement.close();
@@ -196,7 +204,7 @@ async function serveWatched(
       if (closed) return;
       closed = true;
       debouncer?.close();
-      await closeWatched(watcher, actionQueue, runningSupervisor);
+      await closeWatched(actionQueue, () => watcher, runningSupervisor);
     },
     port,
     url: `http://127.0.0.1:${port}`,
@@ -215,14 +223,14 @@ function createWatcher(
 }
 
 async function closeWatched(
-  watcher: ConsumerWatcher,
   actionQueue: WatchActionQueue,
+  currentWatcher: () => ConsumerWatcher,
   supervisor: ProcessSupervisor,
 ): Promise<void> {
   let firstError: unknown;
   for (const close of [
-    () => watcher.close(),
     () => actionQueue.close(),
+    () => currentWatcher().close(),
     () => supervisor.close(),
   ]) {
     try {

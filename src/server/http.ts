@@ -8,6 +8,7 @@ import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import { readManifest } from "../registry/manifest.js";
 import { createCatalogue, type Catalogue } from "./catalogue.js";
+import { loadBrowserClientModules } from "./client_modules.js";
 import { homePage, notFoundPage, reviewPage, viewPage } from "./pages.js";
 
 /** Options for one deterministic server child. */
@@ -31,6 +32,7 @@ export async function startCatalogueServer(
   options: ServerOptions,
 ): Promise<RunningServer> {
   const catalogue = createCatalogue(readManifest(config));
+  const clientModules = loadBrowserClientModules();
   const streams = new Set<ServerResponse>();
   let updateVersion = options.updateVersion ?? 1;
   const server = http.createServer((request, response) => {
@@ -42,6 +44,7 @@ export async function startCatalogueServer(
       config,
       options,
       streams,
+      clientModules,
       () => updateVersion,
     );
   });
@@ -82,6 +85,7 @@ function handleRequest(
   config: ResolvedConfig,
   options: ServerOptions,
   streams: Set<ServerResponse>,
+  clientModules: ReadonlyMap<string, Buffer>,
   currentVersion: () => number,
 ): void {
   if (method !== "GET" && method !== "HEAD")
@@ -93,6 +97,14 @@ function handleRequest(
     return send(response, 200, "text/html", reviewPage(options.base), method);
   if (url.pathname === "/__mokabook/events")
     return openEventStream(response, streams, currentVersion());
+  if (url.pathname.startsWith("/__mokabook/client/")) {
+    return serveClientModule(
+      response,
+      url.pathname.slice("/__mokabook/client/".length),
+      clientModules,
+      method,
+    );
+  }
   if (url.pathname.startsWith("/id/"))
     return redirectId(response, url.pathname.slice(4), catalogue);
   if (url.pathname.startsWith("/view/"))
@@ -100,6 +112,22 @@ function handleRequest(
   if (url.pathname.startsWith("/static/"))
     return serveStatic(response, url.pathname.slice(8), config, method);
   return send(response, 404, "text/html", notFoundPage(url.pathname), method);
+}
+
+function serveClientModule(
+  response: ServerResponse,
+  filename: string,
+  modules: ReadonlyMap<string, Buffer>,
+  method: string,
+): void {
+  const content = modules.get(filename);
+  if (!content) return send(response, 404, "text/plain", "Not found", method);
+  response.writeHead(200, {
+    "cache-control": "no-cache",
+    "content-type": "text/javascript; charset=utf-8",
+    "x-content-type-options": "nosniff",
+  });
+  response.end(method === "HEAD" ? undefined : content);
 }
 
 function redirectId(

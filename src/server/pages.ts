@@ -65,7 +65,7 @@ export function reviewPage(base: string): string {
 }
 
 function document(title: string, body: string): string {
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escape(title)}</title><style>body{font:16px system-ui;max-width:72rem;margin:2rem auto;padding:0 1rem}iframe{width:100%;min-height:32rem;border:1px solid #bbb}code{background:#eee;padding:.15rem .3rem}</style></head><body>${body}</body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escape(title)}</title><style>body{font:16px system-ui;max-width:72rem;margin:2rem auto;padding:0 1rem}iframe{width:100%;min-height:32rem;border:1px solid #bbb}code{background:#eee;padding:.15rem .3rem}</style></head><body>${body}<script type="module" src="/__mokabook/client/browser.js"></script></body></html>`;
 }
 
 function escape(value: string): string {

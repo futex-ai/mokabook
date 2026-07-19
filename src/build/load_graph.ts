@@ -10,7 +10,7 @@ import type { RegistryDefinition } from "../authoring/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import type { Renderer } from "../renderer/types.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { toPosixPath } from "../config/paths.js";
+import { isInside, toPosixPath } from "../config/paths.js";
 import { discoverEntryModules, discoverLegacySources } from "./discovery.js";
 
 /** One loaded legacy module and its authored source path. */
@@ -60,8 +60,7 @@ export async function loadConsumerGraph(
       platform: "node",
       plugins: [
         virtualEntryPlugin(config, entrySources, legacySources),
-        packageApiPlugin(),
-        attributionPlugin(config),
+        packageApiPlugin(config),
         consumerReactPlugin(config),
       ],
       target: "node22",
@@ -181,43 +180,71 @@ function virtualEntryContents(
   ].join("\n");
 }
 
-function attributionPlugin(config: ResolvedConfig): Plugin {
+function packageApiPlugin(config: ResolvedConfig): Plugin {
   const realEntries = fs.realpathSync(config.entriesDir);
+  const indexPath = runtimeModule("../index.js", "../index.ts");
   const definitionsPath = runtimeModule(
     "../authoring/definitions.js",
     "../authoring/definitions.ts",
   );
   return {
-    name: "mokabook-attribution",
+    name: "mokabook-package-api",
     setup(pluginBuild: PluginBuild): void {
-      pluginBuild.onLoad({ filter: /\.mockup\.tsx?$/ }, async (args) => {
-        const source = await fs.promises.readFile(args.path, "utf8");
-        const relative = toPosixPath(path.relative(config.repoRoot, args.path));
-        const banner =
-          `import { __setDefiningModule as __mokabookSetModule } from ${quote(definitionsPath)};\n` +
-          `__mokabookSetModule(${quote(relative)});\n`;
-        if (!fs.realpathSync(args.path).startsWith(realEntries + path.sep))
-          return undefined;
+      pluginBuild.onResolve({ filter: /^mokabook$/ }, (args) => {
+        if (!args.importer) return { path: indexPath };
+        let realImporter: string;
+        try {
+          realImporter = fs.realpathSync(args.importer);
+        } catch {
+          return { path: indexPath };
+        }
+        if (!isInside(realEntries, realImporter)) return { path: indexPath };
         return {
-          contents: banner + source,
-          loader: args.path.endsWith(".tsx") ? "tsx" : "ts",
-          resolveDir: path.dirname(args.path),
+          namespace: "mokabook-attributed-api",
+          path: toPosixPath(path.relative(config.repoRoot, args.importer)),
         };
       });
+      pluginBuild.onLoad(
+        { filter: /.*/, namespace: "mokabook-attributed-api" },
+        (args) => ({
+          contents: attributedApiContents(
+            args.path,
+            indexPath,
+            definitionsPath,
+          ),
+          loader: "js",
+        }),
+      );
+      pluginBuild.onResolve(
+        { filter: /.*/, namespace: "mokabook-attributed-api" },
+        (args) => ({ namespace: "file", path: args.path }),
+      );
     },
   };
 }
 
-function packageApiPlugin(): Plugin {
-  const indexPath = runtimeModule("../index.js", "../index.ts");
-  return {
-    name: "mokabook-package-api",
-    setup(pluginBuild: PluginBuild): void {
-      pluginBuild.onResolve({ filter: /^mokabook$/ }, () => ({
-        path: indexPath,
-      }));
-    },
-  };
+function attributedApiContents(
+  sourceRelativePath: string,
+  indexPath: string,
+  definitionsPath: string,
+): string {
+  return [
+    `import * as api from ${quote(indexPath)};`,
+    `import { __attributeDefinition as attribute } from ${quote(definitionsPath)};`,
+    `const source = ${quote(sourceRelativePath)};`,
+    `export const defineScreen = (input) => attribute(api.defineScreen(input), source);`,
+    `export const defineCollection = (input) => attribute(api.defineCollection(input), source);`,
+    `export const defineUseCase = (input) => attribute(api.defineUseCase(input), source);`,
+    `export const screen = (input) => attribute(api.screen(input), source);`,
+    `export const collection = (input) => attribute(api.collection(input), source);`,
+    `export const defineRoot = (input) => api.defineRoot(input).map((definition) => definition.definedIn ? definition : attribute(definition, source));`,
+    `export const defineConfig = api.defineConfig;`,
+    `export const MockLink = api.MockLink;`,
+    `export const mockLink = api.mockLink;`,
+    `export const ReviewIgnore = api.ReviewIgnore;`,
+    `export const ReviewIgnoreScope = api.ReviewIgnoreScope;`,
+    `export const reviewMaterialKey = api.reviewMaterialKey;`,
+  ].join("\n");
 }
 
 function consumerReactPlugin(config: ResolvedConfig): Plugin {

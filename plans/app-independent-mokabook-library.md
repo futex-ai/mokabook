@@ -353,6 +353,14 @@ the deferred Browse/Review UI.
       replacement, generated output, and the watched child.
 - [x] Read base Review panes through the same regular-file and source-root Git
       guard used for transitive snapshot assets.
+- [x] Attribute definitions to the module that invokes each authoring helper,
+      including helpers shared by multiple entry modules.
+- [x] Validate every local HTML/CSS resource URL and its transitive static
+      dependencies during build/check, not only `href` navigation links.
+- [x] Wire the versioned live-update stream into every served diagnostic page
+      through a package-owned browser client.
+- [x] Make watched shutdown wait for active config adoption before closing the
+      final watcher and child, without restarting after shutdown begins.
 - [ ] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
       `cargo xtask review` under the invoked review loop.
 

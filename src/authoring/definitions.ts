@@ -15,11 +15,12 @@ import type {
   UseCaseInput,
 } from "./types.js";
 
-let currentDefiningModule: string | undefined;
-
-/** Loader hook used to attribute definitions to consumer source modules. */
-export function __setDefiningModule(sourceRelativePath: string): void {
-  currentDefiningModule = sourceRelativePath;
+/** Loader hook used by module-bound consumer authoring facades. */
+export function __attributeDefinition<T extends object>(
+  value: T,
+  sourceRelativePath: string,
+): T & { definedIn: string } {
+  return { ...value, definedIn: sourceRelativePath };
 }
 
 /** Define one canonical screen. */
@@ -43,14 +44,14 @@ export function defineUseCase(input: UseCaseInput): UseCaseDefinition {
 
 /** Create a screen marker inside a nested tree. */
 export function screen(input: NestedScreenInput): NestedScreenMarker {
-  return attributed({ ...input, __nested: "screen" });
+  return { ...input, __nested: "screen" };
 }
 
 /** Create a collection marker inside a nested tree. */
 export function collection(
   input: NestedCollectionInput,
 ): NestedCollectionMarker {
-  return attributed({ ...input, __nested: "collection" });
+  return { ...input, __nested: "collection" };
 }
 
 /** Flatten a nested tree into ordinary registry definitions. */
@@ -163,11 +164,5 @@ function mergeInherited(
 function branded<T extends object>(
   value: T,
 ): T & { __viaDefine: true; definedIn?: string } {
-  return attributed({ ...value, __viaDefine: true });
-}
-
-function attributed<T extends object>(value: T): T & { definedIn?: string } {
-  return currentDefiningModule
-    ? { ...value, definedIn: currentDefiningModule }
-    : value;
+  return { ...value, __viaDefine: true };
 }

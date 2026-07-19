@@ -39,7 +39,8 @@ fails for:
 - invalid config or registry metadata;
 - duplicate ids/routes or route/fragment/legacy collisions;
 - missing collection children, use-case screens, or reciprocal memberships;
-- unresolved `mock:` links, raw document links, or anchors;
+- unresolved `mock:` links, raw document links, local HTML/CSS resources, or
+  anchors;
 - missing stylesheets and declared dependencies;
 - stale, missing, or proven-orphan generated output;
 - malformed Review-ignore markers or material keys;
@@ -99,7 +100,10 @@ the repository mockups before UI implementation.
 ## Watched Development
 
 `mokabook serve` watches by default; `--no-watch` serves one deterministic
-snapshot. Watch classification derives only from resolved config:
+snapshot. Every diagnostic document loads the package-owned browser client,
+which connects to the versioned event stream and reloads its current durable
+URL after a higher version arrives. Watch classification derives only from
+resolved config:
 
 - the discovered or explicit config file reloads configuration, generated
   output, watch targets, and the child;
@@ -144,9 +148,12 @@ stream's first `ready` version establishes the page baseline; a higher version
 after reconnection or an `update` event triggers one reload and one-shot state
 recovery.
 
-Shutdown closes watchers, timers, child processes, HTTP servers, event streams,
-and ports. Tests must prove no orphan process remains after normal shutdown,
-failed startup, or interruption.
+Shutdown first stops queued work and waits for any active configuration
+transaction, then closes the final adopted watcher, timers, child processes,
+HTTP servers, event streams, and ports. A candidate watcher is discarded if
+shutdown begins before adoption, and no later child restart is started. Tests
+must prove no orphan process remains after normal shutdown, failed startup, or
+interruption.
 
 ## Review Comparison
 

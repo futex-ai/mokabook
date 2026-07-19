@@ -1,26 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { parse } from "parse5";
-
 import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
+import {
+  extractCssReferences,
+  extractHtmlReferences,
+} from "../html_references.js";
 import type { GitClient } from "./git.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type { ReviewArtifactContent } from "./types.js";
-
-interface HtmlAttribute {
-  name: string;
-  value: string;
-}
-
-interface HtmlNode {
-  attrs?: HtmlAttribute[];
-  childNodes?: HtmlNode[];
-  tagName?: string;
-  value?: string;
-}
 
 /** Filesystem boundary for current-worktree Review assets. */
 export interface ReviewAssetReader {
@@ -126,9 +116,9 @@ function referencedRoutes(
       : Buffer.from(content).toString("utf8");
   const references =
     extension === ".css"
-      ? cssReferences(text)
+      ? extractCssReferences(text)
       : extension === ".html" || extension === ".htm"
-        ? htmlReferences(text)
+        ? extractHtmlReferences(text).resources
         : [];
   return [
     ...new Set(
@@ -138,82 +128,6 @@ function referencedRoutes(
       }),
     ),
   ].sort();
-}
-
-function htmlReferences(content: string): string[] {
-  const references: string[] = [];
-  visit(parse(content) as unknown as HtmlNode, (node) => {
-    const attributes = new Map(
-      (node.attrs ?? []).map((attribute) => [attribute.name, attribute.value]),
-    );
-    const sourceAttribute = sourceAttributeFor(node.tagName, attributes);
-    if (sourceAttribute) references.push(sourceAttribute);
-    const sourceSet = attributes.get("srcset");
-    if (sourceSet) references.push(...sourceSetReferences(sourceSet));
-    const inlineStyle = attributes.get("style");
-    if (inlineStyle) references.push(...cssReferences(inlineStyle));
-    if (node.tagName === "style") {
-      const style = (node.childNodes ?? [])
-        .map((child) => child.value ?? "")
-        .join("");
-      references.push(...cssReferences(style));
-    }
-  });
-  return references;
-}
-
-function sourceAttributeFor(
-  tagName: string | undefined,
-  attributes: ReadonlyMap<string, string>,
-): string | undefined {
-  if (tagName === "link") return attributes.get("href");
-  if (tagName === "object") return attributes.get("data");
-  if (tagName === "video")
-    return attributes.get("poster") ?? attributes.get("src");
-  if (
-    ["audio", "embed", "img", "input", "script", "source", "track"].includes(
-      tagName ?? "",
-    )
-  ) {
-    return attributes.get("src");
-  }
-  if (tagName === "use")
-    return attributes.get("href") ?? attributes.get("xlink:href");
-  return undefined;
-}
-
-function cssReferences(content: string): string[] {
-  const withoutComments = content.replace(/\/\*[\s\S]*?\*\//g, "");
-  const references = [
-    ...withoutComments.matchAll(
-      /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)'"\s][^)]*?))\s*\)/gi,
-    ),
-  ].flatMap((match) => match[1] ?? match[2] ?? match[3] ?? []);
-  for (const match of withoutComments.matchAll(
-    /@import\s+(?:"([^"]*)"|'([^']*)')/gi,
-  )) {
-    const value = match[1] ?? match[2];
-    if (value) references.push(value);
-  }
-  return references;
-}
-
-function sourceSetReferences(value: string): string[] {
-  const references: string[] = [];
-  let position = 0;
-  while (position < value.length) {
-    while (/[\s,]/.test(value[position] ?? "")) position += 1;
-    const start = position;
-    while (position < value.length && !/\s/.test(value[position] ?? "")) {
-      position += 1;
-    }
-    const token = value.slice(start, position);
-    const reference = token.replace(/,+$/, "");
-    if (reference) references.push(reference);
-    if (reference !== token) continue;
-    while (position < value.length && value[position] !== ",") position += 1;
-  }
-  return references;
 }
 
 function resolveReference(
@@ -244,11 +158,6 @@ function resolveReference(
     throw assetError(sourceRoute, `asset URL escapes mockupsDir: ${reference}`);
   }
   return resolved;
-}
-
-function visit(node: HtmlNode, callback: (node: HtmlNode) => void): void {
-  callback(node);
-  for (const child of node.childNodes ?? []) visit(child, callback);
 }
 
 function assertPublicStaticRoute(
