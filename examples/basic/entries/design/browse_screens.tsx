@@ -1,0 +1,295 @@
+import { screen } from "mokabook";
+
+import { NavDrawer, NavTree } from "./parts/nav.js";
+import {
+  Breadcrumbs,
+  Shell,
+  TitleRow,
+  TopBar,
+  ViewSwitch,
+} from "./parts/shell.js";
+import {
+  BrowserFrame,
+  DetailsPanel,
+  EmptyState,
+  FlowStep,
+  MiniDetails,
+  MiniWelcome,
+  PhoneFrame,
+} from "./parts/stage.js";
+
+function HomeBody() {
+  return (
+    <EmptyState
+      title="Mokabook"
+      body="Browse the mockup catalogue. 15 screens and 1 use case are generated from this repository."
+      linkLabel="Open the first screen"
+    />
+  );
+}
+
+function HomeDesktop() {
+  return (
+    <Shell mode="browse" viewport="desktop" nav={<NavTree />}>
+      <HomeBody />
+    </Shell>
+  );
+}
+
+function HomeMobile() {
+  return (
+    <Shell mode="browse" viewport="mobile" nav={null}>
+      <HomeBody />
+    </Shell>
+  );
+}
+
+function SelectedScreenDesktop() {
+  return (
+    <Shell
+      mode="browse"
+      viewport="desktop"
+      nav={<NavTree activeLabel="Welcome" />}
+    >
+      <Breadcrumbs trail={["Example", "Screens", "Welcome"]} />
+      <TitleRow
+        title="Welcome"
+        address="example.test/welcome"
+        withDetailsToggle
+      />
+      <ViewSwitch active="both" />
+      <div className="mb-stage">
+        <PhoneFrame address="example.test/welcome" label="Mobile">
+          <MiniWelcome compact />
+        </PhoneFrame>
+        <BrowserFrame address="example.test/welcome" label="Desktop">
+          <MiniWelcome />
+        </BrowserFrame>
+      </div>
+      <DetailsPanel />
+    </Shell>
+  );
+}
+
+function SelectedScreenMobile() {
+  return (
+    <Shell mode="browse" viewport="mobile" nav={null}>
+      <Breadcrumbs trail={["Example", "Screens", "Welcome"]} />
+      <TitleRow
+        title="Welcome"
+        address="example.test/welcome"
+        withDetailsToggle
+      />
+      <ViewSwitch active="mobile" />
+      <div className="mb-stage">
+        <PhoneFrame address="example.test/welcome" label="Mobile">
+          <MiniWelcome compact />
+        </PhoneFrame>
+      </div>
+      <DetailsPanel />
+    </Shell>
+  );
+}
+
+function UseCaseSteps({ viewport }: { viewport: "desktop" | "mobile" }) {
+  return (
+    <ol className="mb-steps">
+      <FlowStep number={1} title="Welcome">
+        {viewport === "desktop" ? (
+          <BrowserFrame address="example.test/welcome">
+            <MiniWelcome />
+          </BrowserFrame>
+        ) : (
+          <PhoneFrame address="example.test/welcome">
+            <MiniWelcome compact />
+          </PhoneFrame>
+        )}
+      </FlowStep>
+      <FlowStep number={2} title="Details">
+        {viewport === "desktop" ? (
+          <BrowserFrame address="example.test/details">
+            <MiniDetails />
+          </BrowserFrame>
+        ) : (
+          <PhoneFrame address="example.test/details">
+            <MiniDetails compact />
+          </PhoneFrame>
+        )}
+      </FlowStep>
+    </ol>
+  );
+}
+
+function UseCaseDesktop() {
+  return (
+    <Shell
+      mode="browse"
+      viewport="desktop"
+      nav={<NavTree activeLabel="Example tour" />}
+    >
+      <Breadcrumbs trail={["Example", "Example tour"]} />
+      <TitleRow title="Example tour" />
+      <UseCaseSteps viewport="desktop" />
+    </Shell>
+  );
+}
+
+function UseCaseMobile() {
+  return (
+    <Shell mode="browse" viewport="mobile" nav={null}>
+      <Breadcrumbs trail={["Example", "Example tour"]} />
+      <TitleRow title="Example tour" />
+      <UseCaseSteps viewport="mobile" />
+    </Shell>
+  );
+}
+
+function DetailsOpenDesktop() {
+  return (
+    <Shell
+      mode="browse"
+      viewport="desktop"
+      nav={<NavTree activeLabel="Welcome" />}
+    >
+      <Breadcrumbs trail={["Example", "Screens", "Welcome"]} />
+      <TitleRow
+        title="Welcome"
+        address="example.test/welcome"
+        withDetailsToggle
+      />
+      <ViewSwitch active="desktop" />
+      <div className="mb-stage">
+        <BrowserFrame address="example.test/welcome" label="Desktop">
+          <MiniWelcome />
+        </BrowserFrame>
+      </div>
+      <DetailsPanel open />
+    </Shell>
+  );
+}
+
+function DetailsOpenMobile() {
+  return (
+    <Shell mode="browse" viewport="mobile" nav={null}>
+      <Breadcrumbs trail={["Example", "Screens", "Welcome"]} />
+      <TitleRow
+        title="Welcome"
+        address="example.test/welcome"
+        withDetailsToggle
+      />
+      <DetailsPanel open />
+    </Shell>
+  );
+}
+
+function MissingRouteBody() {
+  return (
+    <EmptyState
+      title="Screen not found"
+      body="Nothing in the catalogue matches"
+      code="view/screens/unknown.html"
+      linkLabel="Go to the catalogue home"
+    />
+  );
+}
+
+function MissingRouteDesktop() {
+  return (
+    <Shell mode="browse" viewport="desktop" nav={<NavTree />}>
+      <MissingRouteBody />
+    </Shell>
+  );
+}
+
+function MissingRouteMobile() {
+  return (
+    <Shell mode="browse" viewport="mobile" nav={null}>
+      <MissingRouteBody />
+    </Shell>
+  );
+}
+
+function NarrowNavigationDesktop() {
+  return (
+    <div className="mb-shell mb-shell--collapsed">
+      <TopBar mode="browse" viewport="mobile" />
+      <main className="mb-main">
+        <HomeBody />
+      </main>
+      <NavDrawer activeLabel="Welcome" />
+    </div>
+  );
+}
+
+function NarrowNavigationMobile() {
+  return (
+    <Shell
+      mode="browse"
+      viewport="mobile"
+      nav={null}
+      aside={<NavDrawer activeLabel="Welcome" />}
+    >
+      <HomeBody />
+    </Shell>
+  );
+}
+
+/** Browse shell design screens grouped by catalogue views and shell states. */
+export const browseViewScreens = [
+  screen({
+    description:
+      "The catalogue home with the navigation tree, search, and filter.",
+    desktop: <HomeDesktop />,
+    id: "design-browse-home",
+    mobile: <HomeMobile />,
+    slug: "home",
+    title: "Home",
+  }),
+  screen({
+    description:
+      "A selected screen with viewport switching and framed fragments.",
+    desktop: <SelectedScreenDesktop />,
+    id: "design-browse-screen",
+    mobile: <SelectedScreenMobile />,
+    slug: "screen",
+    title: "Selected screen",
+  }),
+  screen({
+    description:
+      "A selected use case rendering ordered steps of existing screens.",
+    desktop: <UseCaseDesktop />,
+    id: "design-browse-use-case",
+    mobile: <UseCaseMobile />,
+    slug: "use-case",
+    title: "Selected use case",
+  }),
+];
+
+/** Browse shell design screens for secondary shell states. */
+export const browseStateScreens = [
+  screen({
+    description: "The details panel expanded under a selected screen.",
+    desktop: <DetailsOpenDesktop />,
+    id: "design-browse-details",
+    mobile: <DetailsOpenMobile />,
+    slug: "details",
+    title: "Details panel",
+  }),
+  screen({
+    description: "The not-found view keeping catalogue navigation available.",
+    desktop: <MissingRouteDesktop />,
+    id: "design-browse-missing-route",
+    mobile: <MissingRouteMobile />,
+    slug: "missing-route",
+    title: "Missing route",
+  }),
+  screen({
+    description:
+      "Collapsed navigation opening as a drawer on narrow viewports.",
+    desktop: <NarrowNavigationDesktop />,
+    id: "design-browse-navigation",
+    mobile: <NarrowNavigationMobile />,
+    slug: "navigation",
+    title: "Narrow navigation",
+  }),
+];

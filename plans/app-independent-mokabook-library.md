@@ -4,10 +4,11 @@
 
 ## Status
 
-Active. Milestones 2–5 and the milestone-5A review hardening are implemented;
-repository checks pass. The GitHub repository rename in milestone 2 remains an
-external maintainer action. Commit, push, and the remaining post-push review
-loop are in progress for this delivery.
+Active. Milestones 2–6 are implemented: the engines, the milestone-5A review
+hardening with its completed post-push review loop, and the neutral Browse and
+Review design mockups with their recorded shell design contract. Repository
+checks pass. The GitHub repository rename in milestone 2 remains an external
+maintainer action. Milestone 7 (Browse and Review UI implementation) is next.
 
 ## Summary
 
@@ -363,7 +364,7 @@ the deferred Browse/Review UI.
       final watcher and child, without restarting after shutdown begins.
 - [x] Match stylesheet rules against documented catalogue routes while keeping
       generated fragment-relative stylesheet URLs.
-- [ ] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
+- [x] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
       `cargo xtask review` under the invoked review loop.
 
 At this milestone the milestone-5 engines satisfy their safety and lifecycle
@@ -376,25 +377,27 @@ Tags: mockup
 Summary: specify the package-owned Browse and Review experience using only
 synthetic catalogue data before UI implementation.
 
-- [ ] Create a neutral example catalogue with at least two standalone screens,
+- [x] Create a neutral example catalogue with at least two standalone screens,
       one nested collection, one use case, id links, related docs/dependencies,
       custom stylesheet rules, and one safe Review-ignore example.
-- [ ] Give every synthetic screen a distinct mobile and web/desktop component;
+- [x] Give every synthetic screen a distinct mobile and web/desktop component;
       keep fixture data under examples/tests and never present it as real
       product data.
-- [ ] Create standalone mobile and desktop Mokabook Browse mockups for home,
+- [x] Create standalone mobile and desktop Mokabook Browse mockups for home,
       selected screen/use case, details, missing route, and narrow navigation.
-- [ ] Create separate mobile and desktop Review mockups for changed, added,
+- [x] Create separate mobile and desktop Review mockups for changed, added,
       removed, shared-impact, ignored-only, and empty comparison states; split
       pages before any generated screen-spec page exceeds five screens.
-- [ ] Use the existing Accounting Mokabook prototypes only as behavioral/visual
+      A difference-mode mockup was added beside the required states, and the
+      design screens are split across four collections of at most four screens.
+- [x] Use the existing Accounting Mokabook prototypes only as behavioral/visual
       reference; remove Bookfolio names, product screens, routes, data, colors,
       and theme dependencies from the new designs.
-- [ ] Ensure each design is reachable from the example navigation and that
+- [x] Ensure each design is reachable from the example navigation and that
       implementation notes live outside rendered screen areas.
-- [ ] Build/check/test/typecheck the example mockups and open every changed
+- [x] Build/check/test/typecheck the example mockups and open every changed
       mobile/desktop page directly for visual smoke testing.
-- [ ] Record the approved CSS custom properties and responsive behavior in the
+- [x] Record the approved CSS custom properties and responsive behavior in the
       protocol before the UI milestone begins.
 
 At this milestone reviewers can inspect the complete neutral Browse/Review

@@ -24,6 +24,11 @@ function Welcome({ compact }: { compact: boolean }) {
       </ReviewIgnore>
       <h1>Welcome to Mokabook</h1>
       <MockLink to="example-details">Open the details screen</MockLink>
+      <p>
+        <MockLink to="design-browse-home">
+          See the Mokabook shell design
+        </MockLink>
+      </p>
     </main>
   );
 }

@@ -8,14 +8,32 @@ export default defineConfig({
   review: {
     outDir: ".context/basic-review",
     sharedImpact: [
+      "examples/basic/generated/design-review.css",
+      "examples/basic/generated/design-stage.css",
+      "examples/basic/generated/design.css",
       "examples/basic/renderer.tsx",
       "examples/basic/generated/styles.css",
     ],
   },
-  stylesheets: [{ match: "**/*.html", stylesheets: ["styles.css"] }],
+  stylesheets: [
+    {
+      match: "design/review/**",
+      stylesheets: ["design.css", "design-stage.css", "design-review.css"],
+    },
+    { match: "design/**", stylesheets: ["design.css", "design-stage.css"] },
+    { match: "**/*.html", stylesheets: ["styles.css"] },
+  ],
   watch: {
     rules: [
-      { action: "reload", paths: ["examples/basic/generated/styles.css"] },
+      {
+        action: "reload",
+        paths: [
+          "examples/basic/generated/design-review.css",
+          "examples/basic/generated/design-stage.css",
+          "examples/basic/generated/design.css",
+          "examples/basic/generated/styles.css",
+        ],
+      },
     ],
   },
 });

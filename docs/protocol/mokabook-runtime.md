@@ -94,8 +94,11 @@ and modified-click links retain native browser behavior. A failed enhancement
 falls back to normal document navigation.
 
 The shell meets keyboard, focus, reduced-motion, contrast, semantics, and status
-announcement requirements. Mobile and desktop shell variants are specified in
-the repository mockups before UI implementation.
+announcement requirements. Mobile and desktop shell variants are specified by
+the design mockups in the basic example's `design/` catalogue, and the
+[shell design contract](./mokabook-shell-design.md) records the approved CSS
+custom properties, tokens, and responsive behavior the UI milestone must
+implement.
 
 ## Watched Development
 
