@@ -82,8 +82,9 @@ developed.
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.
-Inside a fragment, use `MockLink` for catalogue destinations; logical screen
-routes are Browse identifiers, not generated static files.
+Base resources must be regular Git files outside configured source roots.
+Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and
+logical screen routes are not portable links in generated static files.
 
 ## Rendering Boundary
 

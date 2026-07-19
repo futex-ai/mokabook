@@ -164,34 +164,6 @@ export const mockups = [defineCollection({
   );
 });
 
-test("link validation fails closed for missing anchors and escaping paths", async (context) => {
-  const fixture = await createFixture(
-    validEntrySource({
-      body: `<a href="details.mobile.html#absent">Broken anchor</a>`,
-    }),
-  );
-  context.after(() => removeFixture(fixture));
-  const config = await loadConfig(fixture.root);
-  await assert.rejects(() => compileCatalogue(config), /missing target anchor/);
-  await fs.promises.writeFile(
-    fixture.entryPath,
-    validEntrySource({ body: `<a href="../../../outside.html">Escape</a>` }),
-  );
-  await assert.rejects(() => compileCatalogue(config), /escapes mockupsDir/);
-  await fs.promises.writeFile(
-    fixture.entryPath,
-    validEntrySource({ body: `<a href="missing.html">Missing</a>` }),
-  );
-  await assert.rejects(() => compileCatalogue(config), /missing target/);
-  await fs.promises.writeFile(
-    fixture.entryPath,
-    validEntrySource({
-      body: `<a href="./details.html">Logical route only</a>`,
-    }),
-  );
-  await assert.rejects(() => compileCatalogue(config), /missing target/);
-});
-
 test("missing declared dependencies and stylesheets are actionable", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

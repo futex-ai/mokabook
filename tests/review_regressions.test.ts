@@ -158,6 +158,27 @@ test("Git changed-path collection uses and enforces output exclusions", async ()
   );
 });
 
+test("Git file classification uses a literal pathspec", async () => {
+  const calls: string[][] = [];
+  const client = new RepositoryGitClient({
+    run: async (arguments_) => {
+      calls.push([...arguments_]);
+      return "120000\n";
+    },
+  });
+
+  const kind = await client.fileKind(
+    "a".repeat(40),
+    "mockups/assets/[linked].css",
+  );
+
+  assert.equal(kind, "symlink");
+  assert.equal(
+    calls[0]?.includes(":(literal)mockups/assets/[linked].css"),
+    true,
+  );
+});
+
 test("Review does not hide an invalid v3 manifest behind v2 fallback", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
@@ -224,11 +245,19 @@ function fakeGit(files: ReadonlyMap<string, string>): GitClient {
   return {
     changedPaths: async () => [],
     fileExists: async (_commit, repoPath) => files.has(repoPath),
+    fileKind: async (_commit, repoPath) =>
+      files.has(repoPath) ? "regular" : "missing",
     readFile: async (_commit, repoPath) => {
       const value = files.get(repoPath);
       if (value === undefined)
         throw new Error(`missing fake Git path ${repoPath}`);
       return value;
+    },
+    readFileBytes: async (_commit, repoPath) => {
+      const value = files.get(repoPath);
+      if (value === undefined)
+        throw new Error(`missing fake Git path ${repoPath}`);
+      return Buffer.from(value);
     },
     resolveRef: async () => "a".repeat(40),
   };

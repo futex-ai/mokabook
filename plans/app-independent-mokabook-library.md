@@ -335,6 +335,12 @@ the deferred Browse/Review UI.
       manifest is absent, never when a present v3 manifest is invalid.
 - [x] Describe the current diagnostic Review index/per-viewport pages without
       claiming the deferred grouped and combined-viewport UI.
+- [x] Apply the same authored-source and regular-file confinement to Git base
+      snapshot dependencies as current-worktree Review dependencies.
+- [x] Reject root-absolute fragment links and rewrite only complete `mock:`
+      `href` values, leaving text and non-link attributes byte-unchanged.
+- [x] Run the Rust file-length audit once through the injected application
+      boundary instead of recursively invoking `xtask` inside the check list.
 - [ ] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
       `cargo xtask review` under the invoked review loop.
 

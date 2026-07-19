@@ -11,6 +11,7 @@ import type { ManifestScreen, ManifestV3 } from "../registry/types.js";
 import {
   copySnapshotDependencies,
   FileSystemReviewAssetReader,
+  GitReviewAssetReader,
   type ReviewAssetReader,
 } from "./assets.js";
 import { readBaseManifest } from "./base_manifest.js";
@@ -47,6 +48,12 @@ export async function compareReview(
   const mockupsPrefix = toPosixPath(
     path.relative(config.repoRoot, config.mockupsDir),
   );
+  const baseAssetReader = new GitReviewAssetReader(
+    config,
+    git,
+    baseCommit,
+    mockupsPrefix,
+  );
   const files = new Map<string, ReviewArtifactContent>();
   const baseSeeds = new Set<string>();
   const headSeeds = new Set<string>();
@@ -80,12 +87,9 @@ export async function compareReview(
       ),
     );
   }
-  await copySnapshotDependencies(files, "before", baseSeeds, async (route) => {
-    const repoPath = joinGit(mockupsPrefix, route);
-    return git.readFileBytes
-      ? git.readFileBytes(baseCommit, repoPath)
-      : Buffer.from(await git.readFile(baseCommit, repoPath), "utf8");
-  });
+  await copySnapshotDependencies(files, "before", baseSeeds, (route) =>
+    baseAssetReader.read(route),
+  );
   await copySnapshotDependencies(files, "after", headSeeds, async (route) => {
     const generated = compilation.outputs.get(route);
     return generated ?? assetReader.read(route);

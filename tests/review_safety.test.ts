@@ -47,8 +47,16 @@ test("Review artifact paths are collision-free for distinct valid routes", async
       changedPaths: async () => [],
       fileExists: async (_commit, repoPath) =>
         repoPath.endsWith("mokabook-manifest.json"),
+      fileKind: async (_commit, repoPath) =>
+        repoPath.endsWith("mokabook-manifest.json") ? "regular" : "missing",
       readFile: async (_commit, repoPath) => {
         if (repoPath.endsWith("mokabook-manifest.json")) return baseManifest;
+        throw new Error(`unexpected Git path ${repoPath}`);
+      },
+      readFileBytes: async (_commit, repoPath) => {
+        if (repoPath.endsWith("mokabook-manifest.json")) {
+          return Buffer.from(baseManifest);
+        }
         throw new Error(`unexpected Git path ${repoPath}`);
       },
       resolveRef: async () => "a".repeat(40),

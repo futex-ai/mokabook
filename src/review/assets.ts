@@ -6,6 +6,7 @@ import { parse } from "parse5";
 import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
+import type { GitClient } from "./git.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type { ReviewArtifactContent } from "./types.js";
 
@@ -31,8 +32,7 @@ export class FileSystemReviewAssetReader implements ReviewAssetReader {
   constructor(private readonly config: ResolvedConfig) {}
 
   async read(route: string): Promise<Uint8Array> {
-    if (!isSafeRepositoryPath(route)) throw assetError(route, "unsafe path");
-    const candidate = path.resolve(this.config.mockupsDir, route);
+    const candidate = assertPublicStaticRoute(route, this.config);
     try {
       const [realRoot, realCandidate] = await Promise.all([
         fs.promises.realpath(this.config.mockupsDir),
@@ -54,6 +54,34 @@ export class FileSystemReviewAssetReader implements ReviewAssetReader {
       return await fs.promises.readFile(realCandidate);
     } catch (error) {
       if (error instanceof MokabookError) throw error;
+      throw assetError(route, errorMessage(error), error);
+    }
+  }
+}
+
+/** Confined Git implementation for base-commit Review assets. */
+export class GitReviewAssetReader implements ReviewAssetReader {
+  constructor(
+    private readonly config: ResolvedConfig,
+    private readonly git: GitClient,
+    private readonly commit: string,
+    private readonly mockupsPrefix: string,
+  ) {}
+
+  async read(route: string): Promise<Uint8Array> {
+    assertPublicStaticRoute(route, this.config);
+    const repoPath =
+      this.mockupsPrefix === "" ? route : `${this.mockupsPrefix}/${route}`;
+    try {
+      const kind = await this.git.fileKind(this.commit, repoPath);
+      if (kind !== "regular") {
+        throw assetError(route, `not a regular Git file (${kind})`);
+      }
+      return await this.git.readFileBytes(this.commit, repoPath);
+    } catch (error) {
+      if (error instanceof MokabookError && error.code === "review-invalid") {
+        throw error;
+      }
       throw assetError(route, errorMessage(error), error);
     }
   }
@@ -221,6 +249,22 @@ function resolveReference(
 function visit(node: HtmlNode, callback: (node: HtmlNode) => void): void {
   callback(node);
   for (const child of node.childNodes ?? []) visit(child, callback);
+}
+
+function assertPublicStaticRoute(
+  route: string,
+  config: ResolvedConfig,
+): string {
+  if (!isSafeRepositoryPath(route)) throw assetError(route, "unsafe path");
+  const candidate = path.resolve(config.mockupsDir, route);
+  if (
+    !isInside(config.mockupsDir, candidate) ||
+    isInside(config.entriesDir, candidate) ||
+    Boolean(config.legacy && isInside(config.legacy.pagesDir, candidate))
+  ) {
+    throw assetError(route, "not a public static file");
+  }
+  return candidate;
 }
 
 function assetError(

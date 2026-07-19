@@ -36,9 +36,6 @@ fn check_runs_every_gate_in_order() {
         CommandRunnerRunMock
             .next_call(matching!((command) if command.display() == "cargo test --workspace"))
             .returns(Ok(())),
-        CommandRunnerRunMock
-            .next_call(matching!((command) if command.display() == "cargo xtask rust-file-length-lint --all"))
-            .returns(Ok(())),
     )));
     let runner = DefaultCheckRunner::new(command_runner);
 

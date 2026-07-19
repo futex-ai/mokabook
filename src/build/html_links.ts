@@ -58,11 +58,12 @@ function validateHref(
   if (
     href === "" ||
     href.startsWith("?") ||
-    /^(?:https?:|mailto:|tel:|data:)/.test(href)
+    /^(?:https?:|mailto:|tel:|data:)/i.test(href)
   )
     return undefined;
   if (href.startsWith("mock:")) return `unresolved id link ${href}`;
-  if (href.startsWith("/")) return undefined;
+  if (href.startsWith("/"))
+    return `root-absolute link is not portable: ${href}`;
   if (href.startsWith("#")) {
     return source.anchors.has(decodeURIComponent(href.slice(1)))
       ? undefined

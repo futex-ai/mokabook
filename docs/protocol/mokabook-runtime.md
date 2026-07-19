@@ -166,7 +166,10 @@ engine guarantees.
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including
 binary fonts and images, while explicit HTTP(S)/data resources remain external.
-Pane documents remain byte-unmodified and run in script-disabled sandboxes.
+Current-worktree resources must resolve to regular public files, and base
+resources must be regular Git files; neither side may read from configured
+entry or legacy source roots. Pane documents remain byte-unmodified and run in
+script-disabled sandboxes.
 Comparison-page routes use bounded route hashes and fail on any artifact-path
 collision rather than overwriting an earlier screen.
 

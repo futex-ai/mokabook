@@ -2,6 +2,9 @@ import { execFile } from "node:child_process";
 
 import { MokabookError, errorMessage } from "../errors.js";
 
+/** Repository object classification used before reading Review dependencies. */
+export type GitFileKind = "missing" | "other" | "regular" | "symlink";
+
 /** Git operations required by Review without checking out the base tree. */
 export interface GitClient {
   changedPaths(
@@ -9,8 +12,9 @@ export interface GitClient {
     excludedPaths?: readonly string[],
   ): Promise<readonly string[]>;
   fileExists(commit: string, repoRelativePath: string): Promise<boolean>;
+  fileKind(commit: string, repoRelativePath: string): Promise<GitFileKind>;
   readFile(commit: string, repoRelativePath: string): Promise<string>;
-  readFileBytes?(commit: string, repoRelativePath: string): Promise<Uint8Array>;
+  readFileBytes(commit: string, repoRelativePath: string): Promise<Uint8Array>;
   resolveRef(reference: string): Promise<string>;
 }
 
@@ -81,12 +85,39 @@ export class RepositoryGitClient implements GitClient {
   }
 
   async fileExists(commit: string, repoRelativePath: string): Promise<boolean> {
+    return (await this.fileKind(commit, repoRelativePath)) !== "missing";
+  }
+
+  async fileKind(
+    commit: string,
+    repoRelativePath: string,
+  ): Promise<GitFileKind> {
     assertGitPath(repoRelativePath);
     const output = await this.run(
-      ["ls-tree", "--name-only", commit, "--", repoRelativePath],
+      [
+        "ls-tree",
+        "--format=%(objectmode)",
+        commit,
+        "--",
+        `:(literal)${repoRelativePath}`,
+      ],
       `inspect ${repoRelativePath} at ${commit}`,
     );
-    return output.split("\n").includes(repoRelativePath);
+    const modes = output
+      .split("\n")
+      .map((mode) => mode.trim())
+      .filter(Boolean);
+    if (modes.length === 0) return "missing";
+    if (modes.length !== 1) {
+      throw new MokabookError(
+        "git-failed",
+        `Git returned multiple entries for ${repoRelativePath}`,
+      );
+    }
+    const mode = modes[0] ?? "";
+    if (/^100[0-7]{3}$/.test(mode)) return "regular";
+    if (mode === "120000") return "symlink";
+    return "other";
   }
 
   async readFileBytes(

@@ -154,7 +154,8 @@ but ids never derive from tree position.
 
 Logical screen and use-case routes are catalogue identifiers, not generated
 documents. Fragment links must target a generated fragment or public static
-asset; authors use `MockLink` for id-addressed catalogue navigation.
+asset with a relative URL; root-absolute links are rejected as non-portable.
+Authors use `MockLink` for id-addressed catalogue navigation.
 
 All public exports ship ESM JavaScript and declarations usable by NodeNext and
 bundler TypeScript resolution. The package export map and packed-tarball tests
@@ -189,10 +190,11 @@ export default function render(input: RenderInput): string;
 ```
 
 The string must contain a complete `<html>` document. Mokabook serializes
-Review-ignore markers and rewrites id links after this function returns. The
-package declares `react` and `react-dom` `>=19.0.0` as peers; it does not ship a
-private runtime. The builder resolves both peers and their subpaths from the
-consumer config, and bundles every React-bearing input in one internal graph.
+Review-ignore markers and rewrites only complete `mock:<id>` `href` values
+after this function returns. The package declares `react` and `react-dom`
+`>=19.0.0` as peers and does not ship a private runtime. The builder resolves
+both peers and their subpaths from consumer config, then bundles every
+React-bearing input in one internal graph.
 
 All entry modules and the renderer are bundled into one build-time graph with
 one React instance. This must work when Mokabook is installed locally and when

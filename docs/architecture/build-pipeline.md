@@ -18,7 +18,7 @@ validate definitions and cross-references in memory
 renderer({ node, entry, viewport, stylesheets })
         |
         v
-serialize Review markers -> resolve mock:id links -> validate hrefs/anchors
+serialize Review markers -> resolve complete mock:id hrefs -> validate hrefs/anchors
         |
         v
 mobile/desktop HTML + schema-v3 manifest in memory
@@ -69,9 +69,11 @@ type Renderer = (input: RenderInput) => string;
 ```
 
 The returned string must be a complete HTML document. Mokabook then converts
-`ReviewIgnore` templates into inert comments and resolves `mock:<id>` links to
-viewport-matched fragments. A use-case link resolves through its first screen;
-collections are intentionally not linkable.
+`ReviewIgnore` templates into inert comments and resolves complete `href`
+values of the form `mock:<id>` to viewport-matched fragments. Text, scripts,
+styles, and non-link attributes containing the same characters remain
+unchanged. A use-case link resolves through its first screen; collections are
+intentionally not linkable.
 
 React Native Web style collection is not a second conversion stage. If an app
 uses it, its renderer wraps the node in the app provider, registers or renders

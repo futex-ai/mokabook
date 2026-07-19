@@ -84,6 +84,103 @@ export default defineConfig({
   }
 });
 
+test("Review rejects base dependencies beneath authored source roots", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const nestedEntries = path.join(fixture.mockupsDir, "src/entries");
+  const nestedEntry = path.join(nestedEntries, "fixture.mockup.tsx");
+  await fs.promises.mkdir(nestedEntries, { recursive: true });
+  await fs.promises.rename(fixture.entryPath, nestedEntry);
+  await fs.promises.writeFile(
+    fixture.configPath,
+    `import { defineConfig } from "mokabook";
+export default defineConfig({
+  entriesDir: "mockups/src/entries",
+  mockupsDir: "mockups",
+  repoRoot: ".",
+  review: { outDir: ".review" }
+});
+`,
+  );
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  const baseFragment = path.join(
+    fixture.mockupsDir,
+    "screens/home.mobile.html",
+  );
+  await fs.promises.writeFile(
+    baseFragment,
+    (await fs.promises.readFile(baseFragment, "utf8")).replace(
+      "</body>",
+      '<script src="../src/entries/fixture.mockup.tsx"></script></body>',
+    ),
+  );
+  await git(fixture.root, ["init", "-q"]);
+  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
+  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["add", "."]);
+  await git(fixture.root, ["commit", "-qm", "test: base source reference"]);
+  await fs.promises.writeFile(
+    nestedEntry,
+    validEntrySource({ firstTitle: "Changed" }),
+  );
+  await writeCompilation(await compileCatalogue(config), config);
+
+  await assert.rejects(
+    () =>
+      runReview(
+        config,
+        "HEAD",
+        config.review.outDir,
+        new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+      ),
+    /not a public static file/,
+  );
+});
+
+test("Review rejects non-regular base dependency blobs", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  const baseFragment = path.join(
+    fixture.mockupsDir,
+    "screens/home.mobile.html",
+  );
+  await fs.promises.symlink(
+    "../notes.md",
+    path.join(fixture.mockupsDir, "linked.css"),
+  );
+  await fs.promises.writeFile(
+    baseFragment,
+    (await fs.promises.readFile(baseFragment, "utf8")).replace(
+      "</head>",
+      '<link rel="stylesheet" href="../linked.css" /></head>',
+    ),
+  );
+  await git(fixture.root, ["init", "-q"]);
+  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
+  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["add", "."]);
+  await git(fixture.root, ["commit", "-qm", "test: base symlink reference"]);
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    validEntrySource({ firstTitle: "Changed" }),
+  );
+  await writeCompilation(await compileCatalogue(config), config);
+
+  await assert.rejects(
+    () =>
+      runReview(
+        config,
+        "HEAD",
+        config.review.outDir,
+        new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+      ),
+    /not a regular Git file/,
+  );
+});
+
 async function git(cwd: string, arguments_: readonly string[]): Promise<void> {
   await execFileAsync("git", [...arguments_], { cwd });
 }

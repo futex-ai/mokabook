@@ -115,11 +115,19 @@ test("Review classifies added, removed, and unchanged routes independently", asy
     {
       changedPaths: async () => [],
       fileExists: async (_commit, repoPath) => gitFiles.has(repoPath),
+      fileKind: async (_commit, repoPath) =>
+        gitFiles.has(repoPath) ? "regular" : "missing",
       readFile: async (_commit, repoPath) => {
         const content = gitFiles.get(repoPath);
         if (content === undefined)
           throw new Error(`missing fake Git path ${repoPath}`);
         return content;
+      },
+      readFileBytes: async (_commit, repoPath) => {
+        const content = gitFiles.get(repoPath);
+        if (content === undefined)
+          throw new Error(`missing fake Git path ${repoPath}`);
+        return Buffer.from(content);
       },
       resolveRef: async () => "a".repeat(40),
     },
