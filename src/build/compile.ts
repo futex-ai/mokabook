@@ -10,6 +10,7 @@ import {
 } from "../registry/manifest.js";
 import { prepareRegistry } from "../registry/prepare.js";
 import type { ManifestLegacyPage, ManifestV3 } from "../registry/types.js";
+import { normalizeSingleDocument } from "../review/ignore.js";
 import { validateHtmlLinks } from "./html_links.js";
 import { loadConsumerGraph } from "./load_graph.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";
@@ -64,6 +65,9 @@ export async function compileCatalogue(
         `fragment route collides with registry route: ${route}`,
       );
     }
+  }
+  for (const [route, content] of outputs) {
+    normalizeSingleDocument(content, route);
   }
   validateHtmlLinks(outputs, config);
   const legacyManifest: ManifestLegacyPage[] = legacy.map((page) => ({

@@ -114,6 +114,7 @@ test("Review classifies added, removed, and unchanged routes independently", asy
     config,
     {
       changedPaths: async () => [],
+      fileExists: async (_commit, repoPath) => gitFiles.has(repoPath),
       readFile: async (_commit, repoPath) => {
         const content = gitFiles.get(repoPath);
         if (content === undefined)

@@ -82,9 +82,10 @@ the completed HTML string.
 ## 4. Validation And Commit
 
 Registry ids, routes, relationships, files, output collisions, stylesheets,
-links, anchors, legacy policies, and manifest data are validated before output
-changes. All expected bytes are held in memory. `check` compares those bytes
-with disk and reports grouped missing, stale, and proven-orphan paths.
+links, anchors, Review-ignore/material markers, legacy policies, and manifest
+data are validated before output changes. All expected bytes are held in
+memory. `check` compares those bytes with disk and reports grouped missing,
+stale, and proven-orphan paths.
 
 `build` writes a same-filesystem staging tree, backs up only files identified by
 Mokabook's generated header and a source path beneath this config's authored

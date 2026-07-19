@@ -76,8 +76,9 @@ npx mokabook review --base origin/main
 
 `build` writes viewport fragments and `mokabook-manifest.json` under
 `mockupsDir`. `check` calculates those bytes without writing and reports
-missing, stale, or orphan generated files. Browse currently uses a deliberately
-plain diagnostic shell while the package-owned responsive UI is developed.
+missing, stale, or orphan generated files. Browse and Review currently use
+deliberately plain diagnostic pages while the package-owned responsive UI is
+developed.
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.

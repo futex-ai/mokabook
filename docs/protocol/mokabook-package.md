@@ -296,9 +296,12 @@ historical app-family rewrites must not become defaults. New structured entries
 must not rely on legacy route repair.
 
 Manifest readers may accept Accounting's `mockbook-manifest.json` version 2
-during the Accounting cutover, but every new build emits
-`mokabook-manifest.json` version 3. Compatibility code has explicit fixtures
-and a removal policy; it is not an undocumented fallback.
+during the Accounting cutover only when the canonical
+`mokabook-manifest.json` is absent. A present but invalid version 3 manifest
+fails validation instead of falling back to potentially stale version 2 data.
+Every new build emits `mokabook-manifest.json` version 3. Compatibility code
+has explicit fixtures and a removal policy; it is not an undocumented
+fallback.
 
 ## Non-Goals
 

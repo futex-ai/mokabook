@@ -327,6 +327,14 @@ the deferred Browse/Review UI.
       transactional writer boundaries, including symlink-resolved paths.
 - [x] Distinguish current engine guarantees from deferred release-ready Browse
       shell and browser-coverage requirements in the runtime protocol.
+- [x] Validate Review-ignore and material markers during compilation and for
+      one-sided added/removed Review panes.
+- [x] Exclude the active Review output directory from Git changed-path and
+      shared-impact evidence, including a CLI `--out` override.
+- [x] Fall back to the compatibility v2 manifest only when the canonical v3
+      manifest is absent, never when a present v3 manifest is invalid.
+- [x] Describe the current diagnostic Review index/per-viewport pages without
+      claiming the deferred grouped and combined-viewport UI.
 - [ ] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
       `cargo xtask review` under the invoked review loop.
 

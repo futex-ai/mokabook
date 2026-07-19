@@ -4,7 +4,11 @@ import { MokabookError, errorMessage } from "../errors.js";
 
 /** Git operations required by Review without checking out the base tree. */
 export interface GitClient {
-  changedPaths(commit: string): Promise<readonly string[]>;
+  changedPaths(
+    commit: string,
+    excludedPaths?: readonly string[],
+  ): Promise<readonly string[]>;
+  fileExists(commit: string, repoRelativePath: string): Promise<boolean>;
   readFile(commit: string, repoRelativePath: string): Promise<string>;
   readFileBytes?(commit: string, repoRelativePath: string): Promise<Uint8Array>;
   resolveRef(reference: string): Promise<string>;
@@ -76,6 +80,15 @@ export class RepositoryGitClient implements GitClient {
     );
   }
 
+  async fileExists(commit: string, repoRelativePath: string): Promise<boolean> {
+    assertGitPath(repoRelativePath);
+    const output = await this.run(
+      ["ls-tree", "--name-only", commit, "--", repoRelativePath],
+      `inspect ${repoRelativePath} at ${commit}`,
+    );
+    return output.split("\n").includes(repoRelativePath);
+  }
+
   async readFileBytes(
     commit: string,
     repoRelativePath: string,
@@ -87,13 +100,20 @@ export class RepositoryGitClient implements GitClient {
     );
   }
 
-  async changedPaths(commit: string): Promise<readonly string[]> {
+  async changedPaths(
+    commit: string,
+    excludedPaths: readonly string[] = [],
+  ): Promise<readonly string[]> {
+    for (const excluded of excludedPaths) assertGitPath(excluded);
+    const pathspecs = excludedPaths.map(
+      (excluded) => `:(exclude,top,literal)${excluded}`,
+    );
     const tracked = await this.run(
-      ["diff", "--name-only", commit, "--"],
+      ["diff", "--name-only", commit, "--", ...pathspecs],
       `diff workspace against ${commit}`,
     );
     const untracked = await this.run(
-      ["ls-files", "--others", "--exclude-standard"],
+      ["ls-files", "--others", "--exclude-standard", "--", ...pathspecs],
       "list untracked workspace paths",
     );
     return [
@@ -101,7 +121,11 @@ export class RepositoryGitClient implements GitClient {
         `${tracked}\n${untracked}`
           .split("\n")
           .map((value) => value.trim())
-          .filter(Boolean),
+          .filter(
+            (value) =>
+              value.length > 0 &&
+              !excludedPaths.some((excluded) => pathBelongsTo(value, excluded)),
+          ),
       ),
     ].sort();
   }
@@ -136,6 +160,10 @@ export class RepositoryGitClient implements GitClient {
       );
     }
   }
+}
+
+function pathBelongsTo(candidate: string, root: string): boolean {
+  return candidate === root || candidate.startsWith(`${root}/`);
 }
 
 function assertGitPath(value: string): void {

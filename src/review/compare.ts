@@ -4,17 +4,18 @@ import path from "node:path";
 import { minimatch } from "minimatch";
 
 import type { Compilation } from "../build/compile.js";
-import type { ResolvedConfig } from "../config/types.js";
 import { toPosixPath } from "../config/paths.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
-import { MANIFEST_NAME, parseManifest } from "../registry/manifest.js";
 import type { ManifestScreen, ManifestV3 } from "../registry/types.js";
-import type { GitClient } from "./git.js";
 import {
   copySnapshotDependencies,
   FileSystemReviewAssetReader,
   type ReviewAssetReader,
 } from "./assets.js";
+import { readBaseManifest } from "./base_manifest.js";
+import { reviewChangedPaths } from "./changed_paths.js";
+import type { GitClient } from "./git.js";
 import { normalizeReviewPair, normalizeSingleDocument } from "./ignore.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type {
@@ -32,11 +33,17 @@ export async function compareReview(
   config: ResolvedConfig,
   git: GitClient,
   baseRef: string,
+  outDir = config.review.outDir,
   assetReader: ReviewAssetReader = new FileSystemReviewAssetReader(config),
 ): Promise<ReviewArtifact> {
   const baseCommit = await git.resolveRef(baseRef);
   const baseManifest = await readBaseManifest(git, baseCommit, config);
-  const changedPaths = await git.changedPaths(baseCommit);
+  const changedPaths = await reviewChangedPaths(
+    git,
+    baseCommit,
+    config,
+    outDir,
+  );
   const mockupsPrefix = toPosixPath(
     path.relative(config.repoRoot, config.mockupsDir),
   );
@@ -177,6 +184,11 @@ function compareViewport(
   beforePath: string | undefined,
   afterPath: string | undefined,
 ): ViewportReview {
+  const context = `${route} (${viewport})`;
+  const normalizedBefore =
+    before === undefined ? undefined : normalizeSingleDocument(before, context);
+  const normalizedAfter =
+    after === undefined ? undefined : normalizeSingleDocument(after, context);
   if (before === undefined)
     return {
       ...(afterPath ? { afterPath } : {}),
@@ -191,15 +203,10 @@ function compareViewport(
       state: "removed",
       viewport,
     };
-  const normalized = normalizeReviewPair(
-    before,
-    after,
-    `${route} (${viewport})`,
-  );
+  const normalized = normalizeReviewPair(before, after, context);
   const normalizedEqual = digest(normalized.base) === digest(normalized.head);
   const rawEqual =
-    digest(normalizeSingleDocument(before, route)) ===
-    digest(normalizeSingleDocument(after, route));
+    digest(normalizedBefore ?? "") === digest(normalizedAfter ?? "");
   return {
     ...(afterPath ? { afterPath } : {}),
     ...(beforePath ? { beforePath } : {}),
@@ -211,28 +218,6 @@ function compareViewport(
         : "changed",
     viewport,
   };
-}
-
-async function readBaseManifest(
-  git: GitClient,
-  commit: string,
-  config: ResolvedConfig,
-): Promise<ManifestV3> {
-  const prefix = toPosixPath(path.relative(config.repoRoot, config.mockupsDir));
-  try {
-    return parseManifest(
-      JSON.parse(await git.readFile(commit, joinGit(prefix, MANIFEST_NAME))),
-      false,
-    );
-  } catch (error) {
-    if (!config.compatibility.readManifestV2) throw error;
-    return parseManifest(
-      JSON.parse(
-        await git.readFile(commit, joinGit(prefix, "mockbook-manifest.json")),
-      ),
-      true,
-    );
-  }
 }
 
 function screenMap(manifest: ManifestV3): Map<string, ManifestScreen> {

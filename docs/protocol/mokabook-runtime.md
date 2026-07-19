@@ -146,17 +146,22 @@ Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
 version 2 and version 3 manifests during Accounting migration. Configured
 shared-impact globs and manifest dependencies identify changes that can affect
-many screens.
+many screens. The active Review artifact directory, including a `--out`
+override and its symlink-resolved in-repository target, is excluded before
+changed-path and shared-impact evidence is calculated.
 
-Review emits a static, self-contained directory with:
+The current engine emits a static, self-contained diagnostic directory with:
 
-- a changed-screen summary grouped by state;
-- one compare page per material route;
+- a flat deterministic index containing every screen and its state;
+- one compare page per screen viewport;
 - side-by-side, opacity-overlay, and difference modes;
-- mobile, desktop, and combined viewport controls;
 - before/head artifacts kept complete and unmodified;
 - aggregate shared-impact and ignored-region evidence;
 - deterministic `review.json` for CI summaries.
+
+The grouped changed-screen summary, combined mobile/desktop controls, and final
+responsive Review presentation are milestone-7 UI work. They are not current
+engine guarantees.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including
