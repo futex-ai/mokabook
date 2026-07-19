@@ -156,6 +156,13 @@ route; use cases live under `user-flows/`. Screens may provide an address-bar
 label and use-case membership. Nested definitions inherit declared metadata,
 but ids never derive from tree position.
 
+Every catalogue-route segment starts with an ASCII letter or digit and then
+uses only URL-unreserved ASCII letters, digits, `.`, `_`, `~`, or `-`. A
+segment's filename stem must not be a Windows device name, and the complete
+route must end in `.html`. Mokabook percent-encodes each path segment whenever
+it emits a URL in HTML or an HTTP redirect, including configured static asset
+paths whose filenames contain other characters.
+
 Logical screen and use-case routes are catalogue identifiers, not generated
 documents. Fragment links must target a generated fragment or public static
 asset with a relative URL; root-absolute links are rejected as non-portable.
@@ -210,9 +217,9 @@ module is evaluated, so bare workspace/package imports never resolve from the
 operating-system temporary directory or npx cache.
 
 Stylesheet rules are ordered, declarative consumer configuration. Generated
-fragment links are relative to the fragment route. Shell and device-frame CSS
-is package-owned and self-contained; product CSS is never copied into the npm
-package.
+fragment links are relative to the fragment route and URL-encoded by segment.
+Shell and device-frame CSS is package-owned and self-contained; product CSS is
+never copied into the npm package.
 
 ## Generated Contract
 

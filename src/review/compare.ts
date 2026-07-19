@@ -75,12 +75,10 @@ export async function compareReview(
       await compareScreen(
         base,
         head,
-        baseCommit,
-        mockupsPrefix,
+        baseAssetReader,
         compilation,
         changedPaths,
         sharedImpact,
-        git,
         files,
         baseSeeds,
         headSeeds,
@@ -109,12 +107,10 @@ export async function compareReview(
 async function compareScreen(
   base: ManifestScreen | undefined,
   head: ManifestScreen | undefined,
-  commit: string,
-  mockupsPrefix: string,
+  baseAssetReader: ReviewAssetReader,
   compilation: Compilation,
   changedPaths: readonly string[],
   sharedImpact: readonly string[],
-  git: GitClient,
   files: Map<string, ReviewArtifactContent>,
   baseSeeds: Set<string>,
   headSeeds: Set<string>,
@@ -127,7 +123,7 @@ async function compareScreen(
     const baseFragment = base?.fragments[viewport];
     const headFragment = head?.fragments[viewport];
     const before = baseFragment
-      ? await git.readFile(commit, joinGit(mockupsPrefix, baseFragment))
+      ? Buffer.from(await baseAssetReader.read(baseFragment)).toString("utf8")
       : undefined;
     const after = headFragment
       ? compilation.outputs.get(headFragment)
@@ -265,10 +261,6 @@ function aggregateIgnored(screens: readonly ScreenReview[]) {
         viewport: viewport as "desktop" | "mobile",
       };
     });
-}
-
-function joinGit(prefix: string, route: string): string {
-  return prefix === "" ? route : `${prefix}/${route}`;
 }
 
 function digest(content: string): string {

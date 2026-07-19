@@ -3,6 +3,9 @@ import path from "node:path";
 
 import { MokabookError } from "../errors.js";
 
+const PORTABLE_URL_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._~-]*$/;
+const WINDOWS_DEVICE = /^(?:aux|con|nul|prn|com[1-9]|lpt[1-9])$/i;
+
 /** Convert a platform path to stable POSIX separators. */
 export function toPosixPath(value: string): string {
   return value.split(path.sep).join("/");
@@ -48,6 +51,51 @@ export function validateRelativeRoute(value: string, label: string): string {
     );
   }
   return normalized.replace(/^\.\//, "");
+}
+
+/** Normalize and require a portable static catalogue `.html` route. */
+export function validateCatalogueRoute(value: string, label: string): string {
+  const normalized = validateRelativeRoute(value, label);
+  if (!isSafeCatalogueRoute(normalized)) {
+    throw new MokabookError(
+      "config-invalid",
+      `${label} must use portable URL-safe path segments and end in .html`,
+    );
+  }
+  return normalized;
+}
+
+/** Return whether a catalogue route is portable as both a path and a URL. */
+export function isSafeCatalogueRoute(value: string): boolean {
+  return value.endsWith(".html") && isPortableUrlPath(value);
+}
+
+/** Return whether every path segment is portable and URL-unreserved. */
+export function isPortableUrlPath(value: string): boolean {
+  return (
+    isSafeRepositoryPath(value) &&
+    value.split("/").every((segment) => {
+      const stem = segment.split(".", 1)[0] ?? "";
+      return (
+        PORTABLE_URL_SEGMENT.test(segment) &&
+        !segment.endsWith(".") &&
+        !WINDOWS_DEVICE.test(stem)
+      );
+    })
+  );
+}
+
+/** Percent-encode path segments while retaining their slash hierarchy. */
+export function encodeUrlPath(value: string): string {
+  return value
+    .split("/")
+    .map((segment) =>
+      encodeURIComponent(segment).replace(
+        /[!'()*]/g,
+        (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+      ),
+    )
+    .join("/");
 }
 
 /** Return whether a value is a canonical, portable repository-relative path. */

@@ -3,11 +3,12 @@ import path from "node:path";
 
 import {
   isInside,
-  isSafeRepositoryPath,
+  isSafeCatalogueRoute,
   projectRealPath,
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
+import { MANIFEST_NAME } from "../registry/manifest.js";
 
 /** Reject generated routes that escape output or target authored source trees. */
 export function validateGeneratedOutputPaths(
@@ -28,7 +29,7 @@ export function validateGeneratedOutputPaths(
     );
   }
   for (const route of routes) {
-    if (!isSafeRepositoryPath(route)) {
+    if (route !== MANIFEST_NAME && !isSafeCatalogueRoute(route)) {
       throw new MokabookError(
         "build-invalid",
         `generated route is unsafe: ${route}`,

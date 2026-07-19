@@ -16,6 +16,18 @@ const CONFIG_NAMES = [
   "mokabook.config.mjs",
 ] as const;
 
+/** Reloadable consumer-configuration boundary used by watched Serve. */
+export interface ConfigLoader {
+  load(configPath: string): Promise<ResolvedConfig>;
+}
+
+/** Filesystem-backed configuration loader. */
+export class FileSystemConfigLoader implements ConfigLoader {
+  load(configPath: string): Promise<ResolvedConfig> {
+    return loadConfig(path.dirname(configPath), configPath);
+  }
+}
+
 /** Find a Mokabook config by explicit path or upward discovery. */
 export function discoverConfig(cwd: string, explicitPath?: string): string {
   if (explicitPath) {

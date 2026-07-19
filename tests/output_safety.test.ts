@@ -83,6 +83,20 @@ test("writer rejects crafted output inside nested authored roots", async (contex
   );
 });
 
+test("writer rejects a crafted URL-sensitive output route", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const compilation = await compileCatalogue(config);
+  const outputs = new Map(compilation.outputs);
+  outputs.set('screens/injected" onclick="alert.html', "<html></html>\n");
+
+  await assert.rejects(
+    () => writeCompilation({ manifest: compilation.manifest, outputs }, config),
+    /generated route is unsafe/,
+  );
+});
+
 test("build rejects generated routes through authored-root symlinks", async (context) => {
   const source = validEntrySource().replace(
     "screens/home.html",

@@ -5,7 +5,8 @@ import {
   FileSystemGeneratedOutputStore,
   type GeneratedOutputStore,
 } from "../build/output_store.js";
-import type { ResolvedConfig, WatchAction } from "../config/types.js";
+import { FileSystemConfigLoader, type ConfigLoader } from "../config/load.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { errorMessage } from "../errors.js";
 import {
   NodeCatalogueServerFactory,
@@ -25,6 +26,7 @@ import {
 import {
   classifyWatchPath,
   NotificationGate,
+  type RuntimeWatchAction,
   WatchActionQueue,
   WatchDebouncer,
   watchTargets,
@@ -32,7 +34,7 @@ import {
 
 /** Public Serve options after CLI validation. */
 export interface ServeOptions {
-  base: string;
+  base?: string;
   port: number;
   watch: boolean;
 }
@@ -46,6 +48,7 @@ export interface RunningServe {
 
 /** Injectable runtime collaborators for Serve orchestration. */
 export interface ServeDependencies {
+  configLoader: ConfigLoader;
   outputStore: GeneratedOutputStore;
   processSupervisorFactory: ProcessSupervisorFactory;
   serverFactory: CatalogueServerFactory;
@@ -53,6 +56,7 @@ export interface ServeDependencies {
 }
 
 const DEFAULT_DEPENDENCIES: ServeDependencies = {
+  configLoader: new FileSystemConfigLoader(),
   outputStore: new FileSystemGeneratedOutputStore(),
   processSupervisorFactory: new NodeProcessSupervisorFactory(),
   serverFactory: new NodeCatalogueServerFactory(),
@@ -70,12 +74,16 @@ export async function serve(
       await compileCatalogue(config),
       config,
     );
-    const server = await dependencies.serverFactory.start(config, options);
+    const server = await dependencies.serverFactory.start(config, {
+      base: options.base ?? config.review.base,
+      port: options.port,
+    });
     return serverLifecycle(server);
   }
   return serveWatched(
     config,
     options,
+    dependencies.configLoader,
     dependencies.watcherFactory,
     dependencies.outputStore,
     dependencies.processSupervisorFactory,
@@ -85,20 +93,18 @@ export async function serve(
 async function serveWatched(
   config: ResolvedConfig,
   options: ServeOptions,
+  configLoader: ConfigLoader,
   watcherFactory: ConsumerWatcherFactory,
   outputStore: GeneratedOutputStore,
   processSupervisorFactory: ProcessSupervisorFactory,
 ): Promise<RunningServe> {
   const gate = new NotificationGate<string>();
   const failureGate = new NotificationGate<Error>();
-  const watcher = watcherFactory.create(watchTargets(config));
+  let activeConfig = config;
+  let watcher = createWatcher(watcherFactory, activeConfig, gate);
   let supervisor: ProcessSupervisor | undefined;
   let port: number;
   try {
-    watcher.onChange((candidate) => gate.notify(candidate));
-    watcher.onError((error) =>
-      process.stderr.write(`${errorMessage(error)}\n`),
-    );
     await watcher.ready();
     await outputStore.write(await compileCatalogue(config), config);
     const binPath = fileURLToPath(new URL("../cli/bin.js", import.meta.url));
@@ -106,8 +112,7 @@ async function serveWatched(
       "__serve-child",
       "--config",
       config.configPath,
-      "--base",
-      options.base,
+      ...(options.base !== undefined ? ["--base", options.base] : []),
     ];
     supervisor = processSupervisorFactory.create(
       binPath,
@@ -122,17 +127,62 @@ async function serveWatched(
   }
   const runningSupervisor = supervisor;
   let closed = false;
-  const processAction = async (action: WatchAction): Promise<void> => {
+  let debouncer: WatchDebouncer | undefined;
+  const notifyCandidate = (candidate: string): void => {
+    debouncer?.notify(classifyWatchPath(candidate, activeConfig));
+  };
+  const reconfigure = async (): Promise<void> => {
+    const nextConfig = await configLoader.load(activeConfig.configPath);
+    const replacementGate = new NotificationGate<string>();
+    const replacement = createWatcher(
+      watcherFactory,
+      nextConfig,
+      replacementGate,
+    );
+    let transferred = false;
+    try {
+      await replacement.ready();
+      await outputStore.write(await compileCatalogue(nextConfig), nextConfig);
+      const previous = watcher;
+      activeConfig = nextConfig;
+      watcher = replacement;
+      transferred = true;
+      debouncer?.close();
+      debouncer = new WatchDebouncer(activeConfig.watch.debounceMs, (action) =>
+        actionQueue.notify(action),
+      );
+      replacementGate.open(notifyCandidate);
+      let closeError: unknown;
+      try {
+        await previous.close();
+      } catch (error) {
+        closeError = error;
+      }
+      await restartWithRecovery(runningSupervisor);
+      if (closeError !== undefined) throw closeError;
+    } catch (error) {
+      if (!transferred) await replacement.close();
+      throw error;
+    }
+  };
+  const processAction = async (action: RuntimeWatchAction): Promise<void> => {
     if (closed) return;
+    if (action === "reconfigure") {
+      await reconfigure();
+      return;
+    }
     if (action === "rebuild")
-      await outputStore.write(await compileCatalogue(config), config);
+      await outputStore.write(
+        await compileCatalogue(activeConfig),
+        activeConfig,
+      );
     if (action === "reload") runningSupervisor.notifyUpdate();
     else await restartWithRecovery(runningSupervisor);
   };
   const actionQueue = new WatchActionQueue(processAction, (error) =>
     process.stderr.write(`${errorMessage(error)}\n`),
   );
-  const debouncer = new WatchDebouncer(config.watch.debounceMs, (action) =>
+  debouncer = new WatchDebouncer(activeConfig.watch.debounceMs, (action) =>
     actionQueue.notify(action),
   );
   failureGate.open((error) => {
@@ -140,19 +190,28 @@ async function serveWatched(
     process.stderr.write(`${errorMessage(error)}\n`);
     actionQueue.notify("restart");
   });
-  gate.open((candidate) =>
-    debouncer.notify(classifyWatchPath(candidate, config)),
-  );
+  gate.open(notifyCandidate);
   return {
     async close(): Promise<void> {
       if (closed) return;
       closed = true;
-      debouncer.close();
+      debouncer?.close();
       await closeWatched(watcher, actionQueue, runningSupervisor);
     },
     port,
     url: `http://127.0.0.1:${port}`,
   };
+}
+
+function createWatcher(
+  factory: ConsumerWatcherFactory,
+  config: ResolvedConfig,
+  gate: NotificationGate<string>,
+): ConsumerWatcher {
+  const watcher = factory.create(watchTargets(config));
+  watcher.onChange((candidate) => gate.notify(candidate));
+  watcher.onError((error) => process.stderr.write(`${errorMessage(error)}\n`));
+  return watcher;
 }
 
 async function closeWatched(

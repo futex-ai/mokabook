@@ -6,6 +6,9 @@ import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig, WatchAction } from "../config/types.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
 
+/** Internal watch work, including package-owned configuration reloads. */
+export type RuntimeWatchAction = "reconfigure" | WatchAction;
+
 /** Buffer notifications until startup is ready to process them. */
 export class NotificationGate<Value> {
   readonly #buffer: Value[] = [];
@@ -39,7 +42,8 @@ export const systemDebounceClock: DebounceClock = {
   schedule: setTimeout,
 };
 
-const ACTION_PRIORITY: readonly WatchAction[] = [
+const ACTION_PRIORITY: readonly RuntimeWatchAction[] = [
+  "reconfigure",
   "rebuild",
   "restart",
   "reload",
@@ -48,17 +52,17 @@ const ACTION_PRIORITY: readonly WatchAction[] = [
 
 /** Coalesce filesystem notifications into one highest-impact action. */
 export class WatchDebouncer {
-  readonly #actions = new Set<WatchAction>();
+  readonly #actions = new Set<RuntimeWatchAction>();
   #handle: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
     private readonly delay: number,
-    private readonly callback: (action: WatchAction) => void,
+    private readonly callback: (action: RuntimeWatchAction) => void,
     private readonly clock: DebounceClock = systemDebounceClock,
   ) {}
 
   /** Add one classified notification to the current burst. */
-  notify(action: WatchAction): void {
+  notify(action: RuntimeWatchAction): void {
     this.#actions.add(action);
     if (this.#handle) this.clock.clear(this.#handle);
     this.#handle = this.clock.schedule(() => this.flush(), this.delay);
@@ -83,17 +87,17 @@ export class WatchDebouncer {
 
 /** Serialize watch work and coalesce changes received during active work. */
 export class WatchActionQueue {
-  readonly #pending = new Set<WatchAction>();
+  readonly #pending = new Set<RuntimeWatchAction>();
   #closed = false;
   #draining: Promise<void> | undefined;
 
   constructor(
-    private readonly process: (action: WatchAction) => Promise<void>,
+    private readonly process: (action: RuntimeWatchAction) => Promise<void>,
     private readonly reportError: (error: unknown) => void,
   ) {}
 
   /** Queue one action; a stronger pending action subsumes weaker actions. */
-  notify(action: WatchAction): void {
+  notify(action: RuntimeWatchAction): void {
     if (this.#closed || action === "ignore") return;
     this.#pending.add(action);
     if (!this.#draining) this.#draining = this.drain();
@@ -138,8 +142,9 @@ export class WatchActionQueue {
 export function classifyWatchPath(
   candidate: string,
   config: ResolvedConfig,
-): WatchAction {
+): RuntimeWatchAction {
   const absolute = path.resolve(candidate);
+  if (absolute === config.configPath) return "reconfigure";
   if (isInside(config.entriesDir, absolute)) return "rebuild";
   if (config.legacy && isInside(config.legacy.pagesDir, absolute))
     return "rebuild";
@@ -176,7 +181,7 @@ export function classifyWatchPath(
 
 /** Resolve the finite roots/globs watched for this consumer. */
 export function watchTargets(config: ResolvedConfig): string[] {
-  const targets = [config.entriesDir];
+  const targets = [config.configPath, config.entriesDir];
   if (config.legacy) targets.push(config.legacy.pagesDir);
   if (config.renderer) targets.push(config.renderer);
   if (config.legacy?.components) targets.push(config.legacy.components);

@@ -89,6 +89,12 @@ data are validated before output changes. All expected bytes are held in
 memory. `check` compares those bytes with disk and reports grouped missing,
 stale, and proven-orphan paths.
 
+Catalogue routes use portable URL-unreserved segments, reject Windows device
+filename stems, and end in `.html`. Framework-generated links and redirects
+still percent-encode every path segment defensively; static asset paths may
+therefore contain characters such as spaces without corrupting HTML attributes
+or URL query/fragment boundaries.
+
 `build` writes a same-filesystem staging tree, backs up only files identified by
 Mokabook's generated header and a source path beneath this config's authored
 roots, or by the reserved manifest name. It installs staged files by rename and

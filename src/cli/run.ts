@@ -64,7 +64,7 @@ export async function run(
     return 0;
   }
   const running = await serve(config, {
-    base,
+    ...(arguments_.base !== undefined ? { base: arguments_.base } : {}),
     port,
     watch: arguments_.watch ?? true,
   });

@@ -1,7 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { toPosixPath, validateRelativeRoute } from "../config/paths.js";
+import {
+  isSafeCatalogueRoute,
+  toPosixPath,
+  validateRelativeRoute,
+} from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import type { LoadedGraph, LoadedLegacyModule } from "../build/load_graph.js";
@@ -36,6 +40,12 @@ export function renderLegacyPages(
         defaultRoute,
       `legacy route for ${relative}`,
     );
+    if (!isSafeCatalogueRoute(route)) {
+      throw new MokabookError(
+        "build-invalid",
+        `legacy route for ${relative} must use portable URL-safe path segments and end in .html`,
+      );
+    }
     const sourceRelativePath = toPosixPath(
       path.relative(config.repoRoot, sourcePath),
     );

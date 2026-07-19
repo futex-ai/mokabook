@@ -1,5 +1,5 @@
 import { MokabookError } from "../errors.js";
-import { isSafeRepositoryPath } from "../config/paths.js";
+import { isSafeCatalogueRoute, isSafeRepositoryPath } from "../config/paths.js";
 import { validateManifestRelationships } from "./manifest_relationships.js";
 import type { ManifestV3 } from "./types.js";
 
@@ -247,15 +247,7 @@ function validateLegacyPages(pages: unknown[], routes: Set<string>): void {
 }
 
 function validateRoute(route: string, label: string): void {
-  if (
-    route === "" ||
-    route.startsWith("/") ||
-    route.includes("\\") ||
-    route
-      .split("/")
-      .some((part) => part === "" || part === "." || part === "..") ||
-    !route.endsWith(".html")
-  ) {
+  if (!isSafeCatalogueRoute(route)) {
     throw new MokabookError("manifest-invalid", `${label} has an unsafe route`);
   }
 }

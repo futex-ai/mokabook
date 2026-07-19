@@ -1,5 +1,6 @@
 import path from "node:path";
 
+import { encodeUrlPath } from "../config/paths.js";
 import type {
   ReviewArtifact,
   ReviewArtifactContent,
@@ -65,7 +66,7 @@ function indexPage(result: ReviewResult): string {
       const links = screen.viewports
         .map(
           (viewport) =>
-            `<a href="${escape(comparisonPagePath(screen.route, viewport.viewport))}">${viewport.viewport}</a>`,
+            `<a href="${escape(encodeUrlPath(comparisonPagePath(screen.route, viewport.viewport)))}">${viewport.viewport}</a>`,
         )
         .join(" · ");
       return `<tr><td>${escape(screen.state)}</td><td>${escape(screen.title)}</td><td><code>${escape(screen.route)}</code></td><td>${links}</td></tr>`;
@@ -102,7 +103,8 @@ function comparePage(screen: ScreenReview, viewport: ViewportReview): string {
 
 function relativeLink(from: string, to: string): string {
   const relative = path.posix.relative(path.posix.dirname(from), to);
-  return relative.startsWith(".") ? relative : `./${relative}`;
+  const encoded = encodeUrlPath(relative);
+  return encoded.startsWith(".") ? encoded : `./${encoded}`;
 }
 
 function page(title: string, body: string): string {

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import http, { type ServerResponse } from "node:http";
 import path from "node:path";
 
+import { encodeUrlPath } from "../config/paths.js";
 import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
@@ -109,7 +110,9 @@ function redirectId(
   const entry = catalogue.byId.get(safeDecode(encodedId));
   if (!entry || entry.kind === "collection")
     return send(response, 404, "text/html", notFoundPage(encodedId));
-  response.writeHead(302, { location: `/view/${encodePath(entry.route)}` });
+  response.writeHead(302, {
+    location: `/view/${encodeUrlPath(entry.route)}`,
+  });
   response.end();
 }
 
@@ -227,10 +230,6 @@ function safeDecode(value: string): string {
   } catch {
     return "";
   }
-}
-
-function encodePath(value: string): string {
-  return value.split("/").map(encodeURIComponent).join("/");
 }
 
 function contentType(candidate: string): string {

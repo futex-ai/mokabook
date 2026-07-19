@@ -347,6 +347,12 @@ the deferred Browse/Review UI.
       exits unexpectedly after reporting readiness.
 - [x] Document filesystem paths, stylesheet paths, and repository-relative
       watch/Review globs with their actual resolution bases.
+- [x] Constrain catalogue routes to portable URL-safe segments and encode every
+      framework-emitted path so mock-link rewriting cannot corrupt attributes.
+- [x] Reload changed consumer configuration transactionally, including watcher
+      replacement, generated output, and the watched child.
+- [x] Read base Review panes through the same regular-file and source-root Git
+      guard used for transitive snapshot assets.
 - [ ] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
       `cargo xtask review` under the invoked review loop.
 

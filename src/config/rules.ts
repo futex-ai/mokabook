@@ -1,5 +1,5 @@
 import { MokabookError } from "../errors.js";
-import { validateRelativeRoute } from "./paths.js";
+import { validateCatalogueRoute, validateRelativeRoute } from "./paths.js";
 import type { LegacyConfig, StylesheetRule, WatchRule } from "./types.js";
 
 const WATCH_ACTIONS = new Set(["ignore", "rebuild", "reload", "restart"]);
@@ -12,7 +12,7 @@ export function resolveLegacyLint(
   const allowRoutes = validateStringArray(
     lint.allowRoutes ?? [],
     "legacy.lint.allowRoutes",
-  ).map((route) => validateRelativeRoute(route, "legacy.lint.allowRoutes"));
+  ).map((route) => validateCatalogueRoute(route, "legacy.lint.allowRoutes"));
   if (
     lint.maxScreensPerPage !== undefined &&
     (!Number.isInteger(lint.maxScreensPerPage) ||

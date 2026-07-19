@@ -181,6 +181,38 @@ test("Review rejects non-regular base dependency blobs", async (context) => {
   );
 });
 
+test("Review rejects a base pane stored as a Git symlink", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  const fragment = path.join(fixture.mockupsDir, "screens/home.mobile.html");
+  await fs.promises.rm(fragment);
+  await fs.promises.symlink("../../notes.md", fragment);
+  await git(fixture.root, ["init", "-q"]);
+  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
+  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["add", "."]);
+  await git(fixture.root, ["commit", "-qm", "test: symlink pane"]);
+  await fs.promises.rm(fragment);
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    validEntrySource({ firstTitle: "Changed" }),
+  );
+  await writeCompilation(await compileCatalogue(config), config);
+
+  await assert.rejects(
+    () =>
+      runReview(
+        config,
+        "HEAD",
+        config.review.outDir,
+        new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+      ),
+    /not a regular Git file/,
+  );
+});
+
 async function git(cwd: string, arguments_: readonly string[]): Promise<void> {
   await execFileAsync("git", [...arguments_], { cwd });
 }

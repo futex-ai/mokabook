@@ -1,5 +1,6 @@
-import type { Catalogue } from "./catalogue.js";
+import { encodeUrlPath } from "../config/paths.js";
 import type { ManifestEntry, ManifestLegacyPage } from "../registry/types.js";
+import type { Catalogue } from "./catalogue.js";
 
 /** Render the diagnostic milestone-5 catalogue home. */
 export function homePage(catalogue: Catalogue): string {
@@ -7,7 +8,7 @@ export function homePage(catalogue: Catalogue): string {
     .filter((entry) => entry.kind !== "collection")
     .map(
       (entry) =>
-        `<li><a href="/view/${encodePath(entry.route)}">${escape(entry.title)}</a></li>`,
+        `<li><a href="/view/${encodeUrlPath(entry.route)}">${escape(entry.title)}</a></li>`,
     )
     .join("");
   return document(
@@ -21,15 +22,15 @@ export function viewPage(entry: ManifestEntry | ManifestLegacyPage): string {
   if (!("kind" in entry)) {
     return document(
       `Legacy · ${entry.route}`,
-      `<h1>${escape(entry.route)}</h1><iframe sandbox="" title="Legacy mockup" src="/static/${encodePath(entry.route)}"></iframe>`,
+      `<h1>${escape(entry.route)}</h1><iframe sandbox="" title="Legacy mockup" src="/static/${encodeUrlPath(entry.route)}"></iframe>`,
     );
   }
   if (entry.kind === "screen") {
     return document(
       entry.title,
       `<h1>${escape(entry.title)}</h1><p>${escape(entry.description)}</p>` +
-        `<h2>Mobile</h2><iframe sandbox="" title="Mobile" src="/static/${encodePath(entry.fragments.mobile)}"></iframe>` +
-        `<h2>Desktop</h2><iframe sandbox="" title="Desktop" src="/static/${encodePath(entry.fragments.desktop)}"></iframe>`,
+        `<h2>Mobile</h2><iframe sandbox="" title="Mobile" src="/static/${encodeUrlPath(entry.fragments.mobile)}"></iframe>` +
+        `<h2>Desktop</h2><iframe sandbox="" title="Desktop" src="/static/${encodeUrlPath(entry.fragments.desktop)}"></iframe>`,
     );
   }
   if (entry.kind === "use-case") {
@@ -65,10 +66,6 @@ export function reviewPage(base: string): string {
 
 function document(title: string, body: string): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escape(title)}</title><style>body{font:16px system-ui;max-width:72rem;margin:2rem auto;padding:0 1rem}iframe{width:100%;min-height:32rem;border:1px solid #bbb}code{background:#eee;padding:.15rem .3rem}</style></head><body>${body}</body></html>`;
-}
-
-function encodePath(value: string): string {
-  return value.split("/").map(encodeURIComponent).join("/");
 }
 
 function escape(value: string): string {

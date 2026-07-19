@@ -3,7 +3,7 @@ import test from "node:test";
 
 import type { Compilation } from "../dist/build/compile.js";
 import type { GeneratedOutputStore } from "../dist/build/output_store.js";
-import { loadConfig } from "../dist/config/load.js";
+import { FileSystemConfigLoader, loadConfig } from "../dist/config/load.js";
 import type { ResolvedConfig } from "../dist/config/types.js";
 import type { CatalogueServerFactory } from "../dist/server/factory.js";
 import type { RunningServer, ServerOptions } from "../dist/server/http.js";
@@ -56,6 +56,7 @@ test("watcher readiness failure closes the watcher", async (context) => {
 
 function dependencies(events: string[], watcher: FakeWatcher) {
   return {
+    configLoader: new FileSystemConfigLoader(),
     outputStore: new FakeOutputStore(events),
     processSupervisorFactory: new FakeSupervisorFactory(events),
     serverFactory: new UnusedServerFactory(),

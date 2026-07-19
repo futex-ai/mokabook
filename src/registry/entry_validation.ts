@@ -2,7 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
-import { isInside, isSafeRepositoryPath } from "../config/paths.js";
+import {
+  isInside,
+  isSafeCatalogueRoute,
+  isSafeRepositoryPath,
+} from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import type { RegistryViolation } from "./types.js";
 
@@ -137,20 +141,13 @@ function validateRoute(
   violations: RegistryViolation[],
 ): void {
   const route = "route" in entry ? entry.route : "";
-  const invalid =
-    !nonEmpty(route) ||
-    route.startsWith("/") ||
-    route.includes("\\") ||
-    route
-      .split("/")
-      .some((part) => part === "" || part === "." || part === "..") ||
-    !route.endsWith(".html");
+  const invalid = !nonEmpty(route) || !isSafeCatalogueRoute(route);
   if (invalid) {
     violations.push(
       problem(
         entry,
         "invalid-route",
-        "route must be a safe relative .html path",
+        "route must use portable URL-safe segments and end in .html",
       ),
     );
   }

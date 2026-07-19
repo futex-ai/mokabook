@@ -3,7 +3,7 @@ import test from "node:test";
 
 import type { Compilation } from "../dist/build/compile.js";
 import type { GeneratedOutputStore } from "../dist/build/output_store.js";
-import { loadConfig } from "../dist/config/load.js";
+import { FileSystemConfigLoader, loadConfig } from "../dist/config/load.js";
 import type { ResolvedConfig } from "../dist/config/types.js";
 import type { CatalogueServerFactory } from "../dist/server/factory.js";
 import type { RunningServer, ServerOptions } from "../dist/server/http.js";
@@ -48,6 +48,7 @@ test("watched Serve restarts through the action queue after an unexpected child 
     config,
     { base: "origin/main", port: 0, watch: true },
     {
+      configLoader: new FileSystemConfigLoader(),
       outputStore: new FakeOutputStore(),
       processSupervisorFactory: new FakeSupervisorFactory(supervisor),
       serverFactory: new UnusedServerFactory(),

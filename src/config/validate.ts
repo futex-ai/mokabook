@@ -1,7 +1,11 @@
 import path from "node:path";
 
 import { MokabookError } from "../errors.js";
-import { resolveInside, validateRelativeRoute } from "./paths.js";
+import {
+  resolveInside,
+  validateCatalogueRoute,
+  validateRelativeRoute,
+} from "./paths.js";
 import {
   optionalModule,
   requireDirectory,
@@ -139,7 +143,7 @@ function resolveLegacy(
       requireString(route, `legacy.routeAliases.${source}`);
       return [
         validateRelativeRoute(source, "legacy.routeAliases source"),
-        validateRelativeRoute(route, "legacy.routeAliases route"),
+        validateCatalogueRoute(route, "legacy.routeAliases route"),
       ];
     }),
   );

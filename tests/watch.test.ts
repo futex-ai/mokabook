@@ -4,7 +4,7 @@ import test from "node:test";
 
 import type { Compilation } from "../dist/build/compile.js";
 import type { GeneratedOutputStore } from "../dist/build/output_store.js";
-import { loadConfig } from "../dist/config/load.js";
+import { FileSystemConfigLoader, loadConfig } from "../dist/config/load.js";
 import type { ResolvedConfig } from "../dist/config/types.js";
 import type { CatalogueServerFactory } from "../dist/server/factory.js";
 import type { RunningServer, ServerOptions } from "../dist/server/http.js";
@@ -110,6 +110,7 @@ test("Serve orchestration accepts fake filesystem, server, and watcher boundarie
     config,
     { base: "origin/main", port: 0, watch: false },
     {
+      configLoader: new FileSystemConfigLoader(),
       outputStore,
       processSupervisorFactory: new UnusedProcessSupervisorFactory(),
       serverFactory,

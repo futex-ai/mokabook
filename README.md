@@ -85,8 +85,10 @@ fonts, and images so comparison artifacts do not depend on the live workspace.
 Base resources must be regular Git files outside configured source roots.
 Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and
 logical screen routes are not portable links in generated static files.
-Watched Serve keeps its resolved port and serially replaces a child that exits
-unexpectedly after readiness.
+Watched Serve keeps its resolved port, transactionally reloads a changed
+consumer config with a ready replacement watcher, and serially replaces a child
+that exits unexpectedly after readiness. A rejected config or failed candidate
+build leaves the last-good watcher, output, and child active.
 
 ## Rendering Boundary
 

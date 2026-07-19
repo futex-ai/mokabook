@@ -6,7 +6,7 @@ import type {
   ResolvedRegistryEntry,
   ScreenDefinition,
 } from "../authoring/types.js";
-import { toPosixPath } from "../config/paths.js";
+import { encodeUrlPath, toPosixPath } from "../config/paths.js";
 import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
@@ -103,7 +103,8 @@ function stylesheetsFor(route: string, config: ResolvedConfig): string[] {
       );
     }
     const relative = path.posix.relative(path.posix.dirname(route), stylesheet);
-    return relative.startsWith(".") ? relative : `./${relative}`;
+    const encoded = encodeUrlPath(relative);
+    return encoded.startsWith(".") ? encoded : `./${encoded}`;
   });
 }
 

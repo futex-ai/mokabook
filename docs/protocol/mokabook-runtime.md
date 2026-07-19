@@ -101,6 +101,8 @@ the repository mockups before UI implementation.
 `mokabook serve` watches by default; `--no-watch` serves one deterministic
 snapshot. Watch classification derives only from resolved config:
 
+- the discovered or explicit config file reloads configuration, generated
+  output, watch targets, and the child;
 - entry/page/renderer inputs rebuild generated output;
 - an input shared with shell metadata rebuilds before restarting the child;
 - configured CSS/fonts/images reload the browser without rebuilding;
@@ -118,6 +120,15 @@ child restarts. Initial validation/bind failure exits non-zero without leaking
 watchers. An unexpected child failure after readiness reports its diagnostic,
 clears the dead process, and enqueues a restart through the same serialized
 action queue used for authored changes.
+
+On a config-file change, the parent first loads and validates the candidate,
+starts a replacement watcher and waits for readiness, then transactionally
+builds the candidate output. Only after those steps succeed does it adopt the
+new resolved config, close the old watcher, and restart the child. A load,
+watcher-readiness, or candidate-build failure closes the candidate watcher and
+retains the previous config, watcher, output, and child. An explicit CLI
+`--base` remains pinned; without one, the restarted child uses the newly loaded
+config's Review base.
 
 Rebuilds are debounced and transactional. A failed rebuild keeps the last-good
 server and output, reports the error, and waits for another authored change. A
@@ -168,9 +179,10 @@ engine guarantees.
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including
 binary fonts and images, while explicit HTTP(S)/data resources remain external.
-Current-worktree resources must resolve to regular public files, and base
-resources must be regular Git files; neither side may read from configured
-entry or legacy source roots. Pane documents remain byte-unmodified and run in
+Current-worktree resources must resolve to regular public files. Every base
+resource, including the pane document itself and each transitive dependency,
+must be a regular Git file. Neither side may read from configured entry or
+legacy source roots. Pane documents remain byte-unmodified and run in
 script-disabled sandboxes.
 Comparison-page routes use bounded route hashes and fail on any artifact-path
 collision rather than overwriting an earlier screen.

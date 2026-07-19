@@ -86,3 +86,58 @@ test("link validation fails closed for non-portable targets", async (context) =>
   );
   await assert.rejects(() => compileCatalogue(config), /root-absolute link/);
 });
+
+test("catalogue routes reject URL and HTML attribute delimiters", async () => {
+  for (const route of [
+    'screens/details.mobile.html" onclick="alert.html',
+    "screens/CON.html",
+    "screens/details#alternate.html",
+    "screens/details?alternate.html",
+    "screens/details space.html",
+  ]) {
+    const fixture = await createFixture(routeSource(route));
+    try {
+      const config = await loadConfig(fixture.root);
+      await assert.rejects(() => compileCatalogue(config), /invalid-route/);
+    } finally {
+      await removeFixture(fixture);
+    }
+  }
+});
+
+test("framework-emitted stylesheet URLs encode path segments", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  await fs.promises.writeFile(
+    path.join(fixture.mockupsDir, "theme #1.css"),
+    "body { color: black; }\n",
+  );
+  await fs.promises.writeFile(
+    fixture.configPath,
+    `export default {
+  entriesDir: "entries",
+  mockupsDir: "mockups",
+  repoRoot: ".",
+  stylesheets: [{ match: "**/*.html", stylesheets: ["theme #1.css"] }]
+};
+`,
+  );
+  const config = await loadConfig(fixture.root);
+
+  const compilation = await compileCatalogue(config);
+  const mobile = compilation.outputs.get("screens/home.mobile.html") ?? "";
+
+  assert.match(mobile, /href="\.\.\/theme%20%231\.css"/);
+});
+
+function routeSource(route: string): string {
+  return `import { defineScreen } from "mokabook";
+import React from "react";
+const metadata = { dependencies: ["notes.md"], navPath: ["Fixture"], relatedDocs: ["notes.md"], useCaseIds: [] };
+export const mockups = [
+  defineScreen({ ...metadata, description: "Home", desktop: <a href="mock:unsafe-target">Target</a>, id: "home", mobile: <a href="mock:unsafe-target">Target</a>, route: "screens/home.html", title: "Home" }),
+  defineScreen({ ...metadata, description: "Ordinary target", desktop: <main>Ordinary</main>, id: "ordinary-target", mobile: <main>Ordinary</main>, route: "screens/details.html", title: "Ordinary" }),
+  defineScreen({ ...metadata, description: "Unsafe target", desktop: <main>Unsafe</main>, id: "unsafe-target", mobile: <main>Unsafe</main>, route: ${JSON.stringify(route)}, title: "Unsafe" })
+];
+`;
+}

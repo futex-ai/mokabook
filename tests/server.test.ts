@@ -217,6 +217,16 @@ test(
       ),
     );
     await waitFor(async () => (await fetch(url)).status === 200);
+    await fs.promises.writeFile(
+      fixture.configPath,
+      `export default { entriesDir: "entries", mockupsDir: "mockups", repoRoot: ".", review: { base: "config-reloaded", outDir: ".review" } };\n`,
+    );
+    await waitFor(async () =>
+      (await (await fetch(`${url}/review`)).text()).includes(
+        "--base config-reloaded",
+      ),
+    );
+    assert.equal(new URL(url).port, firstPort);
     child.kill("SIGTERM");
     assert.equal(
       await new Promise<number | null>((resolve) =>

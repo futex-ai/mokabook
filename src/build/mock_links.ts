@@ -3,6 +3,7 @@ import path from "node:path";
 import { parse } from "parse5";
 
 import type { ResolvedRegistryEntry, Viewport } from "../authoring/types.js";
+import { encodeUrlPath } from "../config/paths.js";
 import { MokabookError } from "../errors.js";
 import { fragmentRoute } from "../registry/manifest.js";
 
@@ -84,7 +85,8 @@ export function rewriteMockLinks(
       path.posix.dirname(sourceRoute),
       targetRoute,
     );
-    const linked = `${relative.startsWith(".") ? relative : `./${relative}`}${hash}`;
+    const encoded = encodeUrlPath(relative);
+    const linked = `${encoded.startsWith(".") ? encoded : `./${encoded}`}${hash}`;
     replacements.push({
       endOffset: location.startOffset + valueRange.endOffset,
       startOffset: location.startOffset + valueRange.startOffset,
