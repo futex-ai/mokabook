@@ -2,7 +2,7 @@
 
 ## Active
 
-- [App-Independent Mockbook Npm Library](./app-independent-mockbook-library.md)
+- [App-Independent Mokabook Npm Library](./app-independent-mokabook-library.md)
 
 ## Completed
 

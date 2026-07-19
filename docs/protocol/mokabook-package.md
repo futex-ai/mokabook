@@ -1,8 +1,8 @@
-# Mockbook Package And Authoring Contract
+# Mokabook Package And Authoring Contract
 
 ## Scope
 
-Mockbook is shared developer tooling for repositories that keep visual mockups
+Mokabook is shared developer tooling for repositories that keep visual mockups
 as code and committed static artifacts. The package owns catalogue definitions,
 generation, validation, Browse, and Review behavior. A consumer owns all product
 screens, product copy, product components, styling, theme setup, and generated
@@ -14,17 +14,16 @@ may exist only under examples and test fixtures.
 
 ## Package Identity
 
-- The public package name is `@firna/mockbook`.
-- The package exposes one executable named `mockbook`.
+- The public package name is `mokabook`.
+- The package exposes one executable named `mokabook`.
 - With no subcommand, the executable runs watched Browse mode.
-- Zero-install documentation uses `npx @firna/mockbook` because npm can infer a
-  package's sole executable.
-- A repository that installs the package as a development dependency may use
-  `npx mockbook` or npm scripts that call `mockbook`.
-- Unscoped `npx mockbook` must not be documented as a remote install path; that
-  npm package name belongs to another publisher.
-- `mokabook` is not a package or executable alias. The spelling in the initial
-  request is treated as a typo unless the product is deliberately renamed.
+- Zero-install and locally installed usage both use `npx mokabook`; npm can
+  infer the package's sole executable.
+- The unscoped package is always public. Firna is its author and controls the
+  approved npm maintainer accounts, owner list, and release workflow.
+- `mockbook` and `@firna/mockbook` are not package or executable aliases. The
+  old spelling appears only when documenting the Accounting source being
+  migrated.
 
 The initial supported runtime is Node.js 22.14 or newer. CI must exercise the
 minimum supported release and the current Firna release runtime. Unsupported
@@ -35,18 +34,18 @@ Node versions fail immediately with an actionable version error.
 The public commands are:
 
 ```text
-mockbook                 Alias for `mockbook serve`
-mockbook serve           Serve Browse and Review; watch by default
-mockbook build           Generate static artifacts and the manifest
-mockbook check           Validate source and committed generated output
-mockbook review          Generate a static comparison artifact
-mockbook --help          Show commands, options, and config discovery
-mockbook --version       Show the installed package version
+mokabook                 Alias for `mokabook serve`
+mokabook serve           Serve Browse and Review; watch by default
+mokabook build           Generate static artifacts and the manifest
+mokabook check           Validate source and committed generated output
+mokabook review          Generate a static comparison artifact
+mokabook --help          Show commands, options, and config discovery
+mokabook --version       Show the installed package version
 ```
 
 Common options include `--config <path>`. Serve accepts `--port`, `--base`,
 `--watch`, and `--no-watch`. Review accepts `--base` and `--out`. A flag after
-the package name belongs to Mockbook; docs must show npx arguments in a form
+the package name belongs to Mokabook; docs must show npx arguments in a form
 that is unambiguous to current npm.
 
 Unknown commands, invalid values, absent configuration, and invalid catalogue
@@ -55,9 +54,9 @@ diagnostic output is explicitly requested.
 
 ## Configuration Discovery
 
-Mockbook searches upward from the current working directory for
-`mockbook.config.ts`, `mockbook.config.mts`, `mockbook.config.js`, or
-`mockbook.config.mjs`, unless `--config` is supplied. Discovery stops at the
+Mokabook searches upward from the current working directory for
+`mokabook.config.ts`, `mokabook.config.mts`, `mokabook.config.js`, or
+`mokabook.config.mjs`, unless `--config` is supplied. Discovery stops at the
 filesystem root and reports every filename it attempted when none is found.
 
 The config's paths resolve relative to the config file, never relative to the
@@ -110,19 +109,19 @@ define the public boundary; consumers must not import `dist` internals.
 
 ## Rendering Boundary
 
-Mockbook provides a plain React static renderer. A consumer may configure one
+Mokabook provides a plain React static renderer. A consumer may configure one
 renderer module that receives the screen node, entry metadata, viewport,
 resolved stylesheet links, and render context, and returns one complete HTML
 document synchronously.
 
 The renderer module is consumer code. It is where Accounting may add a Firna UI
-theme provider or collect React Native Web atomic styles. Mockbook must not
+theme provider or collect React Native Web atomic styles. Mokabook must not
 depend on `@firna/ui`, React Native Web, Accounting tokens, or Juno components.
 
 All entry modules and the renderer are bundled into one build-time graph with
-one React instance. This must work when Mockbook is installed locally and when
+one React instance. This must work when Mokabook is installed locally and when
 it is fetched into npm's npx cache. Consumer dependencies resolve from the
-consumer project, while imports of `@firna/mockbook` resolve to the executing
+consumer project, while imports of `mokabook` resolve to the executing
 package version.
 
 Stylesheet rules are ordered, declarative consumer configuration. Generated
@@ -132,15 +131,15 @@ package.
 
 ## Generated Contract
 
-`mockbook build` writes deterministic output under `mockupsDir`:
+`mokabook build` writes deterministic output under `mockupsDir`:
 
 - `<screen>.mobile.html` and `<screen>.desktop.html` fragments for each screen;
 - legacy HTML only when legacy support is configured;
-- `mockbook-manifest.json` using schema version 3.
+- `mokabook-manifest.json` using schema version 3.
 
 Screen and use-case routes are durable identifiers and do not imply a composed
 HTML file. A screen's fragments are bare product renders with required head
-content but without Mockbook shell chrome. Collections generate no page.
+content but without Mokabook shell chrome. Collections generate no page.
 
 Manifest source and output paths are repository-relative; routes are relative
 to `mockupsDir`. The manifest includes every entry, fragment, legacy page,
@@ -163,19 +162,20 @@ source-layout rules belong in the consumer config or adapter. Accounting's
 historical app-family rewrites must not become defaults. New structured entries
 must not rely on legacy route repair.
 
-Manifest readers may accept Accounting's version 2 manifest during the
-Accounting cutover, but every new build emits version 3. Compatibility code has
-explicit fixtures and a removal policy; it is not an undocumented fallback.
+Manifest readers may accept Accounting's `mockbook-manifest.json` version 2
+during the Accounting cutover, but every new build emits
+`mokabook-manifest.json` version 3. Compatibility code has explicit fixtures
+and a removal policy; it is not an undocumented fallback.
 
 ## Non-Goals
 
 - Owning or publishing Accounting, Bookfolio, or Juno screens.
 - Replacing a consumer's product component library or design tokens.
-- Deploying a hosted Mockbook service.
+- Deploying a hosted Mokabook service.
 - Hydrating product fragments into interactive application replicas.
 - Requiring a monorepo, npm-workspace layout, or one fixed mockup directory.
 
 ## Related Docs
 
-- [Build, Browse, and Review runtime](./mockbook-runtime.md)
+- [Build, Browse, and Review runtime](./mokabook-runtime.md)
 - [CI and npm release](./npm-release.md)

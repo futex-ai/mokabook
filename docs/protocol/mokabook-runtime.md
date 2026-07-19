@@ -1,4 +1,4 @@
-# Mockbook Build, Browse, And Review Runtime
+# Mokabook Build, Browse, And Review Runtime
 
 ## Source Of Truth
 
@@ -10,7 +10,7 @@ second screen renderer or catalogue.
 
 ## Build
 
-`mockbook build` performs this transaction:
+`mokabook build` performs this transaction:
 
 1. Load and validate config.
 2. Discover and bundle all configured entry, renderer, and legacy modules.
@@ -26,7 +26,7 @@ diagnostics use repo-relative paths and deterministic ordering.
 
 ## Check
 
-`mockbook check` computes expected output without mutating committed files. It
+`mokabook check` computes expected output without mutating committed files. It
 fails for:
 
 - invalid config or registry metadata;
@@ -39,7 +39,7 @@ fails for:
 - configured source, screen-cap, stage-id, or legacy-policy violations.
 
 The failure report groups problems by class and tells the author whether to run
-`mockbook build` or edit source/config. `check` never rewrites output.
+`mokabook build` or edit source/config. `check` never rewrites output.
 
 ## Catalogue And Routes
 
@@ -50,7 +50,7 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/id/<id>` as a canonical redirect for routed registry entries;
 - `/static/<path>` for generated fragments, legacy pages, and consumer assets;
 - `/review` for the configured Git comparison;
-- package-owned client and update endpoints under `/__mockbook/`.
+- package-owned client and update endpoints under `/__mokabook/`.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
@@ -59,7 +59,7 @@ outside configured public roots.
 
 ## Browse Shell
 
-The package owns a neutral, responsive Mockbook shell: top-level Browse/Review
+The package owns a neutral, responsive Mokabook shell: top-level Browse/Review
 navigation, search, changed/all filter, nested catalogue, breadcrumbs, viewport
 switching, device frames, and a collapsible details panel. Consumer brand chrome
 does not appear in the shell. A small set of documented CSS custom properties
@@ -88,7 +88,7 @@ the repository mockups before UI implementation.
 
 ## Watched Development
 
-`mockbook serve` watches by default; `--no-watch` serves one deterministic
+`mokabook serve` watches by default; `--no-watch` serves one deterministic
 snapshot. Watch classification derives only from resolved config:
 
 - entry/page/renderer inputs rebuild generated output;
@@ -98,7 +98,7 @@ snapshot. Watch classification derives only from resolved config:
 - additional inputs use the explicit action declared in config.
 
 Package source under `node_modules` or an npx cache is never treated as consumer
-source. Development of Mockbook itself uses repository tooling rather than a
+source. Development of Mokabook itself uses repository tooling rather than a
 hidden consumer-specific self-reload path.
 
 Watchers attach before the initial child is announced healthy. Notifications
@@ -119,10 +119,10 @@ failed startup, or interruption.
 
 ## Review Comparison
 
-`mockbook review` compares the workspace with a configured base ref, defaulting
+`mokabook review` compares the workspace with a configured base ref, defaulting
 to `origin/main`. It resolves the base to a commit and reads the committed
 `mockupsDir` tree from Git without checking out or rebuilding the base. Head
-artifacts come from the current working tree after `mockbook check` succeeds.
+artifacts come from the current working tree after `mokabook check` succeeds.
 
 Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
@@ -180,5 +180,5 @@ summary output.
 
 ## Related Docs
 
-- [Package and authoring contract](./mockbook-package.md)
+- [Package and authoring contract](./mokabook-package.md)
 - [CI and npm release](./npm-release.md)

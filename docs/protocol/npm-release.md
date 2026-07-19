@@ -1,11 +1,11 @@
-# Mockbook CI And Npm Release Contract
+# Mokabook CI And Npm Release Contract
 
 ## Package Metadata
 
-`package.json` describes a public ESM package named `@firna/mockbook` with an
+`package.json` describes an unscoped public ESM package named `mokabook` with an
 initial development version of `0.0.0`, MIT licensing, Firna authorship, exact
-repository/bugs/homepage metadata for `futex-ai/mockbook`, a Node engine floor,
-one `mockbook` bin, explicit exports/types, and a restrictive `files` allowlist.
+repository/bugs/homepage metadata for `futex-ai/mokabook`, a Node engine floor,
+one `mokabook` bin, explicit exports/types, and a restrictive `files` allowlist.
 
 `publishConfig` targets the public npm registry with public access. The package
 contains compiled runtime code, declarations, shell assets, required font
@@ -13,7 +13,7 @@ licenses, README, LICENSE, and package metadata only. Source fixtures, tests,
 plans, protocol docs, caches, review artifacts, and generated demo output are
 not published unless a documented runtime requirement proves otherwise.
 
-Runtime dependencies are intentional and minimal. Mockbook does not take a
+Runtime dependencies are intentional and minimal. Mokabook does not take a
 runtime dependency on `@firna/ui`, Accounting, Juno, Playwright, or a consumer's
 component system. Development and browser-test packages remain development
 dependencies.
@@ -101,7 +101,7 @@ bootstrap sequence is therefore explicit and maintainer-controlled:
 5. Merge the release-please PR for `0.1.0`; confirm the workflow creates the
    tag/release and publishes the first consumer version with provenance.
 6. Verify package visibility, README, executable behavior, provenance, dist
-   tags, and `npx @firna/mockbook --version` from a clean directory.
+   tags, and `npx mokabook --version` from a clean directory.
 
 The bootstrap publish is never documented as a consumer version. If npm offers
 a safer package-reservation mechanism before implementation, revalidate this
@@ -111,8 +111,8 @@ sequence against current official docs before acting.
 
 Before enabling publish, document and verify:
 
-- Firna npm organization membership and 2FA;
-- public package access and the initial package owner list;
+- the approved Firna npm maintainer accounts and 2FA;
+- unscoped public-package access and the initial package owner list;
 - GitHub Actions workflow permissions and required branch checks;
 - any protected `npm` GitHub environment and reviewers;
 - the exact trusted-publisher workflow filename and allowed action;
@@ -134,6 +134,7 @@ Implementation must re-check these primary references because release tooling
 changes over time:
 
 - [npm trusted publishers](https://docs.npmjs.com/trusted-publishers/)
+- [npm unscoped public packages](https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages/)
 - [npm package executables](https://docs.npmjs.com/cli/npm-exec/)
 - [npm package metadata](https://docs.npmjs.com/files/package.json/)
 - [release-please action](https://github.com/googleapis/release-please-action)
@@ -144,5 +145,5 @@ The package must already exist before a trust relationship can be configured.
 
 ## Related Docs
 
-- [Package and authoring contract](./mockbook-package.md)
-- [Build, Browse, and Review runtime](./mockbook-runtime.md)
+- [Package and authoring contract](./mokabook-package.md)
+- [Build, Browse, and Review runtime](./mokabook-runtime.md)

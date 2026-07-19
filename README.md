@@ -1,8 +1,8 @@
-# Mockbook
+# Mokabook
 
-Mockbook is the planned app-independent browser, static generator, validation
+Mokabook is the planned app-independent browser, static generator, validation
 tool, and visual-review harness for Firna mockup catalogues. It will be
-published as the public npm package `@firna/mockbook` and shared by repositories
+published as the public npm package `mokabook` and shared by repositories
 such as Accounting and Juno without owning either product's screens, styles, or
 brand configuration.
 
@@ -11,17 +11,17 @@ the npm package has not been implemented or released yet.
 
 ## Planned Interface
 
-From a repository with a `mockbook.config.ts` file:
+From a repository with a `mokabook.config.ts` file:
 
 ```bash
-npx @firna/mockbook
-npx @firna/mockbook build
-npx @firna/mockbook check
-npx @firna/mockbook review --base origin/main
+npx mokabook
+npx mokabook build
+npx mokabook check
+npx mokabook review --base origin/main
 ```
 
-Installing `@firna/mockbook` as a development dependency also exposes the local
-`mockbook` binary for npm scripts and `npx mockbook`. The package will default to
+Installing `mokabook` as a development dependency also exposes the local
+`mokabook` binary for npm scripts and `npx mokabook`. The package will default to
 the watched Browse server when no subcommand is supplied.
 
 ## Scope

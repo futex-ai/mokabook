@@ -1,4 +1,4 @@
-# App-Independent Mockbook Npm Library
+# App-Independent Mokabook Npm Library
 
 <!-- markdownlint-disable MD013 -->
 
@@ -9,9 +9,9 @@ has not started.
 
 ## Summary
 
-Extract the reusable Mockbook framework from Accounting into this repository,
+Extract the reusable Mokabook framework from Accounting into this repository,
 remove its assumptions about Bookfolio and Accounting's filesystem, publish it
-as `@firna/mockbook`, and prove it through neutral fixture catalogues. The
+as `mokabook`, and prove it through neutral fixture catalogues. The
 package will own structured registry definitions, static build/check, the
 watched Browse server, Git-based Review artifacts, and public authoring helpers.
 
@@ -25,8 +25,8 @@ not Accounting-specific.
 
 The target contracts are:
 
-- [Package and authoring contract](../docs/protocol/mockbook-package.md)
-- [Build, Browse, and Review runtime](../docs/protocol/mockbook-runtime.md)
+- [Package and authoring contract](../docs/protocol/mokabook-package.md)
+- [Build, Browse, and Review runtime](../docs/protocol/mokabook-runtime.md)
 - [CI and npm release contract](../docs/protocol/npm-release.md)
 
 ## Investigation Baseline
@@ -35,7 +35,7 @@ The plan was prepared on 19 July 2026 from these clean `main` snapshots:
 
 | Repository          | Commit                                     | Purpose                               |
 | ------------------- | ------------------------------------------ | ------------------------------------- |
-| `futex-ai/mockbook` | `896a6ecfd26236b1695c7683e7acac73dc4efbc9` | Empty target repository               |
+| `futex-ai/mockbook` | `896a6ecfd26236b1695c7683e7acac73dc4efbc9` | Empty target before planned rename    |
 | Accounting          | `50e422e442a6819f1aae0fbd038d99b519b72a72` | Framework source and current behavior |
 | Juno                | `e41d1832dd1109b4d454c77507e2de867b084849` | Future-consumer layout check          |
 | Firna UI            | `d36889be243a24f862d5d02539f15eca80e3fb7a` | Npm/CI/release convention reference   |
@@ -69,13 +69,15 @@ Juno already uses React-backed `.source.tsx` files and committed HTML under
 directory hierarchy differ. This confirms that renderer, paths, legacy policy,
 watch inputs, and shared-impact rules must be host configuration.
 
-Npm availability was checked during planning: `@firna/mockbook` was not
-published, unscoped `mockbook@0.0.1` existed under another owner, and unscoped
-`mokabook` was absent. Recheck immediately before the bootstrap publish.
+Npm availability was rechecked after the name was confirmed: on 19 July 2026,
+`npm view mokabook` returned `E404`, so the unscoped name appeared unclaimed.
+Unscoped `mockbook@0.0.1` existed under another owner. Recheck `mokabook`
+immediately before the bootstrap publish because availability is not reserved
+by this plan.
 
 ## Ownership Boundary
 
-| Move into `@firna/mockbook`                      | Keep in Accounting                        | Make configurable                           |
+| Move into `mokabook`                             | Keep in Accounting                        | Make configurable                           |
 | ------------------------------------------------ | ----------------------------------------- | ------------------------------------------- |
 | Registry types/helpers and tree flattening       | `src/entries/**` definitions              | Mockups, entries, legacy, and repo roots    |
 | Manifest, fragments, discovery, validation       | `src/pages/**` and generated product HTML | Renderer module and stylesheet rules        |
@@ -93,13 +95,13 @@ silently dropping behavior does not.
 
 ## Decisions
 
-- Publish one public ESM package, `@firna/mockbook`, with one `mockbook` bin.
-- Document `npx @firna/mockbook` for zero-install use and `npx mockbook` only
-  after a local development dependency is installed. Treat `mokabook` as a
-  typo, not an alias.
+- Publish one public ESM package, `mokabook`, with one `mokabook` bin.
+- Use the intentional Mokabook spelling for package, executable, configuration,
+  manifest, shell, and new documentation. Do not publish `mockbook` aliases.
+- Document `npx mokabook` for both zero-install and local dependency use.
 - No-argument CLI behavior is watched `serve`; explicit `build`, `check`, and
   `review` subcommands preserve the current complete workflow.
-- Discover a typed `mockbook.config.*` from the working directory. All consumer
+- Discover a typed `mokabook.config.*` from the working directory. All consumer
   paths resolve from that file.
 - Emit manifest schema version 3 with repo-relative paths. Read version 2 only
   during the Accounting transition.
@@ -118,7 +120,7 @@ silently dropping behavior does not.
 - Preserve all reusable Build, Check, Browse, watched-development, Review, and
   Review-ignore behavior from the audited Accounting snapshot.
 - Make repository shape, renderer, styles, and app compatibility explicit.
-- Support a clean `npx @firna/mockbook` path and deterministic local dependency
+- Support a clean `npx mokabook` path and deterministic local dependency
   use in CI.
 - Provide fully typed public APIs, actionable errors, complete docs, and packed
   package tests.
@@ -129,8 +131,8 @@ silently dropping behavior does not.
 
 - Moving Accounting or Juno screens, product use cases, generated HTML, product
   CSS, theme tokens, email data, or application components into this repo.
-- Migrating Juno to Mockbook in this change.
-- Hosting Mockbook as a deployed service or adding cloud visual-diff storage.
+- Migrating Juno to Mokabook in this change.
+- Hosting Mokabook as a deployed service or adding cloud visual-diff storage.
 - Making product fragments interactive or replacing consumer component tests.
 - Preserving undocumented Accounting path-repair behavior as a global default.
 - Publishing the package before a packed-tarball Accounting compatibility run.
@@ -149,8 +151,8 @@ Summary: establish a complete, reviewable target contract before implementation.
 - [x] Record the move/keep/configure boundary and explicitly exclude real
       product screens.
 - [x] Expand the root README and create `plans/README.md` with this active plan.
-- [x] Verify current npm name availability and document the `mokabook` spelling
-      assumption.
+- [x] Verify current npm name availability and confirm `mokabook` is the
+      intentional package, executable, and product spelling.
 
 At this milestone the target behavior is specified without changing runtime
 code in any repository.
@@ -163,7 +165,10 @@ public exports work before framework behavior is ported.
 - [ ] Fetch `origin/main`, preserve its additions, and confirm the Accounting
       source tip has not moved; if it has, audit the new framework diff and
       update the baseline before copying code.
-- [ ] Create `package.json`/lockfile for public ESM `@firna/mockbook@0.0.0`,
+- [ ] Coordinate renaming the GitHub repository from `futex-ai/mockbook` to
+      `futex-ai/mokabook`, update the local `origin`, and verify redirects and
+      repository settings without renaming the current branch.
+- [ ] Create `package.json`/lockfile for public ESM `mokabook@0.0.0`,
       using npm commands to add current dependencies rather than guessing
       versions.
 - [ ] Add exact repository metadata, MIT `LICENSE`, `CHANGELOG.md`, Node engine,
@@ -172,7 +177,7 @@ public exports work before framework behavior is ported.
 - [ ] Establish short, cohesive `src` module families for CLI, config,
       authoring, build, registry, legacy, server, client, review, and errors;
       target about 200 lines and do not transplant the Accounting monoliths.
-- [ ] Add a shebang-safe `mockbook` executable with `--help`, `--version`,
+- [ ] Add a shebang-safe `mokabook` executable with `--help`, `--version`,
       default-serve dispatch, explicit subcommands, and typed option errors.
 - [ ] Add TypeScript build/typecheck, formatter/linter, and test scripts with no
       unexplained exclusions from typechecking.
@@ -184,7 +189,7 @@ public exports work before framework behavior is ported.
 - [ ] Update README developer setup and code-jumping points for the real
       scaffold without claiming unfinished commands work.
 
-At this milestone `npm run build`, package imports, `mockbook --help`, and the
+At this milestone `npm run build`, package imports, `mokabook --help`, and the
 initial `xtask` tests work even though catalogue commands may report a clear
 not-yet-configured error.
 
@@ -238,7 +243,7 @@ with transactional output and explicit legacy extensions.
       may remain in framework defaults.
 - [ ] Implement an in-memory/staged generation transaction so failed rendering,
       validation, or linking preserves all last-good files.
-- [ ] Implement `mockbook build` and read-only `mockbook check` with sorted,
+- [ ] Implement `mokabook build` and read-only `mokabook check` with sorted,
       grouped, actionable diagnostics and non-zero failure behavior.
 - [ ] Prove deterministic paths/bytes on macOS and Linux path semantics and
       ensure absolute checkout paths never enter output.
@@ -282,7 +287,7 @@ shell UI.
 At this milestone the server/runtime engines and static Review model work via
 integration tests and simple diagnostic responses, without landing the final UI.
 
-## Milestone 6: Neutral Mockbook And Fixture Design
+## Milestone 6: Neutral Mokabook And Fixture Design
 
 Tags: mockup
 
@@ -295,12 +300,12 @@ synthetic catalogue data before UI implementation.
 - [ ] Give every synthetic screen a distinct mobile and web/desktop component;
       keep fixture data under examples/tests and never present it as real
       product data.
-- [ ] Create standalone mobile and desktop Mockbook Browse mockups for home,
+- [ ] Create standalone mobile and desktop Mokabook Browse mockups for home,
       selected screen/use case, details, missing route, and narrow navigation.
 - [ ] Create separate mobile and desktop Review mockups for changed, added,
       removed, shared-impact, ignored-only, and empty comparison states; split
       pages before any generated screen-spec page exceeds five screens.
-- [ ] Use the existing Accounting Mockbook prototypes only as behavioral/visual
+- [ ] Use the existing Accounting Mokabook prototypes only as behavioral/visual
       reference; remove Bookfolio names, product screens, routes, data, colors,
       and theme dependencies from the new designs.
 - [ ] Ensure each design is reachable from the example navigation and that
@@ -347,7 +352,7 @@ If missing backend work is discovered here, insert a new backend milestone and
 then a new `Tags: ui` milestone as required by repository rules; do not mix it
 into this milestone.
 
-At this milestone `mockbook serve` is a complete, accessible, watched Browse and
+At this milestone `mokabook serve` is a complete, accessible, watched Browse and
 Review experience over the neutral catalogue.
 
 ## Milestone 8: Packed Package And Cross-Repository Parity
@@ -360,10 +365,10 @@ enabled.
       against an explicit allowlist; verify no Accounting/Juno source, examples,
       tests, plans, caches, or review artifacts enter the tarball.
 - [ ] Install the real tarball in clean ESM and NodeNext consumers and test all
-      public exports, declarations, `mockbook` bin, help/version, config
-      discovery, build/check/serve/review, and local `npx mockbook` behavior.
+      public exports, declarations, `mokabook` bin, help/version, config
+      discovery, build/check/serve/review, and local `npx mokabook` behavior.
 - [ ] Add a clean-cache smoke that executes the package the way
-      `npx @firna/mockbook` does and proves entry imports still resolve the
+      `npx mokabook` does and proves entry imports still resolve the
       executing package plus consumer dependencies.
 - [ ] Build/check/serve/review an Accounting-shaped fixture using a custom Firna
       renderer, multiple stylesheet families, legacy aliases, external watch
@@ -371,7 +376,7 @@ enabled.
 - [ ] Build/check/serve a Juno-shaped fixture with different roots, components,
       styles, and no Accounting adapter.
 - [ ] In a temporary Accounting worktree, install the tarball and draft only the
-      app-owned config/renderer/compatibility bridge; run existing Mockbook
+      app-owned config/renderer/compatibility bridge; run existing Mokabook
       gates and compare ids, routes, fragment DOM/styles, Browse behavior, and
       Review classification with the source implementation.
 - [ ] Treat schema/header/path changes documented by the version 3 migration as
@@ -433,7 +438,7 @@ the library pull request.
       tests, clean-cache npx-style smoke, and dependency/license inspection.
 - [ ] Run `cargo fmt --all -- --check`, Clippy with warnings denied, all Rust
       tests, and applicable Rust source/file-length audits.
-- [ ] Start `mockbook serve` from the packed example and manually smoke home,
+- [ ] Start `mokabook serve` from the packed example and manually smoke home,
       screen, collection expansion, use case, id redirect, missing route,
       static fragment, Review, watch rebuild/reload/failure recovery, and clean
       shutdown.
@@ -452,35 +457,36 @@ the library pull request.
       nothing, lettered solution options, and a recommended option that
       considers class-wide prevention.
 
-At this milestone the Mockbook library PR is fully verified, pushed, and
+At this milestone the Mokabook library PR is fully verified, pushed, and
 reviewed. The plan remains active until release/bootstrap and Accounting cutover
 are complete.
 
 ## Milestone 11: First Package Release
 
-Summary: after the library PR merges, reserve the scoped package safely,
+Summary: after the library PR merges, reserve the unscoped package safely,
 activate OIDC publishing, and produce the first supported release.
 
 - [ ] Confirm the merge commit on `main` matches the reviewed code and all
       required GitHub checks passed.
-- [ ] Recheck that `@firna/mockbook` is available and pause for explicit
+- [ ] Recheck that `mokabook` is available and pause for explicit
       maintainer approval before the irreversible first publish.
 - [ ] From the exact checked `main` commit at `0.0.0`, rerun all checks, inspect
       the tarball, and manually publish it publicly under the documented
       bootstrap dist-tag solely to create the package.
-- [ ] Configure the npm trusted publisher for `futex-ai/mockbook`, the exact
-      release workflow filename, optional protected environment, and
-      `npm publish`; verify organization owners and 2FA.
+- [ ] Configure the npm trusted publisher for the unscoped `mokabook` package,
+      `futex-ai/mokabook`, the exact release workflow filename, optional
+      protected environment, and `npm publish`; verify approved Firna
+      maintainers, package owners, and 2FA.
 - [ ] Restrict traditional token publishing and remove any obsolete npm write
       token after the trust relationship is proven.
 - [ ] Merge the release-please `0.1.0` PR and verify the same workflow creates
       the immutable tag/GitHub release and publishes with provenance.
 - [ ] From a clean directory, verify npm metadata, README, license, tarball
-      contents, provenance, dist tags, `npx @firna/mockbook --version`, and a
+      contents, provenance, dist tags, `npx mokabook --version`, and a
       minimal generated/served fixture.
 - [ ] Record release evidence and any manual recovery step in the release docs.
 
-At this milestone `@firna/mockbook@0.1.0` is the first supported public version
+At this milestone `mokabook@0.1.0` is the first supported public version
 and future releases are tokenless and release-PR controlled.
 
 ## Milestone 12: Accounting Consumer Cutover
@@ -490,20 +496,20 @@ framework with the released dependency while preserving every actual screen and
 generated product artifact.
 
 - [ ] Create and index an Accounting consumer-migration plan, update its
-      Mockbook protocol/README first, and capture the latest source tip and
+      Mokabook protocol/README first, and capture the latest source tip and
       `origin/main` additions before editing.
-- [ ] Install an explicit compatible `@firna/mockbook` development dependency
+- [ ] Install an explicit compatible `mokabook` development dependency
       and update the Accounting lockfile using npm.
-- [ ] Add Accounting-owned `mockbook.config.ts`, Firna UI/React Native Web
+- [ ] Add Accounting-owned `mokabook.config.ts`, Firna UI/React Native Web
       renderer, stylesheet rules, external email watch input, Review impact
       globs, legacy aliases/allowlists, and any temporary version 2 bridge.
-- [ ] Update root and TypeScript npm scripts to call the installed `mockbook`
+- [ ] Update root and TypeScript npm scripts to call the installed `mokabook`
       bin for build/check/test/serve/review, retaining stable developer command
       names where useful.
 - [ ] Update Accounting CI's blocking mockup gates and non-blocking
-      `mockbook-review` artifact/summary job to use the package and PR merge base.
+      `mokabook-review` artifact/summary job to use the package and PR merge base.
 - [ ] Preserve every Accounting entry, page, component, product style/asset,
-      Mockbook-related protocol requirement, generated fragment, route, id,
+      Mokabook-related protocol requirement, generated fragment, route, id,
       relationship, and actual screen; regenerate only documented schema/header
       differences.
 - [ ] Delete only framework files marked “ported” in the migration ledger after
@@ -521,7 +527,7 @@ generated product artifact.
 - [ ] Do not modify Juno in this milestone; add only a concise future migration
       handoff if its fixture exposed consumer work.
 
-At this milestone Accounting contains no duplicate generic Mockbook framework,
+At this milestone Accounting contains no duplicate generic Mokabook framework,
 uses the public package, and retains all real screen/spec content.
 
 ## Milestone 13: Close The Extraction Plan
@@ -529,7 +535,7 @@ uses the public package, and retains all real screen/spec content.
 Summary: record the released/consumed result in this repository and close the
 plan only after both delivery repositories are verified.
 
-- [ ] Update the migration ledger with the released version, Mockbook merge/tag,
+- [ ] Update the migration ledger with the released version, Mokabook merge/tag,
       Accounting cutover commit, intentional output changes, and any deferred
       compatibility removal.
 - [ ] Update README/protocol docs with the proven install and consumer behavior;
@@ -544,11 +550,11 @@ plan only after both delivery repositories are verified.
 
 ## Definition Of Done
 
-- `@firna/mockbook` contains every reusable behavior in the migration ledger,
+- `mokabook` contains every reusable behavior in the migration ledger,
   has no product screen dependency, and passes all source and packed-artifact
   tests.
-- `npx @firna/mockbook` serves a configured consumer catalogue; a local install
-  supports `npx mockbook` and all explicit subcommands.
+- `npx mokabook` serves a configured consumer catalogue; a local install
+  supports `npx mokabook` and all explicit subcommands.
 - Neutral and Juno-shaped fixtures prove app independence; a real Accounting
   cutover proves production-scale parity.
 - CI blocks broken code/generated output, Review provides non-blocking visual
