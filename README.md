@@ -127,7 +127,9 @@ cargo xtask check
 
 The synthetic fixture at [`examples/basic`](./examples/basic/README.md) proves
 custom rendering, stylesheets, id links, collections, use cases, and
-Review-ignore markers without importing an application.
+Review-ignore markers without importing an application. Its `Design` catalogue
+holds the approved Browse and Review shell mockups recorded by the
+[shell design contract](./docs/protocol/mokabook-shell-design.md).
 
 ### Key Code
 
