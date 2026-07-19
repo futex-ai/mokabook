@@ -48,6 +48,7 @@
     "package:check": "node scripts/package-check.mjs",
     "prepack": "npm run build",
     "test": "npm run build && tsx --test tests/**/*.test.ts tests/**/*.test.tsx",
+    "test:browser": "npm run build && playwright test",
     "typecheck": "npm run build && tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
@@ -62,6 +63,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",

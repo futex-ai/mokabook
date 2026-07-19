@@ -10,10 +10,11 @@ second screen renderer or catalogue.
 
 ## Delivery Status
 
-This document defines the release-ready runtime contract. Milestone 5 currently
-ships the Build, Check, watch, server, and Review engines with a diagnostic
-Browse shell. The responsive shell behavior below and its browser coverage are
-implemented in milestones 6–7 before package-release work begins.
+This document defines the release-ready runtime contract. The Build, Check,
+watch, server, and Review engines, the responsive package-owned Browse shell,
+the designed Review artifact pages, and their Playwright browser coverage are
+implemented. Packed-package, CI, and release verification remain later
+milestones.
 
 ## Build
 
@@ -67,12 +68,14 @@ outside configured public roots.
 
 ## Browse Shell
 
-The release-ready package owns a neutral, responsive Mokabook shell: top-level
-Browse/Review navigation, search, changed/all filter, nested catalogue,
-breadcrumbs, viewport switching, device frames, and a collapsible details
-panel. Consumer brand chrome does not appear in the shell. A small set of
-documented CSS custom properties may tune the shell accent without replacing
-its structural styles.
+The package owns a neutral, responsive Mokabook shell: top-level Browse/Review
+navigation, search, changed/all filter, nested catalogue, breadcrumbs,
+viewport switching, device frames, and a collapsible details panel. Consumer
+brand chrome does not appear in the shell. A small set of documented CSS
+custom properties may tune the shell accent without replacing its structural
+styles. The changed/all filter derives from Git changes against the serve
+base ref; when the repository or base cannot be resolved, Browse omits the
+filter and shows the full catalogue.
 
 A screen embeds its generated mobile and desktop fragments inside package-owned
 device frames. A use case renders ordered steps that reference those same
@@ -97,8 +100,9 @@ The shell meets keyboard, focus, reduced-motion, contrast, semantics, and status
 announcement requirements. Mobile and desktop shell variants are specified by
 the design mockups in the basic example's `design/` catalogue, and the
 [shell design contract](./mokabook-shell-design.md) records the approved CSS
-custom properties, tokens, and responsive behavior the UI milestone must
-implement.
+custom properties, tokens, and responsive behavior the implementation
+preserves. Intentional presentation differences between the mockups and the
+shipped shell are recorded beside the design catalogue in the example notes.
 
 ## Watched Development
 
@@ -173,18 +177,21 @@ many screens. The active Review artifact directory, including a `--out`
 override and its symlink-resolved in-repository target, is excluded before
 changed-path and shared-impact evidence is calculated.
 
-The current engine emits a static, self-contained diagnostic directory with:
+The engine emits a static, self-contained artifact directory with:
 
-- a flat deterministic index containing every screen and its state;
-- one compare page per screen viewport;
-- side-by-side, opacity-overlay, and difference modes;
+- a deterministic index that groups screens by changed, added, removed, and
+  ignored-only state, with an explicit empty state when nothing differs;
+- one designed compare page per screen viewport, linked to its sibling
+  viewport through the page's viewport control;
+- side-by-side, opacity-overlay, and difference modes on every compare page;
 - before/head artifacts kept complete and unmodified;
-- aggregate shared-impact and ignored-region evidence;
+- aggregate shared-impact and ignored-region evidence on the index and
+  per-viewport ignored-region evidence on compare pages;
 - deterministic `review.json` for CI summaries.
 
-The grouped changed-screen summary, combined mobile/desktop controls, and final
-responsive Review presentation are milestone-7 UI work. They are not current
-engine guarantees.
+Artifact pages inline the package-owned shell styles so the directory remains
+viewable without a server, and every embedded pane stays in a script-disabled
+sandbox.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including

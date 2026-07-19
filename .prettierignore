@@ -4,3 +4,5 @@ node_modules
 target
 examples/basic/generated
 package-lock.json
+test-results
+playwright-report

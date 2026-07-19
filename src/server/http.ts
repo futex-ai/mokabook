@@ -10,10 +10,13 @@ import { readManifest } from "../registry/manifest.js";
 import { createCatalogue, type Catalogue } from "./catalogue.js";
 import { loadBrowserClientModules } from "./client_modules.js";
 import { homePage, notFoundPage, reviewPage, viewPage } from "./pages.js";
+import { SHELL_CSS } from "./shell/css.js";
+import type { ShellContext } from "./shell/html.js";
 
 /** Options for one deterministic server child. */
 export interface ServerOptions {
   base: string;
+  changedRoutes?: readonly string[];
   port: number;
   updateVersion?: number;
 }
@@ -91,10 +94,25 @@ function handleRequest(
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed");
   const url = new URL(rawUrl, "http://mokabook.invalid");
+  const context = shellContext(options, "browse");
   if (url.pathname === "/")
-    return send(response, 200, "text/html", homePage(catalogue), method);
+    return send(
+      response,
+      200,
+      "text/html",
+      homePage(catalogue, context),
+      method,
+    );
   if (url.pathname === "/review")
-    return send(response, 200, "text/html", reviewPage(options.base), method);
+    return send(
+      response,
+      200,
+      "text/html",
+      reviewPage(options.base, catalogue, shellContext(options, "review")),
+      method,
+    );
+  if (url.pathname === "/__mokabook/shell.css")
+    return send(response, 200, "text/css", SHELL_CSS, method);
   if (url.pathname === "/__mokabook/events")
     return openEventStream(response, streams, currentVersion());
   if (url.pathname.startsWith("/__mokabook/client/")) {
@@ -106,12 +124,35 @@ function handleRequest(
     );
   }
   if (url.pathname.startsWith("/id/"))
-    return redirectId(response, url.pathname.slice(4), catalogue);
+    return redirectId(response, url.pathname.slice(4), catalogue, context);
   if (url.pathname.startsWith("/view/"))
-    return renderView(response, url.pathname.slice(6), catalogue, method);
+    return renderView(
+      response,
+      url.pathname.slice(6),
+      catalogue,
+      context,
+      method,
+    );
   if (url.pathname.startsWith("/static/"))
     return serveStatic(response, url.pathname.slice(8), config, method);
-  return send(response, 404, "text/html", notFoundPage(url.pathname), method);
+  return send(
+    response,
+    404,
+    "text/html",
+    notFoundPage(url.pathname, catalogue, context),
+    method,
+  );
+}
+
+function shellContext(
+  options: ServerOptions,
+  mode: ShellContext["mode"],
+): ShellContext {
+  return {
+    base: options.base,
+    ...(options.changedRoutes ? { changedRoutes: options.changedRoutes } : {}),
+    mode,
+  };
 }
 
 function serveClientModule(
@@ -134,10 +175,16 @@ function redirectId(
   response: ServerResponse,
   encodedId: string,
   catalogue: Catalogue,
+  context: ShellContext,
 ): void {
   const entry = catalogue.byId.get(safeDecode(encodedId));
   if (!entry || entry.kind === "collection")
-    return send(response, 404, "text/html", notFoundPage(encodedId));
+    return send(
+      response,
+      404,
+      "text/html",
+      notFoundPage(encodedId, catalogue, context),
+    );
   response.writeHead(302, {
     location: `/view/${encodeUrlPath(entry.route)}`,
   });
@@ -148,13 +195,27 @@ function renderView(
   response: ServerResponse,
   encodedRoute: string,
   catalogue: Catalogue,
+  context: ShellContext,
   method: string,
 ): void {
   const route = safeDecodePath(encodedRoute);
   const entry = route ? catalogue.byRoute.get(route) : undefined;
   if (!entry)
-    return send(response, 404, "text/html", notFoundPage(encodedRoute), method);
-  return send(response, 200, "text/html", viewPage(entry), method);
+    return send(
+      response,
+      404,
+      "text/html",
+      notFoundPage(encodedRoute, catalogue, context),
+      method,
+    );
+  const viewContext = { ...context, ...(route ? { activeRoute: route } : {}) };
+  return send(
+    response,
+    200,
+    "text/html",
+    viewPage(entry, catalogue, viewContext),
+    method,
+  );
 }
 
 function serveStatic(

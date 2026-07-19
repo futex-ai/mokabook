@@ -120,10 +120,15 @@ repository tasks.
 npm ci
 npm run build
 npm test
+npm run test:browser
 npm run example:build
 npm run example:check
 cargo xtask check
 ```
+
+`npm run test:browser` drives the served Browse shell and static Review pages
+in Chromium via Playwright; it uses the installed Chrome channel by default and
+honors `PLAYWRIGHT_CHANNEL` for an alternative browser install.
 
 The synthetic fixture at [`examples/basic`](./examples/basic/README.md) proves
 custom rendering, stylesheets, id links, collections, use cases, and
@@ -137,7 +142,10 @@ holds the approved Browse and Review shell mockups recorded by the
 - [`src/config`](./src/config) — config discovery, loading, and confinement.
 - [`src/build`](./src/build) — single-graph bundling, compilation, links, check,
   and transactional writes.
-- [`src/server`](./src/server) — manifest-backed HTTP and watched child lifecycle.
+- [`src/server`](./src/server) — manifest-backed HTTP, the responsive shell,
+  and the watched child lifecycle.
+- [`src/client`](./src/client) — progressive Browse navigation and versioned
+  live updates served to the browser.
 - [`src/review`](./src/review) — Git extraction, comparison, ignore normalization,
   and static artifacts.
 - [`src/legacy`](./src/legacy) — opt-in migration sources and component expansion.

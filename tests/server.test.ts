@@ -32,7 +32,13 @@ test("server validates before bind and supports safe no-watch routes on port zer
   assert.ok(server.port > 0);
   const home = await fetch(`${server.url}/`);
   assert.equal(home.status, 200);
-  assert.match(await home.text(), /Static catalogue diagnostic view/);
+  const homeHtml = await home.text();
+  assert.match(homeHtml, /data-mokabook-shell/);
+  assert.match(homeHtml, /aria-label="Catalogue"/);
+  assert.match(homeHtml, /Browse the mockup catalogue/);
+  const shellCss = await fetch(`${server.url}/__mokabook/shell.css`);
+  assert.equal(shellCss.status, 200);
+  assert.match(await shellCss.text(), /--mokabook-accent/);
   const redirect = await fetch(`${server.url}/id/home`, { redirect: "manual" });
   assert.equal(redirect.status, 302);
   assert.equal(redirect.headers.get("location"), "/view/screens/home.html");

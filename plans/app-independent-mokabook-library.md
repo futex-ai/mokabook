@@ -4,11 +4,12 @@
 
 ## Status
 
-Active. Milestones 2–6 are implemented: the engines, the milestone-5A review
-hardening with its completed post-push review loop, and the neutral Browse and
-Review design mockups with their recorded shell design contract. Repository
-checks pass. The GitHub repository rename in milestone 2 remains an external
-maintainer action. Milestone 7 (Browse and Review UI implementation) is next.
+Active. Milestones 2–7 are implemented: the engines, the milestone-5A review
+hardening, the neutral design mockups with their recorded shell design
+contract, and the responsive package-owned Browse shell and Review artifact UI
+with Playwright browser coverage. Repository checks pass. The GitHub
+repository rename in milestone 2 remains an external maintainer action.
+Milestone 8 (packed package and cross-repository parity) is next.
 
 ## Summary
 
@@ -410,28 +411,31 @@ Tags: ui
 Summary: implement the responsive package-owned shell and Review artifact UI
 against the completed engines and approved mockups.
 
-- [ ] Implement self-contained shell/frame CSS, licensed font assets, icons,
+- [x] Implement self-contained shell/frame CSS, licensed font assets, icons,
       server-rendered markup, and details/navigation views matching the mobile
       and desktop mockups; do not require consumer gallery CSS.
-- [ ] Implement screen fragment frames, viewport controls, use-case steps,
+      The approved design uses the system font stack, so the package ships no
+      bundled font assets.
+- [x] Implement screen fragment frames, viewport controls, use-case steps,
       legacy embedding, missing-route views, search, changed/all filtering,
       breadcrumbs, and details disclosure from the runtime models.
-- [ ] Implement progressive Browse navigation with eligible-link interception,
+- [x] Implement progressive Browse navigation with eligible-link interception,
       latest-wins requests, History API restoration, active-row/title updates,
       escaped frame cleanup, focus management, announcements, and native
       fallback behavior.
-- [ ] Implement update-stream reconnection and one-shot directory-state recovery
+- [x] Implement update-stream reconnection and one-shot directory-state recovery
       after successful development rebuilds/restarts.
-- [ ] Render Review summary and compare pages with side-by-side, overlay,
+- [x] Render Review summary and compare pages with side-by-side, overlay,
       difference, viewport, shared-impact, and ignored-impact views from the
       engine's artifact model.
-- [ ] Add semantic, keyboard, focus, reduced-motion, contrast, zoom, and
+- [x] Add semantic, keyboard, focus, reduced-motion, contrast, zoom, and
       JavaScript-disabled coverage for both shell variants.
-- [ ] Add Playwright regressions for durable links, multiple in-document
+- [x] Add Playwright regressions for durable links, multiple in-document
       navigations, Back/Forward, overlapping/failing requests, state retention,
       responsive layout, Review switching, updates, and clean shutdown.
-- [ ] Visually smoke every implemented state against the approved mockups and
+- [x] Visually smoke every implemented state against the approved mockups and
       record any intentional difference before changing the design source.
+      Intentional differences are recorded in `examples/basic/notes.md`.
 
 If missing backend work is discovered here, insert a new backend milestone and
 then a new `Tags: ui` milestone as required by repository rules; do not mix it
