@@ -54,9 +54,11 @@ sticky process-global state or an absolute checkout path.
 
 ## 3. Rendering
 
-Each screen owns a mobile and desktop React node. For each viewport, Mokabook
-selects the first matching stylesheet rule and calls the configured renderer,
-or its neutral default. The renderer receives:
+Each screen owns a mobile and desktop React node. Mokabook selects the first
+stylesheet rule matching the screen's catalogue route, applies it to both
+viewports, and resolves each emitted URL relative to that viewport's generated
+fragment route. It then calls the configured renderer, or its neutral default.
+The renderer receives:
 
 ```ts
 interface RenderInput {

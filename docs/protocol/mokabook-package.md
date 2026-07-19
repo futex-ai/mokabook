@@ -224,8 +224,10 @@ Config dependencies are bundled from the config directory before the temporary
 module is evaluated, so bare workspace/package imports never resolve from the
 operating-system temporary directory or npx cache.
 
-Stylesheet rules are ordered, declarative consumer configuration. Generated
-fragment links are relative to the fragment route and URL-encoded by segment.
+Stylesheet rules are ordered, declarative consumer configuration. Their globs
+match the catalogue route before viewport fragments are derived, so one exact
+screen-route rule applies to both viewports. Generated fragment links are
+relative to the fragment route and URL-encoded by segment.
 Shell and device-frame CSS is package-owned and self-contained; product CSS is
 never copied into the npm package.
 

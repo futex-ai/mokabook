@@ -30,7 +30,7 @@ export function renderFragments(
     if (entry.kind !== "screen") continue;
     for (const viewport of ["mobile", "desktop"] as const) {
       const route = fragmentRoute(entry.route, viewport);
-      const stylesheets = stylesheetsFor(route, config);
+      const stylesheets = stylesheetsFor(entry.route, route, config);
       let rendered: string;
       try {
         rendered = renderer({
@@ -88,9 +88,13 @@ export function generatedHeader(sourceRelativePath: string): string {
   return `${GENERATED_HEADER} from ${sourceRelativePath}. Do not edit. -->\n`;
 }
 
-function stylesheetsFor(route: string, config: ResolvedConfig): string[] {
+function stylesheetsFor(
+  catalogueRoute: string,
+  fragmentRoute: string,
+  config: ResolvedConfig,
+): string[] {
   const rule = config.stylesheets.find((candidate) =>
-    minimatch(route, candidate.match),
+    minimatch(catalogueRoute, candidate.match),
   );
   if (!rule) return [];
   return rule.stylesheets.map((stylesheet) => {
@@ -102,7 +106,10 @@ function stylesheetsFor(route: string, config: ResolvedConfig): string[] {
         `stylesheet does not exist: ${stylesheet}`,
       );
     }
-    const relative = path.posix.relative(path.posix.dirname(route), stylesheet);
+    const relative = path.posix.relative(
+      path.posix.dirname(fragmentRoute),
+      stylesheet,
+    );
     const encoded = encodeUrlPath(relative);
     return encoded.startsWith(".") ? encoded : `./${encoded}`;
   });

@@ -361,6 +361,8 @@ the deferred Browse/Review UI.
       through a package-owned browser client.
 - [x] Make watched shutdown wait for active config adoption before closing the
       final watcher and child, without restarting after shutdown begins.
+- [x] Match stylesheet rules against documented catalogue routes while keeping
+      generated fragment-relative stylesheet URLs.
 - [ ] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
       `cargo xtask review` under the invoked review loop.
 

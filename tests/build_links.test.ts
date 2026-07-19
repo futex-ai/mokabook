@@ -130,6 +130,36 @@ test("framework-emitted stylesheet URLs encode path segments", async (context) =
   assert.match(mobile, /href="\.\.\/theme%20%231\.css"/);
 });
 
+test("stylesheet rules match catalogue routes for every viewport", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  await fs.promises.writeFile(
+    path.join(fixture.mockupsDir, "home.css"),
+    "body { color: black; }\n",
+  );
+  await fs.promises.writeFile(
+    fixture.configPath,
+    `export default {
+  entriesDir: "entries",
+  mockupsDir: "mockups",
+  repoRoot: ".",
+  stylesheets: [{ match: "screens/home.html", stylesheets: ["home.css"] }]
+};
+`,
+  );
+  const config = await loadConfig(fixture.root);
+
+  const compilation = await compileCatalogue(config);
+
+  for (const viewport of ["mobile", "desktop"]) {
+    const home = compilation.outputs.get(`screens/home.${viewport}.html`) ?? "";
+    const details =
+      compilation.outputs.get(`screens/details.${viewport}.html`) ?? "";
+    assert.match(home, /href="\.\.\/home\.css"/);
+    assert.doesNotMatch(details, /home\.css/);
+  }
+});
+
 function routeSource(route: string): string {
   return `import { defineScreen } from "mokabook";
 import React from "react";
