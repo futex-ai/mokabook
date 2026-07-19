@@ -133,6 +133,8 @@ class FakeSupervisor implements ProcessSupervisor {
 
   notifyUpdate(): void {}
 
+  onUnexpectedExit(_callback: (error: Error) => void): void {}
+
   async restart(): Promise<number> {
     return 43123;
   }

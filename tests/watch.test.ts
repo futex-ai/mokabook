@@ -253,6 +253,8 @@ class RecoverableFakeSupervisor implements ProcessSupervisor {
 
   notifyUpdate(): void {}
 
+  onUnexpectedExit(_callback: (error: Error) => void): void {}
+
   async restart(): Promise<number> {
     this.restarts += 1;
     throw new Error("restart failed");

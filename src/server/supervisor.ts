@@ -38,6 +38,8 @@ export class NodeChildFactory implements ChildFactory {
 export interface ProcessSupervisor {
   close(): Promise<void>;
   notifyUpdate(): void;
+  /** Register the watched-runtime handler for a post-readiness child failure. */
+  onUnexpectedExit(callback: (error: Error) => void): void;
   restart(): Promise<number>;
   start(): Promise<number>;
 }
@@ -69,6 +71,7 @@ export class NodeProcessSupervisorFactory implements ProcessSupervisorFactory {
 /** Child supervisor that waits for readiness and retains a resolved port. */
 export class ReadyProcessSupervisor implements ProcessSupervisor {
   #child: ChildHandle | undefined;
+  #unexpectedExit: ((error: Error) => void) | undefined;
   #resolvedPort: number | undefined;
   #updateVersion = 0;
 
@@ -95,7 +98,12 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
     ]);
     this.#child = child;
     try {
-      const readyPort = await waitForReady(child);
+      const readyPort = await waitForReady(child, (error) => {
+        if (this.#child !== child) return;
+        this.#child = undefined;
+        child.terminate();
+        this.#unexpectedExit?.(error);
+      });
       this.#resolvedPort = readyPort;
       return readyPort;
     } catch (error) {
@@ -114,6 +122,10 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
     if (!this.#child) return;
     this.#updateVersion += 1;
     this.#child.send({ type: "update", version: this.#updateVersion });
+  }
+
+  onUnexpectedExit(callback: (error: Error) => void): void {
+    this.#unexpectedExit = callback;
   }
 
   async close(): Promise<void> {
@@ -138,34 +150,52 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
   }
 }
 
-function waitForReady(child: ChildHandle): Promise<number> {
+function waitForReady(
+  child: ChildHandle,
+  onUnexpectedFailure: (error: Error) => void,
+): Promise<number> {
   return new Promise((resolve, reject) => {
-    let settled = false;
+    let state: "failed" | "ready" | "waiting" = "waiting";
     const timer = setTimeout(
       () => fail(new Error("server child readiness timed out")),
       15_000,
     );
     timer.unref();
     const fail = (error: Error): void => {
-      if (settled) return;
-      settled = true;
+      if (state !== "waiting") return;
+      state = "failed";
       clearTimeout(timer);
-      reject(
-        new MokabookError("server-failed", errorMessage(error), {
-          cause: error,
-        }),
-      );
+      reject(serverFailure(error));
     };
-    child.onError(fail);
-    child.onExit((code) =>
-      fail(new Error(`server child exited before readiness (${String(code)})`)),
-    );
+    child.onError((error) => {
+      if (state === "ready") onUnexpectedFailure(serverFailure(error));
+      else fail(error);
+    });
+    child.onExit((code) => {
+      if (state === "ready") {
+        onUnexpectedFailure(
+          serverFailure(
+            new Error(`server child exited unexpectedly (${String(code)})`),
+          ),
+        );
+      } else {
+        fail(
+          new Error(`server child exited before readiness (${String(code)})`),
+        );
+      }
+    });
     child.onMessage((message) => {
-      if (!isReady(message) || settled) return;
-      settled = true;
+      if (!isReady(message) || state !== "waiting") return;
+      state = "ready";
       clearTimeout(timer);
       resolve(message.port);
     });
+  });
+}
+
+function serverFailure(error: Error): MokabookError {
+  return new MokabookError("server-failed", errorMessage(error), {
+    cause: error,
   });
 }
 

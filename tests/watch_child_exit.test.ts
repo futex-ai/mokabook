@@ -1,0 +1,180 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import type { Compilation } from "../dist/build/compile.js";
+import type { GeneratedOutputStore } from "../dist/build/output_store.js";
+import { loadConfig } from "../dist/config/load.js";
+import type { ResolvedConfig } from "../dist/config/types.js";
+import type { CatalogueServerFactory } from "../dist/server/factory.js";
+import type { RunningServer, ServerOptions } from "../dist/server/http.js";
+import { serve } from "../dist/server/serve.js";
+import {
+  ReadyProcessSupervisor,
+  type ChildFactory,
+  type ChildHandle,
+  type ProcessSupervisor,
+  type ProcessSupervisorFactory,
+} from "../dist/server/supervisor.js";
+import type {
+  ConsumerWatcher,
+  ConsumerWatcherFactory,
+} from "../dist/server/watcher.js";
+import { createFixture, removeFixture } from "./helpers/fixture.js";
+
+test("supervisor reports and clears a child that exits after readiness", async () => {
+  const factory = new FakeChildFactory();
+  const supervisor = new ReadyProcessSupervisor(factory, ["__serve-child"], 0);
+  const failures: Error[] = [];
+  supervisor.onUnexpectedExit((error) => failures.push(error));
+  const starting = supervisor.start();
+  factory.children[0]?.ready(48123);
+  await starting;
+
+  factory.children[0]?.exit(17);
+  assert.match(failures[0]?.message ?? "", /exited unexpectedly \(17\)/);
+
+  const replacement = supervisor.start();
+  factory.children[1]?.ready(48123);
+  assert.equal(await replacement, 48123);
+  await supervisor.close();
+});
+
+test("watched Serve restarts through the action queue after an unexpected child exit", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const supervisor = new ExitingSupervisor();
+  const running = await serve(
+    config,
+    { base: "origin/main", port: 0, watch: true },
+    {
+      outputStore: new FakeOutputStore(),
+      processSupervisorFactory: new FakeSupervisorFactory(supervisor),
+      serverFactory: new UnusedServerFactory(),
+      watcherFactory: new FakeWatcherFactory(),
+    },
+  );
+  context.after(() => running.close());
+
+  supervisor.exitUnexpectedly();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(supervisor.restarts, 1);
+});
+
+class FakeChildFactory implements ChildFactory {
+  readonly children: FakeChild[] = [];
+
+  spawn(_arguments: readonly string[]): ChildHandle {
+    const child = new FakeChild();
+    this.children.push(child);
+    return child;
+  }
+}
+
+class FakeChild implements ChildHandle {
+  private readonly errorCallbacks: Array<(error: Error) => void> = [];
+  private readonly exitCallbacks: Array<(code: number | null) => void> = [];
+  private readonly messageCallbacks: Array<(message: unknown) => void> = [];
+
+  onError(callback: (error: Error) => void): void {
+    this.errorCallbacks.push(callback);
+  }
+
+  onExit(callback: (code: number | null) => void): void {
+    this.exitCallbacks.push(callback);
+  }
+
+  onMessage(callback: (message: unknown) => void): void {
+    this.messageCallbacks.push(callback);
+  }
+
+  send(message: Record<string, string | number>): void {
+    if (message.type === "shutdown") queueMicrotask(() => this.exit(0));
+  }
+
+  terminate(): void {
+    this.exit(null);
+  }
+
+  exit(code: number | null): void {
+    for (const callback of this.exitCallbacks.splice(0)) callback(code);
+  }
+
+  ready(port: number): void {
+    for (const callback of this.messageCallbacks) {
+      callback({ port, type: "ready" });
+    }
+  }
+}
+
+class ExitingSupervisor implements ProcessSupervisor {
+  restarts = 0;
+  private unexpectedExit: ((error: Error) => void) | undefined;
+
+  async close(): Promise<void> {}
+
+  notifyUpdate(): void {}
+
+  onUnexpectedExit(callback: (error: Error) => void): void {
+    this.unexpectedExit = callback;
+  }
+
+  async restart(): Promise<number> {
+    this.restarts += 1;
+    return 48123;
+  }
+
+  async start(): Promise<number> {
+    return 48123;
+  }
+
+  exitUnexpectedly(): void {
+    this.unexpectedExit?.(new Error("server child exited unexpectedly (17)"));
+  }
+}
+
+class FakeSupervisorFactory implements ProcessSupervisorFactory {
+  constructor(private readonly supervisor: ProcessSupervisor) {}
+
+  create(
+    _binPath: string,
+    _baseArguments: readonly string[],
+    _requestedPort: number,
+  ): ProcessSupervisor {
+    return this.supervisor;
+  }
+}
+
+class FakeOutputStore implements GeneratedOutputStore {
+  check(_compilation: Compilation, _config: ResolvedConfig): void {}
+
+  async write(
+    _compilation: Compilation,
+    _config: ResolvedConfig,
+  ): Promise<void> {}
+}
+
+class FakeWatcherFactory implements ConsumerWatcherFactory {
+  create(_targets: readonly string[]): ConsumerWatcher {
+    return new FakeWatcher();
+  }
+}
+
+class FakeWatcher implements ConsumerWatcher {
+  async close(): Promise<void> {}
+
+  onChange(_callback: (path: string) => void): void {}
+
+  onError(_callback: (error: Error) => void): void {}
+
+  async ready(): Promise<void> {}
+}
+
+class UnusedServerFactory implements CatalogueServerFactory {
+  async start(
+    _config: ResolvedConfig,
+    _options: ServerOptions,
+  ): Promise<RunningServer> {
+    throw new Error("watched Serve must not start an in-process server");
+  }
+}

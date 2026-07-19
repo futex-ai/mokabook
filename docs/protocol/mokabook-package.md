@@ -59,9 +59,10 @@ Mokabook searches upward from the current working directory for
 `mokabook.config.mjs`, unless `--config` is supplied. Discovery stops at the
 filesystem root and reports every filename it attempted when none is found.
 
-The config's paths resolve relative to the config file, never relative to the
-installed package or transient npx cache. `defineConfig` validates and types the
-following contract:
+The config's filesystem paths resolve relative to the config file, never
+relative to the installed package or transient npx cache. Repository-matching
+globs operate on repo-relative POSIX paths. `defineConfig` validates and types
+the following contract:
 
 - `mockupsDir`: output/catalogue root, such as `docs/mockups`;
 - `entriesDir`: structured `*.mockup.ts` and `*.mockup.tsx` source directory;
@@ -121,15 +122,18 @@ interface MokabookConfig {
 }
 ```
 
-All paths and globs above are relative to the config except stylesheet paths,
-which are relative to `mockupsDir`. `repoRoot` defaults to the config directory.
-HTTP(S) stylesheet URLs are allowed. Duplicate stylesheet matches and watch
-paths are invalid. Authored source directories may sit below `mockupsDir` for a
-`docs/mockups/src` layout, but they may not equal each other or the output root;
-generated routes are collision-checked against those sources before writing.
-Review output must not overlap a source or output root in either direction.
-That rule applies equally to configured output, a CLI `--out` override, and the
-transactional writer boundary.
+Filesystem fields (`repoRoot`, `entriesDir`, `mockupsDir`, `renderer`, legacy
+page/component paths, and Review `outDir`) are config-relative. Stylesheet file
+paths are relative to `mockupsDir`; HTTP(S) stylesheet URLs are allowed.
+`watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
+globs, while stylesheet `match` and legacy aliases/lint routes match catalogue
+routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
+matches and watch paths are invalid. Authored source directories may sit below
+`mockupsDir` for a `docs/mockups/src` layout, but they may not equal each other
+or the output root; generated routes are collision-checked against those
+sources before writing. Review output must not overlap a source or output root
+in either direction. That rule applies equally to configured output, a CLI
+`--out` override, and the transactional writer boundary.
 
 ## Public Authoring API
 

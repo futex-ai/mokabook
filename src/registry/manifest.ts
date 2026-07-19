@@ -10,6 +10,9 @@ import type { ManifestEntry, ManifestLegacyPage, ManifestV3 } from "./types.js";
 /** Canonical generated manifest filename. */
 export const MANIFEST_NAME = "mokabook-manifest.json";
 
+/** Legacy version 2 manifest filename accepted only during migration. */
+export const LEGACY_MANIFEST_NAME = "mockbook-manifest.json";
+
 /** Derive one viewport fragment route from a screen route. */
 export function fragmentRoute(
   route: string,
@@ -38,12 +41,31 @@ export function serializeManifest(manifest: ManifestV3): string {
   return `${JSON.stringify(manifest, null, 2)}\n`;
 }
 
-/** Read and validate a generated manifest, optionally accepting version 2. */
-export function readManifest(
-  config: ResolvedConfig,
-  manifestPath?: string,
-): ManifestV3 {
-  const candidate = manifestPath ?? path.join(config.mockupsDir, MANIFEST_NAME);
+/** Read canonical output, falling back to the legacy v2 file only when absent. */
+export function readManifest(config: ResolvedConfig): ManifestV3 {
+  const canonicalPath = path.join(config.mockupsDir, MANIFEST_NAME);
+  const selection = selectManifestInput(
+    fs.existsSync(canonicalPath),
+    config.compatibility.readManifestV2,
+  );
+  return readManifestFile(
+    path.join(config.mockupsDir, selection.filename),
+    selection.allowV2,
+  );
+}
+
+/** Select the strict canonical input or the explicitly enabled legacy input. */
+export function selectManifestInput(
+  canonicalExists: boolean,
+  allowLegacyV2: boolean,
+): { allowV2: boolean; filename: string } {
+  if (canonicalExists || !allowLegacyV2) {
+    return { allowV2: false, filename: MANIFEST_NAME };
+  }
+  return { allowV2: true, filename: LEGACY_MANIFEST_NAME };
+}
+
+function readManifestFile(candidate: string, allowV2: boolean): ManifestV3 {
   let value: unknown;
   try {
     value = JSON.parse(fs.readFileSync(candidate, "utf8"));
@@ -56,7 +78,7 @@ export function readManifest(
       },
     );
   }
-  return parseManifest(value, config.compatibility.readManifestV2);
+  return parseManifest(value, allowV2);
 }
 
 /** Validate manifest-shaped JSON and normalize temporary version 2 input. */

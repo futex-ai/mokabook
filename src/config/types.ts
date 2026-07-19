@@ -11,9 +11,9 @@ export interface StylesheetRule {
 
 /** Optional support for pre-registry source pages during consumer migration. */
 export interface LegacyConfig {
-  /** Source directory containing `.source.tsx`, `.source.ts`, or `.source.html`. */
+  /** Config-relative source directory containing legacy source pages. */
   pagesDir: string;
-  /** Optional module exporting a legacy component renderer. */
+  /** Optional config-relative module exporting a legacy component renderer. */
   components?: string;
   /** Explicit source-relative output route replacements. */
   routeAliases?: Readonly<Record<string, string>>;
@@ -50,27 +50,27 @@ export interface WatchConfig {
 export interface ReviewConfig {
   /** Default Git ref used by `mokabook review`. */
   base?: string;
-  /** Artifact directory relative to the repository root. */
+  /** Config-relative artifact directory. */
   outDir?: string;
-  /** Paths whose changes can affect many screens without changing source routes. */
+  /** Repository-relative POSIX globs whose changes can affect many screens. */
   sharedImpact?: readonly string[];
 }
 
 /** Temporary compatibility accepted during a consumer cutover. */
 export interface CompatibilityConfig {
-  /** Accept a version 2 `mockbook-manifest.json` when reading existing output. */
+  /** Read legacy v2 output only when the canonical v3 manifest is absent. */
   readManifestV2?: boolean;
 }
 
 /** Public, serializable host configuration. */
 export interface MokabookConfig {
-  /** Structured `*.mockup.tsx` and `*.mockup.ts` source directory. */
+  /** Config-relative structured mockup source directory. */
   entriesDir: string;
-  /** Generated catalogue/output root. */
+  /** Config-relative generated catalogue/output root. */
   mockupsDir: string;
-  /** Repository root; defaults to the config directory. */
+  /** Config-relative repository root; defaults to the config directory. */
   repoRoot?: string;
-  /** Optional consumer renderer module. */
+  /** Optional config-relative consumer renderer module. */
   renderer?: string;
   /** Ordered route-to-stylesheet mappings. */
   stylesheets?: readonly StylesheetRule[];

@@ -85,6 +85,8 @@ fonts, and images so comparison artifacts do not depend on the live workspace.
 Base resources must be regular Git files outside configured source roots.
 Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and
 logical screen routes are not portable links in generated static files.
+Watched Serve keeps its resolved port and serially replaces a child that exits
+unexpectedly after readiness.
 
 ## Rendering Boundary
 

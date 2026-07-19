@@ -90,6 +90,7 @@ async function serveWatched(
   processSupervisorFactory: ProcessSupervisorFactory,
 ): Promise<RunningServe> {
   const gate = new NotificationGate<string>();
+  const failureGate = new NotificationGate<Error>();
   const watcher = watcherFactory.create(watchTargets(config));
   let supervisor: ProcessSupervisor | undefined;
   let port: number;
@@ -113,6 +114,7 @@ async function serveWatched(
       baseArguments,
       options.port,
     );
+    supervisor.onUnexpectedExit((error) => failureGate.notify(error));
     port = await supervisor.start();
   } catch (error) {
     await Promise.allSettled([watcher.close(), supervisor?.close()]);
@@ -133,6 +135,11 @@ async function serveWatched(
   const debouncer = new WatchDebouncer(config.watch.debounceMs, (action) =>
     actionQueue.notify(action),
   );
+  failureGate.open((error) => {
+    if (closed) return;
+    process.stderr.write(`${errorMessage(error)}\n`);
+    actionQueue.notify("restart");
+  });
   gate.open((candidate) =>
     debouncer.notify(classifyWatchPath(candidate, config)),
   );

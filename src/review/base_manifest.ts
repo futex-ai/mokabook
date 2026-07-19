@@ -2,7 +2,11 @@ import path from "node:path";
 
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MANIFEST_NAME, parseManifest } from "../registry/manifest.js";
+import {
+  MANIFEST_NAME,
+  parseManifest,
+  selectManifestInput,
+} from "../registry/manifest.js";
 import type { ManifestV3 } from "../registry/types.js";
 import type { GitClient } from "./git.js";
 
@@ -14,23 +18,13 @@ export async function readBaseManifest(
 ): Promise<ManifestV3> {
   const prefix = toPosixPath(path.relative(config.repoRoot, config.mockupsDir));
   const canonicalPath = joinGit(prefix, MANIFEST_NAME);
-  if (await git.fileExists(commit, canonicalPath)) {
-    return parseManifest(
-      JSON.parse(await git.readFile(commit, canonicalPath)),
-      false,
-    );
-  }
-  if (!config.compatibility.readManifestV2) {
-    return parseManifest(
-      JSON.parse(await git.readFile(commit, canonicalPath)),
-      false,
-    );
-  }
+  const selection = selectManifestInput(
+    await git.fileExists(commit, canonicalPath),
+    config.compatibility.readManifestV2,
+  );
   return parseManifest(
-    JSON.parse(
-      await git.readFile(commit, joinGit(prefix, "mockbook-manifest.json")),
-    ),
-    true,
+    JSON.parse(await git.readFile(commit, joinGit(prefix, selection.filename))),
+    selection.allowV2,
   );
 }
 

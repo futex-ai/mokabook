@@ -115,7 +115,9 @@ Watchers become ready before initial generation begins. Notifications during
 generation and child startup are buffered. A child validates the catalogue and binds before
 readiness. Port `0` resolves once and the resolved port remains stable across
 child restarts. Initial validation/bind failure exits non-zero without leaking
-watchers.
+watchers. An unexpected child failure after readiness reports its diagnostic,
+clears the dead process, and enqueues a restart through the same serialized
+action queue used for authored changes.
 
 Rebuilds are debounced and transactional. A failed rebuild keeps the last-good
 server and output, reports the error, and waits for another authored change. A

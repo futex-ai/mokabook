@@ -341,6 +341,12 @@ the deferred Browse/Review UI.
       `href` values, leaving text and non-link attributes byte-unchanged.
 - [x] Run the Rust file-length audit once through the injected application
       boundary instead of recursively invoking `xtask` inside the check list.
+- [x] Align Browse/current v2 manifest fallback with Review: canonical v3 must
+      win, and the legacy v2 filename is read only when canonical output is absent.
+- [x] Recover watched Serve through its serialized action queue when a child
+      exits unexpectedly after reporting readiness.
+- [x] Document filesystem paths, stylesheet paths, and repository-relative
+      watch/Review globs with their actual resolution bases.
 - [ ] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
       `cargo xtask review` under the invoked review loop.
 
