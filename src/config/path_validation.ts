@@ -1,7 +1,7 @@
 import fs from "node:fs";
 
 import { MokabookError, type MokabookErrorCode } from "../errors.js";
-import { isInside, resolveInside } from "./paths.js";
+import { isInside, projectRealPath, resolveInside } from "./paths.js";
 import { requireString } from "./rules.js";
 
 interface ReviewOutBoundary {
@@ -27,6 +27,7 @@ export function optionalModule(
       `${label} does not name a file: ${value}`,
     );
   }
+  requireRealInside(repoRoot, resolved, label);
   return resolved;
 }
 
@@ -42,10 +43,16 @@ export function requireDirectory(value: string, label: string): void {
 
 /** Reject source roots whose ownership cannot be distinguished. */
 export function validateSourceRoots(
+  repoRoot: string,
   entriesDir: string,
   mockupsDir: string,
   legacyDir?: string,
 ): void {
+  const realEntries = requireRealInside(repoRoot, entriesDir, "entriesDir");
+  const realMockups = requireRealInside(repoRoot, mockupsDir, "mockupsDir");
+  const realLegacy = legacyDir
+    ? requireRealInside(repoRoot, legacyDir, "legacy.pagesDir")
+    : undefined;
   if (entriesDir === mockupsDir || legacyDir === mockupsDir) {
     throw new MokabookError(
       "config-invalid",
@@ -61,6 +68,23 @@ export function validateSourceRoots(
     throw new MokabookError(
       "config-invalid",
       "entriesDir and legacy.pagesDir must not overlap",
+    );
+  }
+  if (realEntries === realMockups || realLegacy === realMockups) {
+    throw new MokabookError(
+      "config-invalid",
+      "authored source directories must not equal mockupsDir through symlinks",
+    );
+  }
+  if (
+    realLegacy &&
+    (realLegacy === realEntries ||
+      isInside(realLegacy, realEntries) ||
+      isInside(realEntries, realLegacy))
+  ) {
+    throw new MokabookError(
+      "config-invalid",
+      "entriesDir and legacy.pagesDir must not overlap through symlinks",
     );
   }
 }
@@ -79,19 +103,53 @@ export function validateReviewOut(
     entriesDir,
     ...(legacyDir ? [legacyDir] : []),
   ];
+  const realRepoRoot = fs.realpathSync(repoRoot);
+  const realReviewOut = projectRealPath(reviewOut);
+  const realProtectedRoots = protectedRoots.map((root) =>
+    fs.realpathSync(root),
+  );
   if (
     reviewOut === repoRoot ||
     !isInside(repoRoot, reviewOut) ||
+    !isInside(realRepoRoot, realReviewOut) ||
     protectedRoots.some(
       (root) =>
         reviewOut === root ||
         isInside(reviewOut, root) ||
         isInside(root, reviewOut),
+    ) ||
+    realProtectedRoots.some(
+      (root) =>
+        realReviewOut === root ||
+        isInside(realReviewOut, root) ||
+        isInside(root, realReviewOut),
     )
   ) {
+    if (!isInside(realRepoRoot, realReviewOut)) {
+      throw new MokabookError(
+        code,
+        `${label} resolves outside repoRoot through a symlink`,
+      );
+    }
     throw new MokabookError(
       code,
       `${label} must not overlap repository, mockup, or source roots`,
     );
   }
+}
+
+function requireRealInside(
+  repoRoot: string,
+  candidate: string,
+  label: string,
+): string {
+  const realRepoRoot = fs.realpathSync(repoRoot);
+  const realCandidate = fs.realpathSync(candidate);
+  if (!isInside(realRepoRoot, realCandidate)) {
+    throw new MokabookError(
+      "config-invalid",
+      `${label} resolves outside repoRoot through a symlink`,
+    );
+  }
+  return realCandidate;
 }

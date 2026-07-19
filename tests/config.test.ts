@@ -63,3 +63,40 @@ test("config rejects traversal and overlapping roots", async (context) => {
     /must not equal mockupsDir/,
   );
 });
+
+test("config rejects an output root symlink outside repoRoot", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const outside = `${fixture.root}-outside-output`;
+  context.after(() =>
+    fs.promises.rm(outside, { force: true, recursive: true }),
+  );
+  await fs.promises.mkdir(outside);
+  await fs.promises.rm(fixture.mockupsDir, { recursive: true });
+  await fs.promises.symlink(outside, fixture.mockupsDir);
+
+  await assert.rejects(
+    () => loadConfig(fixture.root),
+    /mockupsDir resolves outside repoRoot through a symlink/,
+  );
+});
+
+test("config rejects Review output through an external symlink", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const outside = `${fixture.root}-outside-review`;
+  context.after(() =>
+    fs.promises.rm(outside, { force: true, recursive: true }),
+  );
+  await fs.promises.mkdir(outside);
+  await fs.promises.symlink(outside, path.join(fixture.root, "review-link"));
+  await fs.promises.writeFile(
+    fixture.configPath,
+    'export default { entriesDir: "entries", mockupsDir: "mockups", repoRoot: ".", review: { outDir: "review-link/artifact" } };\n',
+  );
+
+  await assert.rejects(
+    () => loadConfig(fixture.root),
+    /review.outDir resolves outside repoRoot through a symlink/,
+  );
+});

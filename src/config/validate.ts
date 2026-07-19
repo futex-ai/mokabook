@@ -62,7 +62,7 @@ export function resolveConfig(
     "renderer",
   );
   const legacy = resolveLegacy(input.legacy, repoRoot, configDir);
-  validateSourceRoots(entriesDir, mockupsDir, legacy?.pagesDir);
+  validateSourceRoots(repoRoot, entriesDir, mockupsDir, legacy?.pagesDir);
   const stylesheets = validateStylesheets(input.stylesheets ?? []);
   const watchRules = validateWatchRules(input.watch?.rules ?? []);
   if (input.review?.base !== undefined)

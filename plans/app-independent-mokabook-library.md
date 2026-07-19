@@ -321,6 +321,12 @@ the deferred Browse/Review UI.
       changes cannot be lost and readiness failures leak no watcher.
 - [x] Restore one-sided Review material-signal behavior, narrow verification
       documentation to the implemented gate, and add regression coverage.
+- [x] Reject raw links to logical catalogue routes while retaining generated
+      fragment and confined public-asset links.
+- [x] Reject generated targets beneath authored roots at both compilation and
+      transactional writer boundaries, including symlink-resolved paths.
+- [x] Distinguish current engine guarantees from deferred release-ready Browse
+      shell and browser-coverage requirements in the runtime protocol.
 - [ ] Run focused tests, the full `cargo xtask check`, commit, push, and repeat
       `cargo xtask review` under the invoked review loop.
 

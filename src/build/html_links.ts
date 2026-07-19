@@ -4,7 +4,7 @@ import path from "node:path";
 import { parse } from "parse5";
 
 import type { ResolvedConfig } from "../config/types.js";
-import { isInside } from "../config/paths.js";
+import { isPublicStaticFile } from "../config/public_files.js";
 import { MokabookError } from "../errors.js";
 
 interface HtmlAttribute {
@@ -25,7 +25,6 @@ interface DocumentLinks {
 /** Validate relative document links and anchors across generated output. */
 export function validateHtmlLinks(
   outputs: ReadonlyMap<string, string>,
-  configuredRoutes: ReadonlySet<string>,
   config: ResolvedConfig,
 ): void {
   const parsed = new Map(
@@ -34,14 +33,7 @@ export function validateHtmlLinks(
   const violations: string[] = [];
   for (const [route, links] of parsed) {
     for (const href of links.hrefs) {
-      const violation = validateHref(
-        href,
-        route,
-        links,
-        parsed,
-        configuredRoutes,
-        config,
-      );
+      const violation = validateHref(href, route, links, parsed, config);
       if (violation) violations.push(`${route}: ${violation}`);
     }
   }
@@ -61,7 +53,6 @@ function validateHref(
   sourceRoute: string,
   source: DocumentLinks,
   parsed: ReadonlyMap<string, DocumentLinks>,
-  configuredRoutes: ReadonlySet<string>,
   config: ResolvedConfig,
 ): string | undefined {
   if (
@@ -89,10 +80,9 @@ function validateHref(
     return `link escapes mockupsDir: ${href}`;
   const target = rawTarget.replace(/^\.\//, "");
   const generated = parsed.get(target);
-  if (!generated && !configuredRoutes.has(target)) {
+  if (!generated) {
     const absolute = path.resolve(config.mockupsDir, target);
-    if (!isInside(config.mockupsDir, absolute) || !fs.existsSync(absolute))
-      return `missing target ${href}`;
+    if (!isPublicStaticFile(absolute, config)) return `missing target ${href}`;
   }
   if (rawHash) {
     const targetLinks = generated ?? readAuthoredLinks(config, target);
@@ -108,8 +98,7 @@ function readAuthoredLinks(
   route: string,
 ): DocumentLinks | undefined {
   const candidate = path.resolve(config.mockupsDir, route);
-  if (!isInside(config.mockupsDir, candidate) || !fs.existsSync(candidate))
-    return undefined;
+  if (!isPublicStaticFile(candidate, config)) return undefined;
   return documentLinks(fs.readFileSync(candidate, "utf8"));
 }
 

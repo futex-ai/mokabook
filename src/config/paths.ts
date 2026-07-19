@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import path from "node:path";
 
 import { MokabookError } from "../errors.js";
@@ -72,4 +73,27 @@ export function isInside(root: string, candidate: string): boolean {
       !relative.startsWith(`..${path.sep}`) &&
       relative !== "..")
   );
+}
+
+/** Resolve existing symlinks while projecting a path that may not exist yet. */
+export function projectRealPath(candidate: string): string {
+  const missingParts: string[] = [];
+  let existing = candidate;
+  while (!lexicallyExists(existing)) {
+    const parent = path.dirname(existing);
+    if (parent === existing) return candidate;
+    missingParts.unshift(path.basename(existing));
+    existing = parent;
+  }
+  return path.resolve(fs.realpathSync(existing), ...missingParts);
+}
+
+function lexicallyExists(candidate: string): boolean {
+  try {
+    fs.lstatSync(candidate);
+    return true;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+    throw error;
+  }
 }

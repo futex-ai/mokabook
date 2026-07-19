@@ -167,7 +167,7 @@ export const mockups = [defineCollection({
 test("link validation fails closed for missing anchors and escaping paths", async (context) => {
   const fixture = await createFixture(
     validEntrySource({
-      body: `<a href="details.html#absent">Broken anchor</a>`,
+      body: `<a href="details.mobile.html#absent">Broken anchor</a>`,
     }),
   );
   context.after(() => removeFixture(fixture));
@@ -181,6 +181,13 @@ test("link validation fails closed for missing anchors and escaping paths", asyn
   await fs.promises.writeFile(
     fixture.entryPath,
     validEntrySource({ body: `<a href="missing.html">Missing</a>` }),
+  );
+  await assert.rejects(() => compileCatalogue(config), /missing target/);
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    validEntrySource({
+      body: `<a href="./details.html">Logical route only</a>`,
+    }),
   );
   await assert.rejects(() => compileCatalogue(config), /missing target/);
 });

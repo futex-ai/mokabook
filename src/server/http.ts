@@ -2,8 +2,8 @@ import fs from "node:fs";
 import http, { type ServerResponse } from "node:http";
 import path from "node:path";
 
+import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { isInside } from "../config/paths.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import { readManifest } from "../registry/manifest.js";
 import { createCatalogue, type Catalogue } from "./catalogue.js";
@@ -136,23 +136,11 @@ function serveStatic(
   if (!relative)
     return send(response, 400, "text/plain", "Invalid static path", method);
   const candidate = path.resolve(config.mockupsDir, relative);
-  if (
-    !isInside(config.mockupsDir, candidate) ||
-    isAuthoredSource(candidate, config)
-  ) {
+  if (!isPublicStaticFile(candidate, config)) {
     return send(response, 404, "text/plain", "Not found", method);
   }
   let content: Buffer;
   try {
-    if (!fs.statSync(candidate).isFile())
-      return send(response, 404, "text/plain", "Not found", method);
-    const realRoot = fs.realpathSync(config.mockupsDir);
-    const realCandidate = fs.realpathSync(candidate);
-    if (
-      !isInside(realRoot, realCandidate) ||
-      isRealAuthoredSource(realCandidate, config)
-    )
-      return send(response, 404, "text/plain", "Not found", method);
     content = fs.readFileSync(candidate);
   } catch {
     return send(response, 404, "text/plain", "Not found", method);
@@ -163,24 +151,6 @@ function serveStatic(
   });
   if (method !== "HEAD") response.end(content);
   else response.end();
-}
-
-function isRealAuthoredSource(
-  realCandidate: string,
-  config: ResolvedConfig,
-): boolean {
-  const roots = [
-    fs.realpathSync(config.entriesDir),
-    ...(config.legacy ? [fs.realpathSync(config.legacy.pagesDir)] : []),
-  ];
-  return roots.some((root) => isInside(root, realCandidate));
-}
-
-function isAuthoredSource(candidate: string, config: ResolvedConfig): boolean {
-  return (
-    isInside(config.entriesDir, candidate) ||
-    Boolean(config.legacy && isInside(config.legacy.pagesDir, candidate))
-  );
 }
 
 function openEventStream(

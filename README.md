@@ -81,6 +81,8 @@ plain diagnostic shell while the package-owned responsive UI is developed.
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.
+Inside a fragment, use `MockLink` for catalogue destinations; logical screen
+routes are Browse identifiers, not generated static files.
 
 ## Rendering Boundary
 

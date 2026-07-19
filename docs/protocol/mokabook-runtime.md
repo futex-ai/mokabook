@@ -8,6 +8,13 @@ consumer repositories so they can be reviewed without a server. Browse and
 Review consume those same artifacts and definitions; neither may introduce a
 second screen renderer or catalogue.
 
+## Delivery Status
+
+This document defines the release-ready runtime contract. Milestone 5 currently
+ships the Build, Check, watch, server, and Review engines with a diagnostic
+Browse shell. The responsive shell behavior below and its browser coverage are
+implemented in milestones 6–7 before package-release work begins.
+
 ## Build
 
 `mokabook build` performs this transaction:
@@ -59,11 +66,12 @@ outside configured public roots.
 
 ## Browse Shell
 
-The package owns a neutral, responsive Mokabook shell: top-level Browse/Review
-navigation, search, changed/all filter, nested catalogue, breadcrumbs, viewport
-switching, device frames, and a collapsible details panel. Consumer brand chrome
-does not appear in the shell. A small set of documented CSS custom properties
-may tune the shell accent without replacing its structural styles.
+The release-ready package owns a neutral, responsive Mokabook shell: top-level
+Browse/Review navigation, search, changed/all filter, nested catalogue,
+breadcrumbs, viewport switching, device frames, and a collapsible details
+panel. Consumer brand chrome does not appear in the shell. A small set of
+documented CSS custom properties may tune the shell accent without replacing
+its structural styles.
 
 A screen embeds its generated mobile and desktop fragments inside package-owned
 device frames. A use case renders ordered steps that reference those same
@@ -225,12 +233,12 @@ failures in the consumer's normal CI.
 
 ## Required Coverage
 
-Unit, integration, packed-consumer, and browser tests cover every contract in
-this document. At minimum they cover deterministic output, stale/orphan checks,
-path safety, registry links, legacy coexistence, deep links, no-JavaScript
-responses, progressive navigation, history/focus, watch recovery, shutdown,
-base extraction, per-viewport comparison, shared impact, Review ignore, and CI
-summary output.
+Before publication, unit, integration, packed-consumer, and browser tests cover
+every contract in this document. At minimum they cover deterministic output,
+stale/orphan checks, path safety, registry links, legacy coexistence, deep
+links, no-JavaScript responses, progressive navigation, history/focus, watch
+recovery, shutdown, base extraction, per-viewport comparison, shared impact,
+Review ignore, and CI summary output.
 
 ## Related Docs
 

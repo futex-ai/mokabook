@@ -90,4 +90,5 @@ with disk and reports grouped missing, stale, and proven-orphan paths.
 Mokabook's generated header and a source path beneath this config's authored
 roots, or by the reserved manifest name. It installs staged files by rename and
 restores backups on error. It refuses to overwrite an unknown or foreign HTML
-file and never recursively replaces the consumer's mixed source/asset root.
+file, rejects lexical or symlink-resolved targets beneath authored roots, and
+never recursively replaces the consumer's mixed source/asset root.

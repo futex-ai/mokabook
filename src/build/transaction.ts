@@ -5,6 +5,7 @@ import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import type { Compilation } from "./compile.js";
 import { isOwned, ownedGeneratedRoutes } from "./ownership.js";
+import { validateGeneratedOutputPaths } from "./output_paths.js";
 
 /** Atomically replace owned generated files with rollback on any failure. */
 export async function writeCompilation(
@@ -67,6 +68,7 @@ function rejectUnsafeTargets(
   compilation: Compilation,
   config: ResolvedConfig,
 ): void {
+  validateGeneratedOutputPaths(compilation.outputs.keys(), config);
   for (const route of compilation.outputs.keys()) {
     const target = path.join(config.mockupsDir, route);
     if (fs.existsSync(target) && !isOwned(target, config)) {

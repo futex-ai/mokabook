@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import path from "node:path";
 
 import { minimatch } from "minimatch";
@@ -8,7 +7,8 @@ import type {
   ScreenDefinition,
   Viewport,
 } from "../authoring/types.js";
-import { isInside, toPosixPath } from "../config/paths.js";
+import { toPosixPath } from "../config/paths.js";
+import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import type { Renderer } from "../renderer/types.js";
@@ -96,7 +96,7 @@ function stylesheetsFor(route: string, config: ResolvedConfig): string[] {
   return rule.stylesheets.map((stylesheet) => {
     if (/^https?:\/\//.test(stylesheet)) return stylesheet;
     const absolute = path.resolve(config.mockupsDir, stylesheet);
-    if (!isInside(config.mockupsDir, absolute) || !fs.existsSync(absolute)) {
+    if (!isPublicStaticFile(absolute, config)) {
       throw new MokabookError(
         "build-invalid",
         `stylesheet does not exist: ${stylesheet}`,

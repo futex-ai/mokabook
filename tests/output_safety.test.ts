@@ -3,8 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { compileCatalogue } from "../dist/build/compile.js";
+import { compileCatalogue, type Compilation } from "../dist/build/compile.js";
 import { isOwned } from "../dist/build/ownership.js";
+import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import {
   createFixture,
@@ -45,3 +46,73 @@ test("build rejects non-canonical repository dependency paths", async (context) 
     /dependencies path must be a safe repository-relative path/,
   );
 });
+
+test("build rejects generated routes inside nested authored roots", async (context) => {
+  const source = validEntrySource().replace(
+    "screens/home.html",
+    "src/entries/generated.html",
+  );
+  const fixture = await createFixture(source);
+  context.after(() => removeFixture(fixture));
+  await nestEntriesUnderMockups(fixture);
+  const config = await loadConfig(fixture.root);
+
+  await assert.rejects(
+    () => compileCatalogue(config),
+    /generated route overlaps authored source root/,
+  );
+});
+
+test("writer rejects crafted output inside nested authored roots", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  await nestEntriesUnderMockups(fixture);
+  const config = await loadConfig(fixture.root);
+  const compilation = await compileCatalogue(config);
+  const outputs = new Map(compilation.outputs);
+  outputs.set("src/entries/injected.html", "<html></html>\n");
+  const unsafe: Compilation = { manifest: compilation.manifest, outputs };
+
+  await assert.rejects(
+    () => writeCompilation(unsafe, config),
+    /generated route overlaps authored source root/,
+  );
+  assert.equal(
+    fs.existsSync(path.join(config.entriesDir, "injected.html")),
+    false,
+  );
+});
+
+test("build rejects generated routes through authored-root symlinks", async (context) => {
+  const source = validEntrySource().replace(
+    "screens/home.html",
+    "linked-source/generated.html",
+  );
+  const fixture = await createFixture(source);
+  context.after(() => removeFixture(fixture));
+  await fs.promises.symlink(
+    "../entries",
+    path.join(fixture.mockupsDir, "linked-source"),
+  );
+  const config = await loadConfig(fixture.root);
+
+  await assert.rejects(
+    () => compileCatalogue(config),
+    /generated route overlaps authored source root/,
+  );
+});
+
+async function nestEntriesUnderMockups(
+  fixture: Awaited<ReturnType<typeof createFixture>>,
+): Promise<void> {
+  const nestedEntries = path.join(fixture.mockupsDir, "src", "entries");
+  await fs.promises.mkdir(nestedEntries, { recursive: true });
+  await fs.promises.rename(
+    fixture.entryPath,
+    path.join(nestedEntries, "fixture.mockup.tsx"),
+  );
+  await fs.promises.writeFile(
+    fixture.configPath,
+    'export default { entriesDir: "mockups/src/entries", mockupsDir: "mockups", repoRoot: "." };\n',
+  );
+}

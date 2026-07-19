@@ -74,8 +74,9 @@ following contract:
 
 The resolved config has one repository root, one mockups root, and normalized
 repo-relative POSIX paths. Config validation rejects path traversal, output
-outside the repository, overlapping authored/generated roots, duplicate rules,
-and a watch path that cannot be classified safely.
+outside the repository (including through symlinks), overlapping
+authored/generated roots, duplicate rules, and a watch path that cannot be
+classified safely.
 
 No default may encode `docs/mockups` as a mandatory location, Accounting route
 families, Bookfolio/Firna product tokens, email-template paths, or a TypeScript
@@ -150,6 +151,10 @@ dependency paths. Screens and use cases provide a stable relative `.html`
 route; use cases live under `user-flows/`. Screens may provide an address-bar
 label and use-case membership. Nested definitions inherit declared metadata,
 but ids never derive from tree position.
+
+Logical screen and use-case routes are catalogue identifiers, not generated
+documents. Fragment links must target a generated fragment or public static
+asset; authors use `MockLink` for id-addressed catalogue navigation.
 
 All public exports ship ESM JavaScript and declarations usable by NodeNext and
 bundler TypeScript resolution. The package export map and packed-tarball tests

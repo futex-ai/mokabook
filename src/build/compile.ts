@@ -1,5 +1,3 @@
-import path from "node:path";
-
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import { renderLegacyPages } from "../legacy/pages.js";
@@ -14,6 +12,7 @@ import { prepareRegistry } from "../registry/prepare.js";
 import type { ManifestLegacyPage, ManifestV3 } from "../registry/types.js";
 import { validateHtmlLinks } from "./html_links.js";
 import { loadConsumerGraph } from "./load_graph.js";
+import { validateGeneratedOutputPaths } from "./output_paths.js";
 import { addOutput, generatedHeader, renderFragments } from "./render.js";
 
 /** Complete in-memory static compilation result. */
@@ -66,7 +65,7 @@ export async function compileCatalogue(
       );
     }
   }
-  validateHtmlLinks(outputs, routedEntries, config);
+  validateHtmlLinks(outputs, config);
   const legacyManifest: ManifestLegacyPage[] = legacy.map((page) => ({
     route: page.route,
     sourcePath: page.sourceRelativePath,
@@ -74,26 +73,6 @@ export async function compileCatalogue(
   const manifest = createManifest(registry.entries, legacyManifest);
   parseManifest(manifest);
   outputs.set(MANIFEST_NAME, serializeManifest(manifest));
-  validateOutputPaths(outputs, config);
+  validateGeneratedOutputPaths(outputs.keys(), config);
   return { manifest, outputs };
-}
-
-function validateOutputPaths(
-  outputs: ReadonlyMap<string, string>,
-  config: ResolvedConfig,
-): void {
-  for (const route of outputs.keys()) {
-    const target = path.resolve(config.mockupsDir, route);
-    const relative = path.relative(config.mockupsDir, target);
-    if (
-      relative === ".." ||
-      relative.startsWith(`..${path.sep}`) ||
-      path.isAbsolute(relative)
-    ) {
-      throw new MokabookError(
-        "build-invalid",
-        `generated route escapes mockupsDir: ${route}`,
-      );
-    }
-  }
 }
