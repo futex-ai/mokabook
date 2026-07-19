@@ -1,0 +1,114 @@
+{
+  "entries": [
+    {
+      "dependencies": [
+        "examples/basic/entries/catalogue.mockup.tsx",
+        "examples/basic/generated/styles.css"
+      ],
+      "description": "Synthetic screens used to exercise the reusable framework.",
+      "id": "example-screens",
+      "kind": "collection",
+      "navPath": [
+        "Example"
+      ],
+      "relatedDocs": [
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
+      "title": "Screens",
+      "childIds": [
+        "example-welcome",
+        "example-details"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/catalogue.mockup.tsx",
+        "examples/basic/generated/styles.css"
+      ],
+      "description": "A second synthetic screen proving cross-screen links.",
+      "id": "example-details",
+      "kind": "screen",
+      "navPath": [
+        "Example"
+      ],
+      "relatedDocs": [
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
+      "title": "Details",
+      "address": "example.test/details",
+      "fragments": {
+        "desktop": "screens/details.desktop.html",
+        "mobile": "screens/details.mobile.html"
+      },
+      "route": "screens/details.html",
+      "useCaseIds": [
+        "example-tour"
+      ],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/catalogue.mockup.tsx",
+        "examples/basic/generated/styles.css"
+      ],
+      "description": "A linked landing screen for the neutral fixture.",
+      "id": "example-welcome",
+      "kind": "screen",
+      "navPath": [
+        "Example"
+      ],
+      "relatedDocs": [
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
+      "title": "Welcome",
+      "address": "example.test/welcome",
+      "fragments": {
+        "desktop": "screens/welcome.desktop.html",
+        "mobile": "screens/welcome.mobile.html"
+      },
+      "route": "screens/welcome.html",
+      "useCaseIds": [
+        "example-tour"
+      ],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/catalogue.mockup.tsx",
+        "examples/basic/generated/styles.css"
+      ],
+      "description": "An ordered journey that reuses both canonical screens.",
+      "id": "example-tour",
+      "kind": "use-case",
+      "navPath": [
+        "Example"
+      ],
+      "relatedDocs": [
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
+      "title": "Example tour",
+      "route": "user-flows/example-tour.html",
+      "steps": [
+        {
+          "screenId": "example-welcome"
+        },
+        {
+          "screenId": "example-details"
+        }
+      ]
+    }
+  ],
+  "generatedBy": "mokabook",
+  "legacyPages": [],
+  "schemaVersion": 3
+}

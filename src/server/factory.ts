@@ -1,0 +1,21 @@
+import type { ResolvedConfig } from "../config/types.js";
+import {
+  startCatalogueServer,
+  type RunningServer,
+  type ServerOptions,
+} from "./http.js";
+
+/** Server construction seam used by the Serve runtime. */
+export interface CatalogueServerFactory {
+  start(config: ResolvedConfig, options: ServerOptions): Promise<RunningServer>;
+}
+
+/** Node HTTP implementation of the server construction seam. */
+export class NodeCatalogueServerFactory implements CatalogueServerFactory {
+  start(
+    config: ResolvedConfig,
+    options: ServerOptions,
+  ): Promise<RunningServer> {
+    return startCatalogueServer(config, options);
+  }
+}

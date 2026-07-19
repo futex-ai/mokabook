@@ -1,0 +1,110 @@
+/** Filesystem changes understood by the watched development runtime. */
+export type WatchAction = "ignore" | "rebuild" | "reload" | "restart";
+
+/** One glob-to-stylesheet mapping evaluated in declaration order. */
+export interface StylesheetRule {
+  /** POSIX glob matched against a screen or legacy route. */
+  match: string;
+  /** Paths relative to `mockupsDir`, or absolute HTTP(S) URLs. */
+  stylesheets: readonly string[];
+}
+
+/** Optional support for pre-registry source pages during consumer migration. */
+export interface LegacyConfig {
+  /** Source directory containing `.source.tsx`, `.source.ts`, or `.source.html`. */
+  pagesDir: string;
+  /** Optional module exporting a legacy component renderer. */
+  components?: string;
+  /** Explicit source-relative output route replacements. */
+  routeAliases?: Readonly<Record<string, string>>;
+  /** Optional route-level lint policy. No Accounting policy is implicit. */
+  lint?: LegacyLintConfig;
+}
+
+/** Opt-in generic lints for legacy documents. */
+export interface LegacyLintConfig {
+  /** Routes exempt from the screen-count cap. */
+  allowRoutes?: readonly string[];
+  /** Maximum `data-mokabook-screen` markers in one document. */
+  maxScreensPerPage?: number;
+  /** Require ids on elements carrying `data-mokabook-stage`. */
+  requireStageIds?: boolean;
+}
+
+/** One additional consumer watch input. */
+export interface WatchRule {
+  action: WatchAction;
+  /** Repository-relative POSIX globs. */
+  paths: readonly string[];
+}
+
+/** Watched-development behavior. */
+export interface WatchConfig {
+  /** Debounce window applied to a burst of filesystem notifications. */
+  debounceMs?: number;
+  /** Additional classified consumer inputs. */
+  rules?: readonly WatchRule[];
+}
+
+/** Git comparison and artifact configuration. */
+export interface ReviewConfig {
+  /** Default Git ref used by `mokabook review`. */
+  base?: string;
+  /** Artifact directory relative to the repository root. */
+  outDir?: string;
+  /** Paths whose changes can affect many screens without changing source routes. */
+  sharedImpact?: readonly string[];
+}
+
+/** Temporary compatibility accepted during a consumer cutover. */
+export interface CompatibilityConfig {
+  /** Accept a version 2 `mockbook-manifest.json` when reading existing output. */
+  readManifestV2?: boolean;
+}
+
+/** Public, serializable host configuration. */
+export interface MokabookConfig {
+  /** Structured `*.mockup.tsx` and `*.mockup.ts` source directory. */
+  entriesDir: string;
+  /** Generated catalogue/output root. */
+  mockupsDir: string;
+  /** Repository root; defaults to the config directory. */
+  repoRoot?: string;
+  /** Optional consumer renderer module. */
+  renderer?: string;
+  /** Ordered route-to-stylesheet mappings. */
+  stylesheets?: readonly StylesheetRule[];
+  /** Optional legacy source support. */
+  legacy?: LegacyConfig;
+  /** Review settings. */
+  review?: ReviewConfig;
+  /** Watch settings. */
+  watch?: WatchConfig;
+  /** Temporary manifest compatibility. */
+  compatibility?: CompatibilityConfig;
+}
+
+/** Absolute, validated configuration consumed by runtime engines. */
+export interface ResolvedConfig {
+  compatibility: Required<CompatibilityConfig>;
+  configPath: string;
+  entriesDir: string;
+  legacy?: ResolvedLegacyConfig;
+  mockupsDir: string;
+  renderer?: string;
+  repoRoot: string;
+  review: Required<ReviewConfig>;
+  stylesheets: readonly StylesheetRule[];
+  watch: Required<Pick<WatchConfig, "debounceMs">> & {
+    rules: readonly WatchRule[];
+  };
+}
+
+/** Absolute paths plus normalized policy for legacy generation. */
+export interface ResolvedLegacyConfig extends Omit<
+  LegacyConfig,
+  "components" | "pagesDir"
+> {
+  components?: string;
+  pagesDir: string;
+}

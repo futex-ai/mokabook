@@ -113,6 +113,14 @@ successful rebuild or healthy restart publishes a new update version. Browsers
 reload their current durable URL and restore directory state once; a later
 manual refresh must not resurrect stale recovery state.
 
+Watch actions execute serially. Changes received during an active action are
+coalesced by impact before the next action starts, so two rebuilds cannot race
+to replace generated output or restart the same child. The parent assigns a
+monotonic integer update version to each child and asset reload. An event
+stream's first `ready` version establishes the page baseline; a higher version
+after reconnection or an `update` event triggers one reload and one-shot state
+recovery.
+
 Shutdown closes watchers, timers, child processes, HTTP servers, event streams,
 and ports. Tests must prove no orphan process remains after normal shutdown,
 failed startup, or interruption.
@@ -143,6 +151,43 @@ Review emits a static, self-contained directory with:
 Visual differences are review information, not a failing check. Invalid input,
 missing base data, unsafe Git paths, malformed ignore markers, or artifact
 generation errors fail the command.
+
+`review.json` is the normative machine-readable result:
+
+```ts
+interface ReviewResult {
+  schemaVersion: 1;
+  baseRef: string;
+  baseCommit: string;
+  changedPaths: readonly string[];
+  sharedImpact: readonly string[];
+  ignoredImpact: readonly {
+    id: string;
+    viewport: "mobile" | "desktop";
+    count: number;
+  }[];
+  screens: readonly {
+    id: string;
+    route: string;
+    title: string;
+    state: "added" | "removed" | "changed" | "ignored-only" | "unchanged";
+    dependencies: readonly string[];
+    sharedImpact: readonly string[];
+    viewports: readonly {
+      viewport: "mobile" | "desktop";
+      state: "added" | "removed" | "changed" | "ignored-only" | "unchanged";
+      beforePath?: string;
+      afterPath?: string;
+      ignoredIds: readonly string[];
+    }[];
+  }[];
+}
+```
+
+Routes and viewports sort in deterministic catalogue order; changed and impact
+paths sort lexically. No timestamp or absolute checkout path enters the JSON.
+Before/after HTML remains unmodified in the artifact even when ignore
+normalization changes classification.
 
 ## Review Ignore
 

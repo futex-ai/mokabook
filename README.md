@@ -1,48 +1,130 @@
 # Mokabook
 
-Mokabook is the planned app-independent browser, static generator, validation
-tool, and visual-review harness for Firna mockup catalogues. It will be
-published as the public npm package `mokabook` and shared by repositories
-such as Accounting and Juno without owning either product's screens, styles, or
-brand configuration.
+Mokabook turns React-authored mobile and desktop mockups into committed static
+HTML, serves the resulting catalogue during development, and creates Git-based
+Review artifacts. It is app-independent: product screens, component libraries,
+themes, styles, and compatibility adapters stay in the consuming repository.
 
-The repository currently contains the target contracts and implementation plan;
-the npm package has not been implemented or released yet.
+The public npm package and executable are both named `mokabook`. The package is
+currently pre-release and has not yet been published to npm.
 
-## Planned Interface
+## Use Mokabook
 
-From a repository with a `mokabook.config.ts` file:
+Install Mokabook and its React peers in the repository that owns the screens:
 
 ```bash
-npx mokabook
+npm install --save-dev mokabook react react-dom
+```
+
+Create `mokabook.config.ts`:
+
+```ts
+import { defineConfig } from "mokabook";
+
+export default defineConfig({
+  repoRoot: ".",
+  entriesDir: "docs/mockups/src/entries",
+  mockupsDir: "docs/mockups",
+  renderer: "docs/mockups/src/renderer.tsx",
+  stylesheets: [{ match: "app/**/*.html", stylesheets: ["app.css"] }],
+  review: {
+    base: "origin/main",
+    outDir: ".context/mokabook-review",
+    sharedImpact: ["src/components/**", "src/tokens/**"],
+  },
+});
+```
+
+An entry module ends in `.mockup.ts` or `.mockup.tsx` and exports `mockups`:
+
+```tsx
+import { defineScreen, MockLink } from "mokabook";
+
+export const mockups = [
+  defineScreen({
+    id: "account-home",
+    title: "Account home",
+    description: "The account landing screen.",
+    navPath: ["Account"],
+    route: "account/home.html",
+    mobile: (
+      <main>
+        <MockLink to="account-detail">Details</MockLink>
+      </main>
+    ),
+    desktop: (
+      <main>
+        <MockLink to="account-detail">Details</MockLink>
+      </main>
+    ),
+    relatedDocs: ["docs/account.md"],
+    dependencies: ["src/account/home.tsx"],
+    useCaseIds: [],
+  }),
+];
+```
+
+Run the CLI through a local dependency or directly with npx:
+
+```bash
+npx mokabook                         # build, serve, and watch
+npx mokabook serve --no-watch --port 0
 npx mokabook build
 npx mokabook check
 npx mokabook review --base origin/main
 ```
 
-Installing `mokabook` as a development dependency also exposes the local
-`mokabook` binary for npm scripts and `npx mokabook`. The package will default to
-the watched Browse server when no subcommand is supplied.
+`build` writes viewport fragments and `mokabook-manifest.json` under
+`mockupsDir`. `check` calculates those bytes without writing and reports
+missing, stale, or orphan generated files. Browse currently uses a deliberately
+plain diagnostic shell while the package-owned responsive UI is developed.
 
-## Scope
+## Rendering Boundary
 
-- Structured screen, collection, and use-case definitions.
-- Deterministic static screen fragments and a committed catalogue manifest.
-- A watched Browse server with durable links and progressive navigation.
-- Git-based Review artifacts for changed mockups.
-- Configurable rendering, styles, paths, watch inputs, and review impact rules.
-- Synthetic example screens and packed-package consumer tests.
+The default renderer produces neutral static HTML. A consumer renderer can wrap
+the React node in its theme/context and return a complete document. Accounting,
+for example, will keep React Native Web style collection in that adapter rather
+than making React Native Web a Mokabook dependency.
 
-Accounting and Juno screens, product components, theme tokens, generated
-product HTML, and app-specific route compatibility remain in their owning
-repositories.
+Entries, the renderer, and legacy TypeScript sources are bundled into one
+build-time graph. React and React DOM resolve from the consumer config location,
+which prevents duplicate React instances even when the executable came from an
+npx cache. See [the build pipeline](./docs/architecture/build-pipeline.md) for
+the complete raw-React-to-static-HTML flow.
 
-## Developer Get Started
+## Developer Setup
 
-Implementation has not started. Begin with the protocol and active plan:
+The repository requires Node.js 22.14 or newer, npm 11, and Rust 1.95 for its
+repository tasks.
+
+```bash
+npm ci
+npm run build
+npm test
+npm run example:build
+npm run example:check
+cargo xtask check
+```
+
+The synthetic fixture at [`examples/basic`](./examples/basic/README.md) proves
+custom rendering, stylesheets, id links, collections, use cases, and
+Review-ignore markers without importing an application.
+
+### Key Code
+
+- [`src/index.ts`](./src/index.ts) — supported public authoring API.
+- [`src/config`](./src/config) — config discovery, loading, and confinement.
+- [`src/build`](./src/build) — single-graph bundling, compilation, links, check,
+  and transactional writes.
+- [`src/server`](./src/server) — manifest-backed HTTP and watched child lifecycle.
+- [`src/review`](./src/review) — Git extraction, comparison, ignore normalization,
+  and static artifacts.
+- [`src/legacy`](./src/legacy) — opt-in migration sources and component expansion.
+- [`xtask`](./xtask/README.md) — full repository checks and post-push review.
+
+### Related Docs
 
 - [Protocol index](./docs/protocol/README.md)
+- [Package ownership boundary](./docs/architecture/package-boundary.md)
+- [Accounting migration inventory](./docs/migration/accounting-framework-inventory.md)
 - [Implementation plans](./plans/README.md)
-
-The completed package will use `cargo xtask check` as the single full
-verification command and `cargo xtask review` for the required post-push review.

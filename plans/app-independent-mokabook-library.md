@@ -4,8 +4,10 @@
 
 ## Status
 
-Active. Protocol and source-boundary investigation are complete; implementation
-has not started.
+Active. Milestones 2–5 are implemented and their focused verification passes.
+The GitHub repository rename in milestone 2 remains an external maintainer
+action. Repository checks pass; commit, push, and post-push review are in
+progress for this delivery.
 
 ## Summary
 
@@ -63,6 +65,18 @@ The source cannot be copied unchanged:
   two levels below it.
 - large modules such as the 902-line `core.ts` and 484-line Review artifact
   renderer should be decomposed instead of transplanted.
+
+### Implementation Re-Audit
+
+Immediately before milestone implementation on 19 July 2026, `origin/main` in
+this repository remained at `896a6ecfd26236b1695c7683e7acac73dc4efbc9`.
+Accounting `origin/main` had advanced from the investigation baseline to
+`fdd0049a6fb195d4ac59250c0df797302565e58f`. The intervening mockup diff added
+one product entry module and generated assistant-reply fragments, and changed
+product pages, a product test, `app.css`, and the generated v2 manifest. No
+framework, registry, renderer, server, watch, Review, authoring-helper, lint, or
+bundler candidate changed. The extraction baseline therefore remains valid;
+the new product screens and generated HTML remain excluded.
 
 Juno already uses React-backed `.source.tsx` files and committed HTML under
 `docs/mockups`, but its component registry, stylesheets, workspace package, and
@@ -162,31 +176,34 @@ code in any repository.
 Summary: create a buildable, testable npm CLI/library skeleton whose help and
 public exports work before framework behavior is ported.
 
-- [ ] Fetch `origin/main`, preserve its additions, and confirm the Accounting
+- [x] Fetch `origin/main`, preserve its additions, and confirm the Accounting
       source tip has not moved; if it has, audit the new framework diff and
       update the baseline before copying code.
 - [ ] Coordinate renaming the GitHub repository from `futex-ai/mockbook` to
       `futex-ai/mokabook`, update the local `origin`, and verify redirects and
       repository settings without renaming the current branch.
-- [ ] Create `package.json`/lockfile for public ESM `mokabook@0.0.0`,
+      Blocked pending explicit maintainer authorization for the external
+      repository rename. Package metadata already targets the intended URL;
+      the current branch and `origin` have not been renamed silently.
+- [x] Create `package.json`/lockfile for public ESM `mokabook@0.0.0`,
       using npm commands to add current dependencies rather than guessing
       versions.
-- [ ] Add exact repository metadata, MIT `LICENSE`, `CHANGELOG.md`, Node engine,
+- [x] Add exact repository metadata, MIT `LICENSE`, `CHANGELOG.md`, Node engine,
       package manager, `files`, `exports`, types, `bin`, and public
       `publishConfig` fields from the release protocol.
-- [ ] Establish short, cohesive `src` module families for CLI, config,
+- [x] Establish short, cohesive `src` module families for CLI, config,
       authoring, build, registry, legacy, server, client, review, and errors;
       target about 200 lines and do not transplant the Accounting monoliths.
-- [ ] Add a shebang-safe `mokabook` executable with `--help`, `--version`,
+- [x] Add a shebang-safe `mokabook` executable with `--help`, `--version`,
       default-serve dispatch, explicit subcommands, and typed option errors.
-- [ ] Add TypeScript build/typecheck, formatter/linter, and test scripts with no
+- [x] Add TypeScript build/typecheck, formatter/linter, and test scripts with no
       unexplained exclusions from typechecking.
-- [ ] Add the Cargo workspace and small trait-backed `xtask` used by
+- [x] Add the Cargo workspace and small trait-backed `xtask` used by
       `cargo xtask check` and `cargo xtask review`, with Rust tests and crate
       README following repository rules.
-- [ ] Add package metadata/export/bin unit tests and make the production build
+- [x] Add package metadata/export/bin unit tests and make the production build
       succeed before continuing.
-- [ ] Update README developer setup and code-jumping points for the real
+- [x] Update README developer setup and code-jumping points for the real
       scaffold without claiming unfinished commands work.
 
 At this milestone `npm run build`, package imports, `mokabook --help`, and the
@@ -198,28 +215,28 @@ not-yet-configured error.
 Summary: replace source-repository assumptions with a typed host boundary and
 port the pure public registry/review helpers.
 
-- [ ] Write failing tests for config discovery from nested directories, an
+- [x] Write failing tests for config discovery from nested directories, an
       explicit config path, npx-cache execution, npm workspaces, missing config,
       invalid paths, path traversal, and conflicting generated/source roots.
-- [ ] Implement `defineConfig` and typed config loading for mockups/entries/
+- [x] Implement `defineConfig` and typed config loading for mockups/entries/
       legacy roots, renderer, stylesheets, watch inputs, Review paths, and
       compatibility policy exactly as specified.
-- [ ] Port and document `defineScreen`, `defineCollection`, `defineUseCase`,
+- [x] Port and document `defineScreen`, `defineCollection`, `defineUseCase`,
       `defineRoot`, `collection`, `screen`, `mockLink`, `MockLink`,
       `ReviewIgnore`, `ReviewIgnoreScope`, and `reviewMaterialKey`.
-- [ ] Ensure renderer and entry bundling resolves one React instance and works
+- [x] Ensure renderer and entry bundling resolves one React instance and works
       both from a local install and a transient npx package cache.
-- [ ] Implement a neutral default renderer plus a documented consumer renderer
+- [x] Implement a neutral default renderer plus a documented consumer renderer
       module contract; add a test-only custom renderer that wraps context and
       injects collected styles.
-- [ ] Create `docs/migration/accounting-framework-inventory.md`, listing every
+- [x] Create `docs/migration/accounting-framework-inventory.md`, listing every
       candidate Accounting file/behavior as ported, rewritten into config,
       retained in Accounting, product-specific test, or intentionally obsolete
       with rationale.
-- [ ] Add architecture documentation explaining package-owned versus
+- [x] Add architecture documentation explaining package-owned versus
       consumer-owned dependencies and why app compatibility hooks cannot leak
       into defaults.
-- [ ] Run unit tests, typecheck, build, and file-size checks for this milestone.
+- [x] Run unit tests, typecheck, build, and file-size checks for this milestone.
 
 At this milestone a neutral config and registry can be imported and validated
 from a clean external fixture with no Accounting dependencies.
@@ -229,28 +246,28 @@ from a clean external fixture with no Accounting dependencies.
 Summary: port deterministic generation and validation behind the new config,
 with transactional output and explicit legacy extensions.
 
-- [ ] Add failing regressions for stale/missing/orphan output, duplicate ids and
+- [x] Add failing regressions for stale/missing/orphan output, duplicate ids and
       routes, fragment collisions, missing relationships, invalid routes,
       unresolved id/raw/anchor links, missing stylesheets, and unsafe deletes.
-- [ ] Port registry discovery/attribution, nested flattening, validation,
+- [x] Port registry discovery/attribution, nested flattening, validation,
       fragment rendering, schema version 3 manifest generation, and version 2
       read compatibility.
-- [ ] Port generic `.source.ts`, `.source.tsx`, and `.source.html` discovery,
+- [x] Port generic `.source.ts`, `.source.tsx`, and `.source.html` discovery,
       bundling, component expansion, source linting, stage/screen limits, link
       checks, and generated-file ownership.
-- [ ] Extract Accounting legacy route aliases, flat-family rules, allowlists,
+- [x] Extract Accounting legacy route aliases, flat-family rules, allowlists,
       renderer, and stylesheet selection into fixture/consumer adapters; none
       may remain in framework defaults.
-- [ ] Implement an in-memory/staged generation transaction so failed rendering,
+- [x] Implement an in-memory/staged generation transaction so failed rendering,
       validation, or linking preserves all last-good files.
-- [ ] Implement `mokabook build` and read-only `mokabook check` with sorted,
+- [x] Implement `mokabook build` and read-only `mokabook check` with sorted,
       grouped, actionable diagnostics and non-zero failure behavior.
-- [ ] Prove deterministic paths/bytes on macOS and Linux path semantics and
+- [x] Prove deterministic paths/bytes on macOS and Linux path semantics and
       ensure absolute checkout paths never enter output.
-- [ ] Port applicable Accounting tests first, remove product assertions, and add
+- [x] Port applicable Accounting tests first, remove product assertions, and add
       config-boundary and security coverage for every rewritten assumption.
-- [ ] Update package/API docs and protocol ambiguities discovered while porting.
-- [ ] Run focused tests, the full unit/integration suite, typecheck, and build.
+- [x] Update package/API docs and protocol ambiguities discovered while porting.
+- [x] Run focused tests, the full unit/integration suite, typecheck, and build.
 
 At this milestone a headless fixture catalogue builds, checks byte-stably, and
 retains its previous generated output after a deliberate failed build.
@@ -260,28 +277,28 @@ retains its previous generated output after a deliberate failed build.
 Summary: port non-visual runtime behavior before implementing the package-owned
 shell UI.
 
-- [ ] Port manifest loading/validation, catalogue and navigation models, safe
+- [x] Port manifest loading/validation, catalogue and navigation models, safe
       route resolution, id redirects, static-file confinement, and Review route
       orchestration behind injected filesystem/Git/process boundaries.
-- [ ] Port the watched child supervisor, notification gate, debouncing,
+- [x] Port the watched child supervisor, notification gate, debouncing,
       transactional rebuild/rollback, stable port handling, update stream,
       state-recovery protocol, startup readiness, and clean shutdown.
-- [ ] Replace package-source/runtime self-watch assumptions with config-derived
+- [x] Replace package-source/runtime self-watch assumptions with config-derived
       consumer input classes; package development uses repository tooling.
-- [ ] Port Git base resolution/extraction, inventory, per-route/per-viewport
+- [x] Port Git base resolution/extraction, inventory, per-route/per-viewport
       comparison, shared-impact classification, Review-ignore normalization,
       aggregate ignored impact, artifact model, deterministic `review.json`,
       and CI summary generation.
-- [ ] Model filesystem, Git, process, watcher, clock, and server collaborators
+- [x] Model filesystem, Git, process, watcher, clock, and server collaborators
       behind typed interfaces so unit tests use fakes rather than real ambient
       state; reserve real implementations for integration tests.
-- [ ] Add failure-first coverage for manifest-before-bind, occupied ports,
+- [x] Add failure-first coverage for manifest-before-bind, occupied ports,
       port `0`, notification buffering, failed rebuild recovery, restart order,
       no watch loops, base-ref failures, malformed ignore regions, and path
       traversal.
-- [ ] Add integration tests for no-watch server routes, watched CLI lifecycle,
+- [x] Add integration tests for no-watch server routes, watched CLI lifecycle,
       review artifact contents, and process cleanup.
-- [ ] Keep implementation modules below the repository size target and update
+- [x] Keep implementation modules below the repository size target and update
       runtime docs with any resolved lifecycle detail.
 
 At this milestone the server/runtime engines and static Review model work via
