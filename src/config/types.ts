@@ -13,6 +13,8 @@ export interface StylesheetRule {
 export interface LegacyConfig {
   /** Config-relative source directory containing legacy source pages. */
   pagesDir: string;
+  /** Source-relative globs omitted during a staged consumer migration. */
+  exclude?: readonly string[];
   /** Optional config-relative module exporting a legacy component renderer. */
   components?: string;
   /** Explicit source-relative output route replacements. */
@@ -60,6 +62,39 @@ export interface ReviewConfig {
 export interface CompatibilityConfig {
   /** Read legacy v2 output only when the canonical v3 manifest is absent. */
   readManifestV2?: boolean;
+  /** Config-relative module applying a temporary deterministic document bridge. */
+  transformer?: string;
+}
+
+/** Esbuild loaders allowed for consumer-authored module extensions. */
+export type ModuleLoader =
+  | "base64"
+  | "binary"
+  | "css"
+  | "dataurl"
+  | "empty"
+  | "file"
+  | "js"
+  | "json"
+  | "jsx"
+  | "text"
+  | "ts"
+  | "tsx";
+
+/** Consumer-owned module resolution needed by cross-platform component trees. */
+export interface ModuleResolutionConfig {
+  /** Bare module aliases applied while bundling entries and renderers. */
+  aliases?: Readonly<Record<string, string>>;
+  /** Export conditions evaluated in declaration order. */
+  conditions?: readonly string[];
+  /** Extension-to-loader overrides for consumer modules. */
+  loaders?: Readonly<Record<string, ModuleLoader>>;
+  /** Package fields evaluated in declaration order. */
+  mainFields?: readonly string[];
+  /** Config-relative package roots whose node_modules directories are searched. */
+  packageRoots?: readonly string[];
+  /** Module extensions evaluated in declaration order. */
+  resolveExtensions?: readonly string[];
 }
 
 /** Public, serializable host configuration. */
@@ -72,6 +107,8 @@ export interface MokabookConfig {
   repoRoot?: string;
   /** Optional config-relative consumer renderer module. */
   renderer?: string;
+  /** Optional consumer-specific module resolution for cross-platform sources. */
+  moduleResolution?: ModuleResolutionConfig;
   /** Ordered route-to-stylesheet mappings. */
   stylesheets?: readonly StylesheetRule[];
   /** Optional legacy source support. */
@@ -86,11 +123,15 @@ export interface MokabookConfig {
 
 /** Absolute, validated configuration consumed by runtime engines. */
 export interface ResolvedConfig {
-  compatibility: Required<CompatibilityConfig>;
+  compatibility: {
+    readManifestV2: boolean;
+    transformer?: string;
+  };
   configPath: string;
   entriesDir: string;
   legacy?: ResolvedLegacyConfig;
   mockupsDir: string;
+  moduleResolution: ResolvedModuleResolutionConfig;
   renderer?: string;
   repoRoot: string;
   review: Required<ReviewConfig>;
@@ -98,6 +139,16 @@ export interface ResolvedConfig {
   watch: Required<Pick<WatchConfig, "debounceMs">> & {
     rules: readonly WatchRule[];
   };
+}
+
+/** Validated module resolution with absolute package roots. */
+export interface ResolvedModuleResolutionConfig {
+  aliases: Readonly<Record<string, string>>;
+  conditions?: readonly string[];
+  loaders: Readonly<Record<string, ModuleLoader>>;
+  mainFields?: readonly string[];
+  packageRoots: readonly string[];
+  resolveExtensions?: readonly string[];
 }
 
 /** Absolute paths plus normalized policy for legacy generation. */

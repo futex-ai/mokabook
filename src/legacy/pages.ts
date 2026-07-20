@@ -29,36 +29,41 @@ export function renderLegacyPages(
   const loaded = new Map(
     graph.legacy.map((module) => [module.sourcePath, module]),
   );
-  return discoverLegacySources(legacyConfig.pagesDir).map((sourcePath) => {
-    const relative = toPosixPath(
-      path.relative(legacyConfig.pagesDir, sourcePath),
-    );
-    const defaultRoute = relative.replace(/\.source\.(?:tsx?|html)$/, ".html");
-    const route = validateRelativeRoute(
-      legacyConfig.routeAliases?.[relative] ??
-        legacyConfig.routeAliases?.[defaultRoute] ??
-        defaultRoute,
-      `legacy route for ${relative}`,
-    );
-    if (!isSafeCatalogueRoute(route)) {
-      throw new MokabookError(
-        "build-invalid",
-        `legacy route for ${relative} must use portable URL-safe path segments and end in .html`,
+  return discoverLegacySources(legacyConfig.pagesDir, legacyConfig.exclude).map(
+    (sourcePath) => {
+      const relative = toPosixPath(
+        path.relative(legacyConfig.pagesDir, sourcePath),
       );
-    }
-    const sourceRelativePath = toPosixPath(
-      path.relative(config.repoRoot, sourcePath),
-    );
-    const content = sourcePath.endsWith(".source.html")
-      ? expandComponents(
-          fs.readFileSync(sourcePath, "utf8"),
-          graph.renderLegacyComponent,
-          sourceRelativePath,
-        )
-      : renderTypedSource(loaded.get(sourcePath), sourceRelativePath);
-    lintLegacy(content, route, config);
-    return { content, route, sourcePath, sourceRelativePath };
-  });
+      const defaultRoute = relative.replace(
+        /\.source\.(?:tsx?|html)$/,
+        ".html",
+      );
+      const route = validateRelativeRoute(
+        legacyConfig.routeAliases?.[relative] ??
+          legacyConfig.routeAliases?.[defaultRoute] ??
+          defaultRoute,
+        `legacy route for ${relative}`,
+      );
+      if (!isSafeCatalogueRoute(route)) {
+        throw new MokabookError(
+          "build-invalid",
+          `legacy route for ${relative} must use portable URL-safe path segments and end in .html`,
+        );
+      }
+      const sourceRelativePath = toPosixPath(
+        path.relative(config.repoRoot, sourcePath),
+      );
+      const content = sourcePath.endsWith(".source.html")
+        ? expandComponents(
+            fs.readFileSync(sourcePath, "utf8"),
+            graph.renderLegacyComponent,
+            sourceRelativePath,
+          )
+        : renderTypedSource(loaded.get(sourcePath), sourceRelativePath);
+      lintLegacy(content, route, config);
+      return { content, route, sourcePath, sourceRelativePath };
+    },
+  );
 }
 
 function expandComponents(

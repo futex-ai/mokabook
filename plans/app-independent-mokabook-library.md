@@ -4,12 +4,13 @@
 
 ## Status
 
-Active. Milestones 2–7 are implemented: the engines, the milestone-5A review
-hardening, the neutral design mockups with their recorded shell design
-contract, and the responsive package-owned Browse shell and Review artifact UI
-with Playwright browser coverage. Repository checks pass. The GitHub
+Active. All branch-local work in milestones 2–9 is implemented: the complete
+framework, neutral design and UI, packed-consumer and real-Accounting parity,
+and CI/release automation. Milestone 10 verification is in progress. The GitHub
 repository rename in milestone 2 remains an external maintainer action.
-Milestone 8 (packed package and cross-repository parity) is next.
+Milestones 11–13 require a merged release, explicit approval for the first npm
+publish, and work in a separate Accounting workspace, so they cannot be closed
+from this feature branch.
 
 ## Summary
 
@@ -450,29 +451,35 @@ Summary: prove the published artifact contains the whole framework and no app,
 and that it works in realistic consumer layouts before release automation is
 enabled.
 
-- [ ] Build the production distribution and inspect `npm pack --dry-run --json`
+- [x] Build the production distribution and inspect `npm pack --dry-run --json`
       against an explicit allowlist; verify no Accounting/Juno source, examples,
       tests, plans, caches, or review artifacts enter the tarball.
-- [ ] Install the real tarball in clean ESM and NodeNext consumers and test all
+- [x] Install the real tarball in clean ESM and NodeNext consumers and test all
       public exports, declarations, `mokabook` bin, help/version, config
       discovery, build/check/serve/review, and local `npx mokabook` behavior.
-- [ ] Add a clean-cache smoke that executes the package the way
+- [x] Add a clean-cache smoke that executes the package the way
       `npx mokabook` does and proves entry imports still resolve the
       executing package plus consumer dependencies.
-- [ ] Build/check/serve/review an Accounting-shaped fixture using a custom Firna
+- [x] Add typed consumer module-resolution configuration for aliases,
+      conditions, loaders, package roots, main fields, and extensions so
+      React Native Web and other host dependencies resolve from packed installs.
+- [x] Build/check/serve/review an Accounting-shaped fixture using a custom Firna
       renderer, multiple stylesheet families, legacy aliases, external watch
       input, and shared-impact globs.
-- [ ] Build/check/serve a Juno-shaped fixture with different roots, components,
+- [x] Build/check/serve a Juno-shaped fixture with different roots, components,
       styles, and no Accounting adapter.
-- [ ] In a temporary Accounting worktree, install the tarball and draft only the
+- [x] Add an explicitly configured temporary compatibility transformer and
+      legacy exclude globs so the version 2 bridge is consumer-owned and cannot
+      leak Accounting rules into framework defaults.
+- [x] In a temporary Accounting worktree, install the tarball and draft only the
       app-owned config/renderer/compatibility bridge; run existing Mokabook
       gates and compare ids, routes, fragment DOM/styles, Browse behavior, and
       Review classification with the source implementation.
-- [ ] Treat schema/header/path changes documented by the version 3 migration as
+- [x] Treat schema/header/path changes documented by the version 3 migration as
       intentional; investigate every other parity difference before release.
-- [ ] Complete the file/behavior migration ledger with no unexplained source
+- [x] Complete the file/behavior migration ledger with no unexplained source
       candidate and prove product-specific tests remain in Accounting.
-- [ ] Run the entire unit, integration, browser, type, build, and package smoke
+- [x] Run the entire unit, integration, browser, type, build, and package smoke
       suite with a 100% pass rate.
 
 At this milestone the packed tarball—not a source checkout—passes neutral,
@@ -483,31 +490,31 @@ Accounting-shaped, Juno-shaped, and temporary real-Accounting acceptance.
 Summary: make every change release-gated and prepare tokenless, repeatable npm
 publishing without publishing yet.
 
-- [ ] Add PR/main CI with minimal permissions, concurrency, the minimum Node
+- [x] Add PR/main CI with minimal permissions, concurrency, the minimum Node
       runtime, the current Firna release runtime, Linux `cargo xtask check`,
       Chromium, package-tarball smoke, and a required result aggregator.
-- [ ] Use current stable GitHub Actions and release-please majors at
+- [x] Use current stable GitHub Actions and release-please majors at
       implementation time (the planning audit found checkout/setup-node v6 and
       release-please-action v5); apply the repository's reviewed pinning policy.
-- [ ] Add release-please Node configuration so Conventional Commits maintain a
+- [x] Add release-please Node configuration so Conventional Commits maintain a
       reviewed release PR, changelog, package/lock versions, `vX.Y.Z` tag, and
       GitHub release.
-- [ ] Add the same-workflow npm publish path with a GitHub-hosted runner, no
+- [x] Add the same-workflow npm publish path with a GitHub-hosted runner, no
       release dependency cache, trusted-publishing-compatible Node/npm,
       `id-token: write` only on publish, full checks, tag/version validation,
       tarball inspection/smoke, and an already-published guard.
-- [ ] Add a manual `publish_ref` retry for an existing immutable tag; never
+- [x] Add a manual `publish_ref` retry for an existing immutable tag; never
       rebuild from an unrelated branch or move an existing tag.
-- [ ] Test workflow structure and shell branches, including ordinary main
+- [x] Test workflow structure and shell branches, including ordinary main
       pushes, release-PR formatting, no-release output, tag mismatch, existing
       npm version, failed checks, and manual retry.
-- [ ] Document required GitHub settings, release-please credential behavior,
+- [x] Document required GitHub settings, release-please credential behavior,
       Firna npm membership/2FA, public access, the first `0.0.0` bootstrap tag,
       exact trusted-publisher workflow/environment/action, token restriction,
       and `0.1.0` verification.
-- [ ] Finish README install/CLI/config/examples/troubleshooting/release sections,
+- [x] Finish README install/CLI/config/examples/troubleshooting/release sections,
       API docs, architecture docs, migration ledger, and protocol alignment.
-- [ ] Recheck current official npm trusted-publisher, npm-exec/bin, provenance,
+- [x] Recheck current official npm trusted-publisher, npm-exec/bin, provenance,
       and release-please requirements immediately before finalizing workflows.
 
 At this milestone the branch is release-ready, but no irreversible npm publish
@@ -518,21 +525,33 @@ has happened.
 Summary: complete this repository's required quality and review workflow for
 the library pull request.
 
-- [ ] Run formatter and lint checks.
-- [ ] Run TypeScript typecheck and require no unexplained exclusions.
-- [ ] Run all unit and integration tests with a 100% pass rate.
-- [ ] Run the example build/check twice and require byte-stable output.
-- [ ] Run the full Playwright/browser suite and watched/no-watch CLI smokes.
-- [ ] Run production build, `npm pack --dry-run --json`, packed-tarball consumer
+- [x] Exclude the gitignored `.context` collaboration and parity workspace from
+      repository lint traversal so local evidence cannot change or stall the
+      committed-source gate.
+- [x] Apply Node's declared globals to executable repository scripts and make
+      packed-server cleanup preserve the primary smoke failure without an
+      unsafe `finally` throw.
+- [x] Keep the changed build-test module below the repository size target by
+      moving consumer module-resolution coverage into a focused test file.
+- [x] Run formatter and lint checks.
+- [x] Run TypeScript typecheck and require no unexplained exclusions.
+- [x] Run all unit and integration tests with a 100% pass rate.
+- [x] Run the example build/check twice and require byte-stable output.
+- [x] Run the full Playwright/browser suite and watched/no-watch CLI smokes.
+- [x] Run production build, `npm pack --dry-run --json`, packed-tarball consumer
       tests, clean-cache npx-style smoke, and dependency/license inspection.
-- [ ] Run `cargo fmt --all -- --check`, Clippy with warnings denied, all Rust
+- [x] Run `cargo fmt --all -- --check`, Clippy with warnings denied, all Rust
       tests, and applicable Rust source/file-length audits.
 - [ ] Start `mokabook serve` from the packed example and manually smoke home,
       screen, collection expansion, use case, id redirect, missing route,
       static fragment, Review, watch rebuild/reload/failure recovery, and clean
       shutdown.
-- [ ] Run `cargo xtask check` and require a 100% pass rate.
-- [ ] Fetch `origin/main`, audit its additions from the captured source tip, and
+      Blocked only on visual interaction: the in-app browser advertised no
+      available browser surface. The packed watched server passed direct route,
+      collection-markup, Review, rebuild, last-good failure, recovery, and clean
+      shutdown smokes; the 14-test Chromium suite covers the UI behavior.
+- [x] Run `cargo xtask check` and require a 100% pass rate.
+- [x] Fetch `origin/main`, audit its additions from the captured source tip, and
       inspect `git diff --name-status origin/main` plus deletion-only output;
       stop on unauthorized mainline removal or unrelated changes.
 - [ ] Update completed TODOs and docs, then run `git add -A`, commit all source,
@@ -554,6 +573,10 @@ are complete.
 
 Summary: after the library PR merges, reserve the unscoped package safely,
 activate OIDC publishing, and produce the first supported release.
+
+Blocked in this workspace until the reviewed branch is merged to `main`, the
+external GitHub/npm settings are configured, and a maintainer gives explicit
+approval for the irreversible first public publish.
 
 - [ ] Confirm the merge commit on `main` matches the reviewed code and all
       required GitHub checks passed.
@@ -583,6 +606,9 @@ and future releases are tokenless and release-PR controlled.
 Summary: in a separate Accounting Conductor workspace, replace the in-repo
 framework with the released dependency while preserving every actual screen and
 generated product artifact.
+
+Blocked here by milestone 11 and by the requirement to perform this change in a
+separate Accounting Conductor workspace after a supported package is released.
 
 - [ ] Create and index an Accounting consumer-migration plan, update its
       Mokabook protocol/README first, and capture the latest source tip and
@@ -623,6 +649,9 @@ uses the public package, and retains all real screen/spec content.
 
 Summary: record the released/consumed result in this repository and close the
 plan only after both delivery repositories are verified.
+
+Blocked until milestones 11 and 12 supply the release and Accounting cutover
+evidence required for an honest closeout.
 
 - [ ] Update the migration ledger with the released version, Mokabook merge/tag,
       Accounting cutover commit, intentional output changes, and any deferred

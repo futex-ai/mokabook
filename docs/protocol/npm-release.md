@@ -8,8 +8,8 @@ repository/bugs/homepage metadata for `futex-ai/mokabook`, a Node engine floor,
 one `mokabook` bin, explicit exports/types, and a restrictive `files` allowlist.
 
 `publishConfig` targets the public npm registry with public access. The package
-contains compiled runtime code, declarations, shell assets, required font
-licenses, README, LICENSE, and package metadata only. Source fixtures, tests,
+contains compiled runtime code, declarations, package-owned shell assets,
+README, LICENSE, CHANGELOG, and package metadata only. Source fixtures, tests,
 plans, protocol docs, caches, review artifacts, and generated demo output are
 not published unless a documented runtime requirement proves otherwise.
 
@@ -20,9 +20,8 @@ dependencies.
 
 ## Local Verification
 
-During the pre-release engine milestones, `cargo xtask check` is the complete
-source-level gate. It delegates to deterministic npm scripts and currently
-includes:
+`cargo xtask check` is the complete repository and release gate. It delegates
+to deterministic npm scripts and includes:
 
 - formatting and lint checks;
 - TypeScript typechecking with no unexplained source exclusions;
@@ -30,86 +29,106 @@ includes:
 - production build and declaration generation;
 - a byte-stable example `check` against committed generated output;
 - package-file inspection with `npm pack --dry-run --json`;
+- packed-tarball installs in clean ESM, NodeNext, Accounting-shaped, and
+  Juno-shaped consumers;
+- local-npx and clean-cache npx-style execution from the packed artifact;
 - source-tree ESM, declaration, CLI, workspace-resolution, server, Review, and
-  watch regressions;
+  watched-runtime regressions;
+- Playwright Browse and Review regressions using Chromium; and
 - Rust formatting, Clippy, tests, and file-length audits for `xtask`.
 
-This source-level gate is not the release-complete gate. Before publication,
-milestones 7–9 expand it (or required CI jobs invoked alongside it) to include:
-
-- packed-tarball installs in clean temporary consumers;
-- local-npx and clean-cache execution from the packed artifact;
-- Playwright Browse, Review, and watched-runtime regressions;
-- the Accounting- and Juno-shaped cross-repository parity fixtures.
-
 Tests that mutate files use isolated temporary directories and clean up child
-processes. Release-gate package smokes must execute the packed artifact, not the
-source tree or a workspace symlink.
+processes. Package smokes execute the packed artifact, not the source tree or a
+workspace symlink. The temporary real-Accounting parity audit is release
+evidence rather than a recurring CI dependency on another repository.
 
 ## Continuous Integration
 
-GitHub Actions runs on pull requests and pushes to `main`, with read-only
-default permissions and concurrency cancellation for superseded validation.
-Required jobs cover:
+`.github/workflows/ci.yml` runs on pull requests and pushes to `main`, with
+read-only repository contents permission and concurrency cancellation for
+superseded validation. Its two independent verification jobs run the complete
+gate on Ubuntu:
 
-- the minimum supported Node/npm combination;
-- the current Firna release Node/npm combination;
-- full `cargo xtask check` on Linux;
-- the Chromium browser suite;
-- packed-package consumer tests and package-content inspection;
-- a final required-status aggregator when checks are split across jobs.
+- the minimum supported Node 22.14.0 with npm 11.7.0; and
+- release Node 24 with npm 11.7.0.
 
-CI uses `npm ci` and the committed lockfile. Action versions and Node/npm
-versions are explicit and reviewed when upgraded. The release build never
-reuses a dependency cache. Fork pull requests do not receive release secrets or
-write permissions.
+Both install Rust 1.95.0, install Chromium, and run `cargo xtask check`. The
+`Required CI` aggregator fails unless both jobs succeed and is the branch-rule
+status to require. CI uses `npm ci` and the committed lockfile. Action revisions
+are immutable commit hashes with reviewed version comments; runtime versions
+are explicit. Fork pull requests receive no release secrets or write
+permissions.
 
 ## Release Management
 
-Conventional Commits feed release-please's Node release strategy. A push to
-`main` creates or updates a release PR; ordinary pushes never publish. The
-release PR owns `CHANGELOG.md`, `package.json`, and `package-lock.json`. A
-maintainer reviews and merges it to create the `vX.Y.Z` tag and GitHub release.
+Conventional Commits feed release-please's Node release strategy through
+`release-please-config.json` and `.release-please-manifest.json`. A push to
+`main` creates or updates a release PR; an ordinary push with no release does
+not publish. The release PR owns `CHANGELOG.md`, `package.json`, and
+`package-lock.json`. A maintainer reviews and merges it to create the immutable
+`vX.Y.Z` tag and GitHub release.
 
 The release workflow then:
 
-1. Checks out the immutable release SHA/tag on a GitHub-hosted runner.
-2. Installs a trusted-publishing-compatible Node and npm version without a
-   package-manager cache.
-3. Runs `npm ci` and `cargo xtask check`.
-4. Verifies the tag exactly matches the package version.
-5. Builds and inspects the same packed artifact that will publish.
-6. Installs that tarball in clean smoke consumers.
-7. Skips safely when the exact npm version already exists.
-8. Publishes publicly with npm trusted publishing and provenance.
+1. Selects only the release-please tag, or an explicitly supplied manual tag.
+2. Checks out that tag with history on a GitHub-hosted runner.
+3. Installs Node 24, npm 11.7.0, Rust 1.95.0, and Chromium without a package
+   cache.
+4. Verifies the local and remote tag identify `HEAD`, the tree is clean, and
+   the tag exactly matches the package version.
+5. Runs `npm ci` and the complete `cargo xtask check` gate.
+6. Creates one exact tarball, validates its allowlist and license closure, and
+   records its integrity, shasum, file inventory, and size report.
+7. Queries npm. An `E404` permits a publish; any other lookup failure stops the
+   workflow. An existing version must byte-for-byte match the checked report
+   and commit or the workflow fails.
+8. Uploads the exact checked artifact, then publishes that same path publicly
+   with npm trusted publishing when it is not already present.
+9. Downloads the registry artifact and rechecks integrity, shasum, file
+   inventory, version, optional `gitHead`, the `latest` dist-tag, and npm
+   signatures/provenance.
 
 Publishing occurs in the same workflow invocation that creates the GitHub
 release. A manual `publish_ref` dispatch may retry an existing `vX.Y.Z` tag and
 runs the identical verification path. Concurrency never cancels an in-progress
 publish.
 
-The publish job alone receives `id-token: write`. Release-please receives only
-the repository permissions it needs. A repository-owned token or GitHub App
-credential is used when release PR creation must trigger normal PR checks;
-fallback behavior with `GITHUB_TOKEN` is documented.
+The publish job alone receives `id-token: write`, plus read-only contents, and
+runs in the protected GitHub environment named `npm`. Release-please receives
+only contents, pull-request, and issue write permissions. Prefer a
+repository-owned fine-grained token or GitHub App credential in the
+`RELEASE_PLEASE_TOKEN` secret so release PR events trigger normal checks. The
+workflow falls back to `GITHUB_TOKEN`; GitHub suppresses most follow-on workflow
+events created with that token, so maintainers must verify the release PR's
+required checks when using the fallback.
 
 ## First Publication
 
 Trusted publishing can be configured only after the npm package exists. The
 bootstrap sequence is therefore explicit and maintainer-controlled:
 
-1. Merge the release-ready library implementation to `main` at version
-   `0.0.0`, but do not merge the first release PR yet.
-2. From that exact commit, run all checks, inspect the tarball, and manually
-   publish `0.0.0` with public access under a non-consumer bootstrap dist-tag.
-3. Configure the npm trusted publisher for the exact repository, workflow
-   filename, optional protected environment, and `npm publish` permission.
-4. Restrict traditional token publishing and remove obsolete automation tokens
-   after OIDC is verified.
-5. Merge the release-please PR for `0.1.0`; confirm the workflow creates the
-   tag/release and publishes the first consumer version with provenance.
-6. Verify package visibility, README, executable behavior, provenance, dist
-   tags, and `npx mokabook --version` from a clean directory.
+1. Complete the GitHub repository rename to `futex-ai/mokabook`, merge the
+   reviewed implementation to `main` at version `0.0.0`, and confirm `Required
+CI` passed. Do not merge the first release PR yet.
+2. Recheck that the unscoped `mokabook` name remains available. Pause for
+   explicit maintainer approval because the first public publish is
+   irreversible.
+3. From that exact clean `main` commit, rerun `cargo xtask check`, run the
+   release packer, inspect its report, and manually publish that exact tarball
+   as public under the non-consumer `bootstrap` dist-tag. Use an approved
+   maintainer's interactive npm authentication; do not add an npm token to
+   GitHub.
+4. Configure the npm trusted publisher for organization `futex-ai`, repository
+   `mokabook`, workflow filename `release.yml`, GitHub environment `npm`, and
+   the workflow's `npm publish` action.
+5. Verify the trusted relationship with the release workflow, then restrict
+   traditional token publishing and remove obsolete npm automation tokens.
+6. Merge the release-please PR for `0.1.0`; confirm the workflow creates the
+   immutable tag/release and publishes the first supported consumer version
+   with provenance.
+7. From a clean directory, verify package visibility, metadata, README,
+   license, owners, provenance/signatures, dist tags, `npx mokabook --version`,
+   and a minimal build/serve fixture.
 
 The bootstrap publish is never documented as a consumer version. If npm offers
 a safer package-reservation mechanism before implementation, revalidate this
@@ -117,24 +136,30 @@ sequence against current official docs before acting.
 
 ## Maintainer Setup
 
-Before enabling publish, document and verify:
+Before enabling publish, maintainers must configure and verify:
 
-- the approved Firna npm maintainer accounts and 2FA;
-- unscoped public-package access and the initial package owner list;
-- GitHub Actions workflow permissions and required branch checks;
-- any protected `npm` GitHub environment and reviewers;
-- the exact trusted-publisher workflow filename and allowed action;
-- release-please credential ownership and rotation;
-- tag/release protection and manual retry responsibility.
+- repository Actions may create pull requests, and the default workflow token
+  has only the permissions declared in each workflow;
+- the branch rule requires the exact `Required CI` status;
+- the protected `npm` environment has the approved deployment branches/tags and
+  reviewers, without storing an npm token;
+- the `RELEASE_PLEASE_TOKEN` credential owner, least-privilege repository
+  access, expiry/rotation, and fallback behavior;
+- approved Firna npm maintainer accounts, enforced 2FA, public unscoped-package
+  access, and the intended initial owner list;
+- the trusted-publisher repository, workflow filename, environment, and publish
+  action exactly match the values above; and
+- immutable tag/GitHub release protection and who may invoke the manual retry.
 
 No long-lived npm write token is stored in GitHub Actions.
 
 ## Release Evidence
 
-Each release records the checked commit, package version, tarball contents,
-verification result, GitHub release, npm URL, provenance result, and smoke-test
-result. A failed publish never changes the tag or rebuilds a different artifact;
-the manual retry uses the existing tag.
+Each release records the checked commit, package version, uploaded tarball and
+pack report, verification result, GitHub release, npm URL, provenance/signature
+result, and smoke-test result. A failed publish never changes the tag or
+rebuilds from a branch; the manual retry accepts only the existing immutable
+`vX.Y.Z` tag and repeats the identical path.
 
 ## Current External Requirements
 
@@ -147,9 +172,13 @@ changes over time:
 - [npm package metadata](https://docs.npmjs.com/files/package.json/)
 - [release-please action](https://github.com/googleapis/release-please-action)
 
-As of 19 July 2026, npm trusted publishing requires Node 22.14 or newer and npm
-11.5.1 or newer; the `npm trust` management command requires npm 11.15 or newer.
+As rechecked on 20 July 2026, npm trusted publishing requires Node 22.14 or
+newer and npm 11.5.1 or newer; the `npm trust` management command requires npm
+11.15 or newer.
 The package must already exist before a trust relationship can be configured.
+The workflow's npm 11.7.0 satisfies publishing; use npm 11.15 or newer only for
+the separate interactive trust-management command. Trusted publishing creates
+provenance automatically on supported GitHub-hosted runners.
 
 ## Related Docs
 

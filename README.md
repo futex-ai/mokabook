@@ -74,11 +74,28 @@ npx mokabook check
 npx mokabook review --base origin/main
 ```
 
+Options follow the command, so an explicit config is
+`npx mokabook build --config path/to/mokabook.config.ts`. With a local
+development dependency, `npx --no-install mokabook` guarantees npm does not
+fall back to the registry. After the first release, a clean machine may use
+`npx --package mokabook mokabook` without adding a dependency.
+
+| Command              | Outcome                                                 |
+| -------------------- | ------------------------------------------------------- |
+| `mokabook`           | Build, serve, and watch using a stable development URL  |
+| `mokabook serve`     | Serve Browse; add `--no-watch` for one child process    |
+| `mokabook build`     | Validate and transactionally write generated output     |
+| `mokabook check`     | Compare expected and committed bytes without writing    |
+| `mokabook review`    | Compare Git base/head screens and write a static Review |
+| `mokabook --help`    | Show commands and their supported options               |
+| `mokabook --version` | Print the installed package version                     |
+
 `build` writes viewport fragments and `mokabook-manifest.json` under
 `mockupsDir`. `check` calculates those bytes without writing and reports
-missing, stale, or orphan generated files. Browse and Review currently use
-deliberately plain diagnostic pages while the package-owned responsive UI is
-developed.
+missing, stale, or orphan generated files. Browse provides responsive catalogue
+navigation, viewport controls, use-case steps, details, id redirects, and
+watched updates. Review provides summary, side-by-side, overlay, and difference
+views as a static artifact.
 
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
@@ -89,10 +106,34 @@ logical screen routes are not portable links in generated static files. Build
 and check also validate local HTML resource attributes and transitive CSS URLs.
 Watched Serve keeps its resolved port, transactionally reloads a changed
 consumer config with a ready replacement watcher, and serially replaces a child
-that exits unexpectedly after readiness. Open diagnostic pages connect to its
+that exits unexpectedly after readiness. Open Browse and Review pages connect to its
 versioned event stream and reload after a newer build or asset version arrives.
 A rejected config or failed candidate build leaves the last-good watcher,
 output, and child active.
+
+## Configuration
+
+Mokabook discovers `mokabook.config.ts`, `.mts`, `.js`, or `.mjs` by walking
+upward from the current directory. Every filesystem path is relative to that
+file and confined to `repoRoot`.
+
+- `entriesDir` and `mockupsDir` select structured source and generated output.
+- `renderer` and ordered `stylesheets` keep product themes and CSS consumer-owned.
+- `moduleResolution` configures package roots, aliases, export conditions,
+  package fields, file extensions, and esbuild loaders for cross-platform
+  component trees.
+- `legacy` opts into `.source.*` pages, component expansion, route aliases,
+  excluded migration sources, and generic lints.
+- `watch` classifies additional consumer inputs; `review` selects the Git base,
+  artifact directory, and shared-impact globs.
+- `compatibility.readManifestV2` reads Accounting's old manifest only when v3
+  is absent. A temporary `compatibility.transformer` may deterministically
+  repair already-authored documents during a consumer cutover; final links and
+  resources are still validated.
+
+Use `MockLink` for catalogue destinations. Raw relative links remain suitable
+for real static assets and legacy documents, but logical screen/use-case routes
+do not name generated files in schema v3.
 
 ## Rendering Boundary
 
@@ -110,6 +151,29 @@ the complete raw-React-to-static-HTML flow.
 The configuration module itself is also bundled from its own directory, so
 imports of consumer workspace packages resolve before the temporary config
 module is evaluated.
+
+Consumer module-resolution overrides are explicit and contain no React Native
+or app defaults. `packageRoots` must identify in-repository directories with a
+`package.json`; Mokabook searches their `node_modules` directories while still
+forcing React peers to the consumer's one runtime.
+
+## Troubleshooting
+
+- **No config found:** run from the consumer repository or pass `--config`
+  after the command.
+- **A generated file is stale:** run `mokabook build`, inspect the diff, then
+  rerun `mokabook check`.
+- **Mokabook refuses an overwrite:** the existing HTML lacks a valid Mokabook
+  ownership header. Move it or choose a non-colliding route; the tool will not
+  delete an authored file.
+- **A package or React peer cannot resolve:** install React/React DOM in the
+  consumer and configure the correct `moduleResolution.packageRoots` for a
+  nested npm workspace.
+- **A link fails validation:** use `MockLink` for an entry id and a relative URL
+  for a real generated/static file. Root-absolute and source-tree links are not
+  portable.
+- **A watched edit fails:** fix the reported candidate build/config error. The
+  last-good server remains active and adopts the next valid change.
 
 ## Developer Setup
 
@@ -129,6 +193,22 @@ cargo xtask check
 `npm run test:browser` drives the served Browse shell and static Review pages
 in Chromium via Playwright; it uses the installed Chrome channel by default and
 honors `PLAYWRIGHT_CHANNEL` for an alternative browser install.
+
+`cargo xtask check` is the authoritative local gate. It includes formatting,
+lint, typechecking, unit/integration tests, the committed example, package
+allowlist and license checks, clean packed ESM/NodeNext/npx/Accounting/Juno
+consumers, Chromium tests, and all Rust checks.
+
+## Releasing
+
+Changes use Conventional Commits. On `main`, release-please maintains the
+reviewed version/changelog PR; merging that PR creates an immutable `vX.Y.Z`
+release. The same [Release workflow](./.github/workflows/release.yml) checks the
+tag, reruns the full gate, packs and smoke-tests the exact tarball, guards an
+already-published version, and publishes through npm trusted publishing. A
+manual `publish_ref` retries only an existing tag. See the
+[release protocol](./docs/protocol/npm-release.md) for the one-time `0.0.0`
+bootstrap and maintainer settings; do not add an npm write token to GitHub.
 
 The synthetic fixture at [`examples/basic`](./examples/basic/README.md) proves
 custom rendering, stylesheets, id links, collections, use cases, and

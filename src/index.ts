@@ -3,6 +3,8 @@ export type {
   CompatibilityConfig,
   LegacyConfig,
   LegacyLintConfig,
+  ModuleLoader,
+  ModuleResolutionConfig,
   MokabookConfig,
   ReviewConfig,
   StylesheetRule,
@@ -38,3 +40,7 @@ export type {
   Viewport,
 } from "./authoring/types.js";
 export type { Renderer, RenderInput } from "./renderer/types.js";
+export type {
+  CompatibilityTransformer,
+  CompatibilityTransformInput,
+} from "./compatibility/types.js";

@@ -154,6 +154,7 @@ function fragmentResult(
   } catch {
     return { violation: `invalid URL encoding: ${reference}` };
   }
+  if (fragment === "") return {};
   return source.anchors.has(fragment)
     ? {}
     : { violation: `missing anchor ${reference}` };

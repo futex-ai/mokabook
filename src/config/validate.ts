@@ -12,6 +12,7 @@ import {
   validateReviewOut,
   validateSourceRoots,
 } from "./path_validation.js";
+import { resolveModuleResolution } from "./module_resolution.js";
 import {
   requireString,
   resolveLegacyLint,
@@ -65,7 +66,18 @@ export function resolveConfig(
     input.renderer,
     "renderer",
   );
+  const compatibilityTransformer = optionalModule(
+    repoRoot,
+    configDir,
+    input.compatibility?.transformer,
+    "compatibility.transformer",
+  );
   const legacy = resolveLegacy(input.legacy, repoRoot, configDir);
+  const moduleResolution = resolveModuleResolution(
+    input.moduleResolution,
+    repoRoot,
+    configDir,
+  );
   validateSourceRoots(repoRoot, entriesDir, mockupsDir, legacy?.pagesDir);
   const stylesheets = validateStylesheets(input.stylesheets ?? []);
   const watchRules = validateWatchRules(input.watch?.rules ?? []);
@@ -95,11 +107,15 @@ export function resolveConfig(
   return {
     compatibility: {
       readManifestV2: input.compatibility?.readManifestV2 ?? false,
+      ...(compatibilityTransformer
+        ? { transformer: compatibilityTransformer }
+        : {}),
     },
     configPath,
     entriesDir,
     ...(legacy ? { legacy } : {}),
     mockupsDir,
+    moduleResolution,
     ...(renderer ? { renderer } : {}),
     repoRoot,
     review: {
@@ -148,11 +164,16 @@ function resolveLegacy(
     }),
   );
   const lint = resolveLegacyLint(legacy.lint);
+  const exclude = validateStringArray(
+    legacy.exclude ?? [],
+    "legacy.exclude",
+  ).map((glob) => validateRelativeRoute(glob, "legacy.exclude"));
   return {
     ...(components ? { components } : {}),
     ...(lint ? { lint } : {}),
     pagesDir,
     routeAliases,
+    exclude,
   };
 }
 

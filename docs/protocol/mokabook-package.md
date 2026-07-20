@@ -68,10 +68,13 @@ the following contract:
 - `entriesDir`: structured `*.mockup.ts` and `*.mockup.tsx` source directory;
 - optional legacy page discovery and rendering settings;
 - optional renderer-module path and declarative route-to-stylesheet rules;
+- optional consumer package roots, aliases, conditions, fields, extensions, and
+  loaders for app-owned module resolution;
 - default Git base ref and Review output directory;
 - shared-impact globs for Review;
 - additional authored inputs and static assets for watched Serve;
 - optional legacy link aliases and lint policy needed by that consumer.
+- an optional temporary document transformer for an existing consumer cutover.
 
 The resolved config has one repository root, one mockups root, and normalized
 repo-relative POSIX paths. Config validation rejects path traversal, output
@@ -87,11 +90,33 @@ explicit initializer or documented example, not hidden in runtime logic.
 The normative configuration shape is:
 
 ```ts
+type ModuleLoader =
+  | "base64"
+  | "binary"
+  | "css"
+  | "dataurl"
+  | "empty"
+  | "file"
+  | "js"
+  | "json"
+  | "jsx"
+  | "text"
+  | "ts"
+  | "tsx";
+
 interface MokabookConfig {
   entriesDir: string;
   mockupsDir: string;
   repoRoot?: string; // config directory
   renderer?: string;
+  moduleResolution?: {
+    aliases?: Readonly<Record<string, string>>;
+    conditions?: readonly string[];
+    loaders?: Readonly<Record<string, ModuleLoader>>;
+    mainFields?: readonly string[];
+    packageRoots?: readonly string[];
+    resolveExtensions?: readonly string[];
+  };
   stylesheets?: readonly {
     match: string;
     stylesheets: readonly string[];
@@ -99,6 +124,7 @@ interface MokabookConfig {
   legacy?: {
     pagesDir: string;
     components?: string;
+    exclude?: readonly string[];
     routeAliases?: Readonly<Record<string, string>>;
     lint?: {
       allowRoutes?: readonly string[];
@@ -118,13 +144,17 @@ interface MokabookConfig {
       paths: readonly string[];
     }[];
   };
-  compatibility?: { readManifestV2?: boolean }; // false
+  compatibility?: {
+    readManifestV2?: boolean; // false
+    transformer?: string;
+  };
 }
 ```
 
 Filesystem fields (`repoRoot`, `entriesDir`, `mockupsDir`, `renderer`, legacy
-page/component paths, and Review `outDir`) are config-relative. Stylesheet file
-paths are relative to `mockupsDir`; HTTP(S) stylesheet URLs are allowed.
+page/component paths, compatibility transformer, module-resolution package
+roots, and Review `outDir`) are config-relative. Stylesheet file paths are
+relative to `mockupsDir`; HTTP(S) stylesheet URLs are allowed.
 `watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
 globs, while stylesheet `match` and legacy aliases/lint routes match catalogue
 routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
@@ -134,6 +164,19 @@ or the output root; generated routes are collision-checked against those
 sources before writing. Review output must not overlap a source or output root
 in either direction. That rule applies equally to configured output, a CLI
 `--out` override, and the transactional writer boundary.
+
+`moduleResolution` has no defaults beyond esbuild's platform behavior. Package
+roots must be in-repository directories containing `package.json`; their
+`node_modules` directories supplement consumer lookup. Aliases accept bare
+package specifiers only. Conditions, package fields, and extensions are ordered,
+deduplicated lists, while loader keys are extensions and values are supported
+esbuild loader names. React and React DOM still resolve through Mokabook's
+consumer-peer plugin so these options cannot introduce a second React runtime.
+
+Legacy `exclude` values are source-relative POSIX globs. They exist for a
+staged migration that must omit obsolete source-owned framework prototypes;
+they must not be used to hide a product page that still belongs in the
+catalogue.
 
 ## Public Authoring API
 
@@ -209,8 +252,9 @@ export default function render(input: RenderInput): string;
 ```
 
 The string must contain a complete `<html>` document. Mokabook serializes
-Review-ignore markers and rewrites only complete `mock:<id>` `href` values
-after this function returns. The package declares `react` and `react-dom`
+Review-ignore markers and rewrites only complete `mock:<id>` `href` or
+`data-nav-href` values after this function returns. The same rewrite applies to
+legacy output. The package declares `react` and `react-dom`
 `>=19.0.0` as peers and does not ship a private runtime. The builder resolves
 both peers and their subpaths from consumer config, then bundles every
 React-bearing input in one internal graph.
@@ -223,6 +267,34 @@ package version.
 Config dependencies are bundled from the config directory before the temporary
 module is evaluated, so bare workspace/package imports never resolve from the
 operating-system temporary directory or npx cache.
+
+### Temporary Document Compatibility
+
+A consumer with already-authored output may configure one synchronous
+`compatibility.transformer` module. It is bundled into the same consumer graph
+and default-exports this contract:
+
+```ts
+interface CompatibilityTransformInput {
+  availableRoutes: readonly string[];
+  content: string;
+  logicalRoutes: Readonly<Record<string, string>>;
+  outputPath: string;
+  route: string;
+  viewport: "mobile" | "desktop";
+}
+
+type CompatibilityTransformer = (input: CompatibilityTransformInput) => string;
+```
+
+`availableRoutes` contains the complete pending output plus existing public
+static files. `logicalRoutes` maps screen/use-case catalogue routes to concrete
+artifacts for the current viewport. `outputPath` is repository-relative; no
+absolute checkout path is exposed. Mokabook applies the transformer after id
+links resolve and before Review-marker, link, resource, and ownership
+validation. It must return a complete document, remain deterministic, and stay
+consumer-owned. It cannot weaken final validation. New catalogues should author
+portable links directly and leave this option unset.
 
 Stylesheet rules are ordered, declarative consumer configuration. Their globs
 match the catalogue route before viewport fragments are derived, so one exact

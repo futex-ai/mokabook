@@ -44,9 +44,12 @@ export function rewriteMockLinks(
     sourceCodeLocationInfo: true,
   }) as unknown as HtmlNode;
   visit(document, (node) => {
-    const href = node.attrs?.find((attribute) => attribute.name === "href");
-    const match = href ? MOCK_HREF.exec(href.value) : undefined;
-    if (!href || !match) return;
+    const link = node.attrs?.find(
+      (attribute) =>
+        attribute.name === "href" || attribute.name === "data-nav-href",
+    );
+    const match = link ? MOCK_HREF.exec(link.value) : undefined;
+    if (!link || !match) return;
     const id = match[1] ?? "";
     const hash = match[2] ?? "";
     const target = byId.get(id);
@@ -56,14 +59,14 @@ export function rewriteMockLinks(
         `${sourceRoute} links to unknown id: ${id}`,
       );
     }
-    const targetRoute = artifactRoute(target, viewport, byId);
+    const targetRoute = artifactRouteForEntry(target, viewport, byId);
     if (!targetRoute) {
       throw new MokabookError(
         "build-invalid",
         `${sourceRoute} links to collection id: ${id}`,
       );
     }
-    const location = node.sourceCodeLocation?.attrs?.[href.name];
+    const location = node.sourceCodeLocation?.attrs?.[link.name];
     if (!location) {
       throw new MokabookError(
         "build-invalid",
@@ -120,7 +123,8 @@ function attributeValueRange(source: string): HtmlLocation | undefined {
   return endOffset === startOffset ? undefined : { endOffset, startOffset };
 }
 
-function artifactRoute(
+/** Resolve a registry entry to the static artifact appropriate for a viewport. */
+export function artifactRouteForEntry(
   entry: ResolvedRegistryEntry,
   viewport: Viewport,
   byId: ReadonlyMap<string, ResolvedRegistryEntry>,
@@ -132,6 +136,21 @@ function artifactRoute(
   return screen?.kind === "screen"
     ? fragmentRoute(screen.route, viewport)
     : undefined;
+}
+
+/** Map logical catalogue routes to concrete viewport artifacts. */
+export function logicalArtifactRoutes(
+  entries: readonly ResolvedRegistryEntry[],
+  viewport: Viewport,
+): Readonly<Record<string, string>> {
+  const byId = new Map(entries.map((entry) => [entry.id, entry]));
+  return Object.fromEntries(
+    entries.flatMap((entry) => {
+      if (entry.kind === "collection") return [];
+      const artifact = artifactRouteForEntry(entry, viewport, byId);
+      return artifact ? [[entry.route, artifact] as const] : [];
+    }),
+  );
 }
 
 function visit(node: HtmlNode, callback: (node: HtmlNode) => void): void {

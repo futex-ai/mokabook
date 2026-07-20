@@ -12,9 +12,9 @@ second screen renderer or catalogue.
 
 This document defines the release-ready runtime contract. The Build, Check,
 watch, server, and Review engines, the responsive package-owned Browse shell,
-the designed Review artifact pages, and their Playwright browser coverage are
-implemented. Packed-package, CI, and release verification remain later
-milestones.
+the designed Review artifact pages, packed-package consumers, CI/release
+automation, and Playwright browser coverage are implemented. The irreversible
+first publication and downstream consumer cutover remain external steps.
 
 ## Build
 
@@ -107,7 +107,7 @@ shipped shell are recorded beside the design catalogue in the example notes.
 ## Watched Development
 
 `mokabook serve` watches by default; `--no-watch` serves one deterministic
-snapshot. Every diagnostic document loads the package-owned browser client,
+snapshot. Every Browse and Review document loads the package-owned browser client,
 which connects to the versioned event stream and reloads its current durable
 URL after a higher version arrives. Watch classification derives only from
 resolved config:

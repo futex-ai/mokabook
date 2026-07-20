@@ -1,4 +1,5 @@
 import type { ResolvedConfig } from "../config/types.js";
+import { transformCompatibilityDocuments } from "../compatibility/transform.js";
 import { MokabookError } from "../errors.js";
 import { renderLegacyPages } from "../legacy/pages.js";
 import {
@@ -66,6 +67,7 @@ export async function compileCatalogue(
       );
     }
   }
+  transformCompatibilityDocuments(outputs, registry.entries, config, graph);
   for (const [route, content] of outputs) {
     normalizeSingleDocument(content, route);
   }

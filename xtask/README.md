@@ -35,8 +35,8 @@ cargo test --package xtask
 
 - `src/cli.rs` parses and dispatches commands.
 - `src/command.rs` defines the injected command-runner boundary.
-- `src/check.rs` defines the current source-level verification sequence; packed
-  consumer and browser release gates are added in later plan milestones.
+- `src/check.rs` defines the complete source, packed-consumer, browser, and Rust
+  verification sequence.
 - `src/review.rs` creates the read-only review prompt and process.
 
 ### Related Docs

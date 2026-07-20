@@ -6,7 +6,7 @@
 mokabook.config.ts
         |
         v
-discover *.mockup.tsx + renderer + optional legacy sources
+discover *.mockup.tsx + renderer + optional legacy/compatibility modules
         |
         v
 one esbuild graph, with React resolved from the consumer
@@ -18,7 +18,7 @@ validate definitions and cross-references in memory
 renderer({ node, entry, viewport, stylesheets })
         |
         v
-serialize Review markers -> resolve complete mock:id hrefs -> validate hrefs/anchors
+resolve mock:id links -> compatibility bridge -> validate markers/links/resources
         |
         v
 mobile/desktop HTML + schema-v3 manifest in memory
@@ -38,14 +38,20 @@ then resolved from the config file and confined to `repoRoot`.
 ## 2. One Consumer Graph
 
 Structured `*.mockup.ts(x)` files, the configured renderer, optional legacy
-TypeScript sources, and an optional legacy component adapter are imported by a
-single virtual entry and bundled together. The internal bundle is CommonJS so
-Node-oriented consumer dependencies can retain dynamic built-in imports.
+TypeScript sources, an optional legacy component adapter, and an optional
+temporary compatibility transformer are imported by a single virtual entry and
+bundled together. The internal bundle is CommonJS so Node-oriented consumer
+dependencies can retain dynamic built-in imports.
 
 An esbuild resolver uses `createRequire(configPath)` for `react`, React
 subpaths, `react-dom`, and React DOM subpaths. Imports of `mokabook` resolve to
 the executing package. The result is one React runtime even when Mokabook itself
 lives in npm's transient npx directory.
+
+Consumer-owned aliases, export conditions, package fields, loaders, resolution
+extensions, and in-repository package roots pass directly to this graph after
+strict config validation. This supports React Native Web or other workspace
+layouts without putting an app alias or TypeScript-root assumption in Mokabook.
 
 Every module beneath `entriesDir` imports a module-bound Mokabook authoring
 facade. Each definition or nested marker is therefore attributed at the helper
@@ -73,10 +79,17 @@ type Renderer = (input: RenderInput) => string;
 
 The returned string must be a complete HTML document. Mokabook then converts
 `ReviewIgnore` templates into inert comments and resolves complete `href`
-values of the form `mock:<id>` to viewport-matched fragments. Text, scripts,
-styles, and non-link attributes containing the same characters remain
+values of the form `mock:<id>` in `href` and `data-nav-href` to
+viewport-matched fragments. The same pass covers legacy pages. Text, scripts,
+styles, and unrelated attributes containing the same characters remain
 unchanged. A use-case link resolves through its first screen; collections are
 intentionally not linkable.
+
+During a staged migration only, a configured consumer transformer receives the
+complete document, current route/viewport, repository-relative output path,
+available static/output routes, and viewport-resolved logical routes. The
+transformed document must remain complete and then passes every normal
+Review-marker, link, resource, path, and ownership check.
 
 React Native Web style collection is not a second conversion stage. If an app
 uses it, its renderer wraps the node in the app provider, registers or renders

@@ -1,0 +1,112 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      publish_ref:
+        description: Existing immutable vX.Y.Z tag to verify and publish
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.publish_ref || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Create or update release pull request
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
+
+  select-release:
+    if: always()
+    needs: [release-please]
+    runs-on: ubuntu-latest
+    outputs:
+      publish_ref: ${{ steps.select.outputs.publish_ref }}
+    steps:
+      - name: Check out workflow scripts
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Select immutable release
+        id: select
+        env:
+          MANUAL_REF: ${{ inputs.publish_ref }}
+          RELEASE_CREATED: ${{ needs.release-please.outputs.release_created }}
+          RELEASE_EVENT: ${{ github.event_name }}
+          RELEASE_TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: node scripts/release/resolve-ref.mjs
+
+  publish:
+    if: always() && needs.select-release.outputs.publish_ref != ''
+    needs: [release-please, select-release]
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out immutable release tag
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.select-release.outputs.publish_ref }}
+      - name: Set up trusted-publishing runtime
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+      - name: Set up npm
+        run: npm install --global npm@11.7.0
+      - name: Set up Rust
+        run: |
+          rustup toolchain install 1.95.0 --profile minimal
+          rustup default 1.95.0
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify immutable tag
+        run: node scripts/release/verify-ref.mjs "${{ needs.select-release.outputs.publish_ref }}"
+      - name: Run complete verification
+        run: cargo xtask check
+      - name: Prepare exact publish artifact
+        id: package
+        run: node scripts/release/pack.mjs .context/release-artifact
+      - name: Guard an existing npm version
+        id: registry
+        run: node scripts/release/registry.mjs --mode guard --report .context/release-artifact/pack-report.json
+      - name: Preserve checked artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: mokabook-${{ steps.package.outputs.version }}
+          path: |
+            ${{ steps.package.outputs.archive_path }}
+            .context/release-artifact/pack-report.json
+          if-no-files-found: error
+      - name: Publish with npm trusted publishing
+        if: steps.registry.outputs.published != 'true'
+        env:
+          ARCHIVE_PATH: ${{ steps.package.outputs.archive_path }}
+        run: npm publish "$ARCHIVE_PATH" --access public
+      - name: Verify registry package and provenance
+        run: node scripts/release/registry.mjs --mode verify --report .context/release-artifact/pack-report.json --dist-tag latest

@@ -10,9 +10,9 @@ paths, and synthetic tests.
 | Mokabook owns                           | Consumer owns                    | Configured at the boundary |
 | --------------------------------------- | -------------------------------- | -------------------------- |
 | Registry definitions and validation     | Product screens and fixture data | Source and output roots    |
-| esbuild discovery and one-graph loading | Product component library        | Renderer module            |
+| esbuild discovery and one-graph loading | Product component library        | Renderer/module resolution |
 | Static fragments and manifest schema    | Theme/tokens/providers           | Stylesheet rules           |
-| Generated-file ownership and check      | Product CSS/fonts/images         | Legacy aliases and lints   |
+| Generated-file ownership and check      | Product CSS/fonts/images         | Legacy policy/bridge       |
 | Safe Browse routes and watch lifecycle  | Application navigation semantics | Additional watch inputs    |
 | Git comparison and Review-ignore rules  | Product Review policy            | Base, output, impact globs |
 
@@ -29,6 +29,11 @@ only place an app should install theme providers, collect React Native Web's
 Those actions depend on app-owned packages and policy, so moving them into the
 library would make Mokabook app-specific and risk two React runtimes.
 
+Module-resolution configuration is likewise consumer-owned: aliases,
+conditions, package fields, extensions, loaders, and package roots describe the
+consumer component tree. Mokabook validates and applies them without supplying
+React Native Web, Accounting, or Juno defaults.
+
 ## Legacy Boundary
 
 Legacy `.source.ts`, `.source.tsx`, and `.source.html` discovery is generic.
@@ -36,6 +41,9 @@ Comment components use an explicitly configured module exporting
 `renderComponent(name, attributes)`. Route aliases, maximum-screen exemptions,
 stage-id policy, and component names have no defaults. Accounting keeps its
 existing component registry and supplies it as an adapter during migration.
+Source-relative exclusions and the complete-document compatibility transformer
+are temporary cutover tools. They remain explicit, deterministic consumer code,
+and their result receives the same package validation as newly authored output.
 
 ## Runtime Boundary
 

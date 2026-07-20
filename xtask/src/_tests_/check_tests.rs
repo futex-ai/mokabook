@@ -28,6 +28,12 @@ fn check_runs_every_gate_in_order() {
             .next_call(matching!((command) if command.display() == "npm run package:check"))
             .returns(Ok(())),
         CommandRunnerRunMock
+            .next_call(matching!((command) if command.display() == "npm run package:smoke"))
+            .returns(Ok(())),
+        CommandRunnerRunMock
+            .next_call(matching!((command) if command.display() == "npm run test:browser"))
+            .returns(Ok(())),
+        CommandRunnerRunMock
             .next_call(matching!((command) if command.display() == "cargo fmt --all -- --check"))
             .returns(Ok(())),
         CommandRunnerRunMock

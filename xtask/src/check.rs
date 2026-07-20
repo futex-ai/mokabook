@@ -32,7 +32,7 @@ impl CheckRunner for DefaultCheckRunner {
     }
 }
 
-fn commands() -> [CommandSpec; 9] {
+fn commands() -> [CommandSpec; 11] {
     [
         npm(&["run", "format:check"]),
         npm(&["run", "lint"]),
@@ -40,6 +40,8 @@ fn commands() -> [CommandSpec; 9] {
         npm(&["test"]),
         npm(&["run", "example:check"]),
         npm(&["run", "package:check"]),
+        npm(&["run", "package:smoke"]),
+        npm(&["run", "test:browser"]),
         cargo(&["fmt", "--all", "--", "--check"]),
         cargo(&[
             "clippy",
