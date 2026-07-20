@@ -211,12 +211,21 @@ test("release-please owns the Node manifest and first release state", async () =
     "896a6ecfd26236b1695c7683e7acac73dc4efbc9",
   );
   assert.equal(config.packages["."]["bump-minor-pre-major"], true);
-  assert.deepEqual(Object.keys(config.packages["."]).sort(), [
-    "bump-minor-pre-major",
-    "changelog-path",
-    "include-v-in-tag",
-    "release-type",
-  ]);
+  const releaseAs = config.packages["."]["release-as"];
+  if (releaseAs !== undefined) {
+    assert.match(releaseAs, /^0\.\d+\.\d+$/);
+  }
+  assert.deepEqual(
+    Object.keys(config.packages["."])
+      .filter((key) => key !== "release-as")
+      .sort(),
+    [
+      "bump-minor-pre-major",
+      "changelog-path",
+      "include-v-in-tag",
+      "release-type",
+    ],
+  );
   assert.deepEqual(manifest, { ".": "0.0.0" });
 });
 
