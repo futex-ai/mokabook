@@ -1,244 +1,478 @@
-/* Device frames, details, flow steps, and empty states for the design mockups. */
+/* The Mokabook design stage: device chromes on the dotted stage, the mini
+   screen sketches, the details inspector, and the use-case flow track. */
 
-.mb-stage {
+.mbk-viewbar {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  padding: 12px 24px 0;
+}
+
+.mbk-stage {
   align-items: flex-start;
-  background-image: radial-gradient(rgb(39 33 27 / 6%) 1px, transparent 1px);
-  background-size: 22px 22px;
-  border: 1px solid var(--mb-border);
-  border-radius: var(--mb-radius);
+  background: radial-gradient(
+      circle at center,
+      rgba(20, 28, 22, 0.05) 1px,
+      transparent 1px
+    )
+    0 0 / 22px 22px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  flex: 1;
+  gap: 40px;
   justify-content: center;
-  padding: 1.5rem;
+  min-height: 0;
+  overflow: auto;
+  padding: 28px;
 }
 
-.mb-phone {
-  background: var(--mb-surface);
-  border: 2px solid var(--mb-text);
-  border-radius: 26px;
-  box-shadow: var(--mb-shadow);
-  overflow: hidden;
-  width: 15rem;
+.mbk-shell--mobile .mbk-stage {
+  gap: 20px;
+  padding: 20px 14px;
 }
 
-.mb-phone-notch {
-  background: var(--mb-text);
-  border-radius: 999px;
-  height: 0.45rem;
-  margin: 0.5rem auto 0;
-  width: 5rem;
+.mbk-frame-wrap {
+  min-width: 0;
 }
 
-.mb-browser {
-  background: var(--mb-surface);
-  border: 1px solid var(--mb-border);
-  border-radius: 8px;
-  box-shadow: var(--mb-shadow);
-  flex: 1;
-  min-width: 22rem;
-  overflow: hidden;
+.mbk-frame-mobile {
+  flex: 0 0 auto;
 }
 
-.mb-browser-bar {
-  align-items: center;
-  background: var(--mb-bg);
-  border-bottom: 1px solid var(--mb-border);
-  display: flex;
-  gap: 0.6rem;
-  padding: 0.45rem 0.7rem;
+.mbk-frame-desktop {
+  flex: 0 1 1180px;
+  min-width: 0;
 }
 
-.mb-browser-dots {
-  display: flex;
-  gap: 0.3rem;
+.mbk-frame-desktop .browser-frame {
+  width: 100%;
 }
 
-.mb-browser-dots span {
-  background: var(--mb-border);
-  border-radius: 50%;
-  display: block;
-  height: 0.55rem;
-  width: 0.55rem;
-}
-
-.mb-browser-address {
-  background: var(--mb-surface);
-  border: 1px solid var(--mb-border);
-  border-radius: 6px;
-  color: var(--mb-muted);
-  flex: 1;
-  font-family: ui-monospace, monospace;
-  font-size: 0.72rem;
-  padding: 0.2rem 0.6rem;
-}
-
-.mb-frame-label {
-  color: var(--mb-muted);
-  font-size: 0.75rem;
-  margin: 0 0 0.4rem;
-  text-align: center;
-}
-
-.mb-mini {
-  background: #f5f3ff;
-  color: #211b36;
-  font-size: 0.8rem;
-  min-height: 13rem;
-  padding: 1rem;
-}
-
-.mb-mini-nav {
-  border-bottom: 1px solid #bdb2e4;
-  color: #4d4368;
-  font-size: 0.72rem;
-  margin-bottom: 0.8rem;
-  padding-bottom: 0.5rem;
-}
-
-.mb-mini h2 {
-  font-size: 1rem;
-  margin: 0 0 0.5rem;
-}
-
-.mb-mini p {
-  margin: 0 0 0.6rem;
-}
-
-.mb-mini-link {
-  color: #5a3fc0;
-  text-decoration: underline;
-}
-
-.mb-details {
-  background: var(--mb-surface);
-  border: 1px solid var(--mb-border);
-  border-radius: var(--mb-radius);
-}
-
-.mb-details summary,
-.mb-details-bar {
-  align-items: baseline;
-  color: var(--mb-text);
-  display: flex;
-  font-weight: 600;
-  gap: 0.6rem;
-  padding: 0.6rem 0.9rem;
-}
-
-.mb-details-hint {
-  color: var(--mb-muted);
-  font-size: 0.78rem;
-  font-weight: 400;
-}
-
-.mb-details-body {
-  border-top: 1px solid var(--mb-border);
-  display: grid;
-  gap: 0.9rem 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  padding: 0.9rem;
-}
-
-.mb-details-body h3 {
-  color: var(--mb-muted);
-  font-size: 0.72rem;
-  letter-spacing: 0.07em;
-  margin: 0 0 0.3rem;
+.mbk-frame-label {
+  color: var(--chrome-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin: 0 0 10px;
   text-transform: uppercase;
 }
 
-.mb-details-body p,
-.mb-details-body ul {
-  margin: 0;
+/* ---- Phone chrome ----------------------------------------------------- */
+
+.phone-frame {
+  background: #171a18;
+  border-radius: 46px;
+  height: 844px;
+  padding: 12px;
+  position: relative;
+  width: 390px;
 }
 
-.mb-details-body ul {
-  list-style: none;
-  padding: 0;
+.phone-notch {
+  background: #0b0d0c;
+  border-radius: 999px;
+  height: 30px;
+  left: 50%;
+  position: absolute;
+  top: 22px;
+  transform: translateX(-50%);
+  width: 108px;
+  z-index: 2;
 }
 
-.mb-code {
-  background: var(--mb-bg);
-  border: 1px solid var(--mb-border);
-  border-radius: 6px;
-  font-family: ui-monospace, monospace;
-  font-size: 0.72rem;
-  overflow-wrap: anywhere;
-  padding: 0.05rem 0.4rem;
-}
-
-.mb-chip-link {
-  color: var(--mokabook-accent);
-  text-decoration: underline;
-}
-
-.mb-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.mb-step {
-  border-left: 2px solid var(--mb-border);
-  padding-left: 1rem;
+.phone-screen {
+  background: #ffffff;
+  border-radius: 36px;
+  height: 100%;
+  overflow: hidden;
   position: relative;
 }
 
-.mb-step-num {
-  align-items: center;
-  background: var(--mokabook-accent);
-  border-radius: 50%;
-  color: var(--mokabook-accent-contrast);
-  display: inline-flex;
-  font-size: 0.75rem;
-  font-weight: 650;
-  height: 1.4rem;
-  justify-content: center;
-  margin-right: 0.5rem;
-  width: 1.4rem;
+.phone-home {
+  background: rgba(20, 24, 20, 0.4);
+  border-radius: 999px;
+  bottom: 20px;
+  height: 4px;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 128px;
 }
 
-.mb-step-title {
+/* Compact phone for narrow-shell and comparison depictions. */
+.phone-frame--sm {
+  border-radius: 36px;
+  height: 580px;
+  padding: 9px;
+  width: 280px;
+}
+
+.phone-frame--sm .phone-notch {
+  height: 22px;
+  top: 16px;
+  width: 88px;
+}
+
+.phone-frame--sm .phone-screen {
+  border-radius: 28px;
+}
+
+.phone-frame--sm .phone-home {
+  bottom: 12px;
+  width: 96px;
+}
+
+/* ---- Browser chrome --------------------------------------------------- */
+
+.browser-frame {
+  background: var(--chrome-surface);
+  border: 1px solid var(--chrome-border-strong);
+  border-radius: 8px;
+  height: 760px;
+  max-width: 1180px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.browser-bar {
+  align-items: center;
+  background: #ecede9;
+  border-bottom: 1px solid var(--chrome-border);
+  display: flex;
+  gap: 12px;
+  height: 40px;
+  padding: 0 14px;
+}
+
+.lights {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.lights i {
+  border-radius: 999px;
+  height: 11px;
+  width: 11px;
+}
+
+.lights i:first-child {
+  background: #d9655b;
+}
+
+.lights i:nth-child(2) {
+  background: #dba43d;
+}
+
+.lights i:nth-child(3) {
+  background: #50a86d;
+}
+
+.address {
+  align-items: center;
+  background: var(--chrome-surface);
+  border: 1px solid var(--chrome-border);
+  border-radius: 6px;
+  color: var(--chrome-muted);
+  display: flex;
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 12px;
+  height: 26px;
+  max-width: 520px;
+  overflow: hidden;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.browser-expand {
+  align-items: center;
+  background: var(--chrome-surface);
+  border: 1px solid var(--chrome-border);
+  border-radius: 6px;
+  color: var(--chrome-muted);
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 14px;
+  height: 26px;
+  justify-content: center;
+  line-height: 1;
+  width: 26px;
+}
+
+.browser-viewport {
+  background: var(--chrome-surface);
+  height: calc(100% - 40px);
+  overflow: hidden;
+}
+
+/* ---- Mini screen sketches --------------------------------------------- */
+
+.mbk-shot {
+  background: var(--chrome-surface);
+  height: 100%;
+  overflow: hidden;
+}
+
+.mbk-shot-pad {
+  padding: 18px 20px;
+}
+
+.phone-screen .mbk-shot-pad {
+  padding-top: 46px;
+}
+
+.phone-frame--sm .mbk-shot-pad {
+  padding-top: 38px;
+}
+
+.mbk-shot-nav {
+  border-bottom: 1px solid var(--chrome-border);
+  color: var(--chrome-muted);
+  font-size: 11.5px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+}
+
+.mbk-shot h2 {
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+
+.mbk-shot p {
+  color: var(--chrome-ink-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin: 0 0 12px;
+}
+
+.mbk-shot-link {
+  color: var(--mbk-sage);
+  display: inline-block;
+  font-size: 12.5px;
   font-weight: 600;
 }
 
-.mb-step-link {
-  color: var(--mokabook-accent);
-  font-size: 0.8rem;
-  margin-left: 0.6rem;
-  text-decoration: underline;
+/* ---- Details inspector ------------------------------------------------ */
+
+.mbk-details {
+  background: var(--chrome-surface);
+  border-top: 1px solid var(--chrome-border);
+  flex-shrink: 0;
 }
 
-.mb-step .mb-stage {
-  margin-top: 0.6rem;
-}
-
-.mb-empty {
+.mbk-details-bar {
   align-items: center;
+  color: var(--chrome-ink);
+  display: flex;
+  font-size: 12.5px;
+  font-weight: 700;
+  gap: 9px;
+  padding: 11px 24px;
+}
+
+.mbk-details-bar .chev {
+  color: var(--chrome-muted);
+  display: inline-grid;
+  place-items: center;
+}
+
+.mbk-details-bar .chev.open svg {
+  transform: rotate(90deg);
+}
+
+.mbk-details-hint {
+  color: var(--chrome-muted);
+  font-weight: 400;
+  margin-left: auto;
+  text-align: right;
+}
+
+.mbk-details-body {
+  display: grid;
+  gap: 30px;
+  grid-template-columns: 1.35fr 1fr;
+  padding: 6px 24px 20px;
+}
+
+.mbk-shell--mobile .mbk-details-body {
+  gap: 18px;
+  grid-template-columns: 1fr;
+  padding: 6px 16px 18px;
+}
+
+.mbk-details-desc {
+  color: var(--chrome-ink);
+  font-size: 13.5px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.mbk-details-rationale {
+  color: var(--chrome-ink-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin: 12px 0 0;
+}
+
+.mbk-details-rationale .k {
+  color: var(--chrome-muted);
+  font-weight: 700;
+}
+
+.mbk-meta {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 3rem 1.5rem;
-  text-align: center;
+  gap: 11px;
 }
 
-.mb-empty h1 {
-  font-size: 1.3rem;
-  margin: 0;
+.mbk-meta-row {
+  align-items: baseline;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 82px 1fr;
 }
 
-.mb-empty p {
-  color: var(--mb-muted);
-  margin: 0;
-  max-width: 30rem;
+.mbk-meta-k {
+  color: var(--chrome-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
-.mb-empty-link {
-  color: var(--mokabook-accent);
+.mbk-meta-v {
+  color: var(--chrome-ink-2);
+  font-size: 12.5px;
+  min-width: 0;
+}
+
+.mbk-meta-link {
+  color: var(--mbk-sage);
   font-weight: 600;
-  text-decoration: underline;
+}
+
+.mbk-code {
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 6px;
+  color: var(--chrome-ink);
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 11px;
+  max-width: 100%;
+  padding: 2px 7px;
+  word-break: break-all;
+}
+
+.mbk-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mbk-chip {
+  align-items: center;
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 999px;
+  color: var(--chrome-ink-2);
+  display: inline-flex;
+  font-size: 11.5px;
+  gap: 5px;
+  padding: 3px 9px;
+}
+
+.mbk-chip.flow svg {
+  color: var(--mbk-sage);
+  flex-shrink: 0;
+}
+
+/* ---- Use-case flow track ---------------------------------------------- */
+
+.mbk-flow {
+  flex: 1;
+  overflow: auto;
+  padding: 28px 28px 40px;
+}
+
+.mbk-shell--mobile .mbk-flow {
+  padding: 20px 14px 32px;
+}
+
+.flow-track {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.flow-step {
+  position: relative;
+}
+
+.flow-step::before {
+  background: var(--chrome-border);
+  bottom: -26px;
+  content: "";
+  left: 15px;
+  position: absolute;
+  top: 32px;
+  width: 2px;
+}
+
+.flow-step:last-child::before {
+  display: none;
+}
+
+.flow-step-head {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.flow-step-num {
+  background: var(--mbk-sage);
+  border-radius: 9px;
+  color: #ffffff;
+  display: grid;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 800;
+  height: 32px;
+  place-items: center;
+  width: 32px;
+}
+
+.flow-step-head h3 {
+  font-size: 16px;
+  letter-spacing: -0.005em;
+  margin: 2px 0 4px;
+}
+
+.flow-step-head p {
+  color: var(--chrome-muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.flow-step-link {
+  color: var(--mbk-sage);
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.mbk-flow-screen {
+  margin-left: 44px;
+  max-width: 1180px;
+}
+
+.mbk-flow-screen .browser-frame {
+  height: 640px;
+}
+
+.mbk-shell--mobile .mbk-flow-screen {
+  margin-left: 12px;
 }

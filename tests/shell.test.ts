@@ -10,7 +10,7 @@ import {
   viewPage,
 } from "../dist/server/pages.js";
 import { SHELL_CSS } from "../dist/server/shell/css.js";
-import { buildNavGroups, catalogueNav } from "../dist/server/shell/nav.js";
+import { buildNavTree } from "../dist/server/shell/nav_tree.js";
 
 const manifest: ManifestV3 = {
   entries: [
@@ -75,41 +75,75 @@ const manifest: ManifestV3 = {
     },
   ],
   generatedBy: "mokabook",
-  legacyPages: [{ route: "legacy/old.html", sourcePath: "pages/old.html" }],
+  legacyPages: [
+    { route: "legacy/index.html", sourcePath: "pages/index.html" },
+    { route: "legacy/old.html", sourcePath: "pages/old.html" },
+  ],
   schemaVersion: 3,
 };
 
 const context = { base: "origin/main", mode: "browse" as const };
 
-test("nav groups follow collection nesting and navPath roots", () => {
-  const groups = buildNavGroups(manifest);
-  assert.equal(groups.length, 1);
-  assert.equal(groups[0]?.label, "Example");
-  const [screens, tour] = groups[0]?.nodes ?? [];
-  assert.equal(screens?.entry.id, "screens");
+test("nav tree nests collections and folds legacy directories", () => {
+  const tree = buildNavTree(manifest.entries, manifest.legacyPages);
+  const labels = tree.map((node) => node.label);
+  assert.deepEqual(labels, ["Example", "Legacy"]);
+  const example = tree[0];
+  assert.ok(example?.kind === "group");
+  const screens = example.children.find((node) => node.label === "Screens");
+  assert.ok(screens?.kind === "group");
   assert.deepEqual(
-    screens?.children.map((child) => child.entry.id),
-    ["welcome", "details"],
+    screens.children.map((node) => node.label),
+    ["Details", "Welcome"],
   );
-  assert.equal(tour?.entry.id, "tour");
+  const tour = example.children.find((node) => node.label === "Tour");
+  assert.ok(tour?.kind === "leaf" && tour.entryKind === "use-case");
+  const legacy = tree[1];
+  assert.ok(legacy?.kind === "group");
+  assert.deepEqual(
+    legacy.children.map((node) => node.label),
+    ["Overview", "Old"],
+  );
 });
 
-test("catalogue nav marks active, changed, and legacy rows", () => {
-  const nav = catalogueNav(manifest, {
+test("legacy breadcrumbs link ancestors through their Overview page", () => {
+  const catalogue = createCatalogue(manifest);
+  const entry = catalogue.byRoute.get("legacy/old.html");
+  assert.ok(entry);
+  const html = viewPage(entry, catalogue, {
+    ...context,
+    activeRoute: "legacy/old.html",
+  });
+  assert.match(
+    html,
+    /class="mbk-crumb-link" href="\/view\/legacy\/index\.html">Legacy</,
+  );
+  assert.match(html, /class="mbk-stage-embed"/);
+});
+
+test("catalogue nav marks active, changed, and iconed rows", () => {
+  const catalogue = createCatalogue(manifest);
+  const entry = catalogue.byRoute.get("screens/welcome.html");
+  assert.ok(entry);
+  const html = viewPage(entry, catalogue, {
     ...context,
     activeRoute: "screens/welcome.html",
     changedRoutes: ["screens/welcome.html"],
   });
-  assert.match(nav, /aria-current="page"[^>]*>[^<]*<[^>]*>▢<\/span>Welcome/);
-  assert.match(nav, /data-changed="true"/);
-  assert.match(nav, /data-nav-collection="screens"/);
-  assert.match(nav, /Legacy pages/);
-  assert.match(nav, /legacy\/old\.html/);
-  const inactive = catalogueNav(manifest, context);
-  assert.equal(inactive.includes('aria-current="page"'), false);
+  assert.match(
+    html,
+    /aria-current="page"[^>]*data-route="screens\/welcome\.html"/,
+  );
+  assert.match(html, /data-changed="true"/);
+  assert.match(html, /data-nav-collection="\/Example\/Screens"/);
+  assert.match(html, /class="mbk-nav-ico folder"><svg/);
+  assert.match(html, /class="mbk-nav-count">2</);
+  assert.match(html, /Collapse all/);
+  const inactive = homePage(catalogue, context);
+  assert.equal(inactive.includes('aria-current="page"[^>]*data-route'), false);
 });
 
-test("screen page renders frames, viewport switch, and details", () => {
+test("screen page renders device chrome, viewport switch, and details", () => {
   const catalogue = createCatalogue(manifest);
   const entry = catalogue.byRoute.get("screens/welcome.html");
   assert.ok(entry);
@@ -117,26 +151,35 @@ test("screen page renders frames, viewport switch, and details", () => {
     ...context,
     activeRoute: "screens/welcome.html",
   });
-  assert.match(html, /<iframe class="mb-frag" sandbox=""[^>]*welcome\.mobile/);
-  assert.match(html, /<iframe class="mb-frag" sandbox=""[^>]*welcome\.desktop/);
-  assert.match(html, /data-mokabook-stage data-viewport="both"/);
+  assert.match(html, /class="mbk-frag" sandbox=""[^>]*welcome\.mobile/);
+  assert.match(html, /class="mbk-frag" sandbox=""[^>]*welcome\.desktop/);
+  assert.match(html, /class="phone-frame"/);
+  assert.match(html, /class="phone-notch"/);
+  assert.match(html, /class="browser-frame"/);
+  assert.match(html, /class="browser-expand"/);
+  assert.match(html, /class="address">example\.test\/welcome</);
+  assert.match(html, /data-mokabook-stage="" data-viewport="both"/);
   assert.match(html, /data-viewport-option="mobile"/);
-  assert.match(html, /example\.test\/welcome/);
-  assert.match(html, /Example › /);
+  assert.match(html, /class="mbk-crumbs"/);
+  assert.match(html, /class="mbk-idchip" href="\/id\/welcome"/);
   assert.match(html, /Proves the shell/);
   assert.match(html, /notes\.md/);
-  assert.match(html, /\/id\/tour/);
+  assert.match(
+    html,
+    /class="mbk-chip flow" href="\/view\/user-flows\/tour\.html"/,
+  );
   assert.match(html, /aria-live="polite"/);
 });
 
-test("use-case page links each step back to its standalone screen", () => {
+test("use-case page renders the flow with catalogue links per step", () => {
   const catalogue = createCatalogue(manifest);
   const entry = catalogue.byRoute.get("user-flows/tour.html");
   assert.ok(entry);
   const html = viewPage(entry, catalogue, context);
-  assert.match(html, /Open standalone screen/);
+  assert.match(html, /This screen in the catalogue: Welcome/);
   assert.match(html, /href="\/view\/screens\/welcome\.html"/);
-  assert.match(html, /class="mb-step-num"/);
+  assert.match(html, /class="flow-step-num"/);
+  assert.match(html, /class="mbk-flow-screen"/);
 });
 
 test("missing routes and review keep the catalogue shell", () => {
@@ -149,25 +192,30 @@ test("missing routes and review keep the catalogue shell", () => {
     mode: "review",
   });
   assert.match(review, /mokabook review --base origin\/main/);
-  assert.match(review, /href="\/review" aria-current="page"/);
+  assert.match(review, /aria-current="page"[^>]*href="\/review"/);
+  assert.match(review, /class="mbk-basewatch"/);
 });
 
-test("filter renders only when changed routes are known", () => {
+test("filter renders in the nav only when changed routes are known", () => {
   const catalogue = createCatalogue(manifest);
   const withFilter = homePage(catalogue, {
     ...context,
-    changedRoutes: [],
+    changedRoutes: ["screens/welcome.html"],
   });
   assert.match(withFilter, /data-mokabook-filter/);
+  assert.match(withFilter, /class="mbk-nav-filter-count">1</);
   const withoutFilter = homePage(catalogue, context);
   assert.equal(withoutFilter.includes("data-mokabook-filter"), false);
   assert.match(withoutFilter, /data-mokabook-search/);
 });
 
 test("shell stylesheet stays aligned with the design contract", () => {
-  assert.match(SHELL_CSS, /--mokabook-accent: #6f4e37/);
+  assert.match(SHELL_CSS, /--mokabook-accent: #4f7864/);
   assert.match(SHELL_CSS, /--mb-added: #1d7a3d/);
-  assert.match(SHELL_CSS, /min-width: 56\.25rem/);
+  assert.match(SHELL_CSS, /width: 390px/);
+  assert.match(SHELL_CSS, /max-width: 1180px/);
+  assert.match(SHELL_CSS, /max-width: 56\.25rem/);
   assert.match(SHELL_CSS, /prefers-reduced-motion/);
+  assert.match(SHELL_CSS, /InterVariable\.woff2/);
   assert.equal(SHELL_CSS.includes("bookfolio"), false);
 });

@@ -46,7 +46,14 @@ test("Browse recovery parsing rejects malformed session state", () => {
     undefined,
   );
   assert.equal(
-    parseBrowseRecoveryState({ ...browseState(), scroll: -1 }),
+    parseBrowseRecoveryState({
+      ...browseState(),
+      regionScrolls: { stage: -1 },
+    }),
+    undefined,
+  );
+  assert.equal(
+    parseBrowseRecoveryState({ ...browseState(), regionScrolls: [4] }),
     undefined,
   );
 });
@@ -59,7 +66,7 @@ function browseState(): BrowseRecoveryState {
     drawerOpen: true,
     navScroll: 18,
     query: "home",
-    scroll: 42,
+    regionScrolls: { flow: 8, stage: 42 },
     viewport: "mobile",
   };
 }

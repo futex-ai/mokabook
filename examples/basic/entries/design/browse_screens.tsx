@@ -1,21 +1,16 @@
 import { screen } from "mokabook";
 
+import { DetailsPanel } from "./parts/details.js";
 import { NavDrawer, NavTree } from "./parts/nav.js";
-import {
-  Breadcrumbs,
-  Shell,
-  TitleRow,
-  TopBar,
-  ViewSwitch,
-} from "./parts/shell.js";
+import { ScreenHead, Shell, TopBar, ViewSwitch } from "./parts/shell.js";
 import {
   BrowserFrame,
-  DetailsPanel,
   EmptyState,
   FlowStep,
   MiniDetails,
   MiniWelcome,
   PhoneFrame,
+  Stage,
 } from "./parts/stage.js";
 
 function HomeBody() {
@@ -44,6 +39,16 @@ function HomeMobile() {
   );
 }
 
+function WelcomeHead() {
+  return (
+    <ScreenHead
+      crumbs={["Example", "Screens"]}
+      idChip="example-welcome"
+      title="Welcome"
+    />
+  );
+}
+
 function SelectedScreenDesktop() {
   return (
     <Shell
@@ -51,21 +56,16 @@ function SelectedScreenDesktop() {
       viewport="desktop"
       nav={<NavTree activeLabel="Welcome" />}
     >
-      <Breadcrumbs trail={["Example", "Screens", "Welcome"]} />
-      <TitleRow
-        title="Welcome"
-        address="example.test/welcome"
-        withDetailsToggle
-      />
+      <WelcomeHead />
       <ViewSwitch active="both" />
-      <div className="mb-stage">
-        <PhoneFrame address="example.test/welcome" label="Mobile">
+      <Stage>
+        <PhoneFrame label="Mobile">
           <MiniWelcome compact />
         </PhoneFrame>
         <BrowserFrame address="example.test/welcome" label="Desktop">
           <MiniWelcome />
         </BrowserFrame>
-      </div>
+      </Stage>
       <DetailsPanel />
     </Shell>
   );
@@ -74,18 +74,13 @@ function SelectedScreenDesktop() {
 function SelectedScreenMobile() {
   return (
     <Shell mode="browse" viewport="mobile" nav={null}>
-      <Breadcrumbs trail={["Example", "Screens", "Welcome"]} />
-      <TitleRow
-        title="Welcome"
-        address="example.test/welcome"
-        withDetailsToggle
-      />
+      <WelcomeHead />
       <ViewSwitch active="mobile" />
-      <div className="mb-stage">
-        <PhoneFrame address="example.test/welcome" label="Mobile">
+      <Stage>
+        <PhoneFrame label="Mobile" small>
           <MiniWelcome compact />
         </PhoneFrame>
-      </div>
+      </Stage>
       <DetailsPanel />
     </Shell>
   );
@@ -93,30 +88,52 @@ function SelectedScreenMobile() {
 
 function UseCaseSteps({ viewport }: { viewport: "desktop" | "mobile" }) {
   return (
-    <ol className="mb-steps">
-      <FlowStep number={1} title="Welcome">
-        {viewport === "desktop" ? (
-          <BrowserFrame address="example.test/welcome">
-            <MiniWelcome />
-          </BrowserFrame>
-        ) : (
-          <PhoneFrame address="example.test/welcome">
-            <MiniWelcome compact />
-          </PhoneFrame>
-        )}
-      </FlowStep>
-      <FlowStep number={2} title="Details">
-        {viewport === "desktop" ? (
-          <BrowserFrame address="example.test/details">
-            <MiniDetails />
-          </BrowserFrame>
-        ) : (
-          <PhoneFrame address="example.test/details">
-            <MiniDetails compact />
-          </PhoneFrame>
-        )}
-      </FlowStep>
-    </ol>
+    <div className="mbk-flow">
+      <div className="flow-track">
+        <FlowStep
+          number={1}
+          title="Welcome"
+          description="The tour starts on the landing screen."
+          screenId="example-welcome"
+        >
+          {viewport === "desktop" ? (
+            <BrowserFrame address="example.test/welcome">
+              <MiniWelcome />
+            </BrowserFrame>
+          ) : (
+            <PhoneFrame small>
+              <MiniWelcome compact />
+            </PhoneFrame>
+          )}
+        </FlowStep>
+        <FlowStep
+          number={2}
+          title="Details"
+          description="The tour ends on the details screen."
+          screenId="example-details"
+        >
+          {viewport === "desktop" ? (
+            <BrowserFrame address="example.test/details">
+              <MiniDetails />
+            </BrowserFrame>
+          ) : (
+            <PhoneFrame small>
+              <MiniDetails compact />
+            </PhoneFrame>
+          )}
+        </FlowStep>
+      </div>
+    </div>
+  );
+}
+
+function UseCaseHead() {
+  return (
+    <ScreenHead
+      crumbs={["Example"]}
+      idChip="example-tour"
+      title="Example tour"
+    />
   );
 }
 
@@ -127,8 +144,7 @@ function UseCaseDesktop() {
       viewport="desktop"
       nav={<NavTree activeLabel="Example tour" />}
     >
-      <Breadcrumbs trail={["Example", "Example tour"]} />
-      <TitleRow title="Example tour" />
+      <UseCaseHead />
       <UseCaseSteps viewport="desktop" />
     </Shell>
   );
@@ -137,8 +153,7 @@ function UseCaseDesktop() {
 function UseCaseMobile() {
   return (
     <Shell mode="browse" viewport="mobile" nav={null}>
-      <Breadcrumbs trail={["Example", "Example tour"]} />
-      <TitleRow title="Example tour" />
+      <UseCaseHead />
       <UseCaseSteps viewport="mobile" />
     </Shell>
   );
@@ -151,18 +166,13 @@ function DetailsOpenDesktop() {
       viewport="desktop"
       nav={<NavTree activeLabel="Welcome" />}
     >
-      <Breadcrumbs trail={["Example", "Screens", "Welcome"]} />
-      <TitleRow
-        title="Welcome"
-        address="example.test/welcome"
-        withDetailsToggle
-      />
+      <WelcomeHead />
       <ViewSwitch active="desktop" />
-      <div className="mb-stage">
+      <Stage>
         <BrowserFrame address="example.test/welcome" label="Desktop">
           <MiniWelcome />
         </BrowserFrame>
-      </div>
+      </Stage>
       <DetailsPanel open />
     </Shell>
   );
@@ -171,12 +181,7 @@ function DetailsOpenDesktop() {
 function DetailsOpenMobile() {
   return (
     <Shell mode="browse" viewport="mobile" nav={null}>
-      <Breadcrumbs trail={["Example", "Screens", "Welcome"]} />
-      <TitleRow
-        title="Welcome"
-        address="example.test/welcome"
-        withDetailsToggle
-      />
+      <WelcomeHead />
       <DetailsPanel open />
     </Shell>
   );
@@ -211,9 +216,9 @@ function MissingRouteMobile() {
 
 function NarrowNavigationDesktop() {
   return (
-    <div className="mb-shell mb-shell--collapsed">
+    <div className="mbk-shell mbk-shell--collapsed">
       <TopBar mode="browse" viewport="mobile" />
-      <main className="mb-main">
+      <main className="mbk-main">
         <HomeBody />
       </main>
       <NavDrawer activeLabel="Welcome" />

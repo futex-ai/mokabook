@@ -3,35 +3,44 @@ import type { ReactNode } from "react";
 import { screen } from "mokabook";
 
 import {
-  BaseLine,
+  CompareGrid,
   CompareToolbar,
   DiffLegend,
   MissingPane,
   Pane,
-  ReviewNav,
-  StatusBadge,
-  type ReviewState,
-} from "./parts/review.js";
-import { Shell } from "./parts/shell.js";
-import { MiniFarewell, MiniDetails, MiniWelcome } from "./parts/stage.js";
+  ReviewSummary,
+} from "./parts/compare.js";
+import { ReviewNav, StatusBadge, type ReviewState } from "./parts/review.js";
+import { ScreenHead, Shell } from "./parts/shell.js";
+import {
+  BrowserFrame,
+  MiniDetails,
+  MiniFarewell,
+  MiniWelcome,
+  PhoneFrame,
+} from "./parts/stage.js";
+
+type CompareViewport = "desktop" | "mobile";
 
 interface ComparePageProps {
   activeTitle: string;
   children: ReactNode;
-  foot: string;
-  route: string;
+  facts: string;
+  idChip: string;
+  mode?: "difference" | "overlay" | "side-by-side";
+  pct?: string | undefined;
   state: ReviewState;
   title: string;
-  viewport: "desktop" | "mobile";
-  mode?: "difference" | "overlay" | "side-by-side";
+  viewport: CompareViewport;
 }
 
 function ComparePage({
   activeTitle,
   children,
-  foot,
-  mode = "side-by-side",
-  route,
+  facts,
+  idChip,
+  mode,
+  pct,
   state,
   title,
   viewport,
@@ -44,100 +53,136 @@ function ComparePage({
         viewport === "desktop" ? <ReviewNav activeTitle={activeTitle} /> : null
       }
     >
-      <BaseLine />
-      <div className="mb-title-row">
-        <h1>{title}</h1>
-        <StatusBadge state={state} />
-        <span className="mb-code">{route}</span>
-      </div>
-      <CompareToolbar mode={mode} viewport={viewport} />
-      <div className="mb-panes">{children}</div>
-      <p className="mb-review-foot">{foot}</p>
+      <ScreenHead
+        action={<span className="mbk-open-browse">Open in Browse ↗</span>}
+        crumbs={["Example", "Screens"]}
+        idChip={idChip}
+        status={<StatusBadge state={state} />}
+        title={title}
+      />
+      <CompareToolbar mode={mode ?? "side-by-side"} viewport={viewport} />
+      {children}
+      <ReviewSummary facts={facts} pct={pct} state={state} />
     </Shell>
   );
 }
 
-function ChangedCompare({ viewport }: { viewport: "desktop" | "mobile" }) {
+function FramedShot({
+  address,
+  children,
+  viewport,
+}: {
+  address: string;
+  children: ReactNode;
+  viewport: CompareViewport;
+}) {
+  if (viewport === "desktop") {
+    return <BrowserFrame address={address}>{children}</BrowserFrame>;
+  }
+  return <PhoneFrame small>{children}</PhoneFrame>;
+}
+
+function ChangedCompare({ viewport }: { viewport: CompareViewport }) {
   const compact = viewport === "mobile";
   return (
     <ComparePage
       activeTitle="Welcome"
-      foot="Mobile and desktop both changed on this branch."
-      route="screens/welcome.html"
+      facts="Mobile and desktop both changed on this branch."
+      idChip="example-welcome"
+      pct="~4.8% of pixels differ"
       state="changed"
       title="Welcome"
       viewport={viewport}
     >
-      <Pane label="Before — origin/main">
-        <MiniWelcome compact={compact} />
-      </Pane>
-      <Pane label="After — this branch">
-        <MiniWelcome compact={compact} revised />
-      </Pane>
+      <CompareGrid>
+        <Pane label="Before · origin/main" side="before">
+          <FramedShot address="example.test/welcome" viewport={viewport}>
+            <MiniWelcome compact={compact} />
+          </FramedShot>
+        </Pane>
+        <Pane label="After · this branch" side="after">
+          <FramedShot address="example.test/welcome" viewport={viewport}>
+            <MiniWelcome compact={compact} revised />
+          </FramedShot>
+        </Pane>
+      </CompareGrid>
     </ComparePage>
   );
 }
 
-function AddedCompare({ viewport }: { viewport: "desktop" | "mobile" }) {
+function AddedCompare({ viewport }: { viewport: CompareViewport }) {
   const compact = viewport === "mobile";
   return (
     <ComparePage
       activeTitle="Details"
-      foot="This screen is new on this branch."
-      route="screens/details.html"
+      facts="This screen is new on this branch."
+      idChip="example-details"
       state="added"
       title="Details"
       viewport={viewport}
     >
-      <MissingPane
-        label="Before — origin/main"
-        message="This screen does not exist on origin/main."
-      />
-      <Pane label="After — this branch" tone="added">
-        <MiniDetails compact={compact} />
-      </Pane>
+      <CompareGrid>
+        <MissingPane
+          label="Before · origin/main"
+          message="This screen does not exist on origin/main."
+          side="before"
+        />
+        <Pane label="After · this branch" side="after" tone="added">
+          <FramedShot address="example.test/details" viewport={viewport}>
+            <MiniDetails compact={compact} />
+          </FramedShot>
+        </Pane>
+      </CompareGrid>
     </ComparePage>
   );
 }
 
-function RemovedCompare({ viewport }: { viewport: "desktop" | "mobile" }) {
+function RemovedCompare({ viewport }: { viewport: CompareViewport }) {
   const compact = viewport === "mobile";
   return (
     <ComparePage
       activeTitle="Farewell"
-      foot="This screen was removed on this branch."
-      route="screens/farewell.html"
+      facts="This screen was removed on this branch."
+      idChip="example-farewell"
       state="removed"
       title="Farewell"
       viewport={viewport}
     >
-      <Pane label="Before — origin/main" tone="removed">
-        <MiniFarewell compact={compact} />
-      </Pane>
-      <MissingPane
-        label="After — this branch"
-        message="This screen does not exist on this branch."
-      />
+      <CompareGrid>
+        <Pane label="Before · origin/main" side="before" tone="removed">
+          <FramedShot address="example.test/farewell" viewport={viewport}>
+            <MiniFarewell compact={compact} />
+          </FramedShot>
+        </Pane>
+        <MissingPane
+          label="After · this branch"
+          message="This screen does not exist on this branch."
+          side="after"
+        />
+      </CompareGrid>
     </ComparePage>
   );
 }
 
-function DifferenceCompare({ viewport }: { viewport: "desktop" | "mobile" }) {
+function DifferenceCompare({ viewport }: { viewport: CompareViewport }) {
   const compact = viewport === "mobile";
   return (
     <ComparePage
       activeTitle="Welcome"
-      foot="Tinted regions mark the lines that differ from origin/main."
+      facts="Tinted regions mark the lines that differ from origin/main."
+      idChip="example-welcome"
       mode="difference"
-      route="screens/welcome.html"
+      pct="~4.8% of pixels differ"
       state="changed"
       title="Welcome"
       viewport={viewport}
     >
-      <Pane label="Difference — this branch over origin/main">
-        <MiniWelcome compact={compact} revised tinted />
-      </Pane>
-      <DiffLegend />
+      <div className="mbk-diff-view">
+        <DiffLegend />
+        <FramedShot address="example.test/welcome" viewport={viewport}>
+          <MiniWelcome compact={compact} revised tinted />
+        </FramedShot>
+      </div>
     </ComparePage>
   );
 }

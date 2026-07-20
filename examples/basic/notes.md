@@ -25,13 +25,19 @@ in each entry's description and rationale, never inside the rendered screens:
 The shipped shell was visually smoke-tested against these mockups. The
 following presentation differences are intentional:
 
-- The details panel's own summary bar is the disclosure control; the shell
-  does not render the separate top-right "Details" button shown in the
-  selected-screen mockups.
-- Navigation groups render in deterministic catalogue order (sorted by
-  route), so the `Design` group precedes `Example` in this example.
+- The details inspector's collapsed bar shows one fixed hint
+  ("Description, rationale, source, related docs, and use cases") rather than
+  the state-specific hint copy some mockups draw.
+- Navigation groups render in deterministic alphabetical order, so the
+  `Design` group precedes `Example` when this example is served.
 - The Browse changed/all filter appears only when the serve base ref resolves
-  in Git; the mockups always show it.
+  in Git; the mockups always show it with a sample count.
+- The mockups draw a small-phone artboard variant so a full 390×844 phone fits
+  the depicted narrow shells; the served shell always uses the full-size
+  phone frame and scales it below the responsive breakpoint.
 - Static Review artifact pages omit the Browse/Review mode pills because the
   artifact stands alone without a running Browse server; the served `/review`
-  route keeps the full shell.
+  route keeps the full shell. The artifact keeps its own `mb-*` page
+  structure: it inherits the ported palette and typography through the shared
+  stylesheet tokens, while adopting the mockups' full browser-frame compare
+  chrome is deferred to a follow-up milestone.

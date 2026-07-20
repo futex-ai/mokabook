@@ -1,41 +1,51 @@
 import { screen } from "mokabook";
 
 import {
-  BaseLine,
+  CompareGrid,
   CompareToolbar,
-  ImpactedScreens,
-  IgnoredImpactCard,
   Pane,
+  ReviewSummary,
+} from "./parts/compare.js";
+import {
+  EmptyReviewNav,
+  IgnoredImpactCard,
+  ImpactedScreens,
   ReviewNav,
   SharedImpactCard,
   StatusBadge,
 } from "./parts/review.js";
-import { Shell } from "./parts/shell.js";
-import { EmptyState, MiniWelcome } from "./parts/stage.js";
+import { ScreenHead, Shell } from "./parts/shell.js";
+import {
+  BrowserFrame,
+  EmptyState,
+  MiniWelcome,
+  PhoneFrame,
+} from "./parts/stage.js";
 
-function SharedImpactSummary({ viewport }: { viewport: "desktop" | "mobile" }) {
+type ReviewViewport = "desktop" | "mobile";
+
+function SharedImpactSummary({ viewport }: { viewport: ReviewViewport }) {
   return (
     <Shell
       mode="review"
       viewport={viewport}
       nav={viewport === "desktop" ? <ReviewNav withSharedImpact /> : null}
     >
-      <BaseLine />
-      <div className="mb-title-row">
-        <h1>Mokabook review</h1>
+      <ScreenHead crumbs={["Review"]} title="Mokabook review" />
+      <div className="mbk-review-overview">
+        <p className="mbk-review-lede">
+          1 changed · 1 added · 1 removed · 2 impacted against origin/main.
+          Choose a screen to compare.
+        </p>
+        <ImpactedScreens />
+        <SharedImpactCard />
+        <span className="mbk-empty-link">Open the first impacted screen</span>
       </div>
-      <p className="mb-review-foot">
-        1 changed · 1 added · 1 removed · 2 impacted against origin/main. Choose
-        a screen to compare.
-      </p>
-      <ImpactedScreens />
-      <SharedImpactCard />
-      <span className="mb-empty-link">Open the first impacted screen</span>
     </Shell>
   );
 }
 
-function IgnoredOnlyCompare({ viewport }: { viewport: "desktop" | "mobile" }) {
+function IgnoredOnlyCompare({ viewport }: { viewport: ReviewViewport }) {
   const compact = viewport === "mobile";
   return (
     <Shell
@@ -47,47 +57,54 @@ function IgnoredOnlyCompare({ viewport }: { viewport: "desktop" | "mobile" }) {
         ) : null
       }
     >
-      <BaseLine />
-      <div className="mb-title-row">
-        <h1>Welcome</h1>
-        <StatusBadge state="ignored-only" />
-        <span className="mb-code">screens/welcome.html</span>
-      </div>
+      <ScreenHead
+        action={<span className="mbk-open-browse">Open in Browse ↗</span>}
+        crumbs={["Example", "Screens"]}
+        idChip="example-welcome"
+        status={<StatusBadge state="ignored-only" />}
+        title="Welcome"
+      />
       <CompareToolbar mode="side-by-side" viewport={viewport} />
-      <div className="mb-panes">
-        <Pane label="Before — origin/main">
-          <MiniWelcome compact={compact} />
+      <CompareGrid>
+        <Pane label="Before · origin/main" side="before">
+          {viewport === "desktop" ? (
+            <BrowserFrame address="example.test/welcome">
+              <MiniWelcome compact={compact} />
+            </BrowserFrame>
+          ) : (
+            <PhoneFrame small>
+              <MiniWelcome compact={compact} />
+            </PhoneFrame>
+          )}
         </Pane>
-        <Pane label="After — this branch">
-          <MiniWelcome compact={compact} />
+        <Pane label="After · this branch" side="after">
+          {viewport === "desktop" ? (
+            <BrowserFrame address="example.test/welcome">
+              <MiniWelcome compact={compact} />
+            </BrowserFrame>
+          ) : (
+            <PhoneFrame small>
+              <MiniWelcome compact={compact} />
+            </PhoneFrame>
+          )}
         </Pane>
-      </div>
-      <IgnoredImpactCard />
-      <p className="mb-review-foot">
-        Every difference falls inside an ignored region, so this screen is not
-        counted as changed.
-      </p>
+      </CompareGrid>
+      {viewport === "mobile" ? <IgnoredImpactCard /> : null}
+      <ReviewSummary
+        facts="Every difference falls inside an ignored region, so this screen is not counted as changed."
+        state="ignored-only"
+      />
     </Shell>
   );
 }
 
-function EmptyReviewNav() {
-  return (
-    <nav className="mb-nav" aria-label="Changed screens">
-      <h2 className="mb-nav-group">Changed screens</h2>
-      <p className="mb-review-nav-total">0 screens differ from origin/main</p>
-    </nav>
-  );
-}
-
-function EmptyReview({ viewport }: { viewport: "desktop" | "mobile" }) {
+function EmptyReview({ viewport }: { viewport: ReviewViewport }) {
   return (
     <Shell
       mode="review"
       viewport={viewport}
       nav={viewport === "desktop" ? <EmptyReviewNav /> : null}
     >
-      <BaseLine />
       <EmptyState
         title="No visual changes"
         body="This branch matches origin/main for every screen in the catalogue."

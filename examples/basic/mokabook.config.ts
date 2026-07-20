@@ -3,6 +3,22 @@ import { defineConfig } from "mokabook";
 export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "generated",
+  moduleResolution: {
+    aliases: { "react-native": "react-native-web" },
+    conditions: ["react-native", "import", "module", "default"],
+    loaders: { ".js": "jsx" },
+    mainFields: ["react-native", "module", "main"],
+    resolveExtensions: [
+      ".web.tsx",
+      ".web.ts",
+      ".web.js",
+      ".tsx",
+      ".ts",
+      ".js",
+      ".jsx",
+      ".json",
+    ],
+  },
   renderer: "renderer.tsx",
   repoRoot: "../..",
   review: {

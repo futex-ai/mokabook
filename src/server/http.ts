@@ -8,10 +8,13 @@ import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import { readManifest } from "../registry/manifest.js";
 import { createCatalogue, type Catalogue } from "./catalogue.js";
-import { loadBrowserClientModules } from "./client_modules.js";
+import {
+  loadBrowserClientModules,
+  loadShellFontAssets,
+} from "./client_modules.js";
 import { homePage, notFoundPage, reviewPage, viewPage } from "./pages.js";
+import type { ShellContext } from "./shell/context.js";
 import { SHELL_CSS } from "./shell/css.js";
-import type { ShellContext } from "./shell/html.js";
 
 /** Options for one deterministic server child. */
 export interface ServerOptions {
@@ -36,6 +39,7 @@ export async function startCatalogueServer(
 ): Promise<RunningServer> {
   const catalogue = createCatalogue(readManifest(config));
   const clientModules = loadBrowserClientModules();
+  const fontAssets = loadShellFontAssets();
   const streams = new Set<ServerResponse>();
   let updateVersion = options.updateVersion ?? 1;
   const server = http.createServer((request, response) => {
@@ -47,7 +51,7 @@ export async function startCatalogueServer(
       config,
       options,
       streams,
-      clientModules,
+      { clientModules, fontAssets },
       () => updateVersion,
     );
   });
@@ -80,6 +84,11 @@ export async function startCatalogueServer(
   };
 }
 
+interface ServedAssets {
+  clientModules: ReadonlyMap<string, Buffer>;
+  fontAssets: ReadonlyMap<string, Buffer>;
+}
+
 function handleRequest(
   rawUrl: string,
   method: string,
@@ -88,7 +97,7 @@ function handleRequest(
   config: ResolvedConfig,
   options: ServerOptions,
   streams: Set<ServerResponse>,
-  clientModules: ReadonlyMap<string, Buffer>,
+  assets: ServedAssets,
   currentVersion: () => number,
 ): void {
   if (method !== "GET" && method !== "HEAD")
@@ -119,7 +128,15 @@ function handleRequest(
     return serveClientModule(
       response,
       url.pathname.slice("/__mokabook/client/".length),
-      clientModules,
+      assets.clientModules,
+      method,
+    );
+  }
+  if (url.pathname.startsWith("/__mokabook/fonts/")) {
+    return serveFontAsset(
+      response,
+      url.pathname.slice("/__mokabook/fonts/".length),
+      assets.fontAssets,
       method,
     );
   }
@@ -166,6 +183,24 @@ function serveClientModule(
   response.writeHead(200, {
     "cache-control": "no-cache",
     "content-type": "text/javascript; charset=utf-8",
+    "x-content-type-options": "nosniff",
+  });
+  response.end(method === "HEAD" ? undefined : content);
+}
+
+function serveFontAsset(
+  response: ServerResponse,
+  filename: string,
+  fonts: ReadonlyMap<string, Buffer>,
+  method: string,
+): void {
+  const content = fonts.get(filename);
+  if (!content) return send(response, 404, "text/plain", "Not found", method);
+  response.writeHead(200, {
+    "cache-control": "no-cache",
+    "content-type": filename.endsWith(".woff2")
+      ? "font/woff2"
+      : "text/plain; charset=utf-8",
     "x-content-type-options": "nosniff",
   });
   response.end(method === "HEAD" ? undefined : content);

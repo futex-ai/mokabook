@@ -22,7 +22,7 @@ test("every served document loads the browser update client", async (context) =>
     const document = await (await fetch(`${server.url}${route}`)).text();
     assert.match(
       document,
-      /<script type="module" src="\/__mokabook\/client\/browser\.js"><\/script>/,
+      /<script src="\/__mokabook\/client\/browser\.js" type="module"><\/script>/,
       route,
     );
   }

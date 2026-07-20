@@ -78,7 +78,7 @@ function browseState(): BrowseRecoveryState {
     drawerOpen: true,
     navScroll: 12,
     query: "home",
-    scroll: 24,
+    regionScrolls: { stage: 24 },
     viewport: "mobile",
   };
 }

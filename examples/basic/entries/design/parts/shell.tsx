@@ -11,54 +11,51 @@ interface TopBarProps {
   viewport: ArtboardViewport;
 }
 
-/** Shell header with brand, mode switch, search, and filter. */
+function BaseWatch() {
+  return (
+    <span className="mbk-basewatch">
+      <span className="mbk-basewatch-dot" aria-hidden="true" />
+      Comparing this branch with <strong>origin/main</strong>
+    </span>
+  );
+}
+
+/** The 48px shell header: brand mark, search or base ref, mode switch. */
 export function TopBar({ mode, viewport }: TopBarProps) {
   return (
-    <header className="mb-topbar">
+    <header className="mbk-topbar">
       {viewport === "mobile" ? (
         <button
-          className="mb-menu-button"
+          className="mbk-menu-btn"
           type="button"
           aria-label="Open catalogue navigation"
         >
           ☰
         </button>
       ) : null}
-      <span className="mb-brand">
-        <span className="mb-brand-mark" aria-hidden="true" />
+      <span className="mbk-brand">
+        <span className="mbk-mark" aria-hidden="true">
+          ◫
+        </span>
         Mokabook
       </span>
-      <nav className="mb-modes" aria-label="Mokabook modes">
-        <span
-          className="mb-mode"
-          aria-current={mode === "browse" ? "page" : undefined}
-        >
+      {viewport === "desktop" ? (
+        mode === "review" ? (
+          <BaseWatch />
+        ) : (
+          <span className="mbk-search">
+            <span aria-hidden="true">⌕</span>Search screens…
+          </span>
+        )
+      ) : null}
+      <nav className="mbk-modes" aria-label="Mokabook modes">
+        <span className={mode === "browse" ? "mbk-mode active" : "mbk-mode"}>
           Browse
         </span>
-        <span
-          className="mb-mode"
-          aria-current={mode === "review" ? "page" : undefined}
-        >
+        <span className={mode === "review" ? "mbk-mode active" : "mbk-mode"}>
           Review
         </span>
       </nav>
-      {viewport === "desktop" && mode === "browse" ? (
-        <>
-          <span className="mb-search">Search screens…</span>
-          <span
-            className="mb-filter"
-            role="group"
-            aria-label="Catalogue filter"
-          >
-            <span className="mb-filter-option" aria-pressed="true">
-              All
-            </span>
-            <span className="mb-filter-option" aria-pressed="false">
-              Changed
-            </span>
-          </span>
-        </>
-      ) : null}
     </header>
   );
 }
@@ -71,65 +68,73 @@ interface ShellProps {
   viewport: ArtboardViewport;
 }
 
-/** The neutral Mokabook shell scaffold for one design mockup. */
+/** The Mokabook shell scaffold for one design mockup. */
 export function Shell({ aside, children, mode, nav, viewport }: ShellProps) {
   if (viewport === "desktop") {
     return (
-      <div className="mb-shell mb-shell--desktop">
+      <div className="mbk-shell mbk-shell--desktop">
         <TopBar mode={mode} viewport={viewport} />
-        {nav}
-        <main className="mb-main">{children}</main>
+        <div className="mbk-body">
+          {nav}
+          <main className="mbk-main">{children}</main>
+        </div>
       </div>
     );
   }
   return (
-    <div className="mb-shell mb-shell--mobile">
+    <div className="mbk-shell mbk-shell--mobile">
       <TopBar mode={mode} viewport={viewport} />
-      <main className="mb-main">{children}</main>
+      <main className="mbk-main">{children}</main>
       {aside}
     </div>
   );
 }
 
-interface BreadcrumbsProps {
-  trail: readonly string[];
+interface CrumbsProps {
+  items: readonly string[];
 }
 
 /** Ancestor collection trail above a routed catalogue view. */
-export function Breadcrumbs({ trail }: BreadcrumbsProps) {
+export function Crumbs({ items }: CrumbsProps) {
   return (
-    <nav className="mb-breadcrumbs" aria-label="Catalogue location">
-      {trail.map((crumb, index) => (
-        <span key={crumb}>
-          {index > 0 ? " › " : null}
-          {index < trail.length - 1 ? (
-            <span className="mb-crumb">{crumb}</span>
-          ) : (
-            crumb
-          )}
+    <nav className="mbk-crumbs" aria-label="Catalogue location">
+      {items.map((item, index) => (
+        <span key={item}>
+          {index > 0 ? <span className="sep">›</span> : null}
+          {item}
         </span>
       ))}
     </nav>
   );
 }
 
-interface TitleRowProps {
-  address?: string;
+interface ScreenHeadProps {
+  action?: ReactNode;
+  crumbs: readonly string[];
+  idChip?: string;
+  status?: ReactNode;
   title: string;
-  withDetailsToggle?: boolean;
 }
 
-/** Routed-view heading with address chip and details toggle. */
-export function TitleRow({ address, title, withDetailsToggle }: TitleRowProps) {
+/** The white head band: breadcrumbs, title, id chip, and status. */
+export function ScreenHead({
+  action,
+  crumbs,
+  idChip,
+  status,
+  title,
+}: ScreenHeadProps) {
   return (
-    <div className="mb-title-row">
-      <h1>{title}</h1>
-      {address ? <span className="mb-address">{address}</span> : null}
-      {withDetailsToggle ? (
-        <button className="mb-details-toggle" type="button">
-          Details
-        </button>
-      ) : null}
+    <div className="mbk-screen-head">
+      <div>
+        <Crumbs items={crumbs} />
+        <div className="mbk-title-row">
+          <h2>{title}</h2>
+          {idChip ? <span className="mbk-idchip">{idChip}</span> : null}
+          {status}
+        </div>
+      </div>
+      {action}
     </div>
   );
 }
@@ -147,16 +152,17 @@ export function ViewSwitch({ active }: ViewSwitchProps) {
       { key: "both", label: "Both" },
     ];
   return (
-    <div className="mb-viewswitch" role="group" aria-label="Viewport">
-      {options.map((option) => (
-        <span
-          key={option.key}
-          className="mb-viewswitch-option"
-          aria-pressed={option.key === active ? "true" : "false"}
-        >
-          {option.label}
-        </span>
-      ))}
+    <div className="mbk-viewbar">
+      <span className="mbk-seg" role="group" aria-label="Viewport">
+        {options.map((option) => (
+          <span
+            key={option.key}
+            className={option.key === active ? "active" : undefined}
+          >
+            {option.label}
+          </span>
+        ))}
+      </span>
     </div>
   );
 }

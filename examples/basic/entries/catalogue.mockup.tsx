@@ -1,3 +1,6 @@
+import { Badge } from "@firna/ui/badge";
+import { Button } from "@firna/ui/button";
+import { Input } from "@firna/ui/input";
 import {
   defineCollection,
   defineScreen,
@@ -13,16 +16,35 @@ const metadata = {
   relatedDocs: ["examples/basic/notes.md"],
 };
 
+/**
+ * No-op handler for the static screens: the controls are non-interactive
+ * snapshots, but @firna/ui renders a Button without `onPress` as disabled and
+ * warns on a value-without-onChange input, so pass this to keep them enabled.
+ */
+const noop = (): void => undefined;
+
 function Welcome({ compact }: { compact: boolean }) {
   return (
-    <main id="welcome">
+    <main id="welcome" className="example-screen">
       <ReviewIgnore
         id="example-nav"
         materialKey={reviewMaterialKey({ compact })}
       >
         <nav>{compact ? "Menu" : "Example navigation"}</nav>
       </ReviewIgnore>
-      <h1>Welcome to Mokabook</h1>
+      <header className="example-head">
+        <h1>Welcome to Mokabook</h1>
+        <Badge tone="primary">Example</Badge>
+      </header>
+      <Input
+        aria-label="Workspace name"
+        onChangeText={noop}
+        placeholder="Name this workspace"
+        value=""
+      />
+      <Button onPress={noop} tone="primary">
+        Create workspace
+      </Button>
       <MockLink to="example-details">Open the details screen</MockLink>
       <p>
         <MockLink to="design-browse-home">
@@ -35,9 +57,15 @@ function Welcome({ compact }: { compact: boolean }) {
 
 function Details({ compact }: { compact: boolean }) {
   return (
-    <main id="details">
-      <h1>{compact ? "Details" : "Example catalogue details"}</h1>
+    <main id="details" className="example-screen">
+      <header className="example-head">
+        <h1>{compact ? "Details" : "Example catalogue details"}</h1>
+        <Badge tone="neutral">Synthetic</Badge>
+      </header>
       <p>This screen is synthetic and belongs only to the package example.</p>
+      <Button onPress={noop} tone="secondary">
+        A styled secondary action
+      </Button>
       <MockLink to="example-welcome">Return to welcome</MockLink>
     </main>
   );

@@ -2,23 +2,14 @@
 
 import type { ManifestEntry, ManifestLegacyPage } from "../registry/types.js";
 import type { Catalogue } from "./catalogue.js";
-import { shellDocument, type ShellContext } from "./shell/html.js";
-import { catalogueNav } from "./shell/nav.js";
-import {
-  entryView,
-  homeView,
-  missingView,
-  reviewLauncherView,
-} from "./shell/views.js";
+import type { ShellContext } from "./shell/context.js";
+import { renderShellPage } from "./shell/document.js";
+import { toRouteTarget } from "./shell/target.js";
+import type { ShellView } from "./shell/views.js";
 
 /** Render the catalogue home page. */
 export function homePage(catalogue: Catalogue, context: ShellContext): string {
-  return shellDocument({
-    context,
-    main: homeView(catalogue),
-    nav: catalogueNav(catalogue.manifest, context),
-    title: "Mokabook",
-  });
+  return renderShellPage(catalogue, { kind: "home" }, context);
 }
 
 /** Render one screen, use case, or legacy route page. */
@@ -27,13 +18,11 @@ export function viewPage(
   catalogue: Catalogue,
   context: ShellContext,
 ): string {
-  const title = "kind" in entry ? entry.title : entry.route;
-  return shellDocument({
-    context,
-    main: entryView(entry, catalogue),
-    nav: catalogueNav(catalogue.manifest, context),
-    title: `${title} · Mokabook`,
-  });
+  const target = toRouteTarget(entry);
+  const view: ShellView = target
+    ? { kind: "target", target }
+    : { kind: "missing", requested: "kind" in entry ? entry.title : "" };
+  return renderShellPage(catalogue, view, context);
 }
 
 /** Render a route-aware not-found page keeping navigation available. */
@@ -42,12 +31,11 @@ export function notFoundPage(
   catalogue: Catalogue,
   context: ShellContext,
 ): string {
-  return shellDocument({
+  return renderShellPage(
+    catalogue,
+    { kind: "missing", requested: detail },
     context,
-    main: missingView(detail),
-    nav: catalogueNav(catalogue.manifest, context),
-    title: "Not found · Mokabook",
-  });
+  );
 }
 
 /** Render the served Review launcher page. */
@@ -56,10 +44,5 @@ export function reviewPage(
   catalogue: Catalogue,
   context: ShellContext,
 ): string {
-  return shellDocument({
-    context,
-    main: reviewLauncherView(base),
-    nav: catalogueNav(catalogue.manifest, context),
-    title: "Review · Mokabook",
-  });
+  return renderShellPage(catalogue, { kind: "review" }, { ...context, base });
 }

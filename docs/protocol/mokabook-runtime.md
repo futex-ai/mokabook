@@ -72,22 +72,30 @@ outside configured public roots.
 
 ## Browse Shell
 
-The package owns a neutral, responsive Mokabook shell: top-level Browse/Review
-navigation, search, changed/all filter, nested catalogue, breadcrumbs,
-viewport switching, device frames, and a collapsible details panel. Consumer
-brand chrome does not appear in the shell. A small set of documented CSS
-custom properties may tune the shell accent without replacing its structural
-styles. The changed/all filter derives from Git changes against the serve
-base ref; when the repository or base cannot be resolved, Browse omits the
-filter and shows the full catalogue.
+The package owns a neutral, responsive Mokabook shell: a top bar with brand,
+search, and Browse/Review modes; a catalogue navigation column with a
+`Collapse all` control, an All/Changed filter, nested disclosure groups with
+folder/screen/page/flow icons and indent guides; linked breadcrumbs with an id
+chip; viewport switching; realistic phone and browser device chrome; a
+per-frame expand-to-overlay toggle; and a collapsible details inspector.
+Consumer brand chrome does not appear in the shell. A small set of documented
+CSS custom properties may tune the shell accent without replacing its
+structural styles. The shell serves its packaged Inter variable font from
+`/__mokabook/fonts/`. The All/Changed filter lives at the top of the
+navigation column, shows the changed count, and derives from Git changes
+against the serve base ref; when the repository or base cannot be resolved,
+Browse omits the filter and shows the full catalogue.
 When a screen is directly affected, every use case that embeds that screen's
 fragments is affected too and remains visible in the changed-only filter.
 
 A screen embeds its generated mobile and desktop fragments inside package-owned
 device frames. A use case renders ordered steps that reference those same
 fragments and link back to their standalone screens. A legacy page embeds the
-whole generated document. Details may show description, rationale, source and
-fragment paths, related docs, dependencies, use cases, and comparison context.
+whole generated document. Breadcrumb ancestors that resolve to a viewable
+route (a legacy directory's Overview page) are links; structural collection
+crumbs stay text. The details inspector may show description, rationale,
+source and fragment paths, related docs, dependencies, use cases, and
+comparison context.
 Consumer fragments and legacy documents are sandboxed without script permission
 so they cannot alter the same-origin Browse shell.
 
@@ -95,14 +103,20 @@ Browse is server rendered first and progressively enhanced. Direct URLs,
 refresh, missing routes, and JavaScript-disabled use remain functional. For an
 eligible unmodified same-origin Browse link, the client replaces only the
 route-owned main view and updates URL, title, active row, focus, and history.
-Search, disclosure, filters, and catalogue scroll remain mounted.
+Search, disclosure, filters, and catalogue scroll remain mounted; searching
+temporarily force-opens navigation groups and restores their prior disclosure
+when cleared. The browser-frame expand toggle overlays one frame at a time and
+collapses on Escape, on an outside click, and on route navigation. Clicking a
+frame address copies it to the clipboard.
 
-Back and Forward restore the matching route and that history entry's latest
-document scroll. Scroll persistence is limited to one leading update per
-animation frame, and route-change focus never overrides the restored position.
-Overlapping requests are latest-wins. Review, static, iframe, download,
-external, target, hash-only, and modified-click links retain native browser
-behavior. A failed enhancement falls back to normal document navigation.
+The shell scrolls inside its stage, flow, and embed regions rather than the
+document. Back and Forward restore the matching route and that history entry's
+latest per-region scroll positions. Scroll persistence is limited to one
+leading update per animation frame, and route-change focus never overrides the
+restored positions. Overlapping requests are latest-wins. Review, static,
+iframe, download, external, target, hash-only, and modified-click links retain
+native browser behavior. A failed enhancement falls back to normal document
+navigation.
 
 The shell meets keyboard, focus, reduced-motion, contrast, semantics, and status
 announcement requirements. Mobile and desktop shell variants are specified by
@@ -162,7 +176,8 @@ server and output, reports the error, and waits for another authored change. A
 successful rebuild or healthy restart publishes a new update version. Browsers
 reload their current durable URL and restore search, changed-only selection,
 collection and details disclosure, viewport selection, responsive drawer,
-catalogue scroll, and document scroll once. Recovery is strictly parsed,
+catalogue scroll, and per-region stage scroll once. Recovery is strictly
+parsed,
 applies only when its durable URL exactly matches the reloaded page, and is
 removed before application; a later manual refresh cannot resurrect stale
 state.

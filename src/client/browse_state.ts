@@ -11,14 +11,40 @@ export interface BrowseRecoveryState {
   drawerOpen: boolean;
   navScroll: number;
   query: string;
-  scroll: number;
+  regionScrolls: Readonly<Record<string, number>>;
   viewport: BrowseViewport;
+}
+
+/** Read the scroll position of every scrollable stage region. */
+export function captureRegionScrolls(doc: Document): Record<string, number> {
+  const scrolls: Record<string, number> = {};
+  for (const region of doc.querySelectorAll<HTMLElement>(
+    "[data-mokabook-scroll]",
+  )) {
+    const key = region.getAttribute("data-mokabook-scroll");
+    if (key) scrolls[key] = region.scrollTop;
+  }
+  return scrolls;
+}
+
+/** Apply stored scroll positions to the current stage regions. */
+export function restoreRegionScrolls(
+  doc: Document,
+  scrolls: Readonly<Record<string, number>>,
+): void {
+  for (const region of doc.querySelectorAll<HTMLElement>(
+    "[data-mokabook-scroll]",
+  )) {
+    const key = region.getAttribute("data-mokabook-scroll");
+    if (key && typeof scrolls[key] === "number")
+      region.scrollTop = scrolls[key];
+  }
 }
 
 /** Capture the current shell state when Browse is active. */
 export function captureBrowseState(
   doc: Document,
-  win: Window & typeof globalThis,
+  _win: Window & typeof globalThis,
 ): BrowseRecoveryState | undefined {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
   if (!shell) return undefined;
@@ -40,11 +66,12 @@ export function captureBrowseState(
       false,
     drawerOpen: shell.dataset["drawer"] === "open",
     navScroll:
-      doc.querySelector<HTMLElement>("[data-mokabook-nav]")?.scrollTop ?? 0,
+      doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]")?.scrollTop ??
+      0,
     query:
       doc.querySelector<HTMLInputElement>("[data-mokabook-search]")?.value ??
       "",
-    scroll: win.scrollY,
+    regionScrolls: captureRegionScrolls(doc),
     viewport,
   };
 }
@@ -52,7 +79,7 @@ export function captureBrowseState(
 /** Restore a validated Browse snapshot into server-rendered shell markup. */
 export function restoreBrowseState(
   doc: Document,
-  win: Window & typeof globalThis,
+  _win: Window & typeof globalThis,
   state: BrowseRecoveryState,
 ): void {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
@@ -80,9 +107,9 @@ export function restoreBrowseState(
   setDrawer(shell, state.drawerOpen);
   setViewport(doc, state.viewport);
   applyNavVisibility(doc);
-  const nav = doc.querySelector<HTMLElement>("[data-mokabook-nav]");
+  const nav = doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]");
   if (nav) nav.scrollTop = state.navScroll;
-  win.scrollTo(0, state.scroll);
+  restoreRegionScrolls(doc, state.regionScrolls);
 }
 
 /** Parse untrusted session storage into the strict Browse recovery contract. */
@@ -98,7 +125,7 @@ export function parseBrowseRecoveryState(
     typeof value["drawerOpen"] !== "boolean" ||
     !nonNegativeNumber(value["navScroll"]) ||
     typeof value["query"] !== "string" ||
-    !nonNegativeNumber(value["scroll"]) ||
+    !scrollRecord(value["regionScrolls"]) ||
     (viewport !== "both" && viewport !== "desktop" && viewport !== "mobile")
   ) {
     return undefined;
@@ -110,7 +137,7 @@ export function parseBrowseRecoveryState(
     drawerOpen: value["drawerOpen"],
     navScroll: value["navScroll"],
     query: value["query"],
-    scroll: value["scroll"],
+    regionScrolls: { ...value["regionScrolls"] },
     viewport,
   };
 }
@@ -134,6 +161,40 @@ export function applyNavVisibility(doc: Document): void {
     const matchesFilter =
       !changedOnly || row.getAttribute("data-changed") === "true";
     row.hidden = !(matchesQuery && matchesFilter);
+  }
+  applyGroupVisibility(doc, query !== "" || changedOnly);
+}
+
+/**
+ * While a search or changed filter narrows the tree, force every group open
+ * (remembering its prior disclosure) and hide groups with no visible rows;
+ * when the filter clears, restore the remembered disclosure.
+ */
+function applyGroupVisibility(doc: Document, filtering: boolean): void {
+  const groups = [
+    ...doc.querySelectorAll<HTMLDetailsElement>("details[data-nav-collection]"),
+  ];
+  if (filtering) {
+    for (const group of groups) {
+      if (group.dataset["filterOpen"] === undefined)
+        group.dataset["filterOpen"] = group.open ? "1" : "0";
+      group.open = true;
+    }
+    for (const group of [...groups].reverse()) {
+      const visible = [
+        ...group.querySelectorAll<HTMLElement>("[data-nav-row]"),
+      ].some((row) => !row.hidden);
+      group.hidden = !visible;
+    }
+    return;
+  }
+  for (const group of groups) {
+    const saved = group.dataset["filterOpen"];
+    if (saved !== undefined) {
+      group.open = saved === "1";
+      delete group.dataset["filterOpen"];
+    }
+    group.hidden = false;
   }
 }
 
@@ -168,6 +229,15 @@ function nonNegativeNumber(value: unknown): value is number {
 
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function scrollRecord(
+  value: unknown,
+): value is Readonly<Record<string, number>> {
+  return (
+    record(value) &&
+    Object.values(value).every((entry) => nonNegativeNumber(entry))
+  );
 }
 
 function stringArray(value: unknown): value is string[] {

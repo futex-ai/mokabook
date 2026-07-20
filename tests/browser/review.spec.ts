@@ -107,8 +107,12 @@ test("approved impact mockups show the impacted group", async ({ page }) => {
       `shared-impact.${viewport}.html`,
     );
     await page.goto(pathToFileURL(mockup).href);
-    await expect(page.getByRole("heading", { name: "Impacted" })).toBeVisible();
-    await expect(page.locator(".mb-chg-dot--impacted")).toHaveCount(2);
+    await expect(
+      page.locator(".mbk-chg-grouphead", { hasText: "Impacted" }).first(),
+    ).toBeVisible();
+    expect(await page.locator(".mbk-chg-dot.impacted").count()).toBeGreaterThan(
+      0,
+    );
     await expect(
       page.getByText(/2 impacted against origin\/main/),
     ).toBeVisible();

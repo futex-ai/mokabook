@@ -92,10 +92,13 @@ fall back to the registry. After the first release, a clean machine may use
 
 `build` writes viewport fragments and `mokabook-manifest.json` under
 `mockupsDir`. `check` calculates those bytes without writing and reports
-missing, stale, or orphan generated files. Browse provides responsive catalogue
-navigation, viewport controls, use-case steps, details, id redirects, and
-watched updates. Review provides summary, side-by-side, overlay, and difference
-views as a static artifact. Screens with shared or declared dependency impact
+missing, stale, or orphan generated files. Browse serves the package-owned
+Mokabook shell — catalogue navigation with folder/screen/flow icons and an
+All/Changed filter, linked breadcrumbs with id chips, realistic phone and
+browser device chrome with an expand-to-overlay toggle, viewport controls,
+use-case flows, a details inspector, id redirects, and watched updates.
+Review provides summary, side-by-side, overlay, and difference views as a
+static artifact. Screens with shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
 descendant of a directory is reported as the screen's impact evidence.
@@ -231,8 +234,11 @@ bootstrap and maintainer settings; do not add an npm write token to GitHub.
 
 The synthetic fixture at [`examples/basic`](./examples/basic/README.md) proves
 custom rendering, stylesheets, id links, collections, use cases, and
-Review-ignore markers without importing an application. Its `Design` catalogue
-holds the approved Browse and Review shell mockups recorded by the
+Review-ignore markers without importing an application. Its screens use
+`@firna/ui` through a react-native-web renderer adapter, so the example also
+proves the consumer contract against a real cross-platform component stack.
+Its `Design` catalogue holds the approved Browse and Review shell mockups
+recorded by the
 [shell design contract](./docs/protocol/mokabook-shell-design.md).
 
 ### Key Code

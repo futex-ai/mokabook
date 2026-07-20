@@ -1,6 +1,18 @@
 /** Progressive Browse shell enhancement served at /__mokabook/client/browse.js. */
 
-import { applyNavVisibility, setDrawer, setViewport } from "./browse_state.js";
+import {
+  collapseFrame,
+  expandedFrame,
+  handleAddressClick,
+  handleFrameClick,
+} from "./browse_frames.js";
+import {
+  applyNavVisibility,
+  captureRegionScrolls,
+  restoreRegionScrolls,
+  setDrawer,
+  setViewport,
+} from "./browse_state.js";
 
 /** Anchor facts used to decide whether Browse may intercept a click. */
 export interface BrowseLinkCandidate {
@@ -42,7 +54,23 @@ export class NavigationSequencer {
 }
 
 interface ScrollState {
-  scroll?: number;
+  scrolls?: Record<string, number>;
+}
+
+function copyText(doc: Document, text: string): void {
+  const clipboard = doc.defaultView?.navigator.clipboard;
+  if (clipboard) {
+    void clipboard.writeText(text).catch(() => undefined);
+    return;
+  }
+  const area = doc.createElement("textarea");
+  area.value = text;
+  area.style.position = "fixed";
+  area.style.opacity = "0";
+  doc.body.appendChild(area);
+  area.select();
+  doc.execCommand("copy");
+  area.remove();
 }
 
 function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
@@ -54,14 +82,14 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
   let restoringHistory = false;
   const persistScroll = (): void => {
     win.history.replaceState(
-      { scroll: win.scrollY } satisfies ScrollState,
+      { scrolls: captureRegionScrolls(doc) } satisfies ScrollState,
       "",
       win.location.href,
     );
   };
   let scrollFramePending = false;
   persistScroll();
-  win.addEventListener(
+  doc.addEventListener(
     "scroll",
     () => {
       if (restoringHistory || scrollFramePending) return;
@@ -71,7 +99,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
         scrollFramePending = false;
       });
     },
-    { passive: true },
+    { capture: true, passive: true },
   );
   const announce = (message: string): void => {
     const status = doc.getElementById("mb-status");
@@ -91,7 +119,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
   const navigate = async (
     url: string,
     push: boolean,
-    restoreScroll?: number,
+    restoreScrolls?: Readonly<Record<string, number>>,
   ): Promise<void> => {
     if (push) restoringHistory = false;
     const slot = sequencer.begin();
@@ -117,22 +145,26 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
       return;
     }
     for (const frame of main.querySelectorAll("iframe")) frame.remove();
+    collapseFrame(doc, expandedFrame(doc));
     if (push) persistScroll();
     main.innerHTML = nextMain.innerHTML;
     doc.title = parsed.title || doc.title;
     const finalUrl = response.url || url;
     if (push)
-      win.history.pushState({ scroll: 0 } satisfies ScrollState, "", finalUrl);
+      win.history.pushState(
+        { scrolls: {} } satisfies ScrollState,
+        "",
+        finalUrl,
+      );
     markActiveRow(new URL(finalUrl, win.location.href).pathname);
     setDrawer(shell, false);
-    const scroll = restoreScroll ?? 0;
-    win.scrollTo(0, scroll);
+    restoreRegionScrolls(doc, restoreScrolls ?? {});
     if (!push) {
       await new Promise<void>((resolve) =>
         win.requestAnimationFrame(() => resolve()),
       );
       if (!slot.isCurrent()) return;
-      win.scrollTo(0, scroll);
+      restoreRegionScrolls(doc, restoreScrolls ?? {});
       restoringHistory = false;
     }
     main.focus({ preventScroll: true });
@@ -144,6 +176,13 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     if (!target) return;
     if (target.closest("[data-mokabook-menu]")) {
       setDrawer(shell, shell.dataset["drawer"] !== "open");
+      return;
+    }
+    if (target.closest("[data-mokabook-collapse]")) {
+      for (const group of doc.querySelectorAll<HTMLDetailsElement>(
+        "details[data-nav-collection]",
+      ))
+        group.open = false;
       return;
     }
     const viewportOption = target
@@ -161,6 +200,14 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
           option === filterButton ? "true" : "false",
         );
       applyNavVisibility(doc);
+      return;
+    }
+    if (handleFrameClick(doc, target)) {
+      event.preventDefault();
+      return;
+    }
+    if (handleAddressClick(doc, target, (text) => copyText(doc, text))) {
+      event.preventDefault();
       return;
     }
     const anchor = target.closest("a");
@@ -184,18 +231,23 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     void navigate(url.href, true);
   });
 
+  doc.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") collapseFrame(doc, expandedFrame(doc));
+  });
+
   doc.addEventListener("input", (event) => {
     const target = event.target instanceof Element ? event.target : undefined;
     if (target?.matches("[data-mokabook-search]")) applyNavVisibility(doc);
   });
 
   win.addEventListener("popstate", (event) => {
-    const scroll =
-      typeof (event.state as ScrollState | null)?.scroll === "number"
-        ? (event.state as ScrollState).scroll
+    const state = event.state as ScrollState | null;
+    const scrolls =
+      state && typeof state.scrolls === "object" && state.scrolls !== null
+        ? state.scrolls
         : undefined;
     restoringHistory = true;
-    void navigate(win.location.href, false, scroll);
+    void navigate(win.location.href, false, scrolls);
   });
 }
 
