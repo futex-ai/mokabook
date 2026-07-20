@@ -96,7 +96,6 @@ async function verifySignatures(spec, temporaryRoot) {
     "npm",
     [
       "install",
-      "--package-lock-only",
       "--ignore-scripts",
       "--no-audit",
       "--no-fund",
