@@ -6,3 +6,6 @@ examples/basic/generated
 package-lock.json
 test-results
 playwright-report
+
+# release-please owns the changelog format
+CHANGELOG.md
