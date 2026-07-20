@@ -61,6 +61,10 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/review` for the configured Git comparison;
 - package-owned client and update endpoints under `/__mokabook/`.
 
+All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
+returns its response headers and completes without opening or registering an
+event stream.
+
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
 Static path handling rejects traversal and does not expose repository files
@@ -164,9 +168,10 @@ recovery.
 Shutdown first stops queued work and waits for any active configuration
 transaction, then closes the final adopted watcher, timers, child processes,
 HTTP servers, event streams, and ports. A candidate watcher is discarded if
-shutdown begins before adoption, and no later child restart is started. Tests
-must prove no orphan process remains after normal shutdown, failed startup, or
-interruption.
+shutdown begins before adoption: shutdown interrupts an outstanding candidate
+readiness wait and closes that watcher before the action queue finishes
+draining. No later child restart is started. Tests must prove no orphan process
+remains after normal shutdown, failed startup, or interruption.
 
 ## Review Comparison
 
@@ -186,13 +191,16 @@ changed-path and shared-impact evidence is calculated.
 The engine emits a static, self-contained artifact directory with:
 
 - a deterministic index that groups screens by changed, added, removed, and
-  ignored-only state, with an explicit empty state when nothing differs;
+  ignored-only state, plus an impacted group for byte-identical screens with
+  shared or dependency evidence;
+- an explicit empty state only when no screen has either visual differences or
+  impact evidence, with the same material/impacted totals in the CI summary;
 - one designed compare page per screen viewport, linked to its sibling
   viewport through the page's viewport control;
 - side-by-side, opacity-overlay, and difference modes on every compare page;
 - before/head artifacts kept complete and unmodified;
-- aggregate shared-impact and ignored-region evidence on the index and
-  per-viewport ignored-region evidence on compare pages;
+- aggregate shared-impact and ignored-region evidence on the index, screen
+  impact evidence on compare pages, and per-viewport ignored-region evidence;
 - deterministic `review.json` for CI summaries.
 
 Artifact pages inline the package-owned shell styles so the directory remains

@@ -44,57 +44,59 @@ export function rewriteMockLinks(
     sourceCodeLocationInfo: true,
   }) as unknown as HtmlNode;
   visit(document, (node) => {
-    const link = node.attrs?.find(
+    const links = (node.attrs ?? []).filter(
       (attribute) =>
         attribute.name === "href" || attribute.name === "data-nav-href",
     );
-    const match = link ? MOCK_HREF.exec(link.value) : undefined;
-    if (!link || !match) return;
-    const id = match[1] ?? "";
-    const hash = match[2] ?? "";
-    const target = byId.get(id);
-    if (!target) {
-      throw new MokabookError(
-        "build-invalid",
-        `${sourceRoute} links to unknown id: ${id}`,
+    for (const link of links) {
+      const match = MOCK_HREF.exec(link.value);
+      if (!match) continue;
+      const id = match[1] ?? "";
+      const hash = match[2] ?? "";
+      const target = byId.get(id);
+      if (!target) {
+        throw new MokabookError(
+          "build-invalid",
+          `${sourceRoute} links to unknown id: ${id}`,
+        );
+      }
+      const targetRoute = artifactRouteForEntry(target, viewport, byId);
+      if (!targetRoute) {
+        throw new MokabookError(
+          "build-invalid",
+          `${sourceRoute} links to collection id: ${id}`,
+        );
+      }
+      const location = node.sourceCodeLocation?.attrs?.[link.name];
+      if (!location) {
+        throw new MokabookError(
+          "build-invalid",
+          `${sourceRoute} has an id link without source location`,
+        );
+      }
+      const attributeSource = html.slice(
+        location.startOffset,
+        location.endOffset,
       );
-    }
-    const targetRoute = artifactRouteForEntry(target, viewport, byId);
-    if (!targetRoute) {
-      throw new MokabookError(
-        "build-invalid",
-        `${sourceRoute} links to collection id: ${id}`,
+      const valueRange = attributeValueRange(attributeSource);
+      if (!valueRange) {
+        throw new MokabookError(
+          "build-invalid",
+          `${sourceRoute} has an id link that cannot be rewritten`,
+        );
+      }
+      const relative = path.posix.relative(
+        path.posix.dirname(sourceRoute),
+        targetRoute,
       );
+      const encoded = encodeUrlPath(relative);
+      const linked = `${encoded.startsWith(".") ? encoded : `./${encoded}`}${hash}`;
+      replacements.push({
+        endOffset: location.startOffset + valueRange.endOffset,
+        startOffset: location.startOffset + valueRange.startOffset,
+        value: linked,
+      });
     }
-    const location = node.sourceCodeLocation?.attrs?.[link.name];
-    if (!location) {
-      throw new MokabookError(
-        "build-invalid",
-        `${sourceRoute} has an id link without source location`,
-      );
-    }
-    const attributeSource = html.slice(
-      location.startOffset,
-      location.endOffset,
-    );
-    const valueRange = attributeValueRange(attributeSource);
-    if (!valueRange) {
-      throw new MokabookError(
-        "build-invalid",
-        `${sourceRoute} has an id link that cannot be rewritten`,
-      );
-    }
-    const relative = path.posix.relative(
-      path.posix.dirname(sourceRoute),
-      targetRoute,
-    );
-    const encoded = encodeUrlPath(relative);
-    const linked = `${encoded.startsWith(".") ? encoded : `./${encoded}`}${hash}`;
-    replacements.push({
-      endOffset: location.startOffset + valueRange.endOffset,
-      startOffset: location.startOffset + valueRange.startOffset,
-      value: linked,
-    });
   });
   return replacements
     .sort((left, right) => right.startOffset - left.startOffset)

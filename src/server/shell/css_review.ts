@@ -52,6 +52,7 @@ export const SHELL_REVIEW_CSS = `
 .mb-chg-dot--changed { background: var(--mb-changed); }
 .mb-chg-dot--removed { background: var(--mb-removed); }
 .mb-chg-dot--ignored-only { background: var(--mb-ignored); }
+.mb-chg-dot--impacted { background: var(--mokabook-accent); }
 .mb-chg-dot--unchanged { background: var(--mb-border); }
 
 .mb-chg-route {

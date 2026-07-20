@@ -5,6 +5,7 @@ import path from "node:path";
 import { encodeUrlPath } from "../config/paths.js";
 import { SHELL_CSS } from "../server/shell/css.js";
 import { comparisonPagePath } from "./paths.js";
+import { isImpactOnly, isMaterial } from "./materiality.js";
 import type {
   ReviewResult,
   ReviewState,
@@ -21,14 +22,16 @@ const GROUPS: readonly { label: string; state: ReviewState }[] = [
 
 /** Render the grouped Review summary page. */
 export function indexPage(result: ReviewResult): string {
-  const material = result.screens.filter(
-    (screen) => screen.state !== "unchanged",
-  );
+  const material = result.screens.filter(isMaterial);
+  const impacted = result.screens.filter(isImpactOnly);
   const unchanged = result.screens.length - material.length;
-  const counts = GROUPS.map(
-    ({ label, state }) =>
-      `${result.screens.filter((screen) => screen.state === state).length} ${label.toLowerCase()}`,
-  ).join(" · ");
+  const counts = [
+    ...GROUPS.map(
+      ({ label, state }) =>
+        `${result.screens.filter((screen) => screen.state === state).length} ${label.toLowerCase()}`,
+    ),
+    `${impacted.length} impacted`,
+  ].join(" · ");
   const body =
     material.length === 0
       ? `<div class="mb-empty"><h1>No visual changes</h1>` +
@@ -40,8 +43,10 @@ export function indexPage(result: ReviewResult): string {
           groupSection(
             label,
             result.screens.filter((screen) => screen.state === state),
+            state,
           ),
-        ).join("");
+        ).join("") +
+        groupSection("Impacted", impacted, "impacted");
   return page(
     "Mokabook Review",
     baseline(result.baseRef) +
@@ -85,13 +90,18 @@ export function comparePage(
       `${badge(viewport.state)}<span class="mb-code">${escape(screen.route)}</span></div>` +
       toolbar(screen, viewport) +
       `<div class="mb-panes" data-compare-mode="side">${panes}</div>` +
+      screenImpactCard(screen.sharedImpact) +
       ignoredCard(viewport) +
       `<p class="mb-review-foot">${escape(viewport.viewport)} · ${escape(viewport.state)}</p>` +
       MODE_SCRIPT,
   );
 }
 
-function groupSection(label: string, screens: readonly ScreenReview[]): string {
+function groupSection(
+  label: string,
+  screens: readonly ScreenReview[],
+  tone: ReviewState | "impacted",
+): string {
   if (screens.length === 0) return "";
   const rows = screens
     .map((screen) => {
@@ -103,7 +113,7 @@ function groupSection(label: string, screens: readonly ScreenReview[]): string {
         .join(" · ");
       return (
         `<li><span class="mb-chg-row">` +
-        `<span class="mb-chg-dot mb-chg-dot--${escape(screen.state)}" aria-hidden="true"></span>` +
+        `<span class="mb-chg-dot mb-chg-dot--${escape(tone)}" aria-hidden="true"></span>` +
         `<span>${escape(screen.title)}<span class="mb-chg-route">${escape(screen.route)}</span></span>` +
         `<span>${links}</span></span></li>`
       );
@@ -112,6 +122,17 @@ function groupSection(label: string, screens: readonly ScreenReview[]): string {
   return (
     `<section><h2 class="mb-nav-group">${escape(label)}</h2>` +
     `<ul class="mb-nav-list" style="list-style:none;margin:0;padding:0">${rows}</ul></section>`
+  );
+}
+
+function screenImpactCard(sharedImpact: readonly string[]): string {
+  if (sharedImpact.length === 0) return "";
+  return (
+    `<section class="mb-impact-card"><h3>Impact evidence</h3>` +
+    sharedImpact
+      .map((item) => `<span class="mb-code">${escape(item)}</span> `)
+      .join("") +
+    `<p>These changed inputs may affect this screen.</p></section>`
   );
 }
 

@@ -68,6 +68,10 @@
   background: var(--mb-removed);
 }
 
+.mb-chg-dot--impacted {
+  background: var(--mokabook-accent);
+}
+
 .mb-chg-route {
   color: var(--mb-muted);
   display: block;

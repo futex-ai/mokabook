@@ -95,7 +95,9 @@ fall back to the registry. After the first release, a clean machine may use
 missing, stale, or orphan generated files. Browse provides responsive catalogue
 navigation, viewport controls, use-case steps, details, id redirects, and
 watched updates. Review provides summary, side-by-side, overlay, and difference
-views as a static artifact.
+views as a static artifact. Screens with shared or declared dependency impact
+remain linked in a distinct impacted group even when their generated views are
+byte-identical.
 
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
@@ -103,11 +105,14 @@ fonts, and images so comparison artifacts do not depend on the live workspace.
 Base resources must be regular Git files outside configured source roots.
 Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and
 logical screen routes are not portable links in generated static files. Build
-and check also validate local HTML resource attributes and transitive CSS URLs.
-Watched Serve keeps its resolved port, transactionally reloads a changed
-consumer config with a ready replacement watcher, and serially replaces a child
-that exits unexpectedly after readiness. Open Browse and Review pages connect to its
-versioned event stream and reload after a newer build or asset version arrives.
+and check rewrite and validate every supported `href` and `data-nav-href`, plus
+local HTML resource attributes and transitive CSS URLs. Watched Serve keeps its
+resolved port, transactionally reloads a changed consumer config with a ready
+replacement watcher, and serially replaces a child that exits unexpectedly
+after readiness. Shutdown interrupts replacement-watcher readiness and closes
+the candidate before draining the remaining lifecycle. Open Browse and Review
+pages connect to the versioned event stream and reload after a newer build or
+asset version arrives.
 A watched reload restores the current Browse search, filter, disclosures,
 viewport, drawer, and scroll state once on the same durable URL.
 A rejected config or failed candidate build leaves the last-good watcher,

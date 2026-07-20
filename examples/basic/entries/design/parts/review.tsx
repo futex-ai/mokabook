@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 /** Review classification states depicted by the design mockups. */
 export type ReviewState = "added" | "changed" | "ignored-only" | "removed";
+type ReviewRowState = Exclude<ReviewState, "ignored-only"> | "impacted";
 
 /** Branch-versus-base indicator shown in the Review shell. */
 export function BaseLine() {
@@ -16,7 +17,7 @@ export function BaseLine() {
 interface ChangedRowProps {
   active?: boolean;
   route: string;
-  state: Exclude<ReviewState, "ignored-only">;
+  state: ReviewRowState;
   title: string;
 }
 
@@ -48,6 +49,25 @@ const CHANGED_ROWS: readonly Omit<ChangedRowProps, "active">[] = [
   { route: "screens/details.html", state: "added", title: "Details" },
   { route: "screens/farewell.html", state: "removed", title: "Farewell" },
 ];
+
+const IMPACTED_ROWS: readonly Omit<ChangedRowProps, "active">[] = [
+  { route: "screens/profile.html", state: "impacted", title: "Profile" },
+  { route: "screens/settings.html", state: "impacted", title: "Settings" },
+];
+
+/** Byte-identical screens that still need inspection because an input changed. */
+export function ImpactedScreens() {
+  return (
+    <section>
+      <h2 className="mb-nav-group">Impacted</h2>
+      <ul>
+        {IMPACTED_ROWS.map((row) => (
+          <ChangedRow key={row.title} {...row} />
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 /** Review navigation listing every screen with a visual difference. */
 export function ReviewNav({
@@ -81,7 +101,7 @@ export function SharedImpactCard() {
       <h3>Shared impact</h3>
       <span className="mb-code">examples/basic/generated/styles.css</span>
       <p>
-        2 unchanged screens may still look different because a shared stylesheet
+        2 impacted screens may still look different because a shared stylesheet
         changed.
       </p>
     </section>

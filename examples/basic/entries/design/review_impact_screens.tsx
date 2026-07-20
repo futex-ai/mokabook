@@ -3,6 +3,7 @@ import { screen } from "mokabook";
 import {
   BaseLine,
   CompareToolbar,
+  ImpactedScreens,
   IgnoredImpactCard,
   Pane,
   ReviewNav,
@@ -24,11 +25,12 @@ function SharedImpactSummary({ viewport }: { viewport: "desktop" | "mobile" }) {
         <h1>Mokabook review</h1>
       </div>
       <p className="mb-review-foot">
-        1 changed · 1 added · 1 removed against origin/main. Choose a screen to
-        compare, or start with the shared changes below.
+        1 changed · 1 added · 1 removed · 2 impacted against origin/main. Choose
+        a screen to compare.
       </p>
+      <ImpactedScreens />
       <SharedImpactCard />
-      <span className="mb-empty-link">Open the first changed screen</span>
+      <span className="mb-empty-link">Open the first impacted screen</span>
     </Shell>
   );
 }

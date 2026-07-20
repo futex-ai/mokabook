@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import { Agent, request } from "node:http";
 import path from "node:path";
 import test from "node:test";
 
@@ -84,6 +85,31 @@ test("occupied ports fail without disturbing the existing server", async (contex
     /could not bind port/,
   );
   assert.equal((await fetch(first.url)).status, 200);
+});
+
+test("event-stream HEAD releases a keep-alive connection", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  const server = await startCatalogueServer(config, {
+    base: "origin/main",
+    port: 0,
+  });
+  context.after(() => server.close());
+  const agent = new Agent({ keepAlive: true, maxSockets: 1 });
+  context.after(() => agent.destroy());
+
+  const head = await nodeRequest(
+    `${server.url}/__mokabook/events`,
+    "HEAD",
+    agent,
+  );
+  assert.equal(head.status, 200);
+  assert.equal(head.body, "");
+  const home = await nodeRequest(`${server.url}/`, "GET", agent);
+  assert.equal(home.status, 200);
+  assert.match(home.body, /data-mokabook-shell/);
 });
 
 test("malformed manifest routes fail before server readiness", async (context) => {
@@ -296,4 +322,28 @@ async function waitFor(predicate: () => Promise<boolean>): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
   throw new Error("watched condition did not become true");
+}
+
+function nodeRequest(
+  url: string,
+  method: "GET" | "HEAD",
+  agent: Agent,
+): Promise<{ body: string; status: number | undefined }> {
+  return new Promise((resolve, reject) => {
+    const request_ = request(url, { agent, method }, (response) => {
+      let body = "";
+      response.setEncoding("utf8");
+      response.on("data", (chunk: string) => {
+        body += chunk;
+      });
+      response.once("end", () =>
+        resolve({ body, status: response.statusCode }),
+      );
+    });
+    request_.setTimeout(2_000, () =>
+      request_.destroy(new Error(`${method} ${url} timed out`)),
+    );
+    request_.once("error", reject);
+    request_.end();
+  });
 }

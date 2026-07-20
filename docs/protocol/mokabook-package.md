@@ -254,9 +254,11 @@ export default function render(input: RenderInput): string;
 ```
 
 The string must contain a complete `<html>` document. Mokabook serializes
-Review-ignore markers and rewrites only complete `mock:<id>` `href` or
-`data-nav-href` values after this function returns. The same rewrite applies to
-legacy output. The package declares `react` and `react-dom`
+Review-ignore markers and rewrites every complete `mock:<id>` `href` and
+`data-nav-href` value after this function returns, including when one element
+has both attributes. Final values from compatibility transforms are validated
+through the same fail-closed link contract. The same rewrite applies to legacy
+output. The package declares `react` and `react-dom`
 `>=19.0.0` as peers and does not ship a private runtime. The builder resolves
 both peers and their subpaths from consumer config, then bundles every
 React-bearing input in one internal graph.

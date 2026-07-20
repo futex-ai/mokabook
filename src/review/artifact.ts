@@ -6,6 +6,7 @@ import type {
   ReviewResult,
 } from "./types.js";
 import { comparePage, indexPage } from "./artifact_pages.js";
+import { isImpactOnly, isMaterial } from "./materiality.js";
 import { addArtifactFile, comparisonPagePath } from "./paths.js";
 
 /** Add self-contained diagnostic pages, JSON, and CI summary to pane artifacts. */
@@ -35,9 +36,8 @@ export function renderReviewArtifact(
 
 /** Create a concise deterministic CI summary. */
 export function summaryMarkdown(result: ReviewResult): string {
-  const material = result.screens.filter(
-    (screen) => screen.state !== "unchanged",
-  );
+  const material = result.screens.filter(isMaterial);
+  const impacted = result.screens.filter(isImpactOnly).length;
   const counts = new Map<string, number>();
   for (const screen of result.screens)
     counts.set(screen.state, (counts.get(screen.state) ?? 0) + 1);
@@ -46,7 +46,7 @@ export function summaryMarkdown(result: ReviewResult): string {
     "",
     `Base: \`${result.baseRef}\` (\`${result.baseCommit.slice(0, 12)}\`)`,
     "",
-    `Screens: ${result.screens.length}; material: ${material.length}; changed: ${counts.get("changed") ?? 0}; added: ${counts.get("added") ?? 0}; removed: ${counts.get("removed") ?? 0}; ignored-only: ${counts.get("ignored-only") ?? 0}.`,
+    `Screens: ${result.screens.length}; material: ${material.length}; changed: ${counts.get("changed") ?? 0}; added: ${counts.get("added") ?? 0}; removed: ${counts.get("removed") ?? 0}; ignored-only: ${counts.get("ignored-only") ?? 0}; impacted: ${impacted}.`,
   ];
   if (result.sharedImpact.length > 0) {
     lines.push(

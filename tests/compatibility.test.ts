@@ -100,6 +100,28 @@ test("configured compatibility transformers are typed complete-document function
   );
 });
 
+test("compatibility output fails closed on unresolved navigation links", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  await fs.promises.writeFile(
+    path.join(fixture.root, "compatibility.ts"),
+    `import type { CompatibilityTransformInput } from "mokabook";
+export default function transform(input: CompatibilityTransformInput): string {
+  return input.content.replace("<body", '<body data-nav-href="mock:missing"');
+}
+`,
+  );
+  await fs.promises.writeFile(
+    fixture.configPath,
+    'export default { compatibility: { transformer: "compatibility.ts" }, entriesDir: "entries", mockupsDir: "mockups", repoRoot: "." };\n',
+  );
+
+  await assert.rejects(
+    async () => compileCatalogue(await loadConfig(fixture.root)),
+    /unresolved id link mock:missing/,
+  );
+});
+
 test("compatibility routes exclude generated files pending orphan removal", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

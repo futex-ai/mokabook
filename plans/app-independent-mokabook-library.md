@@ -652,6 +652,76 @@ Summary: complete the repository workflow for the invoked Codex review loop.
 At this milestone the invoked review loop has no unaddressed valid finding and
 the reviewed commit is pushed.
 
+## Milestone 10F: Review Impact Mockup
+
+Tags: mockup
+
+Summary: align the approved mobile and desktop Review design screens with the
+impact-only state before committing the artifact implementation.
+
+- [x] Add an impacted group to the shared-impact Review mockup without
+      relabelling it as a byte-level change.
+- [x] Update the matching mockup styles and generate both mobile and desktop
+      artifacts from the source components.
+- [x] Build, check, and visually smoke the changed mockup through the automated
+      Chromium Review flow.
+
+At this milestone the approved Review design makes impact-only screens visible
+and reachable on both supported layouts.
+
+## Milestone 10G: Surface Review Impact
+
+Tags: ui
+
+Summary: keep byte-level comparison states precise while making every screen
+with shared or dependency impact reachable and visible in Review artifacts.
+
+- [x] Add failure-first index and CI-summary coverage for shared-impact-only
+      and dependency-impact-only screens.
+- [x] Add a distinct impacted group and count without relabelling unchanged
+      fragment bytes as changed.
+- [x] Keep the true no-change empty state only when no screen has byte or
+      impact evidence.
+
+At this milestone Review never tells a reviewer there is nothing to inspect
+when shared or dependency evidence can affect rendered screens.
+
+## Milestone 10H: Complete Runtime Contracts
+
+Summary: resolve the remaining link-validation, watcher-shutdown, and HTTP
+lifecycle findings from the second Codex review cycle.
+
+- [x] Add failure-first coverage for elements containing both logical-link
+      attributes in either order, then rewrite and validate every supported
+      logical-link attribute.
+- [x] Add failure-first coverage for shutdown during replacement-watcher
+      readiness, then make candidate adoption cancellable without orphaning a
+      watcher or restarting a child after shutdown.
+- [x] Add failure-first coverage proving `HEAD /__mokabook/events` completes,
+      then make the SSE endpoint method-aware.
+- [x] Update runtime and package protocol documentation for the strengthened
+      contracts.
+
+At this milestone generated output has no unresolved supported logical link,
+watched shutdown remains bounded during candidate adoption, and HEAD probes do
+not create persistent streams.
+
+## Milestone 10I: Second Review-Fix Verification
+
+Summary: verify, commit, push, and independently review the second-cycle fixes.
+
+- [x] Run focused tests for Review artifacts, links, watcher shutdown, and HTTP
+      lifecycle.
+- [x] Run formatter, lint, typecheck, unit/integration/browser/package/Rust
+      checks through `cargo xtask check` with a 100% pass rate.
+- [x] Fetch and audit `origin/main`, inspect the complete diff and deletions,
+      then commit all second-cycle fixes with a Conventional Commit and push.
+- [ ] Run `cargo xtask review` after the push and repeat the bounded review loop
+      until no valid finding remains.
+
+At this milestone every valid second-cycle finding is fixed and the reviewed
+commit is pushed.
+
 ## Milestone 11: First Package Release
 
 Summary: after the library PR merges, reserve the unscoped package safely,

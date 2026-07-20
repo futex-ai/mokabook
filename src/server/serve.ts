@@ -127,6 +127,10 @@ async function serveWatched(
   }
   const runningSupervisor = supervisor;
   let closed = false;
+  let signalShutdown: () => void = () => undefined;
+  const shutdownStarted = new Promise<void>((resolve) => {
+    signalShutdown = resolve;
+  });
   let debouncer: WatchDebouncer | undefined;
   const notifyCandidate = (candidate: string): void => {
     debouncer?.notify(classifyWatchPath(candidate, activeConfig));
@@ -140,15 +144,24 @@ async function serveWatched(
       replacementGate,
     );
     let transferred = false;
+    let replacementClosed = false;
+    const closeReplacement = async (): Promise<void> => {
+      if (replacementClosed) return;
+      replacementClosed = true;
+      await replacement.close();
+    };
     try {
-      await replacement.ready();
-      if (closed) {
-        await replacement.close();
+      const ready = await watcherReadyBeforeShutdown(
+        replacement,
+        shutdownStarted,
+      );
+      if (!ready || closed) {
+        await closeReplacement();
         return;
       }
       await outputStore.write(await compileCatalogue(nextConfig), nextConfig);
       if (closed) {
-        await replacement.close();
+        await closeReplacement();
         return;
       }
       const previous = watcher;
@@ -169,7 +182,7 @@ async function serveWatched(
       if (!closed) await restartWithRecovery(runningSupervisor);
       if (closeError !== undefined) throw closeError;
     } catch (error) {
-      if (!transferred) await replacement.close();
+      if (!transferred) await closeReplacement();
       throw error;
     }
   };
@@ -203,12 +216,24 @@ async function serveWatched(
     async close(): Promise<void> {
       if (closed) return;
       closed = true;
+      signalShutdown();
       debouncer?.close();
       await closeWatched(actionQueue, () => watcher, runningSupervisor);
     },
     port,
     url: `http://127.0.0.1:${port}`,
   };
+}
+
+/** Stop waiting for a candidate watcher as soon as watched shutdown begins. */
+async function watcherReadyBeforeShutdown(
+  watcher: ConsumerWatcher,
+  shutdownStarted: Promise<void>,
+): Promise<boolean> {
+  return Promise.race([
+    watcher.ready().then(() => true),
+    shutdownStarted.then(() => false),
+  ]);
 }
 
 function createWatcher(

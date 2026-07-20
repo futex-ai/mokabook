@@ -53,6 +53,28 @@ test("id-link rewriting uses parsed encoded href values", async (context) => {
   assert.doesNotMatch(mobile, /mock&#58;details/);
 });
 
+test("id-link rewriting resolves both navigation attributes", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  for (const attributes of [
+    'href="mock:details" data-nav-href="mock:details"',
+    'data-nav-href="mock:details" href="mock:details"',
+  ]) {
+    await fs.promises.writeFile(
+      fixture.entryPath,
+      validEntrySource({ body: `<a ${attributes}>Details</a>` }),
+    );
+
+    const compilation = await compileCatalogue(config);
+    const mobile = compilation.outputs.get("screens/home.mobile.html") ?? "";
+
+    assert.doesNotMatch(mobile, /mock:details/);
+    assert.match(mobile, /href="\.\/details\.mobile\.html"/);
+    assert.match(mobile, /data-nav-href="\.\/details\.mobile\.html"/);
+  }
+});
+
 test("link validation fails closed for non-portable targets", async (context) => {
   const fixture = await createFixture(
     validEntrySource({

@@ -78,9 +78,11 @@ type Renderer = (input: RenderInput) => string;
 ```
 
 The returned string must be a complete HTML document. Mokabook then converts
-`ReviewIgnore` templates into inert comments and resolves complete `href`
-values of the form `mock:<id>` in `href` and `data-nav-href` to
-viewport-matched fragments. The same pass covers legacy pages. Text, scripts,
+`ReviewIgnore` templates into inert comments and resolves every complete value
+of the form `mock:<id>` in `href` and `data-nav-href` to viewport-matched
+fragments. Both attributes are resolved when they coexist on one element, and
+the validator independently rejects any logical navigation value left by a
+compatibility transform. The same pass covers legacy pages. Text, scripts,
 styles, and unrelated attributes containing the same characters remain
 unchanged. A use-case link resolves through its first screen; collections are
 intentionally not linkable.
@@ -100,11 +102,12 @@ the completed HTML string.
 ## 4. Validation And Commit
 
 Registry ids, routes, relationships, files, output collisions, stylesheets,
-links, anchors, local HTML resource attributes, `srcset`, inline/style-block
-CSS, transitive CSS imports/URLs, Review-ignore/material markers, legacy
-policies, and manifest data are validated before output changes. All expected
-bytes are held in memory. `check` compares those bytes with disk and reports
-grouped missing, stale, and proven-orphan paths.
+ordinary and `data-nav-href` links, anchors, local HTML resource attributes,
+`srcset`, inline/style-block CSS, transitive CSS imports/URLs,
+Review-ignore/material markers, legacy policies, and manifest data are
+validated before output changes. All expected bytes are held in memory.
+`check` compares those bytes with disk and reports grouped missing, stale, and
+proven-orphan paths.
 
 Pending generated orphans are derived once from the same ownership rule used by
 Check and the output transaction. Link/resource validation and the temporary

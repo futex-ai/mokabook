@@ -114,7 +114,7 @@ function handleRequest(
   if (url.pathname === "/__mokabook/shell.css")
     return send(response, 200, "text/css", SHELL_CSS, method);
   if (url.pathname === "/__mokabook/events")
-    return openEventStream(response, streams, currentVersion());
+    return openEventStream(response, streams, currentVersion(), method);
   if (url.pathname.startsWith("/__mokabook/client/")) {
     return serveClientModule(
       response,
@@ -249,12 +249,17 @@ function openEventStream(
   response: ServerResponse,
   streams: Set<ServerResponse>,
   version: number,
+  method: string,
 ): void {
   response.writeHead(200, {
     "cache-control": "no-cache",
     connection: "keep-alive",
     "content-type": "text/event-stream",
   });
+  if (method === "HEAD") {
+    response.end();
+    return;
+  }
   response.write(`event: ready\ndata: ${version}\n\n`);
   streams.add(response);
   response.on("close", () => streams.delete(response));

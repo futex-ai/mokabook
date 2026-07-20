@@ -47,10 +47,12 @@ export function extractHtmlReferences(content: string): HtmlReferences {
     const id = attributes.get("id");
     if (id !== undefined) anchors.add(id);
     const href = attributes.get("href");
+    const navigationHref = attributes.get("data-nav-href");
     const sourceAttributes = SOURCE_ATTRIBUTES.get(node.tagName ?? "") ?? [];
     if (href !== undefined && !sourceAttributes.includes("href")) {
       hrefs.push(href);
     }
+    if (navigationHref !== undefined) hrefs.push(navigationHref);
     for (const name of sourceAttributes) {
       const value = attributes.get(name);
       if (value !== undefined) resources.push(value);

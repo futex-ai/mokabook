@@ -90,6 +90,57 @@ test("empty review renders the no-visual-changes state", () => {
   assert.match(files.get("index.html") as string, /No visual changes/);
 });
 
+test("impact-only screens remain visible and material", () => {
+  const unchangedViewports = screenReview({}).viewports.map((viewport) => ({
+    ...viewport,
+    state: "unchanged" as const,
+  }));
+  const files = renderReviewArtifact({
+    files: new Map(),
+    result: result({
+      screens: [
+        screenReview({
+          id: "shared-only",
+          route: "screens/shared-only.html",
+          sharedImpact: ["styles.css"],
+          state: "unchanged",
+          title: "Shared only",
+          viewports: unchangedViewports,
+        }),
+        screenReview({
+          dependencies: ["tokens.json"],
+          id: "dependency-only",
+          route: "screens/dependency-only.html",
+          sharedImpact: ["tokens.json"],
+          state: "unchanged",
+          title: "Dependency only",
+          viewports: unchangedViewports,
+        }),
+      ],
+      sharedImpact: ["styles.css"],
+    }),
+  });
+  const index = files.get("index.html") as string;
+  const summary = files.get("summary.md") as string;
+
+  assert.doesNotMatch(index, /No visual changes/);
+  assert.match(index, /Impacted<\/h2>/);
+  assert.match(index, /Shared only/);
+  assert.match(index, /Dependency only/);
+  assert.ok(
+    index.includes(
+      `href="${comparisonPagePath("screens/shared-only.html", "mobile")}"`,
+    ),
+  );
+  assert.ok(
+    index.includes(
+      `href="${comparisonPagePath("screens/dependency-only.html", "mobile")}"`,
+    ),
+  );
+  assert.match(summary, /material: 2/);
+  assert.match(summary, /impacted: 2/);
+});
+
 test("compare pages render modes, viewport links, and missing panes", () => {
   const files = renderReviewArtifact({
     files: new Map(),
