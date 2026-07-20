@@ -127,8 +127,9 @@ CI` passed. Do not merge the first release PR yet.
    immutable tag/release and publishes the first supported consumer version
    with provenance. Release-please treats the `0.0.0` manifest as unreleased
    and would otherwise default the first version to `1.0.0`, so the config
-   carries a one-time `release-as: 0.1.0` override; remove the override in a
-   follow-up change after the release publishes.
+   carried a one-time `release-as: 0.1.0` override, removed after the release
+   published. Tags must be bare `vX.Y.Z` (`include-component-in-tag: false`)
+   because the release workflow only publishes refs of that shape.
 7. From a clean directory, verify package visibility, metadata, README,
    license, owners, provenance/signatures, dist tags, `npx mokabook --version`,
    and a minimal build/serve fixture.

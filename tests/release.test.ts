@@ -215,6 +215,7 @@ test("release-please owns the Node manifest and first release state", async () =
   if (releaseAs !== undefined) {
     assert.match(releaseAs, /^0\.\d+\.\d+$/);
   }
+  assert.equal(config.packages["."]["include-component-in-tag"], false);
   assert.deepEqual(
     Object.keys(config.packages["."])
       .filter((key) => key !== "release-as")
@@ -222,6 +223,7 @@ test("release-please owns the Node manifest and first release state", async () =
     [
       "bump-minor-pre-major",
       "changelog-path",
+      "include-component-in-tag",
       "include-v-in-tag",
       "release-type",
     ],
