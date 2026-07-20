@@ -1,0 +1,717 @@
+{
+  "entries": [
+    {
+      "dependencies": [
+        "examples/basic/entries/design/design.mockup.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "Neutral design mockups for the Mokabook shell implemented in the UI milestone.",
+      "id": "design",
+      "kind": "collection",
+      "navPath": [
+        "Design"
+      ],
+      "rationale": "Reviewers approve the complete Browse and Review design from synthetic data before any shell UI is implemented.",
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/design.mockup.tsx",
+      "title": "Mokabook design",
+      "childIds": [
+        "design-browse",
+        "design-review"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/design.mockup.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The package-owned responsive Browse shell around consumer fragments.",
+      "id": "design-browse",
+      "kind": "collection",
+      "navPath": [
+        "Design",
+        "Mokabook design"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/design.mockup.tsx",
+      "title": "Browse shell",
+      "childIds": [
+        "design-browse-views",
+        "design-browse-states"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/design.mockup.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "Browse states for details, missing routes, and narrow layouts.",
+      "id": "design-browse-states",
+      "kind": "collection",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/design.mockup.tsx",
+      "title": "Shell states",
+      "childIds": [
+        "design-browse-details",
+        "design-browse-missing-route",
+        "design-browse-navigation"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/design.mockup.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "Canonical Browse destinations: home, a screen, and a use case.",
+      "id": "design-browse-views",
+      "kind": "collection",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/design.mockup.tsx",
+      "title": "Catalogue views",
+      "childIds": [
+        "design-browse-home",
+        "design-browse-screen",
+        "design-browse-use-case"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/design.mockup.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The static Git comparison experience produced by mokabook review.",
+      "id": "design-review",
+      "kind": "collection",
+      "navPath": [
+        "Design",
+        "Mokabook design"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/design.mockup.tsx",
+      "title": "Review",
+      "childIds": [
+        "design-review-outcomes",
+        "design-review-impact"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/design.mockup.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "Aggregate review states: shared impact, ignored regions, empty.",
+      "id": "design-review-impact",
+      "kind": "collection",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/design.mockup.tsx",
+      "title": "Impact states",
+      "childIds": [
+        "design-review-shared-impact",
+        "design-review-ignored-only",
+        "design-review-empty"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/design.mockup.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "Per-screen comparison pages for each classification outcome.",
+      "id": "design-review-outcomes",
+      "kind": "collection",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/design.mockup.tsx",
+      "title": "Comparison outcomes",
+      "childIds": [
+        "design-review-changed",
+        "design-review-added",
+        "design-review-removed",
+        "design-review-difference"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/catalogue.mockup.tsx",
+        "examples/basic/generated/styles.css"
+      ],
+      "description": "Synthetic screens used to exercise the reusable framework.",
+      "id": "example-screens",
+      "kind": "collection",
+      "navPath": [
+        "Example"
+      ],
+      "relatedDocs": [
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
+      "title": "Screens",
+      "childIds": [
+        "example-welcome",
+        "example-details"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The details panel expanded under a selected screen.",
+      "id": "design-browse-details",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Shell states"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_screens.tsx",
+      "title": "Details panel",
+      "fragments": {
+        "desktop": "design/browse/states/details.desktop.html",
+        "mobile": "design/browse/states/details.mobile.html"
+      },
+      "route": "design/browse/states/details.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The not-found view keeping catalogue navigation available.",
+      "id": "design-browse-missing-route",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Shell states"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_screens.tsx",
+      "title": "Missing route",
+      "fragments": {
+        "desktop": "design/browse/states/missing-route.desktop.html",
+        "mobile": "design/browse/states/missing-route.mobile.html"
+      },
+      "route": "design/browse/states/missing-route.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "Collapsed navigation opening as a drawer on narrow viewports.",
+      "id": "design-browse-navigation",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Shell states"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_screens.tsx",
+      "title": "Narrow navigation",
+      "fragments": {
+        "desktop": "design/browse/states/navigation.desktop.html",
+        "mobile": "design/browse/states/navigation.mobile.html"
+      },
+      "route": "design/browse/states/navigation.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The catalogue home with the navigation tree, search, and filter.",
+      "id": "design-browse-home",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Catalogue views"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_screens.tsx",
+      "title": "Home",
+      "fragments": {
+        "desktop": "design/browse/views/home.desktop.html",
+        "mobile": "design/browse/views/home.mobile.html"
+      },
+      "route": "design/browse/views/home.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "A selected screen with viewport switching and framed fragments.",
+      "id": "design-browse-screen",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Catalogue views"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_screens.tsx",
+      "title": "Selected screen",
+      "fragments": {
+        "desktop": "design/browse/views/screen.desktop.html",
+        "mobile": "design/browse/views/screen.mobile.html"
+      },
+      "route": "design/browse/views/screen.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "A selected use case rendering ordered steps of existing screens.",
+      "id": "design-browse-use-case",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Catalogue views"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_screens.tsx",
+      "title": "Selected use case",
+      "fragments": {
+        "desktop": "design/browse/views/use-case.desktop.html",
+        "mobile": "design/browse/views/use-case.mobile.html"
+      },
+      "route": "design/browse/views/use-case.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_impact_screens.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The empty comparison when no screen differs from the base.",
+      "id": "design-review-empty",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Impact states"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_impact_screens.tsx",
+      "title": "Empty review",
+      "fragments": {
+        "desktop": "design/review/impact/empty.desktop.html",
+        "mobile": "design/review/impact/empty.mobile.html"
+      },
+      "route": "design/review/impact/empty.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_impact_screens.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "A screen whose only differences fall inside ignored regions.",
+      "id": "design-review-ignored-only",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Impact states"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_impact_screens.tsx",
+      "title": "Ignored only",
+      "fragments": {
+        "desktop": "design/review/impact/ignored-only.desktop.html",
+        "mobile": "design/review/impact/ignored-only.mobile.html"
+      },
+      "route": "design/review/impact/ignored-only.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_impact_screens.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The review summary when shared files can affect unchanged screens.",
+      "id": "design-review-shared-impact",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Impact states"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_impact_screens.tsx",
+      "title": "Shared impact",
+      "fragments": {
+        "desktop": "design/review/impact/shared-impact.desktop.html",
+        "mobile": "design/review/impact/shared-impact.mobile.html"
+      },
+      "route": "design/review/impact/shared-impact.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_outcome_screens.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "An added screen with no base render to compare against.",
+      "id": "design-review-added",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Comparison outcomes"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_outcome_screens.tsx",
+      "title": "Added screen",
+      "fragments": {
+        "desktop": "design/review/outcomes/added.desktop.html",
+        "mobile": "design/review/outcomes/added.mobile.html"
+      },
+      "route": "design/review/outcomes/added.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_outcome_screens.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "A changed screen compared side by side with its base render.",
+      "id": "design-review-changed",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Comparison outcomes"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_outcome_screens.tsx",
+      "title": "Changed screen",
+      "fragments": {
+        "desktop": "design/review/outcomes/changed.desktop.html",
+        "mobile": "design/review/outcomes/changed.mobile.html"
+      },
+      "route": "design/review/outcomes/changed.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_outcome_screens.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "Difference mode highlighting changed and added regions in place.",
+      "id": "design-review-difference",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Comparison outcomes"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_outcome_screens.tsx",
+      "title": "Difference mode",
+      "fragments": {
+        "desktop": "design/review/outcomes/difference.desktop.html",
+        "mobile": "design/review/outcomes/difference.mobile.html"
+      },
+      "route": "design/review/outcomes/difference.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_outcome_screens.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "A removed screen keeping only its base render.",
+      "id": "design-review-removed",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Comparison outcomes"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_outcome_screens.tsx",
+      "title": "Removed screen",
+      "fragments": {
+        "desktop": "design/review/outcomes/removed.desktop.html",
+        "mobile": "design/review/outcomes/removed.mobile.html"
+      },
+      "route": "design/review/outcomes/removed.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/catalogue.mockup.tsx",
+        "examples/basic/generated/styles.css"
+      ],
+      "description": "A second synthetic screen proving cross-screen links.",
+      "id": "example-details",
+      "kind": "screen",
+      "navPath": [
+        "Example"
+      ],
+      "relatedDocs": [
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
+      "title": "Details",
+      "address": "example.test/details",
+      "fragments": {
+        "desktop": "screens/details.desktop.html",
+        "mobile": "screens/details.mobile.html"
+      },
+      "route": "screens/details.html",
+      "useCaseIds": [
+        "example-tour"
+      ],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/catalogue.mockup.tsx",
+        "examples/basic/generated/styles.css"
+      ],
+      "description": "A linked landing screen for the neutral fixture.",
+      "id": "example-welcome",
+      "kind": "screen",
+      "navPath": [
+        "Example"
+      ],
+      "relatedDocs": [
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
+      "title": "Welcome",
+      "address": "example.test/welcome",
+      "fragments": {
+        "desktop": "screens/welcome.desktop.html",
+        "mobile": "screens/welcome.mobile.html"
+      },
+      "route": "screens/welcome.html",
+      "useCaseIds": [
+        "example-tour"
+      ],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/catalogue.mockup.tsx",
+        "examples/basic/generated/styles.css"
+      ],
+      "description": "An ordered journey that reuses both canonical screens.",
+      "id": "example-tour",
+      "kind": "use-case",
+      "navPath": [
+        "Example"
+      ],
+      "relatedDocs": [
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
+      "title": "Example tour",
+      "route": "user-flows/example-tour.html",
+      "steps": [
+        {
+          "screenId": "example-welcome"
+        },
+        {
+          "screenId": "example-details"
+        }
+      ]
+    }
+  ],
+  "generatedBy": "mokabook",
+  "legacyPages": [],
+  "schemaVersion": 3
+}

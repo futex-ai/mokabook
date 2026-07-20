@@ -1,0 +1,456 @@
+/* Mokabook Review mode: the base-ref indicator, the changed-screens
+   navigation, the comparison toolbar and grids, and the summary bands. */
+
+/* ---- Top-bar base-ref indicator --------------------------------------- */
+
+.mbk-basewatch {
+  align-items: center;
+  color: var(--chrome-muted);
+  display: flex;
+  flex: 1;
+  font-size: 12.5px;
+  gap: 8px;
+}
+
+.mbk-basewatch strong {
+  color: var(--chrome-ink);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+
+.mbk-basewatch-dot {
+  background: #c98a2b;
+  border-radius: 999px;
+  height: 7px;
+  width: 7px;
+}
+
+/* ---- Changed-screens navigation --------------------------------------- */
+
+.mbk-nav-total {
+  font-family: var(--mono);
+}
+
+.mbk-chg-group {
+  margin-bottom: 8px;
+}
+
+.mbk-chg-grouphead {
+  align-items: center;
+  color: var(--chrome-ink);
+  display: flex;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 7px;
+  letter-spacing: 0.05em;
+  margin: 10px 8px 4px;
+  text-transform: uppercase;
+}
+
+.mbk-chg-count {
+  color: var(--chrome-muted);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin-left: auto;
+  text-transform: none;
+}
+
+.mbk-chg-row {
+  align-items: center;
+  border-radius: 6px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+.mbk-chg-row:hover {
+  background: rgba(79, 120, 100, 0.08);
+}
+
+.mbk-chg-row.active {
+  background: var(--mbk-sage);
+}
+
+.mbk-chg-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.mbk-chg-text strong {
+  color: var(--chrome-ink);
+  display: block;
+  font-size: 12.5px;
+}
+
+.mbk-chg-text span {
+  color: var(--chrome-muted);
+  font-size: 10.5px;
+}
+
+.mbk-chg-note {
+  color: var(--chrome-muted);
+  flex-shrink: 0;
+  font-size: 10.5px;
+}
+
+.mbk-chg-row.active .mbk-chg-text strong,
+.mbk-chg-row.active .mbk-chg-text span,
+.mbk-chg-row.active .mbk-chg-note {
+  color: #fff;
+}
+
+.mbk-chg-row.active .mbk-chg-dot {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.mbk-chg-more {
+  color: var(--chrome-muted);
+  font-size: 11px;
+  margin: 2px 8px 0;
+}
+
+.mbk-chg-dot {
+  background: var(--chrome-border-strong);
+  border-radius: 999px;
+  flex-shrink: 0;
+  height: 7px;
+  width: 7px;
+}
+
+.mbk-chg-dot.added {
+  background: var(--mbk-sage);
+}
+
+.mbk-chg-dot.changed {
+  background: #c98a2b;
+}
+
+.mbk-chg-dot.removed {
+  background: #b5564a;
+}
+
+.mbk-chg-dot.impacted {
+  background: var(--mbk-sage-deep);
+}
+
+/* ---- Shared-impact and ignored cards ---------------------------------- */
+
+.mbk-chg-shared {
+  background: var(--chrome-surface);
+  border: 1px solid var(--chrome-border);
+  border-radius: 10px;
+  margin: 12px 8px 0;
+  padding: 11px 12px;
+}
+
+.mbk-chg-shared strong {
+  font-size: 12px;
+}
+
+.mbk-chg-shared p {
+  color: var(--chrome-muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+  margin: 4px 0 8px;
+}
+
+.mbk-chg-shared-link {
+  color: var(--mbk-sage);
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.mbk-chg-ignored-head {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.mbk-chg-ignored-head span {
+  background: var(--chrome-bg);
+  border-radius: 999px;
+  color: var(--chrome-muted);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+}
+
+/* ---- Review head, status pills, and toolbar --------------------------- */
+
+.mbk-status {
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+
+.mbk-status.changed {
+  background: #fbeccb;
+  color: #8a6d1e;
+}
+
+.mbk-status.added {
+  background: #e3eee6;
+  color: var(--mbk-sage-deep);
+}
+
+.mbk-status.removed {
+  background: #f6dedb;
+  color: #7d352c;
+}
+
+.mbk-status.ignored {
+  background: var(--chrome-bg);
+  color: var(--chrome-muted);
+}
+
+.mbk-open-browse {
+  color: var(--mbk-sage);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mbk-cmp-toolbar {
+  align-items: center;
+  background: var(--chrome-surface);
+  border-bottom: 1px solid var(--chrome-border);
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px 24px;
+}
+
+.mbk-shell--mobile .mbk-cmp-toolbar {
+  padding: 12px 16px;
+}
+
+/* ---- Side-by-side comparison ------------------------------------------ */
+
+.mbk-compare {
+  align-items: start;
+  background: radial-gradient(
+      circle at center,
+      rgba(20, 28, 22, 0.05) 1px,
+      transparent 1px
+    )
+    0 0 / 22px 22px;
+  display: grid;
+  flex: 1;
+  gap: 28px;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+  overflow: auto;
+  padding: 26px;
+}
+
+.mbk-shell--mobile .mbk-compare {
+  gap: 20px;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  padding: 20px 14px;
+}
+
+.mbk-compare-side {
+  min-width: 0;
+}
+
+.mbk-compare-label {
+  align-items: center;
+  display: flex;
+  font-size: 11.5px;
+  font-weight: 700;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.mbk-compare-label.before {
+  color: var(--chrome-muted);
+}
+
+.mbk-compare-label.after {
+  color: var(--mbk-sage-deep);
+}
+
+.mbk-chg-dot.base {
+  background: var(--chrome-border-strong);
+}
+
+.mbk-compare .browser-frame {
+  height: 470px;
+  width: 100%;
+}
+
+.mbk-pane-missing {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px dashed var(--chrome-border-strong);
+  border-radius: 8px;
+  color: var(--chrome-muted);
+  display: flex;
+  font-size: 12.5px;
+  justify-content: center;
+  min-height: 470px;
+  padding: 16px;
+  text-align: center;
+}
+
+.mbk-shell--mobile .mbk-pane-missing {
+  min-height: 280px;
+  width: 100%;
+}
+
+/* ---- Difference view -------------------------------------------------- */
+
+.mbk-diff-view {
+  align-items: center;
+  background: radial-gradient(
+      circle at center,
+      rgba(20, 28, 22, 0.05) 1px,
+      transparent 1px
+    )
+    0 0 / 22px 22px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  overflow: auto;
+  padding: 24px 26px 32px;
+}
+
+.mbk-diff-view .mbk-frame-wrap {
+  max-width: 820px;
+  width: 100%;
+}
+
+.mbk-diff-view .browser-frame {
+  height: 470px;
+  width: 100%;
+}
+
+.mbk-diff-legend {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 16px;
+  justify-content: center;
+  margin: 0;
+}
+
+.mbk-diff-legend > span {
+  align-items: center;
+  color: var(--chrome-ink-2);
+  display: flex;
+  gap: 6px;
+}
+
+.mbk-diff-legend i {
+  border-radius: 3px;
+  height: 12px;
+  width: 12px;
+}
+
+.mbk-diff-legend i.changed {
+  background: rgba(201, 138, 43, 0.45);
+}
+
+.mbk-diff-legend i.added {
+  background: rgba(79, 120, 100, 0.45);
+}
+
+.mbk-diff-legend-note {
+  color: var(--chrome-muted);
+}
+
+/* Diff marks: a soft full-width tint, no border. */
+.mbk-shot .mbk-diff-changed {
+  background: rgba(201, 138, 43, 0.14);
+  border-radius: 4px;
+  margin-left: -6px;
+  margin-right: -6px;
+  padding: 3px 6px;
+}
+
+.mbk-shot .mbk-diff-added {
+  background: rgba(79, 120, 100, 0.14);
+  border-radius: 4px;
+  color: var(--mbk-sage-deep);
+  margin-left: -6px;
+  margin-right: -6px;
+  padding: 3px 6px;
+}
+
+/* ---- Foot summary and overview ---------------------------------------- */
+
+.mbk-review-summary {
+  align-items: center;
+  background: var(--chrome-surface);
+  border-top: 1px solid var(--chrome-border);
+  display: flex;
+  flex-shrink: 0;
+  font-size: 12.5px;
+  gap: 14px;
+  padding: 11px 24px;
+}
+
+.mbk-review-facts {
+  color: var(--chrome-ink-2);
+}
+
+.mbk-review-pct {
+  color: var(--chrome-muted);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.mbk-review-overview {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 auto;
+  max-width: 560px;
+  overflow: auto;
+  padding: 24px;
+  width: 100%;
+}
+
+.mbk-review-lede {
+  color: var(--chrome-ink-2);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.mbk-impact-list {
+  background: var(--chrome-surface);
+  border: 1px solid var(--chrome-border);
+  border-radius: 10px;
+  padding: 6px 8px 8px;
+}
+
+.mbk-impact-list .mbk-chg-grouphead {
+  margin: 6px 4px 4px;
+}
+
+.mbk-review-overview .mbk-chg-shared {
+  margin: 0;
+}
+
+.mbk-review-overview .mbk-empty-link {
+  margin-top: 2px;
+}

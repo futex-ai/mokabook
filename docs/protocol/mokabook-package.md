@@ -1,0 +1,427 @@
+# Mokabook Package And Authoring Contract
+
+## Scope
+
+Mokabook is shared developer tooling for repositories that keep visual mockups
+as code and committed static artifacts. The package owns catalogue definitions,
+generation, validation, Browse, and Review behavior. A consumer owns all product
+screens, product copy, product components, styling, theme setup, and generated
+product output.
+
+The package must be usable by Accounting and Juno without importing either
+application or recognizing application-specific route names. Synthetic screens
+may exist only under examples and test fixtures.
+
+## Package Identity
+
+- The public package name is `mokabook`.
+- The package exposes one executable named `mokabook`.
+- With no subcommand, the executable runs watched Browse mode.
+- Zero-install and locally installed usage both use `npx mokabook`; npm can
+  infer the package's sole executable.
+- The unscoped package is always public. Firna is its author and controls the
+  approved npm maintainer accounts, owner list, and release workflow.
+- `mockbook` and `@firna/mockbook` are not package or executable aliases. The
+  old spelling appears only when documenting the Accounting source being
+  migrated.
+
+The initial supported runtime is Node.js 22.14 or newer. CI must exercise the
+minimum supported release and the current Firna release runtime. Unsupported
+Node versions fail immediately with an actionable version error.
+
+## CLI
+
+The public commands are:
+
+```text
+mokabook                 Alias for `mokabook serve`
+mokabook serve           Serve Browse and Review; watch by default
+mokabook build           Generate static artifacts and the manifest
+mokabook check           Validate source and committed generated output
+mokabook review          Generate a static comparison artifact
+mokabook --help          Show commands, options, and config discovery
+mokabook --version       Show the installed package version
+```
+
+Common options include `--config <path>`. Serve accepts `--port`, `--base`,
+`--watch`, and `--no-watch`. Review accepts `--base` and `--out`. A flag after
+the package name belongs to Mokabook; docs must show npx arguments in a form
+that is unambiguous to current npm.
+
+Unknown commands, invalid values, absent configuration, and invalid catalogue
+data exit non-zero. Expected author errors do not print JavaScript stacks unless
+diagnostic output is explicitly requested.
+
+## Configuration Discovery
+
+Mokabook searches upward from the current working directory for
+`mokabook.config.ts`, `mokabook.config.mts`, `mokabook.config.js`, or
+`mokabook.config.mjs`, unless `--config` is supplied. Discovery stops at the
+filesystem root and reports every filename it attempted when none is found.
+
+The config's filesystem paths resolve relative to the config file, never
+relative to the installed package or transient npx cache. Repository-matching
+globs operate on repo-relative POSIX paths. `defineConfig` validates and types
+the following contract:
+
+- `mockupsDir`: output/catalogue root, such as `docs/mockups`;
+- `entriesDir`: structured `*.mockup.ts` and `*.mockup.tsx` source directory;
+- optional legacy page discovery and rendering settings;
+- optional renderer-module path and declarative route-to-stylesheet rules;
+- optional consumer package roots, aliases, conditions, fields, extensions, and
+  loaders for app-owned module resolution;
+- default Git base ref and Review output directory;
+- shared-impact globs for Review;
+- additional authored inputs and static assets for watched Serve;
+- optional legacy link aliases and lint policy needed by that consumer.
+- an optional temporary document transformer for an existing consumer cutover.
+
+The resolved config has one repository root, one mockups root, and normalized
+repo-relative POSIX paths. Config validation rejects path traversal, output
+outside the repository (including through symlinks), overlapping
+authored/generated roots, duplicate rules, and a watch path that cannot be
+classified safely.
+
+No default may encode `docs/mockups` as a mandatory location, Accounting route
+families, Bookfolio/Firna product tokens, email-template paths, or a TypeScript
+workspace layout. A conventional `docs/mockups` layout may be offered by an
+explicit initializer or documented example, not hidden in runtime logic.
+
+The normative configuration shape is:
+
+```ts
+type ModuleLoader =
+  | "base64"
+  | "binary"
+  | "css"
+  | "dataurl"
+  | "empty"
+  | "file"
+  | "js"
+  | "json"
+  | "jsx"
+  | "text"
+  | "ts"
+  | "tsx";
+
+interface MokabookConfig {
+  entriesDir: string;
+  mockupsDir: string;
+  repoRoot?: string; // config directory
+  renderer?: string;
+  moduleResolution?: {
+    aliases?: Readonly<Record<string, string>>;
+    conditions?: readonly string[];
+    loaders?: Readonly<Record<string, ModuleLoader>>;
+    mainFields?: readonly string[];
+    packageRoots?: readonly string[];
+    resolveExtensions?: readonly string[];
+  };
+  stylesheets?: readonly {
+    match: string;
+    stylesheets: readonly string[];
+  }[];
+  legacy?: {
+    pagesDir: string;
+    components?: string;
+    exclude?: readonly string[];
+    routeAliases?: Readonly<Record<string, string>>;
+    lint?: {
+      allowRoutes?: readonly string[];
+      maxScreensPerPage?: number;
+      requireStageIds?: boolean;
+    };
+  };
+  review?: {
+    base?: string; // origin/main
+    outDir?: string; // .context/mokabook-review
+    sharedImpact?: readonly string[];
+  };
+  watch?: {
+    debounceMs?: number; // 75
+    rules?: readonly {
+      action: "ignore" | "rebuild" | "reload" | "restart";
+      paths: readonly string[];
+    }[];
+  };
+  compatibility?: {
+    readManifestV2?: boolean; // false
+    transformer?: string;
+  };
+}
+```
+
+Filesystem fields (`repoRoot`, `entriesDir`, `mockupsDir`, `renderer`, legacy
+page/component paths, compatibility transformer, module-resolution package
+roots, and Review `outDir`) are config-relative. Stylesheet file paths are
+relative to `mockupsDir`; HTTP(S) stylesheet URLs are allowed.
+`watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
+globs, while stylesheet `match` and legacy aliases/lint routes match catalogue
+routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
+matches and watch paths are invalid. Additional watch rules cannot override
+configured source/module rebuilds, configured stylesheet reloads, or
+package-owned ignores for dependency, build, test, Review, header-proven
+generated, and transaction paths. An unowned public HTML file below
+`mockupsDir` remains consumer-authored and can match an explicit watch rule.
+Authored source directories may sit below `mockupsDir` for a `docs/mockups/src`
+layout, but they may not equal each other or the output root; generated routes
+are collision-checked against those sources before writing. Review output must
+not overlap a source or output root in either direction. That rule applies
+equally to configured output, a CLI `--out` override, and the transactional
+writer boundary.
+
+`moduleResolution` has no defaults beyond esbuild's platform behavior. Package
+roots must be in-repository directories containing `package.json`; their
+`node_modules` directories supplement consumer lookup. Aliases accept bare
+package specifiers only. Conditions, package fields, and extensions are ordered,
+deduplicated lists, while loader keys are extensions and values are supported
+esbuild loader names. React and React DOM still resolve through Mokabook's
+consumer-peer plugin so these options cannot introduce a second React runtime.
+
+Legacy `exclude` values are source-relative POSIX globs. They exist for a
+staged migration that must omit obsolete source-owned framework prototypes;
+they must not be used to hide a product page that still belongs in the
+catalogue.
+
+## Public Authoring API
+
+The root package export supplies typed, documented authoring helpers:
+
+- `defineConfig`;
+- `defineScreen`, `defineCollection`, and `defineUseCase`;
+- `defineRoot`, `collection`, and `screen` for nested trees;
+- `mockLink` and `MockLink` for id-addressed links;
+- `ReviewIgnore`, `ReviewIgnoreScope`, and `reviewMaterialKey`.
+
+A screen owns one mobile React node and one desktop React node. A collection is
+structural and owns child ids but no route. A use case owns ordered references
+to existing screens and never defines a screen inline. Ids are explicit,
+globally unique kebab-case values and remain stable across navigation changes.
+
+Each entry provides a title, description, navigation path, related docs, and
+dependency paths. A dependency may identify an existing repository file or
+directory; Browse and Review match the path itself and every descendant, while
+Review reports the concrete changed descendant as evidence. Screens and use
+cases provide a stable relative `.html` route; use cases live under
+`user-flows/`. Screens may provide an address-bar label and use-case
+membership. Nested definitions inherit declared metadata, but ids never derive
+from tree position.
+
+Imports of `mokabook` from modules beneath `entriesDir` bind the authoring
+helpers to that importing module. Definitions created at module evaluation or
+later through a shared helper factory therefore retain the helper module's
+repo-relative source path without process-global attribution state.
+
+Every catalogue-route segment starts with an ASCII letter or digit and then
+uses only URL-unreserved ASCII letters, digits, `.`, `_`, `~`, or `-`. A
+segment's filename stem must not be a Windows device name, and the complete
+route must end in `.html`. Mokabook percent-encodes each path segment whenever
+it emits a URL in HTML or an HTTP redirect, including configured static asset
+paths whose filenames contain other characters.
+
+Logical screen and use-case routes are catalogue identifiers, not generated
+documents. Fragment links must target a generated fragment or public static
+asset with a relative URL; root-absolute links are rejected as non-portable.
+Authors use `MockLink` for id-addressed catalogue navigation.
+Local resource URLs in HTML source attributes, `srcset`, inline/style-block
+CSS, and transitively referenced HTML/CSS must likewise resolve to public
+static files beneath `mockupsDir` that remain after the pending build. An owned
+generated file absent from the next output set is a pending orphan, never a
+valid link or resource target merely because it still exists before commit.
+
+All public exports ship ESM JavaScript and declarations usable by NodeNext and
+bundler TypeScript resolution. The package export map and packed-tarball tests
+define the public boundary; consumers must not import `dist` internals.
+
+## Rendering Boundary
+
+Mokabook provides a plain React static renderer. A consumer may configure one
+renderer module that receives the screen node, entry metadata, viewport,
+resolved stylesheet links, and render context, and returns one complete HTML
+document synchronously.
+
+The renderer module is consumer code. It is where Accounting may add a Firna UI
+theme provider or collect React Native Web atomic styles. Mokabook must not
+depend on `@firna/ui`, React Native Web, Accounting tokens, or Juno components.
+
+The renderer module has one default synchronous export with this exact
+contract:
+
+```ts
+import type { ReactNode } from "react";
+import type { ScreenDefinition, Viewport } from "mokabook";
+
+interface RenderInput {
+  entry: ScreenDefinition;
+  node: ReactNode;
+  stylesheets: readonly string[];
+  viewport: Viewport;
+}
+
+export default function render(input: RenderInput): string;
+```
+
+The string must contain a complete `<html>` document. Mokabook serializes
+Review-ignore markers and rewrites every complete `mock:<id>` `href` and
+`data-nav-href` value after this function returns, including when one element
+has both attributes. Final values from compatibility transforms are validated
+through the same fail-closed link contract. The same rewrite applies to legacy
+output. The package declares `react` and `react-dom`
+`>=19.0.0` as peers and does not ship a private runtime. The builder resolves
+both peers and their subpaths from consumer config, then bundles every
+React-bearing input in one internal graph.
+
+All entry modules and the renderer are bundled into one build-time graph with
+one React instance. This must work when Mokabook is installed locally and when
+it is fetched into npm's npx cache. Consumer dependencies resolve from the
+consumer project, while imports of `mokabook` resolve to the executing
+package version.
+Config dependencies are bundled from the config directory before the temporary
+module is evaluated, so bare workspace/package imports never resolve from the
+operating-system temporary directory or npx cache.
+
+### Temporary Document Compatibility
+
+A consumer with already-authored output may configure one synchronous
+`compatibility.transformer` module. It is bundled into the same consumer graph
+and default-exports this contract:
+
+```ts
+interface CompatibilityTransformInput {
+  availableRoutes: readonly string[];
+  content: string;
+  logicalRoutes: Readonly<Record<string, string>>;
+  outputPath: string;
+  route: string;
+  viewport: "mobile" | "desktop";
+}
+
+type CompatibilityTransformer = (input: CompatibilityTransformInput) => string;
+```
+
+`availableRoutes` contains the complete pending output plus retained existing
+public static files; generated files scheduled for orphan removal are excluded.
+`logicalRoutes` maps screen/use-case catalogue routes to concrete artifacts for
+the current viewport. `outputPath` is repository-relative; no absolute checkout
+path is exposed. Mokabook applies the transformer after id links resolve and
+before Review-marker, link, resource, and ownership validation. It must return
+a complete document, remain deterministic, and stay consumer-owned. It cannot
+weaken final validation. New catalogues should author portable links directly
+and leave this option unset.
+
+Stylesheet rules are ordered, declarative consumer configuration. Their globs
+match the catalogue route before viewport fragments are derived, so one exact
+screen-route rule applies to both viewports. Generated fragment links are
+relative to the fragment route and URL-encoded by segment.
+Shell and device-frame CSS is package-owned and self-contained; product CSS is
+never copied into the npm package.
+
+## Generated Contract
+
+`mokabook build` writes deterministic output under `mockupsDir`:
+
+- `<screen>.mobile.html` and `<screen>.desktop.html` fragments for each screen;
+- legacy HTML only when legacy support is configured;
+- `mokabook-manifest.json` using schema version 3.
+
+Screen and use-case routes are durable identifiers and do not imply a composed
+HTML file. A screen's fragments are bare product renders with required head
+content but without Mokabook shell chrome. Collections generate no page.
+
+Manifest source and output paths are repository-relative; routes are relative
+to `mockupsDir`. The manifest includes every entry, fragment, legacy page,
+relationship, related doc, and dependency needed by Browse and Review. It is
+stable across operating systems and independent of absolute checkout paths.
+Repository paths are canonical POSIX paths with no empty, dot, parent, drive,
+or backslash segments; generated manifests are self-validated before writing.
+
+Generated documents carry a generic generated-file header. Build removes only
+files that it can prove were previously generated by the same configured
+catalogue: an HTML header's source must belong to the current entries or legacy
+root even when that source was just deleted. It never deletes an unknown or
+foreign-catalogue file.
+
+The normative version 3 manifest shape is:
+
+```ts
+interface ManifestV3 {
+  schemaVersion: 3;
+  generatedBy: "mokabook";
+  entries: readonly ManifestEntry[];
+  legacyPages: readonly { route: string; sourcePath: string }[];
+}
+
+interface CommonEntry {
+  id: string;
+  kind: "screen" | "collection" | "use-case";
+  title: string;
+  description: string;
+  rationale?: string;
+  navPath: readonly string[];
+  sourcePath: string;
+  relatedDocs: readonly string[];
+  dependencies: readonly string[];
+}
+
+type ManifestEntry =
+  | (CommonEntry & {
+      kind: "screen";
+      route: string;
+      address?: string;
+      fragments: { mobile: string; desktop: string };
+      viewports: readonly ["mobile", "desktop"];
+      useCaseIds: readonly string[];
+    })
+  | (CommonEntry & {
+      kind: "collection";
+      childIds: readonly string[];
+    })
+  | (CommonEntry & {
+      kind: "use-case";
+      route: string;
+      steps: readonly {
+        screenId: string;
+        title?: string;
+        description?: string;
+      }[];
+    });
+```
+
+Entries sort by route then id; legacy pages, dependencies, and generated files
+sort lexically. Optional properties are omitted, not emitted as `null`.
+`sourcePath`, related docs, and dependencies use repo-relative POSIX paths.
+Manifest dependencies retain the file-or-directory-root matching semantics of
+the authoring API.
+
+## Legacy Compatibility
+
+Legacy `.source.ts`, `.source.tsx`, and `.source.html` generation is an optional
+transition feature. Generic discovery, bundling, stale/orphan detection, link
+validation, screen-cap validation, and comment-component expansion belong to
+the package.
+
+Application-specific route repairs, allowlists, component registries, and
+source-layout rules belong in the consumer config or adapter. Accounting's
+historical app-family rewrites must not become defaults. New structured entries
+must not rely on legacy route repair.
+
+Manifest readers may accept Accounting's `mockbook-manifest.json` version 2
+during the Accounting cutover only when the canonical
+`mokabook-manifest.json` is absent. A present but invalid version 3 manifest
+fails validation instead of falling back to potentially stale version 2 data.
+Every new build emits `mokabook-manifest.json` version 3. Compatibility code
+has explicit fixtures and a removal policy; it is not an undocumented
+fallback.
+
+## Non-Goals
+
+- Owning or publishing Accounting, Bookfolio, or Juno screens.
+- Replacing a consumer's product component library or design tokens.
+- Deploying a hosted Mokabook service.
+- Hydrating product fragments into interactive application replicas.
+- Requiring a monorepo, npm-workspace layout, or one fixed mockup directory.
+
+## Related Docs
+
+- [Build, Browse, and Review runtime](./mokabook-runtime.md)
+- [CI and npm release](./npm-release.md)

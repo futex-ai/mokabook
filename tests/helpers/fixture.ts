@@ -1,0 +1,68 @@
+import fs from "node:fs";
+import path from "node:path";
+
+/** Repository root containing the package under test. */
+export const repositoryRoot = path.resolve(import.meta.dirname, "../..");
+
+/** One isolated consumer repository under the ignored test context. */
+export interface TestFixture {
+  configPath: string;
+  entriesDir: string;
+  entryPath: string;
+  mockupsDir: string;
+  root: string;
+}
+
+/** Create a clean synthetic consumer that resolves package peers from this repo. */
+export async function createFixture(
+  entrySource = validEntrySource(),
+): Promise<TestFixture> {
+  const contextRoot = path.join(repositoryRoot, ".context");
+  await fs.promises.mkdir(contextRoot, { recursive: true });
+  const root = await fs.promises.mkdtemp(
+    path.join(contextRoot, "mokabook-test-"),
+  );
+  const entriesDir = path.join(root, "entries");
+  const mockupsDir = path.join(root, "mockups");
+  await fs.promises.mkdir(entriesDir, { recursive: true });
+  await fs.promises.mkdir(mockupsDir, { recursive: true });
+  await fs.promises.writeFile(path.join(root, "notes.md"), "# Fixture notes\n");
+  const entryPath = path.join(entriesDir, "fixture.mockup.tsx");
+  await fs.promises.writeFile(entryPath, entrySource);
+  const configPath = path.join(root, "mokabook.config.ts");
+  await fs.promises.writeFile(
+    configPath,
+    `import { defineConfig } from "mokabook";
+export default defineConfig({
+  entriesDir: "entries",
+  mockupsDir: "mockups",
+  repoRoot: ".",
+  review: { outDir: ".review", sharedImpact: ["notes.md"] }
+});
+`,
+  );
+  return { configPath, entriesDir, entryPath, mockupsDir, root };
+}
+
+/** Remove a synthetic consumer after a test. */
+export async function removeFixture(fixture: TestFixture): Promise<void> {
+  await fs.promises.rm(fixture.root, { force: true, recursive: true });
+}
+
+/** Valid two-screen catalogue with reciprocal use-case membership. */
+export function validEntrySource(
+  options: { body?: string; firstTitle?: string } = {},
+): string {
+  const body = options.body ?? `<a href="mock:details">Details</a>`;
+  const firstTitle = options.firstTitle ?? "Home";
+  return `import { defineCollection, defineScreen, defineUseCase } from "mokabook";
+import React from "react";
+const metadata = { dependencies: ["notes.md"], navPath: ["Fixture"], relatedDocs: ["notes.md"] };
+export const mockups = [
+  defineCollection({ ...metadata, childIds: ["home", "details"], description: "Fixture collection", id: "fixture", title: "Fixture" }),
+  defineScreen({ ...metadata, description: "Home screen", desktop: <main id="home">${body}</main>, id: "home", mobile: <main id="home-mobile">${body}</main>, route: "screens/home.html", title: ${JSON.stringify(firstTitle)}, useCaseIds: ["tour"] }),
+  defineScreen({ ...metadata, description: "Detail screen", desktop: <main id="details">Detail</main>, id: "details", mobile: <main id="details-mobile">Detail</main>, route: "screens/details.html", title: "Details", useCaseIds: ["tour"] }),
+  defineUseCase({ ...metadata, description: "Fixture journey", id: "tour", route: "user-flows/tour.html", steps: [{ screenId: "home" }, { screenId: "details" }], title: "Tour" })
+];
+`;
+}

@@ -1,0 +1,41 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background: #f7f7f3;
+  color: #1c1f1d;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.9rem;
+  margin: 2rem auto;
+  max-width: 48rem;
+  padding: 1.5rem;
+}
+
+main a {
+  color: #2f5945;
+  font-weight: 600;
+}
+
+nav {
+  align-self: stretch;
+  border-bottom: 1px solid #d3d8cd;
+  color: #68706a;
+  padding-bottom: 0.75rem;
+}
+
+.example-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.example-head h1 {
+  margin: 0;
+}
