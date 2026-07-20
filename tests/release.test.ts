@@ -226,7 +226,13 @@ test("release-please owns the Node manifest and first release state", async () =
       "release-type",
     ],
   );
-  assert.deepEqual(manifest, { ".": "0.0.0" });
+  const packageVersion = JSON.parse(
+    await fs.promises.readFile(
+      path.join(repositoryRoot, "package.json"),
+      "utf8",
+    ),
+  ).version;
+  assert.deepEqual(manifest, { ".": packageVersion });
 });
 
 async function workflowSource(name: string): Promise<string> {
