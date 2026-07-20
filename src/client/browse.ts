@@ -51,6 +51,28 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
   if (!shell || !main) return;
   if (win.history.scrollRestoration) win.history.scrollRestoration = "manual";
   const sequencer = new NavigationSequencer();
+  let restoringHistory = false;
+  const persistScroll = (): void => {
+    win.history.replaceState(
+      { scroll: win.scrollY } satisfies ScrollState,
+      "",
+      win.location.href,
+    );
+  };
+  let scrollFramePending = false;
+  persistScroll();
+  win.addEventListener(
+    "scroll",
+    () => {
+      if (restoringHistory || scrollFramePending) return;
+      persistScroll();
+      scrollFramePending = true;
+      win.requestAnimationFrame(() => {
+        scrollFramePending = false;
+      });
+    },
+    { passive: true },
+  );
   const announce = (message: string): void => {
     const status = doc.getElementById("mb-status");
     if (status) status.textContent = message;
@@ -71,6 +93,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     push: boolean,
     restoreScroll?: number,
   ): Promise<void> => {
+    if (push) restoringHistory = false;
     const slot = sequencer.begin();
     let response: Response;
     let text: string;
@@ -94,20 +117,25 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
       return;
     }
     for (const frame of main.querySelectorAll("iframe")) frame.remove();
-    if (push)
-      win.history.replaceState(
-        { scroll: win.scrollY } satisfies ScrollState,
-        "",
-        win.location.href,
-      );
+    if (push) persistScroll();
     main.innerHTML = nextMain.innerHTML;
     doc.title = parsed.title || doc.title;
     const finalUrl = response.url || url;
-    if (push) win.history.pushState({} satisfies ScrollState, "", finalUrl);
+    if (push)
+      win.history.pushState({ scroll: 0 } satisfies ScrollState, "", finalUrl);
     markActiveRow(new URL(finalUrl, win.location.href).pathname);
     setDrawer(shell, false);
-    win.scrollTo(0, restoreScroll ?? 0);
-    main.focus();
+    const scroll = restoreScroll ?? 0;
+    win.scrollTo(0, scroll);
+    if (!push) {
+      await new Promise<void>((resolve) =>
+        win.requestAnimationFrame(() => resolve()),
+      );
+      if (!slot.isCurrent()) return;
+      win.scrollTo(0, scroll);
+      restoringHistory = false;
+    }
+    main.focus({ preventScroll: true });
     announce(`Loaded ${doc.title}`);
   };
 
@@ -166,6 +194,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
       typeof (event.state as ScrollState | null)?.scroll === "number"
         ? (event.state as ScrollState).scroll
         : undefined;
+    restoringHistory = true;
     void navigate(win.location.href, false, scroll);
   });
 }

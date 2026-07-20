@@ -121,6 +121,10 @@ class FakeChild implements ChildHandle {
   private readonly exitCallbacks: Array<(code: number | null) => void> = [];
   private readonly messageCallbacks: Array<(message: unknown) => void> = [];
 
+  forceKill(): void {
+    this.exit(null);
+  }
+
   onError(callback: (error: Error) => void): void {
     this.errorCallbacks.push(callback);
   }

@@ -113,14 +113,18 @@ local HTML resource attributes and transitive CSS URLs. Watched Serve keeps its
 resolved port, transactionally reloads a changed consumer config with a ready
 replacement watcher, and serially replaces a child that exits unexpectedly
 after readiness. A watched child also closes its server when the parent IPC
-channel disconnects. Package-owned generated, dependency, build, test, Review,
-and transaction paths are pruned even when a custom rule watches the repository
-root; configured stylesheets retain reload precedence. Shutdown interrupts
-replacement-watcher readiness and closes the candidate before draining the
-remaining lifecycle. Open Browse and Review pages connect to the versioned
-event stream and reload after a newer build or asset version arrives.
-A watched reload restores the current Browse search, filter, disclosures,
-viewport, drawer, and scroll state once on the same durable URL.
+channel disconnects. Header-proven generated output plus package-owned
+dependency, build, test, Review, and transaction paths are pruned even when a
+custom rule watches the repository root; an unowned public HTML file can still
+use an explicit watch rule, and configured stylesheets retain reload
+precedence. Shutdown interrupts replacement-watcher readiness, closes the
+candidate before draining the remaining lifecycle, and waits for child exit
+through graceful, terminate, and force-kill stages. Open Browse and Review pages
+connect to the versioned event stream and reload after a newer build or asset
+version arrives. A watched reload restores the current Browse search, filter,
+disclosures, viewport, drawer, and scroll state once on the same durable URL.
+Browse also retains each history entry's latest document position for Back and
+Forward.
 A rejected config or failed candidate build leaves the last-good watcher,
 output, and child active.
 
@@ -137,9 +141,10 @@ file and confined to `repoRoot`.
   component trees.
 - `legacy` opts into `.source.*` pages, component expansion, route aliases,
   excluded migration sources, and generic lints.
-- `watch` classifies additional consumer inputs after package-owned ignores and
-  configured stylesheets; `review` selects the Git base, artifact directory,
-  and shared-impact globs.
+- `watch` classifies additional consumer inputs after proven package-owned
+  ignores and configured stylesheets; this includes authored static HTML under
+  `mockupsDir`. `review` selects the Git base, artifact directory, and
+  shared-impact globs.
 - `compatibility.readManifestV2` reads Accounting's old manifest only when v3
   is absent. A temporary `compatibility.transformer` may deterministically
   repair already-authored documents during a consumer cutover; final links and

@@ -160,13 +160,15 @@ globs, while stylesheet `match` and legacy aliases/lint routes match catalogue
 routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
 matches and watch paths are invalid. Additional watch rules cannot override
 configured source/module rebuilds, configured stylesheet reloads, or
-package-owned ignores for dependency, build, test, Review, generated, and
-transaction paths. Authored source directories may sit below `mockupsDir` for
-a `docs/mockups/src` layout, but they may not equal each other or the output
-root; generated routes are collision-checked against those sources before
-writing. Review output must not overlap a source or output root in either
-direction. That rule applies equally to configured output, a CLI `--out`
-override, and the transactional writer boundary.
+package-owned ignores for dependency, build, test, Review, header-proven
+generated, and transaction paths. An unowned public HTML file below
+`mockupsDir` remains consumer-authored and can match an explicit watch rule.
+Authored source directories may sit below `mockupsDir` for a `docs/mockups/src`
+layout, but they may not equal each other or the output root; generated routes
+are collision-checked against those sources before writing. Review output must
+not overlap a source or output root in either direction. That rule applies
+equally to configured output, a CLI `--out` override, and the transactional
+writer boundary.
 
 `moduleResolution` has no defaults beyond esbuild's platform behavior. Package
 roots must be in-repository directories containing `package.json`; their

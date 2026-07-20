@@ -55,6 +55,40 @@ test("progressive navigation swaps the main view without reloads", async ({
   expect(await hasMarker(page)).toBe(true);
 });
 
+test("Back and Forward restore each route's document scroll", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 300, width: 1_280 });
+  await page.goto("/view/screens/welcome.html");
+  await page.click(detailsRow);
+  await expect(page.locator("#mb-main h1")).toHaveText("Details");
+  const destinationScroll = await page.evaluate(() => {
+    window.scrollTo(0, Math.min(500, document.documentElement.scrollHeight));
+    return window.scrollY;
+  });
+  expect(destinationScroll).toBeGreaterThan(100);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (history.state as { scroll?: number } | null)?.scroll,
+      ),
+    )
+    .toBe(destinationScroll);
+
+  await page.goBack();
+  await expect(page.locator("#mb-main h1")).toHaveText("Welcome");
+  await page.goForward();
+  await expect(page.locator("#mb-main h1")).toHaveText("Details");
+  expect(
+    await page.evaluate(
+      () => (history.state as { scroll?: number } | null)?.scroll,
+    ),
+  ).toBe(destinationScroll);
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBe(destinationScroll);
+});
+
 test("search state is retained across in-shell navigation", async ({
   page,
 }) => {

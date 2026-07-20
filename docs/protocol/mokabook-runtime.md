@@ -97,10 +97,12 @@ eligible unmodified same-origin Browse link, the client replaces only the
 route-owned main view and updates URL, title, active row, focus, and history.
 Search, disclosure, filters, and catalogue scroll remain mounted.
 
-Back and Forward restore matching route and scroll state. Overlapping requests
-are latest-wins. Review, static, iframe, download, external, target, hash-only,
-and modified-click links retain native browser behavior. A failed enhancement
-falls back to normal document navigation.
+Back and Forward restore the matching route and that history entry's latest
+document scroll. Scroll persistence is limited to one leading update per
+animation frame, and route-change focus never overrides the restored position.
+Overlapping requests are latest-wins. Review, static, iframe, download,
+external, target, hash-only, and modified-click links retain native browser
+behavior. A failed enhancement falls back to normal document navigation.
 
 The shell meets keyboard, focus, reduced-motion, contrast, semantics, and status
 announcement requirements. Mobile and desktop shell variants are specified by
@@ -123,9 +125,9 @@ resolved config:
 - entry/page/renderer inputs rebuild generated output;
 - an input shared with shell metadata rebuilds before restarting the child;
 - configured CSS/fonts/images reload the browser without rebuilding;
-- generated output plus `.git`, `.context`, `node_modules`, `dist`, `target`,
-  coverage, browser-test output, Review output, and Mokabook transaction trees
-  are pruned from broad watches and classify as ignored;
+- header-proven generated output plus `.git`, `.context`, `node_modules`,
+  `dist`, `target`, coverage, browser-test output, Review output, and Mokabook
+  transaction trees are pruned from broad watches and classify as ignored;
 - additional inputs use the explicit action declared in config.
 
 Configured source roots and modules remain rebuild inputs even when intentionally
@@ -134,6 +136,9 @@ remain reload inputs. Those package-owned classifications take precedence over
 additional watch rules. Package source under `node_modules` or an npx cache is
 never treated as consumer source. Development of Mokabook itself uses repository
 tooling rather than a hidden consumer-specific self-reload path.
+An unowned public HTML file beneath `mockupsDir` is an authored static input,
+not generated merely because of its extension, so an explicit rule may reload,
+restart, rebuild, or ignore it.
 
 Watchers become ready before initial generation begins. Notifications during
 generation and child startup are buffered. A child validates the catalogue and binds before
@@ -178,7 +183,10 @@ readiness wait and closes that watcher before the action queue finishes
 draining. No later child restart is started. Tests must prove no orphan process
 remains after normal shutdown, failed startup, or interruption. The child also
 runs the same idempotent server close when its parent IPC channel disconnects,
-so an abruptly terminated parent cannot leave a listening orphan.
+so an abruptly terminated parent cannot leave a listening orphan. Parent-driven
+shutdown first requests graceful IPC closure, then sends SIGTERM and SIGKILL at
+bounded intervals when necessary; the supervisor does not finish closing until
+the child exit notification arrives.
 
 ## Review Comparison
 

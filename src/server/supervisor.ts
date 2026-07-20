@@ -9,12 +9,26 @@ interface ReadyMessage {
 
 /** Child-process handle used by the restart supervisor. */
 export interface ChildHandle {
+  forceKill(): void;
   onError(callback: (error: Error) => void): void;
   onExit(callback: (code: number | null) => void): void;
   onMessage(callback: (message: unknown) => void): void;
   send(message: Record<string, string | number>): void;
   terminate(): void;
 }
+
+/** Time allowed for each watched-child shutdown stage. */
+export interface ChildShutdownTimings {
+  /** Time allowed for the IPC shutdown request. */
+  gracefulMilliseconds: number;
+  /** Time allowed for SIGTERM before SIGKILL. */
+  terminateMilliseconds: number;
+}
+
+const DEFAULT_SHUTDOWN_TIMINGS: ChildShutdownTimings = {
+  gracefulMilliseconds: 2_000,
+  terminateMilliseconds: 2_000,
+};
 
 /** Factory seam for unit-testing child lifecycle ordering. */
 export interface ChildFactory {
@@ -79,6 +93,7 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
     private readonly factory: ChildFactory,
     private readonly baseArguments: readonly string[],
     private readonly requestedPort: number,
+    private readonly shutdownTimings: ChildShutdownTimings = DEFAULT_SHUTDOWN_TIMINGS,
   ) {}
 
   async start(): Promise<number> {
@@ -132,22 +147,35 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
     const child = this.#child;
     if (!child) return;
     this.#child = undefined;
-    await new Promise<void>((resolve) => {
-      let finished = false;
-      const finish = (): void => {
-        if (!finished) {
-          finished = true;
-          resolve();
-        }
-      };
-      child.onExit(finish);
-      child.send({ type: "shutdown" });
-      setTimeout(() => {
-        child.terminate();
-        finish();
-      }, 2_000).unref();
-    });
+    await stopChild(child, this.shutdownTimings);
   }
+}
+
+function stopChild(
+  child: ChildHandle,
+  timings: ChildShutdownTimings,
+): Promise<void> {
+  return new Promise((resolve) => {
+    let exited = false;
+    let forceTimer: ReturnType<typeof setTimeout> | undefined;
+    const terminateTimer = setTimeout(() => {
+      child.terminate();
+      if (exited) return;
+      forceTimer = setTimeout(() => {
+        child.forceKill();
+      }, timings.terminateMilliseconds);
+      forceTimer.unref();
+    }, timings.gracefulMilliseconds);
+    terminateTimer.unref();
+    child.onExit(() => {
+      if (exited) return;
+      exited = true;
+      clearTimeout(terminateTimer);
+      if (forceTimer) clearTimeout(forceTimer);
+      resolve();
+    });
+    child.send({ type: "shutdown" });
+  });
 }
 
 function waitForReady(
@@ -211,6 +239,11 @@ function isReady(message: unknown): message is ReadyMessage {
 class NodeChildHandle implements ChildHandle {
   constructor(private readonly child: ChildProcess) {}
 
+  forceKill(): void {
+    if (this.child.exitCode === null && this.child.signalCode === null)
+      this.child.kill("SIGKILL");
+  }
+
   onError(callback: (error: Error) => void): void {
     this.child.once("error", callback);
   }
@@ -228,6 +261,7 @@ class NodeChildHandle implements ChildHandle {
   }
 
   terminate(): void {
-    if (!this.child.killed) this.child.kill("SIGTERM");
+    if (this.child.exitCode === null && this.child.signalCode === null)
+      this.child.kill("SIGTERM");
   }
 }

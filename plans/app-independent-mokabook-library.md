@@ -763,6 +763,59 @@ Summary: verify, commit, push, and independently review the third-cycle fixes.
 At this milestone every valid third-cycle finding is fixed and the reviewed
 commit is pushed.
 
+## Milestone 10L: Complete Watch Runtime Boundaries
+
+Summary: resolve the remaining process-shutdown and authored-static-input
+findings from the fourth Codex review cycle.
+
+- [x] Add failure-first coverage for a child that ignores graceful shutdown
+      and termination, then require supervisor close to wait for confirmed
+      exit through a bounded graceful, terminate, and force-kill sequence.
+- [x] Add failure-first coverage for authored static HTML beneath `mockupsDir`,
+      then ignore only HTML proven to be Mokabook-owned while allowing explicit
+      consumer watch rules to classify unowned public files.
+- [x] Update runtime, package, and architecture documentation for the completed
+      shutdown and output-ownership contracts.
+
+At this milestone watched Serve cannot report shutdown before its child exits,
+and authored public HTML remains a first-class configurable watch input.
+
+## Milestone 10M: Restore Forward Scroll
+
+Tags: ui
+
+Summary: keep each Browse history entry's latest document position so both
+Back and Forward restore the position promised by the runtime contract.
+
+- [x] Add a failure-first browser regression that scrolls a destination route,
+      navigates Back, then Forward, and requires the destination position to be
+      restored.
+- [x] Persist the active entry's latest scroll state with bounded browser work
+      and restore it during either history direction.
+- [x] Retain route-change focus management without allowing focus to override
+      a restored history position.
+- [x] Run the focused Browse browser suite and confirm ordinary in-shell
+      navigation, overlapping requests, and native fallback remain intact.
+
+At this milestone long Browse screens retain their document position through
+both directions of session-history navigation.
+
+## Milestone 10N: Fourth Review-Fix Verification
+
+Summary: verify, commit, push, and independently review the fourth-cycle fixes.
+
+- [x] Run focused failure-first regressions and the complete relevant test
+      suites for child shutdown, watch ownership, and Browse history.
+- [x] Run formatter, lint, typecheck, unit/integration/browser/package/Rust
+      checks through `cargo xtask check` with a 100% pass rate.
+- [x] Fetch and audit `origin/main`, inspect the complete diff and deletions,
+      then commit all fourth-cycle fixes with a Conventional Commit and push.
+- [ ] Run `cargo xtask review` after the push and repeat the bounded review loop
+      until no valid finding remains.
+
+At this milestone every valid fourth-cycle finding is fixed and the reviewed
+commit is pushed.
+
 ## Milestone 11: First Package Release
 
 Summary: after the library PR merges, reserve the unscoped package safely,

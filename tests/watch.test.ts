@@ -17,9 +17,6 @@ import {
   type DebounceClock,
 } from "../dist/server/watch_events.js";
 import {
-  ReadyProcessSupervisor,
-  type ChildFactory,
-  type ChildHandle,
   type ProcessSupervisor,
   type ProcessSupervisorFactory,
 } from "../dist/server/supervisor.js";
@@ -124,35 +121,6 @@ test("Serve orchestration accepts fake filesystem, server, and watcher boundarie
   assert.equal(serverFactory.closed, true);
 });
 
-test("supervisor waits for readiness, keeps port, sends update, and shuts down before restart", async () => {
-  const factory = new FakeFactory();
-  const supervisor = new ReadyProcessSupervisor(factory, ["__serve-child"], 0);
-  const starting = supervisor.start();
-  factory.children[0]?.ready(48123);
-  assert.equal(await starting, 48123);
-  supervisor.notifyUpdate();
-  assert.deepEqual(factory.children[0]?.messages, [
-    { type: "update", version: 2 },
-  ]);
-
-  const restarting = supervisor.restart();
-  await new Promise((resolve) => setImmediate(resolve));
-  assert.deepEqual(factory.children[0]?.messages, [
-    { type: "update", version: 2 },
-    { type: "shutdown" },
-  ]);
-  assert.deepEqual(factory.arguments_[1], [
-    "__serve-child",
-    "--port",
-    "48123",
-    "--update-version",
-    "3",
-  ]);
-  factory.children[1]?.ready(48123);
-  assert.equal(await restarting, 48123);
-  await supervisor.close();
-});
-
 test("a failed restart restores a child and retains the original diagnostic", async () => {
   const supervisor = new RecoverableFakeSupervisor();
   await assert.rejects(() => restartWithRecovery(supervisor), /restart failed/);
@@ -234,18 +202,6 @@ class UnusedProcessSupervisorFactory implements ProcessSupervisorFactory {
   }
 }
 
-class FakeFactory implements ChildFactory {
-  readonly arguments_: string[][] = [];
-  readonly children: FakeChild[] = [];
-
-  spawn(arguments_: readonly string[]): ChildHandle {
-    this.arguments_.push([...arguments_]);
-    const child = new FakeChild();
-    this.children.push(child);
-    return child;
-  }
-}
-
 class RecoverableFakeSupervisor implements ProcessSupervisor {
   restarts = 0;
   starts = 0;
@@ -264,38 +220,5 @@ class RecoverableFakeSupervisor implements ProcessSupervisor {
   async start(): Promise<number> {
     this.starts += 1;
     return 48123;
-  }
-}
-
-class FakeChild implements ChildHandle {
-  readonly messages: Array<Record<string, string | number>> = [];
-  private errorCallback: ((error: Error) => void) | undefined;
-  private exitCallback: ((code: number | null) => void) | undefined;
-  private messageCallback: ((message: unknown) => void) | undefined;
-
-  onError(callback: (error: Error) => void): void {
-    this.errorCallback = callback;
-  }
-
-  onExit(callback: (code: number | null) => void): void {
-    this.exitCallback = callback;
-  }
-
-  onMessage(callback: (message: unknown) => void): void {
-    this.messageCallback = callback;
-  }
-
-  send(message: Record<string, string | number>): void {
-    this.messages.push(message);
-    if (message.type === "shutdown")
-      queueMicrotask(() => this.exitCallback?.(0));
-  }
-
-  terminate(): void {
-    this.exitCallback?.(null);
-  }
-
-  ready(port: number): void {
-    this.messageCallback?.({ port, type: "ready" });
   }
 }

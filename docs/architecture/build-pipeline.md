@@ -120,6 +120,10 @@ compatibility route inventory exclude those routes before any write begins, so
 a document cannot validate against a file that the successful transaction will
 remove.
 
+Watched Serve reuses that header-based ownership proof when pruning generated
+HTML. Public HTML without the header remains a consumer-owned static input and
+may be classified by an explicit watch rule.
+
 Catalogue routes use portable URL-unreserved segments, reject Windows device
 filename stems, and end in `.html`. Framework-generated links and redirects
 still percent-encode every path segment defensively; static asset paths may

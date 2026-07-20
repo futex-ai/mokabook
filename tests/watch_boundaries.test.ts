@@ -109,6 +109,42 @@ test(
   },
 );
 
+test(
+  "explicit rules watch unowned public HTML beneath mockupsDir",
+  { timeout: 10_000 },
+  async (context) => {
+    const fixture = await createFixture();
+    const publicHtml = path.join(fixture.mockupsDir, "static/help.html");
+    await fs.promises.mkdir(path.dirname(publicHtml), { recursive: true });
+    await fs.promises.writeFile(publicHtml, "<!doctype html><p>Before</p>\n");
+    await fs.promises.writeFile(
+      fixture.configPath,
+      'export default { entriesDir: "entries", mockupsDir: "mockups", repoRoot: ".", watch: { debounceMs: 0, rules: [{ action: "reload", paths: ["mockups/static/**"] }] } };\n',
+    );
+    const config = await loadConfig(fixture.root);
+    assert.equal(classifyWatchPath(publicHtml, config), "reload");
+    const supervisor = new CountingSupervisor();
+    const running = await serve(
+      config,
+      { port: 0, watch: true },
+      {
+        configLoader: new FileSystemConfigLoader(),
+        outputStore: new FakeOutputStore(),
+        processSupervisorFactory: new CountingSupervisorFactory(supervisor),
+        serverFactory: new UnusedServerFactory(),
+        watcherFactory: new ChokidarWatcherFactory(),
+      },
+    );
+    context.after(async () => {
+      await running.close();
+      await removeFixture(fixture);
+    });
+
+    await fs.promises.writeFile(publicHtml, "<!doctype html><p>After</p>\n");
+    await waitFor(() => supervisor.updates === 1);
+  },
+);
+
 class FakeOutputStore implements GeneratedOutputStore {
   check(_compilation: Compilation, _config: ResolvedConfig): void {}
 
@@ -132,10 +168,13 @@ class CountingSupervisorFactory implements ProcessSupervisorFactory {
 
 class CountingSupervisor implements ProcessSupervisor {
   restarts = 0;
+  updates = 0;
 
   async close(): Promise<void> {}
 
-  notifyUpdate(): void {}
+  notifyUpdate(): void {
+    this.updates += 1;
+  }
 
   onUnexpectedExit(_callback: (error: Error) => void): void {}
 

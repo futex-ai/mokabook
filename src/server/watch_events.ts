@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { minimatch } from "minimatch";
 
+import { isOwned } from "../build/ownership.js";
 import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig, WatchAction } from "../config/types.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
@@ -237,7 +238,7 @@ function isGeneratedOutputPath(
 ): boolean {
   if (!isInside(config.mockupsDir, candidate)) return false;
   const relative = toPosixPath(path.relative(config.mockupsDir, candidate));
-  return relative === MANIFEST_NAME || relative.endsWith(".html");
+  return relative === MANIFEST_NAME || isOwned(candidate, config);
 }
 
 function isRequiredWatchPath(
