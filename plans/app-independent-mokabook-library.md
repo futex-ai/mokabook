@@ -9,7 +9,7 @@ framework, neutral design and UI, packed-consumer and real-Accounting parity,
 and CI/release automation. Milestone 10 verification completed and its
 post-push review fixes are implemented in milestones 10A–10D; milestone 10E is
 running the required commit, push, and repeated-review workflow.
-The GitHub repository rename in milestone 2 remains an external maintainer action.
+The milestone-2 GitHub repository rename to `futex-ai/mokabook` is complete.
 Milestones 11–13 require a merged release, explicit approval for the first npm
 publish, and work in a separate Accounting workspace, so they cannot be closed
 from this feature branch.
@@ -184,12 +184,12 @@ public exports work before framework behavior is ported.
 - [x] Fetch `origin/main`, preserve its additions, and confirm the Accounting
       source tip has not moved; if it has, audit the new framework diff and
       update the baseline before copying code.
-- [ ] Coordinate renaming the GitHub repository from `futex-ai/mockbook` to
+- [x] Coordinate renaming the GitHub repository from `futex-ai/mockbook` to
       `futex-ai/mokabook`, update the local `origin`, and verify redirects and
       repository settings without renaming the current branch.
-      Blocked pending explicit maintainer authorization for the external
-      repository rename. Package metadata already targets the intended URL;
-      the current branch and `origin` have not been renamed silently.
+      Completed with maintainer authorization via `gh repo rename`; the
+      repository is `futex-ai/mokabook`, the local `origin` points at the new
+      URL, old URLs redirect, and the current branch name is unchanged.
 - [x] Create `package.json`/lockfile for public ESM `mokabook@0.0.0`,
       using npm commands to add current dependencies rather than guessing
       versions.
