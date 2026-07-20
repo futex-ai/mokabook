@@ -6,7 +6,8 @@
       "changelog-path": "CHANGELOG.md",
       "include-v-in-tag": true,
       "release-type": "node",
-      "bump-minor-pre-major": true
+      "bump-minor-pre-major": true,
+      "release-as": "0.1.0"
     }
   }
 }

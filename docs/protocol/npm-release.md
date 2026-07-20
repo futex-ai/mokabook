@@ -125,7 +125,10 @@ CI` passed. Do not merge the first release PR yet.
    traditional token publishing and remove obsolete npm automation tokens.
 6. Merge the release-please PR for `0.1.0`; confirm the workflow creates the
    immutable tag/release and publishes the first supported consumer version
-   with provenance.
+   with provenance. Release-please treats the `0.0.0` manifest as unreleased
+   and would otherwise default the first version to `1.0.0`, so the config
+   carries a one-time `release-as: 0.1.0` override; remove the override in a
+   follow-up change after the release publishes.
 7. From a clean directory, verify package visibility, metadata, README,
    license, owners, provenance/signatures, dist tags, `npx mokabook --version`,
    and a minimal build/serve fixture.
