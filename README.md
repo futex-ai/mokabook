@@ -47,22 +47,18 @@ export const mockups = [
     description: "The account landing screen.",
     navPath: ["Account"],
     route: "account/home.html",
-    mobile: (
-      <main>
-        <MockLink to="account-detail">Details</MockLink>
-      </main>
-    ),
-    desktop: (
-      <main>
-        <MockLink to="account-detail">Details</MockLink>
-      </main>
-    ),
+    mobile: <MockLink to="account-detail">Details</MockLink>,
+    desktop: <MockLink to="account-detail">Details</MockLink>,
     relatedDocs: ["docs/account.md"],
     dependencies: ["src/account/home.tsx"],
     useCaseIds: [],
   }),
 ];
 ```
+
+`mobile` and `desktop` accept any React node; real screens usually wrap their
+content in a `<main>` landmark because each fragment is generated as its own
+standalone page.
 
 Run the CLI through a local dependency or directly with npx:
 
