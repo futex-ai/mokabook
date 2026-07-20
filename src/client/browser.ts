@@ -1,4 +1,9 @@
 import {
+  captureBrowseState,
+  restoreBrowseState,
+  type BrowseRecoveryState,
+} from "./browse_state.js";
+import {
   LiveUpdateController,
   type RecoveryStorage,
   type ReloadLocation,
@@ -17,8 +22,10 @@ export interface BrowserEventSource {
 /** Injectable browser globals used to test the served live-update entry. */
 export interface BrowserLiveUpdateEnvironment {
   createEventSource(url: string): BrowserEventSource;
+  captureBrowseState(): BrowseRecoveryState | undefined;
   location: ReloadLocation;
   onPageHide(callback: () => void): void;
+  restoreBrowseState(state: BrowseRecoveryState): void;
   storage: RecoveryStorage;
 }
 
@@ -30,8 +37,11 @@ export function startBrowserLiveUpdates(
     new EventSourceStream(environment.createEventSource("/__mokabook/events")),
     environment.storage,
     environment.location,
+    environment.captureBrowseState,
   );
-  controller.consumeRecovery();
+  const recovery = controller.consumeRecovery();
+  if (recovery?.browse && recovery.url === environment.location.href)
+    environment.restoreBrowseState(recovery.browse);
   controller.start();
   environment.onPageHide(() => controller.close());
   return controller;
@@ -59,10 +69,12 @@ class EventSourceStream implements UpdateEventStream {
 
 if (typeof window !== "undefined" && typeof EventSource !== "undefined") {
   startBrowserLiveUpdates({
+    captureBrowseState: () => captureBrowseState(document, window),
     createEventSource: (url) => new EventSource(url),
     location: window.location,
     onPageHide: (callback) =>
       window.addEventListener("pagehide", callback, { once: true }),
+    restoreBrowseState: (state) => restoreBrowseState(document, window, state),
     storage: window.sessionStorage,
   });
 }

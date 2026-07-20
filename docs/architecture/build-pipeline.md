@@ -106,6 +106,12 @@ policies, and manifest data are validated before output changes. All expected
 bytes are held in memory. `check` compares those bytes with disk and reports
 grouped missing, stale, and proven-orphan paths.
 
+Pending generated orphans are derived once from the same ownership rule used by
+Check and the output transaction. Link/resource validation and the temporary
+compatibility route inventory exclude those routes before any write begins, so
+a document cannot validate against a file that the successful transaction will
+remove.
+
 Catalogue routes use portable URL-unreserved segments, reject Windows device
 filename stems, and end in `.html`. Framework-generated links and redirects
 still percent-encode every path segment defensively; static asset paths may

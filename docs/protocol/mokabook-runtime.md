@@ -76,6 +76,8 @@ custom properties may tune the shell accent without replacing its structural
 styles. The changed/all filter derives from Git changes against the serve
 base ref; when the repository or base cannot be resolved, Browse omits the
 filter and shows the full catalogue.
+When a screen is directly affected, every use case that embeds that screen's
+fragments is affected too and remains visible in the changed-only filter.
 
 A screen embeds its generated mobile and desktop fragments inside package-owned
 device frames. A use case renders ordered steps that reference those same
@@ -144,8 +146,12 @@ config's Review base.
 Rebuilds are debounced and transactional. A failed rebuild keeps the last-good
 server and output, reports the error, and waits for another authored change. A
 successful rebuild or healthy restart publishes a new update version. Browsers
-reload their current durable URL and restore directory state once; a later
-manual refresh must not resurrect stale recovery state.
+reload their current durable URL and restore search, changed-only selection,
+collection and details disclosure, viewport selection, responsive drawer,
+catalogue scroll, and document scroll once. Recovery is strictly parsed,
+applies only when its durable URL exactly matches the reloaded page, and is
+removed before application; a later manual refresh cannot resurrect stale
+state.
 
 Watch actions execute serially. Changes received during an active action are
 coalesced by impact before the next action starts, so two rebuilds cannot race

@@ -6,8 +6,10 @@
 
 Active. All branch-local work in milestones 2–9 is implemented: the complete
 framework, neutral design and UI, packed-consumer and real-Accounting parity,
-and CI/release automation. Milestone 10 verification is in progress. The GitHub
-repository rename in milestone 2 remains an external maintainer action.
+and CI/release automation. Milestone 10 verification completed and its
+post-push review fixes are implemented in milestones 10A–10D; milestone 10E is
+running the required commit, push, and repeated-review workflow.
+The GitHub repository rename in milestone 2 remains an external maintainer action.
 Milestones 11–13 require a merged release, explicit approval for the first npm
 publish, and work in a separate Accounting workspace, so they cannot be closed
 from this feature branch.
@@ -554,13 +556,13 @@ the library pull request.
 - [x] Fetch `origin/main`, audit its additions from the captured source tip, and
       inspect `git diff --name-status origin/main` plus deletion-only output;
       stop on unauthorized mainline removal or unrelated changes.
-- [ ] Update completed TODOs and docs, then run `git add -A`, commit all source,
+- [x] Update completed TODOs and docs, then run `git add -A`, commit all source,
       tests, assets, generated example artifacts, docs, and plan changes with a
       Conventional Commit title of at most 50 characters, and push the current
       branch without renaming it.
-- [ ] Run `cargo xtask review` only after the push so it reviews the complete
+- [x] Run `cargo xtask review` only after the push so it reviews the complete
       diff against `origin/main`.
-- [ ] Do not automatically fix review findings. Report every finding as a
+- [x] Do not automatically fix review findings. Report every finding as a
       numbered item with severity, feature/codebase context, impact of doing
       nothing, lettered solution options, and a recommended option that
       considers class-wide prevention.
@@ -568,6 +570,87 @@ the library pull request.
 At this milestone the Mokabook library PR is fully verified, pushed, and
 reviewed. The plan remains active until release/bootstrap and Accounting cutover
 are complete.
+
+## Milestone 10A: Review Runtime Correctness
+
+Summary: resolve the independently confirmed build-link and changed-route
+findings behind shared runtime invariants.
+
+- [x] Add failure-first coverage proving a generated orphan cannot satisfy a
+      current document link during compilation.
+- [x] Centralize pending-orphan discovery and exclude pending generated orphans
+      from HTML/resource validation and compatibility `availableRoutes`.
+- [x] Add separate-source coverage proving a changed screen affects every use
+      case that embeds its fragments.
+- [x] Propagate directly changed screen entries to referencing use-case routes
+      in the changed-only Browse model.
+- [x] Run focused build, compatibility, and changed-route tests.
+
+At this milestone a successful build cannot create a broken link by deleting
+its validated target, and changed-only Browse includes visually affected use
+cases.
+
+## Milestone 10B: Reload-State Recovery
+
+Tags: ui
+
+Summary: make the documented one-shot watched-reload recovery restore real
+Browse state instead of discarding its payload.
+
+- [x] Add a browser regression that establishes search, viewport, details, and
+      mobile-drawer state before a watched rebuild and requires it after reload.
+- [x] Define and validate a typed Browse recovery snapshot with stable
+      collection-disclosure identifiers.
+- [x] Define the capture and restore integration needed by the browser adapter.
+
+At this milestone the recovery state and DOM behavior are typed and ready for
+the package-owned browser delivery boundary.
+
+## Milestone 10C: Recovery Module Delivery
+
+Summary: serve the additional package-owned browser module required by the
+typed recovery implementation without widening the public static-file boundary.
+
+- [x] Add the recovery module to the explicit in-memory browser-client
+      allowlist loaded before server bind.
+- [x] Add an HTTP regression proving the required module is served while
+      unknown client module paths remain unavailable.
+- [x] Run focused server and browser-client delivery tests.
+
+At this milestone every import in the package-owned browser graph resolves
+through the confined client-module endpoint.
+
+## Milestone 10D: Complete Reload-State Recovery
+
+Tags: ui
+
+Summary: finish the UI behavior that was blocked on recovery-module delivery.
+
+- [x] Capture Browse state immediately before an automatic reload and restore
+      it only once on the same durable URL.
+- [x] Cover malformed, stale-URL, one-shot, capture, and restore behavior with
+      focused client tests.
+- [x] Run focused client and Playwright watch tests.
+
+At this milestone successful watched reloads preserve the user's Browse
+context, while later manual reloads use clean server-rendered defaults.
+
+## Milestone 10E: Review-Fix Verification
+
+Summary: complete the repository workflow for the invoked Codex review loop.
+
+- [x] Remove the four fixture whitespace warnings reported by the reviewer.
+- [x] Update runtime/architecture documentation for the corrected invariants.
+- [x] Run formatter, lint, typecheck, unit/integration/browser/package/Rust
+      checks through `cargo xtask check` with a 100% pass rate.
+- [x] Fetch and audit `origin/main`, inspect the complete diff and deletions,
+      then commit all review fixes with a Conventional Commit and push.
+- [ ] Run `cargo xtask review` after the push and repeat investigation, fixes,
+      checks, commit, push, and review for up to ten total review cycles until
+      no valid findings remain.
+
+At this milestone the invoked review loop has no unaddressed valid finding and
+the reviewed commit is pushed.
 
 ## Milestone 11: First Package Release
 

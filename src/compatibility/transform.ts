@@ -10,7 +10,9 @@ import { isPublicStaticFile } from "../config/public_files.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
+import { MANIFEST_NAME } from "../registry/manifest.js";
 import type { LoadedGraph } from "../build/load_graph.js";
+import { pendingGeneratedOrphanRoutes } from "../build/ownership.js";
 
 /** Resolve legacy id links and apply an explicitly configured migration bridge. */
 export function transformCompatibilityDocuments(
@@ -66,12 +68,17 @@ function availablePublicRoutes(
   outputRoutes: readonly string[],
   config: ResolvedConfig,
 ): string[] {
+  const nextRoutes = [...outputRoutes, MANIFEST_NAME];
+  const pendingOrphans = new Set(
+    pendingGeneratedOrphanRoutes(config, nextRoutes),
+  );
   const publicRoutes = walkFiles(config.mockupsDir)
     .filter((candidate) => isPublicStaticFile(candidate, config))
     .map((candidate) =>
       toPosixPath(path.relative(config.mockupsDir, candidate)),
-    );
-  return [...new Set([...outputRoutes, ...publicRoutes])].sort();
+    )
+    .filter((route) => !pendingOrphans.has(route));
+  return [...new Set([...nextRoutes, ...publicRoutes])].sort();
 }
 
 function routeViewport(route: string): Viewport {

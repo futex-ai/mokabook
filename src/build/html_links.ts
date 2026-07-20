@@ -10,6 +10,7 @@ import {
   extractHtmlReferences,
   type HtmlReferences,
 } from "../html_references.js";
+import { pendingGeneratedOrphanRoutes } from "./ownership.js";
 
 interface ParsedResource {
   anchors: ReadonlySet<string>;
@@ -31,6 +32,9 @@ export function validateHtmlLinks(
   outputs: ReadonlyMap<string, string>,
   config: ResolvedConfig,
 ): void {
+  const pendingOrphans = new Set(
+    pendingGeneratedOrphanRoutes(config, outputs.keys()),
+  );
   const parsed = new Map<string, ParsedResource>();
   for (const [route, content] of outputs) {
     parsed.set(route, htmlResource(extractHtmlReferences(content)));
@@ -51,6 +55,7 @@ export function validateHtmlLinks(
         resource,
         parsed,
         config,
+        pendingOrphans,
       );
       if (result.violation) violations.push(`${route}: ${result.violation}`);
       if (
@@ -58,7 +63,12 @@ export function validateHtmlLinks(
         !visited.has(result.target) &&
         !pending.includes(result.target)
       ) {
-        const targetResource = loadResource(result.target, outputs, config);
+        const targetResource = loadResource(
+          result.target,
+          outputs,
+          config,
+          pendingOrphans,
+        );
         if (targetResource) {
           parsed.set(result.target, targetResource);
           pending.push(result.target);
@@ -84,6 +94,7 @@ function validateReference(
   source: ParsedResource,
   parsed: Map<string, ParsedResource>,
   config: ResolvedConfig,
+  pendingOrphans: ReadonlySet<string>,
 ): ReferenceResult {
   const reference = item.value;
   if (
@@ -126,7 +137,7 @@ function validateReference(
   const target = rawTarget.replace(/^\.\//, "");
   let targetResource = parsed.get(target);
   if (!targetResource) {
-    targetResource = loadResource(target, new Map(), config);
+    targetResource = loadResource(target, new Map(), config, pendingOrphans);
     if (!targetResource) return { violation: `missing target ${reference}` };
     parsed.set(target, targetResource);
   }
@@ -164,10 +175,12 @@ function loadResource(
   route: string,
   outputs: ReadonlyMap<string, string>,
   config: ResolvedConfig,
+  pendingOrphans: ReadonlySet<string>,
 ): ParsedResource | undefined {
   const generated = outputs.get(route);
   if (generated !== undefined)
     return htmlResource(extractHtmlReferences(generated));
+  if (pendingOrphans.has(route)) return undefined;
   const candidate = path.resolve(config.mockupsDir, route);
   if (!isPublicStaticFile(candidate, config)) return undefined;
   const extension = path.posix.extname(route).toLowerCase();

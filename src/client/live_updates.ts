@@ -1,4 +1,9 @@
 /** Storage subset used for one-shot reload recovery. */
+
+import {
+  parseBrowseRecoveryState,
+  type BrowseRecoveryState,
+} from "./browse_state.js";
 export interface RecoveryStorage {
   getItem(key: string): string | null;
   removeItem(key: string): void;
@@ -20,6 +25,7 @@ export interface UpdateEventStream {
 
 /** One-shot recovery payload consumed after an automatic reload. */
 export interface RecoveryState {
+  browse?: BrowseRecoveryState;
   url: string;
   version: number;
 }
@@ -34,6 +40,8 @@ export class LiveUpdateController {
     private readonly stream: UpdateEventStream,
     private readonly storage: RecoveryStorage,
     private readonly location: ReloadLocation,
+    private readonly captureBrowseState: () =>
+      BrowseRecoveryState | undefined = () => undefined,
   ) {}
 
   /** Begin receiving server update versions. */
@@ -53,10 +61,23 @@ export class LiveUpdateController {
     this.storage.removeItem(RECOVERY_KEY);
     if (!raw) return undefined;
     try {
-      const value = JSON.parse(raw) as { url?: unknown; version?: unknown };
-      return typeof value.url === "string" && Number.isInteger(value.version)
-        ? { url: value.url, version: value.version as number }
-        : undefined;
+      const value = JSON.parse(raw) as {
+        browse?: unknown;
+        url?: unknown;
+        version?: unknown;
+      };
+      if (typeof value.url !== "string" || !Number.isSafeInteger(value.version))
+        return undefined;
+      const browse =
+        value.browse === undefined
+          ? undefined
+          : parseBrowseRecoveryState(value.browse);
+      if (value.browse !== undefined && !browse) return undefined;
+      return {
+        ...(browse ? { browse } : {}),
+        url: value.url,
+        version: value.version as number,
+      };
     } catch {
       return undefined;
     }
@@ -67,10 +88,13 @@ export class LiveUpdateController {
     const initialReady = this.#lastVersion === 0 && !forceReload;
     this.#lastVersion = version;
     if (initialReady) return;
-    this.storage.setItem(
-      RECOVERY_KEY,
-      JSON.stringify({ url: this.location.href, version }),
-    );
+    const browse = this.captureBrowseState();
+    const recovery: RecoveryState = {
+      ...(browse ? { browse } : {}),
+      url: this.location.href,
+      version,
+    };
+    this.storage.setItem(RECOVERY_KEY, JSON.stringify(recovery));
     this.location.reload();
   }
 }

@@ -50,7 +50,8 @@ export function changedManifestRoutes(
   const mockupsPrefix = toPosixPath(
     path.relative(config.repoRoot, config.mockupsDir),
   );
-  const routes: string[] = [];
+  const routes = new Set<string>();
+  const changedScreenIds = new Set<string>();
   for (const entry of manifest.entries) {
     if (entry.kind === "collection") continue;
     const candidates = [entry.sourcePath, ...entry.dependencies];
@@ -60,8 +61,17 @@ export function changedManifestRoutes(
         `${mockupsPrefix}/${entry.fragments.desktop}`,
       );
     }
-    if (candidates.some((candidate) => changed.has(candidate)))
-      routes.push(entry.route);
+    if (!candidates.some((candidate) => changed.has(candidate))) continue;
+    routes.add(entry.route);
+    if (entry.kind === "screen") changedScreenIds.add(entry.id);
   }
-  return routes.sort();
+  for (const entry of manifest.entries) {
+    if (
+      entry.kind === "use-case" &&
+      entry.steps.some((step) => changedScreenIds.has(step.screenId))
+    ) {
+      routes.add(entry.route);
+    }
+  }
+  return [...routes].sort();
 }

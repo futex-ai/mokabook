@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
+import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import {
   createFixture,
@@ -85,6 +86,16 @@ test("link validation fails closed for non-portable targets", async (context) =>
     }),
   );
   await assert.rejects(() => compileCatalogue(config), /root-absolute link/);
+});
+
+test("link validation rejects generated targets pending orphan removal", async (context) => {
+  const fixture = await createFixture(orphanLinkSource(true));
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  await fs.promises.writeFile(fixture.entryPath, orphanLinkSource(false));
+
+  await assert.rejects(() => compileCatalogue(config), /missing target/);
 });
 
 test("catalogue routes reject URL and HTML attribute delimiters", async () => {
@@ -169,5 +180,19 @@ export const mockups = [
   defineScreen({ ...metadata, description: "Ordinary target", desktop: <main>Ordinary</main>, id: "ordinary-target", mobile: <main>Ordinary</main>, route: "screens/details.html", title: "Ordinary" }),
   defineScreen({ ...metadata, description: "Unsafe target", desktop: <main>Unsafe</main>, id: "unsafe-target", mobile: <main>Unsafe</main>, route: ${JSON.stringify(route)}, title: "Unsafe" })
 ];
+`;
+}
+
+function orphanLinkSource(includeTarget: boolean): string {
+  const target = includeTarget
+    ? `defineScreen({ ...metadata, description: "Details", desktop: <main>Details</main>, id: "details", mobile: <main>Details</main>, route: "screens/details.html", title: "Details" })`
+    : "";
+  return `import { defineScreen } from "mokabook";
+import React from "react";
+const metadata = { dependencies: [], navPath: ["Fixture"], relatedDocs: [] };
+export const mockups = [
+  defineScreen({ ...metadata, description: "Home", desktop: <a href="./details.desktop.html">Details</a>, id: "home", mobile: <a href="./details.mobile.html">Details</a>, route: "screens/home.html", title: "Home" }),
+  ${target}
+].filter(Boolean);
 `;
 }

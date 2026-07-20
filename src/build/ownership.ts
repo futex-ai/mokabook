@@ -21,6 +21,15 @@ export function ownedGeneratedRoutes(config: ResolvedConfig): string[] {
     .sort();
 }
 
+/** List currently owned routes absent from the next generated output set. */
+export function pendingGeneratedOrphanRoutes(
+  config: ResolvedConfig,
+  expectedRoutes: Iterable<string>,
+): string[] {
+  const expected = new Set(expectedRoutes);
+  return ownedGeneratedRoutes(config).filter((route) => !expected.has(route));
+}
+
 /** Determine whether an existing target may be replaced safely. */
 export function isOwned(candidate: string, config: ResolvedConfig): boolean {
   if (

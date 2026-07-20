@@ -102,6 +102,7 @@ test("catalogue nav marks active, changed, and legacy rows", () => {
   });
   assert.match(nav, /aria-current="page"[^>]*>[^<]*<[^>]*>▢<\/span>Welcome/);
   assert.match(nav, /data-changed="true"/);
+  assert.match(nav, /data-nav-collection="screens"/);
   assert.match(nav, /Legacy pages/);
   assert.match(nav, /legacy\/old\.html/);
   const inactive = catalogueNav(manifest, context);

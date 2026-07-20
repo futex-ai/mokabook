@@ -4,7 +4,7 @@ import path from "node:path";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import type { Compilation } from "./compile.js";
-import { ownedGeneratedRoutes } from "./ownership.js";
+import { pendingGeneratedOrphanRoutes } from "./ownership.js";
 
 /** Compare expected bytes with committed output without writing anything. */
 export function checkCompilation(
@@ -21,9 +21,9 @@ export function checkCompilation(
       stale.push(route);
     }
   }
-  const expectedRoutes = new Set(compilation.outputs.keys());
-  const orphan = ownedGeneratedRoutes(config).filter(
-    (route) => !expectedRoutes.has(route),
+  const orphan = pendingGeneratedOrphanRoutes(
+    config,
+    compilation.outputs.keys(),
   );
   if (missing.length === 0 && stale.length === 0 && orphan.length === 0) return;
   const groups = [

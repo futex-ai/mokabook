@@ -31,12 +31,31 @@ test("changed routes match source, dependency, and fragment paths", async (conte
     changedManifestRoutes(compilation.manifest, config, [
       "mockups/screens/home.mobile.html",
     ]),
-    ["screens/home.html"],
+    ["screens/home.html", "user-flows/tour.html"],
   );
   assert.deepEqual(
     changedManifestRoutes(compilation.manifest, config, ["unrelated.txt"]),
     [],
   );
+});
+
+test("changed screens propagate to use cases authored separately", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const manifest = structuredClone((await compileCatalogue(config)).manifest);
+  const home = manifest.entries.find((entry) => entry.id === "home");
+  const tour = manifest.entries.find((entry) => entry.id === "tour");
+  if (!home || !tour) throw new Error("fixture entries missing");
+  home.sourcePath = "entries/home.mockup.tsx";
+  home.dependencies = [home.sourcePath];
+  tour.sourcePath = "entries/tour.mockup.tsx";
+  tour.dependencies = [tour.sourcePath];
+
+  assert.deepEqual(changedManifestRoutes(manifest, config, [home.sourcePath]), [
+    "screens/home.html",
+    "user-flows/tour.html",
+  ]);
 });
 
 test("changed routes require the config repo root to be the Git top level", async (context) => {

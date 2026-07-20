@@ -2,13 +2,21 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { startBrowserLiveUpdates } from "../dist/client/browser.js";
+import type { BrowseRecoveryState } from "../dist/client/browse_state.js";
 
 test("browser adapter connects updates to reload and shutdown", () => {
   const source = new FakeEventSource();
   const storage = new FakeStorage();
   const location = new FakeLocation();
+  const browse = browseState();
+  storage.setItem(
+    "mokabook:live-update-recovery",
+    JSON.stringify({ browse, url: location.href, version: 1 }),
+  );
   let pageHide: (() => void) | undefined;
+  let restored: BrowseRecoveryState | undefined;
   const controller = startBrowserLiveUpdates({
+    captureBrowseState: () => browse,
     createEventSource(url) {
       assert.equal(url, "/__mokabook/events");
       return source;
@@ -17,19 +25,63 @@ test("browser adapter connects updates to reload and shutdown", () => {
     onPageHide(callback) {
       pageHide = callback;
     },
+    restoreBrowseState(state) {
+      restored = state;
+    },
     storage,
   });
+  assert.deepEqual(restored, browse);
 
   source.emit("ready", "1");
   source.emit("update", "2");
   assert.equal(location.reloads, 1);
   assert.deepEqual(controller.consumeRecovery(), {
+    browse,
     url: "http://127.0.0.1:4173/view/screens/home.html",
     version: 2,
   });
   pageHide?.();
   assert.equal(source.closed, true);
 });
+
+test("browser adapter consumes stale-URL recovery without applying it", () => {
+  const storage = new FakeStorage();
+  storage.setItem(
+    "mokabook:live-update-recovery",
+    JSON.stringify({
+      browse: browseState(),
+      url: "http://127.0.0.1:4173/view/screens/other.html",
+      version: 2,
+    }),
+  );
+  let restored = false;
+  startBrowserLiveUpdates({
+    captureBrowseState: () => undefined,
+    createEventSource: () => new FakeEventSource(),
+    location: new FakeLocation(),
+    onPageHide: () => undefined,
+    restoreBrowseState: () => {
+      restored = true;
+    },
+    storage,
+  });
+
+  assert.equal(restored, false);
+  assert.equal(storage.getItem("mokabook:live-update-recovery"), null);
+});
+
+function browseState(): BrowseRecoveryState {
+  return {
+    changedOnly: false,
+    closedCollectionIds: ["fixture"],
+    detailsOpen: true,
+    drawerOpen: true,
+    navScroll: 12,
+    query: "home",
+    scroll: 24,
+    viewport: "mobile",
+  };
+}
 
 class FakeEventSource {
   closed = false;

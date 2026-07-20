@@ -4,7 +4,7 @@ import path from "node:path";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import type { Compilation } from "./compile.js";
-import { isOwned, ownedGeneratedRoutes } from "./ownership.js";
+import { isOwned, pendingGeneratedOrphanRoutes } from "./ownership.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";
 
 /** Atomically replace owned generated files with rollback on any failure. */
@@ -19,10 +19,7 @@ export async function writeCompilation(
   const stageRoot = path.join(temporaryRoot, "stage");
   const backupRoot = path.join(temporaryRoot, "backup");
   const expected = [...compilation.outputs.keys()].sort();
-  const expectedSet = new Set(expected);
-  const orphan = ownedGeneratedRoutes(config).filter(
-    (route) => !expectedSet.has(route),
-  );
+  const orphan = pendingGeneratedOrphanRoutes(config, expected);
   const affected = [...new Set([...expected, ...orphan])].sort();
   const backedUp: string[] = [];
   const installed: string[] = [];

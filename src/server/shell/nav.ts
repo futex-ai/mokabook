@@ -74,7 +74,8 @@ function renderNode(node: NavNode, context: ShellContext): string {
       .map((child) => renderNode(child, context))
       .join("");
     return (
-      `<li><details open><summary class="mb-nav-row" data-nav-collection>` +
+      `<li><details open data-nav-collection="${escapeHtml(entry.id)}">` +
+      `<summary class="mb-nav-row">` +
       `<span class="mb-caret mb-caret--folder" aria-hidden="true">▸</span>` +
       `${escapeHtml(entry.title)}</summary>` +
       `<ul>${children}</ul></details></li>`

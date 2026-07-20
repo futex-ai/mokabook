@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
+import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import {
   createFixture,
@@ -98,3 +99,49 @@ test("configured compatibility transformers are typed complete-document function
     /must return a complete HTML document/,
   );
 });
+
+test("compatibility routes exclude generated files pending orphan removal", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  await fs.promises.writeFile(
+    path.join(fixture.root, "compatibility.ts"),
+    `import type { CompatibilityTransformInput } from "mokabook";
+export default function transform(input: CompatibilityTransformInput): string {
+  if (input.availableRoutes.some((route) => route.includes("details."))) {
+    throw new Error("pending orphan was exposed");
+  }
+  return input.content;
+}
+`,
+  );
+  await fs.promises.writeFile(
+    fixture.configPath,
+    'export default { entriesDir: "entries", mockupsDir: "mockups", repoRoot: "." };\n',
+  );
+  const initial = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(initial), initial);
+  await fs.promises.writeFile(fixture.entryPath, oneScreenSource());
+  await fs.promises.writeFile(
+    fixture.configPath,
+    'export default { compatibility: { transformer: "compatibility.ts" }, entriesDir: "entries", mockupsDir: "mockups", repoRoot: "." };\n',
+  );
+
+  await compileCatalogue(await loadConfig(fixture.root));
+});
+
+function oneScreenSource(): string {
+  return `import { defineScreen } from "mokabook";
+import React from "react";
+export const mockups = [defineScreen({
+  dependencies: [],
+  description: "Home",
+  desktop: <main>Home</main>,
+  id: "home",
+  mobile: <main>Home</main>,
+  navPath: ["Fixture"],
+  relatedDocs: [],
+  route: "screens/home.html",
+  title: "Home"
+})];
+`;
+}

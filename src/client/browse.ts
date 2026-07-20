@@ -1,5 +1,7 @@
 /** Progressive Browse shell enhancement served at /__mokabook/client/browse.js. */
 
+import { applyNavVisibility, setDrawer, setViewport } from "./browse_state.js";
+
 /** Anchor facts used to decide whether Browse may intercept a click. */
 export interface BrowseLinkCandidate {
   download: boolean;
@@ -54,45 +56,6 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     if (status) status.textContent = message;
   };
 
-  const setDrawer = (open: boolean): void => {
-    shell.dataset["drawer"] = open ? "open" : "closed";
-    const button = shell.querySelector("[data-mokabook-menu]");
-    button?.setAttribute("aria-expanded", open ? "true" : "false");
-  };
-
-  const setViewport = (value: string): void => {
-    for (const stage of doc.querySelectorAll("[data-mokabook-stage]"))
-      stage.setAttribute("data-viewport", value);
-    for (const option of doc.querySelectorAll("[data-viewport-option]"))
-      option.setAttribute(
-        "aria-pressed",
-        option.getAttribute("data-viewport-option") === value
-          ? "true"
-          : "false",
-      );
-  };
-
-  const applyNavVisibility = (): void => {
-    const query =
-      doc
-        .querySelector<HTMLInputElement>("[data-mokabook-search]")
-        ?.value.trim()
-        .toLowerCase() ?? "";
-    const changedOnly =
-      doc
-        .querySelector('[data-filter="changed"]')
-        ?.getAttribute("aria-pressed") === "true";
-    for (const row of doc.querySelectorAll<HTMLElement>("[data-nav-row]")) {
-      const matchesQuery =
-        query === "" ||
-        (row.textContent ?? "").toLowerCase().includes(query) ||
-        (row.getAttribute("data-route") ?? "").toLowerCase().includes(query);
-      const matchesFilter =
-        !changedOnly || row.getAttribute("data-changed") === "true";
-      row.hidden = !(matchesQuery && matchesFilter);
-    }
-  };
-
   const markActiveRow = (pathname: string): void => {
     for (const row of doc.querySelectorAll<HTMLAnchorElement>(
       "a[data-nav-row]",
@@ -142,7 +105,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     const finalUrl = response.url || url;
     if (push) win.history.pushState({} satisfies ScrollState, "", finalUrl);
     markActiveRow(new URL(finalUrl, win.location.href).pathname);
-    setDrawer(false);
+    setDrawer(shell, false);
     win.scrollTo(0, restoreScroll ?? 0);
     main.focus();
     announce(`Loaded ${doc.title}`);
@@ -152,14 +115,14 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     const target = event.target instanceof Element ? event.target : undefined;
     if (!target) return;
     if (target.closest("[data-mokabook-menu]")) {
-      setDrawer(shell.dataset["drawer"] !== "open");
+      setDrawer(shell, shell.dataset["drawer"] !== "open");
       return;
     }
     const viewportOption = target
       .closest("[data-viewport-option]")
       ?.getAttribute("data-viewport-option");
     if (viewportOption) {
-      setViewport(viewportOption);
+      setViewport(doc, viewportOption);
       return;
     }
     const filterButton = target.closest("[data-filter]");
@@ -169,7 +132,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
           "aria-pressed",
           option === filterButton ? "true" : "false",
         );
-      applyNavVisibility();
+      applyNavVisibility(doc);
       return;
     }
     const anchor = target.closest("a");
@@ -195,7 +158,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
 
   doc.addEventListener("input", (event) => {
     const target = event.target instanceof Element ? event.target : undefined;
-    if (target?.matches("[data-mokabook-search]")) applyNavVisibility();
+    if (target?.matches("[data-mokabook-search]")) applyNavVisibility(doc);
   });
 
   win.addEventListener("popstate", (event) => {

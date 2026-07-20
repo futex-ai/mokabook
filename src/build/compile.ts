@@ -71,7 +71,6 @@ export async function compileCatalogue(
   for (const [route, content] of outputs) {
     normalizeSingleDocument(content, route);
   }
-  validateHtmlLinks(outputs, config);
   const legacyManifest: ManifestLegacyPage[] = legacy.map((page) => ({
     route: page.route,
     sourcePath: page.sourceRelativePath,
@@ -79,6 +78,7 @@ export async function compileCatalogue(
   const manifest = createManifest(registry.entries, legacyManifest);
   parseManifest(manifest);
   outputs.set(MANIFEST_NAME, serializeManifest(manifest));
+  validateHtmlLinks(outputs, config);
   validateGeneratedOutputPaths(outputs.keys(), config);
   return { manifest, outputs };
 }

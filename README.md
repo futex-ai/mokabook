@@ -108,6 +108,8 @@ Watched Serve keeps its resolved port, transactionally reloads a changed
 consumer config with a ready replacement watcher, and serially replaces a child
 that exits unexpectedly after readiness. Open Browse and Review pages connect to its
 versioned event stream and reload after a newer build or asset version arrives.
+A watched reload restores the current Browse search, filter, disclosures,
+viewport, drawer, and scroll state once on the same durable URL.
 A rejected config or failed candidate build leaves the last-good watcher,
 output, and child active.
 

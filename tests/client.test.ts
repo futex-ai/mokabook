@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  parseBrowseRecoveryState,
+  type BrowseRecoveryState,
+} from "../dist/client/browse_state.js";
+import {
   LiveUpdateController,
   type RecoveryStorage,
   type ReloadLocation,
@@ -12,7 +16,13 @@ test("live updates are latest-wins and recovery is consumed once", () => {
   const stream = new FakeStream();
   const storage = new FakeStorage();
   const location = new FakeLocation();
-  const controller = new LiveUpdateController(stream, storage, location);
+  const browse = browseState();
+  const controller = new LiveUpdateController(
+    stream,
+    storage,
+    location,
+    () => browse,
+  );
   controller.start();
   stream.ready(1);
   assert.equal(location.reloads, 0);
@@ -20,6 +30,7 @@ test("live updates are latest-wins and recovery is consumed once", () => {
   stream.update(1);
   assert.equal(location.reloads, 1);
   assert.deepEqual(controller.consumeRecovery(), {
+    browse,
     url: "http://127.0.0.1:4173/view/screens/home.html",
     version: 2,
   });
@@ -27,6 +38,31 @@ test("live updates are latest-wins and recovery is consumed once", () => {
   controller.close();
   assert.equal(stream.closed, true);
 });
+
+test("Browse recovery parsing rejects malformed session state", () => {
+  assert.deepEqual(parseBrowseRecoveryState(browseState()), browseState());
+  assert.equal(
+    parseBrowseRecoveryState({ ...browseState(), viewport: "tablet" }),
+    undefined,
+  );
+  assert.equal(
+    parseBrowseRecoveryState({ ...browseState(), scroll: -1 }),
+    undefined,
+  );
+});
+
+function browseState(): BrowseRecoveryState {
+  return {
+    changedOnly: true,
+    closedCollectionIds: ["fixture"],
+    detailsOpen: true,
+    drawerOpen: true,
+    navScroll: 18,
+    query: "home",
+    scroll: 42,
+    viewport: "mobile",
+  };
+}
 
 class FakeStream implements UpdateEventStream {
   closed = false;

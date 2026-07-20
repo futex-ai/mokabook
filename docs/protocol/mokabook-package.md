@@ -217,7 +217,9 @@ asset with a relative URL; root-absolute links are rejected as non-portable.
 Authors use `MockLink` for id-addressed catalogue navigation.
 Local resource URLs in HTML source attributes, `srcset`, inline/style-block
 CSS, and transitively referenced HTML/CSS must likewise resolve to public
-static files beneath `mockupsDir`.
+static files beneath `mockupsDir` that remain after the pending build. An owned
+generated file absent from the next output set is a pending orphan, never a
+valid link or resource target merely because it still exists before commit.
 
 All public exports ship ESM JavaScript and declarations usable by NodeNext and
 bundler TypeScript resolution. The package export map and packed-tarball tests
@@ -287,14 +289,15 @@ interface CompatibilityTransformInput {
 type CompatibilityTransformer = (input: CompatibilityTransformInput) => string;
 ```
 
-`availableRoutes` contains the complete pending output plus existing public
-static files. `logicalRoutes` maps screen/use-case catalogue routes to concrete
-artifacts for the current viewport. `outputPath` is repository-relative; no
-absolute checkout path is exposed. Mokabook applies the transformer after id
-links resolve and before Review-marker, link, resource, and ownership
-validation. It must return a complete document, remain deterministic, and stay
-consumer-owned. It cannot weaken final validation. New catalogues should author
-portable links directly and leave this option unset.
+`availableRoutes` contains the complete pending output plus retained existing
+public static files; generated files scheduled for orphan removal are excluded.
+`logicalRoutes` maps screen/use-case catalogue routes to concrete artifacts for
+the current viewport. `outputPath` is repository-relative; no absolute checkout
+path is exposed. Mokabook applies the transformer after id links resolve and
+before Review-marker, link, resource, and ownership validation. It must return
+a complete document, remain deterministic, and stay consumer-owned. It cannot
+weaken final validation. New catalogues should author portable links directly
+and leave this option unset.
 
 Stylesheet rules are ordered, declarative consumer configuration. Their globs
 match the catalogue route before viewport fragments are derived, so one exact

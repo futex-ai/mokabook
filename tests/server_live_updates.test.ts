@@ -31,6 +31,10 @@ test("every served document loads the browser update client", async (context) =>
   assert.match(browser.headers.get("content-type") ?? "", /javascript/);
   assert.match(await browser.text(), /EventSource/);
   assert.equal(
+    (await fetch(`${server.url}/__mokabook/client/browse_state.js`)).status,
+    200,
+  );
+  assert.equal(
     (await fetch(`${server.url}/__mokabook/client/live_updates.js`)).status,
     200,
   );
