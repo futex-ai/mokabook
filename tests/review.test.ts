@@ -200,6 +200,40 @@ test("Review compares Git base without checkout and writes deterministic artifac
   );
 });
 
+test("Review reports descendants of directory dependencies", async (context) => {
+  const fixture = await createFixture(
+    validEntrySource().replace(
+      'dependencies: ["notes.md"]',
+      'dependencies: ["src/components"]',
+    ),
+  );
+  context.after(() => removeFixture(fixture));
+  const component = path.join(fixture.root, "src/components/Button.tsx");
+  await fs.promises.mkdir(path.dirname(component), { recursive: true });
+  await fs.promises.writeFile(component, "export const label = 'Before';\n");
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  await git(fixture.root, ["init", "-q"]);
+  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
+  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["add", "."]);
+  await git(fixture.root, ["commit", "-qm", "test: base directory dependency"]);
+  await fs.promises.writeFile(component, "export const label = 'After';\n");
+
+  const result = await runReview(
+    config,
+    "HEAD",
+    config.review.outDir,
+    new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+  );
+
+  assert.ok(
+    result.screens.every((screen) =>
+      screen.sharedImpact.includes("src/components/Button.tsx"),
+    ),
+  );
+});
+
 test("Review writer will not replace an unowned directory or repository root", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

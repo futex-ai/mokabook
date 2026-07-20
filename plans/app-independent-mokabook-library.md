@@ -722,6 +722,47 @@ Summary: verify, commit, push, and independently review the second-cycle fixes.
 At this milestone every valid second-cycle finding is fixed and the reviewed
 commit is pushed.
 
+## Milestone 10J: Harden Runtime Boundaries
+
+Summary: resolve the child-lifecycle, broad-watch, dependency-impact, and base
+asset findings from the third Codex review cycle.
+
+- [x] Add failure-first coverage proving a watched child exits when its parent
+      IPC channel disconnects, then close the child server on disconnect.
+- [x] Add failure-first coverage for broad watch rules across dependency,
+      build, test, Review, and transaction paths, then enforce package-owned
+      ignore and stylesheet precedence in both classification and filesystem
+      traversal.
+- [x] Add failure-first Browse and Review coverage for directory dependencies,
+      then treat declared dependencies as roots matching themselves and
+      descendants.
+- [x] Add failure-first coverage for root-absolute and protocol-relative base
+      resources, then make Review fail closed instead of emitting incomplete
+      snapshots.
+- [x] Update the runtime, package, architecture, and README contracts with the
+      strengthened lifecycle and path semantics.
+
+At this milestone watched processes cannot outlive their parent, broad rules do
+not turn package-owned output into work, dependency impact is complete, and
+Review snapshots fail closed on non-portable base resources.
+
+## Milestone 10K: Third Review-Fix Verification
+
+Summary: verify, commit, push, and independently review the third-cycle fixes.
+
+- [x] Run focused failure-first regressions and the complete relevant test
+      suites for child lifecycle, watch classification, impact, and Review
+      assets.
+- [x] Run formatter, lint, typecheck, unit/integration/browser/package/Rust
+      checks through `cargo xtask check` with a 100% pass rate.
+- [x] Fetch and audit `origin/main`, inspect the complete diff and deletions,
+      then commit all third-cycle fixes with a Conventional Commit and push.
+- [ ] Run `cargo xtask review` after the push and repeat the bounded review loop
+      until no valid finding remains.
+
+At this milestone every valid third-cycle finding is fixed and the reviewed
+commit is pushed.
+
 ## Milestone 11: First Package Release
 
 Summary: after the library PR merges, reserve the unscoped package safely,

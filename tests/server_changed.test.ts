@@ -58,6 +58,21 @@ test("changed screens propagate to use cases authored separately", async (contex
   ]);
 });
 
+test("changed routes match descendants of directory dependencies", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const manifest = structuredClone((await compileCatalogue(config)).manifest);
+  const home = manifest.entries.find((entry) => entry.id === "home");
+  if (!home) throw new Error("fixture home entry missing");
+  home.dependencies = ["src/components"];
+
+  assert.deepEqual(
+    changedManifestRoutes(manifest, config, ["src/components/Button.tsx"]),
+    ["screens/home.html", "user-flows/tour.html"],
+  );
+});
+
 test("changed routes require the config repo root to be the Git top level", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

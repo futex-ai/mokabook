@@ -135,14 +135,30 @@ function resolveReference(
   rawReference: string,
 ): string | undefined {
   const reference = rawReference.trim();
+  if (reference.startsWith("//")) {
+    throw assetError(
+      sourceRoute,
+      `non-portable asset URL ${reference} (protocol-relative)`,
+    );
+  }
+  if (reference.startsWith("/")) {
+    throw assetError(
+      sourceRoute,
+      `non-portable asset URL ${reference} (root-absolute)`,
+    );
+  }
   if (
     reference === "" ||
     reference.startsWith("#") ||
-    reference.startsWith("/") ||
-    reference.startsWith("//") ||
-    /^[a-z][a-z0-9+.-]*:/i.test(reference)
+    /^(?:https?:|data:)/i.test(reference)
   ) {
     return undefined;
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(reference)) {
+    throw assetError(
+      sourceRoute,
+      `non-portable asset URL ${reference} (unsupported scheme)`,
+    );
   }
   const encodedPath = reference.split(/[?#]/, 1)[0] ?? "";
   let decodedPath: string;

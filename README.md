@@ -97,22 +97,28 @@ navigation, viewport controls, use-case steps, details, id redirects, and
 watched updates. Review provides summary, side-by-side, overlay, and difference
 views as a static artifact. Screens with shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
-byte-identical.
+byte-identical. A declared dependency may be a file or directory; a changed
+descendant of a directory is reported as the screen's impact evidence.
 
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.
-Base resources must be regular Git files outside configured source roots.
+Base resources must use portable relative URLs or explicit HTTP(S)/data URLs;
+root-absolute, protocol-relative, and unsupported-scheme URLs fail Review.
+Copied base resources must be regular Git files outside configured source roots.
 Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and
 logical screen routes are not portable links in generated static files. Build
 and check rewrite and validate every supported `href` and `data-nav-href`, plus
 local HTML resource attributes and transitive CSS URLs. Watched Serve keeps its
 resolved port, transactionally reloads a changed consumer config with a ready
 replacement watcher, and serially replaces a child that exits unexpectedly
-after readiness. Shutdown interrupts replacement-watcher readiness and closes
-the candidate before draining the remaining lifecycle. Open Browse and Review
-pages connect to the versioned event stream and reload after a newer build or
-asset version arrives.
+after readiness. A watched child also closes its server when the parent IPC
+channel disconnects. Package-owned generated, dependency, build, test, Review,
+and transaction paths are pruned even when a custom rule watches the repository
+root; configured stylesheets retain reload precedence. Shutdown interrupts
+replacement-watcher readiness and closes the candidate before draining the
+remaining lifecycle. Open Browse and Review pages connect to the versioned
+event stream and reload after a newer build or asset version arrives.
 A watched reload restores the current Browse search, filter, disclosures,
 viewport, drawer, and scroll state once on the same durable URL.
 A rejected config or failed candidate build leaves the last-good watcher,
@@ -131,8 +137,9 @@ file and confined to `repoRoot`.
   component trees.
 - `legacy` opts into `.source.*` pages, component expansion, route aliases,
   excluded migration sources, and generic lints.
-- `watch` classifies additional consumer inputs; `review` selects the Git base,
-  artifact directory, and shared-impact globs.
+- `watch` classifies additional consumer inputs after package-owned ignores and
+  configured stylesheets; `review` selects the Git base, artifact directory,
+  and shared-impact globs.
 - `compatibility.readManifestV2` reads Accounting's old manifest only when v3
   is absent. A temporary `compatibility.transformer` may deterministically
   repair already-authored documents during a consumer cutover; final links and

@@ -32,6 +32,7 @@ function waitForChildShutdown(
   return new Promise((resolve, reject) => {
     let closing = false;
     const cleanup = (): void => {
+      process.off("disconnect", onDisconnect);
       process.off("message", onMessage);
       process.off("SIGINT", onSignal);
       process.off("SIGTERM", onSignal);
@@ -52,7 +53,9 @@ function waitForChildShutdown(
       if (isUpdateMessage(message)) server.publishUpdate(message.version);
       if (isMessage(message, "shutdown")) void close();
     };
+    const onDisconnect = (): void => void close();
     const onSignal = (): void => void close();
+    process.once("disconnect", onDisconnect);
     process.on("message", onMessage);
     process.once("SIGINT", onSignal);
     process.once("SIGTERM", onSignal);

@@ -8,6 +8,7 @@ import { promisify } from "node:util";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
+import { copySnapshotDependencies } from "../dist/review/assets.js";
 import {
   NodeGitCommandRunner,
   RepositoryGitClient,
@@ -20,6 +21,34 @@ import {
 } from "./helpers/fixture.js";
 
 const execFileAsync = promisify(execFile);
+
+test("Review rejects non-portable base resource URLs", async () => {
+  for (const reference of [
+    "/styles.css",
+    "//cdn.example.invalid/styles.css",
+    "file:///tmp/styles.css",
+  ]) {
+    const route = "screens/home.mobile.html";
+    const files = new Map([
+      [
+        `snapshots/before/${route}`,
+        `<html><head><link rel="stylesheet" href="${reference}"></head></html>`,
+      ],
+    ]);
+
+    await assert.rejects(
+      () =>
+        copySnapshotDependencies(
+          files,
+          "before",
+          new Set([route]),
+          async () => "",
+        ),
+      /non-portable asset URL/,
+      reference,
+    );
+  }
+});
 
 test("Review copies local stylesheet dependencies for both snapshots", async (context) => {
   const fixture = await createFixture(

@@ -158,12 +158,15 @@ relative to `mockupsDir`; HTTP(S) stylesheet URLs are allowed.
 `watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
 globs, while stylesheet `match` and legacy aliases/lint routes match catalogue
 routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
-matches and watch paths are invalid. Authored source directories may sit below
-`mockupsDir` for a `docs/mockups/src` layout, but they may not equal each other
-or the output root; generated routes are collision-checked against those
-sources before writing. Review output must not overlap a source or output root
-in either direction. That rule applies equally to configured output, a CLI
-`--out` override, and the transactional writer boundary.
+matches and watch paths are invalid. Additional watch rules cannot override
+configured source/module rebuilds, configured stylesheet reloads, or
+package-owned ignores for dependency, build, test, Review, generated, and
+transaction paths. Authored source directories may sit below `mockupsDir` for
+a `docs/mockups/src` layout, but they may not equal each other or the output
+root; generated routes are collision-checked against those sources before
+writing. Review output must not overlap a source or output root in either
+direction. That rule applies equally to configured output, a CLI `--out`
+override, and the transactional writer boundary.
 
 `moduleResolution` has no defaults beyond esbuild's platform behavior. Package
 roots must be in-repository directories containing `package.json`; their
@@ -194,10 +197,13 @@ to existing screens and never defines a screen inline. Ids are explicit,
 globally unique kebab-case values and remain stable across navigation changes.
 
 Each entry provides a title, description, navigation path, related docs, and
-dependency paths. Screens and use cases provide a stable relative `.html`
-route; use cases live under `user-flows/`. Screens may provide an address-bar
-label and use-case membership. Nested definitions inherit declared metadata,
-but ids never derive from tree position.
+dependency paths. A dependency may identify an existing repository file or
+directory; Browse and Review match the path itself and every descendant, while
+Review reports the concrete changed descendant as evidence. Screens and use
+cases provide a stable relative `.html` route; use cases live under
+`user-flows/`. Screens may provide an address-bar label and use-case
+membership. Nested definitions inherit declared metadata, but ids never derive
+from tree position.
 
 Imports of `mokabook` from modules beneath `entriesDir` bind the authoring
 helpers to that importing module. Definitions created at module evaluation or
@@ -382,6 +388,8 @@ type ManifestEntry =
 Entries sort by route then id; legacy pages, dependencies, and generated files
 sort lexically. Optional properties are omitted, not emitted as `null`.
 `sourcePath`, related docs, and dependencies use repo-relative POSIX paths.
+Manifest dependencies retain the file-or-directory-root matching semantics of
+the authoring API.
 
 ## Legacy Compatibility
 

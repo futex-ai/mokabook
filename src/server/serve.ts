@@ -25,6 +25,7 @@ import {
 } from "./watcher.js";
 import {
   classifyWatchPath,
+  isPackageOwnedIgnoredWatchPath,
   NotificationGate,
   type RuntimeWatchAction,
   WatchActionQueue,
@@ -241,7 +242,9 @@ function createWatcher(
   config: ResolvedConfig,
   gate: NotificationGate<string>,
 ): ConsumerWatcher {
-  const watcher = factory.create(watchTargets(config));
+  const watcher = factory.create(watchTargets(config), (candidate) =>
+    isPackageOwnedIgnoredWatchPath(candidate, config),
+  );
   watcher.onChange((candidate) => gate.notify(candidate));
   watcher.onError((error) => process.stderr.write(`${errorMessage(error)}\n`));
   return watcher;

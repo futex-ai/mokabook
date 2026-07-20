@@ -8,17 +8,27 @@ export interface ConsumerWatcher {
   ready(): Promise<void>;
 }
 
+/** Predicate used to prune package-owned paths from a recursive watch. */
+export type WatchIgnorePredicate = (candidate: string) => boolean;
+
 /** Factory seam for watcher integration tests and alternate platforms. */
 export interface ConsumerWatcherFactory {
-  create(targets: readonly string[]): ConsumerWatcher;
+  create(
+    targets: readonly string[],
+    ignore?: WatchIgnorePredicate,
+  ): ConsumerWatcher;
 }
 
 /** Chokidar-backed consumer watcher factory. */
 export class ChokidarWatcherFactory implements ConsumerWatcherFactory {
-  create(targets: readonly string[]): ConsumerWatcher {
+  create(
+    targets: readonly string[],
+    ignore?: WatchIgnorePredicate,
+  ): ConsumerWatcher {
     return new ChokidarConsumerWatcher(
       chokidar.watch([...targets], {
         awaitWriteFinish: { pollInterval: 20, stabilityThreshold: 50 },
+        ...(ignore ? { ignored: ignore } : {}),
         ignoreInitial: true,
       }),
     );

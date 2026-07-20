@@ -109,6 +109,11 @@ validated before output changes. All expected bytes are held in memory.
 `check` compares those bytes with disk and reports grouped missing, stale, and
 proven-orphan paths.
 
+Declared dependency paths may be files or directories. The manifest preserves
+that declaration, and downstream Browse/Review impact matching treats a
+directory as a root containing every changed descendant rather than requiring
+an exact Git path match.
+
 Pending generated orphans are derived once from the same ownership rule used by
 Check and the output transaction. Link/resource validation and the temporary
 compatibility route inventory exclude those routes before any write begins, so

@@ -4,8 +4,9 @@ import path from "node:path";
 
 import { projectRealPath, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import type { ManifestV3 } from "../registry/types.js";
+import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
 import { readManifest } from "../registry/manifest.js";
+import type { ManifestV3 } from "../registry/types.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import type { GitClient } from "../review/git.js";
 import { NodeGitCommandRunner, RepositoryGitClient } from "../review/git.js";
@@ -46,7 +47,6 @@ export function changedManifestRoutes(
   config: ResolvedConfig,
   changedPaths: readonly string[],
 ): readonly string[] {
-  const changed = new Set(changedPaths);
   const mockupsPrefix = toPosixPath(
     path.relative(config.repoRoot, config.mockupsDir),
   );
@@ -61,7 +61,15 @@ export function changedManifestRoutes(
         `${mockupsPrefix}/${entry.fragments.desktop}`,
       );
     }
-    if (!candidates.some((candidate) => changed.has(candidate))) continue;
+    if (
+      !candidates.some((candidate) =>
+        changedPaths.some((changedPath) =>
+          dependencyContainsChangedPath(candidate, changedPath),
+        ),
+      )
+    ) {
+      continue;
+    }
     routes.add(entry.route);
     if (entry.kind === "screen") changedScreenIds.add(entry.id);
   }

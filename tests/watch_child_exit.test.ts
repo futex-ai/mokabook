@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
+import { fork, type ChildProcess } from "node:child_process";
+import path from "node:path";
 import test from "node:test";
 
 import type { Compilation } from "../dist/build/compile.js";
+import { compileCatalogue } from "../dist/build/compile.js";
 import type { GeneratedOutputStore } from "../dist/build/output_store.js";
+import { writeCompilation } from "../dist/build/transaction.js";
 import { FileSystemConfigLoader, loadConfig } from "../dist/config/load.js";
 import type { ResolvedConfig } from "../dist/config/types.js";
 import type { CatalogueServerFactory } from "../dist/server/factory.js";
@@ -19,7 +23,47 @@ import type {
   ConsumerWatcher,
   ConsumerWatcherFactory,
 } from "../dist/server/watcher.js";
-import { createFixture, removeFixture } from "./helpers/fixture.js";
+import {
+  createFixture,
+  removeFixture,
+  repositoryRoot,
+} from "./helpers/fixture.js";
+
+test(
+  "watched child exits when its parent IPC channel disconnects",
+  { timeout: 10_000 },
+  async (context) => {
+    const fixture = await createFixture();
+    const config = await loadConfig(fixture.root);
+    await writeCompilation(await compileCatalogue(config), config);
+    const child = fork(
+      path.join(repositoryRoot, "dist/cli/bin.js"),
+      [
+        "__serve-child",
+        "--config",
+        fixture.configPath,
+        "--port",
+        "0",
+        "--update-version",
+        "1",
+      ],
+      {
+        cwd: fixture.root,
+        stdio: ["ignore", "ignore", "ignore", "ipc"],
+      },
+    );
+    context.after(async () => {
+      await stopChild(child);
+      await removeFixture(fixture);
+    });
+    const port = await readyPort(child);
+    assert.equal((await fetch(`http://127.0.0.1:${port}`)).status, 200);
+
+    child.disconnect();
+
+    assert.equal(await exitsWithin(child, 1_000), 0);
+  },
+);
 
 test("supervisor reports and clears a child that exits after readiness", async () => {
   const factory = new FakeChildFactory();
@@ -178,4 +222,47 @@ class UnusedServerFactory implements CatalogueServerFactory {
   ): Promise<RunningServer> {
     throw new Error("watched Serve must not start an in-process server");
   }
+}
+
+function readyPort(child: ChildProcess): Promise<number> {
+  return new Promise((resolve, reject) => {
+    child.once("error", reject);
+    child.once("exit", (code) =>
+      reject(new Error(`child exited before readiness (${String(code)})`)),
+    );
+    child.on("message", (message) => {
+      if (
+        typeof message === "object" &&
+        message !== null &&
+        (message as { type?: unknown }).type === "ready" &&
+        Number.isInteger((message as { port?: unknown }).port)
+      ) {
+        resolve((message as { port: number }).port);
+      }
+    });
+  });
+}
+
+function exitsWithin(
+  child: ChildProcess,
+  milliseconds: number,
+): Promise<number | null> {
+  return new Promise((resolve, reject) => {
+    const onExit = (code: number | null): void => {
+      clearTimeout(timer);
+      resolve(code);
+    };
+    const timer = setTimeout(() => {
+      child.off("exit", onExit);
+      reject(new Error("watched child did not exit after IPC disconnect"));
+    }, milliseconds);
+    child.once("exit", onExit);
+  });
+}
+
+async function stopChild(child: ChildProcess): Promise<void> {
+  if (child.exitCode !== null || child.signalCode !== null) return;
+  const exited = exitsWithin(child, 2_000);
+  child.kill("SIGTERM");
+  await exited;
 }

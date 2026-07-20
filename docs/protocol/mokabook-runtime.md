@@ -123,12 +123,17 @@ resolved config:
 - entry/page/renderer inputs rebuild generated output;
 - an input shared with shell metadata rebuilds before restarting the child;
 - configured CSS/fonts/images reload the browser without rebuilding;
-- generated output, dependency trees, test output, and temporary files ignore;
+- generated output plus `.git`, `.context`, `node_modules`, `dist`, `target`,
+  coverage, browser-test output, Review output, and Mokabook transaction trees
+  are pruned from broad watches and classify as ignored;
 - additional inputs use the explicit action declared in config.
 
-Package source under `node_modules` or an npx cache is never treated as consumer
-source. Development of Mokabook itself uses repository tooling rather than a
-hidden consumer-specific self-reload path.
+Configured source roots and modules remain rebuild inputs even when intentionally
+nested beneath an ordinarily ignored directory. Configured stylesheet files
+remain reload inputs. Those package-owned classifications take precedence over
+additional watch rules. Package source under `node_modules` or an npx cache is
+never treated as consumer source. Development of Mokabook itself uses repository
+tooling rather than a hidden consumer-specific self-reload path.
 
 Watchers become ready before initial generation begins. Notifications during
 generation and child startup are buffered. A child validates the catalogue and binds before
@@ -171,7 +176,9 @@ HTTP servers, event streams, and ports. A candidate watcher is discarded if
 shutdown begins before adoption: shutdown interrupts an outstanding candidate
 readiness wait and closes that watcher before the action queue finishes
 draining. No later child restart is started. Tests must prove no orphan process
-remains after normal shutdown, failed startup, or interruption.
+remains after normal shutdown, failed startup, or interruption. The child also
+runs the same idempotent server close when its parent IPC channel disconnects,
+so an abruptly terminated parent cannot leave a listening orphan.
 
 ## Review Comparison
 
@@ -184,9 +191,11 @@ Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
 version 2 and version 3 manifests during Accounting migration. Configured
 shared-impact globs and manifest dependencies identify changes that can affect
-many screens. The active Review artifact directory, including a `--out`
-override and its symlink-resolved in-repository target, is excluded before
-changed-path and shared-impact evidence is calculated.
+many screens. A dependency is a repository file or directory root: its own
+change or any descendant change affects the entry, and Review records the
+matching changed path as evidence. The active Review artifact directory,
+including a `--out` override and its symlink-resolved in-repository target, is
+excluded before changed-path and shared-impact evidence is calculated.
 
 The engine emits a static, self-contained artifact directory with:
 
@@ -210,6 +219,9 @@ sandbox.
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including
 binary fonts and images, while explicit HTTP(S)/data resources remain external.
+Root-absolute, protocol-relative, and other scheme-qualified resource URLs are
+not portable in a disk-viewable artifact and fail Review instead of being
+silently omitted.
 Current-worktree resources must resolve to regular public files. Every base
 resource, including the pane document itself and each transitive dependency,
 must be a regular Git file. Neither side may read from configured entry or

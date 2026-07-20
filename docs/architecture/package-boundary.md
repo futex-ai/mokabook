@@ -49,9 +49,13 @@ and their result receives the same package validation as newly authored output.
 
 Browse serves only the configured mockups root and rejects authored entry and
 legacy source trees, traversal, and symlink escapes. Watch targets come only
-from resolved config; package files in `node_modules` or an npx cache are never
-consumer inputs. Review reads the base tree through Git object access and never
-checks it out over the worktree.
+from resolved config; package-owned dependency/build/test/output trees are
+pruned before broad consumer rules, while explicit source modules and
+stylesheets retain their required action. A child closes on either an orderly
+message/signal or loss of its parent IPC channel. Review reads the base tree
+through Git object access, matches directory dependencies recursively, rejects
+non-portable base resource URLs, and never checks the base out over the
+worktree.
 
 ## Related Docs
 

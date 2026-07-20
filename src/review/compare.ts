@@ -7,6 +7,7 @@ import type { Compilation } from "../build/compile.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
+import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
 import type { ManifestScreen, ManifestV3 } from "../registry/types.js";
 import {
   copySnapshotDependencies,
@@ -162,8 +163,10 @@ async function compareScreen(
   const dependencies = [
     ...new Set([...(base?.dependencies ?? []), ...(head?.dependencies ?? [])]),
   ].sort();
-  const dependencyImpact = dependencies.filter((dependency) =>
-    changedPaths.includes(dependency),
+  const dependencyImpact = changedPaths.filter((changedPath) =>
+    dependencies.some((dependency) =>
+      dependencyContainsChangedPath(dependency, changedPath),
+    ),
   );
   return {
     dependencies,
