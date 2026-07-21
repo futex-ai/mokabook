@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { minimatch } from "minimatch";
+
 import { isPublicStaticFile } from "../config/public_files.js";
 import { isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
@@ -104,6 +106,12 @@ function validateReference(
   ) {
     return {};
   }
+  if (
+    item.checkFragment &&
+    isTrustedTemplateVariable(reference, sourceRoute, config)
+  ) {
+    return {};
+  }
   if (reference.startsWith("mock:")) {
     return { violation: `unresolved id link ${reference}` };
   }
@@ -153,6 +161,20 @@ function validateReference(
     }
   }
   return { target };
+}
+
+function isTrustedTemplateVariable(
+  reference: string,
+  sourceRoute: string,
+  config: ResolvedConfig,
+): boolean {
+  const match = /^\{\{([A-Za-z_][A-Za-z0-9_.-]*)\}\}$/.exec(reference);
+  const variable = match?.[1];
+  if (!variable) return false;
+  return config.linkValidation.trustedTemplateVariables.some(
+    (rule) =>
+      minimatch(sourceRoute, rule.match) && rule.variables.includes(variable),
+  );
 }
 
 function fragmentResult(

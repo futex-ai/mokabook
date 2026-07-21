@@ -110,6 +110,74 @@ test("link validation fails closed for non-portable targets", async (context) =>
   await assert.rejects(() => compileCatalogue(config), /root-absolute link/);
 });
 
+test("link validation preserves route-scoped template variables", async (context) => {
+  const fixture = await createFixture(
+    validEntrySource({
+      body: '<a href="{{reset_url}}">Reset password</a>',
+    }),
+  );
+  context.after(() => removeFixture(fixture));
+  await fs.promises.writeFile(
+    fixture.configPath,
+    `export default {
+  entriesDir: "entries",
+  linkValidation: {
+    trustedTemplateVariables: [
+      { match: "screens/home.*.html", variables: ["reset_url"] }
+    ]
+  },
+  mockupsDir: "mockups",
+  repoRoot: "."
+};
+`,
+  );
+  let config = await loadConfig(fixture.root);
+
+  const compilation = await compileCatalogue(config);
+
+  for (const viewport of ["mobile", "desktop"]) {
+    const home = compilation.outputs.get(`screens/home.${viewport}.html`) ?? "";
+    assert.match(home, /href="{{reset_url}}"/);
+  }
+
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    validEntrySource({
+      body: '<a href="{{untrusted_url}}">Reset password</a>',
+    }),
+  );
+  await assert.rejects(() => compileCatalogue(config), /missing target/);
+
+  for (const body of [
+    '<a href="./{{reset_url}}">Reset password</a>',
+    '<img alt="Reset" src="{{reset_url}}" />',
+  ]) {
+    await fs.promises.writeFile(fixture.entryPath, validEntrySource({ body }));
+    await assert.rejects(() => compileCatalogue(config), /missing target/);
+  }
+
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    validEntrySource({ body: '<a href="{{reset_url}}">Reset password</a>' }),
+  );
+  await fs.promises.writeFile(
+    fixture.configPath,
+    `export default {
+  entriesDir: "entries",
+  linkValidation: {
+    trustedTemplateVariables: [
+      { match: "screens/unmatched.*.html", variables: ["reset_url"] }
+    ]
+  },
+  mockupsDir: "mockups",
+  repoRoot: "."
+};
+`,
+  );
+  config = await loadConfig(fixture.root);
+  await assert.rejects(() => compileCatalogue(config), /missing target/);
+});
+
 test("link validation rejects generated targets pending orphan removal", async (context) => {
   const fixture = await createFixture(orphanLinkSource(true));
   context.after(() => removeFixture(fixture));

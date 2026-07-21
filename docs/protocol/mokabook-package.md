@@ -117,6 +117,12 @@ interface MokabookConfig {
     packageRoots?: readonly string[];
     resolveExtensions?: readonly string[];
   };
+  linkValidation?: {
+    trustedTemplateVariables?: readonly {
+      match: string;
+      variables: readonly string[];
+    }[];
+  };
   stylesheets?: readonly {
     match: string;
     stylesheets: readonly string[];
@@ -169,6 +175,18 @@ are collision-checked against those sources before writing. Review output must
 not overlap a source or output root in either direction. That rule applies
 equally to configured output, a CLI `--out` override, and the transactional
 writer boundary.
+
+`linkValidation.trustedTemplateVariables` is the only exception to local
+navigation-target validation. Each rule matches generated HTML routes with a
+POSIX glob and names exact Mustache variables. A trusted navigation reference
+must be the complete `{{variable_name}}` attribute value; embedded variables,
+resource URLs, variables not listed by the matching rule, and references on
+other routes remain subject to normal validation. Match patterns must be
+unique, variable names must use letters, digits, underscores, dots, or hyphens,
+starting with a letter or underscore, and each name list must be non-empty and
+duplicate-free. This exception is for
+provider-rendered templates such as transactional email and must use the
+narrowest practical route pattern.
 
 `moduleResolution` has no defaults beyond esbuild's platform behavior. Package
 roots must be in-repository directories containing `package.json`; their

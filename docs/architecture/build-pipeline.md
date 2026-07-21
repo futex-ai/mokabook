@@ -109,6 +109,12 @@ validated before output changes. All expected bytes are held in memory.
 `check` compares those bytes with disk and reports grouped missing, stale, and
 proven-orphan paths.
 
+Provider-rendered navigation URLs may opt into a route-scoped exact Mustache
+variable allowlist. The validator skips target resolution only when the whole
+attribute is `{{name}}`, the generated route matches the configured glob, and
+that name is listed by the rule. Resource URLs and every unmatched reference
+continue through the normal fail-closed path.
+
 Declared dependency paths may be files or directories. The manifest preserves
 that declaration, and downstream Browse/Review impact matching treats a
 directory as a root containing every changed descendant rather than requiring

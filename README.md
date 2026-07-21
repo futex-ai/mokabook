@@ -138,6 +138,8 @@ file and confined to `repoRoot`.
 - `moduleResolution` configures package roots, aliases, export conditions,
   package fields, file extensions, and esbuild loaders for cross-platform
   component trees.
+- `linkValidation.trustedTemplateVariables` permits named Mustache URL values
+  only on explicitly matched generated routes.
 - `legacy` opts into `.source.*` pages, component expansion, route aliases,
   excluded migration sources, and generic lints.
 - `watch` classifies additional consumer inputs after proven package-owned
@@ -152,6 +154,13 @@ file and confined to `repoRoot`.
 Use `MockLink` for catalogue destinations. Raw relative links remain suitable
 for real static assets and legacy documents, but logical screen/use-case routes
 do not name generated files in schema v3.
+
+Provider-rendered legacy documents may need a complete navigation URL such as
+`{{reset_url}}`. Declare its variable name against the narrowest generated-route
+glob, for example `{ match: "email-password-reset.html", variables:
+["reset_url"] }`. Mokabook preserves that exact value without local-target
+validation; other variables, other routes, embedded placeholders, and resource
+URLs still follow the normal fail-closed checks.
 
 ## Rendering Boundary
 
