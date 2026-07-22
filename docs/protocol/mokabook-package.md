@@ -48,6 +48,11 @@ Common options include `--config <path>`. Serve accepts `--port`, `--base`,
 the package name belongs to Mokabook; docs must show npx arguments in a form
 that is unambiguous to current npm.
 
+Serve uses `4173` as its default starting port. An occupied concrete starting
+port advances one at a time through `65535` until binding succeeds; exhausting
+that range fails. Port `0` delegates free-port selection to the operating
+system.
+
 Unknown commands, invalid values, absent configuration, and invalid catalogue
 data exit non-zero. Expected author errors do not print JavaScript stacks unless
 diagnostic output is explicitly requested.

@@ -12,6 +12,7 @@ export interface CliArguments {
   help: boolean;
   out?: string;
   port?: number;
+  strictPort?: boolean;
   updateVersion?: number;
   version: boolean;
   watch?: boolean;
@@ -43,6 +44,7 @@ export function parseArguments(argv: readonly string[]): CliArguments {
     else if (option === "--version" || option === "-v") parsed.version = true;
     else if (option === "--watch") parsed.watch = true;
     else if (option === "--no-watch") parsed.watch = false;
+    else if (option === "--strict-port") parsed.strictPort = true;
     else if (option === "--config") parsed.config = takeValue(option, values);
     else if (option === "--base") parsed.base = takeValue(option, values);
     else if (option === "--out") parsed.out = takeValue(option, values);
@@ -109,6 +111,15 @@ function validateCommandOptions(arguments_: CliArguments): void {
     throw new MokabookError(
       "cli-invalid",
       "--update-version is reserved for the watched server child",
+    );
+  }
+  if (
+    arguments_.command !== "__serve-child" &&
+    arguments_.strictPort !== undefined
+  ) {
+    throw new MokabookError(
+      "cli-invalid",
+      "--strict-port is reserved for the watched server child",
     );
   }
   if (arguments_.command === "build" || arguments_.command === "check") {

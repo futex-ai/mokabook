@@ -102,12 +102,14 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
         "server-failed",
         "server child is already running",
       );
-    const port = this.#resolvedPort ?? this.requestedPort;
+    const resolvedPort = this.#resolvedPort;
+    const port = resolvedPort ?? this.requestedPort;
     this.#updateVersion += 1;
     const child = this.factory.spawn([
       ...this.baseArguments,
       "--port",
       String(port),
+      ...(resolvedPort === undefined ? [] : ["--strict-port"]),
       "--update-version",
       String(this.#updateVersion),
     ]);

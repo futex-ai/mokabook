@@ -60,7 +60,13 @@ export async function run(
   }
   const port = arguments_.port ?? 4173;
   if (arguments_.command === "__serve-child") {
-    await runServerChild(config, port, base, arguments_.updateVersion ?? 1);
+    await runServerChild(
+      config,
+      port,
+      base,
+      arguments_.updateVersion ?? 1,
+      arguments_.strictPort ?? false,
+    );
     return 0;
   }
   const running = await serve(config, {
