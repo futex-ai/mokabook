@@ -217,12 +217,41 @@ cargo xtask check
 `npm run test:browser` drives the served Browse and Review experience plus
 disk-viewable Review artifacts in Chromium via Playwright; it uses the
 installed Chrome channel by default and honors `PLAYWRIGHT_CHANNEL` for an
-alternative browser install.
+alternative browser install. Parallel workspaces can set
+`MOKABOOK_PLAYWRIGHT_PORT` to an available port.
 
 `cargo xtask check` is the authoritative local gate. It includes formatting,
 lint, typechecking, unit/integration tests, the committed example, package
 allowlist and license checks, clean packed ESM/NodeNext/npx/Accounting/Juno
 consumers, Chromium tests, and all Rust checks.
+
+## Preview Deployments
+
+`npm run preview:build` turns the real `examples/basic` Browse catalogue into a
+static Cloudflare Pages artifact at `.context/mokabook-preview`. It snapshots
+every catalogue route through Mokabook's HTTP server, copies the package shell
+and public example assets, preserves id redirects, and excludes the
+development-only live-reload connection. The artifact is not part of the npm
+package.
+
+The Preview workflow deploys `main` to the Cloudflare Pages project `mokabook`
+at `https://mokabook.pages.dev`. Same-repository, non-release pull requests use
+the stable `pr-<number>` branch alias at
+`https://pr-<number>.mokabook.pages.dev`; a sticky `<!-- mokabook-preview -->`
+comment reports the deployment status and link. Closing a pull request marks
+that comment inactive and attempts to remove its deployments. Fork pull
+requests do not receive Cloudflare credentials, and Release Please pull
+requests are skipped because their source changes were already previewed.
+
+Maintainers must create the direct-upload Pages project with `main` as its
+production branch, then configure repository variable `CLOUDFLARE_ACCOUNT_ID`
+and repository secret `CLOUDFLARE_PAGES_API_TOKEN` (or
+`CLOUDFLARE_API_TOKEN`). The token needs Pages write access for deploy and
+cleanup operations.
+
+```bash
+npx --no-install wrangler pages project create mokabook --production-branch main
+```
 
 ## Releasing
 
