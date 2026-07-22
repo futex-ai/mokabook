@@ -81,7 +81,7 @@ export function ScreenHead(props: {
               data-copy-id={props.id}
               type="button"
             >
-              {props.id}
+              #{props.id}
             </button>
           ) : null}
         </div>

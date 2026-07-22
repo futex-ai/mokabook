@@ -213,8 +213,21 @@ test("ID chips copy their ID without navigating", async ({ page }) => {
   });
   await page.goto("/view/screens/welcome.html");
   const url = page.url();
+  const idChip = page.locator("[data-copy-id]");
 
-  await page.locator("[data-copy-id]").click();
+  await expect(idChip).toHaveText("#example-welcome");
+  await idChip.hover();
+  expect(
+    await idChip.evaluate((element) => getComputedStyle(element).cursor),
+  ).toBe("pointer");
+  await page.mouse.down();
+  const pressed = await idChip.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { boxShadow: style.boxShadow, transform: style.transform };
+  });
+  expect(pressed.boxShadow).not.toBe("none");
+  expect(pressed.transform).not.toBe("none");
+  await page.mouse.up();
 
   await expect
     .poll(() =>

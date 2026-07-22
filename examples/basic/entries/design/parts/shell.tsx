@@ -130,7 +130,15 @@ export function ScreenHead({
         <Crumbs items={crumbs} />
         <div className="mbk-title-row">
           <h2>{title}</h2>
-          {idChip ? <span className="mbk-idchip">{idChip}</span> : null}
+          {idChip ? (
+            <button
+              aria-label={`Copy ID ${idChip}`}
+              className="mbk-idchip"
+              type="button"
+            >
+              #{idChip}
+            </button>
+          ) : null}
           {status}
         </div>
       </div>

@@ -90,10 +90,10 @@ fall back to the registry. After the first release, a clean machine may use
 `mockupsDir`. `check` calculates those bytes without writing and reports
 missing, stale, or orphan generated files. Browse serves the package-owned
 Mokabook shell — catalogue navigation with folder/screen/flow icons and an
-All/Changed filter, linked breadcrumbs with copyable id chips, realistic phone and
-browser device chrome with an expand-to-overlay toggle, header viewport
-controls, use-case flows, a details inspector, id redirects, and watched
-updates.
+All/Changed filter, linked breadcrumbs with hash-prefixed copyable ID chips,
+realistic phone and browser device chrome with an expand-to-overlay toggle,
+header viewport controls, use-case flows, a details inspector, id redirects,
+and watched updates.
 Review provides summary, side-by-side, overlay, and difference views as a
 static artifact. Screens with shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
