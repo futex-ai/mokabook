@@ -2,6 +2,7 @@
 .mokabook-cache/
 .mokabook-review-*/
 .mokabook-write-*/
+.wrangler/
 coverage/
 dist/
 node_modules/

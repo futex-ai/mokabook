@@ -33,10 +33,13 @@ From the repository root:
 npm run example:build
 npm run example:check
 node dist/cli/bin.js serve --config examples/basic/mokabook.config.ts --port 0 --no-watch
+npm run preview:build
 ```
 
 Generated HTML and the schema-v3 manifest are committed under `generated/` so
 the fixture also exercises stale and deterministic-output checks. The
 hand-authored stylesheets (`styles.css`, `design.css`, `design-stage.css`,
 `design-review.css`) also live under `generated/` because it doubles as the
-public static root.
+public static root. `preview:build` snapshots this catalogue through the real
+server into `.context/mokabook-preview` for Cloudflare Pages; it is the same
+artifact used by the main and pull-request preview workflow.

@@ -48,6 +48,7 @@
     "package:check": "node scripts/package-check.mjs",
     "package:smoke": "npm run build && node scripts/package-smoke.mjs",
     "prepack": "npm run build",
+    "preview:build": "npm run build && npm run example:build && node scripts/preview/build.mjs",
     "test": "npm run build && tsx --test tests/**/*.test.ts tests/**/*.test.tsx",
     "test:browser": "npm run build && playwright test",
     "typecheck": "npm run build && tsc --project tsconfig.json --noEmit"
@@ -85,6 +86,10 @@
     "tsx": "^4.23.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.64.0",
+    "wrangler": "4.113.0",
     "yaml": "^2.9.0"
+  },
+  "overrides": {
+    "sharp": "0.35.3"
   }
 }
