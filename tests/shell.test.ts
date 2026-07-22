@@ -166,7 +166,11 @@ test("screen page renders device chrome, viewport switch, and details", () => {
   );
   assert.equal(html.includes('class="mbk-viewbar"'), false);
   assert.match(html, /class="mbk-crumbs"/);
-  assert.match(html, /class="mbk-idchip" href="\/id\/welcome"/);
+  assert.match(
+    html,
+    /aria-label="Copy ID welcome" class="mbk-idchip" data-copy-id="welcome" type="button">welcome<\/button>/,
+  );
+  assert.doesNotMatch(html, /class="mbk-idchip"[^>]*href=/);
   assert.match(html, /Proves the shell/);
   assert.match(html, /notes\.md/);
   assert.match(

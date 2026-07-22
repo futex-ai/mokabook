@@ -75,6 +75,7 @@ export const SHELL_VIEW_CSS = `
   font-family: var(--mono);
   font-size: 11px;
   text-decoration: none;
+  cursor: copy;
 }
 
 .mbk-seg {

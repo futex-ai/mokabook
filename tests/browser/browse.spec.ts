@@ -199,6 +199,36 @@ test("viewport controls switch device frames", async ({ page }) => {
   await expect(page.locator(".mbk-frame-desktop")).toBeVisible();
 });
 
+test("ID chips copy their ID without navigating", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText(text: string) {
+          (window as Window & { __copiedId?: string }).__copiedId = text;
+          return Promise.resolve();
+        },
+      },
+    });
+  });
+  await page.goto("/view/screens/welcome.html");
+  const url = page.url();
+
+  await page.locator("[data-copy-id]").click();
+
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { __copiedId?: string }).__copiedId,
+      ),
+    )
+    .toBe("example-welcome");
+  await expect(page).toHaveURL(url);
+  await expect(page.locator("#mb-status")).toHaveText(
+    "Copied ID example-welcome",
+  );
+});
+
 test("the browser frame expands to an overlay and collapses again", async ({
   page,
 }) => {
