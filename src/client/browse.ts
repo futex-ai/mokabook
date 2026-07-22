@@ -174,6 +174,15 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
   doc.addEventListener("click", (event) => {
     const target = event.target instanceof Element ? event.target : undefined;
     if (!target) return;
+    const idChip = target.closest<HTMLElement>("button[data-copy-id]");
+    if (idChip) {
+      const id = idChip.dataset["copyId"] ?? "";
+      if (id !== "") {
+        copyText(doc, id);
+        announce(`Copied ID ${id}`);
+      }
+      return;
+    }
     if (target.closest("[data-mokabook-menu]")) {
       setDrawer(shell, shell.dataset["drawer"] !== "open");
       return;

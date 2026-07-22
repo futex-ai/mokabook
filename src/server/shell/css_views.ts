@@ -75,6 +75,15 @@ export const SHELL_VIEW_CSS = `
   font-family: var(--mono);
   font-size: 11px;
   text-decoration: none;
+  cursor: pointer;
+}
+
+.mbk-idchip:active {
+  background: var(--chrome-border);
+  border-color: var(--chrome-border-strong);
+  box-shadow: inset 0 1px 2px rgba(20, 28, 22, 0.14);
+  color: var(--chrome-ink);
+  transform: translateY(1px);
 }
 
 .mbk-seg {
