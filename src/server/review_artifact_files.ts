@@ -5,7 +5,7 @@ import type { ServerResponse } from "node:http";
 import path from "node:path";
 
 import { validateReviewOut } from "../config/path_validation.js";
-import { isInside } from "../config/paths.js";
+import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import { contentType } from "./static_files.js";
@@ -15,8 +15,10 @@ const ARTIFACT_MARKER = ".mokabook-review-artifact";
 /** Filesystem identity pinned after one successful Review generation. */
 export interface ReviewArtifactIdentity {
   device: number;
+  files: ReadonlySet<string>;
   inode: number;
   realPath: string;
+  trustedPages: ReadonlySet<string>;
 }
 
 /** Validate and pin the newly generated owned artifact directory. */
@@ -37,7 +39,15 @@ export function captureReviewArtifact(
       `generated Review artifact is not owned: ${config.review.outDir}`,
     );
   }
-  return { device: stats.dev, inode: stats.ino, realPath };
+  const files = captureArtifactFiles(realPath);
+  const trustedPages = new Set([...files].filter(isReviewPage));
+  return {
+    device: stats.dev,
+    files,
+    inode: stats.ino,
+    realPath,
+    trustedPages,
+  };
 }
 
 /** Serve one file only while the configured output retains its pinned identity. */
@@ -48,7 +58,7 @@ export function serveReviewArtifact(
   relative: string,
   method: string,
 ): void {
-  if (!matchesArtifact(config, artifact)) {
+  if (!artifact.files.has(relative) || !matchesArtifact(config, artifact)) {
     sendReviewText(response, 404, "Not found", method);
     return;
   }
@@ -68,13 +78,14 @@ export function serveReviewArtifact(
     sendReviewText(response, 404, "Not found", method);
     return;
   }
-  const body = isReviewPage(relative)
+  const trustedPage = artifact.trustedPages.has(relative);
+  const body = trustedPage
     ? enhanceServedPage(content.toString("utf8"))
     : content;
   const type = contentType(candidate);
   response.writeHead(200, {
     "cache-control": "no-cache",
-    ...(!isReviewPage(relative) && type.startsWith("text/html")
+    ...(!trustedPage && type.startsWith("text/html")
       ? { "content-security-policy": "sandbox" }
       : {}),
     "content-type": type,
@@ -129,6 +140,35 @@ function ownedMarkerExists(realPath: string): boolean {
   } catch {
     return false;
   }
+}
+
+function captureArtifactFiles(realPath: string): ReadonlySet<string> {
+  const files = new Set<string>();
+  const pending = [realPath];
+  while (pending.length > 0) {
+    const directory = pending.pop();
+    if (!directory) continue;
+    const entries = fs
+      .readdirSync(directory, { withFileTypes: true })
+      .sort((left, right) => left.name.localeCompare(right.name));
+    for (const entry of entries) {
+      const candidate = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(candidate);
+        continue;
+      }
+      if (!entry.isFile()) {
+        throw new MokabookError(
+          "review-invalid",
+          `generated Review artifact contains a non-file entry: ${toPosixPath(
+            path.relative(realPath, candidate),
+          )}`,
+        );
+      }
+      files.add(toPosixPath(path.relative(realPath, candidate)));
+    }
+  }
+  return files;
 }
 
 function isReviewPage(relative: string): boolean {

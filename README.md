@@ -100,7 +100,8 @@ without leaving Mokabook. `Refresh comparison` recomputes it in place.
 `mokabook review` writes the same comparison as a disk-viewable static artifact.
 Watched updates invalidate the served comparison before Review reloads, and the
 server refuses to serve a cached artifact if its owned output directory is
-replaced. Screens with shared or declared dependency impact
+replaced or gains a file outside the captured generated artifact. Screens with
+shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
 descendant of a directory is reported as the screen's impact evidence.

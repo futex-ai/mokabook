@@ -101,6 +101,19 @@ test("served Review lazily generates and refreshes the full artifact", async (co
   const head = await fetch(compareUrl, { method: "HEAD" });
   assert.equal(head.status, 200);
   assert.equal(await head.text(), "");
+  const injectedPage = path.join(
+    config.review.outDir,
+    "comparisons/injected/mobile/index.html",
+  );
+  await fs.promises.mkdir(path.dirname(injectedPage), { recursive: true });
+  await fs.promises.writeFile(
+    injectedPage,
+    "<!doctype html><body><script>globalThis.injected = true</script></body>",
+  );
+  const injected = await fetch(
+    `${server.url}/review/comparisons/injected/mobile/index.html`,
+  );
+  assert.equal(injected.status, 404);
   assert.equal(
     (await fetch(`${server.url}/review/..%2Fmokabook.config.ts`)).status,
     400,

@@ -80,7 +80,9 @@ requested page or asset. Generation failures return a Review-specific error
 without taking down Browse, and invalid, traversing, or symlink-escaping Review
 paths never expose files outside the owned artifact. After generation, the
 server pins the artifact directory's filesystem identity and ownership marker;
-every cached response revalidates both plus the repository boundary.
+it also captures the generated file set and the summary/compare pages trusted
+to run shell controls. Every cached response revalidates the directory,
+ownership, and repository boundary, and later-added files are not served.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
