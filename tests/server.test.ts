@@ -72,7 +72,7 @@ test("server validates before bind and supports safe no-watch routes on port zer
   assert.equal((await fetch(`${server.url}/view/unknown.html`)).status, 404);
 });
 
-test("occupied ports fail without disturbing the existing server", async (context) => {
+test("strict occupied ports fail without disturbing the existing server", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
   const config = await loadConfig(fixture.root);
@@ -84,7 +84,11 @@ test("occupied ports fail without disturbing the existing server", async (contex
   context.after(() => first.close());
   await assert.rejects(
     () =>
-      startCatalogueServer(config, { base: "origin/main", port: first.port }),
+      startCatalogueServer(config, {
+        base: "origin/main",
+        port: first.port,
+        strictPort: true,
+      }),
     /could not bind port/,
   );
   assert.equal((await fetch(first.url)).status, 200);

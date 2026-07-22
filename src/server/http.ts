@@ -2,7 +2,7 @@ import http, { type ServerResponse } from "node:http";
 
 import { encodeUrlPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MokabookError } from "../errors.js";
 import { readManifest } from "../registry/manifest.js";
 import { createCatalogue, type Catalogue } from "./catalogue.js";
 import {
@@ -10,6 +10,7 @@ import {
   loadShellFontAssets,
 } from "./client_modules.js";
 import { homePage, notFoundPage, viewPage } from "./pages.js";
+import { listenOnAvailablePort } from "./ports.js";
 import {
   EngineReviewGenerator,
   type ReviewGenerator,
@@ -29,6 +30,7 @@ export interface ServerOptions {
   base: string;
   changedRoutes?: readonly string[];
   port: number;
+  strictPort?: boolean;
   updateVersion?: number;
 }
 
@@ -70,7 +72,11 @@ export async function startCatalogueServer(
       () => updateVersion,
     );
   });
-  await listen(server, options.port);
+  await listenOnAvailablePort(
+    server,
+    options.port,
+    options.strictPort ?? false,
+  );
   const address = server.address();
   if (!address || typeof address === "string") {
     server.close();
@@ -266,28 +272,6 @@ function send(
     "x-content-type-options": "nosniff",
   });
   response.end(method === "HEAD" ? undefined : body);
-}
-
-function listen(server: http.Server, port: number): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const onError = (error: Error): void => {
-      server.off("listening", onListening);
-      reject(
-        new MokabookError(
-          "server-failed",
-          `could not bind port ${port}: ${errorMessage(error)}`,
-          { cause: error },
-        ),
-      );
-    };
-    const onListening = (): void => {
-      server.off("error", onError);
-      resolve();
-    };
-    server.once("error", onError);
-    server.once("listening", onListening);
-    server.listen(port, "127.0.0.1");
-  });
 }
 
 function safeDecode(value: string): string {

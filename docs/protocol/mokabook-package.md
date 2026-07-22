@@ -55,6 +55,11 @@ Review output directory, and regenerates when the reviewer chooses
 before the browser reloads. The standalone `review` command remains the way to
 write and inspect the artifact without a running server.
 
+Serve uses `4173` as its default starting port. An occupied concrete starting
+port advances one at a time through `65535` until binding succeeds; exhausting
+that range fails. Port `0` delegates free-port selection to the operating
+system.
+
 Unknown commands, invalid values, absent configuration, and invalid catalogue
 data exit non-zero. Expected author errors do not print JavaScript stacks unless
 diagnostic output is explicitly requested.

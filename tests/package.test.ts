@@ -75,6 +75,10 @@ test("CLI defaults to watched serve and rejects misplaced options", () => {
     () => parseArguments(["serve", "--update-version", "2"]),
     /reserved for the watched server child/,
   );
+  assert.throws(
+    () => parseArguments(["serve", "--strict-port"]),
+    /reserved for the watched server child/,
+  );
   assert.throws(() => parseArguments(["unknown"]), /unknown command/);
 });
 

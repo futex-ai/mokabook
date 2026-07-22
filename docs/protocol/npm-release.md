@@ -3,7 +3,7 @@
 ## Package Metadata
 
 `package.json` describes an unscoped public ESM package named `mokabook` with the
-current development version `0.1.0`, MIT licensing, Firna authorship, exact
+current development version `0.2.0`, MIT licensing, Firna authorship, exact
 repository/bugs/homepage metadata for `futex-ai/mokabook`, a Node engine floor,
 one `mokabook` bin, explicit exports/types, and a restrictive `files` allowlist.
 
