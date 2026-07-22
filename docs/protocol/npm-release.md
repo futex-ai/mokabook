@@ -107,14 +107,18 @@ The release workflow then:
 5. Runs `npm ci` and the complete `cargo xtask check` gate.
 6. Creates one exact tarball, validates its allowlist and license closure, and
    records its integrity, shasum, file inventory, and size report.
-7. Queries npm. An `E404` permits a publish; any other lookup failure stops the
-   workflow. An existing version must byte-for-byte match the checked report
-   and commit or the workflow fails.
+7. Queries npm. A recognized missing-version response (`E404` or `ETARGET`)
+   permits a publish; any other lookup failure stops the workflow. An existing
+   version must byte-for-byte match the checked report and commit or the
+   workflow fails.
 8. Uploads the exact checked artifact, then publishes that same path publicly
    with npm trusted publishing when it is not already present.
 9. Downloads the registry artifact and rechecks integrity, shasum, file
    inventory, version, optional `gitHead`, the `latest` dist-tag, and npm
-   signatures/provenance.
+   signatures/provenance. Because npm metadata and tarball endpoints may become
+   consistent at different times, recognized missing-version or stale dist-tag
+   responses retry the complete check with bounded backoff; content,
+   provenance, and unexpected transport failures remain fail-closed.
 
 Publishing occurs in the same workflow invocation that creates the GitHub
 release. A manual `publish_ref` dispatch may retry an existing `vX.Y.Z` tag and
