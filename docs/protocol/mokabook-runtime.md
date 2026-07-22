@@ -65,7 +65,9 @@ Browse validates the manifest before binding its listening port. It exposes:
 
 All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
 returns its response headers and completes without opening or registering an
-event stream.
+event stream. Server-rendered documents and package-owned client, shell, and
+font responses use an explicit `no-cache` policy so local rebuilds cannot reuse
+stale runtime assets.
 
 `/review` redirects to `/review/index.html`. The server generates the Review
 artifact on the first artifact request, coalesces concurrent first requests,
@@ -73,7 +75,9 @@ and serves it from the configured in-repository Review output directory.
 `?refresh=1` regenerates the artifact transactionally before serving the
 requested page or asset. Generation failures return a Review-specific error
 without taking down Browse, and invalid, traversing, or symlink-escaping Review
-paths never expose files outside the owned artifact.
+paths never expose files outside the owned artifact. After generation, the
+server pins the artifact directory's filesystem identity and ownership marker;
+every cached response revalidates both plus the repository boundary.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
@@ -142,7 +146,9 @@ shipped shell are recorded beside the design catalogue in the example notes.
 snapshot. Every Browse document and each served Review summary/compare page
 loads the package-owned browser client, which connects to the versioned event
 stream and reloads its current durable URL after a higher version arrives.
-Review snapshots remain byte-unmodified and script-disabled. Watch
+The server invalidates its cached Review before publishing that update, so the
+next Review request regenerates against the new workspace state. Review
+snapshots remain byte-unmodified and script-disabled. Watch
 classification derives only from resolved config:
 
 - the discovered or explicit config file reloads configuration, generated
@@ -212,7 +218,9 @@ runs the same idempotent server close when its parent IPC channel disconnects,
 so an abruptly terminated parent cannot leave a listening orphan. Parent-driven
 shutdown first requests graceful IPC closure, then sends SIGTERM and SIGKILL at
 bounded intervals when necessary; the supervisor does not finish closing until
-the child exit notification arrives.
+the child exit notification arrives. HTTP shutdown rejects new Review work,
+destroys its pending responses, aborts the active generation through the Git
+and transactional-write boundaries, and waits for cleanup before completing.
 
 ## Review Comparison
 

@@ -11,7 +11,9 @@ export async function writeReviewArtifact(
   files: ReadonlyMap<string, ReviewArtifactContent>,
   outDir: string,
   config: ResolvedConfig,
+  signal?: AbortSignal,
 ): Promise<void> {
+  signal?.throwIfAborted();
   validateReviewOut(outDir, config, "Review output", "review-invalid");
   if (
     fs.existsSync(outDir) &&
@@ -34,6 +36,7 @@ export async function writeReviewArtifact(
     for (const [relative, content] of [...files].sort(([left], [right]) =>
       left.localeCompare(right),
     )) {
+      signal?.throwIfAborted();
       validateArtifactPath(relative);
       const target = path.join(stage, relative);
       await fs.promises.mkdir(path.dirname(target), { recursive: true });
@@ -43,12 +46,15 @@ export async function writeReviewArtifact(
         await fs.promises.writeFile(target, Buffer.from(content));
       }
     }
+    signal?.throwIfAborted();
     if (fs.existsSync(outDir)) {
       await fs.promises.rename(outDir, backup);
       backedUp = true;
     }
+    signal?.throwIfAborted();
     await fs.promises.rename(stage, outDir);
     installed = true;
+    signal?.throwIfAborted();
   } catch (error) {
     if (installed)
       await fs.promises.rm(outDir, { force: true, recursive: true });

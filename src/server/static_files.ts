@@ -104,6 +104,7 @@ function sendBuffer(
   method: string,
 ): void {
   response.writeHead(200, {
+    "cache-control": "no-cache",
     "content-type": type,
     "x-content-type-options": "nosniff",
   });
@@ -121,6 +122,7 @@ function sendText(
   method: string,
 ): void {
   response.writeHead(status, {
+    "cache-control": "no-cache",
     "content-type": "text/plain; charset=utf-8",
     "x-content-type-options": "nosniff",
   });

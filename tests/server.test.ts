@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import fs from "node:fs";
 import { Agent, request } from "node:http";
 import path from "node:path";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
@@ -15,6 +16,8 @@ import {
   repositoryRoot,
   validEntrySource,
 } from "./helpers/fixture.js";
+
+const execute = promisify(execFile);
 
 test("server validates before bind and supports safe no-watch routes on port zero", async (context) => {
   const fixture = await createFixture();
@@ -195,7 +198,7 @@ test("CLI no-watch lifecycle becomes ready and exits cleanly on SIGTERM", async 
 
 test(
   "watched CLI rebuilds, restarts on one stable port, and cleans up its child",
-  { timeout: 30_000 },
+  { timeout: 60_000 },
   async (context) => {
     const fixture = await createFixture();
     context.after(() => removeFixture(fixture));
@@ -216,6 +219,12 @@ test(
     const stderr = captureOutput(child.stderr);
     const url = await outputUrl(child.stdout);
     const firstPort = new URL(url).port;
+    await git(fixture.root, "init", "--initial-branch=main");
+    await git(fixture.root, "config", "user.email", "fixture@example.test");
+    await git(fixture.root, "config", "user.name", "Fixture");
+    await git(fixture.root, "add", "-A");
+    await git(fixture.root, "commit", "-m", "base");
+    await git(fixture.root, "branch", "config-reloaded");
     await fs.promises.writeFile(
       fixture.entryPath,
       validEntrySource({ firstTitle: "Watched Home" }),
@@ -253,10 +262,21 @@ test(
       fixture.configPath,
       `export default { entriesDir: "entries", mockupsDir: "mockups", repoRoot: ".", review: { base: "config-reloaded", outDir: ".review" } };\n`,
     );
-    await waitFor(async () =>
-      (
-        await (await fetch(`${url}/review/index.html?refresh=1`)).text()
-      ).includes("config-reloaded"),
+    await waitFor(async () => {
+      const response = await fetch(`${url}/review/index.html?refresh=1`);
+      if (response.status !== 200) return false;
+      const review = await fetch(`${url}/review/review.json`);
+      if (review.status !== 200) return false;
+      return (
+        ((await review.json()) as { baseRef?: unknown }).baseRef ===
+        "config-reloaded"
+      );
+    });
+    const review = await fetch(`${url}/review/review.json`);
+    assert.equal(review.status, 200);
+    assert.equal(
+      ((await review.json()) as { baseRef?: unknown }).baseRef,
+      "config-reloaded",
     );
     assert.equal(new URL(url).port, firstPort);
     child.kill("SIGTERM");
@@ -276,6 +296,10 @@ function captureOutput(stream: NodeJS.ReadableStream): () => string {
     output += chunk.toString("utf8");
   });
   return () => output;
+}
+
+async function git(cwd: string, ...arguments_: string[]): Promise<void> {
+  await execute("git", arguments_, { cwd });
 }
 
 async function readEvent(

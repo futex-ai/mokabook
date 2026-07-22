@@ -79,18 +79,25 @@ export async function startCatalogueServer(
       "server did not expose a TCP address",
     );
   }
+  let closePromise: Promise<void> | undefined;
   return {
-    async close(): Promise<void> {
+    close(): Promise<void> {
+      if (closePromise) return closePromise;
       for (const stream of streams) stream.end();
-      await new Promise<void>((resolve, reject) => {
+      const serverClosing = new Promise<void>((resolve, reject) => {
         server.close((error) => (error ? reject(error) : resolve()));
       });
+      closePromise = Promise.all([serverClosing, review.close()]).then(
+        () => undefined,
+      );
+      return closePromise;
     },
     port: address.port,
     publishUpdate(version?: number): void {
       const nextVersion = version ?? updateVersion + 1;
       if (!Number.isSafeInteger(nextVersion) || nextVersion <= updateVersion)
         return;
+      review.invalidate();
       updateVersion = nextVersion;
       const payload = `event: update\ndata: ${updateVersion}\n\n`;
       for (const stream of streams) stream.write(payload);
@@ -254,6 +261,7 @@ function send(
   method = "GET",
 ): void {
   response.writeHead(status, {
+    "cache-control": "no-cache",
     "content-type": `${type}; charset=utf-8`,
     "x-content-type-options": "nosniff",
   });

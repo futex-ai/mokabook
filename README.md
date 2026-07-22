@@ -98,6 +98,9 @@ Choosing Review in the served shell lazily generates the configured Git
 comparison and opens its summary, side-by-side, overlay, and difference views
 without leaving Mokabook. `Refresh comparison` recomputes it in place.
 `mokabook review` writes the same comparison as a disk-viewable static artifact.
+Watched updates invalidate the served comparison before Review reloads, and the
+server refuses to serve a cached artifact if its owned output directory is
+replaced.
 Screens with shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
@@ -122,9 +125,10 @@ custom rule watches the repository root; an unowned public HTML file can still
 use an explicit watch rule, and configured stylesheets retain reload
 precedence. Shutdown interrupts replacement-watcher readiness, closes the
 candidate before draining the remaining lifecycle, and waits for child exit
-through graceful, terminate, and force-kill stages. Open Browse and Review pages
-connect to the versioned event stream and reload after a newer build or asset
-version arrives. A watched reload restores the current Browse search, filter,
+through graceful, terminate, and force-kill stages. It also aborts and drains
+an in-flight served Review generation before the HTTP child exits. Open Browse
+and Review pages connect to the versioned event stream and reload after a newer
+build or asset version arrives. A watched reload restores the current Browse search, filter,
 disclosures, viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and
 Forward.

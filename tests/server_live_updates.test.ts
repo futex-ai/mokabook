@@ -37,8 +37,17 @@ test("every served document loads the browser update client", async (context) =>
   }
   const browser = await fetch(`${server.url}/__mokabook/client/browser.js`);
   assert.equal(browser.status, 200);
+  assert.equal(browser.headers.get("cache-control"), "no-cache");
   assert.match(browser.headers.get("content-type") ?? "", /javascript/);
   assert.match(await browser.text(), /EventSource/);
+  for (const route of [
+    "/__mokabook/shell.css",
+    "/__mokabook/fonts/InterVariable.woff2",
+  ]) {
+    const response = await fetch(`${server.url}${route}`);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("cache-control"), "no-cache", route);
+  }
   assert.equal(
     (await fetch(`${server.url}/__mokabook/client/browse_state.js`)).status,
     200,

@@ -183,12 +183,17 @@ class ControlledReviewGenerator implements ReviewGenerator {
     _config: ResolvedConfig,
     _baseRef: string,
     outDir: string,
+    _signal: AbortSignal,
   ): Promise<void> {
     this.calls += 1;
     this.signalStarted();
     await this.waitForRelease;
     await fs.promises.rm(outDir, { force: true, recursive: true });
     await fs.promises.mkdir(outDir, { recursive: true });
+    await fs.promises.writeFile(
+      path.join(outDir, ".mokabook-review-artifact"),
+      "schemaVersion=1\n",
+    );
     await fs.promises.writeFile(
       path.join(outDir, "index.html"),
       '<!doctype html><body><main class="mb-artifact-main">Review</main></body>',

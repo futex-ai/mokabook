@@ -1,0 +1,83 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
+
+import { loadConfig } from "../dist/config/load.js";
+import { NodeGitCommandRunner } from "../dist/review/git.js";
+import { runReview } from "../dist/review/run.js";
+import { writeReviewArtifact } from "../dist/review/write.js";
+import { createFixture, removeFixture } from "./helpers/fixture.js";
+
+test("a pre-aborted Review stops before compilation or Git work", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const controller = new AbortController();
+  controller.abort(new Error("stop Review"));
+
+  await assert.rejects(
+    runReview(
+      config,
+      "HEAD",
+      config.review.outDir,
+      undefined,
+      undefined,
+      controller.signal,
+    ),
+    /stop Review/,
+  );
+  assert.equal(fs.existsSync(config.review.outDir), false);
+});
+
+test("the Git subprocess runner honors Review cancellation", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const controller = new AbortController();
+  controller.abort();
+  const runner = new NodeGitCommandRunner(fixture.root, controller.signal);
+
+  await assert.rejects(
+    runner.run(["status", "--short"]),
+    (error: unknown) => error instanceof Error && error.name === "AbortError",
+  );
+});
+
+test("an aborted artifact transaction restores the last-good Review", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const marker = [".mokabook-review-artifact", "schemaVersion=1\n"] as const;
+  await writeReviewArtifact(
+    new Map([marker, ["index.html", "last good\n"]]),
+    config.review.outDir,
+    config,
+  );
+  const files = new Map<string, string>([
+    marker,
+    ["index.html", "replacement\n"],
+  ]);
+  for (let index = 0; index < 500; index += 1) {
+    files.set(`assets/${String(index).padStart(3, "0")}.txt`, "asset\n");
+  }
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), 0);
+
+  await assert.rejects(
+    writeReviewArtifact(files, config.review.outDir, config, controller.signal),
+    /aborted/i,
+  );
+  assert.equal(
+    await fs.promises.readFile(
+      path.join(config.review.outDir, "index.html"),
+      "utf8",
+    ),
+    "last good\n",
+  );
+  assert.equal(
+    (await fs.promises.readdir(fixture.root)).some((entry) =>
+      entry.startsWith(".mokabook-review-"),
+    ),
+    false,
+  );
+});

@@ -1,14 +1,17 @@
-/** Lazy generation and confined HTTP serving for development Review mode. */
+/** Lazy generation lifecycle for development Review mode. */
 
-import fs from "node:fs";
 import type { ServerResponse } from "node:http";
-import path from "node:path";
 
-import { isInside } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { errorMessage } from "../errors.js";
 import { runReview } from "../review/run.js";
-import { contentType, safeDecodePath } from "./static_files.js";
+import {
+  captureReviewArtifact,
+  sendReviewText,
+  serveReviewArtifact,
+  type ReviewArtifactIdentity,
+} from "./review_artifact_files.js";
+import { safeDecodePath } from "./static_files.js";
 
 /** Generation seam used by the served Review lifecycle. */
 export interface ReviewGenerator {
@@ -16,6 +19,7 @@ export interface ReviewGenerator {
     config: ResolvedConfig,
     baseRef: string,
     outDir: string,
+    signal: AbortSignal,
   ): Promise<void>;
 }
 
@@ -25,15 +29,27 @@ export class EngineReviewGenerator implements ReviewGenerator {
     config: ResolvedConfig,
     baseRef: string,
     outDir: string,
+    signal: AbortSignal,
   ): Promise<void> {
-    await runReview(config, baseRef, outDir);
+    await runReview(config, baseRef, outDir, undefined, undefined, signal);
   }
+}
+
+interface ReviewGeneration {
+  promise: Promise<void>;
+  revision: number;
 }
 
 /** One server instance's lazy, refreshable Review artifact host. */
 export class ServedReviewArtifact {
-  private generated = false;
-  private generation: Promise<void> | undefined;
+  private readonly abortController = new AbortController();
+  private readonly responses = new Set<ServerResponse>();
+  private artifact: ReviewArtifactIdentity | undefined;
+  private closePromise: Promise<void> | undefined;
+  private closing = false;
+  private generatedRevision = -1;
+  private generation: ReviewGeneration | undefined;
+  private revision = 0;
 
   constructor(
     private readonly config: ResolvedConfig,
@@ -43,18 +59,44 @@ export class ServedReviewArtifact {
 
   /** Handle a `/review` request without blocking unrelated server routes. */
   serve(url: URL, response: ServerResponse, method: string): void {
-    void this.respond(url, response, method).catch((error: unknown) => {
-      if (response.headersSent) {
-        response.destroy();
-        return;
-      }
-      sendText(
-        response,
-        500,
-        `Mokabook could not generate this review.\n${errorMessage(error)}\n`,
-        method,
-      );
-    });
+    if (this.closing) {
+      response.destroy();
+      return;
+    }
+    this.responses.add(response);
+    void this.respond(url, response, method)
+      .catch((error: unknown) => {
+        if (this.closing || response.destroyed) return;
+        if (response.headersSent) {
+          response.destroy();
+          return;
+        }
+        sendReviewText(
+          response,
+          500,
+          `Mokabook could not generate this review.\n${errorMessage(error)}\n`,
+          method,
+        );
+      })
+      .finally(() => this.responses.delete(response));
+  }
+
+  /** Mark the cached artifact stale before publishing a browser update. */
+  invalidate(): void {
+    if (!this.closing) this.revision += 1;
+  }
+
+  /** Reject new work, abort active generation, and drain its cleanup. */
+  close(): Promise<void> {
+    if (this.closePromise) return this.closePromise;
+    this.closing = true;
+    const reason = new Error("served Review is closing");
+    this.abortController.abort(reason);
+    for (const response of this.responses) response.destroy(reason);
+    this.closePromise = (this.generation?.promise ?? Promise.resolve()).catch(
+      () => undefined,
+    );
+    return this.closePromise;
   }
 
   private async respond(
@@ -69,99 +111,53 @@ export class ServedReviewArtifact {
     }
     const relative = safeDecodePath(url.pathname.slice("/review/".length));
     if (!relative) {
-      sendText(response, 400, "Invalid Review path", method);
+      sendReviewText(response, 400, "Invalid Review path", method);
       return;
     }
-    await this.ensureGenerated(url.searchParams.get("refresh") === "1");
-    serveArtifactFile(response, this.config.review.outDir, relative, method);
+    const artifact = await this.ensureGenerated(
+      url.searchParams.get("refresh") === "1",
+    );
+    if (!response.destroyed)
+      serveReviewArtifact(response, this.config, artifact, relative, method);
   }
 
-  private async ensureGenerated(refresh: boolean): Promise<void> {
-    if (this.generation) {
-      await this.generation;
-      return;
+  private async ensureGenerated(
+    refresh: boolean,
+  ): Promise<ReviewArtifactIdentity> {
+    if (refresh) this.invalidate();
+    while (true) {
+      this.abortController.signal.throwIfAborted();
+      if (this.artifact && this.generatedRevision === this.revision) {
+        return this.artifact;
+      }
+      const generation = this.generation ?? this.startGeneration(this.revision);
+      await generation.promise;
     }
-    if (this.generated && !refresh) return;
-    const generation = this.generator.generate(
+  }
+
+  private startGeneration(revision: number): ReviewGeneration {
+    const state = {
+      promise: this.generateRevision(revision),
+      revision,
+    };
+    this.generation = state;
+    const clear = (): void => {
+      if (this.generation === state) this.generation = undefined;
+    };
+    void state.promise.then(clear, clear);
+    return state;
+  }
+
+  private async generateRevision(revision: number): Promise<void> {
+    await this.generator.generate(
       this.config,
       this.baseRef,
       this.config.review.outDir,
+      this.abortController.signal,
     );
-    this.generation = generation;
-    try {
-      await generation;
-      this.generated = true;
-    } finally {
-      if (this.generation === generation) this.generation = undefined;
-    }
+    this.abortController.signal.throwIfAborted();
+    if (this.revision !== revision) return;
+    this.artifact = captureReviewArtifact(this.config);
+    this.generatedRevision = revision;
   }
-}
-
-function serveArtifactFile(
-  response: ServerResponse,
-  outDir: string,
-  relative: string,
-  method: string,
-): void {
-  const candidate = path.resolve(outDir, relative);
-  let content: Buffer;
-  try {
-    const realOutDir = fs.realpathSync(outDir);
-    const realCandidate = fs.realpathSync(candidate);
-    if (
-      !isInside(realOutDir, realCandidate) ||
-      !fs.lstatSync(candidate).isFile()
-    ) {
-      sendText(response, 404, "Not found", method);
-      return;
-    }
-    content = fs.readFileSync(candidate);
-  } catch {
-    sendText(response, 404, "Not found", method);
-    return;
-  }
-  const body = isReviewPage(relative)
-    ? enhanceServedPage(content.toString("utf8"))
-    : content;
-  response.writeHead(200, {
-    "cache-control": "no-cache",
-    "content-type": contentType(candidate),
-    "x-content-type-options": "nosniff",
-  });
-  response.end(method === "HEAD" ? undefined : body);
-}
-
-function isReviewPage(relative: string): boolean {
-  return (
-    relative === "index.html" ||
-    (relative.startsWith("comparisons/") && relative.endsWith(".html"))
-  );
-}
-
-function enhanceServedPage(content: string): string {
-  const controls =
-    `<div class="mb-served-reviewbar">` +
-    `<nav aria-label="Mokabook modes" class="mb-viewswitch">` +
-    `<a class="mb-viewswitch-option" href="/">Browse</a>` +
-    `<span aria-current="page" class="mb-viewswitch-option">Review</span>` +
-    `</nav><a class="mb-empty-link" href="?refresh=1">Refresh comparison</a>` +
-    `</div>`;
-  const client = `<script src="/__mokabook/client/browser.js" type="module"></script>`;
-  return content
-    .replace('<main class="mb-artifact-main">', `$&${controls}`)
-    .replace("</body>", `${client}</body>`);
-}
-
-function sendText(
-  response: ServerResponse,
-  status: number,
-  body: string,
-  method: string,
-): void {
-  response.writeHead(status, {
-    "cache-control": "no-cache",
-    "content-type": "text/plain; charset=utf-8",
-    "x-content-type-options": "nosniff",
-  });
-  response.end(method === "HEAD" ? undefined : body);
 }
