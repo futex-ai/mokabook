@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
@@ -108,6 +109,62 @@ test("preview build refuses to replace an unowned directory", async (context) =>
     /refusing to replace unowned preview directory/,
   );
   assert.equal(await read(output, "keep.txt"), "owned by user\n");
+});
+
+test("preview build rejects an external symlink parent", async (context) => {
+  const contextDir = path.join(repositoryRoot, ".context");
+  await fs.promises.mkdir(contextDir, { recursive: true });
+  const outside = await fs.promises.mkdtemp(
+    path.join(os.tmpdir(), "mokabook-preview-outside-"),
+  );
+  const output = path.join(outside, "artifact");
+  await fs.promises.mkdir(output);
+  await fs.promises.writeFile(path.join(output, "keep.txt"), "outside\n");
+  const link = await fs.promises.mkdtemp(
+    path.join(contextDir, "preview-parent-link-"),
+  );
+  await fs.promises.rm(link, { recursive: true });
+  await fs.promises.symlink(outside, link, "dir");
+  context.after(async () => {
+    await fs.promises.rm(link, { force: true, recursive: true });
+    await fs.promises.rm(outside, { force: true, recursive: true });
+  });
+
+  await assert.rejects(
+    execute(
+      process.execPath,
+      ["scripts/preview/build.mjs", "--out", path.join(link, "artifact")],
+      { cwd: repositoryRoot },
+    ),
+    /preview output resolves outside .*\.context through a symlink/,
+  );
+  assert.equal(await read(output, "keep.txt"), "outside\n");
+});
+
+test("preview build rejects an external output symlink", async (context) => {
+  const contextDir = path.join(repositoryRoot, ".context");
+  await fs.promises.mkdir(contextDir, { recursive: true });
+  const outside = await fs.promises.mkdtemp(
+    path.join(os.tmpdir(), "mokabook-preview-target-"),
+  );
+  await fs.promises.writeFile(path.join(outside, "keep.txt"), "outside\n");
+  const output = await fs.promises.mkdtemp(
+    path.join(contextDir, "preview-output-link-"),
+  );
+  await fs.promises.rm(output, { recursive: true });
+  await fs.promises.symlink(outside, output, "dir");
+  context.after(async () => {
+    await fs.promises.rm(output, { force: true, recursive: true });
+    await fs.promises.rm(outside, { force: true, recursive: true });
+  });
+
+  await assert.rejects(
+    execute(process.execPath, ["scripts/preview/build.mjs", "--out", output], {
+      cwd: repositoryRoot,
+    }),
+    /preview output resolves outside .*\.context through a symlink/,
+  );
+  assert.equal(await read(outside, "keep.txt"), "outside\n");
 });
 
 async function read(root: string, relative: string): Promise<string> {

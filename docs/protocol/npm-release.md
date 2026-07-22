@@ -37,6 +37,10 @@ to deterministic npm scripts and includes:
 - Playwright Browse and Review regressions using Chromium; and
 - Rust formatting, Clippy, tests, and file-length audits for `xtask`.
 
+The Node test runner caps file-level concurrency at four so heavyweight build,
+Git, preview, and server lifecycle suites cannot starve one another on hosts
+with many logical cores.
+
 Tests that mutate files use isolated temporary directories and clean up child
 processes. Package smokes execute the packed artifact, not the source tree or a
 workspace symlink. The temporary real-Accounting parity audit is release
@@ -81,7 +85,10 @@ modules, fonts, id redirects, and every validated public consumer asset under
 extensionless HTML routes, static deployments omit the watched server's
 live-update module, and response rules sandbox raw consumer and Review snapshot
 documents. Artifact replacement is transactional and refuses to overwrite a
-directory without Mokabook's ownership marker.
+directory without Mokabook's ownership marker. Preview output confinement is
+checked both lexically and after resolving existing symlink parents; staging,
+backup, and installation use the resolved path beneath the real `.context`
+directory.
 
 Closing a same-repository pull request marks its sticky comment inactive and
 attempts to delete all Cloudflare deployments carrying that PR branch alias.

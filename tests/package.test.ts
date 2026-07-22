@@ -93,6 +93,16 @@ test("CLI help advertises served Review and its base", () => {
   );
 });
 
+test("Node tests cap file concurrency for lifecycle stability", async () => {
+  const packageJson = JSON.parse(
+    await fs.promises.readFile(
+      path.join(repositoryRoot, "package.json"),
+      "utf8",
+    ),
+  ) as { scripts?: { test?: string } };
+  assert.match(packageJson.scripts?.test ?? "", /--test-concurrency=4/);
+});
+
 test("packed package contains only the declared public surface", async () => {
   const { stdout } = await execFileAsync(
     "npm",

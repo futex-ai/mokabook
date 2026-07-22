@@ -245,7 +245,9 @@ every catalogue route through Mokabook's HTTP server, copies the package shell
 and public example assets, preserves id redirects, and includes a complete
 static Review comparison against `origin/main`. Raw consumer pages and Review
 snapshots receive sandbox response rules, while the development-only
-live-reload connection is excluded. The artifact is not part of the npm package.
+live-reload connection is excluded. Custom output paths must remain beneath the
+real `.context` directory after symlink resolution. The artifact is not part of
+the npm package.
 
 The Preview workflow deploys `main` to the Cloudflare Pages project `mokabook`
 at `https://mokabook.pages.dev`. Same-repository, non-release pull requests use

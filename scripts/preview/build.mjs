@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { isPublicStaticFile } from "../../dist/config/public_files.js";
 import { loadConfig } from "../../dist/config/load.js";
+import { isInside, projectRealPath } from "../../dist/config/paths.js";
 import { readManifest } from "../../dist/registry/manifest.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
 import {
@@ -25,11 +26,12 @@ await buildPreview(outputDir);
 process.stdout.write(`Built Mokabook preview at ${outputDir}.\n`);
 
 async function buildPreview(output) {
-  assertSafeOutput(output);
-  assertOwnedOutput(output);
-  await fs.promises.mkdir(path.dirname(output), { recursive: true });
+  await fs.promises.mkdir(contextRoot, { recursive: true });
+  const resolvedOutput = resolveSafeOutput(output);
+  assertOwnedOutput(resolvedOutput);
+  await fs.promises.mkdir(path.dirname(resolvedOutput), { recursive: true });
   const stage = await fs.promises.mkdtemp(
-    path.join(path.dirname(output), ".mokabook-preview-stage-"),
+    path.join(path.dirname(resolvedOutput), ".mokabook-preview-stage-"),
   );
   try {
     const config = await loadConfig(repositoryRoot, configPath);
@@ -77,7 +79,7 @@ async function buildPreview(output) {
     await writeText(stage, "_headers", headers());
     await writeText(stage, "_redirects", redirects(manifest.entries));
     await writeText(stage, markerName, "schemaVersion=1\n");
-    await installArtifact(stage, output);
+    await installArtifact(stage, resolvedOutput);
   } catch (error) {
     await fs.promises.rm(stage, { force: true, recursive: true });
     throw error;
@@ -212,7 +214,7 @@ function assertOwnedOutput(output) {
   }
 }
 
-function assertSafeOutput(output) {
+function resolveSafeOutput(output) {
   const relative = path.relative(contextRoot, output);
   if (
     relative === "" ||
@@ -221,6 +223,17 @@ function assertSafeOutput(output) {
   ) {
     throw new Error(`preview output must be inside ${contextRoot}`);
   }
+  const realContextRoot = fs.realpathSync(contextRoot);
+  const realOutput = projectRealPath(output);
+  if (
+    realOutput === realContextRoot ||
+    !isInside(realContextRoot, realOutput)
+  ) {
+    throw new Error(
+      `preview output resolves outside ${contextRoot} through a symlink`,
+    );
+  }
+  return realOutput;
 }
 
 function outputArgument(arguments_) {

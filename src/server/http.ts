@@ -166,7 +166,13 @@ function handleRequest(
     );
   }
   if (url.pathname.startsWith("/id/"))
-    return redirectId(response, url.pathname.slice(4), catalogue, context);
+    return redirectId(
+      response,
+      url.pathname.slice(4),
+      catalogue,
+      context,
+      method,
+    );
   if (url.pathname.startsWith("/view/"))
     return renderView(
       response,
@@ -197,6 +203,7 @@ function redirectId(
   encodedId: string,
   catalogue: Catalogue,
   context: ShellContext,
+  method: string,
 ): void {
   const entry = catalogue.byId.get(safeDecode(encodedId));
   if (!entry || entry.kind === "collection")
@@ -205,6 +212,7 @@ function redirectId(
       404,
       "text/html",
       notFoundPage(encodedId, catalogue, context),
+      method,
     );
   response.writeHead(302, {
     location: `/view/${encodeUrlPath(entry.route)}`,

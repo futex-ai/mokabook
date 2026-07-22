@@ -46,6 +46,18 @@ test("server validates before bind and supports safe no-watch routes on port zer
   const redirect = await fetch(`${server.url}/id/home`, { redirect: "manual" });
   assert.equal(redirect.status, 302);
   assert.equal(redirect.headers.get("location"), "/view/screens/home.html");
+  const headRedirect = await fetch(`${server.url}/id/home`, {
+    method: "HEAD",
+    redirect: "manual",
+  });
+  assert.equal(headRedirect.status, 302);
+  assert.equal(headRedirect.headers.get("location"), "/view/screens/home.html");
+  assert.equal(await headRedirect.text(), "");
+  const missingHead = await fetch(`${server.url}/id/missing`, {
+    method: "HEAD",
+  });
+  assert.equal(missingHead.status, 404);
+  assert.equal(await missingHead.text(), "");
   assert.equal(
     (await fetch(`${server.url}/view/screens/home.html`)).status,
     200,
