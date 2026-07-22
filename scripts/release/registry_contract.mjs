@@ -29,6 +29,8 @@ export function comparePublishedPackage(local, remote, metadata, commit) {
 export function isMissingPackage(result) {
   return (
     result.code !== 0 &&
-    /(?:E404|404 Not Found)/.test(`${result.stdout}\n${result.stderr}`)
+    /(?:E404|ETARGET|404 Not Found|No matching version found)/.test(
+      `${result.stdout}\n${result.stderr}`,
+    )
   );
 }
