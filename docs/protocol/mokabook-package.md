@@ -48,6 +48,12 @@ Common options include `--config <path>`. Serve accepts `--port`, `--base`,
 the package name belongs to Mokabook; docs must show npx arguments in a form
 that is unambiguous to current npm.
 
+Serve exposes the same Review artifact under `/review`. It generates the
+comparison lazily on first entry, uses the resolved Serve base and configured
+Review output directory, and regenerates when the reviewer chooses
+`Refresh comparison`. The standalone `review` command remains the way to write
+and inspect the artifact without a running server.
+
 Unknown commands, invalid values, absent configuration, and invalid catalogue
 data exit non-zero. Expected author errors do not print JavaScript stacks unless
 diagnostic output is explicitly requested.

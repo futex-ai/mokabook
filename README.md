@@ -94,8 +94,11 @@ All/Changed filter, linked breadcrumbs with id chips, realistic phone and
 browser device chrome with an expand-to-overlay toggle, header viewport
 controls, use-case flows, a details inspector, id redirects, and watched
 updates.
-Review provides summary, side-by-side, overlay, and difference views as a
-static artifact. Screens with shared or declared dependency impact
+Choosing Review in the served shell lazily generates the configured Git
+comparison and opens its summary, side-by-side, overlay, and difference views
+without leaving Mokabook. `Refresh comparison` recomputes it in place.
+`mokabook review` writes the same comparison as a disk-viewable static artifact.
+Screens with shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
 descendant of a directory is reported as the screen's impact evidence.
@@ -191,6 +194,8 @@ forcing React peers to the consumer's one runtime.
 - **A link fails validation:** use `MockLink` for an entry id and a relative URL
   for a real generated/static file. Root-absolute and source-tree links are not
   portable.
+- **Review cannot compare the branch:** make sure the configured base ref exists
+  and the committed base contains Mokabook output, then use `Refresh comparison`.
 - **A watched edit fails:** fix the reported candidate build/config error. The
   last-good server remains active and adopts the next valid change.
 
@@ -209,9 +214,10 @@ npm run example:check
 cargo xtask check
 ```
 
-`npm run test:browser` drives the served Browse shell and static Review pages
-in Chromium via Playwright; it uses the installed Chrome channel by default and
-honors `PLAYWRIGHT_CHANNEL` for an alternative browser install.
+`npm run test:browser` drives the served Browse and Review experience plus
+disk-viewable Review artifacts in Chromium via Playwright; it uses the
+installed Chrome channel by default and honors `PLAYWRIGHT_CHANNEL` for an
+alternative browser install.
 
 `cargo xtask check` is the authoritative local gate. It includes formatting,
 lint, typechecking, unit/integration tests, the committed example, package
@@ -244,8 +250,8 @@ recorded by the
 - [`src/config`](./src/config) — config discovery, loading, and confinement.
 - [`src/build`](./src/build) — single-graph bundling, compilation, links, check,
   and transactional writes.
-- [`src/server`](./src/server) — manifest-backed HTTP, the responsive shell,
-  and the watched child lifecycle.
+- [`src/server`](./src/server) — manifest-backed HTTP, lazy served Review,
+  the responsive shell, and the watched child lifecycle.
 - [`src/client`](./src/client) — progressive Browse navigation and versioned
   live updates served to the browser.
 - [`src/review`](./src/review) — Git extraction, comparison, ignore normalization,

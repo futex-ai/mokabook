@@ -163,6 +163,10 @@ existing `mb-*` markup. The stylesheet therefore must keep:
   `mb-title-row`, `mb-viewswitch`, `mb-viewswitch-option`, `mb-frag`,
   `mb-nav-group`, `mb-nav-list`) alongside the review-specific classes in the
   review stylesheet module.
+- When the artifact is hosted by Serve, a compact bar uses those view-switch
+  styles to link back to Browse, mark Review active, and offer
+  `Refresh comparison`; the disk artifact and snapshot documents remain
+  unchanged.
 
 ## Related Docs
 

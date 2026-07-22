@@ -3,12 +3,7 @@ import test from "node:test";
 
 import type { ManifestV3 } from "../dist/registry/types.js";
 import { createCatalogue } from "../dist/server/catalogue.js";
-import {
-  homePage,
-  notFoundPage,
-  reviewPage,
-  viewPage,
-} from "../dist/server/pages.js";
+import { homePage, notFoundPage, viewPage } from "../dist/server/pages.js";
 import { SHELL_CSS } from "../dist/server/shell/css.js";
 import { buildNavTree } from "../dist/server/shell/nav_tree.js";
 
@@ -82,7 +77,7 @@ const manifest: ManifestV3 = {
   schemaVersion: 3,
 };
 
-const context = { base: "origin/main", mode: "browse" as const };
+const context = {};
 
 test("nav tree nests collections and folds legacy directories", () => {
   const tree = buildNavTree(manifest.entries, manifest.legacyPages);
@@ -187,18 +182,12 @@ test("use-case page renders the flow with catalogue links per step", () => {
   assert.match(html, /class="mbk-flow-screen"/);
 });
 
-test("missing routes and review keep the catalogue shell", () => {
+test("missing routes keep the catalogue shell and link to Review", () => {
   const catalogue = createCatalogue(manifest);
   const missing = notFoundPage("view/unknown.html", catalogue, context);
   assert.match(missing, /Screen not found/);
   assert.match(missing, /aria-label="Catalogue"/);
-  const review = reviewPage("origin/main", catalogue, {
-    ...context,
-    mode: "review",
-  });
-  assert.match(review, /mokabook review --base origin\/main/);
-  assert.match(review, /aria-current="page"[^>]*href="\/review"/);
-  assert.match(review, /class="mbk-basewatch"/);
+  assert.match(missing, /class="mbk-mode"[^>]*href="\/review"/);
 });
 
 test("filter renders in the nav only when changed routes are known", () => {

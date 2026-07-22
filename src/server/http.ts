@@ -1,9 +1,6 @@
-import fs from "node:fs";
 import http, { type ServerResponse } from "node:http";
-import path from "node:path";
 
 import { encodeUrlPath } from "../config/paths.js";
-import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import { readManifest } from "../registry/manifest.js";
@@ -12,9 +9,20 @@ import {
   loadBrowserClientModules,
   loadShellFontAssets,
 } from "./client_modules.js";
-import { homePage, notFoundPage, reviewPage, viewPage } from "./pages.js";
+import { homePage, notFoundPage, viewPage } from "./pages.js";
+import {
+  EngineReviewGenerator,
+  type ReviewGenerator,
+  ServedReviewArtifact,
+} from "./review_artifact.js";
 import type { ShellContext } from "./shell/context.js";
 import { SHELL_CSS } from "./shell/css.js";
+import {
+  safeDecodePath,
+  serveClientModule,
+  serveFontAsset,
+  servePublicStatic,
+} from "./static_files.js";
 
 /** Options for one deterministic server child. */
 export interface ServerOptions {
@@ -36,10 +44,16 @@ export interface RunningServer {
 export async function startCatalogueServer(
   config: ResolvedConfig,
   options: ServerOptions,
+  reviewGenerator: ReviewGenerator = new EngineReviewGenerator(),
 ): Promise<RunningServer> {
   const catalogue = createCatalogue(readManifest(config));
   const clientModules = loadBrowserClientModules();
   const fontAssets = loadShellFontAssets();
+  const review = new ServedReviewArtifact(
+    config,
+    options.base,
+    reviewGenerator,
+  );
   const streams = new Set<ServerResponse>();
   let updateVersion = options.updateVersion ?? 1;
   const server = http.createServer((request, response) => {
@@ -52,6 +66,7 @@ export async function startCatalogueServer(
       options,
       streams,
       { clientModules, fontAssets },
+      review,
       () => updateVersion,
     );
   });
@@ -98,12 +113,13 @@ function handleRequest(
   options: ServerOptions,
   streams: Set<ServerResponse>,
   assets: ServedAssets,
+  review: ServedReviewArtifact,
   currentVersion: () => number,
 ): void {
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed");
   const url = new URL(rawUrl, "http://mokabook.invalid");
-  const context = shellContext(options, "browse");
+  const context = shellContext(options);
   if (url.pathname === "/")
     return send(
       response,
@@ -112,14 +128,10 @@ function handleRequest(
       homePage(catalogue, context),
       method,
     );
-  if (url.pathname === "/review")
-    return send(
-      response,
-      200,
-      "text/html",
-      reviewPage(options.base, catalogue, shellContext(options, "review")),
-      method,
-    );
+  if (url.pathname === "/review" || url.pathname.startsWith("/review/")) {
+    review.serve(url, response, method);
+    return;
+  }
   if (url.pathname === "/__mokabook/shell.css")
     return send(response, 200, "text/css", SHELL_CSS, method);
   if (url.pathname === "/__mokabook/events")
@@ -151,7 +163,7 @@ function handleRequest(
       method,
     );
   if (url.pathname.startsWith("/static/"))
-    return serveStatic(response, url.pathname.slice(8), config, method);
+    return servePublicStatic(response, url.pathname.slice(8), config, method);
   return send(
     response,
     404,
@@ -161,49 +173,10 @@ function handleRequest(
   );
 }
 
-function shellContext(
-  options: ServerOptions,
-  mode: ShellContext["mode"],
-): ShellContext {
+function shellContext(options: ServerOptions): ShellContext {
   return {
-    base: options.base,
     ...(options.changedRoutes ? { changedRoutes: options.changedRoutes } : {}),
-    mode,
   };
-}
-
-function serveClientModule(
-  response: ServerResponse,
-  filename: string,
-  modules: ReadonlyMap<string, Buffer>,
-  method: string,
-): void {
-  const content = modules.get(filename);
-  if (!content) return send(response, 404, "text/plain", "Not found", method);
-  response.writeHead(200, {
-    "cache-control": "no-cache",
-    "content-type": "text/javascript; charset=utf-8",
-    "x-content-type-options": "nosniff",
-  });
-  response.end(method === "HEAD" ? undefined : content);
-}
-
-function serveFontAsset(
-  response: ServerResponse,
-  filename: string,
-  fonts: ReadonlyMap<string, Buffer>,
-  method: string,
-): void {
-  const content = fonts.get(filename);
-  if (!content) return send(response, 404, "text/plain", "Not found", method);
-  response.writeHead(200, {
-    "cache-control": "no-cache",
-    "content-type": filename.endsWith(".woff2")
-      ? "font/woff2"
-      : "text/plain; charset=utf-8",
-    "x-content-type-options": "nosniff",
-  });
-  response.end(method === "HEAD" ? undefined : content);
 }
 
 function redirectId(
@@ -251,33 +224,6 @@ function renderView(
     viewPage(entry, catalogue, viewContext),
     method,
   );
-}
-
-function serveStatic(
-  response: ServerResponse,
-  encodedPath: string,
-  config: ResolvedConfig,
-  method: string,
-): void {
-  const relative = safeDecodePath(encodedPath);
-  if (!relative)
-    return send(response, 400, "text/plain", "Invalid static path", method);
-  const candidate = path.resolve(config.mockupsDir, relative);
-  if (!isPublicStaticFile(candidate, config)) {
-    return send(response, 404, "text/plain", "Not found", method);
-  }
-  let content: Buffer;
-  try {
-    content = fs.readFileSync(candidate);
-  } catch {
-    return send(response, 404, "text/plain", "Not found", method);
-  }
-  response.writeHead(200, {
-    "content-type": contentType(candidate),
-    "x-content-type-options": "nosniff",
-  });
-  if (method !== "HEAD") response.end(content);
-  else response.end();
 }
 
 function openEventStream(
@@ -336,44 +282,10 @@ function listen(server: http.Server, port: number): Promise<void> {
   });
 }
 
-function safeDecodePath(value: string): string | undefined {
-  try {
-    const decoded = value.split("/").map(decodeURIComponent).join("/");
-    if (
-      decoded === "" ||
-      decoded.startsWith("/") ||
-      decoded
-        .split("/")
-        .some((part) => part === ".." || part === "." || part === "")
-    )
-      return undefined;
-    return decoded;
-  } catch {
-    return undefined;
-  }
-}
-
 function safeDecode(value: string): string {
   try {
     return decodeURIComponent(value);
   } catch {
     return "";
   }
-}
-
-function contentType(candidate: string): string {
-  const extension = path.extname(candidate).toLowerCase();
-  return extension === ".html"
-    ? "text/html; charset=utf-8"
-    : extension === ".css"
-      ? "text/css; charset=utf-8"
-      : extension === ".svg"
-        ? "image/svg+xml"
-        : extension === ".png"
-          ? "image/png"
-          : extension === ".jpg" || extension === ".jpeg"
-            ? "image/jpeg"
-            : extension === ".woff2"
-              ? "font/woff2"
-              : "application/octet-stream";
 }

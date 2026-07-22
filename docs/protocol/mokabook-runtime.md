@@ -58,12 +58,22 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/view/<route>` for screens, use cases, and configured legacy pages;
 - `/id/<id>` as a canonical redirect for routed registry entries;
 - `/static/<path>` for generated fragments, legacy pages, and consumer assets;
-- `/review` for the configured Git comparison;
+- `/review` as the stable entry point for the configured Git comparison;
+- `/review/<artifact-path>` for its generated summary, compare pages,
+  snapshots, and assets;
 - package-owned client and update endpoints under `/__mokabook/`.
 
 All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
 returns its response headers and completes without opening or registering an
 event stream.
+
+`/review` redirects to `/review/index.html`. The server generates the Review
+artifact on the first artifact request, coalesces concurrent first requests,
+and serves it from the configured in-repository Review output directory.
+`?refresh=1` regenerates the artifact transactionally before serving the
+requested page or asset. Generation failures return a Review-specific error
+without taking down Browse, and invalid, traversing, or symlink-escaping Review
+paths never expose files outside the owned artifact.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
@@ -129,10 +139,11 @@ shipped shell are recorded beside the design catalogue in the example notes.
 ## Watched Development
 
 `mokabook serve` watches by default; `--no-watch` serves one deterministic
-snapshot. Every Browse and Review document loads the package-owned browser client,
-which connects to the versioned event stream and reloads its current durable
-URL after a higher version arrives. Watch classification derives only from
-resolved config:
+snapshot. Every Browse document and each served Review summary/compare page
+loads the package-owned browser client, which connects to the versioned event
+stream and reloads its current durable URL after a higher version arrives.
+Review snapshots remain byte-unmodified and script-disabled. Watch
+classification derives only from resolved config:
 
 - the discovered or explicit config file reloads configuration, generated
   output, watch targets, and the child;
@@ -205,10 +216,12 @@ the child exit notification arrives.
 
 ## Review Comparison
 
-`mokabook review` compares the workspace with a configured base ref, defaulting
-to `origin/main`. It resolves the base to a commit and reads the committed
-`mockupsDir` tree from Git without checking out or rebuilding the base. Head
-artifacts come from the current working tree after `mokabook check` succeeds.
+`mokabook review` and served Review compare the workspace with a configured
+base ref, defaulting to `origin/main`. The CLI writes the artifact directly;
+Serve generates the same artifact lazily and offers an in-place refresh. Both
+resolve the base to a commit and read the committed `mockupsDir` tree from Git
+without checking out or rebuilding the base. Head artifacts come from the
+current working tree after `mokabook check` succeeds.
 
 Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
@@ -237,7 +250,9 @@ The engine emits a static, self-contained artifact directory with:
 
 Artifact pages inline the package-owned shell styles so the directory remains
 viewable without a server, and every embedded pane stays in a script-disabled
-sandbox.
+sandbox. When served, summary and compare responses add Browse/Review mode
+controls, a refresh action, and the live-update client; these additions do not
+rewrite the disk artifact or its before/after snapshots.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including

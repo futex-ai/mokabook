@@ -254,9 +254,9 @@ test(
       `export default { entriesDir: "entries", mockupsDir: "mockups", repoRoot: ".", review: { base: "config-reloaded", outDir: ".review" } };\n`,
     );
     await waitFor(async () =>
-      (await (await fetch(`${url}/review`)).text()).includes(
-        "--base config-reloaded",
-      ),
+      (
+        await (await fetch(`${url}/review/index.html?refresh=1`)).text()
+      ).includes("config-reloaded"),
     );
     assert.equal(new URL(url).port, firstPort);
     child.kill("SIGTERM");
