@@ -59,6 +59,34 @@ are immutable commit hashes with reviewed version comments; runtime versions
 are explicit. Fork pull requests receive no release secrets or write
 permissions.
 
+## Preview Deployments
+
+`.github/workflows/preview.yml` deploys a browsable copy of the synthetic basic
+consumer to the direct-upload Cloudflare Pages project `mokabook`. A `main`
+push updates the production deployment at `https://mokabook.pages.dev`.
+Same-repository pull requests, except Release Please pull requests, deploy to a
+stable `pr-<number>` branch alias and receive one updated sticky comment with
+the deployment result, URL, commit, and workflow run. Fork pull requests never
+receive Cloudflare credentials or write-capable execution.
+
+`npm run preview:build` first rebuilds Mokabook and its committed basic
+consumer. The repository-only preview builder starts the real Browse server on
+an ephemeral loopback port and snapshots the home, review launcher, not-found,
+and every manifest-backed route. It copies the shell stylesheet, browser
+navigation modules, fonts, id redirects, and every validated public consumer
+asset into `.context/mokabook-preview`. Preview shell links use Cloudflare
+Pages' canonical extensionless HTML routes, and static deployments omit the
+watched server's live-update module. Artifact replacement is transactional and
+refuses to overwrite a directory without Mokabook's ownership marker.
+
+Closing a same-repository pull request marks its sticky comment inactive and
+attempts to delete all Cloudflare deployments carrying that PR branch alias.
+Cleanup failures retain the deployment and report why rather than hiding the
+failure. Superseded runs for the same main ref or pull request are cancelled.
+All workflow actions use immutable commit hashes, Wrangler is lockfile-pinned,
+and its vulnerable transitive `sharp` release is overridden with the fixed
+release so the installed dependency tree remains audit-clean.
+
 ## Release Management
 
 Conventional Commits feed release-please's Node release strategy through
@@ -145,6 +173,10 @@ Before enabling publish, maintainers must configure and verify:
 - repository Actions may create pull requests, and the default workflow token
   has only the permissions declared in each workflow;
 - the branch rule requires the exact `Required CI` status;
+- the direct-upload Cloudflare Pages project `mokabook` exists with production
+  branch `main`, repository variable `CLOUDFLARE_ACCOUNT_ID` is set, and
+  repository secret `CLOUDFLARE_PAGES_API_TOKEN` or `CLOUDFLARE_API_TOKEN`
+  holds a least-privilege token with Pages write access;
 - the protected `npm` environment has the approved deployment branches/tags and
   reviewers, without storing an npm token;
 - the `RELEASE_PLEASE_TOKEN` credential owner, least-privilege repository
