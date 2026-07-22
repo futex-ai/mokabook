@@ -29,7 +29,7 @@ export async function runReview(
   const client =
     git ??
     new RepositoryGitClient(new NodeGitCommandRunner(config.repoRoot, signal));
-  const compilation = await compileCatalogue(config);
+  const compilation = await compileCatalogue(config, signal);
   signal?.throwIfAborted();
   outputStore.check(compilation, config);
   const artifact = await compareReview(
@@ -38,6 +38,8 @@ export async function runReview(
     client,
     baseRef,
     outDir,
+    undefined,
+    signal,
   );
   signal?.throwIfAborted();
   await writeReviewArtifact(

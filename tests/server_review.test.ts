@@ -60,6 +60,12 @@ test("served Review lazily generates and refreshes the full artifact", async (co
     fs.existsSync(path.join(config.review.outDir, ".mokabook-review-artifact")),
     true,
   );
+  const snapshot = await fetch(
+    `${server.url}/review/snapshots/after/screens/home.mobile.html`,
+  );
+  assert.equal(snapshot.status, 200);
+  assert.equal(snapshot.headers.get("content-security-policy"), "sandbox");
+  assert.equal(indexResponse.headers.get("content-security-policy"), null);
 
   const compareHref = index.match(
     /href="([^"]*comparisons\/[^"]+)"[^>]*>mobile<\/a>/,

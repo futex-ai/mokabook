@@ -79,7 +79,7 @@ fall back to the registry. After the first release, a clean machine may use
 | Command              | Outcome                                                 |
 | -------------------- | ------------------------------------------------------- |
 | `mokabook`           | Build, serve, and watch using a stable development URL  |
-| `mokabook serve`     | Serve Browse; add `--no-watch` for one child process    |
+| `mokabook serve`     | Serve Browse and Review; `--no-watch` stays in-process  |
 | `mokabook build`     | Validate and transactionally write generated output     |
 | `mokabook check`     | Compare expected and committed bytes without writing    |
 | `mokabook review`    | Compare Git base/head screens and write a static Review |
@@ -126,7 +126,7 @@ use an explicit watch rule, and configured stylesheets retain reload
 precedence. Shutdown interrupts replacement-watcher readiness, closes the
 candidate before draining the remaining lifecycle, and waits for child exit
 through graceful, terminate, and force-kill stages. It also aborts and drains
-an in-flight served Review generation before the HTTP child exits. Open Browse
+an in-flight served Review generation before the HTTP server exits. Open Browse
 and Review pages connect to the versioned event stream and reload after a newer
 build or asset version arrives. A watched reload restores the current Browse search, filter,
 disclosures, viewport, drawer, and scroll state once on the same durable URL.

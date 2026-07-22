@@ -3,11 +3,49 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
+import { compileCatalogue } from "../dist/build/compile.js";
 import { loadConfig } from "../dist/config/load.js";
+import { compareReview } from "../dist/review/compare.js";
 import { NodeGitCommandRunner } from "../dist/review/git.js";
+import type { GitClient } from "../dist/review/git.js";
 import { runReview } from "../dist/review/run.js";
 import { writeReviewArtifact } from "../dist/review/write.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
+
+test("catalogue compilation honors Review cancellation", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const controller = new AbortController();
+  controller.abort(new Error("stop compilation"));
+
+  await assert.rejects(
+    compileCatalogue(config, controller.signal),
+    /stop compilation/,
+  );
+});
+
+test("comparison honors cancellation before Git work", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const compilation = await compileCatalogue(config);
+  const controller = new AbortController();
+  controller.abort(new Error("stop comparison"));
+
+  await assert.rejects(
+    compareReview(
+      compilation,
+      config,
+      rejectingGitClient(),
+      "HEAD",
+      undefined,
+      undefined,
+      controller.signal,
+    ),
+    /stop comparison/,
+  );
+});
 
 test("a pre-aborted Review stops before compilation or Git work", async (context) => {
   const fixture = await createFixture();
@@ -81,3 +119,17 @@ test("an aborted artifact transaction restores the last-good Review", async (con
     false,
   );
 });
+
+function rejectingGitClient(): GitClient {
+  const reject = async (): Promise<never> => {
+    throw new Error("Git must not run after cancellation");
+  };
+  return {
+    changedPaths: reject,
+    fileExists: reject,
+    fileKind: reject,
+    readFile: reject,
+    readFileBytes: reject,
+    resolveRef: reject,
+  };
+}

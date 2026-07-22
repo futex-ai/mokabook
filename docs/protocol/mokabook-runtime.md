@@ -67,7 +67,10 @@ All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
 returns its response headers and completes without opening or registering an
 event stream. Server-rendered documents and package-owned client, shell, and
 font responses use an explicit `no-cache` policy so local rebuilds cannot reuse
-stale runtime assets.
+stale runtime assets. Raw generated and Review-snapshot HTML responses also use
+`Content-Security-Policy: sandbox`, so opening their URLs directly cannot bypass
+the script-disabled frame boundary; shell-owned Browse and Review pages remain
+interactive.
 
 `/review` redirects to `/review/index.html`. The server generates the Review
 artifact on the first artifact request, coalesces concurrent first requests,
@@ -220,7 +223,8 @@ shutdown first requests graceful IPC closure, then sends SIGTERM and SIGKILL at
 bounded intervals when necessary; the supervisor does not finish closing until
 the child exit notification arrives. HTTP shutdown rejects new Review work,
 destroys its pending responses, aborts the active generation through the Git
-and transactional-write boundaries, and waits for cleanup before completing.
+catalogue-compile, comparison, asset-read, and transactional-write boundaries,
+and waits for cleanup before completing.
 
 ## Review Comparison
 

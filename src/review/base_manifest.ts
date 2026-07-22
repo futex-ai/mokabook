@@ -15,17 +15,22 @@ export async function readBaseManifest(
   git: GitClient,
   commit: string,
   config: ResolvedConfig,
+  signal?: AbortSignal,
 ): Promise<ManifestV3> {
+  signal?.throwIfAborted();
   const prefix = toPosixPath(path.relative(config.repoRoot, config.mockupsDir));
   const canonicalPath = joinGit(prefix, MANIFEST_NAME);
   const selection = selectManifestInput(
     await git.fileExists(commit, canonicalPath),
     config.compatibility.readManifestV2,
   );
-  return parseManifest(
-    JSON.parse(await git.readFile(commit, joinGit(prefix, selection.filename))),
-    selection.allowV2,
+  signal?.throwIfAborted();
+  const content = await git.readFile(
+    commit,
+    joinGit(prefix, selection.filename),
   );
+  signal?.throwIfAborted();
+  return parseManifest(JSON.parse(content), selection.allowV2);
 }
 
 function joinGit(prefix: string, route: string): string {

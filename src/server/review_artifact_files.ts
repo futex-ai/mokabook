@@ -71,9 +71,13 @@ export function serveReviewArtifact(
   const body = isReviewPage(relative)
     ? enhanceServedPage(content.toString("utf8"))
     : content;
+  const type = contentType(candidate);
   response.writeHead(200, {
     "cache-control": "no-cache",
-    "content-type": contentType(candidate),
+    ...(!isReviewPage(relative) && type.startsWith("text/html")
+      ? { "content-security-policy": "sandbox" }
+      : {}),
+    "content-type": type,
     "x-content-type-options": "nosniff",
   });
   response.end(method === "HEAD" ? undefined : body);

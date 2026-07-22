@@ -105,6 +105,9 @@ function sendBuffer(
 ): void {
   response.writeHead(200, {
     "cache-control": "no-cache",
+    ...(type.startsWith("text/html")
+      ? { "content-security-policy": "sandbox" }
+      : {}),
     "content-type": type,
     "x-content-type-options": "nosniff",
   });

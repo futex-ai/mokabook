@@ -20,12 +20,16 @@ test("Browse frames sandbox generated scripts away from the shell", async (conte
   });
   context.after(() => server.close());
 
-  const html = await (
-    await fetch(`${server.url}/view/screens/home.html`)
-  ).text();
+  const shell = await fetch(`${server.url}/view/screens/home.html`);
+  const html = await shell.text();
 
+  assert.equal(shell.headers.get("content-security-policy"), null);
   assert.match(html, /<iframe[^>]+sandbox=""/);
   assert.doesNotMatch(html, /allow-scripts/);
+
+  const raw = await fetch(`${server.url}/static/screens/home.mobile.html`);
+  assert.equal(raw.status, 200);
+  assert.equal(raw.headers.get("content-security-policy"), "sandbox");
 });
 
 test("static serving rejects symlinks into nested authored source roots", async (context) => {
