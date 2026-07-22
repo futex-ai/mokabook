@@ -52,12 +52,12 @@ gate on Ubuntu:
 - the minimum supported Node 22.14.0 with npm 11.7.0; and
 - release Node 24 with npm 11.7.0.
 
-Both install Rust 1.95.0, install Chromium, and run `cargo xtask check`. The
-`Required CI` aggregator fails unless both jobs succeed and is the branch-rule
-status to require. CI uses `npm ci` and the committed lockfile. Action revisions
-are immutable commit hashes with reviewed version comments; runtime versions
-are explicit. Fork pull requests receive no release secrets or write
-permissions.
+Both fetch full Git history so Review verification can resolve `origin/main`,
+install Rust 1.95.0 and Chromium, and run `cargo xtask check`. The `Required CI`
+aggregator fails unless both jobs succeed and is the branch-rule status to
+require. CI uses `npm ci` and the committed lockfile. Action revisions are
+immutable commit hashes with reviewed version comments; runtime versions are
+explicit. Fork pull requests receive no release secrets or write permissions.
 
 ## Preview Deployments
 
