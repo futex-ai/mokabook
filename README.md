@@ -86,6 +86,12 @@ fall back to the registry. After the first release, a clean machine may use
 | `mokabook --help`    | Show commands and their supported options               |
 | `mokabook --version` | Print the installed package version                     |
 
+Serve starts at port `4173`. If that port, or a concrete `--port` value, is
+already occupied, Mokabook tries each following port in order until one is
+free. `--port 0` instead asks the operating system to choose a free port.
+Watched Serve keeps the first resolved port for later child restarts so its URL
+stays stable.
+
 `build` writes viewport fragments and `mokabook-manifest.json` under
 `mockupsDir`. `check` calculates those bytes without writing and reports
 missing, stale, or orphan generated files. Browse serves the package-owned

@@ -15,7 +15,7 @@ Commands:
 
 Options:
   --config <path>  Use an explicit mokabook.config file
-  --port <port>    Listening port; 0 selects an available stable port
+  --port <port>    Starting port; advances if occupied, 0 selects any free port
   --base <ref>     Git base used by Browse Review or review
   --watch          Watch consumer inputs (serve default)
   --no-watch       Serve one deterministic snapshot

@@ -8,12 +8,14 @@ export async function runServerChild(
   port: number,
   base: string,
   updateVersion: number,
+  strictPort: boolean,
 ): Promise<void> {
   const changedRoutes = await computeChangedRoutes(config, base);
   const server = await startCatalogueServer(config, {
     base,
     ...(changedRoutes ? { changedRoutes } : {}),
     port,
+    strictPort,
     updateVersion,
   });
   process.send?.({ port: server.port, type: "ready", version: updateVersion });

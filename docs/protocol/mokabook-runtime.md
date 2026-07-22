@@ -157,8 +157,11 @@ restart, rebuild, or ignore it.
 
 Watchers become ready before initial generation begins. Notifications during
 generation and child startup are buffered. A child validates the catalogue and binds before
-readiness. Port `0` resolves once and the resolved port remains stable across
-child restarts. Initial validation/bind failure exits non-zero without leaking
+readiness. Initial startup tries a requested concrete port and then each higher
+port in order when the address is occupied; port `0` delegates selection to the
+operating system. The resolved port remains stable across child restarts, which
+bind strictly rather than changing the published URL. Exhausting the valid port
+range or encountering another bind error exits non-zero without leaking
 watchers. An unexpected child failure after readiness reports its diagnostic,
 clears the dead process, and enqueues a restart through the same serialized
 action queue used for authored changes.

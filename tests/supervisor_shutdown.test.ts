@@ -28,6 +28,7 @@ test("supervisor waits for readiness and shuts down before restart", async () =>
     "__serve-child",
     "--port",
     "48123",
+    "--strict-port",
     "--update-version",
     "3",
   ]);
