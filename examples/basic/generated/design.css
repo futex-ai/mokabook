@@ -345,10 +345,15 @@ body {
   background: var(--chrome-surface);
   border-bottom: 1px solid var(--chrome-border);
   display: flex;
+  flex-wrap: wrap;
   flex-shrink: 0;
   gap: 16px;
   justify-content: space-between;
   padding: 14px 24px 13px;
+}
+
+.mbk-screen-head > .mbk-seg {
+  margin-left: auto;
 }
 
 .mbk-crumbs {
@@ -388,6 +393,16 @@ body {
 
 .mbk-shell--mobile .mbk-screen-head {
   padding: 12px 16px 11px;
+}
+
+.mbk-shell--mobile .mbk-screen-head > .mbk-seg {
+  margin-left: 0;
+  width: 100%;
+}
+
+.mbk-shell--mobile .mbk-screen-head > .mbk-seg span {
+  flex: 1;
+  text-align: center;
 }
 
 .mbk-shell--mobile .mbk-title-row h2 {

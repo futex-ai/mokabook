@@ -3,6 +3,8 @@
 // catalogue hierarchy. Structural collection crumbs remain text; only legacy
 // directory groups with an Overview page become parent links.
 
+import type { ReactNode } from "react";
+
 import { encodeUrlPath } from "../../config/paths.js";
 import type { Catalogue } from "../catalogue.js";
 import { buildNavTree, resolveCrumbTrail, titleCase } from "./nav_tree.js";
@@ -31,26 +33,58 @@ function Crumbs(props: { items: readonly CrumbLink[] }) {
   );
 }
 
-/** The breadcrumb + title block rendered above every target view. */
+/** Viewport selection shown in the header of a screen route. */
+export function ViewportSwitch() {
+  const options = [
+    ["mobile", "Mobile"],
+    ["desktop", "Desktop"],
+    ["both", "Both"],
+  ] as const;
+  return (
+    <span
+      aria-label="Viewport"
+      className="mbk-seg"
+      data-mokabook-viewswitch=""
+      role="group"
+    >
+      {options.map(([value, label]) => (
+        <button
+          aria-pressed={value === "both" ? "true" : "false"}
+          data-viewport-option={value}
+          key={value}
+          type="button"
+        >
+          {label}
+        </button>
+      ))}
+    </span>
+  );
+}
+
+/** The breadcrumb, title, and optional action rendered above a target view. */
 export function ScreenHead(props: {
+  action?: ReactNode;
   crumbs: readonly CrumbLink[];
   heading: string;
   id?: string | undefined;
 }) {
   return (
     <div className="mbk-screen-head">
-      <Crumbs items={props.crumbs} />
-      <div className="mbk-title-row">
-        <h2>{props.heading}</h2>
-        {props.id ? (
-          <a
-            className="mbk-idchip"
-            href={`/id/${encodeURIComponent(props.id)}`}
-          >
-            {props.id}
-          </a>
-        ) : null}
+      <div className="mbk-screen-head-copy">
+        <Crumbs items={props.crumbs} />
+        <div className="mbk-title-row">
+          <h2>{props.heading}</h2>
+          {props.id ? (
+            <a
+              className="mbk-idchip"
+              href={`/id/${encodeURIComponent(props.id)}`}
+            >
+              {props.id}
+            </a>
+          ) : null}
+        </div>
       </div>
+      {props.action}
     </div>
   );
 }

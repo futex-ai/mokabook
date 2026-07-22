@@ -5,7 +5,7 @@
 import type { Catalogue } from "../catalogue.js";
 import type { ShellContext } from "./context.js";
 import { DetailsPanel } from "./details.js";
-import { ScreenHead, targetHead } from "./head.js";
+import { ScreenHead, targetHead, ViewportSwitch } from "./head.js";
 import { EmptyStage, TargetStage } from "./stages.js";
 import type { RouteTarget } from "./target.js";
 
@@ -20,7 +20,17 @@ function TargetView(props: { catalogue: Catalogue; target: RouteTarget }) {
   const head = targetHead(props.catalogue, props.target);
   return (
     <>
-      <ScreenHead crumbs={head.crumbs} heading={head.title} id={head.id} />
+      <ScreenHead
+        action={
+          props.target.kind === "entry" &&
+          props.target.entry.kind === "screen" ? (
+            <ViewportSwitch />
+          ) : null
+        }
+        crumbs={head.crumbs}
+        heading={head.title}
+        id={head.id}
+      />
       <TargetStage
         catalogue={props.catalogue}
         legacyTitle={head.title}

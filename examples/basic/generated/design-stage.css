@@ -1,13 +1,6 @@
 /* The Mokabook design stage: device chromes on the dotted stage, the mini
    screen sketches, the details inspector, and the use-case flow track. */
 
-.mbk-viewbar {
-  display: flex;
-  flex-shrink: 0;
-  justify-content: flex-end;
-  padding: 12px 24px 0;
-}
-
 .mbk-stage {
   align-items: flex-start;
   background: radial-gradient(

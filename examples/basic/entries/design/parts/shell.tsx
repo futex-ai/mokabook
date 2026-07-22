@@ -143,7 +143,7 @@ interface ViewSwitchProps {
   active: "both" | "desktop" | "mobile";
 }
 
-/** Viewport selection control shown above a screen stage. */
+/** Viewport selection control shown in a selected screen header. */
 export function ViewSwitch({ active }: ViewSwitchProps) {
   const options: readonly { key: ViewSwitchProps["active"]; label: string }[] =
     [
@@ -152,17 +152,15 @@ export function ViewSwitch({ active }: ViewSwitchProps) {
       { key: "both", label: "Both" },
     ];
   return (
-    <div className="mbk-viewbar">
-      <span className="mbk-seg" role="group" aria-label="Viewport">
-        {options.map((option) => (
-          <span
-            key={option.key}
-            className={option.key === active ? "active" : undefined}
-          >
-            {option.label}
-          </span>
-        ))}
-      </span>
-    </div>
+    <span className="mbk-seg" role="group" aria-label="Viewport">
+      {options.map((option) => (
+        <span
+          key={option.key}
+          className={option.key === active ? "active" : undefined}
+        >
+          {option.label}
+        </span>
+      ))}
+    </span>
   );
 }
