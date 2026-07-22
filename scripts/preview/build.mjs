@@ -5,6 +5,10 @@ import { isPublicStaticFile } from "../../dist/config/public_files.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { readManifest } from "../../dist/registry/manifest.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
+import {
+  captureReviewArtifact,
+  readReviewArtifactFile,
+} from "../../dist/server/review_artifact_files.js";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const contextRoot = path.join(repositoryRoot, ".context");
@@ -34,9 +38,11 @@ async function buildPreview(output) {
       base: "origin/main",
       port: 0,
     });
+    let reviewArtifact;
     try {
       await capturePage(server.url, "/", stage, "index.html");
       await generateReview(server.url);
+      reviewArtifact = captureReviewArtifact(config);
       for (const entry of manifest.entries) {
         if (entry.kind === "collection") continue;
         await capturePage(
@@ -65,7 +71,8 @@ async function buildPreview(output) {
     } finally {
       await server.close();
     }
-    await copyReviewArtifact(config, stage);
+    if (!reviewArtifact) throw new Error("preview Review was not captured");
+    await copyReviewArtifact(config, reviewArtifact, stage);
     await copyPublicFiles(config, stage);
     await writeText(stage, "_headers", headers());
     await writeText(stage, "_redirects", redirects(manifest.entries));
@@ -125,14 +132,15 @@ async function capturePage(
   await writeText(stage, relativePath, staticPage(html));
 }
 
-async function copyReviewArtifact(config, stage) {
-  for (const candidate of await regularFiles(config.review.outDir)) {
-    const relative = path.relative(config.review.outDir, candidate);
-    await writeFile(
-      stage,
-      path.join("review", relative),
-      await fs.promises.readFile(candidate),
-    );
+async function copyReviewArtifact(config, artifact, stage) {
+  for (const relative of [...artifact.files.keys()].sort()) {
+    const content = readReviewArtifactFile(config, artifact, relative);
+    if (!content) {
+      throw new Error(
+        `preview Review file changed after generation: ${relative}`,
+      );
+    }
+    await writeFile(stage, path.join("review", relative), content);
   }
 }
 

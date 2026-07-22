@@ -67,10 +67,10 @@ All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
 returns its response headers and completes without opening or registering an
 event stream. Server-rendered documents and package-owned client, shell, and
 font responses use an explicit `no-cache` policy so local rebuilds cannot reuse
-stale runtime assets. Raw generated and Review-snapshot HTML responses also use
-`Content-Security-Policy: sandbox`, so opening their URLs directly cannot bypass
-the script-disabled frame boundary; shell-owned Browse and Review pages remain
-interactive.
+stale runtime assets. Raw generated and Review-snapshot HTML and SVG responses
+also use `Content-Security-Policy: sandbox`, so opening their URLs directly
+cannot bypass the script-disabled frame boundary; shell-owned Browse and Review
+pages remain interactive.
 
 `/review` redirects to `/review/index.html`. The server generates the Review
 artifact on the first artifact request, coalesces concurrent first requests,
@@ -81,8 +81,10 @@ without taking down Browse, and invalid, traversing, or symlink-escaping Review
 paths never expose files outside the owned artifact. After generation, the
 server pins the artifact directory's filesystem identity and ownership marker;
 it also captures the generated file set and the summary/compare pages trusted
-to run shell controls. Every cached response revalidates the directory,
-ownership, and repository boundary, and later-added files are not served.
+to run shell controls. SHA-256 fingerprints pin every captured file, and the
+preview copier applies the same immutable-view rule. Every cached response
+revalidates the directory, ownership, and repository boundary, and later-added
+files are not served.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.

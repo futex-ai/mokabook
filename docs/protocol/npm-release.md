@@ -2,8 +2,8 @@
 
 ## Package Metadata
 
-`package.json` describes an unscoped public ESM package named `mokabook` with an
-initial development version of `0.0.0`, MIT licensing, Firna authorship, exact
+`package.json` describes an unscoped public ESM package named `mokabook` with the
+current development version `0.1.0`, MIT licensing, Firna authorship, exact
 repository/bugs/homepage metadata for `futex-ai/mokabook`, a Node engine floor,
 one `mokabook` bin, explicit exports/types, and a restrictive `files` allowlist.
 
@@ -140,8 +140,8 @@ Trusted publishing can be configured only after the npm package exists. The
 bootstrap sequence is therefore explicit and maintainer-controlled:
 
 1. Complete the GitHub repository rename to `futex-ai/mokabook`, merge the
-   reviewed implementation to `main` at version `0.0.0`, and confirm `Required
-CI` passed. Do not merge the first release PR yet.
+   reviewed implementation to `main` at the current manifest version, and
+   confirm `Required CI` passed. Do not merge the next release PR yet.
 2. Recheck that the unscoped `mokabook` name remains available. Pause for
    explicit maintainer approval because the first public publish is
    irreversible.
@@ -155,13 +155,13 @@ CI` passed. Do not merge the first release PR yet.
    the workflow's `npm publish` action.
 5. Verify the trusted relationship with the release workflow, then restrict
    traditional token publishing and remove obsolete npm automation tokens.
-6. Merge the release-please PR for `0.1.0`; confirm the workflow creates the
-   immutable tag/release and publishes the first supported consumer version
-   with provenance. Release-please treats the `0.0.0` manifest as unreleased
-   and would otherwise default the first version to `1.0.0`, so the config
-   carried a one-time `release-as: 0.1.0` override, removed after the release
-   published. Tags must be bare `vX.Y.Z` (`include-component-in-tag: false`)
-   because the release workflow only publishes refs of that shape.
+6. Merge the next release-please PR; confirm the workflow creates the immutable
+   tag/release and publishes the first supported consumer version with
+   provenance. The historical `0.0.0` bootstrap and one-time `0.1.0`
+   `release-as` transition are complete repository setup and are no longer
+   active release instructions. Tags must be bare `vX.Y.Z`
+   (`include-component-in-tag: false`) because the release workflow only
+   publishes refs of that shape.
 7. From a clean directory, verify package visibility, metadata, README,
    license, owners, provenance/signatures, dist tags, `npx mokabook --version`,
    and a minimal build/serve fixture.

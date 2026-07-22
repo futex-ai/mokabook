@@ -29,12 +29,13 @@ export class NodeGitCommandRunner implements GitCommandRunner {
   constructor(
     private readonly cwd: string,
     private readonly signal?: AbortSignal,
+    private readonly executable = "git",
   ) {}
 
   run(arguments_: readonly string[]): Promise<string> {
     return new Promise((resolve, reject) => {
       execFile(
-        "git",
+        this.executable,
         [...arguments_],
         {
           cwd: this.cwd,
@@ -53,7 +54,7 @@ export class NodeGitCommandRunner implements GitCommandRunner {
   runBytes(arguments_: readonly string[]): Promise<Uint8Array> {
     return new Promise((resolve, reject) => {
       execFile(
-        "git",
+        this.executable,
         [...arguments_],
         {
           cwd: this.cwd,

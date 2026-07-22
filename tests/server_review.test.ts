@@ -20,8 +20,15 @@ import {
 const run = promisify(execFile);
 
 test("served Review lazily generates and refreshes the full artifact", async (context) => {
-  const fixture = await createFixture();
+  const activeAsset =
+    '<svg xmlns="http://www.w3.org/2000/svg"><script>globalThis.active = true</script></svg>';
+  const body = '<img alt="Active asset" src="../active.svg" />';
+  const fixture = await createFixture(validEntrySource({ body }));
   context.after(() => removeFixture(fixture));
+  await fs.promises.writeFile(
+    path.join(fixture.mockupsDir, "active.svg"),
+    activeAsset,
+  );
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
   await git(fixture.root, "init", "--initial-branch=main");
@@ -31,7 +38,7 @@ test("served Review lazily generates and refreshes the full artifact", async (co
   await git(fixture.root, "commit", "-m", "base");
   await fs.promises.writeFile(
     fixture.entryPath,
-    validEntrySource({ firstTitle: "Home Revised" }),
+    validEntrySource({ body, firstTitle: "Home Revised" }),
   );
   await writeCompilation(await compileCatalogue(config), config);
 
@@ -74,6 +81,14 @@ test("served Review lazily generates and refreshes the full artifact", async (co
   );
   assert.equal(snapshot.status, 200);
   assert.equal(snapshot.headers.get("content-security-policy"), "sandbox");
+  const activeSnapshot = await fetch(
+    `${server.url}/review/snapshots/after/active.svg`,
+  );
+  assert.equal(activeSnapshot.status, 200);
+  assert.equal(
+    activeSnapshot.headers.get("content-security-policy"),
+    "sandbox",
+  );
   assert.equal(indexResponse.headers.get("content-security-policy"), null);
 
   const compareHref = index.match(
@@ -89,10 +104,7 @@ test("served Review lazily generates and refreshes the full artifact", async (co
 
   const reviewJson = path.join(config.review.outDir, "review.json");
   await fs.promises.writeFile(reviewJson, "stale\n");
-  assert.equal(
-    await (await fetch(`${server.url}/review/review.json`)).text(),
-    "stale\n",
-  );
+  assert.equal((await fetch(`${server.url}/review/review.json`)).status, 404);
   const refreshed = await (
     await fetch(`${server.url}/review/review.json?refresh=1`)
   ).json();

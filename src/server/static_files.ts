@@ -97,6 +97,11 @@ export function contentType(candidate: string): string {
   return types[extension] ?? "application/octet-stream";
 }
 
+/** Return whether direct navigation could execute an untrusted document. */
+export function requiresDocumentSandbox(type: string): boolean {
+  return type.startsWith("text/html") || type.startsWith("image/svg+xml");
+}
+
 function sendBuffer(
   response: ServerResponse,
   content: Buffer | string,
@@ -105,7 +110,7 @@ function sendBuffer(
 ): void {
   response.writeHead(200, {
     "cache-control": "no-cache",
-    ...(type.startsWith("text/html")
+    ...(requiresDocumentSandbox(type)
       ? { "content-security-policy": "sandbox" }
       : {}),
     "content-type": type,

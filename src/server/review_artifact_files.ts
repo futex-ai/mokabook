@@ -1,5 +1,6 @@
 /** Owned Review artifact identity validation and confined file responses. */
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import type { ServerResponse } from "node:http";
 import path from "node:path";
@@ -8,14 +9,14 @@ import { validateReviewOut } from "../config/path_validation.js";
 import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
-import { contentType } from "./static_files.js";
+import { contentType, requiresDocumentSandbox } from "./static_files.js";
 
 const ARTIFACT_MARKER = ".mokabook-review-artifact";
 
 /** Filesystem identity pinned after one successful Review generation. */
 export interface ReviewArtifactIdentity {
   device: number;
-  files: ReadonlySet<string>;
+  files: ReadonlyMap<string, string>;
   inode: number;
   realPath: string;
   trustedPages: ReadonlySet<string>;
@@ -40,7 +41,7 @@ export function captureReviewArtifact(
     );
   }
   const files = captureArtifactFiles(realPath);
-  const trustedPages = new Set([...files].filter(isReviewPage));
+  const trustedPages = new Set([...files.keys()].filter(isReviewPage));
   return {
     device: stats.dev,
     files,
@@ -58,26 +59,12 @@ export function serveReviewArtifact(
   relative: string,
   method: string,
 ): void {
-  if (!artifact.files.has(relative) || !matchesArtifact(config, artifact)) {
+  const content = readReviewArtifactFile(config, artifact, relative);
+  if (!content) {
     sendReviewText(response, 404, "Not found", method);
     return;
   }
   const candidate = path.resolve(artifact.realPath, relative);
-  let content: Buffer;
-  try {
-    const realCandidate = fs.realpathSync(candidate);
-    if (
-      !isInside(artifact.realPath, realCandidate) ||
-      !fs.lstatSync(candidate).isFile()
-    ) {
-      sendReviewText(response, 404, "Not found", method);
-      return;
-    }
-    content = fs.readFileSync(realCandidate);
-  } catch {
-    sendReviewText(response, 404, "Not found", method);
-    return;
-  }
   const trustedPage = artifact.trustedPages.has(relative);
   const body = trustedPage
     ? enhanceServedPage(content.toString("utf8"))
@@ -85,13 +72,37 @@ export function serveReviewArtifact(
   const type = contentType(candidate);
   response.writeHead(200, {
     "cache-control": "no-cache",
-    ...(!trustedPage && type.startsWith("text/html")
+    ...(!trustedPage && requiresDocumentSandbox(type)
       ? { "content-security-policy": "sandbox" }
       : {}),
     "content-type": type,
     "x-content-type-options": "nosniff",
   });
   response.end(method === "HEAD" ? undefined : body);
+}
+
+/** Read one captured file only when its path, identity, and bytes still match. */
+export function readReviewArtifactFile(
+  config: ResolvedConfig,
+  artifact: ReviewArtifactIdentity,
+  relative: string,
+): Buffer | undefined {
+  const expectedDigest = artifact.files.get(relative);
+  if (!expectedDigest || !matchesArtifact(config, artifact)) return undefined;
+  const candidate = path.resolve(artifact.realPath, relative);
+  try {
+    const realCandidate = fs.realpathSync(candidate);
+    if (
+      !isInside(artifact.realPath, realCandidate) ||
+      !fs.lstatSync(candidate).isFile()
+    ) {
+      return undefined;
+    }
+    const content = fs.readFileSync(realCandidate);
+    return digest(content) === expectedDigest ? content : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Send one non-HTML Review response without allowing browser reuse. */
@@ -142,8 +153,8 @@ function ownedMarkerExists(realPath: string): boolean {
   }
 }
 
-function captureArtifactFiles(realPath: string): ReadonlySet<string> {
-  const files = new Set<string>();
+function captureArtifactFiles(realPath: string): ReadonlyMap<string, string> {
+  const files = new Map<string, string>();
   const pending = [realPath];
   while (pending.length > 0) {
     const directory = pending.pop();
@@ -165,10 +176,17 @@ function captureArtifactFiles(realPath: string): ReadonlySet<string> {
           )}`,
         );
       }
-      files.add(toPosixPath(path.relative(realPath, candidate)));
+      files.set(
+        toPosixPath(path.relative(realPath, candidate)),
+        digest(fs.readFileSync(candidate)),
+      );
     }
   }
   return files;
+}
+
+function digest(content: Buffer): string {
+  return crypto.createHash("sha256").update(content).digest("hex");
 }
 
 function isReviewPage(relative: string): boolean {

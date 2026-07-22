@@ -68,15 +68,26 @@ test("a pre-aborted Review stops before compilation or Git work", async (context
   assert.equal(fs.existsSync(config.review.outDir), false);
 });
 
-test("the Git subprocess runner honors Review cancellation", async (context) => {
+test("the Git subprocess runner cancels an active command", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
   const controller = new AbortController();
+  const started = path.join(fixture.root, "subprocess-started");
+  const runner = new NodeGitCommandRunner(
+    fixture.root,
+    controller.signal,
+    process.execPath,
+  );
+  const running = runner.run([
+    "-e",
+    'require("node:fs").writeFileSync(process.argv[1], ""); setTimeout(() => {}, 30_000);',
+    started,
+  ]);
+  await waitForPath(started);
   controller.abort();
-  const runner = new NodeGitCommandRunner(fixture.root, controller.signal);
 
   await assert.rejects(
-    runner.run(["status", "--short"]),
+    running,
     (error: unknown) => error instanceof Error && error.name === "AbortError",
   );
 });
@@ -132,4 +143,13 @@ function rejectingGitClient(): GitClient {
     readFileBytes: reject,
     resolveRef: reject,
   };
+}
+
+async function waitForPath(candidate: string): Promise<void> {
+  const deadline = Date.now() + 5_000;
+  while (Date.now() < deadline) {
+    if (fs.existsSync(candidate)) return;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  throw new Error(`timed out waiting for ${candidate}`);
 }
