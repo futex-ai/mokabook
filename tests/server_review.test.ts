@@ -46,6 +46,15 @@ test("served Review lazily generates and refreshes the full artifact", async (co
   assert.equal(redirect.status, 302);
   assert.equal(redirect.headers.get("location"), "/review/index.html");
   assert.equal(fs.existsSync(config.review.outDir), false);
+  const refreshRedirect = await fetch(`${server.url}/review?refresh=1`, {
+    redirect: "manual",
+  });
+  assert.equal(refreshRedirect.status, 302);
+  assert.equal(
+    refreshRedirect.headers.get("location"),
+    "/review/index.html?refresh=1",
+  );
+  assert.equal(fs.existsSync(config.review.outDir), false);
 
   const indexResponse = await fetch(`${server.url}/review/index.html`);
   assert.equal(indexResponse.status, 200);

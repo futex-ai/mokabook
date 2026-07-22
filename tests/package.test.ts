@@ -13,6 +13,7 @@ import {
   screen,
 } from "../dist/index.js";
 import { parseArguments } from "../dist/cli/arguments.js";
+import { HELP } from "../dist/cli/help.js";
 import { repositoryRoot } from "./helpers/fixture.js";
 
 const execFileAsync = promisify(execFile);
@@ -75,6 +76,17 @@ test("CLI defaults to watched serve and rejects misplaced options", () => {
     /reserved for the watched server child/,
   );
   assert.throws(() => parseArguments(["unknown"]), /unknown command/);
+});
+
+test("CLI help advertises served Review and its base", () => {
+  assert.match(
+    HELP,
+    /serve\s+Build and serve Browse and Review; watch by default/,
+  );
+  assert.match(
+    HELP,
+    /--base <ref>\s+Git base used by served and static Review/,
+  );
 });
 
 test("packed package contains only the declared public surface", async () => {

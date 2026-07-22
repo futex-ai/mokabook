@@ -105,7 +105,9 @@ export class ServedReviewArtifact {
     method: string,
   ): Promise<void> {
     if (url.pathname === "/review" || url.pathname === "/review/") {
-      response.writeHead(302, { location: "/review/index.html" });
+      response.writeHead(302, {
+        location: `/review/index.html${url.search}`,
+      });
       response.end();
       return;
     }
