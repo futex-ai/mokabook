@@ -75,12 +75,14 @@ export function ScreenHead(props: {
         <div className="mbk-title-row">
           <h2>{props.heading}</h2>
           {props.id ? (
-            <a
+            <button
+              aria-label={`Copy ID ${props.id}`}
               className="mbk-idchip"
-              href={`/id/${encodeURIComponent(props.id)}`}
+              data-copy-id={props.id}
+              type="button"
             >
-              {props.id}
-            </a>
+              #{props.id}
+            </button>
           ) : null}
         </div>
       </div>

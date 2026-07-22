@@ -101,7 +101,9 @@ scrollable region scrolls internally:
     visible; the active row uses the accent with contrast text.
 - **Screen head** — surface band with the breadcrumb trail (11.5px, `›`
   separators; ancestor crumbs that resolve to a viewable route are links) and
-  a title row: 19px heading plus a monospace id chip linking to `/id/<id>`.
+  a title row: 19px heading plus a monospace ID button labelled `#<id>`. The
+  button uses the standard pointer cursor, moves down 1px with an inset shadow
+  while pressed, and copies the unprefixed ID without navigating.
   Screen routes place the right-aligned Mobile/Desktop/Both segmented viewport
   control in this band.
 - **Stage** — dotted-grid background (22px radial dots), centred frames with

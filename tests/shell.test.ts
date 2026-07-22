@@ -161,7 +161,11 @@ test("screen page renders device chrome, viewport switch, and details", () => {
   );
   assert.equal(html.includes('class="mbk-viewbar"'), false);
   assert.match(html, /class="mbk-crumbs"/);
-  assert.match(html, /class="mbk-idchip" href="\/id\/welcome"/);
+  assert.match(
+    html,
+    /aria-label="Copy ID welcome" class="mbk-idchip" data-copy-id="welcome" type="button">#welcome<\/button>/,
+  );
+  assert.doesNotMatch(html, /class="mbk-idchip"[^>]*href=/);
   assert.match(html, /Proves the shell/);
   assert.match(html, /notes\.md/);
   assert.match(
@@ -211,5 +215,10 @@ test("shell stylesheet stays aligned with the design contract", () => {
   assert.match(SHELL_CSS, /max-width: 56\.25rem/);
   assert.match(SHELL_CSS, /prefers-reduced-motion/);
   assert.match(SHELL_CSS, /InterVariable\.woff2/);
+  assert.match(SHELL_CSS, /\.mbk-idchip \{[\s\S]*cursor: pointer;/);
+  assert.match(
+    SHELL_CSS,
+    /\.mbk-idchip:active \{[\s\S]*transform: translateY\(1px\);/,
+  );
   assert.equal(SHELL_CSS.includes("bookfolio"), false);
 });

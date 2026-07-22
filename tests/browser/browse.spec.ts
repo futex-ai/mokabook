@@ -199,6 +199,49 @@ test("viewport controls switch device frames", async ({ page }) => {
   await expect(page.locator(".mbk-frame-desktop")).toBeVisible();
 });
 
+test("ID chips copy their ID without navigating", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText(text: string) {
+          (window as Window & { __copiedId?: string }).__copiedId = text;
+          return Promise.resolve();
+        },
+      },
+    });
+  });
+  await page.goto("/view/screens/welcome.html");
+  const url = page.url();
+  const idChip = page.locator("[data-copy-id]");
+
+  await expect(idChip).toHaveText("#example-welcome");
+  await idChip.hover();
+  expect(
+    await idChip.evaluate((element) => getComputedStyle(element).cursor),
+  ).toBe("pointer");
+  await page.mouse.down();
+  const pressed = await idChip.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { boxShadow: style.boxShadow, transform: style.transform };
+  });
+  expect(pressed.boxShadow).not.toBe("none");
+  expect(pressed.transform).not.toBe("none");
+  await page.mouse.up();
+
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as Window & { __copiedId?: string }).__copiedId,
+      ),
+    )
+    .toBe("example-welcome");
+  await expect(page).toHaveURL(url);
+  await expect(page.locator("#mb-status")).toHaveText(
+    "Copied ID example-welcome",
+  );
+});
+
 test("the browser frame expands to an overlay and collapses again", async ({
   page,
 }) => {
