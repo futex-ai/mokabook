@@ -223,7 +223,8 @@ shutdown first requests graceful IPC closure, then sends SIGTERM and SIGKILL at
 bounded intervals when necessary; the supervisor does not finish closing until
 the child exit notification arrives. HTTP shutdown rejects new Review work,
 destroys its pending responses, aborts the active generation through the Git
-catalogue-compile, comparison, asset-read, and transactional-write boundaries,
+repository, catalogue compilation, comparison, asset-read, and
+transactional-write boundaries,
 and waits for cleanup before completing.
 
 ## Review Comparison

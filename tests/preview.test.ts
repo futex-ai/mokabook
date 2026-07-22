@@ -55,6 +55,33 @@ test("preview build snapshots a static Browse catalogue", async (context) => {
     ).size > 0,
   );
   assert.match(await read(output, "404.html"), /Screen not found/);
+  const review = await read(output, "review/index.html");
+  assert.doesNotMatch(review, /Refresh comparison/);
+  const comparisons = (
+    await relativeFiles(output, "review/comparisons")
+  ).filter((candidate) => candidate.endsWith("/index.html"));
+  assert.ok(comparisons.length > 0);
+  const comparisonPath = comparisons[0];
+  assert.ok(comparisonPath);
+  const comparison = await read(output, comparisonPath);
+  assert.match(comparison, /data-mode="side"/);
+  const snapshotLinks = [...comparison.matchAll(/<iframe[^>]+src="([^"]+)"/g)]
+    .map((match) => match[1])
+    .filter((candidate): candidate is string => candidate !== undefined);
+  assert.ok(snapshotLinks.length > 0);
+  for (const link of snapshotLinks) {
+    const target = path.posix.normalize(
+      path.posix.join(
+        path.posix.dirname(comparisonPath),
+        decodeURIComponent(link),
+      ),
+    );
+    assert.match(await read(output, target), /<!doctype html>/i);
+  }
+  assert.equal(
+    await read(output, "_headers"),
+    "/static/*\n  Content-Security-Policy: sandbox\n\n/review/snapshots/*\n  Content-Security-Policy: sandbox\n",
+  );
   assert.match(
     await read(output, "_redirects"),
     /\/id\/example-welcome \/view\/screens\/welcome 302/,
@@ -85,4 +112,19 @@ test("preview build refuses to replace an unowned directory", async (context) =>
 
 async function read(root: string, relative: string): Promise<string> {
   return await fs.promises.readFile(path.join(root, relative), "utf8");
+}
+
+async function relativeFiles(
+  root: string,
+  relative: string,
+): Promise<string[]> {
+  const directory = path.join(root, relative);
+  const entries = await fs.promises.readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(
+    entries.map(async (entry) => {
+      const child = path.posix.join(relative, entry.name);
+      return entry.isDirectory() ? relativeFiles(root, child) : [child];
+    }),
+  );
+  return nested.flat().sort();
 }

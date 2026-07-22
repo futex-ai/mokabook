@@ -41,5 +41,6 @@ the fixture also exercises stale and deterministic-output checks. The
 hand-authored stylesheets (`styles.css`, `design.css`, `design-stage.css`,
 `design-review.css`) also live under `generated/` because it doubles as the
 public static root. `preview:build` snapshots this catalogue through the real
-server into `.context/mokabook-preview` for Cloudflare Pages; it is the same
-artifact used by the main and pull-request preview workflow.
+server into `.context/mokabook-preview` for Cloudflare Pages, including the
+complete static Review comparison against `origin/main`; it is the same artifact
+used by the main and pull-request preview workflow.

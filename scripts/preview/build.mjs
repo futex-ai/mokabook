@@ -36,7 +36,7 @@ async function buildPreview(output) {
     });
     try {
       await capturePage(server.url, "/", stage, "index.html");
-      await capturePage(server.url, "/review", stage, "review/index.html");
+      await generateReview(server.url);
       for (const entry of manifest.entries) {
         if (entry.kind === "collection") continue;
         await capturePage(
@@ -65,7 +65,9 @@ async function buildPreview(output) {
     } finally {
       await server.close();
     }
+    await copyReviewArtifact(config, stage);
     await copyPublicFiles(config, stage);
+    await writeText(stage, "_headers", headers());
     await writeText(stage, "_redirects", redirects(manifest.entries));
     await writeText(stage, markerName, "schemaVersion=1\n");
     await installArtifact(stage, output);
@@ -73,6 +75,14 @@ async function buildPreview(output) {
     await fs.promises.rm(stage, { force: true, recursive: true });
     throw error;
   }
+}
+
+async function generateReview(serverUrl) {
+  const response = await fetch(`${serverUrl}/review/index.html`);
+  if (!response.ok) {
+    throw new Error(`preview Review returned ${response.status}`);
+  }
+  await response.arrayBuffer();
 }
 
 async function captureAssets(serverUrl, stage) {
@@ -115,6 +125,17 @@ async function capturePage(
   await writeText(stage, relativePath, staticPage(html));
 }
 
+async function copyReviewArtifact(config, stage) {
+  for (const candidate of await regularFiles(config.review.outDir)) {
+    const relative = path.relative(config.review.outDir, candidate);
+    await writeFile(
+      stage,
+      path.join("review", relative),
+      await fs.promises.readFile(candidate),
+    );
+  }
+}
+
 async function copyPublicFiles(config, stage) {
   for (const candidate of await regularFiles(config.mockupsDir)) {
     if (!isPublicStaticFile(candidate, config)) continue;
@@ -135,6 +156,10 @@ async function regularFiles(root) {
     else if (entry.isFile()) files.push(candidate);
   }
   return files;
+}
+
+function headers() {
+  return "/static/*\n  Content-Security-Policy: sandbox\n\n/review/snapshots/*\n  Content-Security-Policy: sandbox\n";
 }
 
 function redirects(entries) {

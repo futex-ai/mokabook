@@ -350,32 +350,6 @@ details.mbk-nav-group > summary::-webkit-details-marker {
   display: none;
 }
 
-.mbk-basewatch {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  margin: 0;
-  padding: 12px 24px;
-  border-bottom: 1px solid var(--chrome-border);
-  background: var(--chrome-surface);
-  color: var(--chrome-muted);
-  font-size: 12.5px;
-}
-
-.mbk-basewatch strong {
-  color: var(--chrome-ink);
-  font-family: var(--mono);
-  font-size: 11.5px;
-}
-
-.mbk-basewatch-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: #c98a2b;
-}
-
 @media (max-width: 56.25rem) {
   .mbk-menu {
     display: inline-flex;

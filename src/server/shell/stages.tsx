@@ -107,7 +107,7 @@ function UseCaseFlowStage(props: {
   );
 }
 
-/** Quiet state used by home, missing routes, and the review launcher. */
+/** Quiet state used by home and missing routes. */
 export function EmptyStage(props: { children: ReactNode; heading: string }) {
   return (
     <div className="mbk-empty">

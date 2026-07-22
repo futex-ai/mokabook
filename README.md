@@ -234,9 +234,10 @@ consumers, Chromium tests, and all Rust checks.
 `npm run preview:build` turns the real `examples/basic` Browse catalogue into a
 static Cloudflare Pages artifact at `.context/mokabook-preview`. It snapshots
 every catalogue route through Mokabook's HTTP server, copies the package shell
-and public example assets, preserves id redirects, and excludes the
-development-only live-reload connection. The artifact is not part of the npm
-package.
+and public example assets, preserves id redirects, and includes a complete
+static Review comparison against `origin/main`. Raw consumer pages and Review
+snapshots receive sandbox response rules, while the development-only
+live-reload connection is excluded. The artifact is not part of the npm package.
 
 The Preview workflow deploys `main` to the Cloudflare Pages project `mokabook`
 at `https://mokabook.pages.dev`. Same-repository, non-release pull requests use

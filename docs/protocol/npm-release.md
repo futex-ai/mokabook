@@ -71,13 +71,17 @@ receive Cloudflare credentials or write-capable execution.
 
 `npm run preview:build` first rebuilds Mokabook and its committed basic
 consumer. The repository-only preview builder starts the real Browse server on
-an ephemeral loopback port and snapshots the home, review launcher, not-found,
-and every manifest-backed route. It copies the shell stylesheet, browser
-navigation modules, fonts, id redirects, and every validated public consumer
-asset into `.context/mokabook-preview`. Preview shell links use Cloudflare
-Pages' canonical extensionless HTML routes, and static deployments omit the
-watched server's live-update module. Artifact replacement is transactional and
-refuses to overwrite a directory without Mokabook's ownership marker.
+an ephemeral loopback port and snapshots the home, not-found, and every
+manifest-backed route. It also generates and copies the complete static Review
+artifact, including its comparison pages, snapshots, and assets. The deployment
+jobs fetch full repository history so the configured `origin/main` base is
+available. The artifact includes the shell stylesheet, browser navigation
+modules, fonts, id redirects, and every validated public consumer asset under
+`.context/mokabook-preview`. Preview shell links use Cloudflare Pages' canonical
+extensionless HTML routes, static deployments omit the watched server's
+live-update module, and response rules sandbox raw consumer and Review snapshot
+documents. Artifact replacement is transactional and refuses to overwrite a
+directory without Mokabook's ownership marker.
 
 Closing a same-repository pull request marks its sticky comment inactive and
 attempts to delete all Cloudflare deployments carrying that PR branch alias.
