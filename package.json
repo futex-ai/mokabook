@@ -1,6 +1,6 @@
 {
   "name": "mokabook",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "App-independent static mockup catalogues, development browsing, and visual review.",
   "type": "module",
   "license": "MIT",
