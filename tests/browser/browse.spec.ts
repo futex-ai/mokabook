@@ -185,6 +185,10 @@ test("failed enhancement falls back to native navigation", async ({ page }) => {
 
 test("viewport controls switch device frames", async ({ page }) => {
   await page.goto("/view/screens/welcome.html");
+  await expect(
+    page.locator(".mbk-screen-head [data-mokabook-viewswitch]"),
+  ).toBeVisible();
+  await expect(page.locator(".mbk-viewbar")).toHaveCount(0);
   await expect(page.locator(".mbk-frame-mobile")).toBeVisible();
   await expect(page.locator(".mbk-frame-desktop")).toBeVisible();
   await page.click('[data-viewport-option="mobile"]');

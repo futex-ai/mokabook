@@ -160,6 +160,11 @@ test("screen page renders device chrome, viewport switch, and details", () => {
   assert.match(html, /class="address">example\.test\/welcome</);
   assert.match(html, /data-mokabook-stage="" data-viewport="both"/);
   assert.match(html, /data-viewport-option="mobile"/);
+  assert.match(
+    html,
+    /data-mokabook-viewswitch=""[\s\S]*<\/span><\/div><div class="mbk-stage/,
+  );
+  assert.equal(html.includes('class="mbk-viewbar"'), false);
   assert.match(html, /class="mbk-crumbs"/);
   assert.match(html, /class="mbk-idchip" href="\/id\/welcome"/);
   assert.match(html, /Proves the shell/);

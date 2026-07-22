@@ -39,9 +39,10 @@ function HomeMobile() {
   );
 }
 
-function WelcomeHead() {
+function WelcomeHead({ active }: { active: "both" | "desktop" | "mobile" }) {
   return (
     <ScreenHead
+      action={<ViewSwitch active={active} />}
       crumbs={["Example", "Screens"]}
       idChip="example-welcome"
       title="Welcome"
@@ -56,8 +57,7 @@ function SelectedScreenDesktop() {
       viewport="desktop"
       nav={<NavTree activeLabel="Welcome" />}
     >
-      <WelcomeHead />
-      <ViewSwitch active="both" />
+      <WelcomeHead active="both" />
       <Stage>
         <PhoneFrame label="Mobile">
           <MiniWelcome compact />
@@ -74,8 +74,7 @@ function SelectedScreenDesktop() {
 function SelectedScreenMobile() {
   return (
     <Shell mode="browse" viewport="mobile" nav={null}>
-      <WelcomeHead />
-      <ViewSwitch active="mobile" />
+      <WelcomeHead active="mobile" />
       <Stage>
         <PhoneFrame label="Mobile" small>
           <MiniWelcome compact />
@@ -166,8 +165,7 @@ function DetailsOpenDesktop() {
       viewport="desktop"
       nav={<NavTree activeLabel="Welcome" />}
     >
-      <WelcomeHead />
-      <ViewSwitch active="desktop" />
+      <WelcomeHead active="desktop" />
       <Stage>
         <BrowserFrame address="example.test/welcome" label="Desktop">
           <MiniWelcome />
@@ -181,7 +179,7 @@ function DetailsOpenDesktop() {
 function DetailsOpenMobile() {
   return (
     <Shell mode="browse" viewport="mobile" nav={null}>
-      <WelcomeHead />
+      <WelcomeHead active="mobile" />
       <DetailsPanel open />
     </Shell>
   );

@@ -1,7 +1,7 @@
 // Route stage renderers for the served Mokabook shell: the framed screen
-// stage with its viewport bar, the ordered use-case flow, the legacy-page
-// embed, and the quiet empty stage shared by home and missing routes. All
-// embedded consumer documents are sandboxed without script permission.
+// stage, ordered use-case flow, legacy-page embed, and quiet empty stage shared
+// by home and missing routes. All embedded consumer documents are sandboxed
+// without script permission.
 
 import type { ReactNode } from "react";
 
@@ -24,71 +24,39 @@ function EmbedStage(props: { route: string; title: string }) {
   );
 }
 
-function ViewBar() {
-  const options = [
-    ["mobile", "Mobile"],
-    ["desktop", "Desktop"],
-    ["both", "Both"],
-  ] as const;
-  return (
-    <div className="mbk-viewbar">
-      <span
-        aria-label="Viewport"
-        className="mbk-seg"
-        data-mokabook-viewswitch=""
-        role="group"
-      >
-        {options.map(([value, label]) => (
-          <button
-            aria-pressed={value === "both" ? "true" : "false"}
-            data-viewport-option={value}
-            key={value}
-            type="button"
-          >
-            {label}
-          </button>
-        ))}
-      </span>
-    </div>
-  );
-}
-
 function FramesStage(props: { screen: ManifestScreen }) {
   const screen = props.screen;
   const address = screen.address ?? screen.route;
   return (
-    <>
-      <ViewBar />
-      <div
-        className="mbk-stage mbk-live"
-        data-mokabook-scroll="stage"
-        data-mokabook-stage=""
-        data-viewport="both"
-      >
-        <div className="mbk-frame-wrap mbk-frame-mobile">
-          <p className="mbk-frame-label">Mobile</p>
-          <PhoneFrame>
-            <iframe
-              className="mbk-frag"
-              sandbox=""
-              src={`/static/${encodeUrlPath(screen.fragments.mobile)}`}
-              title={`${screen.title} — mobile`}
-            />
-          </PhoneFrame>
-        </div>
-        <div className="mbk-frame-wrap mbk-frame-desktop">
-          <p className="mbk-frame-label">Desktop</p>
-          <BrowserFrame address={address}>
-            <iframe
-              className="mbk-frag"
-              sandbox=""
-              src={`/static/${encodeUrlPath(screen.fragments.desktop)}`}
-              title={`${screen.title} — desktop`}
-            />
-          </BrowserFrame>
-        </div>
+    <div
+      className="mbk-stage mbk-live"
+      data-mokabook-scroll="stage"
+      data-mokabook-stage=""
+      data-viewport="both"
+    >
+      <div className="mbk-frame-wrap mbk-frame-mobile">
+        <p className="mbk-frame-label">Mobile</p>
+        <PhoneFrame>
+          <iframe
+            className="mbk-frag"
+            sandbox=""
+            src={`/static/${encodeUrlPath(screen.fragments.mobile)}`}
+            title={`${screen.title} — mobile`}
+          />
+        </PhoneFrame>
       </div>
-    </>
+      <div className="mbk-frame-wrap mbk-frame-desktop">
+        <p className="mbk-frame-label">Desktop</p>
+        <BrowserFrame address={address}>
+          <iframe
+            className="mbk-frag"
+            sandbox=""
+            src={`/static/${encodeUrlPath(screen.fragments.desktop)}`}
+            title={`${screen.title} — desktop`}
+          />
+        </BrowserFrame>
+      </div>
+    </div>
   );
 }
 

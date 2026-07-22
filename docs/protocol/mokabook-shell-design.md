@@ -102,9 +102,11 @@ scrollable region scrolls internally:
 - **Screen head** — surface band with the breadcrumb trail (11.5px, `›`
   separators; ancestor crumbs that resolve to a viewable route are links) and
   a title row: 19px heading plus a monospace id chip linking to `/id/<id>`.
+  Screen routes place the right-aligned Mobile/Desktop/Both segmented viewport
+  control in this band.
 - **Stage** — dotted-grid background (22px radial dots), centred frames with
   40px gap, internal `overflow: auto`, `MOBILE` / `DESKTOP` uppercase frame
-  labels, and a right-aligned Mobile/Desktop/Both segmented view bar above.
+  labels, and no separate toolbar above the grid.
 - **Details inspector** — collapsible `<details>` bottom panel, open by
   default: a bar with a rotating chevron, `Details`, and a muted hint; a
   two-column body (`1.35fr / 1fr`) with description and `Why this screen —`
@@ -142,7 +144,8 @@ The shell has one breakpoint at **56.25rem (900px)**:
   20rem) opened by the top-bar menu button; the phone frame scales via
   `aspect-ratio: 390 / 844` within available width, the browser frame drops
   to 560px height, flow connector lines hide, and the details body stacks to
-  one column.
+  one column. When a screen head cannot fit its title and viewport control on
+  one row, the control wraps beneath the title and spans the available width.
 
 `prefers-reduced-motion: reduce` disables shell transitions.
 

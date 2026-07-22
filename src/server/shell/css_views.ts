@@ -1,5 +1,5 @@
-/** Main-column view styles: screen head, stage, view bar, embeds, and the
- * home / missing-route empty states. */
+/** Main-column view styles: screen head, stage, embeds, and the home /
+ * missing-route empty states. */
 
 /** Main-column view styles. */
 export const SHELL_VIEW_CSS = `
@@ -12,10 +12,23 @@ export const SHELL_VIEW_CSS = `
 }
 
 .mbk-screen-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
   flex-shrink: 0;
+  gap: 12px 24px;
   padding: 14px 24px 13px;
   border-bottom: 1px solid var(--chrome-border);
   background: var(--chrome-surface);
+}
+
+.mbk-screen-head-copy {
+  min-width: 0;
+}
+
+.mbk-screen-head > .mbk-seg {
+  margin-left: auto;
 }
 
 .mbk-crumbs {
@@ -62,13 +75,6 @@ export const SHELL_VIEW_CSS = `
   font-family: var(--mono);
   font-size: 11px;
   text-decoration: none;
-}
-
-.mbk-viewbar {
-  display: flex;
-  justify-content: flex-end;
-  flex-shrink: 0;
-  padding: 12px 24px 0;
 }
 
 .mbk-seg {
@@ -264,6 +270,19 @@ export const SHELL_VIEW_CSS = `
 }
 
 @media (max-width: 760px) {
+  .mbk-screen-head {
+    padding: 12px 16px 11px;
+  }
+
+  .mbk-screen-head > .mbk-seg {
+    flex: 1 0 100%;
+    margin-left: 0;
+  }
+
+  .mbk-screen-head > .mbk-seg button {
+    flex: 1;
+  }
+
   .mbk-stage {
     flex-direction: column;
     align-items: center;
