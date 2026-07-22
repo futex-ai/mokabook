@@ -267,10 +267,14 @@ test("the shell is keyboard navigable with a skip link", async ({ page }) => {
   await expect(page.locator("#mb-main")).toBeFocused();
 });
 
-test("the shell works without JavaScript", async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+test("the shell works without JavaScript", async ({ baseURL, browser }) => {
+  if (!baseURL) throw new Error("Playwright baseURL is required");
+  const context = await browser.newContext({
+    baseURL,
+    javaScriptEnabled: false,
+  });
   const page = await context.newPage();
-  await page.goto("http://127.0.0.1:4517/");
+  await page.goto("/");
   await page
     .locator('details[data-nav-collection="/Example/Screens"] summary')
     .click();

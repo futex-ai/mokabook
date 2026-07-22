@@ -1,6 +1,12 @@
 import { defineConfig } from "@playwright/test";
 
-const port = 4517;
+const configuredPort = process.env["MOKABOOK_PLAYWRIGHT_PORT"] ?? "4517";
+const port = Number(configuredPort);
+if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) {
+  throw new Error(
+    `MOKABOOK_PLAYWRIGHT_PORT must be an available TCP port; received ${configuredPort}`,
+  );
+}
 
 /** Browser regression configuration for the served Mokabook shell. */
 export default defineConfig({
