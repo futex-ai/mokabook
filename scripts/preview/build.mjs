@@ -4,6 +4,7 @@ import path from "node:path";
 import { isPublicStaticFile } from "../../dist/config/public_files.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { readManifest } from "../../dist/registry/manifest.js";
+import { computeChangedRoutes } from "../../dist/server/changed.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
@@ -30,8 +31,10 @@ async function buildPreview(output) {
   try {
     const config = await loadConfig(repositoryRoot, configPath);
     const manifest = readManifest(config);
+    const changedRoutes = await computeChangedRoutes(config, "origin/main");
     const server = await startCatalogueServer(config, {
       base: "origin/main",
+      ...(changedRoutes ? { changedRoutes } : {}),
       port: 0,
     });
     try {

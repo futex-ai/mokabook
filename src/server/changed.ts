@@ -1,12 +1,14 @@
 /** Optional changed-route detection powering the Browse changed/all filter. */
 
 import path from "node:path";
+import { isDeepStrictEqual } from "node:util";
 
 import { projectRealPath, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
 import { readManifest } from "../registry/manifest.js";
-import type { ManifestV3 } from "../registry/types.js";
+import type { ManifestEntry, ManifestV3 } from "../registry/types.js";
+import { readBaseManifest } from "../review/base_manifest.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import type { GitClient } from "../review/git.js";
 import { NodeGitCommandRunner, RepositoryGitClient } from "../review/git.js";
@@ -35,7 +37,9 @@ export async function computeChangedRoutes(
       config,
       config.review.outDir,
     );
-    return changedManifestRoutes(readManifest(config), config, changed);
+    const manifest = readManifest(config);
+    const baseManifest = await readBaseManifest(client, commit, config);
+    return changedManifestRoutes(manifest, baseManifest, config, changed);
   } catch {
     return undefined;
   }
@@ -44,6 +48,7 @@ export async function computeChangedRoutes(
 /** Match manifest entries against repository-relative changed paths. */
 export function changedManifestRoutes(
   manifest: ManifestV3,
+  baseManifest: ManifestV3,
   config: ResolvedConfig,
   changedPaths: readonly string[],
 ): readonly string[] {
@@ -52,16 +57,15 @@ export function changedManifestRoutes(
   );
   const routes = new Set<string>();
   const changedScreenIds = new Set<string>();
+  const baseEntries = new Map(
+    baseManifest.entries.map((entry) => [entry.id, entry]),
+  );
   for (const entry of manifest.entries) {
     if (entry.kind === "collection") continue;
-    const candidates = [entry.sourcePath, ...entry.dependencies];
-    if (entry.kind === "screen") {
-      candidates.push(
-        `${mockupsPrefix}/${entry.fragments.mobile}`,
-        `${mockupsPrefix}/${entry.fragments.desktop}`,
-      );
-    }
+    const baseEntry = baseEntries.get(entry.id);
+    const candidates = changedPathCandidates(entry, baseEntry, mockupsPrefix);
     if (
+      isDeepStrictEqual(entry, baseEntry) &&
       !candidates.some((candidate) =>
         changedPaths.some((changedPath) =>
           dependencyContainsChangedPath(candidate, changedPath),
@@ -82,4 +86,29 @@ export function changedManifestRoutes(
     }
   }
   return [...routes].sort();
+}
+
+function changedPathCandidates(
+  entry: ManifestEntry,
+  baseEntry: ManifestEntry | undefined,
+  mockupsPrefix: string,
+): string[] {
+  const candidates = [
+    ...declaredDependencies(entry),
+    ...(baseEntry ? declaredDependencies(baseEntry) : []),
+  ];
+  for (const candidate of [entry, baseEntry]) {
+    if (candidate?.kind !== "screen") continue;
+    candidates.push(
+      `${mockupsPrefix}/${candidate.fragments.mobile}`,
+      `${mockupsPrefix}/${candidate.fragments.desktop}`,
+    );
+  }
+  return [...new Set(candidates)];
+}
+
+function declaredDependencies(entry: ManifestEntry): readonly string[] {
+  return entry.dependencies.filter(
+    (dependency) => dependency !== entry.sourcePath,
+  );
 }
