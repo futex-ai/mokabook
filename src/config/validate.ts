@@ -17,6 +17,7 @@ import {
   requireString,
   resolveLegacyLint,
   validateDebounce,
+  validateLinkValidation,
   validateStringArray,
   validateStylesheets,
   validateWatchRules,
@@ -80,6 +81,7 @@ export function resolveConfig(
   );
   validateSourceRoots(repoRoot, entriesDir, mockupsDir, legacy?.pagesDir);
   const stylesheets = validateStylesheets(input.stylesheets ?? []);
+  const linkValidation = validateLinkValidation(input.linkValidation);
   const watchRules = validateWatchRules(input.watch?.rules ?? []);
   if (input.review?.base !== undefined)
     requireString(input.review.base, "review.base");
@@ -114,6 +116,7 @@ export function resolveConfig(
     configPath,
     entriesDir,
     ...(legacy ? { legacy } : {}),
+    linkValidation,
     mockupsDir,
     moduleResolution,
     ...(renderer ? { renderer } : {}),

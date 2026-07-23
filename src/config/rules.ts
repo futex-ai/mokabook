@@ -1,8 +1,15 @@
 import { MokabookError } from "../errors.js";
 import { validateCatalogueRoute, validateRelativeRoute } from "./paths.js";
-import type { LegacyConfig, StylesheetRule, WatchRule } from "./types.js";
+import type {
+  LegacyConfig,
+  LinkValidationConfig,
+  StylesheetRule,
+  TrustedTemplateVariableRule,
+  WatchRule,
+} from "./types.js";
 
 const WATCH_ACTIONS = new Set(["ignore", "rebuild", "reload", "restart"]);
+const TEMPLATE_VARIABLE = /^[A-Za-z_][A-Za-z0-9_.-]*$/;
 
 /** Normalize configured legacy lint policy. */
 export function resolveLegacyLint(
@@ -84,6 +91,79 @@ export function validateStylesheets(
       }),
     };
   });
+}
+
+/** Validate route-scoped dynamic link exceptions. */
+export function validateLinkValidation(
+  value: LinkValidationConfig | undefined,
+): Required<LinkValidationConfig> {
+  if (value !== undefined && !record(value)) {
+    throw new MokabookError(
+      "config-invalid",
+      "linkValidation must be an object",
+    );
+  }
+  const rules = value?.trustedTemplateVariables ?? [];
+  if (!Array.isArray(rules)) {
+    throw new MokabookError(
+      "config-invalid",
+      "linkValidation.trustedTemplateVariables must be an array",
+    );
+  }
+  const matches = new Set<string>();
+  return {
+    trustedTemplateVariables: rules.map((rawRule, index) =>
+      validateTrustedTemplateVariableRule(rawRule, index, matches),
+    ),
+  };
+}
+
+function validateTrustedTemplateVariableRule(
+  rawRule: TrustedTemplateVariableRule,
+  index: number,
+  matches: Set<string>,
+): TrustedTemplateVariableRule {
+  if (!record(rawRule)) {
+    throw new MokabookError(
+      "config-invalid",
+      `linkValidation.trustedTemplateVariables[${index}] must be an object`,
+    );
+  }
+  requireString(
+    rawRule.match,
+    `linkValidation.trustedTemplateVariables[${index}].match`,
+  );
+  const match = validateRelativeRoute(
+    rawRule.match,
+    `linkValidation.trustedTemplateVariables[${index}].match`,
+  );
+  if (matches.has(match)) {
+    throw new MokabookError(
+      "config-invalid",
+      `duplicate trusted template-variable match: ${match}`,
+    );
+  }
+  matches.add(match);
+  const variables = validateStringArray(
+    rawRule.variables,
+    `linkValidation.trustedTemplateVariables[${index}].variables`,
+  );
+  if (
+    variables.length === 0 ||
+    variables.some((variable) => !TEMPLATE_VARIABLE.test(variable))
+  ) {
+    throw new MokabookError(
+      "config-invalid",
+      `linkValidation.trustedTemplateVariables[${index}].variables must contain valid variable names`,
+    );
+  }
+  if (new Set(variables).size !== variables.length) {
+    throw new MokabookError(
+      "config-invalid",
+      `linkValidation.trustedTemplateVariables[${index}].variables must not contain duplicates`,
+    );
+  }
+  return { match, variables };
 }
 
 /** Validate explicit watch classifications and reject ambiguity. */

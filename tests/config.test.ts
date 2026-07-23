@@ -100,3 +100,35 @@ test("config rejects Review output through an external symlink", async (context)
     /review.outDir resolves outside repoRoot through a symlink/,
   );
 });
+
+test("config rejects ambiguous trusted template variables", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const invalidRules = [
+    {
+      expected: /must contain valid variable names/,
+      rules: [{ match: "emails/reset.html", variables: ["{{reset_url}}"] }],
+    },
+    {
+      expected: /must not contain duplicates/,
+      rules: [
+        { match: "emails/reset.html", variables: ["reset_url", "reset_url"] },
+      ],
+    },
+    {
+      expected: /duplicate trusted template-variable match/,
+      rules: [
+        { match: "emails/reset.html", variables: ["reset_url"] },
+        { match: "emails/reset.html", variables: ["verify_url"] },
+      ],
+    },
+  ];
+
+  for (const { expected, rules } of invalidRules) {
+    await fs.promises.writeFile(
+      fixture.configPath,
+      `export default { entriesDir: "entries", linkValidation: { trustedTemplateVariables: ${JSON.stringify(rules)} }, mockupsDir: "mockups", repoRoot: "." };\n`,
+    );
+    await assert.rejects(() => loadConfig(fixture.root), expected);
+  }
+});

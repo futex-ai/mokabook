@@ -9,6 +9,20 @@ export interface StylesheetRule {
   stylesheets: readonly string[];
 }
 
+/** Exact template-variable references trusted for matching generated routes. */
+export interface TrustedTemplateVariableRule {
+  /** POSIX glob matched against a generated HTML route. */
+  match: string;
+  /** Mustache variable names accepted as complete URL values. */
+  variables: readonly string[];
+}
+
+/** Explicit exceptions for links resolved after Mokabook generation. */
+export interface LinkValidationConfig {
+  /** Route-scoped Mustache variables that bypass local-target validation. */
+  trustedTemplateVariables?: readonly TrustedTemplateVariableRule[];
+}
+
 /** Optional support for pre-registry source pages during consumer migration. */
 export interface LegacyConfig {
   /** Config-relative source directory containing legacy source pages. */
@@ -109,6 +123,8 @@ export interface MokabookConfig {
   renderer?: string;
   /** Optional consumer-specific module resolution for cross-platform sources. */
   moduleResolution?: ModuleResolutionConfig;
+  /** Explicit route-scoped exceptions for dynamic link values. */
+  linkValidation?: LinkValidationConfig;
   /** Ordered route-to-stylesheet mappings. */
   stylesheets?: readonly StylesheetRule[];
   /** Optional legacy source support. */
@@ -130,6 +146,7 @@ export interface ResolvedConfig {
   configPath: string;
   entriesDir: string;
   legacy?: ResolvedLegacyConfig;
+  linkValidation: Required<LinkValidationConfig>;
   mockupsDir: string;
   moduleResolution: ResolvedModuleResolutionConfig;
   renderer?: string;
