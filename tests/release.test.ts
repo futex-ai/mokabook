@@ -75,8 +75,14 @@ test("CI pins actions and gates both supported Node runtimes", async () => {
   assert.equal((source.match(/cargo xtask check/g) ?? []).length, 2);
   assert.match(source, /playwright install --with-deps chromium/);
   const required = workflow.jobs.required;
+  const minimumRuntime = workflow.jobs["minimum-runtime"];
+  const releaseRuntime = workflow.jobs["release-runtime"];
   assert.ok(required);
+  assert.ok(minimumRuntime);
+  assert.ok(releaseRuntime);
   assert.deepEqual(required.needs, ["minimum-runtime", "release-runtime"]);
+  assertFullHistoryCheckout(minimumRuntime);
+  assertFullHistoryCheckout(releaseRuntime);
   assertPinnedActions(workflow);
 });
 
@@ -250,6 +256,14 @@ function assertPinnedActions(workflow: Workflow): void {
   );
   assert.ok(actions.length > 0);
   for (const action of actions) assert.match(action, /@[a-f0-9]{40}$/);
+}
+
+function assertFullHistoryCheckout(job: WorkflowJob): void {
+  const checkout = job.steps.find((step) =>
+    step.uses?.startsWith("actions/checkout@"),
+  );
+  assert.ok(checkout);
+  assert.equal(checkout.with?.["fetch-depth"], 0);
 }
 
 async function releaseContext(): Promise<ReleaseContextModule> {

@@ -11,6 +11,7 @@ interface WorkflowStep {
   name?: string;
   run?: string;
   uses?: string;
+  with?: Readonly<Record<string, unknown>>;
 }
 
 interface WorkflowJob {
@@ -63,6 +64,8 @@ test("preview workflow deploys main and same-repository pull requests", async ()
   assert.match(source, /branch="pr-\$\{\{/);
   assert.match(source, /Mokabook preview/);
   assert.match(source, /deployment_trigger\.metadata\.branch/);
+  assertFullHistoryCheckout(deployMain);
+  assertFullHistoryCheckout(deployPullRequest);
   assertPinnedActions(workflow);
 });
 
@@ -88,4 +91,12 @@ function assertPinnedActions(workflow: Workflow): void {
   );
   assert.ok(actions.length > 0);
   for (const action of actions) assert.match(action, /@[a-f0-9]{40}$/);
+}
+
+function assertFullHistoryCheckout(job: WorkflowJob): void {
+  const checkout = job.steps.find((step) =>
+    step.uses?.startsWith("actions/checkout@"),
+  );
+  assert.ok(checkout);
+  assert.equal(checkout.with?.["fetch-depth"], 0);
 }

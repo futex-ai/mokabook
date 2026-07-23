@@ -31,6 +31,8 @@ test("preview build snapshots a static Browse catalogue", async (context) => {
 
   const index = await read(output, "index.html");
   assert.match(index, /<title>Mokabook<\/title>/);
+  assert.match(index, /data-mokabook-filter/);
+  assert.match(index, /class="mbk-nav-filter-count">\d+</);
   assert.match(index, /\/__mokabook\/client\/browse\.js/);
   assert.doesNotMatch(index, /\/__mokabook\/client\/browser\.js/);
   assert.match(index, /href="\/view\/screens\/welcome"/);

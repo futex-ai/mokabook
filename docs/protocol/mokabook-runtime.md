@@ -86,6 +86,11 @@ structural styles. The shell serves its packaged Inter variable font from
 navigation column, shows the changed count, and derives from Git changes
 against the serve base ref; when the repository or base cannot be resolved,
 Browse omits the filter and shows the full catalogue.
+Route attribution compares each current manifest entry with its base entry and
+matches changed generated fragments plus explicitly declared dependencies. The
+automatically recorded registry source module is attribution metadata, not a
+route dependency: changing a shared registry module alone must not mark its
+unchanged sibling routes.
 When a screen is directly affected, every use case that embeds that screen's
 fragments is affected too and remains visible in the changed-only filter.
 
