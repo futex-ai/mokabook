@@ -6,6 +6,7 @@ import {
 import { validateReviewOut } from "../config/path_validation.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { renderReviewArtifact } from "./artifact.js";
+import type { ReviewRenderOptions } from "./artifact_pages.js";
 import { compareReview } from "./compare.js";
 import {
   NodeGitCommandRunner,
@@ -24,6 +25,7 @@ export async function runReview(
     new NodeGitCommandRunner(config.repoRoot),
   ),
   outputStore: GeneratedOutputStore = new FileSystemGeneratedOutputStore(),
+  render: ReviewRenderOptions = {},
 ): Promise<ReviewResult> {
   validateReviewOut(outDir, config, "Review output", "review-invalid");
   const compilation = await compileCatalogue(config);
@@ -35,6 +37,10 @@ export async function runReview(
     baseRef,
     outDir,
   );
-  await writeReviewArtifact(renderReviewArtifact(artifact), outDir, config);
+  await writeReviewArtifact(
+    renderReviewArtifact(artifact, render),
+    outDir,
+    config,
+  );
   return artifact.result;
 }

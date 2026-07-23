@@ -13,6 +13,12 @@ import type {
   ViewportReview,
 } from "./types.js";
 
+/** Presentation hooks for Review artifacts rendered behind a server. */
+export interface ReviewRenderOptions {
+  /** When set, artifact pages link back to the Browse shell at this href. */
+  browseHref?: string;
+}
+
 const GROUPS: readonly { label: string; state: ReviewState }[] = [
   { label: "Changed", state: "changed" },
   { label: "Added", state: "added" },
@@ -21,7 +27,10 @@ const GROUPS: readonly { label: string; state: ReviewState }[] = [
 ];
 
 /** Render the grouped Review summary page. */
-export function indexPage(result: ReviewResult): string {
+export function indexPage(
+  result: ReviewResult,
+  options: ReviewRenderOptions = {},
+): string {
   const material = result.screens.filter(isMaterial);
   const impacted = result.screens.filter(isImpactOnly);
   const unchanged = result.screens.length - material.length;
@@ -50,9 +59,11 @@ export function indexPage(result: ReviewResult): string {
   return page(
     "Mokabook Review",
     baseline(result.baseRef) +
+      servedLinks(options, "index.html") +
       body +
       sharedImpactCard(result.sharedImpact) +
       ignoredImpactCard(result),
+    options,
   );
 }
 
@@ -61,6 +72,7 @@ export function comparePage(
   result: ReviewResult,
   screen: ScreenReview,
   viewport: ViewportReview,
+  options: ReviewRenderOptions = {},
 ): string {
   const pagePath = comparisonPagePath(screen.route, viewport.viewport);
   const rootLink = relativeLink(pagePath, "index.html");
@@ -85,7 +97,11 @@ export function comparePage(
   return page(
     `${screen.title} · ${viewport.viewport}`,
     baseline(result.baseRef) +
-      `<p><a href="${escape(rootLink)}">Review</a></p>` +
+      `<p><a href="${escape(rootLink)}">Review</a>${
+        options.browseHref
+          ? ` · <a href="${escape(options.browseHref)}">Browse the catalogue</a>`
+          : ""
+      }</p>` +
       `<div class="mb-title-row"><h1>${escape(screen.title)}</h1>` +
       `${badge(viewport.state)}<span class="mb-code">${escape(screen.route)}</span></div>` +
       toolbar(screen, viewport) +
@@ -94,6 +110,7 @@ export function comparePage(
       ignoredCard(viewport) +
       `<p class="mb-review-foot">${escape(viewport.viewport)} · ${escape(viewport.state)}</p>` +
       MODE_SCRIPT,
+    options,
   );
 }
 
@@ -233,6 +250,17 @@ function paneMarkup(
   );
 }
 
+function servedLinks(
+  options: ReviewRenderOptions,
+  refreshTarget: string,
+): string {
+  if (!options.browseHref) return "";
+  return (
+    `<p><a href="${escape(options.browseHref)}">Browse the catalogue</a> · ` +
+    `<a href="${escape(refreshTarget)}?refresh=1">Recompute the comparison</a></p>`
+  );
+}
+
 function badge(state: ReviewState): string {
   const label = state === "ignored-only" ? "Ignored only" : state;
   return `<span class="mb-badge mb-badge--${escape(state)}">${escape(label)}</span>`;
@@ -258,13 +286,21 @@ function relativeLink(from: string, to: string): string {
   return encoded.startsWith(".") ? encoded : `./${encoded}`;
 }
 
-function page(title: string, body: string): string {
+function page(
+  title: string,
+  body: string,
+  options: ReviewRenderOptions = {},
+): string {
+  const liveUpdates = options.browseHref
+    ? `<script type="module" src="/__mokabook/client/browser.js"></script>`
+    : "";
   return (
     `<!doctype html><html lang="en"><head><meta charset="utf-8">` +
     `<meta name="viewport" content="width=device-width, initial-scale=1">` +
     `<title>${escape(title)}</title>` +
     `<style>${SHELL_CSS}.mb-artifact-main{margin:0 auto;max-width:72rem;padding:1.25rem;display:flex;flex-direction:column;gap:.9rem}</style>` +
-    `</head><body><main class="mb-artifact-main">${body}</main></body></html>\n`
+    `</head><body><main class="mb-artifact-main">${body}</main>` +
+    `${liveUpdates}</body></html>\n`
   );
 }
 

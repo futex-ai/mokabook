@@ -181,3 +181,29 @@ test("compare pages render modes, viewport links, and missing panes", () => {
   assert.match(added, /does not exist on origin\/main/);
   assert.match(added, /mb-pane-doc--added/);
 });
+
+test("served render options add browse, recompute, and live-update hooks", () => {
+  const artifact = {
+    files: new Map(),
+    result: result({ screens: [screenReview({})] }),
+  };
+  const served = renderReviewArtifact(artifact, { browseHref: "/" });
+  const index = served.get("index.html") as string;
+  assert.match(index, /href="\/">Browse the catalogue<\/a>/);
+  assert.match(index, /index\.html\?refresh=1">Recompute the comparison/);
+  assert.match(index, /\/__mokabook\/client\/browser\.js/);
+  const compare = served.get(
+    comparisonPagePath("screens/welcome.html", "mobile"),
+  ) as string;
+  assert.match(compare, /href="\/">Browse the catalogue<\/a>/);
+  assert.match(compare, /\/__mokabook\/client\/browser\.js/);
+
+  const staticArtifact = renderReviewArtifact({
+    files: new Map(),
+    result: result({ screens: [screenReview({})] }),
+  });
+  const staticIndex = staticArtifact.get("index.html") as string;
+  assert.doesNotMatch(staticIndex, /Browse the catalogue/);
+  assert.doesNotMatch(staticIndex, /refresh=1/);
+  assert.doesNotMatch(staticIndex, /browser\.js/);
+});

@@ -58,7 +58,8 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/view/<route>` for screens, use cases, and configured legacy pages;
 - `/id/<id>` as a canonical redirect for routed registry entries;
 - `/static/<path>` for generated fragments, legacy pages, and consumer assets;
-- `/review` for the configured Git comparison;
+- `/review` for the configured Git comparison, redirecting to the artifact
+  index, with `/review/<path>` serving the generated artifact files;
 - package-owned client and update endpoints under `/__mokabook/`.
 
 All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
@@ -242,6 +243,20 @@ The engine emits a static, self-contained artifact directory with:
 Artifact pages inline the package-owned shell styles so the directory remains
 viewable without a server, and every embedded pane stays in a script-disabled
 sandbox.
+
+## Served Review
+
+Serve exposes the same comparison in the shell's Review mode. The server
+generates the artifact into the configured Review output directory lazily on
+the first `/review` request and again when a request carries `?refresh=1`, so
+the comparison reflects the workspace when viewed; generations serialize so a
+refresh never races an in-flight run. Artifact pages generated behind the
+server add links back to the Browse shell, a recompute link, and the
+package-owned browser client for watched reloads; static `mokabook review`
+artifacts omit all three. A generation failure answers with a
+retryable error page and leaves the server running, and the next request
+retries the generation. A server constructed without a Review provider keeps
+the launcher view that points at the `mokabook review` command.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including
