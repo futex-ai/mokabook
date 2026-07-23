@@ -1,7 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { isPublicStaticFile } from "../../dist/config/public_files.js";
+import {
+  ARTIFACT_MARKER_CONTENT,
+  hasArtifactOwnershipMarker,
+  PREVIEW_ARTIFACT_MARKER,
+} from "../../dist/artifact_ownership.js";
+import { listPublicStaticFiles } from "../../dist/config/public_files.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { isInside, projectRealPath } from "../../dist/config/paths.js";
 import { readManifest } from "../../dist/registry/manifest.js";
@@ -17,7 +22,6 @@ const configPath = path.join(
   repositoryRoot,
   "examples/basic/mokabook.config.ts",
 );
-const markerName = ".mokabook-preview-artifact";
 const liveUpdateScript =
   '<script src="/__mokabook/client/browser.js" type="module"></script>';
 const outputDir = outputArgument(process.argv.slice(2));
@@ -78,7 +82,7 @@ async function buildPreview(output) {
     await copyPublicFiles(config, stage);
     await writeText(stage, "_headers", headers());
     await writeText(stage, "_redirects", redirects(manifest.entries));
-    await writeText(stage, markerName, "schemaVersion=1\n");
+    await writeText(stage, PREVIEW_ARTIFACT_MARKER, ARTIFACT_MARKER_CONTENT);
     await installArtifact(stage, resolvedOutput);
   } catch (error) {
     await fs.promises.rm(stage, { force: true, recursive: true });
@@ -147,25 +151,9 @@ async function copyReviewArtifact(config, artifact, stage) {
 }
 
 async function copyPublicFiles(config, stage) {
-  for (const candidate of await regularFiles(config.mockupsDir)) {
-    if (!isPublicStaticFile(candidate, config)) continue;
-    const relative = path.relative(config.mockupsDir, candidate);
-    const target = path.join(stage, "static", relative);
-    await fs.promises.mkdir(path.dirname(target), { recursive: true });
-    await fs.promises.copyFile(candidate, target);
+  for (const file of listPublicStaticFiles(config)) {
+    await writeFile(stage, path.join("static", file.route), file.content);
   }
-}
-
-async function regularFiles(root) {
-  const files = [];
-  const entries = await fs.promises.readdir(root, { withFileTypes: true });
-  entries.sort((left, right) => left.name.localeCompare(right.name));
-  for (const entry of entries) {
-    const candidate = path.join(root, entry.name);
-    if (entry.isDirectory()) files.push(...(await regularFiles(candidate)));
-    else if (entry.isFile()) files.push(candidate);
-  }
-  return files;
 }
 
 function headers() {
@@ -190,6 +178,7 @@ function staticPage(html) {
 }
 
 async function installArtifact(stage, output) {
+  assertOwnedOutput(output);
   if (!fs.existsSync(output)) {
     await fs.promises.rename(stage, output);
     return;
@@ -209,7 +198,10 @@ async function installArtifact(stage, output) {
 }
 
 function assertOwnedOutput(output) {
-  if (fs.existsSync(output) && !fs.existsSync(path.join(output, markerName))) {
+  if (
+    fs.existsSync(output) &&
+    !hasArtifactOwnershipMarker(output, PREVIEW_ARTIFACT_MARKER)
+  ) {
     throw new Error(`refusing to replace unowned preview directory: ${output}`);
   }
 }

@@ -111,6 +111,74 @@ test("preview build refuses to replace an unowned directory", async (context) =>
   assert.equal(await read(output, "keep.txt"), "owned by user\n");
 });
 
+test("preview replacement requires an exact regular ownership marker", async (context) => {
+  const contextDir = path.join(repositoryRoot, ".context");
+  await fs.promises.mkdir(contextDir, { recursive: true });
+  const cases = ["directory", "symlink", "wrong-content"] as const;
+
+  for (const markerKind of cases) {
+    const output = await fs.promises.mkdtemp(
+      path.join(contextDir, `preview-${markerKind}-`),
+    );
+    context.after(() =>
+      fs.promises.rm(output, { force: true, recursive: true }),
+    );
+    await fs.promises.writeFile(
+      path.join(output, "keep.txt"),
+      "owned by user\n",
+    );
+    const marker = path.join(output, ".mokabook-preview-artifact");
+    if (markerKind === "directory") {
+      await fs.promises.mkdir(marker);
+    } else if (markerKind === "symlink") {
+      await fs.promises.writeFile(
+        path.join(output, "marker-target"),
+        "schemaVersion=1\n",
+      );
+      await fs.promises.symlink("marker-target", marker);
+    } else {
+      await fs.promises.writeFile(marker, "owned-by-someone-else\n");
+    }
+
+    await assert.rejects(
+      execute(
+        process.execPath,
+        ["scripts/preview/build.mjs", "--out", output],
+        {
+          cwd: repositoryRoot,
+        },
+      ),
+      /refusing to replace unowned preview directory/,
+    );
+    assert.equal(await read(output, "keep.txt"), "owned by user\n");
+  }
+});
+
+test("preview rechecks ownership immediately before installation", async (context) => {
+  const contextDir = path.join(repositoryRoot, ".context");
+  await fs.promises.mkdir(contextDir, { recursive: true });
+  const parent = await fs.promises.mkdtemp(
+    path.join(contextDir, "preview-appearing-"),
+  );
+  const output = path.join(parent, "artifact");
+  context.after(() => fs.promises.rm(parent, { force: true, recursive: true }));
+
+  const building = execute(
+    process.execPath,
+    ["scripts/preview/build.mjs", "--out", output],
+    { cwd: repositoryRoot },
+  );
+  await waitForPreviewStage(parent);
+  await fs.promises.mkdir(output);
+  await fs.promises.writeFile(path.join(output, "keep.txt"), "owned by user\n");
+
+  await assert.rejects(
+    building,
+    /refusing to replace unowned preview directory/,
+  );
+  assert.equal(await read(output, "keep.txt"), "owned by user\n");
+});
+
 test("preview build rejects an external symlink parent", async (context) => {
   const contextDir = path.join(repositoryRoot, ".context");
   await fs.promises.mkdir(contextDir, { recursive: true });
@@ -184,4 +252,15 @@ async function relativeFiles(
     }),
   );
   return nested.flat().sort();
+}
+
+async function waitForPreviewStage(parent: string): Promise<void> {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const entries = await fs.promises.readdir(parent);
+    if (entries.some((entry) => entry.startsWith(".mokabook-preview-stage-"))) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  throw new Error("preview staging did not start");
 }

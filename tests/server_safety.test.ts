@@ -64,3 +64,33 @@ test("static serving rejects symlinks into nested authored source roots", async 
 
   assert.equal(response.status, 404);
 });
+
+test("static serving rejects symlinked public files and directories", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const assets = path.join(fixture.mockupsDir, "assets");
+  await fs.promises.mkdir(assets);
+  await fs.promises.writeFile(path.join(assets, "public.txt"), "public\n");
+  await fs.promises.symlink(
+    "assets/public.txt",
+    path.join(fixture.mockupsDir, "linked.txt"),
+  );
+  await fs.promises.symlink("assets", path.join(fixture.mockupsDir, "linked"));
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  const server = await startCatalogueServer(config, {
+    base: "origin/main",
+    port: 0,
+  });
+  context.after(() => server.close());
+
+  assert.equal(
+    (await fetch(`${server.url}/static/assets/public.txt`)).status,
+    200,
+  );
+  assert.equal((await fetch(`${server.url}/static/linked.txt`)).status, 404);
+  assert.equal(
+    (await fetch(`${server.url}/static/linked/public.txt`)).status,
+    404,
+  );
+});

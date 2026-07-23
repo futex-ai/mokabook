@@ -1,10 +1,9 @@
 /** Confined static-file and bundled-asset responses for the HTTP server. */
 
-import fs from "node:fs";
 import type { ServerResponse } from "node:http";
 import path from "node:path";
 
-import { isPublicStaticFile } from "../config/public_files.js";
+import { readPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 
 /** Serve one allowlisted browser client module. */
@@ -46,16 +45,9 @@ export function servePublicStatic(
   const relative = safeDecodePath(encodedPath);
   if (!relative) return sendText(response, 400, "Invalid static path", method);
   const candidate = path.resolve(config.mockupsDir, relative);
-  if (!isPublicStaticFile(candidate, config)) {
-    return sendMissing(response, method);
-  }
-  let content: Buffer;
-  try {
-    content = fs.readFileSync(candidate);
-  } catch {
-    return sendMissing(response, method);
-  }
-  sendBuffer(response, content, contentType(candidate), method);
+  const file = readPublicStaticFile(candidate, config);
+  if (!file) return sendMissing(response, method);
+  sendBuffer(response, file.content, contentType(file.route), method);
 }
 
 /** Decode a relative URL path once and reject empty or traversal segments. */

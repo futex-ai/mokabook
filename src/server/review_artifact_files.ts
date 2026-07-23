@@ -5,13 +5,15 @@ import fs from "node:fs";
 import type { ServerResponse } from "node:http";
 import path from "node:path";
 
+import {
+  hasArtifactOwnershipMarker,
+  REVIEW_ARTIFACT_MARKER,
+} from "../artifact_ownership.js";
 import { validateReviewOut } from "../config/path_validation.js";
 import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import { contentType, requiresDocumentSandbox } from "./static_files.js";
-
-const ARTIFACT_MARKER = ".mokabook-review-artifact";
 
 /** Filesystem identity pinned after one successful Review generation. */
 export interface ReviewArtifactIdentity {
@@ -151,11 +153,7 @@ function matchesArtifact(
 }
 
 function ownedMarkerExists(realPath: string): boolean {
-  try {
-    return fs.lstatSync(path.join(realPath, ARTIFACT_MARKER)).isFile();
-  } catch {
-    return false;
-  }
+  return hasArtifactOwnershipMarker(realPath, REVIEW_ARTIFACT_MARKER);
 }
 
 function captureArtifactFiles(realPath: string): ReadonlyMap<string, string> {

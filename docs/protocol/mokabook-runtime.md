@@ -87,8 +87,10 @@ server pins the artifact directory's filesystem identity and ownership marker;
 it also captures the generated file set and the summary/compare pages trusted
 to run shell controls. SHA-256 fingerprints pin every captured file, and the
 preview copier applies the same immutable-view rule. Every cached response
-revalidates the directory, ownership, and repository boundary, and later-added
-files are not served.
+revalidates the directory, ownership, and repository boundary. Ownership
+requires a regular, non-symlink marker whose bytes exactly match the supported
+schema marker; a marker directory, symlink, or different content is unowned.
+Later-added files are not served.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
@@ -285,7 +287,9 @@ binary fonts and images, while explicit HTTP(S)/data resources remain external.
 Root-absolute, protocol-relative, and other scheme-qualified resource URLs are
 not portable in a disk-viewable artifact and fail Review instead of being
 silently omitted.
-Current-worktree resources must resolve to regular public files. Every base
+Current-worktree resources must resolve to regular public files without file or
+directory symlinks below `mockupsDir`; Review reads the same pinned identity
+used by Build, Serve, compatibility, and repository preview. Every base
 resource, including the pane document itself and each transitive dependency,
 must be a regular Git file. Neither side may read from configured entry or
 legacy source roots. Pane documents remain byte-unmodified and run in

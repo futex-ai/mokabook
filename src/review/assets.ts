@@ -1,6 +1,6 @@
-import fs from "node:fs";
 import path from "node:path";
 
+import { readPublicStaticFile } from "../config/public_files.js";
 import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
@@ -24,31 +24,10 @@ export class FileSystemReviewAssetReader implements ReviewAssetReader {
   async read(route: string, signal?: AbortSignal): Promise<Uint8Array> {
     signal?.throwIfAborted();
     const candidate = assertPublicStaticRoute(route, this.config);
-    try {
-      const [realRoot, realCandidate] = await Promise.all([
-        fs.promises.realpath(this.config.mockupsDir),
-        fs.promises.realpath(candidate),
-      ]);
-      const sourceRoots = await Promise.all([
-        fs.promises.realpath(this.config.entriesDir),
-        ...(this.config.legacy
-          ? [fs.promises.realpath(this.config.legacy.pagesDir)]
-          : []),
-      ]);
-      signal?.throwIfAborted();
-      if (
-        !isInside(realRoot, realCandidate) ||
-        sourceRoots.some((root) => isInside(root, realCandidate)) ||
-        !(await fs.promises.stat(realCandidate)).isFile()
-      ) {
-        throw assetError(route, "not a public static file");
-      }
-      return await fs.promises.readFile(realCandidate, { signal });
-    } catch (error) {
-      signal?.throwIfAborted();
-      if (error instanceof MokabookError) throw error;
-      throw assetError(route, errorMessage(error), error);
-    }
+    const file = readPublicStaticFile(candidate, this.config);
+    signal?.throwIfAborted();
+    if (!file) throw assetError(route, "not a public static file");
+    return file.content;
   }
 }
 

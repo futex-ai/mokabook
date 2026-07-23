@@ -1,5 +1,9 @@
 /** Assemble self-contained Review pages, JSON, and the CI summary. */
 
+import {
+  ARTIFACT_MARKER_CONTENT,
+  REVIEW_ARTIFACT_MARKER,
+} from "../artifact_ownership.js";
 import type {
   ReviewArtifact,
   ReviewArtifactContent,
@@ -30,7 +34,7 @@ export function renderReviewArtifact(
       );
     }
   }
-  addArtifactFile(files, ".mokabook-review-artifact", "schemaVersion=1\n");
+  addArtifactFile(files, REVIEW_ARTIFACT_MARKER, ARTIFACT_MARKER_CONTENT);
   return files;
 }
 

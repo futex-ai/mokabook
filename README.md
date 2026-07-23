@@ -109,8 +109,13 @@ stable summary, as does a live reload of a comparison that no longer exists.
 Watched updates invalidate the served comparison before Review reloads, and the
 server refuses to serve a cached artifact if its owned output directory is
 replaced or a captured file no longer matches its generated fingerprint. Files
-added after capture are not served. Screens with shared or declared dependency
-impact
+added after capture are not served. Review and repository-preview replacement
+require a regular, non-symlink ownership marker with the exact supported schema
+content; a marker name alone never authorizes directory replacement. Public
+consumer assets must likewise be regular files reached without file or
+directory symlinks, and one validated file identity supplies Build, Serve,
+Review, compatibility, and preview reads. Screens with shared or declared
+dependency impact
 remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
 descendant of a directory is reported as the screen's impact evidence.

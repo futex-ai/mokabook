@@ -154,6 +154,28 @@ test("cached Review refuses changes to a captured trusted page", async (context)
   assert.doesNotMatch(await response.text(), /globalThis\.injected/);
 });
 
+test("cached Review refuses a changed ownership marker", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  const server = await startCatalogueServer(
+    config,
+    { base: "main", port: 0 },
+    new CountingReviewGenerator(),
+  );
+  context.after(() => server.close());
+  assert.equal((await fetch(`${server.url}/review/index.html`)).status, 200);
+
+  await fs.promises.writeFile(
+    path.join(config.review.outDir, ".mokabook-review-artifact"),
+    "owned-by-someone-else\n",
+  );
+  const response = await fetch(`${server.url}/review/index.html`);
+
+  assert.equal(response.status, 404);
+});
+
 test("cached Review refuses an output symlink moved outside the repository", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

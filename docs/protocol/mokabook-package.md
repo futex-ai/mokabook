@@ -242,6 +242,11 @@ CSS, and transitively referenced HTML/CSS must likewise resolve to public
 static files beneath `mockupsDir` that remain after the pending build. An owned
 generated file absent from the next output set is a pending orphan, never a
 valid link or resource target merely because it still exists before commit.
+Public static files are regular files reached without a symlink in either the
+file or its path below `mockupsDir`; symlinked files and directories are not
+public assets. Build validation, compatibility route inventory, Serve, Review,
+and repository preview use one resolver that pins the validated file identity
+for every read.
 
 All public exports ship ESM JavaScript and declarations usable by NodeNext and
 bundler TypeScript resolution. The package export map and packed-tarball tests
