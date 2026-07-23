@@ -227,17 +227,19 @@ excluded before changed-path and shared-impact evidence is calculated.
 
 The engine emits a static, self-contained artifact directory with:
 
-- a deterministic index that groups screens by changed, added, removed, and
-  ignored-only state, plus an impacted group for byte-identical screens with
-  shared or dependency evidence;
+- a deterministic index, with every page rendered in the Mokabook shell
+  beside a changed-screens navigation column that groups changed, added,
+  removed, and ignored-only screens, plus an impacted group for
+  byte-identical screens with shared or dependency evidence;
 - an explicit empty state only when no screen has either visual differences or
   impact evidence, with the same material/impacted totals in the CI summary;
 - one designed compare page per screen viewport, linked to its sibling
   viewport through the page's viewport control;
 - side-by-side, opacity-overlay, and difference modes on every compare page;
 - before/head artifacts kept complete and unmodified;
-- aggregate shared-impact and ignored-region evidence on the index, screen
-  impact evidence on compare pages, and per-viewport ignored-region evidence;
+- aggregate shared-impact and ignored-region evidence in the navigation
+  column, screen impact evidence on compare pages, and per-viewport
+  ignored-region evidence;
 - deterministic `review.json` for CI summaries.
 
 Artifact pages inline the package-owned shell styles so the directory remains
@@ -251,7 +253,7 @@ generates the artifact into the configured Review output directory lazily on
 the first `/review` request and again when a request carries `?refresh=1`, so
 the comparison reflects the workspace when viewed; generations serialize so a
 refresh never races an in-flight run. Artifact pages generated behind the
-server add links back to the Browse shell, a recompute link, and the
+server add the shell's Browse/Review mode pills, a recompute link, and the
 package-owned browser client for watched reloads; static `mokabook review`
 artifacts omit all three. A generation failure answers with a
 retryable error page and leaves the server running, and the next request

@@ -162,7 +162,7 @@ test("no-watch serve exposes the Git comparison with compare pages", async (cont
   const indexHtml = await index.text();
   assert.match(indexHtml, /Mokabook review/);
   assert.match(indexHtml, /Updated Home/);
-  assert.match(indexHtml, /Browse the catalogue/);
+  assert.match(indexHtml, /href="\/">Browse<\/a>/);
   assert.match(indexHtml, /Recompute the comparison/);
   const compareHref = indexHtml.match(/href="(comparisons\/[^"]+)"/)?.[1];
   assert.ok(compareHref);
@@ -176,7 +176,7 @@ test("no-watch serve exposes the Git comparison with compare pages", async (cont
   assert.match(compareHtml, /data-mode="difference"/);
   assert.match(compareHtml, /Before — HEAD/);
   assert.match(compareHtml, /After — this branch/);
-  assert.match(compareHtml, /href="\/">Browse the catalogue<\/a>/);
+  assert.match(compareHtml, /href="\/">Browse<\/a>/);
   assert.match(compareHtml, /\/__mokabook\/client\/browser\.js/);
 
   const paneSrc = compareHtml.match(/<iframe[^>]*src="([^"]+)"/)?.[1];

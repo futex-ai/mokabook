@@ -151,20 +151,27 @@ The shell has one breakpoint at **56.25rem (900px)**:
 
 `prefers-reduced-motion: reduce` disables shell transitions.
 
-## Review Artifact Legacy Styles
+## Review Pages
 
-The static Review artifact pages inline the shell stylesheet and keep their
-existing `mb-*` markup. The stylesheet therefore must keep:
+Review pages render in the same shell scaffold as Browse and inline the shell
+stylesheet so the static artifact stays viewable from disk. Each page has the
+top bar with the brand mark and the base-comparison indicator, and a
+changed-screens navigation column using the `mbk-chg-*` classes: group heads
+with classification dots and counts, title-and-route rows with the accent
+active state, and shared-impact and ignored-region cards. Compare pages reuse
+the screen head, `mbk-seg` segments for the comparison-mode and viewport
+controls, `mbk-status` classification badges, and a summary band. Served
+pages add the Browse/Review mode pills; static artifacts omit them because
+the artifact stands alone without a running server.
 
-- The `--mb-*` token set (`--mb-bg`, `--mb-surface`, `--mb-border`,
-  `--mb-text`, `--mb-muted`, `--mb-radius`, `--mb-shadow`) mapped onto the
-  chrome palette, plus the review classification pairs: added
-  `#1d7a3d`/`#e3f0e7`, changed `#9a6b00`/`#f6ecd4`, removed
-  `#b3261e`/`#f7e2e0`, ignored `#6c6862`/`#edebe8`.
-- The legacy class subset the artifact markup uses (`mb-empty`, `mb-code`,
-  `mb-title-row`, `mb-viewswitch`, `mb-viewswitch-option`, `mb-frag`,
-  `mb-nav-group`, `mb-nav-list`) alongside the review-specific classes in the
-  review stylesheet module.
+The compare stage keeps its `mb-*` classes and the `--mb-*` token set
+(`--mb-bg`, `--mb-surface`, `--mb-border`, `--mb-text`, `--mb-muted`,
+`--mb-radius`, `--mb-shadow`) mapped onto the chrome palette, plus the review
+classification pairs: added `#1d7a3d`/`#e3f0e7`, changed `#9a6b00`/`#f6ecd4`,
+removed `#b3261e`/`#f7e2e0`, ignored `#6c6862`/`#edebe8`. The pane grid
+(`mb-panes`, `mb-pane`, `mb-pane-doc`, `mb-pane-missing`, `mb-frag`) drives
+the side-by-side, opacity-overlay, and blend-mode difference modes through
+its `data-compare-mode` attribute.
 
 ## Related Docs
 

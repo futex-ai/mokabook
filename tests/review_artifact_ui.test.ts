@@ -72,9 +72,10 @@ test("review index groups outcomes and reports aggregate impact", () => {
   const index = files.get("index.html");
   assert.equal(typeof index, "string");
   assert.match(index as string, /Comparing this branch with/);
-  assert.match(index as string, /Changed<\/h2>/);
-  assert.match(index as string, /Added<\/h2>/);
-  assert.match(index as string, /1 unchanged/);
+  assert.match(index as string, /Changed screens/);
+  assert.match(index as string, /<\/span>Changed<span class="mbk-chg-count">1/);
+  assert.match(index as string, /<\/span>Added<span class="mbk-chg-count">1/);
+  assert.match(index as string, /1 screen unchanged/);
   assert.match(index as string, /Shared impact/);
   assert.match(index as string, /example-nav/);
   assert.match(index as string, /--mokabook-accent/);
@@ -124,7 +125,7 @@ test("impact-only screens remain visible and material", () => {
   const summary = files.get("summary.md") as string;
 
   assert.doesNotMatch(index, /No visual changes/);
-  assert.match(index, /Impacted<\/h2>/);
+  assert.match(index, /Impacted/);
   assert.match(index, /Shared only/);
   assert.match(index, /Dependency only/);
   assert.ok(
@@ -170,9 +171,9 @@ test("compare pages render modes, viewport links, and missing panes", () => {
   assert.match(changed, /data-mode="side"/);
   assert.match(changed, /data-mode="overlay"/);
   assert.match(changed, /data-mode="difference"/);
-  assert.match(changed, /aria-current="page">Desktop/);
+  assert.match(changed, /aria-current="page"[^>]*>Desktop/);
   assert.match(changed, /href="[^"]*mobile[^"]*">Mobile/);
-  assert.match(changed, /mb-badge--changed/);
+  assert.match(changed, /mbk-status changed/);
   assert.match(changed, /Ignored regions/);
   assert.match(changed, /<iframe class="mb-frag" sandbox=""/);
   const added = files.get(
@@ -189,13 +190,13 @@ test("served render options add browse, recompute, and live-update hooks", () =>
   };
   const served = renderReviewArtifact(artifact, { browseHref: "/" });
   const index = served.get("index.html") as string;
-  assert.match(index, /href="\/">Browse the catalogue<\/a>/);
+  assert.match(index, /href="\/">Browse<\/a>/);
   assert.match(index, /index\.html\?refresh=1">Recompute the comparison/);
   assert.match(index, /\/__mokabook\/client\/browser\.js/);
   const compare = served.get(
     comparisonPagePath("screens/welcome.html", "mobile"),
   ) as string;
-  assert.match(compare, /href="\/">Browse the catalogue<\/a>/);
+  assert.match(compare, /href="\/">Browse<\/a>/);
   assert.match(compare, /\/__mokabook\/client\/browser\.js/);
 
   const staticArtifact = renderReviewArtifact({
@@ -203,7 +204,7 @@ test("served render options add browse, recompute, and live-update hooks", () =>
     result: result({ screens: [screenReview({})] }),
   });
   const staticIndex = staticArtifact.get("index.html") as string;
-  assert.doesNotMatch(staticIndex, /Browse the catalogue/);
+  assert.doesNotMatch(staticIndex, /aria-label="Mokabook modes"/);
   assert.doesNotMatch(staticIndex, /refresh=1/);
   assert.doesNotMatch(staticIndex, /browser\.js/);
 });

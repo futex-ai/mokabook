@@ -37,7 +37,7 @@ following presentation differences are intentional:
   phone frame and scales it below the responsive breakpoint.
 - Static Review artifact pages omit the Browse/Review mode pills because the
   artifact stands alone without a running Browse server; the served `/review`
-  route keeps the full shell. The artifact keeps its own `mb-*` page
-  structure: it inherits the ported palette and typography through the shared
-  stylesheet tokens, while adopting the mockups' full browser-frame compare
-  chrome is deferred to a follow-up milestone.
+  route keeps them. Compare pages navigate between the mobile and desktop
+  variants as separate pages through the viewport segment rather than the
+  in-place toggle the mockups depict, and the difference mode is a real pixel
+  blend of both renders rather than the mockups' tinted-region illustration.
