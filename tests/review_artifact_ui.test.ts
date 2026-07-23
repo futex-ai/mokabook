@@ -204,7 +204,19 @@ test("served render options add browse, recompute, and live-update hooks", () =>
     result: result({ screens: [screenReview({})] }),
   });
   const staticIndex = staticArtifact.get("index.html") as string;
-  assert.doesNotMatch(staticIndex, /aria-label="Mokabook modes"/);
+  assert.match(staticIndex, /data-mokabook-menu=""/);
+  assert.match(staticIndex, /data-drawer="closed"/);
+  assert.match(
+    staticIndex,
+    /aria-current="page" class="mbk-mode active" href="index\.html">Review/,
+  );
+  const staticCompare = staticArtifact.get(
+    comparisonPagePath("screens/welcome.html", "mobile"),
+  ) as string;
+  assert.match(
+    staticCompare,
+    /aria-current="page" class="mbk-mode active" href="\.\.\/\.\.\/\.\.\/index\.html">Review/,
+  );
   assert.doesNotMatch(staticIndex, /refresh=1/);
   assert.doesNotMatch(staticIndex, /browser\.js/);
 });

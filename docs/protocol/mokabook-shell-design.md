@@ -143,11 +143,12 @@ The shell has one breakpoint at **56.25rem (900px)**:
 - At or above it, the navigation column is persistent and the layout is the
   fixed two-column split above.
 - Below it, the navigation becomes a scrimmed overlay drawer (82% width, max
-  20rem) opened by the top-bar menu button; the phone frame scales via
-  `aspect-ratio: 390 / 844` within available width, the browser frame drops
-  to 560px height, flow connector lines hide, and the details body stacks to
-  one column. When a screen head cannot fit its title and viewport control on
-  one row, the control wraps beneath the title and spans the available width.
+  20rem) opened by the top-bar menu button in both Browse and Review; the
+  phone frame scales via `aspect-ratio: 390 / 844` within available width, the
+  browser frame drops to 560px height, flow connector lines hide, and the
+  details body stacks to one column. When a screen head cannot fit its title
+  and viewport control on one row, the control wraps beneath the title and
+  spans the available width.
 
 `prefers-reduced-motion: reduce` disables shell transitions.
 
@@ -155,14 +156,16 @@ The shell has one breakpoint at **56.25rem (900px)**:
 
 Review pages render in the same shell scaffold as Browse and inline the shell
 stylesheet so the static artifact stays viewable from disk. Each page has the
-top bar with the brand mark and the base-comparison indicator, and a
-changed-screens navigation column using the `mbk-chg-*` classes: group heads
-with classification dots and counts, title-and-route rows with the accent
-active state, and shared-impact and ignored-region cards. Compare pages reuse
-the screen head, `mbk-seg` segments for the comparison-mode and viewport
-controls, `mbk-status` classification badges, and a summary band. Served
-pages add the Browse/Review mode pills; static artifacts omit them because
-the artifact stands alone without a running server.
+top bar with the drawer button, brand mark, base-comparison indicator, and a
+Review pill that returns compare pages to the artifact index. Served pages
+also show the Browse pill. Each page has a changed-screens navigation column
+using the `mbk-chg-*` classes: group heads with classification dots and
+counts, title-and-route rows with the accent active state, and shared-impact
+and ignored-region cards. Compare pages reuse the screen head, `mbk-seg`
+segments for the comparison-mode and viewport controls, `mbk-status`
+classification badges, and a summary band. The drawer control and script
+remain inline so static artifacts retain narrow-viewport navigation without a
+running server.
 
 The compare stage keeps its `mb-*` classes and the `--mb-*` token set
 (`--mb-bg`, `--mb-surface`, `--mb-border`, `--mb-text`, `--mb-muted`,

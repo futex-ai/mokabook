@@ -93,6 +93,32 @@ test("served review generates lazily, recomputes on refresh, and stays safe", as
   assert.equal((await fetch(`${server.url}/review/missing.css`)).status, 404);
 });
 
+test("published updates invalidate the served review artifact", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const review = countingReview(path.join(fixture.root, ".review"));
+  const server = await startedFixtureServer(fixture, review);
+  context.after(() => server.close());
+
+  assert.match(
+    await (await fetch(`${server.url}/review/index.html`)).text(),
+    /Generation 1/,
+  );
+
+  server.publishUpdate();
+
+  const regenerated = await Promise.all([
+    fetch(`${server.url}/review/index.html`).then((response) =>
+      response.text(),
+    ),
+    fetch(`${server.url}/review/index.html`).then((response) =>
+      response.text(),
+    ),
+  ]);
+  for (const html of regenerated) assert.match(html, /Generation 2/);
+  assert.equal(review.generations, 2);
+});
+
 test("a failed review generation answers a retryable page and then recovers", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

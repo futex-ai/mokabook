@@ -28,7 +28,11 @@ export function TopBar({ mode, viewport }: TopBarProps) {
         <button
           className="mbk-menu-btn"
           type="button"
-          aria-label="Open catalogue navigation"
+          aria-label={
+            mode === "review"
+              ? "Open changed screens navigation"
+              : "Open catalogue navigation"
+          }
         >
           ☰
         </button>
