@@ -101,6 +101,10 @@ All/Changed filter, linked breadcrumbs with hash-prefixed copyable ID chips,
 realistic phone and browser device chrome with an expand-to-overlay toggle,
 header viewport controls, use-case flows, a details inspector, id redirects,
 and watched updates.
+The Changed filter compares route-level manifest metadata, generated fragments,
+and explicitly declared dependencies against the Git base. A registry module
+that defines many routes does not make every route appear changed merely because
+the module's imports or composition changed.
 Review provides summary, side-by-side, overlay, and difference views as a
 static artifact. Screens with shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
@@ -232,17 +236,20 @@ consumers, Chromium tests, and all Rust checks.
 static Cloudflare Pages artifact at `.context/mokabook-preview`. It snapshots
 every catalogue route through Mokabook's HTTP server, copies the package shell
 and public example assets, preserves id redirects, and excludes the
-development-only live-reload connection. The artifact is not part of the npm
-package.
+development-only live-reload connection. The snapshot compares the catalogue
+with `origin/main`, so Browse includes its All/Changed filter even when the
+changed count is zero. The artifact is not part of the npm package.
 
 The Preview workflow deploys `main` to the Cloudflare Pages project `mokabook`
 at `https://mokabook.pages.dev`. Same-repository, non-release pull requests use
 the stable `pr-<number>` branch alias at
 `https://pr-<number>.mokabook.pages.dev`; a sticky `<!-- mokabook-preview -->`
-comment reports the deployment status and link. Closing a pull request marks
-that comment inactive and attempts to remove its deployments. Fork pull
-requests do not receive Cloudflare credentials, and Release Please pull
-requests are skipped because their source changes were already previewed.
+comment reports the deployment status and link. Preview checkouts retain full
+Git history so `origin/main` and route-level changes can be resolved. Closing a
+pull request marks that comment inactive and attempts to remove its
+deployments. Fork pull requests do not receive Cloudflare credentials, and
+Release Please pull requests are skipped because their source changes were
+already previewed.
 
 Maintainers must create the direct-upload Pages project with `main` as its
 production branch, then configure repository variable `CLOUDFLARE_ACCOUNT_ID`

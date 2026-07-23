@@ -54,9 +54,10 @@ gate on Ubuntu:
 
 Both install Rust 1.95.0, install Chromium, and run `cargo xtask check`. The
 `Required CI` aggregator fails unless both jobs succeed and is the branch-rule
-status to require. CI uses `npm ci` and the committed lockfile. Action revisions
-are immutable commit hashes with reviewed version comments; runtime versions
-are explicit. Fork pull requests receive no release secrets or write
+status to require. CI checks out complete Git history so the preview regression
+can resolve `origin/main`, and uses `npm ci` with the committed lockfile. Action
+revisions are immutable commit hashes with reviewed version comments; runtime
+versions are explicit. Fork pull requests receive no release secrets or write
 permissions.
 
 ## Preview Deployments
@@ -76,8 +77,11 @@ and every manifest-backed route. It copies the shell stylesheet, browser
 navigation modules, fonts, id redirects, and every validated public consumer
 asset into `.context/mokabook-preview`. Preview shell links use Cloudflare
 Pages' canonical extensionless HTML routes, and static deployments omit the
-watched server's live-update module. Artifact replacement is transactional and
-refuses to overwrite a directory without Mokabook's ownership marker.
+watched server's live-update module. The builder computes route changes against
+`origin/main`, and both deployment jobs fetch complete Git history so the
+static Browse shell always includes the All/Changed filter, including a zero
+count. Artifact replacement is transactional and refuses to overwrite a
+directory without Mokabook's ownership marker.
 
 Closing a same-repository pull request marks its sticky comment inactive and
 attempts to delete all Cloudflare deployments carrying that PR branch alias.
