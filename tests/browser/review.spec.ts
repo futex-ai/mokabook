@@ -6,6 +6,11 @@ import { promisify } from "node:util";
 
 import { expect, test } from "@playwright/test";
 
+import { loadConfig } from "../../dist/config/load.js";
+import {
+  startCatalogueServer,
+  type RunningServer,
+} from "../../dist/server/http.js";
 import {
   createFixture,
   removeFixture,
@@ -18,7 +23,8 @@ const run = promisify(execFile);
 const cli = path.join(repositoryRoot, "dist/cli/bin.js");
 
 let fixture: TestFixture;
-let outDir: string;
+let reviewUrl: string;
+let server: RunningServer;
 
 async function git(cwd: string, ...args: string[]): Promise<void> {
   await run("git", args, { cwd });
@@ -37,23 +43,18 @@ test.beforeAll(async () => {
     validEntrySource({ firstTitle: "Home Revised" }),
   );
   await run("node", [cli, "build", "--config", fixture.configPath]);
-  await run("node", [
-    cli,
-    "review",
-    "--config",
-    fixture.configPath,
-    "--base",
-    "main",
-  ]);
-  outDir = path.join(fixture.root, ".review");
+  const config = await loadConfig(fixture.root);
+  server = await startCatalogueServer(config, { base: "main", port: 0 });
+  reviewUrl = `${server.url}/review/index.html`;
 });
 
 test.afterAll(async () => {
+  if (server) await server.close();
   if (fixture) await removeFixture(fixture);
 });
 
 test("the review index groups changed screens", async ({ page }) => {
-  await page.goto(pathToFileURL(path.join(outDir, "index.html")).href);
+  await page.goto(reviewUrl);
   await expect(page.locator("h1")).toHaveText("Mokabook review");
   await expect(page.locator(".mb-baseline")).toContainText("main");
   await expect(page.getByRole("heading", { name: "Changed" })).toBeVisible();
@@ -119,8 +120,28 @@ test("approved impact mockups show the impacted group", async ({ page }) => {
   }
 });
 
+test("approved served Review mockups show refresh controls", async ({
+  page,
+}) => {
+  for (const viewport of ["mobile", "desktop"]) {
+    const mockup = path.join(
+      repositoryRoot,
+      "examples/basic/generated/design/review/outcomes",
+      `served.${viewport}.html`,
+    );
+    await page.goto(pathToFileURL(mockup).href);
+    await expect(
+      page.getByRole("navigation", { name: "Mokabook modes" }),
+    ).toBeVisible();
+    await expect(page.getByText("Review", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Refresh comparison", { exact: true }),
+    ).toBeVisible();
+  }
+});
+
 test("compare pages switch modes and viewports", async ({ page }) => {
-  await page.goto(pathToFileURL(path.join(outDir, "index.html")).href);
+  await page.goto(reviewUrl);
   await page.locator('a:has-text("desktop")').first().click();
   await expect(page.locator(".mb-panes")).toHaveAttribute(
     "data-compare-mode",
@@ -135,13 +156,17 @@ test("compare pages switch modes and viewports", async ({ page }) => {
     "data-compare-mode",
     "overlay",
   );
+  await expect(page.locator(".mb-pane-label").first()).toBeHidden();
   await page.click('[data-mode="difference"]');
   await expect(page.locator(".mb-panes")).toHaveAttribute(
     "data-compare-mode",
     "difference",
   );
+  await expect(page.locator(".mb-pane-label").first()).toBeHidden();
   await page.click('a.mb-viewswitch-option:has-text("Mobile")');
   await expect(
-    page.locator('span.mb-viewswitch-option[aria-current="page"]'),
+    page
+      .getByRole("group", { name: "Viewport" })
+      .locator('span.mb-viewswitch-option[aria-current="page"]'),
   ).toHaveText("Mobile");
 });

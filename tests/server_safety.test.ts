@@ -14,18 +14,29 @@ test("Browse frames sandbox generated scripts away from the shell", async (conte
   context.after(() => removeFixture(fixture));
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
+  await fs.promises.writeFile(
+    path.join(fixture.mockupsDir, "active.svg"),
+    '<svg xmlns="http://www.w3.org/2000/svg"><script>globalThis.active = true</script></svg>',
+  );
   const server = await startCatalogueServer(config, {
     base: "origin/main",
     port: 0,
   });
   context.after(() => server.close());
 
-  const html = await (
-    await fetch(`${server.url}/view/screens/home.html`)
-  ).text();
+  const shell = await fetch(`${server.url}/view/screens/home.html`);
+  const html = await shell.text();
 
+  assert.equal(shell.headers.get("content-security-policy"), null);
   assert.match(html, /<iframe[^>]+sandbox=""/);
   assert.doesNotMatch(html, /allow-scripts/);
+
+  const raw = await fetch(`${server.url}/static/screens/home.mobile.html`);
+  assert.equal(raw.status, 200);
+  assert.equal(raw.headers.get("content-security-policy"), "sandbox");
+  const activeSvg = await fetch(`${server.url}/static/active.svg`);
+  assert.equal(activeSvg.status, 200);
+  assert.equal(activeSvg.headers.get("content-security-policy"), "sandbox");
 });
 
 test("static serving rejects symlinks into nested authored source roots", async (context) => {
@@ -52,4 +63,34 @@ test("static serving rejects symlinks into nested authored source roots", async 
   const response = await fetch(`${server.url}/static/exposed.tsx`);
 
   assert.equal(response.status, 404);
+});
+
+test("static serving rejects symlinked public files and directories", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const assets = path.join(fixture.mockupsDir, "assets");
+  await fs.promises.mkdir(assets);
+  await fs.promises.writeFile(path.join(assets, "public.txt"), "public\n");
+  await fs.promises.symlink(
+    "assets/public.txt",
+    path.join(fixture.mockupsDir, "linked.txt"),
+  );
+  await fs.promises.symlink("assets", path.join(fixture.mockupsDir, "linked"));
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  const server = await startCatalogueServer(config, {
+    base: "origin/main",
+    port: 0,
+  });
+  context.after(() => server.close());
+
+  assert.equal(
+    (await fetch(`${server.url}/static/assets/public.txt`)).status,
+    200,
+  );
+  assert.equal((await fetch(`${server.url}/static/linked.txt`)).status, 404);
+  assert.equal(
+    (await fetch(`${server.url}/static/linked/public.txt`)).status,
+    404,
+  );
 });

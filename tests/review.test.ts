@@ -256,6 +256,117 @@ test("Review writer will not replace an unowned directory or repository root", a
   );
 });
 
+test("Review writer requires an exact regular ownership marker", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const cases = ["directory", "symlink", "wrong-content"] as const;
+
+  for (const markerKind of cases) {
+    const out = path.join(fixture.root, `existing-${markerKind}`);
+    const marker = path.join(out, ".mokabook-review-artifact");
+    await fs.promises.mkdir(out);
+    await fs.promises.writeFile(path.join(out, "keep.txt"), "keep\n");
+    if (markerKind === "directory") {
+      await fs.promises.mkdir(marker);
+    } else if (markerKind === "symlink") {
+      await fs.promises.writeFile(
+        path.join(out, "marker-target"),
+        "schemaVersion=1\n",
+      );
+      await fs.promises.symlink("marker-target", marker);
+    } else {
+      await fs.promises.writeFile(marker, "owned-by-someone-else\n");
+    }
+
+    await assert.rejects(
+      () => writeReviewArtifact(new Map([["index.html", "safe"]]), out, config),
+      /unowned Review directory/,
+    );
+    assert.equal(
+      await fs.promises.readFile(path.join(out, "keep.txt"), "utf8"),
+      "keep\n",
+    );
+  }
+});
+
+test("Review writer rechecks ownership before installation", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const out = path.join(fixture.root, "appearing-output");
+  const files = {
+    *[Symbol.iterator]() {
+      fs.mkdirSync(out);
+      fs.writeFileSync(path.join(out, "keep.txt"), "keep\n");
+      yield ["index.html", "safe"] as const;
+    },
+  } as unknown as ReadonlyMap<string, string>;
+
+  await assert.rejects(
+    () => writeReviewArtifact(files, out, config),
+    /unowned Review directory/,
+  );
+  assert.equal(
+    await fs.promises.readFile(path.join(out, "keep.txt"), "utf8"),
+    "keep\n",
+  );
+});
+
+test("Review writer restores output swapped during the ownership check", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const out = path.join(fixture.root, "swapped-output");
+  const displaced = path.join(fixture.root, "displaced-owned-output");
+  await fs.promises.mkdir(out);
+  await fs.promises.writeFile(
+    path.join(out, ".mokabook-review-artifact"),
+    "schemaVersion=1\n",
+  );
+  await fs.promises.writeFile(path.join(out, "index.html"), "last good\n");
+
+  const rename = fs.promises.rename.bind(fs.promises);
+  let swapped = false;
+  context.mock.method(
+    fs.promises,
+    "rename",
+    async (source: fs.PathLike, destination: fs.PathLike) => {
+      if (!swapped && source === out) {
+        swapped = true;
+        await rename(out, displaced);
+        await fs.promises.mkdir(out);
+        await fs.promises.writeFile(
+          path.join(out, "keep.txt"),
+          "owned by user\n",
+        );
+      }
+      await rename(source, destination);
+    },
+  );
+
+  await assert.rejects(
+    () =>
+      writeReviewArtifact(
+        new Map([
+          [".mokabook-review-artifact", "schemaVersion=1\n"],
+          ["index.html", "replacement\n"],
+        ]),
+        out,
+        config,
+      ),
+    /unowned Review directory/,
+  );
+  assert.equal(
+    await fs.promises.readFile(path.join(out, "keep.txt"), "utf8"),
+    "owned by user\n",
+  );
+  assert.equal(
+    await fs.promises.readFile(path.join(displaced, "index.html"), "utf8"),
+    "last good\n",
+  );
+});
+
 async function git(cwd: string, arguments_: readonly string[]): Promise<void> {
   await execFileAsync("git", [...arguments_], { cwd });
 }

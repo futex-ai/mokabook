@@ -11,6 +11,7 @@ interface WorkflowStep {
   name?: string;
   run?: string;
   uses?: string;
+  with?: Readonly<Record<string, unknown>>;
 }
 
 interface WorkflowJob {
@@ -63,7 +64,30 @@ test("preview workflow deploys main and same-repository pull requests", async ()
   assert.match(source, /branch="pr-\$\{\{/);
   assert.match(source, /Mokabook preview/);
   assert.match(source, /deployment_trigger\.metadata\.branch/);
+  for (const job of [deployMain, deployPullRequest]) {
+    const checkout = job.steps.find((step) =>
+      step.uses?.startsWith("actions/checkout@"),
+    );
+    assert.equal(checkout?.with?.["fetch-depth"], 0);
+  }
   assertPinnedActions(workflow);
+});
+
+test("CI fetches the Git base used by Review verification", async () => {
+  const source = await fs.promises.readFile(
+    path.join(repositoryRoot, ".github", "workflows", "ci.yml"),
+    "utf8",
+  );
+  const workflow = parse(source) as Workflow;
+
+  for (const name of ["minimum-runtime", "release-runtime"]) {
+    const job = workflow.jobs[name];
+    assert.ok(job);
+    const checkout = job.steps.find((step) =>
+      step.uses?.startsWith("actions/checkout@"),
+    );
+    assert.equal(checkout?.with?.["fetch-depth"], 0);
+  }
 });
 
 test("browser checks support an isolated workspace port", async () => {

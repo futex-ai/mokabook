@@ -80,7 +80,7 @@ fall back to the registry. After the first release, a clean machine may use
 | Command              | Outcome                                                 |
 | -------------------- | ------------------------------------------------------- |
 | `mokabook`           | Build, serve, and watch using a stable development URL  |
-| `mokabook serve`     | Serve Browse; add `--no-watch` for one child process    |
+| `mokabook serve`     | Serve Browse and Review; `--no-watch` stays in-process  |
 | `mokabook build`     | Validate and transactionally write generated output     |
 | `mokabook check`     | Compare expected and committed bytes without writing    |
 | `mokabook review`    | Compare Git base/head screens and write a static Review |
@@ -101,13 +101,29 @@ All/Changed filter, linked breadcrumbs with hash-prefixed copyable ID chips,
 realistic phone and browser device chrome with an expand-to-overlay toggle,
 header viewport controls, use-case flows, a details inspector, id redirects,
 and watched updates.
-Review provides summary, side-by-side, overlay, and difference views as a
-static artifact. Screens with shared or declared dependency impact
+Choosing Review in the served shell lazily generates the configured Git
+comparison and opens its summary, side-by-side, overlay, and difference views
+without leaving Mokabook. `Refresh comparison` recomputes it and returns to the
+stable summary, as does a live reload of a comparison that no longer exists.
+`mokabook review` writes the same comparison as a disk-viewable static artifact.
+Watched updates invalidate the served comparison before Review reloads, and the
+server refuses to serve a cached artifact if its owned output directory is
+replaced or a captured file no longer matches its generated fingerprint. Files
+added after capture are not served. Review and repository-preview replacement
+require a regular, non-symlink ownership marker with the exact supported schema
+content; a marker name alone never authorizes directory replacement. The shared
+Review/preview transaction also verifies that the directory moved aside is the
+same owned directory it inspected, restoring or preserving it instead of
+deleting raced-in data. Public consumer assets must likewise be regular files
+reached without file or directory symlinks, and one validated file identity
+supplies Build, Serve, Review, compatibility, and preview reads. Screens with
+shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
 descendant of a directory is reported as the screen's impact evidence.
 
-Consumer documents run in sandboxed frames. Review keeps unmodified base/head
+Direct HTML and SVG document responses receive sandbox policy, and embedded
+mockup documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.
 Base resources must use portable relative URLs or explicit HTTP(S)/data URLs;
@@ -126,9 +142,10 @@ custom rule watches the repository root; an unowned public HTML file can still
 use an explicit watch rule, and configured stylesheets retain reload
 precedence. Shutdown interrupts replacement-watcher readiness, closes the
 candidate before draining the remaining lifecycle, and waits for child exit
-through graceful, terminate, and force-kill stages. Open Browse and Review pages
-connect to the versioned event stream and reload after a newer build or asset
-version arrives. A watched reload restores the current Browse search, filter,
+through graceful, terminate, and force-kill stages. It also aborts and drains
+an in-flight served Review generation before the HTTP server exits. Open Browse
+and Review pages connect to the versioned event stream and reload after a newer
+build or asset version arrives. A watched reload restores the current Browse search, filter,
 disclosures, viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and
 Forward.
@@ -198,6 +215,8 @@ forcing React peers to the consumer's one runtime.
 - **A link fails validation:** use `MockLink` for an entry id and a relative URL
   for a real generated/static file. Root-absolute and source-tree links are not
   portable.
+- **Review cannot compare the branch:** make sure the configured base ref exists
+  and the committed base contains Mokabook output, then use `Refresh comparison`.
 - **A watched edit fails:** fix the reported candidate build/config error. The
   last-good server remains active and adopts the next valid change.
 
@@ -216,10 +235,11 @@ npm run example:check
 cargo xtask check
 ```
 
-`npm run test:browser` drives the served Browse shell and static Review pages
-in Chromium via Playwright; it uses the installed Chrome channel by default and
-honors `PLAYWRIGHT_CHANNEL` for an alternative browser install. Parallel
-workspaces can set `MOKABOOK_PLAYWRIGHT_PORT` to an available port.
+`npm run test:browser` drives the served Browse and Review experience plus
+disk-viewable Review artifacts in Chromium via Playwright; it uses the
+installed Chrome channel by default and honors `PLAYWRIGHT_CHANNEL` for an
+alternative browser install. Parallel workspaces can set
+`MOKABOOK_PLAYWRIGHT_PORT` to an available port.
 
 `cargo xtask check` is the authoritative local gate. It includes formatting,
 lint, typechecking, unit/integration tests, the committed example, package
@@ -231,9 +251,12 @@ consumers, Chromium tests, and all Rust checks.
 `npm run preview:build` turns the real `examples/basic` Browse catalogue into a
 static Cloudflare Pages artifact at `.context/mokabook-preview`. It snapshots
 every catalogue route through Mokabook's HTTP server, copies the package shell
-and public example assets, preserves id redirects, and excludes the
-development-only live-reload connection. The artifact is not part of the npm
-package.
+and public example assets, preserves id redirects, and includes a complete
+static Review comparison against `origin/main`. Raw consumer pages and Review
+snapshots receive sandbox response rules, while the development-only
+live-reload connection is excluded. Custom output paths must remain beneath the
+real `.context` directory after symlink resolution. The artifact is not part of
+the npm package.
 
 The Preview workflow deploys `main` to the Cloudflare Pages project `mokabook`
 at `https://mokabook.pages.dev`. Same-repository, non-release pull requests use
@@ -282,8 +305,8 @@ recorded by the
 - [`src/config`](./src/config) — config discovery, loading, and confinement.
 - [`src/build`](./src/build) — single-graph bundling, compilation, links, check,
   and transactional writes.
-- [`src/server`](./src/server) — manifest-backed HTTP, the responsive shell,
-  and the watched child lifecycle.
+- [`src/server`](./src/server) — manifest-backed HTTP, lazy served Review,
+  the responsive shell, and the watched child lifecycle.
 - [`src/client`](./src/client) — progressive Browse navigation and versioned
   live updates served to the browser.
 - [`src/review`](./src/review) — Git extraction, comparison, ignore normalization,

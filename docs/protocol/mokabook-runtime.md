@@ -58,12 +58,42 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/view/<route>` for screens, use cases, and configured legacy pages;
 - `/id/<id>` as a canonical redirect for routed registry entries;
 - `/static/<path>` for generated fragments, legacy pages, and consumer assets;
-- `/review` for the configured Git comparison;
+- `/review` as the stable entry point for the configured Git comparison;
+- `/review/<artifact-path>` for its generated summary, compare pages,
+  snapshots, and assets;
 - package-owned client and update endpoints under `/__mokabook/`.
 
 All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
 returns its response headers and completes without opening or registering an
-event stream.
+event stream. Server-rendered documents and package-owned client, shell, and
+font responses use an explicit `no-cache` policy so local rebuilds cannot reuse
+stale runtime assets. Raw generated and Review-snapshot HTML and SVG responses
+also use `Content-Security-Policy: sandbox`, so opening their URLs directly
+cannot bypass the script-disabled frame boundary; shell-owned Browse and Review
+pages remain interactive.
+
+`/review` redirects to `/review/index.html`. The server generates the Review
+artifact on the first artifact request, coalesces concurrent first requests,
+and serves it from the configured in-repository Review output directory.
+`?refresh=1` regenerates the artifact transactionally before serving the
+requested page or asset. The visible refresh control targets the stable Review
+summary. If a regenerated artifact no longer contains a requested comparison
+page, the server redirects that stale page to the summary; missing snapshots,
+assets, and other paths remain not-found responses. Generation failures return
+a Review-specific error without taking down Browse, and invalid, traversing,
+or symlink-escaping Review paths never expose files outside the owned artifact.
+After generation, the
+server pins the artifact directory's filesystem identity and ownership marker;
+it also captures the generated file set and the summary/compare pages trusted
+to run shell controls. SHA-256 fingerprints pin every captured file, and the
+preview copier applies the same immutable-view rule. Every cached response
+revalidates the directory, ownership, and repository boundary. Ownership
+requires a regular, non-symlink marker whose bytes exactly match the supported
+schema marker; a marker directory, symlink, or different content is unowned.
+Review replacement records the owned output directory's filesystem identity,
+then verifies the moved backup has that same identity and marker before
+installation or deletion. A raced-in directory is restored when safe, or
+preserved at its recovery path. Later-added files are not served.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
@@ -130,10 +160,13 @@ shipped shell are recorded beside the design catalogue in the example notes.
 ## Watched Development
 
 `mokabook serve` watches by default; `--no-watch` serves one deterministic
-snapshot. Every Browse and Review document loads the package-owned browser client,
-which connects to the versioned event stream and reloads its current durable
-URL after a higher version arrives. Watch classification derives only from
-resolved config:
+snapshot. Every Browse document and each served Review summary/compare page
+loads the package-owned browser client, which connects to the versioned event
+stream and reloads its current durable URL after a higher version arrives.
+The server invalidates its cached Review before publishing that update, so the
+next Review request regenerates against the new workspace state. Review
+snapshots remain byte-unmodified and script-disabled. Watch
+classification derives only from resolved config:
 
 - the discovered or explicit config file reloads configuration, generated
   output, watch targets, and the child;
@@ -205,14 +238,20 @@ runs the same idempotent server close when its parent IPC channel disconnects,
 so an abruptly terminated parent cannot leave a listening orphan. Parent-driven
 shutdown first requests graceful IPC closure, then sends SIGTERM and SIGKILL at
 bounded intervals when necessary; the supervisor does not finish closing until
-the child exit notification arrives.
+the child exit notification arrives. HTTP shutdown rejects new Review work,
+destroys its pending responses, aborts the active generation through the Git
+repository, catalogue compilation, comparison, asset-read, and
+transactional-write boundaries,
+and waits for cleanup before completing.
 
 ## Review Comparison
 
-`mokabook review` compares the workspace with a configured base ref, defaulting
-to `origin/main`. It resolves the base to a commit and reads the committed
-`mockupsDir` tree from Git without checking out or rebuilding the base. Head
-artifacts come from the current working tree after `mokabook check` succeeds.
+`mokabook review` and served Review compare the workspace with a configured
+base ref, defaulting to `origin/main`. The CLI writes the artifact directly;
+Serve generates the same artifact lazily and offers an in-place refresh. Both
+resolve the base to a commit and read the committed `mockupsDir` tree from Git
+without checking out or rebuilding the base. Head artifacts come from the
+current working tree after `mokabook check` succeeds.
 
 Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
@@ -241,7 +280,9 @@ The engine emits a static, self-contained artifact directory with:
 
 Artifact pages inline the package-owned shell styles so the directory remains
 viewable without a server, and every embedded pane stays in a script-disabled
-sandbox.
+sandbox. When served, summary and compare responses add Browse/Review mode
+controls, a refresh action, and the live-update client; these additions do not
+rewrite the disk artifact or its before/after snapshots.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including
@@ -249,7 +290,9 @@ binary fonts and images, while explicit HTTP(S)/data resources remain external.
 Root-absolute, protocol-relative, and other scheme-qualified resource URLs are
 not portable in a disk-viewable artifact and fail Review instead of being
 silently omitted.
-Current-worktree resources must resolve to regular public files. Every base
+Current-worktree resources must resolve to regular public files without file or
+directory symlinks below `mockupsDir`; Review reads the same pinned identity
+used by Build, Serve, compatibility, and repository preview. Every base
 resource, including the pane document itself and each transitive dependency,
 must be a regular Git file. Neither side may read from configured entry or
 legacy source roots. Pane documents remain byte-unmodified and run in

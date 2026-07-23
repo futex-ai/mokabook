@@ -2,8 +2,8 @@
 
 ## Package Metadata
 
-`package.json` describes an unscoped public ESM package named `mokabook` with an
-initial development version of `0.0.0`, MIT licensing, Firna authorship, exact
+`package.json` describes an unscoped public ESM package named `mokabook` with the
+current development version `0.2.0`, MIT licensing, Firna authorship, exact
 repository/bugs/homepage metadata for `futex-ai/mokabook`, a Node engine floor,
 one `mokabook` bin, explicit exports/types, and a restrictive `files` allowlist.
 
@@ -37,6 +37,10 @@ to deterministic npm scripts and includes:
 - Playwright Browse and Review regressions using Chromium; and
 - Rust formatting, Clippy, tests, and file-length audits for `xtask`.
 
+The Node test runner caps file-level concurrency at four so heavyweight build,
+Git, preview, and server lifecycle suites cannot starve one another on hosts
+with many logical cores.
+
 Tests that mutate files use isolated temporary directories and clean up child
 processes. Package smokes execute the packed artifact, not the source tree or a
 workspace symlink. The temporary real-Accounting parity audit is release
@@ -52,12 +56,12 @@ gate on Ubuntu:
 - the minimum supported Node 22.14.0 with npm 11.7.0; and
 - release Node 24 with npm 11.7.0.
 
-Both install Rust 1.95.0, install Chromium, and run `cargo xtask check`. The
-`Required CI` aggregator fails unless both jobs succeed and is the branch-rule
-status to require. CI uses `npm ci` and the committed lockfile. Action revisions
-are immutable commit hashes with reviewed version comments; runtime versions
-are explicit. Fork pull requests receive no release secrets or write
-permissions.
+Both fetch full Git history so Review verification can resolve `origin/main`,
+install Rust 1.95.0 and Chromium, and run `cargo xtask check`. The `Required CI`
+aggregator fails unless both jobs succeed and is the branch-rule status to
+require. CI uses `npm ci` and the committed lockfile. Action revisions are
+immutable commit hashes with reviewed version comments; runtime versions are
+explicit. Fork pull requests receive no release secrets or write permissions.
 
 ## Preview Deployments
 
@@ -71,13 +75,25 @@ receive Cloudflare credentials or write-capable execution.
 
 `npm run preview:build` first rebuilds Mokabook and its committed basic
 consumer. The repository-only preview builder starts the real Browse server on
-an ephemeral loopback port and snapshots the home, review launcher, not-found,
-and every manifest-backed route. It copies the shell stylesheet, browser
-navigation modules, fonts, id redirects, and every validated public consumer
-asset into `.context/mokabook-preview`. Preview shell links use Cloudflare
-Pages' canonical extensionless HTML routes, and static deployments omit the
-watched server's live-update module. Artifact replacement is transactional and
-refuses to overwrite a directory without Mokabook's ownership marker.
+an ephemeral loopback port and snapshots the home, not-found, and every
+manifest-backed route. It also generates and copies the complete static Review
+artifact, including its comparison pages, snapshots, and assets. The deployment
+jobs fetch full repository history so the configured `origin/main` base is
+available. The artifact includes the shell stylesheet, browser navigation
+modules, fonts, id redirects, and every validated public consumer asset under
+`.context/mokabook-preview`. Preview shell links use Cloudflare Pages' canonical
+extensionless HTML routes, static deployments omit the watched server's
+live-update module, and response rules sandbox raw consumer and Review snapshot
+documents. Artifact replacement is transactional and refuses to overwrite a
+directory unless its regular, non-symlink ownership marker has the exact
+supported schema content. The shared Review/preview replacer verifies the
+directory's filesystem identity again after moving it to the backup path, and
+restores or preserves any unexpected directory instead of deleting it. Preview
+output confinement is checked both lexically and after resolving existing
+symlink parents; staging, backup, and installation use the resolved path beneath
+the real `.context` directory. Preview copies public assets through the same
+pinned regular-file resolver used by Build, Serve, Review, and compatibility,
+so symlinked assets are consistently absent.
 
 Closing a same-repository pull request marks its sticky comment inactive and
 attempts to delete all Cloudflare deployments carrying that PR branch alias.
@@ -140,8 +156,8 @@ Trusted publishing can be configured only after the npm package exists. The
 bootstrap sequence is therefore explicit and maintainer-controlled:
 
 1. Complete the GitHub repository rename to `futex-ai/mokabook`, merge the
-   reviewed implementation to `main` at version `0.0.0`, and confirm `Required
-CI` passed. Do not merge the first release PR yet.
+   reviewed implementation to `main` at the current manifest version, and
+   confirm `Required CI` passed. Do not merge the next release PR yet.
 2. Recheck that the unscoped `mokabook` name remains available. Pause for
    explicit maintainer approval because the first public publish is
    irreversible.
@@ -155,13 +171,13 @@ CI` passed. Do not merge the first release PR yet.
    the workflow's `npm publish` action.
 5. Verify the trusted relationship with the release workflow, then restrict
    traditional token publishing and remove obsolete npm automation tokens.
-6. Merge the release-please PR for `0.1.0`; confirm the workflow creates the
-   immutable tag/release and publishes the first supported consumer version
-   with provenance. Release-please treats the `0.0.0` manifest as unreleased
-   and would otherwise default the first version to `1.0.0`, so the config
-   carried a one-time `release-as: 0.1.0` override, removed after the release
-   published. Tags must be bare `vX.Y.Z` (`include-component-in-tag: false`)
-   because the release workflow only publishes refs of that shape.
+6. Merge the next release-please PR; confirm the workflow creates the immutable
+   tag/release and publishes the first supported consumer version with
+   provenance. The historical `0.0.0` bootstrap and one-time `0.1.0`
+   `release-as` transition are complete repository setup and are no longer
+   active release instructions. Tags must be bare `vX.Y.Z`
+   (`include-component-in-tag: false`) because the release workflow only
+   publishes refs of that shape.
 7. From a clean directory, verify package visibility, metadata, README,
    license, owners, provenance/signatures, dist tags, `npx mokabook --version`,
    and a minimal build/serve fixture.

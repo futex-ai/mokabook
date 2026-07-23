@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 
-import { build } from "esbuild";
+import { context, type BuildContext } from "esbuild";
 
 import type { RegistryDefinition } from "../authoring/types.js";
 import type { CompatibilityTransformer } from "../compatibility/types.js";
@@ -44,7 +44,9 @@ export interface LoadedGraph {
 /** Bundle and import all React-bearing consumer modules as one graph. */
 export async function loadConsumerGraph(
   config: ResolvedConfig,
+  signal?: AbortSignal,
 ): Promise<LoadedGraph> {
+  signal?.throwIfAborted();
   const entrySources = discoverEntryModules(config.entriesDir);
   const allLegacy = config.legacy
     ? discoverLegacySources(config.legacy.pagesDir, config.legacy.exclude)
@@ -56,8 +58,10 @@ export async function loadConsumerGraph(
     path.join(os.tmpdir(), "mokabook-graph-"),
   );
   const outputPath = path.join(temporaryDir, "consumer.cjs");
+  let buildContext: BuildContext | undefined;
+  let cancelBuild: (() => void) | undefined;
   try {
-    await build({
+    buildContext = await context({
       absWorkingDir: path.dirname(config.configPath),
       alias: config.moduleResolution.aliases,
       bundle: true,
@@ -85,6 +89,14 @@ export async function loadConsumerGraph(
         : {}),
       target: "node22",
     });
+    cancelBuild = (): void => {
+      const activeContext = buildContext;
+      if (activeContext) void activeContext.cancel().catch(() => undefined);
+    };
+    signal?.addEventListener("abort", cancelBuild, { once: true });
+    signal?.throwIfAborted();
+    await buildContext.rebuild();
+    signal?.throwIfAborted();
     const imported = createRequire(import.meta.url)(outputPath) as {
       compatibilityTransformer?: unknown;
       definitions: unknown[];
@@ -111,6 +123,7 @@ export async function loadConsumerGraph(
         "compatibility transformer module must default-export a function",
       );
     }
+    signal?.throwIfAborted();
     return {
       ...(typeof imported.compatibilityTransformer === "function"
         ? {
@@ -132,6 +145,7 @@ export async function loadConsumerGraph(
       renderer: imported.renderer as Renderer,
     };
   } catch (error) {
+    signal?.throwIfAborted();
     if (error instanceof MokabookError) throw error;
     throw new MokabookError(
       "build-invalid",
@@ -141,6 +155,8 @@ export async function loadConsumerGraph(
       },
     );
   } finally {
+    if (cancelBuild) signal?.removeEventListener("abort", cancelBuild);
+    await buildContext?.dispose();
     await fs.promises.rm(temporaryDir, { force: true, recursive: true });
   }
 }

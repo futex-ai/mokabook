@@ -26,14 +26,23 @@ export interface GitCommandRunner {
 
 /** Operating-system Git subprocess implementation. */
 export class NodeGitCommandRunner implements GitCommandRunner {
-  constructor(private readonly cwd: string) {}
+  constructor(
+    private readonly cwd: string,
+    private readonly signal?: AbortSignal,
+    private readonly executable = "git",
+  ) {}
 
   run(arguments_: readonly string[]): Promise<string> {
     return new Promise((resolve, reject) => {
       execFile(
-        "git",
+        this.executable,
         [...arguments_],
-        { cwd: this.cwd, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+        {
+          cwd: this.cwd,
+          encoding: "utf8",
+          maxBuffer: 64 * 1024 * 1024,
+          signal: this.signal,
+        },
         (error, stdout) => {
           if (error) reject(error);
           else resolve(stdout);
@@ -45,9 +54,14 @@ export class NodeGitCommandRunner implements GitCommandRunner {
   runBytes(arguments_: readonly string[]): Promise<Uint8Array> {
     return new Promise((resolve, reject) => {
       execFile(
-        "git",
+        this.executable,
         [...arguments_],
-        { cwd: this.cwd, encoding: "buffer", maxBuffer: 64 * 1024 * 1024 },
+        {
+          cwd: this.cwd,
+          encoding: "buffer",
+          maxBuffer: 64 * 1024 * 1024,
+          signal: this.signal,
+        },
         (error, stdout) => {
           if (error) reject(error);
           else resolve(Buffer.from(stdout));

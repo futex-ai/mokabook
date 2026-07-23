@@ -1,10 +1,21 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { isPublicStaticFile } from "../../dist/config/public_files.js";
+import {
+  ARTIFACT_MARKER_CONTENT,
+  hasArtifactOwnershipMarker,
+  PREVIEW_ARTIFACT_MARKER,
+  replaceOwnedDirectory,
+} from "../../dist/artifact_ownership.js";
+import { listPublicStaticFiles } from "../../dist/config/public_files.js";
 import { loadConfig } from "../../dist/config/load.js";
+import { isInside, projectRealPath } from "../../dist/config/paths.js";
 import { readManifest } from "../../dist/registry/manifest.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
+import {
+  captureReviewArtifact,
+  readReviewArtifactFile,
+} from "../../dist/server/review_artifact_files.js";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const contextRoot = path.join(repositoryRoot, ".context");
@@ -12,7 +23,6 @@ const configPath = path.join(
   repositoryRoot,
   "examples/basic/mokabook.config.ts",
 );
-const markerName = ".mokabook-preview-artifact";
 const liveUpdateScript =
   '<script src="/__mokabook/client/browser.js" type="module"></script>';
 const outputDir = outputArgument(process.argv.slice(2));
@@ -21,11 +31,12 @@ await buildPreview(outputDir);
 process.stdout.write(`Built Mokabook preview at ${outputDir}.\n`);
 
 async function buildPreview(output) {
-  assertSafeOutput(output);
-  assertOwnedOutput(output);
-  await fs.promises.mkdir(path.dirname(output), { recursive: true });
+  await fs.promises.mkdir(contextRoot, { recursive: true });
+  const resolvedOutput = resolveSafeOutput(output);
+  assertOwnedOutput(resolvedOutput);
+  await fs.promises.mkdir(path.dirname(resolvedOutput), { recursive: true });
   const stage = await fs.promises.mkdtemp(
-    path.join(path.dirname(output), ".mokabook-preview-stage-"),
+    path.join(path.dirname(resolvedOutput), ".mokabook-preview-stage-"),
   );
   try {
     const config = await loadConfig(repositoryRoot, configPath);
@@ -34,9 +45,11 @@ async function buildPreview(output) {
       base: "origin/main",
       port: 0,
     });
+    let reviewArtifact;
     try {
       await capturePage(server.url, "/", stage, "index.html");
-      await capturePage(server.url, "/review", stage, "review/index.html");
+      await generateReview(server.url);
+      reviewArtifact = captureReviewArtifact(config);
       for (const entry of manifest.entries) {
         if (entry.kind === "collection") continue;
         await capturePage(
@@ -65,14 +78,25 @@ async function buildPreview(output) {
     } finally {
       await server.close();
     }
+    if (!reviewArtifact) throw new Error("preview Review was not captured");
+    await copyReviewArtifact(config, reviewArtifact, stage);
     await copyPublicFiles(config, stage);
+    await writeText(stage, "_headers", headers());
     await writeText(stage, "_redirects", redirects(manifest.entries));
-    await writeText(stage, markerName, "schemaVersion=1\n");
-    await installArtifact(stage, output);
+    await writeText(stage, PREVIEW_ARTIFACT_MARKER, ARTIFACT_MARKER_CONTENT);
+    await installArtifact(stage, resolvedOutput);
   } catch (error) {
     await fs.promises.rm(stage, { force: true, recursive: true });
     throw error;
   }
+}
+
+async function generateReview(serverUrl) {
+  const response = await fetch(`${serverUrl}/review/index.html`);
+  if (!response.ok) {
+    throw new Error(`preview Review returned ${response.status}`);
+  }
+  await response.arrayBuffer();
 }
 
 async function captureAssets(serverUrl, stage) {
@@ -115,26 +139,26 @@ async function capturePage(
   await writeText(stage, relativePath, staticPage(html));
 }
 
-async function copyPublicFiles(config, stage) {
-  for (const candidate of await regularFiles(config.mockupsDir)) {
-    if (!isPublicStaticFile(candidate, config)) continue;
-    const relative = path.relative(config.mockupsDir, candidate);
-    const target = path.join(stage, "static", relative);
-    await fs.promises.mkdir(path.dirname(target), { recursive: true });
-    await fs.promises.copyFile(candidate, target);
+async function copyReviewArtifact(config, artifact, stage) {
+  for (const relative of [...artifact.files.keys()].sort()) {
+    const content = readReviewArtifactFile(config, artifact, relative);
+    if (!content) {
+      throw new Error(
+        `preview Review file changed after generation: ${relative}`,
+      );
+    }
+    await writeFile(stage, path.join("review", relative), content);
   }
 }
 
-async function regularFiles(root) {
-  const files = [];
-  const entries = await fs.promises.readdir(root, { withFileTypes: true });
-  entries.sort((left, right) => left.name.localeCompare(right.name));
-  for (const entry of entries) {
-    const candidate = path.join(root, entry.name);
-    if (entry.isDirectory()) files.push(...(await regularFiles(candidate)));
-    else if (entry.isFile()) files.push(candidate);
+async function copyPublicFiles(config, stage) {
+  for (const file of listPublicStaticFiles(config)) {
+    await writeFile(stage, path.join("static", file.route), file.content);
   }
-  return files;
+}
+
+function headers() {
+  return "/static/*\n  Content-Security-Policy: sandbox\n\n/review/snapshots/*\n  Content-Security-Policy: sandbox\n";
 }
 
 function redirects(entries) {
@@ -155,31 +179,25 @@ function staticPage(html) {
 }
 
 async function installArtifact(stage, output) {
-  if (!fs.existsSync(output)) {
-    await fs.promises.rename(stage, output);
-    return;
-  }
-  const backup = await fs.promises.mkdtemp(
-    path.join(path.dirname(output), ".mokabook-preview-backup-"),
-  );
-  await fs.promises.rmdir(backup);
-  await fs.promises.rename(output, backup);
-  try {
-    await fs.promises.rename(stage, output);
-  } catch (error) {
-    await fs.promises.rename(backup, output);
-    throw error;
-  }
-  await fs.promises.rm(backup, { force: true, recursive: true });
+  await replaceOwnedDirectory({
+    backupPrefix: ".mokabook-preview-backup-",
+    markerName: PREVIEW_ARTIFACT_MARKER,
+    output,
+    ownershipError: `refusing to replace unowned preview directory: ${output}`,
+    stage,
+  });
 }
 
 function assertOwnedOutput(output) {
-  if (fs.existsSync(output) && !fs.existsSync(path.join(output, markerName))) {
+  if (
+    fs.existsSync(output) &&
+    !hasArtifactOwnershipMarker(output, PREVIEW_ARTIFACT_MARKER)
+  ) {
     throw new Error(`refusing to replace unowned preview directory: ${output}`);
   }
 }
 
-function assertSafeOutput(output) {
+function resolveSafeOutput(output) {
   const relative = path.relative(contextRoot, output);
   if (
     relative === "" ||
@@ -188,6 +206,17 @@ function assertSafeOutput(output) {
   ) {
     throw new Error(`preview output must be inside ${contextRoot}`);
   }
+  const realContextRoot = fs.realpathSync(contextRoot);
+  const realOutput = projectRealPath(output);
+  if (
+    realOutput === realContextRoot ||
+    !isInside(realContextRoot, realOutput)
+  ) {
+    throw new Error(
+      `preview output resolves outside ${contextRoot} through a symlink`,
+    );
+  }
+  return realOutput;
 }
 
 function outputArgument(arguments_) {

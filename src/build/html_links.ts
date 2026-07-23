@@ -1,7 +1,6 @@
-import fs from "node:fs";
 import path from "node:path";
 
-import { isPublicStaticFile } from "../config/public_files.js";
+import { readPublicStaticFile } from "../config/public_files.js";
 import { isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
@@ -182,12 +181,13 @@ function loadResource(
     return htmlResource(extractHtmlReferences(generated));
   if (pendingOrphans.has(route)) return undefined;
   const candidate = path.resolve(config.mockupsDir, route);
-  if (!isPublicStaticFile(candidate, config)) return undefined;
+  const file = readPublicStaticFile(candidate, config);
+  if (!file) return undefined;
   const extension = path.posix.extname(route).toLowerCase();
   if (extension !== ".css" && extension !== ".html" && extension !== ".htm") {
     return { anchors: new Set(), references: [] };
   }
-  const content = fs.readFileSync(candidate, "utf8");
+  const content = file.content.toString("utf8");
   return extension === ".css"
     ? {
         anchors: new Set(),

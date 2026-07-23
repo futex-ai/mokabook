@@ -163,6 +163,35 @@ test("framework-emitted stylesheet URLs encode path segments", async (context) =
   assert.match(mobile, /href="\.\.\/theme%20%231\.css"/);
 });
 
+test("stylesheet rules reject symlinked public files", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  await fs.promises.writeFile(
+    path.join(fixture.mockupsDir, "theme.css"),
+    "body { color: black; }\n",
+  );
+  await fs.promises.symlink(
+    "theme.css",
+    path.join(fixture.mockupsDir, "linked.css"),
+  );
+  await fs.promises.writeFile(
+    fixture.configPath,
+    `export default {
+  entriesDir: "entries",
+  mockupsDir: "mockups",
+  repoRoot: ".",
+  stylesheets: [{ match: "**/*.html", stylesheets: ["linked.css"] }]
+};
+`,
+  );
+  const config = await loadConfig(fixture.root);
+
+  await assert.rejects(
+    () => compileCatalogue(config),
+    /stylesheet does not exist/,
+  );
+});
+
 test("stylesheet rules match catalogue routes for every viewport", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

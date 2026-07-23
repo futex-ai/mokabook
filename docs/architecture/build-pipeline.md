@@ -128,7 +128,10 @@ Catalogue routes use portable URL-unreserved segments, reject Windows device
 filename stems, and end in `.html`. Framework-generated links and redirects
 still percent-encode every path segment defensively; static asset paths may
 therefore contain characters such as spaces without corrupting HTML attributes
-or URL query/fragment boundaries.
+or URL query/fragment boundaries. Public assets must be regular files reached
+without symlinks below `mockupsDir`. One resolver validates and pins the file
+identity used by Build, Serve, Review, compatibility discovery, and preview
+copying, preventing those surfaces from disagreeing about an asset.
 
 `build` writes a same-filesystem staging tree, backs up only files identified by
 Mokabook's generated header and a source path beneath this config's authored

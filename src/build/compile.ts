@@ -26,8 +26,11 @@ export interface Compilation {
 /** Compile all expected bytes without mutating consumer output. */
 export async function compileCatalogue(
   config: ResolvedConfig,
+  signal?: AbortSignal,
 ): Promise<Compilation> {
-  const graph = await loadConsumerGraph(config);
+  signal?.throwIfAborted();
+  const graph = await loadConsumerGraph(config, signal);
+  signal?.throwIfAborted();
   const registry = prepareRegistry(graph.definitions, config);
   const outputs = renderFragments(registry.entries, graph.renderer, config);
   const legacy = renderLegacyPages(config, graph);
@@ -47,6 +50,7 @@ export async function compileCatalogue(
     ),
   );
   for (const page of legacy) {
+    signal?.throwIfAborted();
     if (routedEntries.has(page.route) || fragmentRoutes.has(page.route)) {
       throw new MokabookError(
         "build-invalid",
@@ -59,6 +63,7 @@ export async function compileCatalogue(
       `${generatedHeader(page.sourceRelativePath)}${page.content}`,
     );
   }
+  signal?.throwIfAborted();
   for (const route of routedEntries) {
     if (fragmentRoutes.has(route)) {
       throw new MokabookError(
@@ -67,8 +72,10 @@ export async function compileCatalogue(
       );
     }
   }
+  signal?.throwIfAborted();
   transformCompatibilityDocuments(outputs, registry.entries, config, graph);
   for (const [route, content] of outputs) {
+    signal?.throwIfAborted();
     normalizeSingleDocument(content, route);
   }
   const legacyManifest: ManifestLegacyPage[] = legacy.map((page) => ({
@@ -78,7 +85,9 @@ export async function compileCatalogue(
   const manifest = createManifest(registry.entries, legacyManifest);
   parseManifest(manifest);
   outputs.set(MANIFEST_NAME, serializeManifest(manifest));
+  signal?.throwIfAborted();
   validateHtmlLinks(outputs, config);
   validateGeneratedOutputPaths(outputs.keys(), config);
+  signal?.throwIfAborted();
   return { manifest, outputs };
 }

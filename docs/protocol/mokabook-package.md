@@ -48,6 +48,15 @@ Common options include `--config <path>`. Serve accepts `--port`, `--base`,
 the package name belongs to Mokabook; docs must show npx arguments in a form
 that is unambiguous to current npm.
 
+Serve exposes the same Review artifact under `/review`. It generates the
+comparison lazily on first entry, uses the resolved Serve base and configured
+Review output directory, and regenerates when the reviewer chooses
+`Refresh comparison`, returning to the stable summary. Watched updates
+invalidate an existing served comparison before the browser reloads; a stale
+comparison path that disappears in the new artifact also returns to the
+summary. The standalone `review` command remains the way to write and inspect
+the artifact without a running server.
+
 Serve uses `4173` as its default starting port. An occupied concrete starting
 port advances one at a time through `65535` until binding succeeds; exhausting
 that range fails. Port `0` delegates free-port selection to the operating
@@ -233,6 +242,11 @@ CSS, and transitively referenced HTML/CSS must likewise resolve to public
 static files beneath `mockupsDir` that remain after the pending build. An owned
 generated file absent from the next output set is a pending orphan, never a
 valid link or resource target merely because it still exists before commit.
+Public static files are regular files reached without a symlink in either the
+file or its path below `mockupsDir`; symlinked files and directories are not
+public assets. Build validation, compatibility route inventory, Serve, Review,
+and repository preview use one resolver that pins the validated file identity
+for every read.
 
 All public exports ship ESM JavaScript and declarations usable by NodeNext and
 bundler TypeScript resolution. The package export map and packed-tarball tests

@@ -1,9 +1,8 @@
 // Route-owned main-region rendering for the persistent Mokabook shell: the
-// home, missing-route, review-launcher, and target views, plus the title and
+// home, missing-route, and target views, plus the title and
 // active-route helpers the document scaffold and progressive navigation use.
 
 import type { Catalogue } from "../catalogue.js";
-import type { ShellContext } from "./context.js";
 import { DetailsPanel } from "./details.js";
 import { ScreenHead, targetHead, ViewportSwitch } from "./head.js";
 import { EmptyStage, TargetStage } from "./stages.js";
@@ -13,7 +12,6 @@ import type { RouteTarget } from "./target.js";
 export type ShellView =
   | { kind: "home" }
   | { kind: "missing"; requested: string }
-  | { kind: "review" }
   | { kind: "target"; target: RouteTarget };
 
 function TargetView(props: { catalogue: Catalogue; target: RouteTarget }) {
@@ -80,28 +78,6 @@ function MissingView(props: { requested: string }) {
   );
 }
 
-function ReviewLauncherView(props: { base: string }) {
-  return (
-    <>
-      <p className="mbk-basewatch">
-        <span aria-hidden="true" className="mbk-basewatch-dot" />
-        Comparing this branch with <strong>{props.base}</strong>
-      </p>
-      <EmptyStage heading="Mokabook review">
-        <p>
-          Generate the static comparison for this branch, then open its report:
-        </p>
-        <p>
-          <code className="mbk-code">mokabook review --base {props.base}</code>
-        </p>
-        <a className="mbk-empty-link" href="/">
-          Browse the catalogue
-        </a>
-      </EmptyStage>
-    </>
-  );
-}
-
 /** The active catalogue route for a shell view, when it has one. */
 export function activeRouteForView(view: ShellView): string | undefined {
   if (view.kind !== "target") {
@@ -120,18 +96,11 @@ export function viewTitle(catalogue: Catalogue, view: ShellView): string {
   if (view.kind === "missing") {
     return "Not found · Mokabook";
   }
-  if (view.kind === "review") {
-    return "Review · Mokabook";
-  }
   return `${targetHead(catalogue, view.target).title} · Mokabook`;
 }
 
 /** Render the only region replaced by client-side Browse navigation. */
-export function ShellMain(props: {
-  catalogue: Catalogue;
-  context: ShellContext;
-  view: ShellView;
-}) {
+export function ShellMain(props: { catalogue: Catalogue; view: ShellView }) {
   return (
     <main className="mbk-main" data-mokabook-view="" id="mb-main" tabIndex={-1}>
       {props.view.kind === "home" ? (
@@ -139,9 +108,6 @@ export function ShellMain(props: {
       ) : null}
       {props.view.kind === "missing" ? (
         <MissingView requested={props.view.requested} />
-      ) : null}
-      {props.view.kind === "review" ? (
-        <ReviewLauncherView base={props.context.base} />
       ) : null}
       {props.view.kind === "target" ? (
         <TargetView catalogue={props.catalogue} target={props.view.target} />

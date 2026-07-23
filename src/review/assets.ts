@@ -1,6 +1,6 @@
-import fs from "node:fs";
 import path from "node:path";
 
+import { readPublicStaticFile } from "../config/public_files.js";
 import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
@@ -14,38 +14,20 @@ import type { ReviewArtifactContent } from "./types.js";
 
 /** Filesystem boundary for current-worktree Review assets. */
 export interface ReviewAssetReader {
-  read(route: string): Promise<Uint8Array>;
+  read(route: string, signal?: AbortSignal): Promise<Uint8Array>;
 }
 
 /** Confined filesystem implementation for current-worktree Review assets. */
 export class FileSystemReviewAssetReader implements ReviewAssetReader {
   constructor(private readonly config: ResolvedConfig) {}
 
-  async read(route: string): Promise<Uint8Array> {
+  async read(route: string, signal?: AbortSignal): Promise<Uint8Array> {
+    signal?.throwIfAborted();
     const candidate = assertPublicStaticRoute(route, this.config);
-    try {
-      const [realRoot, realCandidate] = await Promise.all([
-        fs.promises.realpath(this.config.mockupsDir),
-        fs.promises.realpath(candidate),
-      ]);
-      const sourceRoots = await Promise.all([
-        fs.promises.realpath(this.config.entriesDir),
-        ...(this.config.legacy
-          ? [fs.promises.realpath(this.config.legacy.pagesDir)]
-          : []),
-      ]);
-      if (
-        !isInside(realRoot, realCandidate) ||
-        sourceRoots.some((root) => isInside(root, realCandidate)) ||
-        !(await fs.promises.stat(realCandidate)).isFile()
-      ) {
-        throw assetError(route, "not a public static file");
-      }
-      return await fs.promises.readFile(realCandidate);
-    } catch (error) {
-      if (error instanceof MokabookError) throw error;
-      throw assetError(route, errorMessage(error), error);
-    }
+    const file = readPublicStaticFile(candidate, this.config);
+    signal?.throwIfAborted();
+    if (!file) throw assetError(route, "not a public static file");
+    return file.content;
   }
 }
 
@@ -58,17 +40,22 @@ export class GitReviewAssetReader implements ReviewAssetReader {
     private readonly mockupsPrefix: string,
   ) {}
 
-  async read(route: string): Promise<Uint8Array> {
+  async read(route: string, signal?: AbortSignal): Promise<Uint8Array> {
+    signal?.throwIfAborted();
     assertPublicStaticRoute(route, this.config);
     const repoPath =
       this.mockupsPrefix === "" ? route : `${this.mockupsPrefix}/${route}`;
     try {
       const kind = await this.git.fileKind(this.commit, repoPath);
+      signal?.throwIfAborted();
       if (kind !== "regular") {
         throw assetError(route, `not a regular Git file (${kind})`);
       }
-      return await this.git.readFileBytes(this.commit, repoPath);
+      const content = await this.git.readFileBytes(this.commit, repoPath);
+      signal?.throwIfAborted();
+      return content;
     } catch (error) {
+      signal?.throwIfAborted();
       if (error instanceof MokabookError && error.code === "review-invalid") {
         throw error;
       }
@@ -82,21 +69,26 @@ export async function copySnapshotDependencies(
   files: Map<string, ReviewArtifactContent>,
   side: "after" | "before",
   seedRoutes: ReadonlySet<string>,
-  read: (route: string) => Promise<ReviewArtifactContent>,
+  read: (route: string, signal?: AbortSignal) => Promise<ReviewArtifactContent>,
+  signal?: AbortSignal,
 ): Promise<void> {
+  signal?.throwIfAborted();
   const queued = [...seedRoutes].sort();
   const seen = new Set<string>();
   while (queued.length > 0) {
+    signal?.throwIfAborted();
     const route = queued.shift();
     if (!route || seen.has(route)) continue;
     seen.add(route);
     const artifactPath = snapshotPath(side, route);
     let content = files.get(artifactPath);
     if (content === undefined) {
-      content = await read(route);
+      content = await read(route, signal);
+      signal?.throwIfAborted();
       addArtifactFile(files, artifactPath, content);
     }
     for (const dependency of referencedRoutes(route, content)) {
+      signal?.throwIfAborted();
       if (!seen.has(dependency) && !queued.includes(dependency)) {
         queued.push(dependency);
         queued.sort();

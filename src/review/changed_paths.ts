@@ -16,9 +16,12 @@ export async function reviewChangedPaths(
   commit: string,
   config: ResolvedConfig,
   outDir: string,
+  signal?: AbortSignal,
 ): Promise<readonly string[]> {
+  signal?.throwIfAborted();
   const excludedPaths = outputPaths(config.repoRoot, outDir);
   const changed = await git.changedPaths(commit, excludedPaths);
+  signal?.throwIfAborted();
   return [...new Set(changed)]
     .filter(
       (candidate) =>

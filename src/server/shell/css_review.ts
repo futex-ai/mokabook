@@ -104,6 +104,14 @@ export const SHELL_REVIEW_CSS = `
   gap: 0.6rem;
 }
 
+.mb-served-reviewbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
 .mb-panes {
   display: grid;
   gap: 1rem;
@@ -156,6 +164,11 @@ export const SHELL_REVIEW_CSS = `
 .mb-panes[data-compare-mode="overlay"] .mb-pane,
 .mb-panes[data-compare-mode="difference"] .mb-pane {
   grid-area: 1 / 1;
+}
+
+.mb-panes[data-compare-mode="overlay"] .mb-pane-label,
+.mb-panes[data-compare-mode="difference"] .mb-pane-label {
+  display: none;
 }
 
 .mb-panes[data-compare-mode="overlay"] .mb-pane--after {

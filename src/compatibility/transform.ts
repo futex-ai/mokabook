@@ -5,8 +5,7 @@ import {
   rewriteMockLinks,
   logicalArtifactRoutes,
 } from "../build/mock_links.js";
-import { walkFiles } from "../build/discovery.js";
-import { isPublicStaticFile } from "../config/public_files.js";
+import { listPublicStaticFiles } from "../config/public_files.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
@@ -72,11 +71,8 @@ function availablePublicRoutes(
   const pendingOrphans = new Set(
     pendingGeneratedOrphanRoutes(config, nextRoutes),
   );
-  const publicRoutes = walkFiles(config.mockupsDir)
-    .filter((candidate) => isPublicStaticFile(candidate, config))
-    .map((candidate) =>
-      toPosixPath(path.relative(config.mockupsDir, candidate)),
-    )
+  const publicRoutes = listPublicStaticFiles(config)
+    .map((file) => file.route)
     .filter((route) => !pendingOrphans.has(route));
   return [...new Set([...nextRoutes, ...publicRoutes])].sort();
 }

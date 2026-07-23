@@ -11,8 +11,7 @@ import { CatalogueNav } from "./nav.js";
 import { ShellMain, viewTitle } from "./views.js";
 import type { ShellView } from "./views.js";
 
-function TopBar(props: { context: ShellContext }) {
-  const browse = props.context.mode === "browse";
+function TopBar() {
   return (
     <header className="mbk-topbar">
       <button
@@ -31,32 +30,25 @@ function TopBar(props: { context: ShellContext }) {
         </span>
         Mokabook
       </a>
-      {browse ? (
-        <div className="mbk-search">
-          <span aria-hidden="true">⌕</span>
-          <input
-            aria-label="Search screens"
-            data-mokabook-search=""
-            placeholder="Search screens…"
-            type="search"
-          />
-        </div>
-      ) : null}
+      <div className="mbk-search">
+        <span aria-hidden="true">⌕</span>
+        <input
+          aria-label="Search screens"
+          data-mokabook-search=""
+          placeholder="Search screens…"
+          type="search"
+        />
+      </div>
       <nav aria-label="Mokabook modes" className="mbk-modes">
         <a
-          aria-current={browse ? "page" : undefined}
-          className={browse ? "mbk-mode active" : "mbk-mode"}
+          aria-current="page"
+          className="mbk-mode active"
           data-mokabook-mode=""
           href="/"
         >
           Browse
         </a>
-        <a
-          aria-current={browse ? undefined : "page"}
-          className={browse ? "mbk-mode" : "mbk-mode active"}
-          data-mokabook-mode=""
-          href="/review"
-        >
+        <a className="mbk-mode" data-mokabook-mode="" href="/review">
           Review
         </a>
       </nav>
@@ -83,10 +75,10 @@ export function renderShellPage(
           <a className="mbk-skip-link" href="#mb-main">
             Skip to content
           </a>
-          <TopBar context={context} />
+          <TopBar />
           <div className="mbk-body">
             <CatalogueNav context={context} manifest={catalogue.manifest} />
-            <ShellMain catalogue={catalogue} context={context} view={view} />
+            <ShellMain catalogue={catalogue} view={view} />
           </div>
           <p
             aria-atomic="true"

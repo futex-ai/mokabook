@@ -20,21 +20,34 @@ export async function runReview(
   config: ResolvedConfig,
   baseRef: string,
   outDir: string,
-  git: GitClient = new RepositoryGitClient(
-    new NodeGitCommandRunner(config.repoRoot),
-  ),
+  git: GitClient | undefined = undefined,
   outputStore: GeneratedOutputStore = new FileSystemGeneratedOutputStore(),
+  signal?: AbortSignal,
 ): Promise<ReviewResult> {
+  signal?.throwIfAborted();
   validateReviewOut(outDir, config, "Review output", "review-invalid");
-  const compilation = await compileCatalogue(config);
+  const client =
+    git ??
+    new RepositoryGitClient(new NodeGitCommandRunner(config.repoRoot, signal));
+  const compilation = await compileCatalogue(config, signal);
+  signal?.throwIfAborted();
   outputStore.check(compilation, config);
   const artifact = await compareReview(
     compilation,
     config,
-    git,
+    client,
     baseRef,
     outDir,
+    undefined,
+    signal,
   );
-  await writeReviewArtifact(renderReviewArtifact(artifact), outDir, config);
+  signal?.throwIfAborted();
+  await writeReviewArtifact(
+    renderReviewArtifact(artifact),
+    outDir,
+    config,
+    signal,
+  );
+  signal?.throwIfAborted();
   return artifact.result;
 }

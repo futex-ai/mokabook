@@ -37,15 +37,20 @@ export async function compareReview(
   baseRef: string,
   outDir = config.review.outDir,
   assetReader: ReviewAssetReader = new FileSystemReviewAssetReader(config),
+  signal?: AbortSignal,
 ): Promise<ReviewArtifact> {
+  signal?.throwIfAborted();
   const baseCommit = await git.resolveRef(baseRef);
-  const baseManifest = await readBaseManifest(git, baseCommit, config);
+  signal?.throwIfAborted();
+  const baseManifest = await readBaseManifest(git, baseCommit, config, signal);
   const changedPaths = await reviewChangedPaths(
     git,
     baseCommit,
     config,
     outDir,
+    signal,
   );
+  signal?.throwIfAborted();
   const mockupsPrefix = toPosixPath(
     path.relative(config.repoRoot, config.mockupsDir),
   );
@@ -70,6 +75,7 @@ export async function compareReview(
   );
   const screens: ScreenReview[] = [];
   for (const route of routes) {
+    signal?.throwIfAborted();
     const base = baseByRoute.get(route);
     const head = headByRoute.get(route);
     screens.push(
@@ -83,16 +89,28 @@ export async function compareReview(
         files,
         baseSeeds,
         headSeeds,
+        signal,
       ),
     );
   }
-  await copySnapshotDependencies(files, "before", baseSeeds, (route) =>
-    baseAssetReader.read(route),
+  await copySnapshotDependencies(
+    files,
+    "before",
+    baseSeeds,
+    (route, activeSignal) => baseAssetReader.read(route, activeSignal),
+    signal,
   );
-  await copySnapshotDependencies(files, "after", headSeeds, async (route) => {
-    const generated = compilation.outputs.get(route);
-    return generated ?? assetReader.read(route);
-  });
+  await copySnapshotDependencies(
+    files,
+    "after",
+    headSeeds,
+    async (route, activeSignal) => {
+      const generated = compilation.outputs.get(route);
+      return generated ?? assetReader.read(route, activeSignal);
+    },
+    signal,
+  );
+  signal?.throwIfAborted();
   const result: ReviewResult = {
     baseCommit,
     baseRef,
@@ -115,17 +133,23 @@ async function compareScreen(
   files: Map<string, ReviewArtifactContent>,
   baseSeeds: Set<string>,
   headSeeds: Set<string>,
+  signal?: AbortSignal,
 ): Promise<ScreenReview> {
+  signal?.throwIfAborted();
   const entry = head ?? base;
   if (!entry)
     throw new MokabookError("review-invalid", "comparison route has no screen");
   const viewports: ViewportReview[] = [];
   for (const viewport of ["mobile", "desktop"] as const) {
+    signal?.throwIfAborted();
     const baseFragment = base?.fragments[viewport];
     const headFragment = head?.fragments[viewport];
     const before = baseFragment
-      ? Buffer.from(await baseAssetReader.read(baseFragment)).toString("utf8")
+      ? Buffer.from(await baseAssetReader.read(baseFragment, signal)).toString(
+          "utf8",
+        )
       : undefined;
+    signal?.throwIfAborted();
     const after = headFragment
       ? compilation.outputs.get(headFragment)
       : undefined;

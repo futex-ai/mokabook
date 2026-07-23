@@ -28,6 +28,7 @@ generated under `examples/basic/generated/design/`:
 | `design/review/outcomes/added.html`       | Added screen with missing base pane   |
 | `design/review/outcomes/removed.html`     | Removed screen with missing head pane |
 | `design/review/outcomes/difference.html`  | Tinted in-place difference mode       |
+| `design/review/outcomes/served.html`      | Hosted mode switch and refresh action |
 | `design/review/impact/shared-impact.html` | Summary with shared-impact card       |
 | `design/review/impact/ignored-only.html`  | Ignored-region-only classification    |
 | `design/review/impact/empty.html`         | Empty comparison result               |
@@ -165,6 +166,10 @@ existing `mb-*` markup. The stylesheet therefore must keep:
   `mb-title-row`, `mb-viewswitch`, `mb-viewswitch-option`, `mb-frag`,
   `mb-nav-group`, `mb-nav-list`) alongside the review-specific classes in the
   review stylesheet module.
+- When the artifact is hosted by Serve, a compact bar uses those view-switch
+  styles to link back to Browse, mark Review active, and offer
+  `Refresh comparison`; the disk artifact and snapshot documents remain
+  unchanged.
 
 ## Related Docs
 
