@@ -5,8 +5,9 @@ HTML, serves the resulting catalogue during development, and creates Git-based
 Review artifacts. It is app-independent: product screens, component libraries,
 themes, styles, and compatibility adapters stay in the consuming repository.
 
-The public npm package and executable are both named `mokabook`. The package is
-currently pre-release and has not yet been published to npm.
+The public [npm package](https://www.npmjs.com/package/mokabook) and executable
+are both named `mokabook`. Releases remain pre-1.0 while the consumer contract
+settles.
 
 ## Use Mokabook
 
@@ -275,7 +276,9 @@ reviewed version/changelog PR; merging that PR creates an immutable `vX.Y.Z`
 release. The same [Release workflow](./.github/workflows/release.yml) checks the
 tag, reruns the full gate, packs and smoke-tests the exact tarball, guards an
 already-published version, and publishes through npm trusted publishing. A
-manual `publish_ref` retries only an existing tag. See the
+bounded post-publish check tolerates npm metadata, tarball, dist-tag, and
+signature propagation before proving the registry artifact. A manual
+`publish_ref` retries only an existing tag. See the
 [release protocol](./docs/protocol/npm-release.md) for the one-time `0.0.0`
 bootstrap and maintainer settings; do not add an npm write token to GitHub.
 
