@@ -90,7 +90,10 @@ preview copier applies the same immutable-view rule. Every cached response
 revalidates the directory, ownership, and repository boundary. Ownership
 requires a regular, non-symlink marker whose bytes exactly match the supported
 schema marker; a marker directory, symlink, or different content is unowned.
-Later-added files are not served.
+Review replacement records the owned output directory's filesystem identity,
+then verifies the moved backup has that same identity and marker before
+installation or deletion. A raced-in directory is restored when safe, or
+preserved at its recovery path. Later-added files are not served.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.

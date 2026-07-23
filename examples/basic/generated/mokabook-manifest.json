@@ -104,6 +104,7 @@
       "dependencies": [
         "examples/basic/entries/design/design.mockup.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
@@ -129,6 +130,7 @@
       "dependencies": [
         "examples/basic/entries/design/design.mockup.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
@@ -156,10 +158,11 @@
       "dependencies": [
         "examples/basic/entries/design/design.mockup.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
-      "description": "Per-screen comparison pages for each classification outcome.",
+      "description": "Per-screen comparisons and the hosted Review entry state.",
       "id": "design-review-outcomes",
       "kind": "collection",
       "navPath": [
@@ -177,7 +180,8 @@
         "design-review-changed",
         "design-review-added",
         "design-review-removed",
-        "design-review-difference"
+        "design-review-difference",
+        "design-review-served"
       ]
     },
     {
@@ -397,6 +401,7 @@
       "dependencies": [
         "examples/basic/entries/design/review_impact_screens.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
@@ -430,6 +435,7 @@
       "dependencies": [
         "examples/basic/entries/design/review_impact_screens.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
@@ -463,6 +469,7 @@
       "dependencies": [
         "examples/basic/entries/design/review_impact_screens.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
@@ -496,6 +503,7 @@
       "dependencies": [
         "examples/basic/entries/design/review_outcome_screens.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
@@ -529,6 +537,7 @@
       "dependencies": [
         "examples/basic/entries/design/review_outcome_screens.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
@@ -562,6 +571,7 @@
       "dependencies": [
         "examples/basic/entries/design/review_outcome_screens.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
@@ -595,6 +605,7 @@
       "dependencies": [
         "examples/basic/entries/design/review_outcome_screens.tsx",
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
@@ -618,6 +629,40 @@
         "mobile": "design/review/outcomes/removed.mobile.html"
       },
       "route": "design/review/outcomes/removed.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_served_screen.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The hosted Review summary with Browse, Review, and refresh controls.",
+      "id": "design-review-served",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Comparison outcomes"
+      ],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_served_screen.tsx",
+      "title": "Served review",
+      "fragments": {
+        "desktop": "design/review/outcomes/served.desktop.html",
+        "mobile": "design/review/outcomes/served.mobile.html"
+      },
+      "route": "design/review/outcomes/served.html",
       "useCaseIds": [],
       "viewports": [
         "mobile",

@@ -3,6 +3,7 @@ import { collection, defineRoot } from "mokabook";
 import { browseStateScreens, browseViewScreens } from "./browse_screens.js";
 import { reviewOutcomeScreens } from "./review_outcome_screens.js";
 import { reviewImpactScreens } from "./review_impact_screens.js";
+import { reviewServedScreen } from "./review_served_screen.js";
 
 const DESIGN_DEPENDENCIES = [
   "examples/basic/generated/design-stage.css",
@@ -40,9 +41,9 @@ export const mockups = defineRoot({
     collection({
       children: [
         collection({
-          children: reviewOutcomeScreens,
+          children: [...reviewOutcomeScreens, reviewServedScreen],
           description:
-            "Per-screen comparison pages for each classification outcome.",
+            "Per-screen comparisons and the hosted Review entry state.",
           id: "design-review-outcomes",
           segment: "outcomes",
           title: "Comparison outcomes",
@@ -59,6 +60,7 @@ export const mockups = defineRoot({
       dependencies: [
         ...DESIGN_DEPENDENCIES,
         "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-served-review.css",
       ],
       description:
         "The static Git comparison experience produced by mokabook review.",

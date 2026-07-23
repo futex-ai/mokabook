@@ -86,11 +86,14 @@ extensionless HTML routes, static deployments omit the watched server's
 live-update module, and response rules sandbox raw consumer and Review snapshot
 documents. Artifact replacement is transactional and refuses to overwrite a
 directory unless its regular, non-symlink ownership marker has the exact
-supported schema content. Preview output confinement is checked both lexically
-and after resolving existing symlink parents; staging, backup, and installation
-use the resolved path beneath the real `.context` directory. Preview copies
-public assets through the same pinned regular-file resolver used by Build,
-Serve, Review, and compatibility, so symlinked assets are consistently absent.
+supported schema content. The shared Review/preview replacer verifies the
+directory's filesystem identity again after moving it to the backup path, and
+restores or preserves any unexpected directory instead of deleting it. Preview
+output confinement is checked both lexically and after resolving existing
+symlink parents; staging, backup, and installation use the resolved path beneath
+the real `.context` directory. Preview copies public assets through the same
+pinned regular-file resolver used by Build, Serve, Review, and compatibility,
+so symlinked assets are consistently absent.
 
 Closing a same-repository pull request marks its sticky comment inactive and
 attempts to delete all Cloudflare deployments carrying that PR branch alias.

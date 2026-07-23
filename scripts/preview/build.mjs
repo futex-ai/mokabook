@@ -5,6 +5,7 @@ import {
   ARTIFACT_MARKER_CONTENT,
   hasArtifactOwnershipMarker,
   PREVIEW_ARTIFACT_MARKER,
+  replaceOwnedDirectory,
 } from "../../dist/artifact_ownership.js";
 import { listPublicStaticFiles } from "../../dist/config/public_files.js";
 import { loadConfig } from "../../dist/config/load.js";
@@ -178,23 +179,13 @@ function staticPage(html) {
 }
 
 async function installArtifact(stage, output) {
-  assertOwnedOutput(output);
-  if (!fs.existsSync(output)) {
-    await fs.promises.rename(stage, output);
-    return;
-  }
-  const backup = await fs.promises.mkdtemp(
-    path.join(path.dirname(output), ".mokabook-preview-backup-"),
-  );
-  await fs.promises.rmdir(backup);
-  await fs.promises.rename(output, backup);
-  try {
-    await fs.promises.rename(stage, output);
-  } catch (error) {
-    await fs.promises.rename(backup, output);
-    throw error;
-  }
-  await fs.promises.rm(backup, { force: true, recursive: true });
+  await replaceOwnedDirectory({
+    backupPrefix: ".mokabook-preview-backup-",
+    markerName: PREVIEW_ARTIFACT_MARKER,
+    output,
+    ownershipError: `refusing to replace unowned preview directory: ${output}`,
+    stage,
+  });
 }
 
 function assertOwnedOutput(output) {

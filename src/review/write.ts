@@ -3,6 +3,7 @@ import path from "node:path";
 
 import {
   hasArtifactOwnershipMarker,
+  replaceOwnedDirectory,
   REVIEW_ARTIFACT_MARKER,
 } from "../artifact_ownership.js";
 import { validateReviewOut } from "../config/path_validation.js";
@@ -25,9 +26,6 @@ export async function writeReviewArtifact(
     path.join(path.dirname(outDir), ".mokabook-review-"),
   );
   const stage = path.join(temporary, "stage");
-  const backup = path.join(temporary, "backup");
-  let backedUp = false;
-  let installed = false;
   try {
     for (const [relative, content] of [...files].sort(([left], [right]) =>
       left.localeCompare(right),
@@ -43,19 +41,14 @@ export async function writeReviewArtifact(
       }
     }
     signal?.throwIfAborted();
-    if (fs.existsSync(outDir)) {
-      assertOwnedReviewOutput(outDir);
-      await fs.promises.rename(outDir, backup);
-      backedUp = true;
-    }
-    signal?.throwIfAborted();
-    await fs.promises.rename(stage, outDir);
-    installed = true;
-    signal?.throwIfAborted();
+    await replaceOwnedDirectory({
+      backupPrefix: ".mokabook-review-backup-",
+      markerName: REVIEW_ARTIFACT_MARKER,
+      output: outDir,
+      ownershipError: `refusing to replace unowned Review directory: ${outDir}`,
+      stage,
+    });
   } catch (error) {
-    if (installed)
-      await fs.promises.rm(outDir, { force: true, recursive: true });
-    if (backedUp) await fs.promises.rename(backup, outDir);
     throw new MokabookError(
       "review-invalid",
       `could not write Review artifact: ${errorMessage(error)}`,

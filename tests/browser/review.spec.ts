@@ -120,6 +120,26 @@ test("approved impact mockups show the impacted group", async ({ page }) => {
   }
 });
 
+test("approved served Review mockups show refresh controls", async ({
+  page,
+}) => {
+  for (const viewport of ["mobile", "desktop"]) {
+    const mockup = path.join(
+      repositoryRoot,
+      "examples/basic/generated/design/review/outcomes",
+      `served.${viewport}.html`,
+    );
+    await page.goto(pathToFileURL(mockup).href);
+    await expect(
+      page.getByRole("navigation", { name: "Mokabook modes" }),
+    ).toBeVisible();
+    await expect(page.getByText("Review", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("Refresh comparison", { exact: true }),
+    ).toBeVisible();
+  }
+});
+
 test("compare pages switch modes and viewports", async ({ page }) => {
   await page.goto(reviewUrl);
   await page.locator('a:has-text("desktop")').first().click();

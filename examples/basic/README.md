@@ -20,11 +20,11 @@ React DOM need none of this and can keep a plain `renderToStaticMarkup`
 adapter.
 
 The `Design` navigation group is the approved design catalogue for Mokabook's
-own Browse and Review shell: thirteen screens covering the Browse home,
+own Browse and Review shell: fourteen screens covering the Browse home,
 selected screen and use case, details panel, missing route, narrow navigation,
-and the changed, added, removed, difference, shared-impact, ignored-only, and
-empty Review states, each with distinct mobile and desktop variants. The
-recorded tokens and responsive rules live in
+and the changed, added, removed, difference, served, shared-impact,
+ignored-only, and empty Review states, each with distinct mobile and desktop
+variants. The recorded tokens and responsive rules live in
 [`docs/protocol/mokabook-shell-design.md`](../../docs/protocol/mokabook-shell-design.md).
 
 From the repository root:

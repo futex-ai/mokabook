@@ -45,6 +45,23 @@ test("custom renderer shares consumer React context and injects collected styles
   assert.equal(mobile.includes(repositoryRoot), false);
 });
 
+test("design catalogue covers the served Review toolbar", async () => {
+  const config = await loadConfig(
+    repositoryRoot,
+    "examples/basic/mokabook.config.ts",
+  );
+  const compilation = await compileCatalogue(config);
+  for (const viewport of ["mobile", "desktop"]) {
+    const output =
+      compilation.outputs.get(
+        `design/review/outcomes/served.${viewport}.html`,
+      ) ?? "";
+    assert.match(output, /aria-label="Mokabook modes"/);
+    assert.match(output, /aria-current="page"[^>]*>Review<\/span>/);
+    assert.match(output, />Refresh comparison<\/span>/);
+  }
+});
+
 test("manifest readers accept version 2 only through explicit compatibility", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

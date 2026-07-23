@@ -28,6 +28,7 @@ generated under `examples/basic/generated/design/`:
 | `design/review/outcomes/added.html`       | Added screen with missing base pane   |
 | `design/review/outcomes/removed.html`     | Removed screen with missing head pane |
 | `design/review/outcomes/difference.html`  | Tinted in-place difference mode       |
+| `design/review/outcomes/served.html`      | Hosted mode switch and refresh action |
 | `design/review/impact/shared-impact.html` | Summary with shared-impact card       |
 | `design/review/impact/ignored-only.html`  | Ignored-region-only classification    |
 | `design/review/impact/empty.html`         | Empty comparison result               |
