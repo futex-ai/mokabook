@@ -54,9 +54,10 @@ gate on Ubuntu:
 
 Both install Rust 1.95.0, install Chromium, and run `cargo xtask check`. The
 `Required CI` aggregator fails unless both jobs succeed and is the branch-rule
-status to require. CI uses `npm ci` and the committed lockfile. Action revisions
-are immutable commit hashes with reviewed version comments; runtime versions
-are explicit. Fork pull requests receive no release secrets or write
+status to require. CI checks out complete Git history so the preview regression
+can resolve `origin/main`, and uses `npm ci` with the committed lockfile. Action
+revisions are immutable commit hashes with reviewed version comments; runtime
+versions are explicit. Fork pull requests receive no release secrets or write
 permissions.
 
 ## Preview Deployments
