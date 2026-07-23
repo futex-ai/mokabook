@@ -14,6 +14,8 @@ import {
 } from "./client_modules.js";
 import { homePage, notFoundPage, reviewPage, viewPage } from "./pages.js";
 import { listenOnAvailablePort } from "./ports.js";
+import { contentType, safeDecode, safeDecodePath, send } from "./respond.js";
+import { ReviewRoutes, type ServedReview } from "./review_routes.js";
 import type { ShellContext } from "./shell/context.js";
 import { SHELL_CSS } from "./shell/css.js";
 
@@ -22,6 +24,8 @@ export interface ServerOptions {
   base: string;
   changedRoutes?: readonly string[];
   port: number;
+  /** When set, `/review` serves this comparison instead of the launcher. */
+  review?: ServedReview;
   strictPort?: boolean;
   updateVersion?: number;
 }
@@ -43,6 +47,9 @@ export async function startCatalogueServer(
   const clientModules = loadBrowserClientModules();
   const fontAssets = loadShellFontAssets();
   const streams = new Set<ServerResponse>();
+  const reviewRoutes = options.review
+    ? new ReviewRoutes(options.review)
+    : undefined;
   let updateVersion = options.updateVersion ?? 1;
   const server = http.createServer((request, response) => {
     handleRequest(
@@ -55,6 +62,7 @@ export async function startCatalogueServer(
       streams,
       { clientModules, fontAssets },
       () => updateVersion,
+      reviewRoutes,
     );
   });
   await listenOnAvailablePort(
@@ -105,6 +113,7 @@ function handleRequest(
   streams: Set<ServerResponse>,
   assets: ServedAssets,
   currentVersion: () => number,
+  reviewRoutes?: ReviewRoutes,
 ): void {
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed");
@@ -118,6 +127,13 @@ function handleRequest(
       homePage(catalogue, context),
       method,
     );
+  if (
+    reviewRoutes &&
+    (url.pathname === "/review" || url.pathname.startsWith("/review/"))
+  ) {
+    void reviewRoutes.handle(url, response, method);
+    return;
+  }
   if (url.pathname === "/review")
     return send(
       response,
@@ -304,60 +320,4 @@ function openEventStream(
   response.write(`event: ready\ndata: ${version}\n\n`);
   streams.add(response);
   response.on("close", () => streams.delete(response));
-}
-
-function send(
-  response: ServerResponse,
-  status: number,
-  type: string,
-  body: string,
-  method = "GET",
-): void {
-  response.writeHead(status, {
-    "content-type": `${type}; charset=utf-8`,
-    "x-content-type-options": "nosniff",
-  });
-  response.end(method === "HEAD" ? undefined : body);
-}
-
-function safeDecodePath(value: string): string | undefined {
-  try {
-    const decoded = value.split("/").map(decodeURIComponent).join("/");
-    if (
-      decoded === "" ||
-      decoded.startsWith("/") ||
-      decoded
-        .split("/")
-        .some((part) => part === ".." || part === "." || part === "")
-    )
-      return undefined;
-    return decoded;
-  } catch {
-    return undefined;
-  }
-}
-
-function safeDecode(value: string): string {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return "";
-  }
-}
-
-function contentType(candidate: string): string {
-  const extension = path.extname(candidate).toLowerCase();
-  return extension === ".html"
-    ? "text/html; charset=utf-8"
-    : extension === ".css"
-      ? "text/css; charset=utf-8"
-      : extension === ".svg"
-        ? "image/svg+xml"
-        : extension === ".png"
-          ? "image/png"
-          : extension === ".jpg" || extension === ".jpeg"
-            ? "image/jpeg"
-            : extension === ".woff2"
-              ? "font/woff2"
-              : "application/octet-stream";
 }

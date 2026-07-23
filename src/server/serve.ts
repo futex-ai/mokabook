@@ -13,6 +13,7 @@ import {
   type CatalogueServerFactory,
 } from "./factory.js";
 import type { RunningServer } from "./http.js";
+import { configuredServedReview } from "./review_routes.js";
 import {
   NodeProcessSupervisorFactory,
   type ProcessSupervisor,
@@ -75,9 +76,11 @@ export async function serve(
       await compileCatalogue(config),
       config,
     );
+    const base = options.base ?? config.review.base;
     const server = await dependencies.serverFactory.start(config, {
-      base: options.base ?? config.review.base,
+      base,
       port: options.port,
+      review: configuredServedReview(config, base),
     });
     return serverLifecycle(server);
   }

@@ -1,6 +1,7 @@
 import type { ResolvedConfig } from "../config/types.js";
 import { computeChangedRoutes } from "./changed.js";
 import { startCatalogueServer } from "./http.js";
+import { configuredServedReview } from "./review_routes.js";
 
 /** Run the hidden deterministic server child until its parent shuts it down. */
 export async function runServerChild(
@@ -15,6 +16,7 @@ export async function runServerChild(
     base,
     ...(changedRoutes ? { changedRoutes } : {}),
     port,
+    review: configuredServedReview(config, base),
     strictPort,
     updateVersion,
   });

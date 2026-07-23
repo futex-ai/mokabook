@@ -54,10 +54,12 @@ test.afterAll(async () => {
 
 test("the review index groups changed screens", async ({ page }) => {
   await page.goto(pathToFileURL(path.join(outDir, "index.html")).href);
-  await expect(page.locator("h1")).toHaveText("Mokabook review");
-  await expect(page.locator(".mb-baseline")).toContainText("main");
-  await expect(page.getByRole("heading", { name: "Changed" })).toBeVisible();
-  await expect(page.locator(".mb-chg-dot--changed").first()).toBeVisible();
+  await expect(page.locator(".mbk-empty h2")).toHaveText("Mokabook review");
+  await expect(page.locator(".mbk-basewatch")).toContainText("main");
+  await expect(
+    page.locator(".mbk-chg-grouphead", { hasText: "Changed" }).first(),
+  ).toBeVisible();
+  await expect(page.locator(".mbk-chg-dot.changed").first()).toBeVisible();
 });
 
 test("impact-only screens stay linked from the review index", async ({
@@ -86,14 +88,18 @@ test("impact-only screens stay linked from the review index", async ({
     const impactedOut = path.join(impacted.root, ".review");
 
     await page.goto(pathToFileURL(path.join(impactedOut, "index.html")).href);
-    await expect(page.getByRole("heading", { name: "Impacted" })).toBeVisible();
+    await expect(
+      page.locator(".mbk-chg-grouphead", { hasText: "Impacted" }).first(),
+    ).toBeVisible();
     await expect(page.getByText("No visual changes")).toHaveCount(0);
-    await expect(page.locator(".mb-chg-dot--impacted").first()).toBeVisible();
-    await page.locator('a:has-text("desktop")').first().click();
+    await expect(page.locator(".mbk-chg-dot.impacted").first()).toBeVisible();
+    await page.locator(".mbk-chg-row").first().click();
     await expect(
       page.getByRole("heading", { name: "Impact evidence" }),
     ).toBeVisible();
-    await expect(page.getByText("notes.md", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText("notes.md", { exact: true }).first(),
+    ).toBeVisible();
   } finally {
     await removeFixture(impacted);
   }
@@ -121,7 +127,7 @@ test("approved impact mockups show the impacted group", async ({ page }) => {
 
 test("compare pages switch modes and viewports", async ({ page }) => {
   await page.goto(pathToFileURL(path.join(outDir, "index.html")).href);
-  await page.locator('a:has-text("desktop")').first().click();
+  await page.locator(".mbk-chg-row").first().click();
   await expect(page.locator(".mb-panes")).toHaveAttribute(
     "data-compare-mode",
     "side",
@@ -140,8 +146,8 @@ test("compare pages switch modes and viewports", async ({ page }) => {
     "data-compare-mode",
     "difference",
   );
-  await page.click('a.mb-viewswitch-option:has-text("Mobile")');
-  await expect(
-    page.locator('span.mb-viewswitch-option[aria-current="page"]'),
-  ).toHaveText("Mobile");
+  await page.click('.mbk-seg a:has-text("Desktop")');
+  await expect(page.locator('.mbk-seg span[aria-current="page"]')).toHaveText(
+    "Desktop",
+  );
 });

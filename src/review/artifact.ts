@@ -5,13 +5,18 @@ import type {
   ReviewArtifactContent,
   ReviewResult,
 } from "./types.js";
-import { comparePage, indexPage } from "./artifact_pages.js";
+import {
+  comparePage,
+  indexPage,
+  type ReviewRenderOptions,
+} from "./artifact_pages.js";
 import { isImpactOnly, isMaterial } from "./materiality.js";
 import { addArtifactFile, comparisonPagePath } from "./paths.js";
 
 /** Add self-contained diagnostic pages, JSON, and CI summary to pane artifacts. */
 export function renderReviewArtifact(
   artifact: ReviewArtifact,
+  options: ReviewRenderOptions = {},
 ): ReadonlyMap<string, ReviewArtifactContent> {
   const files = new Map(artifact.files);
   addArtifactFile(
@@ -20,13 +25,13 @@ export function renderReviewArtifact(
     `${JSON.stringify(artifact.result, null, 2)}\n`,
   );
   addArtifactFile(files, "summary.md", summaryMarkdown(artifact.result));
-  addArtifactFile(files, "index.html", indexPage(artifact.result));
+  addArtifactFile(files, "index.html", indexPage(artifact.result, options));
   for (const screen of artifact.result.screens) {
     for (const viewport of screen.viewports) {
       addArtifactFile(
         files,
         comparisonPagePath(screen.route, viewport.viewport),
-        comparePage(artifact.result, screen, viewport),
+        comparePage(artifact.result, screen, viewport, options),
       );
     }
   }

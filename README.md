@@ -110,6 +110,11 @@ static artifact. Screens with shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
 descendant of a directory is reported as the screen's impact evidence.
+Review pages render in the Mokabook shell with a changed-screens navigation
+column beside each compare view. The served shell exposes the same comparison
+in its Review mode: `/review` generates the artifact on first visit, serves
+its index and compare pages directly, and offers a recompute link that
+refreshes the comparison against the current workspace.
 
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
