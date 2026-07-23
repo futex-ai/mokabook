@@ -213,6 +213,12 @@ test("filter renders in the nav only when changed routes are known", () => {
   });
   assert.match(withFilter, /data-mokabook-filter/);
   assert.match(withFilter, /class="mbk-nav-filter-count">1</);
+  const withNoChanges = homePage(catalogue, {
+    ...context,
+    changedRoutes: [],
+  });
+  assert.match(withNoChanges, /data-mokabook-filter/);
+  assert.match(withNoChanges, /class="mbk-nav-filter-count">0</);
   const withoutFilter = homePage(catalogue, context);
   assert.equal(withoutFilter.includes("data-mokabook-filter"), false);
   assert.match(withoutFilter, /data-mokabook-search/);
