@@ -70,7 +70,10 @@ test("served Review lazily generates and refreshes the full artifact", async (co
   assert.match(index, /Changed<\/h2>/);
   assert.match(index, /href="\/">Browse<\/a>/);
   assert.match(index, /aria-current="page"[^>]*>Review<\/span>/);
-  assert.match(index, /href="\?refresh=1">Refresh comparison<\/a>/);
+  assert.match(
+    index,
+    /href="\/review\/index\.html\?refresh=1">Refresh comparison<\/a>/,
+  );
   assert.match(index, /\/__mokabook\/client\/browser\.js/);
   assert.equal(
     fs.existsSync(path.join(config.review.outDir, ".mokabook-review-artifact")),

@@ -37,6 +37,46 @@ test("publishing an update invalidates the served Review artifact", async (conte
   assert.equal(generator.calls, 2);
 });
 
+test("stale Review comparisons return to the regenerated summary", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  const generator = new DisappearingComparisonGenerator();
+  const server = await startCatalogueServer(
+    config,
+    { base: "main", port: 0 },
+    generator,
+  );
+  context.after(() => server.close());
+  const watchedPath = "/review/comparisons/watched/mobile/index.html";
+  const refreshedPath = "/review/comparisons/refreshed/mobile/index.html";
+
+  const watched = await fetch(`${server.url}${watchedPath}`);
+  assert.equal(watched.status, 200);
+  const watchedBody = await watched.text();
+  assert.equal((await fetch(`${server.url}${refreshedPath}`)).status, 200);
+
+  server.publishUpdate(2);
+  const afterUpdate = await fetch(`${server.url}${watchedPath}`, {
+    redirect: "manual",
+  });
+  assert.equal(afterUpdate.status, 302);
+  assert.equal(afterUpdate.headers.get("location"), "/review/index.html");
+  assert.equal(generator.calls, 2);
+
+  const afterRefresh = await fetch(`${server.url}${refreshedPath}?refresh=1`, {
+    redirect: "manual",
+  });
+  assert.equal(afterRefresh.status, 302);
+  assert.equal(afterRefresh.headers.get("location"), "/review/index.html");
+  assert.equal(generator.calls, 3);
+  assert.match(
+    watchedBody,
+    /href="\/review\/index\.html\?refresh=1">Refresh comparison<\/a>/,
+  );
+});
+
 test("server close aborts and drains in-flight Review generation", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
@@ -153,6 +193,41 @@ class CountingReviewGenerator implements ReviewGenerator {
   ): Promise<void> {
     this.calls += 1;
     await writeArtifact(outDir, `Review generation ${this.calls}`);
+  }
+}
+
+class DisappearingComparisonGenerator implements ReviewGenerator {
+  calls = 0;
+
+  async generate(
+    _config: ResolvedConfig,
+    _baseRef: string,
+    outDir: string,
+    _signal: AbortSignal,
+  ): Promise<void> {
+    this.calls += 1;
+    await fs.promises.rm(outDir, { force: true, recursive: true });
+    await writeArtifact(outDir, `Review generation ${this.calls}`);
+    const comparisonIds =
+      this.calls === 1
+        ? ["watched", "refreshed"]
+        : this.calls === 2
+          ? ["refreshed"]
+          : [];
+    for (const id of comparisonIds) {
+      const comparison = path.join(
+        outDir,
+        "comparisons",
+        id,
+        "mobile",
+        "index.html",
+      );
+      await fs.promises.mkdir(path.dirname(comparison), { recursive: true });
+      await fs.promises.writeFile(
+        comparison,
+        `<!doctype html><body><main class="mb-artifact-main">${id}</main></body>`,
+      );
+    }
   }
 }
 

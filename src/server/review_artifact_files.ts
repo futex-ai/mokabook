@@ -51,19 +51,16 @@ export function captureReviewArtifact(
   };
 }
 
-/** Serve one file only while the configured output retains its pinned identity. */
+/** Serve one pinned file and report whether a trusted response was available. */
 export function serveReviewArtifact(
   response: ServerResponse,
   config: ResolvedConfig,
   artifact: ReviewArtifactIdentity,
   relative: string,
   method: string,
-): void {
+): boolean {
   const content = readReviewArtifactFile(config, artifact, relative);
-  if (!content) {
-    sendReviewText(response, 404, "Not found", method);
-    return;
-  }
+  if (!content) return false;
   const candidate = path.resolve(artifact.realPath, relative);
   const trustedPage = artifact.trustedPages.has(relative);
   const body = trustedPage
@@ -79,6 +76,14 @@ export function serveReviewArtifact(
     "x-content-type-options": "nosniff",
   });
   response.end(method === "HEAD" ? undefined : body);
+  return true;
+}
+
+/** Return whether a path has the shape of a generated comparison page. */
+export function isReviewComparisonPage(relative: string): boolean {
+  return (
+    relative.startsWith("comparisons/") && relative.endsWith("/index.html")
+  );
 }
 
 /** Read one captured file only when its path, identity, and bytes still match. */
@@ -190,10 +195,7 @@ function digest(content: Buffer): string {
 }
 
 function isReviewPage(relative: string): boolean {
-  return (
-    relative === "index.html" ||
-    (relative.startsWith("comparisons/") && relative.endsWith(".html"))
-  );
+  return relative === "index.html" || isReviewComparisonPage(relative);
 }
 
 function enhanceServedPage(content: string): string {
@@ -202,7 +204,7 @@ function enhanceServedPage(content: string): string {
     `<nav aria-label="Mokabook modes" class="mb-viewswitch">` +
     `<a class="mb-viewswitch-option" href="/">Browse</a>` +
     `<span aria-current="page" class="mb-viewswitch-option">Review</span>` +
-    `</nav><a class="mb-empty-link" href="?refresh=1">Refresh comparison</a>` +
+    `</nav><a class="mb-empty-link" href="/review/index.html?refresh=1">Refresh comparison</a>` +
     `</div>`;
   const client = `<script src="/__mokabook/client/browser.js" type="module"></script>`;
   return content

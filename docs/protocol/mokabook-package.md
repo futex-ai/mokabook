@@ -51,9 +51,11 @@ that is unambiguous to current npm.
 Serve exposes the same Review artifact under `/review`. It generates the
 comparison lazily on first entry, uses the resolved Serve base and configured
 Review output directory, and regenerates when the reviewer chooses
-`Refresh comparison`. Watched updates invalidate an existing served comparison
-before the browser reloads. The standalone `review` command remains the way to
-write and inspect the artifact without a running server.
+`Refresh comparison`, returning to the stable summary. Watched updates
+invalidate an existing served comparison before the browser reloads; a stale
+comparison path that disappears in the new artifact also returns to the
+summary. The standalone `review` command remains the way to write and inspect
+the artifact without a running server.
 
 Serve uses `4173` as its default starting port. An occupied concrete starting
 port advances one at a time through `65535` until binding succeeds; exhausting

@@ -76,9 +76,13 @@ pages remain interactive.
 artifact on the first artifact request, coalesces concurrent first requests,
 and serves it from the configured in-repository Review output directory.
 `?refresh=1` regenerates the artifact transactionally before serving the
-requested page or asset. Generation failures return a Review-specific error
-without taking down Browse, and invalid, traversing, or symlink-escaping Review
-paths never expose files outside the owned artifact. After generation, the
+requested page or asset. The visible refresh control targets the stable Review
+summary. If a regenerated artifact no longer contains a requested comparison
+page, the server redirects that stale page to the summary; missing snapshots,
+assets, and other paths remain not-found responses. Generation failures return
+a Review-specific error without taking down Browse, and invalid, traversing,
+or symlink-escaping Review paths never expose files outside the owned artifact.
+After generation, the
 server pins the artifact directory's filesystem identity and ownership marker;
 it also captures the generated file set and the summary/compare pages trusted
 to run shell controls. SHA-256 fingerprints pin every captured file, and the

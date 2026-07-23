@@ -7,6 +7,7 @@ import { errorMessage } from "../errors.js";
 import { runReview } from "../review/run.js";
 import {
   captureReviewArtifact,
+  isReviewComparisonPage,
   sendReviewText,
   serveReviewArtifact,
   type ReviewArtifactIdentity,
@@ -49,6 +50,7 @@ export class ServedReviewArtifact {
   private closing = false;
   private generatedRevision = -1;
   private generation: ReviewGeneration | undefined;
+  private readonly knownComparisonPages = new Set<string>();
   private revision = 0;
 
   constructor(
@@ -119,8 +121,18 @@ export class ServedReviewArtifact {
     const artifact = await this.ensureGenerated(
       url.searchParams.get("refresh") === "1",
     );
-    if (!response.destroyed)
-      serveReviewArtifact(response, this.config, artifact, relative, method);
+    if (response.destroyed) return;
+    if (
+      serveReviewArtifact(response, this.config, artifact, relative, method)
+    ) {
+      return;
+    }
+    if (this.knownComparisonPages.has(relative)) {
+      response.writeHead(302, { location: "/review/index.html" });
+      response.end();
+      return;
+    }
+    sendReviewText(response, 404, "Not found", method);
   }
 
   private async ensureGenerated(
@@ -159,7 +171,13 @@ export class ServedReviewArtifact {
     );
     this.abortController.signal.throwIfAborted();
     if (this.revision !== revision) return;
-    this.artifact = captureReviewArtifact(this.config);
+    const artifact = captureReviewArtifact(this.config);
+    for (const relative of artifact.trustedPages) {
+      if (isReviewComparisonPage(relative)) {
+        this.knownComparisonPages.add(relative);
+      }
+    }
+    this.artifact = artifact;
     this.generatedRevision = revision;
   }
 }

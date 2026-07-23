@@ -103,13 +103,14 @@ header viewport controls, use-case flows, a details inspector, id redirects,
 and watched updates.
 Choosing Review in the served shell lazily generates the configured Git
 comparison and opens its summary, side-by-side, overlay, and difference views
-without leaving Mokabook. `Refresh comparison` recomputes it in place.
+without leaving Mokabook. `Refresh comparison` recomputes it and returns to the
+stable summary, as does a live reload of a comparison that no longer exists.
 `mokabook review` writes the same comparison as a disk-viewable static artifact.
 Watched updates invalidate the served comparison before Review reloads, and the
 server refuses to serve a cached artifact if its owned output directory is
-replaced, gains a file outside the captured generated artifact, or any captured
-file no longer matches its generated fingerprint. Screens with
-shared or declared dependency impact
+replaced or a captured file no longer matches its generated fingerprint. Files
+added after capture are not served. Screens with shared or declared dependency
+impact
 remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
 descendant of a directory is reported as the screen's impact evidence.
