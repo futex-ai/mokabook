@@ -101,6 +101,10 @@ All/Changed filter, linked breadcrumbs with hash-prefixed copyable ID chips,
 realistic phone and browser device chrome with an expand-to-overlay toggle,
 header viewport controls, use-case flows, a details inspector, id redirects,
 and watched updates.
+The Changed filter compares route-level manifest metadata, generated fragments,
+and explicitly declared dependencies against the Git base. A registry module
+that defines many routes does not make every route appear changed merely because
+the module's imports or composition changed.
 Review provides summary, side-by-side, overlay, and difference views as a
 static artifact. Screens with shared or declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
