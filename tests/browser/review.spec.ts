@@ -151,3 +151,31 @@ test("compare pages switch modes and viewports", async ({ page }) => {
     "Desktop",
   );
 });
+
+test("narrow static review pages expose navigation and the index", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 900, width: 420 });
+  await page.goto(pathToFileURL(path.join(outDir, "index.html")).href);
+
+  const menu = page.getByRole("button", {
+    name: "Open changed screens navigation",
+  });
+  await expect(page.locator(".mbk-nav")).toBeHidden();
+  await menu.click();
+  await expect(page.locator(".mbk-nav")).toBeVisible();
+  await expect(menu).toHaveAttribute("aria-expanded", "true");
+
+  await page.locator(".mbk-chg-row").first().click();
+  await expect(page.locator(".mbk-screen-head h2")).toHaveText("Home Revised");
+  await expect(page.locator(".mbk-nav")).toBeHidden();
+  await page
+    .getByRole("button", {
+      name: "Open changed screens navigation",
+    })
+    .click();
+  await expect(page.locator(".mbk-nav")).toBeVisible();
+
+  await page.getByRole("link", { exact: true, name: "Review" }).click();
+  await expect(page.locator(".mbk-empty h2")).toHaveText("Mokabook review");
+});

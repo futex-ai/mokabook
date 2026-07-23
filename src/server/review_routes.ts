@@ -1,9 +1,9 @@
 /** Served Review under `/review`: lazy artifact generation plus file serving.
  *
  * Browse links its Review mode here. The artifact is generated into the
- * configured Review output directory on the first request and again when a
- * request carries `?refresh=1`, so the comparison reflects the workspace when
- * viewed. Generated pages link back to the Browse shell.
+ * configured Review output directory on the first request, after a published
+ * watch update, and when a request carries `?refresh=1`, so the comparison
+ * reflects the workspace when viewed. Generated pages link back to Browse.
  */
 
 import fs from "node:fs";
@@ -50,8 +50,14 @@ export function configuredServedReview(
 /** Serialize lazy Review generation and serve the artifact's files. */
 export class ReviewRoutes {
   private generation: Promise<void> | undefined;
+  private stale = false;
 
   constructor(private readonly review: ServedReview) {}
+
+  /** Mark the cached artifact stale after an update that reloads browsers. */
+  invalidate(): void {
+    this.stale = true;
+  }
 
   /** Respond to one `/review` or `/review/<path>` request. */
   async handle(
@@ -83,9 +89,10 @@ export class ReviewRoutes {
     );
   }
 
-  /** Reuse one successful generation; refresh queues a new one after it. */
+  /** Reuse a fresh generation; stale and refresh requests queue after it. */
   private ensureGenerated(refresh: boolean): Promise<void> {
-    if (this.generation && !refresh) return this.generation;
+    if (this.generation && !refresh && !this.stale) return this.generation;
+    this.stale = false;
     const previous = this.generation ?? Promise.resolve();
     const generation = previous
       .catch(() => undefined)

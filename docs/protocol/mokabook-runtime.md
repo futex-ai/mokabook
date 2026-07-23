@@ -200,6 +200,11 @@ stream's first `ready` version establishes the page baseline; a higher version
 after reconnection or an `update` event triggers one reload and one-shot state
 recovery.
 
+Publishing an update without restarting the child marks its cached served
+Review artifact stale before notifying browsers. The first reloaded Review
+request serially regenerates the artifact, while concurrent requests reuse
+that regeneration.
+
 Shutdown first stops queued work and waits for any active configuration
 transaction, then closes the final adopted watcher, timers, child processes,
 HTTP servers, event streams, and ports. A candidate watcher is discarded if
@@ -240,6 +245,8 @@ The engine emits a static, self-contained artifact directory with:
   impact evidence, with the same material/impacted totals in the CI summary;
 - one designed compare page per screen viewport, linked to its sibling
   viewport through the page's viewport control;
+- a responsive changed-screens drawer opened by the top-bar menu button, plus
+  a Review pill that links every compare page back to the artifact index;
 - side-by-side, opacity-overlay, and difference modes on every compare page;
 - before/head artifacts kept complete and unmodified;
 - aggregate shared-impact and ignored-region evidence in the navigation
@@ -256,11 +263,14 @@ sandbox.
 Serve exposes the same comparison in the shell's Review mode. The server
 generates the artifact into the configured Review output directory lazily on
 the first `/review` request and again when a request carries `?refresh=1`, so
-the comparison reflects the workspace when viewed; generations serialize so a
-refresh never races an in-flight run. Artifact pages generated behind the
-server add the shell's Browse/Review mode pills, a recompute link, and the
-package-owned browser client for watched reloads; static `mokabook review`
-artifacts omit all three. A generation failure answers with a
+the comparison reflects the workspace when viewed. A published watch update
+also invalidates the cached artifact before browsers reload; generations
+serialize so neither invalidation nor refresh races an in-flight run. Every
+artifact page includes the Review/index pill and self-contained responsive
+drawer. Pages generated behind the server additionally add the Browse pill, a
+recompute link, and the package-owned browser client for watched reloads;
+static `mokabook review` artifacts omit those server-only hooks. A generation
+failure answers with a
 retryable error page and leaves the server running, and the next request
 retries the generation. A server constructed without a Review provider keeps
 the launcher view that points at the `mokabook review` command.

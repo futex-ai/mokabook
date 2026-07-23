@@ -91,6 +91,7 @@ export async function startCatalogueServer(
       if (!Number.isSafeInteger(nextVersion) || nextVersion <= updateVersion)
         return;
       updateVersion = nextVersion;
+      reviewRoutes?.invalidate();
       const payload = `event: update\ndata: ${updateVersion}\n\n`;
       for (const stream of streams) stream.write(payload);
     },

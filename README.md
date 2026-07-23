@@ -111,10 +111,12 @@ remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
 descendant of a directory is reported as the screen's impact evidence.
 Review pages render in the Mokabook shell with a changed-screens navigation
-column beside each compare view. The served shell exposes the same comparison
-in its Review mode: `/review` generates the artifact on first visit, serves
-its index and compare pages directly, and offers a recompute link that
-refreshes the comparison against the current workspace.
+column beside each compare view. Every static or served page provides a mobile
+navigation drawer and a Review pill that returns an opened compare page to the
+artifact index. The served shell exposes the same comparison in its Review
+mode: `/review` generates the artifact on first visit, serves its index and
+compare pages directly, and offers a recompute link that refreshes the
+comparison against the current workspace.
 
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
@@ -137,8 +139,10 @@ precedence. Shutdown interrupts replacement-watcher readiness, closes the
 candidate before draining the remaining lifecycle, and waits for child exit
 through graceful, terminate, and force-kill stages. Open Browse and Review pages
 connect to the versioned event stream and reload after a newer build or asset
-version arrives. A watched reload restores the current Browse search, filter,
-disclosures, viewport, drawer, and scroll state once on the same durable URL.
+version arrives. Publishing a reload-only watch update invalidates the served
+Review cache, so the reloaded Review URL regenerates before it is served. A
+watched reload restores the current Browse search, filter, disclosures,
+viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and
 Forward.
 A rejected config or failed candidate build leaves the last-good watcher,
