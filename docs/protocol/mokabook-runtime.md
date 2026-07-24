@@ -224,6 +224,11 @@ the child exit notification arrives.
 to `origin/main`. It resolves the base to a commit and reads the committed
 `mockupsDir` tree from Git without checking out or rebuilding the base. Head
 artifacts come from the current working tree after `mokabook check` succeeds.
+Review inspects the requested base paths with one recursive `ls-tree` operation
+and reads regular-file blobs through content-size-bounded `cat-file` batches.
+The initial viewport set is one batch request; transitively referenced assets
+are grouped by dependency depth. File modes are still checked before any blob
+is accepted, so batching does not weaken symlink or non-regular-file rejection.
 
 Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
@@ -245,6 +250,9 @@ The engine emits a static, self-contained artifact directory with:
   impact evidence, with the same material/impacted totals in the CI summary;
 - one designed compare page per screen viewport, linked to its sibling
   viewport through the page's viewport control;
+- one artifact-root navigation payload shared by all compare pages, while the
+  index keeps complete inline navigation and a compare page without JavaScript
+  keeps a direct fallback link to that index;
 - a responsive changed-screens drawer opened by the top-bar menu button, plus
   a Review pill that links every compare page back to the artifact index;
 - side-by-side, opacity-overlay, and difference modes on every compare page;
@@ -255,8 +263,9 @@ The engine emits a static, self-contained artifact directory with:
 - deterministic `review.json` for CI summaries.
 
 Artifact pages inline the package-owned shell styles so the directory remains
-viewable without a server, and every embedded pane stays in a script-disabled
-sandbox.
+viewable without a server. Compare pages load their package-owned navigation
+payload by relative path from the same artifact directory, and every embedded
+pane stays in a script-disabled sandbox.
 
 ## Served Review
 

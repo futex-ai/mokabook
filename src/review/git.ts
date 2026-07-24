@@ -1,9 +1,15 @@
 import { execFile } from "node:child_process";
 
 import { MokabookError, errorMessage } from "../errors.js";
+import { readGitFiles } from "./git_batch.js";
 
 /** Repository object classification used before reading Review dependencies. */
 export type GitFileKind = "missing" | "other" | "regular" | "symlink";
+
+/** A requested Git tree entry, with bytes retained only for regular files. */
+export type GitFile =
+  | { readonly bytes: Uint8Array; readonly kind: "regular" }
+  | { readonly kind: Exclude<GitFileKind, "regular"> };
 
 /** Git operations required by Review without checking out the base tree. */
 export interface GitClient {
@@ -15,6 +21,10 @@ export interface GitClient {
   fileKind(commit: string, repoRelativePath: string): Promise<GitFileKind>;
   readFile(commit: string, repoRelativePath: string): Promise<string>;
   readFileBytes(commit: string, repoRelativePath: string): Promise<Uint8Array>;
+  readFiles?(
+    commit: string,
+    repoRelativePaths: readonly string[],
+  ): Promise<ReadonlyMap<string, GitFile>>;
   resolveRef(reference: string): Promise<string>;
 }
 
@@ -22,6 +32,10 @@ export interface GitClient {
 export interface GitCommandRunner {
   run(arguments_: readonly string[]): Promise<string>;
   runBytes?(arguments_: readonly string[]): Promise<Uint8Array>;
+  runBytesWithInput?(
+    arguments_: readonly string[],
+    input: Uint8Array,
+  ): Promise<Uint8Array>;
 }
 
 /** Operating-system Git subprocess implementation. */
@@ -53,6 +67,29 @@ export class NodeGitCommandRunner implements GitCommandRunner {
           else resolve(Buffer.from(stdout));
         },
       );
+    });
+  }
+
+  runBytesWithInput(
+    arguments_: readonly string[],
+    input: Uint8Array,
+  ): Promise<Uint8Array> {
+    return new Promise((resolve, reject) => {
+      let inputError: Error | undefined;
+      const child = execFile(
+        "git",
+        [...arguments_],
+        { cwd: this.cwd, encoding: "buffer", maxBuffer: 64 * 1024 * 1024 },
+        (error, stdout) => {
+          if (error) reject(error);
+          else if (inputError) reject(inputError);
+          else resolve(Buffer.from(stdout));
+        },
+      );
+      child.stdin?.on("error", (error) => {
+        inputError = error;
+      });
+      child.stdin?.end(Buffer.from(input));
     });
   }
 }
@@ -129,6 +166,32 @@ export class RepositoryGitClient implements GitClient {
       ["show", `${commit}:${repoRelativePath}`],
       `read ${repoRelativePath} at ${commit}`,
     );
+  }
+
+  async readFiles(
+    commit: string,
+    repoRelativePaths: readonly string[],
+  ): Promise<ReadonlyMap<string, GitFile>> {
+    for (const repoRelativePath of repoRelativePaths) {
+      assertGitPath(repoRelativePath);
+    }
+    if (this.runner.runBytesWithInput) {
+      return readGitFiles(this.runner, commit, repoRelativePaths);
+    }
+    const files = new Map<string, GitFile>();
+    for (const repoRelativePath of [...new Set(repoRelativePaths)].sort()) {
+      const kind = await this.fileKind(commit, repoRelativePath);
+      files.set(
+        repoRelativePath,
+        kind === "regular"
+          ? {
+              bytes: await this.readFileBytes(commit, repoRelativePath),
+              kind,
+            }
+          : { kind },
+      );
+    }
+    return files;
   }
 
   async changedPaths(

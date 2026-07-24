@@ -10,6 +10,10 @@ import {
   indexPage,
   type ReviewRenderOptions,
 } from "./artifact_pages.js";
+import {
+  REVIEW_NAVIGATION_SCRIPT,
+  reviewNavigationScript,
+} from "./artifact_navigation.js";
 import { isImpactOnly, isMaterial } from "./materiality.js";
 import { addArtifactFile, comparisonPagePath } from "./paths.js";
 
@@ -26,6 +30,11 @@ export function renderReviewArtifact(
   );
   addArtifactFile(files, "summary.md", summaryMarkdown(artifact.result));
   addArtifactFile(files, "index.html", indexPage(artifact.result, options));
+  addArtifactFile(
+    files,
+    REVIEW_NAVIGATION_SCRIPT,
+    reviewNavigationScript(artifact.result),
+  );
   for (const screen of artifact.result.screens) {
     for (const viewport of screen.viewports) {
       addArtifactFile(

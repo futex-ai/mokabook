@@ -50,15 +50,17 @@ export function contentType(candidate: string): string {
   const extension = path.extname(candidate).toLowerCase();
   return extension === ".html"
     ? "text/html; charset=utf-8"
-    : extension === ".css"
-      ? "text/css; charset=utf-8"
-      : extension === ".svg"
-        ? "image/svg+xml"
-        : extension === ".png"
-          ? "image/png"
-          : extension === ".jpg" || extension === ".jpeg"
-            ? "image/jpeg"
-            : extension === ".woff2"
-              ? "font/woff2"
-              : "application/octet-stream";
+    : extension === ".js"
+      ? "text/javascript; charset=utf-8"
+      : extension === ".css"
+        ? "text/css; charset=utf-8"
+        : extension === ".svg"
+          ? "image/svg+xml"
+          : extension === ".png"
+            ? "image/png"
+            : extension === ".jpg" || extension === ".jpeg"
+              ? "image/jpeg"
+              : extension === ".woff2"
+                ? "font/woff2"
+                : "application/octet-stream";
 }

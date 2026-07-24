@@ -60,6 +60,12 @@ export async function compareReview(
   const headSeeds = new Set<string>();
   const baseByRoute = screenMap(baseManifest);
   const headByRoute = screenMap(compilation.manifest);
+  const baseDocuments = await baseAssetReader.readMany(
+    [...baseByRoute.values()].flatMap((screen) => [
+      screen.fragments.mobile,
+      screen.fragments.desktop,
+    ]),
+  );
   const routes = [
     ...new Set([...baseByRoute.keys(), ...headByRoute.keys()]),
   ].sort();
@@ -76,7 +82,7 @@ export async function compareReview(
       await compareScreen(
         base,
         head,
-        baseAssetReader,
+        baseDocuments,
         compilation,
         changedPaths,
         sharedImpact,
@@ -86,8 +92,12 @@ export async function compareReview(
       ),
     );
   }
-  await copySnapshotDependencies(files, "before", baseSeeds, (route) =>
-    baseAssetReader.read(route),
+  await copySnapshotDependencies(
+    files,
+    "before",
+    baseSeeds,
+    (route) => baseAssetReader.read(route),
+    (routes) => baseAssetReader.readMany(routes),
   );
   await copySnapshotDependencies(files, "after", headSeeds, async (route) => {
     const generated = compilation.outputs.get(route);
@@ -108,7 +118,7 @@ export async function compareReview(
 async function compareScreen(
   base: ManifestScreen | undefined,
   head: ManifestScreen | undefined,
-  baseAssetReader: ReviewAssetReader,
+  baseDocuments: ReadonlyMap<string, Uint8Array>,
   compilation: Compilation,
   changedPaths: readonly string[],
   sharedImpact: readonly string[],
@@ -123,8 +133,17 @@ async function compareScreen(
   for (const viewport of ["mobile", "desktop"] as const) {
     const baseFragment = base?.fragments[viewport];
     const headFragment = head?.fragments[viewport];
-    const before = baseFragment
-      ? Buffer.from(await baseAssetReader.read(baseFragment)).toString("utf8")
+    const baseDocument = baseFragment
+      ? baseDocuments.get(baseFragment)
+      : undefined;
+    if (baseFragment && !baseDocument) {
+      throw new MokabookError(
+        "review-invalid",
+        `base fragment is missing: ${baseFragment}`,
+      );
+    }
+    const before = baseDocument
+      ? Buffer.from(baseDocument).toString("utf8")
       : undefined;
     const after = headFragment
       ? compilation.outputs.get(headFragment)

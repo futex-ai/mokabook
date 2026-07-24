@@ -56,9 +56,10 @@ generated header proves package ownership; consumer-authored public HTML may
 use explicit watch rules. A child closes on either an orderly message/signal or
 loss of its parent IPC channel, and supervisor shutdown waits for confirmed
 exit while escalating from IPC to SIGTERM and SIGKILL. Review reads the base
-tree through Git object access, matches directory dependencies recursively,
-rejects non-portable base resource URLs, and never checks the base out over the
-worktree.
+tree through bounded Git object batches, matches directory dependencies
+recursively, rejects non-portable base resource URLs, and never checks the base
+out over the worktree. Comparison pages share one artifact-owned navigation
+payload instead of repeating the complete catalogue in every HTML document.
 
 ## Related Docs
 

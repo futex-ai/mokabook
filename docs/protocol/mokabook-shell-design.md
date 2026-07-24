@@ -165,7 +165,11 @@ and ignored-region cards. Compare pages reuse the screen head, `mbk-seg`
 segments for the comparison-mode and viewport controls, `mbk-status`
 classification badges, and a summary band. The drawer control and script
 remain inline so static artifacts retain narrow-viewport navigation without a
-running server.
+running server. The index renders the complete navigation inline. Compare
+pages hydrate the same markup from the artifact-root `review-navigation.js`
+payload and retain an `Open Review index` fallback in the navigation column
+when JavaScript is unavailable, avoiding one full catalogue copy per viewport
+page without changing the rendered design.
 
 The compare stage keeps its `mb-*` classes and the `--mb-*` token set
 (`--mb-bg`, `--mb-surface`, `--mb-border`, `--mb-text`, `--mb-muted`,

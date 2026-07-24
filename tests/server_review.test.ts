@@ -205,6 +205,11 @@ test("no-watch serve exposes the Git comparison with compare pages", async (cont
   assert.match(compareHtml, /href="\/">Browse<\/a>/);
   assert.match(compareHtml, /\/__mokabook\/client\/browser\.js/);
 
+  const navigation = await fetch(`${running.url}/review/review-navigation.js`);
+  assert.equal(navigation.status, 200);
+  assert.match(navigation.headers.get("content-type") ?? "", /javascript/);
+  assert.match(await navigation.text(), /data-mokabook-review-route/);
+
   const paneSrc = compareHtml.match(/<iframe[^>]*src="([^"]+)"/)?.[1];
   assert.ok(paneSrc);
   const pane = await fetch(new URL(paneSrc, compareUrl));
