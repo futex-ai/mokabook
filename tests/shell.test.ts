@@ -155,6 +155,10 @@ test("screen page renders device chrome, viewport switch, and details", () => {
   assert.match(html, /class="mbk-frag" sandbox=""[^>]*welcome\.desktop/);
   assert.match(html, /class="phone-frame"/);
   assert.match(html, /class="phone-notch"/);
+  assert.match(
+    html,
+    /class="phone-status"><span>9:41<\/span><span class="phone-status-icons">(<svg[\s\S]*?<\/svg>){3}<\/span><\/div><iframe/,
+  );
   assert.match(html, /class="browser-frame"/);
   assert.match(html, /class="browser-expand"/);
   assert.match(html, /class="address">example\.test\/welcome</);
@@ -230,6 +234,15 @@ test("shell stylesheet stays aligned with the design contract", () => {
   assert.match(SHELL_CSS, /width: 390px/);
   assert.match(SHELL_CSS, /max-width: 1180px/);
   assert.match(SHELL_CSS, /max-width: 56\.25rem/);
+  assert.match(
+    SHELL_CSS,
+    /\.phone-status \{[\s\S]*flex: 0 0 44px;[\s\S]*padding: 14px 28px 0;/,
+  );
+  assert.match(SHELL_CSS, /\.phone-screen \{[\s\S]*flex-direction: column;/);
+  assert.match(
+    SHELL_CSS,
+    /\.phone-screen \.mbk-frag \{[\s\S]*border-radius: 0 0 36px 36px;/,
+  );
   assert.match(SHELL_CSS, /prefers-reduced-motion/);
   assert.match(SHELL_CSS, /InterVariable\.woff2/);
   assert.match(SHELL_CSS, /\.mbk-idchip \{[\s\S]*cursor: pointer;/);

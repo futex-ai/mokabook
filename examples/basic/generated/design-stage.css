@@ -75,9 +75,32 @@
 .phone-screen {
   background: #ffffff;
   border-radius: 36px;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   overflow: hidden;
   position: relative;
+}
+
+.phone-status {
+  align-items: flex-start;
+  color: var(--chrome-ink);
+  display: flex;
+  flex: 0 0 44px;
+  font-feature-settings: "tnum";
+  font-size: 13.5px;
+  font-weight: 600;
+  height: 44px;
+  justify-content: space-between;
+  padding: 14px 28px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.phone-status-icons {
+  align-items: center;
+  display: flex;
+  gap: 6px;
 }
 
 .phone-home {
@@ -112,6 +135,26 @@
 .phone-frame--sm .phone-home {
   bottom: 12px;
   width: 96px;
+}
+
+.phone-frame--sm .phone-status {
+  flex: 0 0 32px;
+  font-size: 10px;
+  height: 32px;
+  padding: 10px 20px 0;
+}
+
+.phone-frame--sm .phone-status-icons {
+  gap: 4px;
+}
+
+.phone-frame--sm .phone-status svg {
+  height: 8px;
+  width: 12px;
+}
+
+.phone-frame--sm .phone-status svg:last-child {
+  width: 16px;
 }
 
 /* ---- Browser chrome --------------------------------------------------- */
@@ -209,12 +252,10 @@
   padding: 18px 20px;
 }
 
-.phone-screen .mbk-shot-pad {
-  padding-top: 46px;
-}
-
-.phone-frame--sm .mbk-shot-pad {
-  padding-top: 38px;
+.phone-screen .mbk-shot {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
 }
 
 .mbk-shot-nav {
