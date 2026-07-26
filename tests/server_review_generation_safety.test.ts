@@ -173,6 +173,69 @@ test("failed refresh preserves an unowned concurrent replacement", async (contex
   assert.equal(await fs.promises.readFile(userFile, "utf8"), "user-authored\n");
 });
 
+test("shutdown waits for an in-flight refresh to restore output", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const outDir = path.join(fixture.root, ".review");
+  const refreshStarted = deferred();
+  const releaseRefresh = deferred();
+  let attempts = 0;
+  const review: ServedReview = {
+    base: "origin/main",
+    async generate(): Promise<void> {
+      attempts += 1;
+      if (attempts === 1) {
+        await writeOwnedGeneration(outDir, attempts);
+        return;
+      }
+      refreshStarted.resolve();
+      await releaseRefresh.promise;
+      throw new Error("replacement interrupted");
+    },
+    outDir,
+  };
+  const server = await startFixtureServer(fixture.root, review);
+  let closed = false;
+  context.after(async () => {
+    if (!closed) await server.close();
+  });
+
+  assert.match(
+    await (await fetch(`${server.url}/review/index.html`)).text(),
+    /Generation 1/,
+  );
+  const controller = new AbortController();
+  const refresh = fetch(`${server.url}/review/index.html?refresh=1`, {
+    signal: controller.signal,
+  });
+  await refreshStarted.promise;
+  controller.abort();
+  await assert.rejects(refresh, { name: "AbortError" });
+
+  const closing = server.close().then(() => {
+    closed = true;
+  });
+  const closedBeforeRelease = await Promise.race([
+    closing.then(() => true),
+    delay(250).then(() => false),
+  ]);
+  releaseRefresh.resolve();
+  await closing;
+  await new Promise<void>((resolve) => setImmediate(resolve));
+
+  assert.equal(closedBeforeRelease, false);
+  assert.match(
+    await fs.promises.readFile(path.join(outDir, "index.html"), "utf8"),
+    /Generation 1/,
+  );
+  assert.equal(
+    (await fs.promises.readdir(path.dirname(outDir))).some((entry) =>
+      entry.startsWith(".mokabook-review-served-"),
+    ),
+    false,
+  );
+});
+
 async function startFixtureServer(root: string, review: ServedReview) {
   const config = await loadConfig(root);
   await writeCompilation(await compileCatalogue(config), config);
@@ -207,4 +270,8 @@ function deferred(): {
     resolve = resolvePromise;
   });
   return { promise, resolve };
+}
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }

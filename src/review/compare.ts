@@ -37,6 +37,7 @@ export async function compareReview(
   baseRef: string,
   outDir = config.review.outDir,
   assetReader: ReviewAssetReader = new FileSystemReviewAssetReader(config),
+  changedPathExclusions: readonly string[] = [],
 ): Promise<ReviewArtifact> {
   const baseCommit = await git.resolveRef(baseRef);
   const baseManifest = await readBaseManifest(git, baseCommit, config);
@@ -45,6 +46,7 @@ export async function compareReview(
     baseCommit,
     config,
     outDir,
+    changedPathExclusions,
   );
   const mockupsPrefix = toPosixPath(
     path.relative(config.repoRoot, config.mockupsDir),

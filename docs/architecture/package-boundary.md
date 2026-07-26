@@ -65,7 +65,9 @@ superseded directories for a bounded idle window. Responses disable HTTP
 caching, while the versioned paths keep a document's scripts, panes, and assets
 on the same generation during regeneration. In-flight invalidations coalesce
 behind the active generation, and only a marker-owned current output may enter
-the server's temporary archive lifecycle.
+the server's temporary archive lifecycle. Archive roots are explicit
+changed-path exclusions rather than consumer-owned ignore policy, and shutdown
+drains generation work before removing them.
 
 ## Related Docs
 

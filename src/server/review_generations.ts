@@ -9,10 +9,16 @@ import { MokabookError, errorMessage } from "../errors.js";
 const GENERATION_RETENTION_MS = 60_000;
 const REVIEW_ARTIFACT_MARKER = ".mokabook-review-artifact";
 
+/** Filesystem context excluded while generating a served Review artifact. */
+export interface ReviewArtifactGenerationOptions {
+  /** Package-owned directories that must not enter changed-path evidence. */
+  readonly changedPathExclusions: readonly string[];
+}
+
 /** Provider that replaces one configured Review artifact directory. */
 export interface ReviewArtifactProvider {
   /** Replace {@link outDir} with one complete Review artifact. */
-  generate(): Promise<void>;
+  generate(options: ReviewArtifactGenerationOptions): Promise<void>;
   /** Configured directory holding the current Review artifact. */
   outDir: string;
 }
@@ -29,6 +35,7 @@ export class ReviewGenerationStore {
   private readonly generations = new Map<string, ReviewGeneration>();
   private readonly retentionTimers = new Map<string, NodeJS.Timeout>();
   private readonly removals = new Set<Promise<void>>();
+  private closed = false;
   private currentGeneration: ReviewGeneration | undefined;
 
   constructor(private readonly provider: ReviewArtifactProvider) {}
@@ -51,7 +58,9 @@ export class ReviewGenerationStore {
     const previous = this.currentGeneration;
     const archived = previous ? await this.archive(previous) : undefined;
     try {
-      await this.provider.generate();
+      await this.provider.generate({
+        changedPathExclusions: this.archiveRoot ? [this.archiveRoot] : [],
+      });
       if (reviewDirectoryState(this.provider.outDir) === "missing") {
         throw new MokabookError(
           "server-failed",
@@ -74,6 +83,7 @@ export class ReviewGenerationStore {
 
   /** Remove only temporary archives owned by this server instance. */
   async close(): Promise<void> {
+    this.closed = true;
     for (const timer of this.retentionTimers.values()) clearTimeout(timer);
     this.retentionTimers.clear();
     await Promise.allSettled([...this.removals]);
@@ -150,6 +160,7 @@ export class ReviewGenerationStore {
   }
 
   private scheduleExpiry(generation: ReviewGeneration): void {
+    if (this.closed) return;
     const existing = this.retentionTimers.get(generation.version);
     if (existing) clearTimeout(existing);
     const timer = setTimeout(

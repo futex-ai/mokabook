@@ -10,14 +10,21 @@ import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import type { GitClient } from "./git.js";
 
-/** Collect deterministic changes while excluding the active artifact tree. */
+/** Collect deterministic changes while excluding active and retained output. */
 export async function reviewChangedPaths(
   git: GitClient,
   commit: string,
   config: ResolvedConfig,
   outDir: string,
+  additionalOutputDirectories: readonly string[] = [],
 ): Promise<readonly string[]> {
-  const excludedPaths = outputPaths(config.repoRoot, outDir);
+  const excludedPaths = [
+    ...new Set(
+      [outDir, ...additionalOutputDirectories].flatMap((directory) =>
+        outputPaths(config.repoRoot, directory),
+      ),
+    ),
+  ].sort();
   const changed = await git.changedPaths(commit, excludedPaths);
   return [...new Set(changed)]
     .filter(

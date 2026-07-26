@@ -285,21 +285,24 @@ immutable generation URL.
 Relative scripts, panes, and resources therefore stay pinned to that
 generation. Replaced directories remain available for a bounded idle window,
 and a watched top-level reload advances to the latest generation without
-redirecting an old document's concurrent subresources. Every artifact page
-includes the Review/index pill and self-contained responsive drawer. Pages
-generated behind the server additionally add the Browse pill, a recompute link,
-and the package-owned browser client for watched reloads; static
-`mokabook review` artifacts omit those server-only hooks. Successful redirects
-and artifact responses use `Cache-Control: no-store`. A generation failure
-restores the previous served directory, answers with a retryable error page,
-and leaves the server running; the next request retries the generation. Server
-shutdown removes retained temporary generations but not the configured current
-output. Before archiving a current output, the server requires its regular-file
-Review ownership marker and refuses an unowned replacement without moving or
-deleting it. Failed-generation recovery likewise removes only marker-owned
-incomplete output before restoring the prior artifact. A server constructed
-without a Review provider keeps the launcher view that points at the
-`mokabook review` command.
+redirecting an old document's concurrent subresources. Package-owned archive
+roots are passed into changed-path collection as explicit exclusions, so
+consumer ignore policy cannot turn retained output into impact evidence. Every
+artifact page includes the Review/index pill and self-contained responsive
+drawer. Pages generated behind the server additionally add the Browse pill, a
+recompute link, and the package-owned browser client for watched reloads;
+static `mokabook review` artifacts omit those server-only hooks. Successful
+redirects and artifact responses use `Cache-Control: no-store`. A generation
+failure restores the previous served directory, answers with a retryable error
+page, and leaves the server running; the next request retries the generation.
+Server shutdown stops new Review work, waits for active or queued generation to
+settle, then removes retained temporary generations but not the configured
+current output. Before archiving a current output, the server requires its
+regular-file Review ownership marker and refuses an unowned replacement
+without moving or deleting it. Failed-generation recovery likewise removes
+only marker-owned incomplete output before restoring the prior artifact. A
+server constructed without a Review provider keeps the launcher view that
+points at the `mokabook review` command.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including

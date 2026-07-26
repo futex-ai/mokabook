@@ -12,7 +12,7 @@ import type { ServerResponse } from "node:http";
 
 import { encodeUrlPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { errorMessage } from "../errors.js";
+import { MokabookError, errorMessage } from "../errors.js";
 import { runReview } from "../review/run.js";
 import {
   ReviewGenerationStore,
@@ -36,7 +36,7 @@ export function configuredServedReview(
 ): ServedReview {
   return {
     base,
-    async generate(): Promise<void> {
+    async generate(options): Promise<void> {
       await runReview(
         config,
         base,
@@ -44,6 +44,7 @@ export function configuredServedReview(
         undefined,
         undefined,
         { browseHref: "/" },
+        options.changedPathExclusions,
       );
     },
     outDir: config.review.outDir,
@@ -52,6 +53,8 @@ export function configuredServedReview(
 
 /** Serialize lazy Review generation and serve the artifact's files. */
 export class ReviewRoutes {
+  private closed = false;
+  private closePromise: Promise<void> | undefined;
   private generation: Promise<ReviewGeneration> | undefined;
   private generationKind: "demand" | "refresh" | undefined;
   private queuedGeneration: Promise<ReviewGeneration> | undefined;
@@ -64,12 +67,13 @@ export class ReviewRoutes {
 
   /** Mark the cached artifact stale after an update that reloads browsers. */
   invalidate(): void {
-    this.stale = true;
+    if (!this.closed) this.stale = true;
   }
 
-  /** Remove retained superseded generations when the server stops. */
-  async close(): Promise<void> {
-    await this.generations.close();
+  /** Drain generation work and remove retained artifacts when the server stops. */
+  close(): Promise<void> {
+    this.closePromise ??= this.finishClose();
+    return this.closePromise;
   }
 
   /** Respond to one `/review` or `/review/<path>` request. */
@@ -109,6 +113,7 @@ export class ReviewRoutes {
 
   /** Reuse a fresh generation; stale and refresh requests queue after it. */
   private ensureGenerated(refresh: boolean): Promise<ReviewGeneration> {
+    if (this.closed) return Promise.reject(reviewServerClosing());
     if (this.queuedGeneration) return this.queuedGeneration;
     if (this.generation) {
       if (this.stale || (refresh && this.generationKind === "demand")) {
@@ -124,6 +129,7 @@ export class ReviewRoutes {
   private startGeneration(
     kind: "demand" | "refresh",
   ): Promise<ReviewGeneration> {
+    if (this.closed) return Promise.reject(reviewServerClosing());
     this.stale = false;
     const generation = this.generations.generate();
     this.trackGeneration(generation, kind);
@@ -160,10 +166,17 @@ export class ReviewRoutes {
         if (this.generation === generation) {
           this.generation = undefined;
           this.generationKind = undefined;
-          this.stale = true;
+          if (!this.closed) this.stale = true;
         }
       },
     );
+  }
+
+  private async finishClose(): Promise<void> {
+    this.closed = true;
+    const pending = this.queuedGeneration ?? this.generation;
+    if (pending) await Promise.allSettled([pending]);
+    await this.generations.close();
   }
 
   private async handleGeneration(
@@ -300,4 +313,8 @@ function escapeHtml(value: string): string {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function reviewServerClosing(): MokabookError {
+  return new MokabookError("server-failed", "Review server is closing");
 }
