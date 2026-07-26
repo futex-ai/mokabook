@@ -26,10 +26,33 @@ export const SHELL_CHROME_CSS = `
 
 .phone-screen {
   position: relative;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   overflow: hidden;
   border-radius: 36px;
   background: #ffffff;
+}
+
+.phone-status {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: 44px;
+  padding: 14px 28px 0;
+  color: var(--chrome-ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-feature-settings: "tnum";
+}
+
+.phone-status-icons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
 }
 
 .phone-home {
