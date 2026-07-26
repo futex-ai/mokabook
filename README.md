@@ -127,8 +127,8 @@ into one follow-up run. Served Review files disable HTTP caching, so one
 document cannot combine files from different artifact generations, and the
 server refuses to archive a current output whose ownership marker is missing.
 Retained-generation directories are excluded from changed-path evidence
-independently of consumer ignore rules, and shutdown drains active Review work
-before cleaning those directories.
+independently of consumer ignore rules. Shutdown prevents queued Review work
+from starting, drains active work, and then cleans retained directories.
 
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
