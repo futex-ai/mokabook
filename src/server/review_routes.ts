@@ -83,7 +83,9 @@ export class ReviewRoutes {
     method: string,
   ): Promise<void> {
     if (url.pathname === "/review" || url.pathname === "/review/") {
-      return redirect(response, "/review/index.html");
+      const refresh =
+        url.searchParams.get("refresh") === "1" ? "?refresh=1" : "";
+      return redirect(response, `/review/index.html${refresh}`);
     }
     if (url.pathname.startsWith(GENERATION_ROUTE)) {
       const requested = generationPath(url.pathname);

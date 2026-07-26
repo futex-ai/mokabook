@@ -98,7 +98,7 @@ test("served review generates lazily, recomputes on refresh, and stays safe", as
   assert.match(await (await fetch(firstPaneUrl)).text(), /Generation 1/);
   assert.equal(review.generations, 1);
 
-  const refreshed = await fetch(`${server.url}/review/index.html?refresh=1`);
+  const refreshed = await fetch(`${server.url}/review?refresh=1`);
   assert.notEqual(refreshed.url, first.url);
   assert.match(await refreshed.text(), /Generation 2/);
   assert.equal(review.generations, 2);

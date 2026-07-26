@@ -229,11 +229,11 @@ artifacts come from the current working tree after `mokabook check` succeeds.
 Review inspects only the requested base paths, grouping exact literal pathspecs
 into count- and byte-bounded `ls-tree` operations, and reads regular-file blobs
 through output-byte- and object-count-bounded `cat-file` batches. A single blob
-that cannot fit the output budget fails explicitly before Git is spawned. The
-initial viewport set is one logical batch request; transitively referenced
-assets are grouped by dependency depth. File modes are still checked before any
-blob is accepted, so batching does not weaken symlink or non-regular-file
-rejection.
+that cannot fit the output budget fails explicitly after metadata inspection
+and before a `cat-file` content process is spawned. The initial viewport set is
+one logical batch request; transitively referenced assets are grouped by
+dependency depth. File modes are still checked before any blob is accepted, so
+batching does not weaken symlink or non-regular-file rejection.
 
 Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
