@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import { MokabookError, errorMessage } from "../errors.js";
 
 const GENERATION_RETENTION_MS = 60_000;
+const REVIEW_ARTIFACT_MARKER = ".mokabook-review-artifact";
 
 /** Provider that replaces one configured Review artifact directory. */
 export interface ReviewArtifactProvider {
@@ -51,11 +52,10 @@ export class ReviewGenerationStore {
     const archived = previous ? await this.archive(previous) : undefined;
     try {
       await this.provider.generate();
-      const output = await fs.promises.stat(this.provider.outDir);
-      if (!output.isDirectory()) {
+      if (reviewDirectoryState(this.provider.outDir) === "missing") {
         throw new MokabookError(
           "server-failed",
-          `Review provider did not generate a directory at ${this.provider.outDir}`,
+          `Review provider did not generate an artifact at ${this.provider.outDir}`,
         );
       }
     } catch (error) {
@@ -84,8 +84,18 @@ export class ReviewGenerationStore {
 
   private async archive(
     generation: ReviewGeneration,
-  ): Promise<ReviewGeneration> {
+  ): Promise<ReviewGeneration | undefined> {
+    if (reviewDirectoryState(this.provider.outDir) === "missing") {
+      this.generations.delete(generation.version);
+      this.currentGeneration = undefined;
+      return undefined;
+    }
     const archiveRoot = await this.ensureArchiveRoot();
+    if (reviewDirectoryState(this.provider.outDir) === "missing") {
+      this.generations.delete(generation.version);
+      this.currentGeneration = undefined;
+      return undefined;
+    }
     const archived = {
       directory: path.join(archiveRoot, generation.version),
       version: generation.version,
@@ -116,10 +126,12 @@ export class ReviewGenerationStore {
     generationError: unknown,
   ): Promise<void> {
     try {
-      await fs.promises.rm(this.provider.outDir, {
-        force: true,
-        recursive: true,
-      });
+      if (reviewDirectoryState(this.provider.outDir) === "owned") {
+        await fs.promises.rm(this.provider.outDir, {
+          force: true,
+          recursive: true,
+        });
+      }
       fs.renameSync(archived.directory, this.provider.outDir);
       const restored = {
         directory: path.resolve(this.provider.outDir),
@@ -162,4 +174,32 @@ export class ReviewGenerationStore {
       () => this.removals.delete(removal),
     );
   }
+}
+
+function reviewDirectoryState(directory: string): "missing" | "owned" {
+  let output: fs.Stats;
+  try {
+    output = fs.lstatSync(directory);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return "missing";
+    throw error;
+  }
+  let marker: fs.Stats;
+  try {
+    marker = fs.lstatSync(path.join(directory, REVIEW_ARTIFACT_MARKER));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    throw unownedReviewDirectory(directory);
+  }
+  if (!output.isDirectory() || !marker.isFile()) {
+    throw unownedReviewDirectory(directory);
+  }
+  return "owned";
+}
+
+function unownedReviewDirectory(directory: string): MokabookError {
+  return new MokabookError(
+    "review-invalid",
+    `refusing to replace unowned Review directory: ${directory}`,
+  );
 }

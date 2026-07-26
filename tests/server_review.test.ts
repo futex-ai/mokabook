@@ -47,6 +47,10 @@ function countingReview(
         path.join(outDir, "snapshots", "head", "pane.html"),
         `<h1>Generation ${this.generations}</h1>`,
       );
+      await fs.promises.writeFile(
+        path.join(outDir, ".mokabook-review-artifact"),
+        "schemaVersion=1\n",
+      );
     },
     generations: 0,
     outDir,
@@ -161,6 +165,10 @@ test("a failed review generation answers a retryable page and then recovers", as
         path.join(outDir, "index.html"),
         "<h1>Recovered</h1>",
       );
+      await fs.promises.writeFile(
+        path.join(outDir, ".mokabook-review-artifact"),
+        "schemaVersion=1\n",
+      );
     },
     outDir,
   };
@@ -198,6 +206,10 @@ test("a failed recompute restores the served generation", async (context) => {
       await fs.promises.writeFile(
         path.join(outDir, "review-navigation.js"),
         `// Generation ${attempts}\n`,
+      );
+      await fs.promises.writeFile(
+        path.join(outDir, ".mokabook-review-artifact"),
+        "schemaVersion=1\n",
       );
       if (attempts === 2) throw new Error("replacement interrupted");
     },

@@ -278,8 +278,10 @@ generates the artifact into the configured Review output directory lazily on
 the first `/review` request and again when a request carries `?refresh=1`, so
 the comparison reflects the workspace when viewed. A published watch update
 also invalidates the cached artifact before browsers reload; generations
-serialize so neither invalidation nor refresh races an in-flight run. Every
-stable artifact path redirects to a server-owned immutable generation URL.
+serialize so neither invalidation nor refresh races an in-flight run. Refresh
+and invalidation requests that arrive during an unrelated run coalesce into one
+follow-up generation. Every stable artifact path redirects to a server-owned
+immutable generation URL.
 Relative scripts, panes, and resources therefore stay pinned to that
 generation. Replaced directories remain available for a bounded idle window,
 and a watched top-level reload advances to the latest generation without
@@ -292,8 +294,12 @@ and artifact responses use `Cache-Control: no-store`. A generation failure
 restores the previous served directory, answers with a retryable error page,
 and leaves the server running; the next request retries the generation. Server
 shutdown removes retained temporary generations but not the configured current
-output. A server constructed without a Review provider keeps the launcher view
-that points at the `mokabook review` command.
+output. Before archiving a current output, the server requires its regular-file
+Review ownership marker and refuses an unowned replacement without moving or
+deleting it. Failed-generation recovery likewise removes only marker-owned
+incomplete output before restoring the prior artifact. A server constructed
+without a Review provider keeps the launcher view that points at the
+`mokabook review` command.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including

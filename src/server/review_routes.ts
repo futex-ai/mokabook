@@ -53,6 +53,8 @@ export function configuredServedReview(
 /** Serialize lazy Review generation and serve the artifact's files. */
 export class ReviewRoutes {
   private generation: Promise<ReviewGeneration> | undefined;
+  private generationKind: "demand" | "refresh" | undefined;
+  private queuedGeneration: Promise<ReviewGeneration> | undefined;
   private readonly generations: ReviewGenerationStore;
   private stale = false;
 
@@ -107,24 +109,61 @@ export class ReviewRoutes {
 
   /** Reuse a fresh generation; stale and refresh requests queue after it. */
   private ensureGenerated(refresh: boolean): Promise<ReviewGeneration> {
-    if (this.generation) return this.generation;
+    if (this.queuedGeneration) return this.queuedGeneration;
+    if (this.generation) {
+      if (this.stale || (refresh && this.generationKind === "demand")) {
+        return this.queueGeneration(this.generation);
+      }
+      return this.generation;
+    }
     const current = this.generations.current();
     if (current && !refresh && !this.stale) return Promise.resolve(current);
+    return this.startGeneration(refresh || this.stale ? "refresh" : "demand");
+  }
+
+  private startGeneration(
+    kind: "demand" | "refresh",
+  ): Promise<ReviewGeneration> {
     this.stale = false;
     const generation = this.generations.generate();
+    this.trackGeneration(generation, kind);
+    return generation;
+  }
+
+  private queueGeneration(
+    active: Promise<ReviewGeneration>,
+  ): Promise<ReviewGeneration> {
+    const queued = active
+      .catch(() => undefined)
+      .then(() => {
+        if (this.queuedGeneration === queued) this.queuedGeneration = undefined;
+        return this.startGeneration("refresh");
+      });
+    this.queuedGeneration = queued;
+    return queued;
+  }
+
+  private trackGeneration(
+    generation: Promise<ReviewGeneration>,
+    kind: "demand" | "refresh",
+  ): void {
     this.generation = generation;
+    this.generationKind = kind;
     void generation.then(
       () => {
-        if (this.generation === generation) this.generation = undefined;
+        if (this.generation === generation) {
+          this.generation = undefined;
+          this.generationKind = undefined;
+        }
       },
       () => {
         if (this.generation === generation) {
           this.generation = undefined;
+          this.generationKind = undefined;
           this.stale = true;
         }
       },
     );
-    return generation;
   }
 
   private async handleGeneration(
@@ -136,16 +175,17 @@ export class ReviewRoutes {
     const generation = this.generations.get(requested.version);
     const current = this.generations.current();
     const refresh = url.searchParams.get("refresh") === "1";
+    const pending = this.queuedGeneration ?? this.generation;
     const advance =
       refresh ||
       (isReviewDocument(requested.relative) &&
         (this.stale ||
-          this.generation !== undefined ||
+          pending !== undefined ||
           (current !== undefined && current.version !== requested.version)));
     if (advance) {
       try {
         const latest =
-          refresh || this.stale || this.generation
+          refresh || this.stale || pending
             ? await this.ensureGenerated(refresh)
             : current;
         if (latest)

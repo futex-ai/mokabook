@@ -122,8 +122,10 @@ comparison in its Review mode: `/review` generates the artifact on first visit,
 redirects each page to an immutable generation URL, and offers a recompute link
 that refreshes the comparison against the current workspace. Superseded
 generations remain available briefly for their pages' scripts, panes, and
-assets. Served Review files disable HTTP caching, so one document cannot combine
-files from different artifact generations.
+assets. Refreshes and watched updates that arrive during generation coalesce
+into one follow-up run. Served Review files disable HTTP caching, so one
+document cannot combine files from different artifact generations, and the
+server refuses to archive a current output whose ownership marker is missing.
 
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,

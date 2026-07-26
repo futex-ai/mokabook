@@ -63,7 +63,9 @@ payload instead of repeating the complete catalogue in every HTML document.
 Served Review redirects artifact paths to immutable generation URLs and retains
 superseded directories for a bounded idle window. Responses disable HTTP
 caching, while the versioned paths keep a document's scripts, panes, and assets
-on the same generation during regeneration.
+on the same generation during regeneration. In-flight invalidations coalesce
+behind the active generation, and only a marker-owned current output may enter
+the server's temporary archive lifecycle.
 
 ## Related Docs
 
