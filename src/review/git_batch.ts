@@ -2,6 +2,8 @@ import { MokabookError, errorMessage } from "../errors.js";
 import type { GitCommandRunner, GitFile, GitFileKind } from "./git.js";
 
 const MAX_BATCH_CONTENT_BYTES = 48 * 1024 * 1024;
+const MAX_TREE_PATHS_PER_BATCH = 256;
+const MAX_TREE_PATHSPEC_BYTES = 24 * 1024;
 
 interface TreeRecord {
   readonly kind: GitFileKind;
@@ -55,43 +57,41 @@ async function readTree(
   commit: string,
   paths: readonly string[],
 ): Promise<ReadonlyMap<string, TreeRecord>> {
-  const commonParent = commonParentPath(paths);
-  const pathspecs = (commonParent ? [commonParent] : paths).map(
-    (repoPath) => `:(literal)${repoPath}`,
-  );
-  let output: string;
-  try {
-    output = await runner.run([
-      "ls-tree",
-      "-rztl",
-      "--full-tree",
-      commit,
-      "--",
-      ...pathspecs,
-    ]);
-  } catch (error) {
-    throw gitBatchError(`inspect files at ${commit}`, error);
-  }
   const requested = new Set(paths);
   const records = new Map<string, TreeRecord>();
-  for (const rawRecord of output.split("\0")) {
-    if (rawRecord === "") continue;
-    const separator = rawRecord.indexOf("\t");
-    if (separator < 0) {
-      throw new MokabookError(
-        "git-failed",
-        `Git returned invalid tree metadata at ${commit}`,
-      );
+  for (const batch of treePathBatches(paths)) {
+    let output: string;
+    try {
+      output = await runner.run([
+        "ls-tree",
+        "-zl",
+        "--full-tree",
+        commit,
+        "--",
+        ...batch.map((repoPath) => `:(literal)${repoPath}`),
+      ]);
+    } catch (error) {
+      throw gitBatchError(`inspect files at ${commit}`, error);
     }
-    const repoPath = rawRecord.slice(separator + 1);
-    if (!requested.has(repoPath)) continue;
-    if (records.has(repoPath)) {
-      throw new MokabookError(
-        "git-failed",
-        `Git returned multiple entries for ${repoPath}`,
-      );
+    for (const rawRecord of output.split("\0")) {
+      if (rawRecord === "") continue;
+      const separator = rawRecord.indexOf("\t");
+      if (separator < 0) {
+        throw new MokabookError(
+          "git-failed",
+          `Git returned invalid tree metadata at ${commit}`,
+        );
+      }
+      const repoPath = rawRecord.slice(separator + 1);
+      if (!requested.has(repoPath)) continue;
+      if (records.has(repoPath)) {
+        throw new MokabookError(
+          "git-failed",
+          `Git returned multiple entries for ${repoPath}`,
+        );
+      }
+      records.set(repoPath, parseTreeRecord(rawRecord.slice(0, separator)));
     }
-    records.set(repoPath, parseTreeRecord(rawRecord.slice(0, separator)));
   }
   return records;
 }
@@ -209,22 +209,27 @@ function parseBlobBatch(
   return contents;
 }
 
-function commonParentPath(paths: readonly string[]): string {
-  const [first, ...rest] = paths.map((repoPath) =>
-    repoPath.split("/").slice(0, -1),
-  );
-  if (!first) return "";
-  let length = first.length;
-  for (const parts of rest) {
-    length = Math.min(length, parts.length);
-    for (let index = 0; index < length; index += 1) {
-      if (first[index] !== parts[index]) {
-        length = index;
-        break;
-      }
+function treePathBatches(paths: readonly string[]): string[][] {
+  const batches: string[][] = [];
+  let current: string[] = [];
+  let currentBytes = 0;
+  for (const repoPath of paths) {
+    const pathspecBytes =
+      Buffer.byteLength(`:(literal)${repoPath}`, "utf8") + 1;
+    if (
+      current.length > 0 &&
+      (current.length >= MAX_TREE_PATHS_PER_BATCH ||
+        currentBytes + pathspecBytes > MAX_TREE_PATHSPEC_BYTES)
+    ) {
+      batches.push(current);
+      current = [];
+      currentBytes = 0;
     }
+    current.push(repoPath);
+    currentBytes += pathspecBytes;
   }
-  return first.slice(0, length).join("/");
+  if (current.length > 0) batches.push(current);
+  return batches;
 }
 
 function fileKind(mode: string): GitFileKind {

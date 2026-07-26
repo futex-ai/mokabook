@@ -120,7 +120,9 @@ size by reading base fragments from Git in bounded batches and sharing one
 navigation payload across compare pages. The served shell exposes the same
 comparison in its Review mode: `/review` generates the artifact on first visit,
 serves its index and compare pages directly, and offers a recompute link that
-refreshes the comparison against the current workspace.
+refreshes the comparison against the current workspace. Served Review files
+disable HTTP caching so a regenerated comparison is always presented as one
+coherent artifact version.
 
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,

@@ -116,6 +116,50 @@ test("Git reads regular base files through two batch commands", async () => {
     calls.map(([command]) => command),
     ["ls-tree", "cat-file"],
   );
+  assert.deepEqual(calls[0], [
+    "ls-tree",
+    "-zl",
+    "--full-tree",
+    "a".repeat(40),
+    "--",
+    ":(literal)mockups/linked.html",
+    ":(literal)mockups/missing.html",
+    ":(literal)mockups/regular.html",
+  ]);
+});
+
+test("Git bounds tree metadata to exact pathspec batches", async () => {
+  const paths = Array.from(
+    { length: 600 },
+    (_, index) =>
+      `mockups/screens/screen-${String(index).padStart(4, "0")}.html`,
+  );
+  const calls: string[][] = [];
+  const client = new RepositoryGitClient({
+    run: async (arguments_) => {
+      calls.push([...arguments_]);
+      return "";
+    },
+    runBytesWithInput: async () => {
+      throw new Error("missing files must not read blobs");
+    },
+  });
+
+  const files = await client.readFiles("a".repeat(40), paths);
+
+  assert.equal(files.size, paths.length);
+  assert.ok(calls.length > 1);
+  const pathspecs = calls.flatMap((arguments_) => {
+    assert.equal(arguments_[0], "ls-tree");
+    assert.equal(arguments_[1], "-zl");
+    const separator = arguments_.indexOf("--");
+    assert.notEqual(separator, -1);
+    return arguments_.slice(separator + 1);
+  });
+  assert.deepEqual(
+    pathspecs,
+    paths.map((repoPath) => `:(literal)${repoPath}`),
+  );
 });
 
 test("Review comparison pages share large navigation markup", () => {

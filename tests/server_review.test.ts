@@ -36,6 +36,10 @@ function countingReview(
         path.join(outDir, "index.html"),
         `<h1>Generation ${this.generations}</h1>`,
       );
+      await fs.promises.writeFile(
+        path.join(outDir, "review-navigation.js"),
+        `// Generation ${this.generations}\n`,
+      );
     },
     generations: 0,
     outDir,
@@ -74,11 +78,21 @@ test("served review generates lazily, recomputes on refresh, and stays safe", as
     await (await fetch(`${server.url}/review/index.html`)).text(),
     /Generation 1/,
   );
+  const firstNavigation = await fetch(
+    `${server.url}/review/review-navigation.js`,
+  );
+  assert.equal(firstNavigation.headers.get("cache-control"), "no-store");
+  assert.match(await firstNavigation.text(), /Generation 1/);
   assert.equal(review.generations, 1);
 
   const refreshed = await fetch(`${server.url}/review/index.html?refresh=1`);
   assert.match(await refreshed.text(), /Generation 2/);
   assert.equal(review.generations, 2);
+  const refreshedNavigation = await fetch(
+    `${server.url}/review/review-navigation.js`,
+  );
+  assert.equal(refreshedNavigation.headers.get("cache-control"), "no-store");
+  assert.match(await refreshedNavigation.text(), /Generation 2/);
 
   const head = await fetch(`${server.url}/review/index.html`, {
     method: "HEAD",

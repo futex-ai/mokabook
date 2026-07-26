@@ -60,6 +60,8 @@ tree through bounded Git object batches, matches directory dependencies
 recursively, rejects non-portable base resource URLs, and never checks the base
 out over the worktree. Comparison pages share one artifact-owned navigation
 payload instead of repeating the complete catalogue in every HTML document.
+Served Review artifacts disable HTTP caching so regeneration cannot combine
+files from different artifact versions.
 
 ## Related Docs
 

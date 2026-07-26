@@ -224,11 +224,12 @@ the child exit notification arrives.
 to `origin/main`. It resolves the base to a commit and reads the committed
 `mockupsDir` tree from Git without checking out or rebuilding the base. Head
 artifacts come from the current working tree after `mokabook check` succeeds.
-Review inspects the requested base paths with one recursive `ls-tree` operation
-and reads regular-file blobs through content-size-bounded `cat-file` batches.
-The initial viewport set is one batch request; transitively referenced assets
-are grouped by dependency depth. File modes are still checked before any blob
-is accepted, so batching does not weaken symlink or non-regular-file rejection.
+Review inspects only the requested base paths, grouping exact literal pathspecs
+into count- and byte-bounded `ls-tree` operations, and reads regular-file blobs
+through content-size-bounded `cat-file` batches. The initial viewport set is one
+logical batch request; transitively referenced assets are grouped by dependency
+depth. File modes are still checked before any blob is accepted, so batching
+does not weaken symlink or non-regular-file rejection.
 
 Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
@@ -278,8 +279,9 @@ serialize so neither invalidation nor refresh races an in-flight run. Every
 artifact page includes the Review/index pill and self-contained responsive
 drawer. Pages generated behind the server additionally add the Browse pill, a
 recompute link, and the package-owned browser client for watched reloads;
-static `mokabook review` artifacts omit those server-only hooks. A generation
-failure answers with a
+static `mokabook review` artifacts omit those server-only hooks. Successful
+served artifact responses use `Cache-Control: no-store`, so regeneration cannot
+mix files from different artifact versions. A generation failure answers with a
 retryable error page and leaves the server running, and the next request
 retries the generation. A server constructed without a Review provider keeps
 the launcher view that points at the `mokabook review` command.

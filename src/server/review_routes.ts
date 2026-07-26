@@ -121,6 +121,7 @@ export class ReviewRoutes {
       return send(response, 404, "text/plain", "Not found", method);
     }
     response.writeHead(200, {
+      "cache-control": "no-store",
       "content-type": contentType(filePath),
       "x-content-type-options": "nosniff",
     });
