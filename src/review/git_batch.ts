@@ -1,7 +1,8 @@
 import { MokabookError, errorMessage } from "../errors.js";
 import type { GitCommandRunner, GitFile, GitFileKind } from "./git.js";
 
-const MAX_BATCH_CONTENT_BYTES = 48 * 1024 * 1024;
+const MAX_BATCH_OUTPUT_BYTES = 48 * 1024 * 1024;
+const MAX_BLOBS_PER_BATCH = 4_096;
 const MAX_TREE_PATHS_PER_BATCH = 256;
 const MAX_TREE_PATHSPEC_BYTES = 24 * 1024;
 
@@ -13,6 +14,7 @@ interface TreeRecord {
 
 interface BlobRecord {
   readonly objectId: string;
+  readonly repoPath: string;
   readonly size: number;
 }
 
@@ -119,7 +121,7 @@ function parseTreeRecord(metadata: string): TreeRecord {
 
 function uniqueBlobs(tree: ReadonlyMap<string, TreeRecord>): BlobRecord[] {
   const blobs = new Map<string, BlobRecord>();
-  for (const record of tree.values()) {
+  for (const [repoPath, record] of tree) {
     if (
       record.kind === "regular" &&
       record.objectId !== undefined &&
@@ -127,6 +129,7 @@ function uniqueBlobs(tree: ReadonlyMap<string, TreeRecord>): BlobRecord[] {
     ) {
       blobs.set(record.objectId, {
         objectId: record.objectId,
+        repoPath,
         size: record.size,
       });
     }
@@ -139,21 +142,38 @@ function uniqueBlobs(tree: ReadonlyMap<string, TreeRecord>): BlobRecord[] {
 function contentBatches(blobs: readonly BlobRecord[]): BlobRecord[][] {
   const batches: BlobRecord[][] = [];
   let current: BlobRecord[] = [];
-  let currentSize = 0;
+  let currentOutputBytes = 0;
   for (const blob of blobs) {
+    const outputBytes = blobOutputBytes(blob);
+    if (outputBytes > MAX_BATCH_OUTPUT_BYTES) {
+      throw new MokabookError(
+        "git-failed",
+        `Git file ${blob.repoPath} is too large for a bounded Git batch ` +
+          `(${blob.size} bytes)`,
+      );
+    }
     if (
       current.length > 0 &&
-      currentSize + blob.size > MAX_BATCH_CONTENT_BYTES
+      (current.length >= MAX_BLOBS_PER_BATCH ||
+        currentOutputBytes + outputBytes > MAX_BATCH_OUTPUT_BYTES)
     ) {
       batches.push(current);
       current = [];
-      currentSize = 0;
+      currentOutputBytes = 0;
     }
     current.push(blob);
-    currentSize += blob.size;
+    currentOutputBytes += outputBytes;
   }
   if (current.length > 0) batches.push(current);
   return batches;
+}
+
+function blobOutputBytes(blob: BlobRecord): number {
+  return (
+    Buffer.byteLength(`${blob.objectId} blob ${blob.size}\n`, "utf8") +
+    blob.size +
+    1
+  );
 }
 
 async function readBlobBatch(

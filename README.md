@@ -119,10 +119,11 @@ artifact index. Large catalogues keep Review generation proportional to their
 size by reading base fragments from Git in bounded batches and sharing one
 navigation payload across compare pages. The served shell exposes the same
 comparison in its Review mode: `/review` generates the artifact on first visit,
-serves its index and compare pages directly, and offers a recompute link that
-refreshes the comparison against the current workspace. Served Review files
-disable HTTP caching so a regenerated comparison is always presented as one
-coherent artifact version.
+redirects each page to an immutable generation URL, and offers a recompute link
+that refreshes the comparison against the current workspace. Superseded
+generations remain available briefly for their pages' scripts, panes, and
+assets. Served Review files disable HTTP caching, so one document cannot combine
+files from different artifact generations.
 
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,

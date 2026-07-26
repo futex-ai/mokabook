@@ -202,8 +202,9 @@ recovery.
 
 Publishing an update without restarting the child marks its cached served
 Review artifact stale before notifying browsers. The first reloaded Review
-request serially regenerates the artifact, while concurrent requests reuse
-that regeneration.
+top-level document request serially regenerates the artifact, while concurrent
+requests reuse that regeneration and subresources remain pinned to their
+document's immutable generation.
 
 Shutdown first stops queued work and waits for any active configuration
 transaction, then closes the final adopted watcher, timers, child processes,
@@ -226,10 +227,12 @@ to `origin/main`. It resolves the base to a commit and reads the committed
 artifacts come from the current working tree after `mokabook check` succeeds.
 Review inspects only the requested base paths, grouping exact literal pathspecs
 into count- and byte-bounded `ls-tree` operations, and reads regular-file blobs
-through content-size-bounded `cat-file` batches. The initial viewport set is one
-logical batch request; transitively referenced assets are grouped by dependency
-depth. File modes are still checked before any blob is accepted, so batching
-does not weaken symlink or non-regular-file rejection.
+through output-byte- and object-count-bounded `cat-file` batches. A single blob
+that cannot fit the output budget fails explicitly before Git is spawned. The
+initial viewport set is one logical batch request; transitively referenced
+assets are grouped by dependency depth. File modes are still checked before any
+blob is accepted, so batching does not weaken symlink or non-regular-file
+rejection.
 
 Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
@@ -276,15 +279,21 @@ the first `/review` request and again when a request carries `?refresh=1`, so
 the comparison reflects the workspace when viewed. A published watch update
 also invalidates the cached artifact before browsers reload; generations
 serialize so neither invalidation nor refresh races an in-flight run. Every
-artifact page includes the Review/index pill and self-contained responsive
-drawer. Pages generated behind the server additionally add the Browse pill, a
-recompute link, and the package-owned browser client for watched reloads;
-static `mokabook review` artifacts omit those server-only hooks. Successful
-served artifact responses use `Cache-Control: no-store`, so regeneration cannot
-mix files from different artifact versions. A generation failure answers with a
-retryable error page and leaves the server running, and the next request
-retries the generation. A server constructed without a Review provider keeps
-the launcher view that points at the `mokabook review` command.
+stable artifact path redirects to a server-owned immutable generation URL.
+Relative scripts, panes, and resources therefore stay pinned to that
+generation. Replaced directories remain available for a bounded idle window,
+and a watched top-level reload advances to the latest generation without
+redirecting an old document's concurrent subresources. Every artifact page
+includes the Review/index pill and self-contained responsive drawer. Pages
+generated behind the server additionally add the Browse pill, a recompute link,
+and the package-owned browser client for watched reloads; static
+`mokabook review` artifacts omit those server-only hooks. Successful redirects
+and artifact responses use `Cache-Control: no-store`. A generation failure
+restores the previous served directory, answers with a retryable error page,
+and leaves the server running; the next request retries the generation. Server
+shutdown removes retained temporary generations but not the configured current
+output. A server constructed without a Review provider keeps the launcher view
+that points at the `mokabook review` command.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including
