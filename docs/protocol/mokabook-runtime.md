@@ -59,7 +59,8 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/id/<id>` as a canonical redirect for routed registry entries;
 - `/static/<path>` for generated fragments, legacy pages, and consumer assets;
 - `/review` for the configured Git comparison, redirecting to the artifact
-  index, with `/review/<path>` serving the generated artifact files;
+  index, with stable `/review/<path>` routes redirecting to immutable
+  `/review/__generations/<version>/<path>` artifact files;
 - package-owned client and update endpoints under `/__mokabook/`.
 
 All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
