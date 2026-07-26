@@ -120,8 +120,15 @@ scrollable region scrolls internally:
 
 - **Phone frame** — 390×844, 12px bezel padding, `#171a18` body,
   46px radius, floating notch (108×30 at top 22px), 36px-radius white screen,
-  and a bottom home pill (128×4). The embedded mobile fragment fills the
-  screen with a matching 36px radius.
+  and a bottom home pill (128×4). The screen is a column: a reserved status
+  band followed by the embedded mobile fragment, which takes the remaining
+  height and rounds only its bottom corners.
+- **Phone status band** — the top 44px of the screen, padded `14px 28px 0` so
+  its content clears the notch: a `9:41` clock on the left and cellular, Wi-Fi,
+  and battery glyphs on the right. Text is 13.5px/600 `--chrome-ink` with
+  tabular numerals; glyphs are 16×11 except the 22×11 battery, drawn with
+  `currentColor` on their own viewBoxes. The band is device chrome, so it
+  reserves space above the fragment rather than covering screen content.
 - **Browser frame** — width 100%, max-width 1180px, height 760px, strong
   hairline border, 8px radius. Its 40px bar holds three traffic lights
   (`#d9655b`, `#dba43d`, `#50a86d`), a monospace address pill (copies the

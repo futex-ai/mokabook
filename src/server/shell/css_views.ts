@@ -275,7 +275,10 @@ export const SHELL_VIEW_CSS = `
 }
 
 .phone-screen .mbk-frag {
-  border-radius: 36px;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  border-radius: 0 0 36px 36px;
 }
 
 @media (max-width: 760px) {
