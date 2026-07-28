@@ -56,9 +56,18 @@ generated header proves package ownership; consumer-authored public HTML may
 use explicit watch rules. A child closes on either an orderly message/signal or
 loss of its parent IPC channel, and supervisor shutdown waits for confirmed
 exit while escalating from IPC to SIGTERM and SIGKILL. Review reads the base
-tree through Git object access, matches directory dependencies recursively,
-rejects non-portable base resource URLs, and never checks the base out over the
-worktree.
+tree through bounded Git object batches, matches directory dependencies
+recursively, rejects non-portable base resource URLs, and never checks the base
+out over the worktree. Comparison pages share one artifact-owned navigation
+payload instead of repeating the complete catalogue in every HTML document.
+Served Review redirects artifact paths to immutable generation URLs and retains
+superseded directories for a bounded idle window. Responses disable HTTP
+caching, while the versioned paths keep a document's scripts, panes, and assets
+on the same generation during regeneration. In-flight invalidations coalesce
+behind the active generation, and only a marker-owned current output may enter
+the server's temporary archive lifecycle. Archive roots are explicit
+changed-path exclusions rather than consumer-owned ignore policy, and shutdown
+drains generation work before removing them.
 
 ## Related Docs
 

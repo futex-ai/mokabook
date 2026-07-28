@@ -164,6 +164,7 @@ export function comparePage(
     ),
     result,
     rootPrefix: "../../../",
+    navigation: "shared",
     script: MODE_SCRIPT,
     title: `${screen.title} · ${viewport.viewport}`,
   });

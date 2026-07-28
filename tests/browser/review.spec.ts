@@ -128,6 +128,9 @@ test("approved impact mockups show the impacted group", async ({ page }) => {
 test("compare pages switch modes and viewports", async ({ page }) => {
   await page.goto(pathToFileURL(path.join(outDir, "index.html")).href);
   await page.locator(".mbk-chg-row").first().click();
+  await expect(page.locator('.mbk-chg-row[aria-current="page"]')).toHaveCount(
+    1,
+  );
   await expect(page.locator(".mb-panes")).toHaveAttribute(
     "data-compare-mode",
     "side",

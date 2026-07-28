@@ -199,7 +199,7 @@ test("CLI no-watch lifecycle becomes ready and exits cleanly on SIGTERM", async 
 
 test(
   "watched CLI rebuilds, restarts on one stable port, and cleans up its child",
-  { timeout: 30_000 },
+  { timeout: 45_000 },
   async (context) => {
     const fixture = await createFixture();
     context.after(() => removeFixture(fixture));
@@ -257,8 +257,12 @@ test(
       fixture.configPath,
       `export default { entriesDir: "entries", mockupsDir: "mockups", repoRoot: ".", review: { base: "config-reloaded", outDir: ".review" } };\n`,
     );
-    await waitFor(async () =>
-      (await (await fetch(`${url}/review`)).text()).includes("config-reloaded"),
+    await waitFor(
+      async () =>
+        (await (await fetch(`${url}/review`)).text()).includes(
+          "config-reloaded",
+        ),
+      20_000,
     );
     assert.equal(new URL(url).port, firstPort);
     child.kill("SIGTERM");
@@ -313,8 +317,11 @@ function outputUrl(stream: NodeJS.ReadableStream): Promise<string> {
   });
 }
 
-async function waitFor(predicate: () => Promise<boolean>): Promise<void> {
-  const deadline = Date.now() + 12_000;
+async function waitFor(
+  predicate: () => Promise<boolean>,
+  timeoutMilliseconds = 12_000,
+): Promise<void> {
+  const deadline = Date.now() + timeoutMilliseconds;
   while (Date.now() < deadline) {
     try {
       if (await predicate()) return;

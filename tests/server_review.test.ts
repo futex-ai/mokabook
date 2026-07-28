@@ -36,6 +36,21 @@ function countingReview(
         path.join(outDir, "index.html"),
         `<h1>Generation ${this.generations}</h1>`,
       );
+      await fs.promises.writeFile(
+        path.join(outDir, "review-navigation.js"),
+        `// Generation ${this.generations}\n`,
+      );
+      await fs.promises.mkdir(path.join(outDir, "snapshots", "head"), {
+        recursive: true,
+      });
+      await fs.promises.writeFile(
+        path.join(outDir, "snapshots", "head", "pane.html"),
+        `<h1>Generation ${this.generations}</h1>`,
+      );
+      await fs.promises.writeFile(
+        path.join(outDir, ".mokabook-review-artifact"),
+        "schemaVersion=1\n",
+      );
     },
     generations: 0,
     outDir,
@@ -68,17 +83,32 @@ test("served review generates lazily, recomputes on refresh, and stays safe", as
 
   const first = await fetch(`${server.url}/review/index.html`);
   assert.equal(first.status, 200);
+  assert.match(first.url, /\/review\/__generations\/[a-f0-9-]+\/index\.html$/);
   assert.match(first.headers.get("content-type") ?? "", /text\/html/);
   assert.match(await first.text(), /Generation 1/);
   assert.match(
     await (await fetch(`${server.url}/review/index.html`)).text(),
     /Generation 1/,
   );
+  const firstNavigationUrl = new URL("review-navigation.js", first.url);
+  const firstPaneUrl = new URL("snapshots/head/pane.html", first.url);
+  const firstNavigation = await fetch(firstNavigationUrl);
+  assert.equal(firstNavigation.headers.get("cache-control"), "no-store");
+  assert.match(await firstNavigation.text(), /Generation 1/);
+  assert.match(await (await fetch(firstPaneUrl)).text(), /Generation 1/);
   assert.equal(review.generations, 1);
 
-  const refreshed = await fetch(`${server.url}/review/index.html?refresh=1`);
+  const refreshed = await fetch(`${server.url}/review?refresh=1`);
+  assert.notEqual(refreshed.url, first.url);
   assert.match(await refreshed.text(), /Generation 2/);
   assert.equal(review.generations, 2);
+  const refreshedNavigation = await fetch(
+    new URL("review-navigation.js", refreshed.url),
+  );
+  assert.equal(refreshedNavigation.headers.get("cache-control"), "no-store");
+  assert.match(await refreshedNavigation.text(), /Generation 2/);
+  assert.match(await (await fetch(firstNavigationUrl)).text(), /Generation 1/);
+  assert.match(await (await fetch(firstPaneUrl)).text(), /Generation 1/);
 
   const head = await fetch(`${server.url}/review/index.html`, {
     method: "HEAD",
@@ -100,22 +130,24 @@ test("published updates invalidate the served review artifact", async (context) 
   const server = await startedFixtureServer(fixture, review);
   context.after(() => server.close());
 
-  assert.match(
-    await (await fetch(`${server.url}/review/index.html`)).text(),
-    /Generation 1/,
-  );
+  const initial = await fetch(`${server.url}/review/index.html`);
+  assert.match(await initial.text(), /Generation 1/);
 
   server.publishUpdate();
 
   const regenerated = await Promise.all([
+    fetch(initial.url).then(async (response) => ({
+      body: await response.text(),
+      url: response.url,
+    })),
     fetch(`${server.url}/review/index.html`).then((response) =>
-      response.text(),
-    ),
-    fetch(`${server.url}/review/index.html`).then((response) =>
-      response.text(),
+      response.text().then((body) => ({ body, url: response.url })),
     ),
   ]);
-  for (const html of regenerated) assert.match(html, /Generation 2/);
+  for (const result of regenerated) {
+    assert.match(result.body, /Generation 2/);
+    assert.notEqual(result.url, initial.url);
+  }
   assert.equal(review.generations, 2);
 });
 
@@ -132,6 +164,10 @@ test("a failed review generation answers a retryable page and then recovers", as
       await fs.promises.writeFile(
         path.join(outDir, "index.html"),
         "<h1>Recovered</h1>",
+      );
+      await fs.promises.writeFile(
+        path.join(outDir, ".mokabook-review-artifact"),
+        "schemaVersion=1\n",
       );
     },
     outDir,
@@ -151,6 +187,63 @@ test("a failed review generation answers a retryable page and then recovers", as
   const recovered = await fetch(`${server.url}/review/index.html`);
   assert.equal(recovered.status, 200);
   assert.match(await recovered.text(), /Recovered/);
+});
+
+test("a failed recompute restores the served generation", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const outDir = path.join(fixture.root, ".review");
+  let attempts = 0;
+  const review: ServedReview = {
+    base: "origin/main",
+    async generate(): Promise<void> {
+      attempts += 1;
+      await fs.promises.mkdir(outDir, { recursive: true });
+      await fs.promises.writeFile(
+        path.join(outDir, "index.html"),
+        `<h1>Generation ${attempts}</h1>`,
+      );
+      await fs.promises.writeFile(
+        path.join(outDir, "review-navigation.js"),
+        `// Generation ${attempts}\n`,
+      );
+      await fs.promises.writeFile(
+        path.join(outDir, ".mokabook-review-artifact"),
+        "schemaVersion=1\n",
+      );
+      if (attempts === 2) throw new Error("replacement interrupted");
+    },
+    outDir,
+  };
+  const server = await startedFixtureServer(fixture, review);
+  let closed = false;
+  context.after(async () => {
+    if (!closed) await server.close();
+  });
+
+  const first = await fetch(`${server.url}/review/index.html`);
+  assert.match(await first.text(), /Generation 1/);
+
+  const failed = await fetch(`${server.url}/review/index.html?refresh=1`);
+  assert.equal(failed.status, 500);
+  assert.match(await failed.text(), /replacement interrupted/);
+  assert.match(
+    await (await fetch(new URL("review-navigation.js", first.url))).text(),
+    /Generation 1/,
+  );
+
+  const recovered = await fetch(`${server.url}/review/index.html`);
+  assert.match(await recovered.text(), /Generation 3/);
+  assert.equal(attempts, 3);
+
+  await server.close();
+  closed = true;
+  assert.equal(
+    (await fs.promises.readdir(path.dirname(outDir))).some((entry) =>
+      entry.startsWith(".mokabook-review-served-"),
+    ),
+    false,
+  );
 });
 
 test("a server without a review provider keeps the launcher view", async (context) => {
@@ -193,7 +286,7 @@ test("no-watch serve exposes the Git comparison with compare pages", async (cont
   const compareHref = indexHtml.match(/href="(comparisons\/[^"]+)"/)?.[1];
   assert.ok(compareHref);
 
-  const compareUrl = `${running.url}/review/${compareHref}`;
+  const compareUrl = new URL(compareHref, index.url);
   const compare = await fetch(compareUrl);
   assert.equal(compare.status, 200);
   const compareHtml = await compare.text();
@@ -205,9 +298,26 @@ test("no-watch serve exposes the Git comparison with compare pages", async (cont
   assert.match(compareHtml, /href="\/">Browse<\/a>/);
   assert.match(compareHtml, /\/__mokabook\/client\/browser\.js/);
 
+  const navigation = await fetch(new URL("review-navigation.js", index.url));
+  assert.equal(navigation.status, 200);
+  assert.match(navigation.headers.get("content-type") ?? "", /javascript/);
+  assert.match(await navigation.text(), /data-mokabook-review-route/);
+
+  assert.equal(fs.existsSync(path.join(fixture.root, ".gitignore")), false);
+  const refreshed = await fetch(`${running.url}/review/index.html?refresh=1`);
+  const reviewJson = (await (
+    await fetch(new URL("review.json", refreshed.url))
+  ).json()) as { changedPaths: string[] };
+  assert.equal(
+    reviewJson.changedPaths.some((changed) =>
+      changed.includes(".mokabook-review-served-"),
+    ),
+    false,
+  );
+
   const paneSrc = compareHtml.match(/<iframe[^>]*src="([^"]+)"/)?.[1];
   assert.ok(paneSrc);
-  const pane = await fetch(new URL(paneSrc, compareUrl));
+  const pane = await fetch(new URL(paneSrc, compare.url));
   assert.equal(pane.status, 200);
   assert.match(await pane.text(), /Home/);
 });

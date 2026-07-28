@@ -59,7 +59,8 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/id/<id>` as a canonical redirect for routed registry entries;
 - `/static/<path>` for generated fragments, legacy pages, and consumer assets;
 - `/review` for the configured Git comparison, redirecting to the artifact
-  index, with `/review/<path>` serving the generated artifact files;
+  index, with stable `/review/<path>` routes redirecting to immutable
+  `/review/__generations/<version>/<path>` artifact files;
 - package-owned client and update endpoints under `/__mokabook/`.
 
 All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
@@ -202,8 +203,9 @@ recovery.
 
 Publishing an update without restarting the child marks its cached served
 Review artifact stale before notifying browsers. The first reloaded Review
-request serially regenerates the artifact, while concurrent requests reuse
-that regeneration.
+top-level document request serially regenerates the artifact, while concurrent
+requests reuse that regeneration and subresources remain pinned to their
+document's immutable generation.
 
 Shutdown first stops queued work and waits for any active configuration
 transaction, then closes the final adopted watcher, timers, child processes,
@@ -224,6 +226,14 @@ the child exit notification arrives.
 to `origin/main`. It resolves the base to a commit and reads the committed
 `mockupsDir` tree from Git without checking out or rebuilding the base. Head
 artifacts come from the current working tree after `mokabook check` succeeds.
+Review inspects only the requested base paths, grouping exact literal pathspecs
+into count- and byte-bounded `ls-tree` operations, and reads regular-file blobs
+through output-byte- and object-count-bounded `cat-file` batches. A single blob
+that cannot fit the output budget fails explicitly after metadata inspection
+and before a `cat-file` content process is spawned. The initial viewport set is
+one logical batch request; transitively referenced assets are grouped by
+dependency depth. File modes are still checked before any blob is accepted, so
+batching does not weaken symlink or non-regular-file rejection.
 
 Screens pair by stable manifest route. Mobile and desktop classify separately
 from their fragments. Added, removed, changed, and unchanged states handle
@@ -245,6 +255,9 @@ The engine emits a static, self-contained artifact directory with:
   impact evidence, with the same material/impacted totals in the CI summary;
 - one designed compare page per screen viewport, linked to its sibling
   viewport through the page's viewport control;
+- one artifact-root navigation payload shared by all compare pages, while the
+  index keeps complete inline navigation and a compare page without JavaScript
+  keeps a direct fallback link to that index;
 - a responsive changed-screens drawer opened by the top-bar menu button, plus
   a Review pill that links every compare page back to the artifact index;
 - side-by-side, opacity-overlay, and difference modes on every compare page;
@@ -255,8 +268,9 @@ The engine emits a static, self-contained artifact directory with:
 - deterministic `review.json` for CI summaries.
 
 Artifact pages inline the package-owned shell styles so the directory remains
-viewable without a server, and every embedded pane stays in a script-disabled
-sandbox.
+viewable without a server. Compare pages load their package-owned navigation
+payload by relative path from the same artifact directory, and every embedded
+pane stays in a script-disabled sandbox.
 
 ## Served Review
 
@@ -265,15 +279,31 @@ generates the artifact into the configured Review output directory lazily on
 the first `/review` request and again when a request carries `?refresh=1`, so
 the comparison reflects the workspace when viewed. A published watch update
 also invalidates the cached artifact before browsers reload; generations
-serialize so neither invalidation nor refresh races an in-flight run. Every
+serialize so neither invalidation nor refresh races an in-flight run. Refresh
+and invalidation requests that arrive during an unrelated run coalesce into one
+follow-up generation. Every stable artifact path redirects to a server-owned
+immutable generation URL.
+Relative scripts, panes, and resources therefore stay pinned to that
+generation. Replaced directories remain available for a bounded idle window,
+and a watched top-level reload advances to the latest generation without
+redirecting an old document's concurrent subresources. Package-owned archive
+roots are passed into changed-path collection as explicit exclusions, so
+consumer ignore policy cannot turn retained output into impact evidence. Every
 artifact page includes the Review/index pill and self-contained responsive
 drawer. Pages generated behind the server additionally add the Browse pill, a
 recompute link, and the package-owned browser client for watched reloads;
-static `mokabook review` artifacts omit those server-only hooks. A generation
-failure answers with a
-retryable error page and leaves the server running, and the next request
-retries the generation. A server constructed without a Review provider keeps
-the launcher view that points at the `mokabook review` command.
+static `mokabook review` artifacts omit those server-only hooks. Successful
+redirects and artifact responses use `Cache-Control: no-store`. A generation
+failure restores the previous served directory, answers with a retryable error
+page, and leaves the server running; the next request retries the generation.
+Server shutdown stops new Review work, waits for active or queued generation to
+settle, then removes retained temporary generations but not the configured
+current output. Before archiving a current output, the server requires its
+regular-file Review ownership marker and refuses an unowned replacement
+without moving or deleting it. Failed-generation recovery likewise removes
+only marker-owned incomplete output before restoring the prior artifact. A
+server constructed without a Review provider keeps the launcher view that
+points at the `mokabook review` command.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including

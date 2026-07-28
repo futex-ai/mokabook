@@ -26,6 +26,7 @@ export async function runReview(
   ),
   outputStore: GeneratedOutputStore = new FileSystemGeneratedOutputStore(),
   render: ReviewRenderOptions = {},
+  changedPathExclusions: readonly string[] = [],
 ): Promise<ReviewResult> {
   validateReviewOut(outDir, config, "Review output", "review-invalid");
   const compilation = await compileCatalogue(config);
@@ -36,6 +37,8 @@ export async function runReview(
     git,
     baseRef,
     outDir,
+    undefined,
+    changedPathExclusions,
   );
   await writeReviewArtifact(
     renderReviewArtifact(artifact, render),

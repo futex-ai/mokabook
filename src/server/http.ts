@@ -81,9 +81,14 @@ export async function startCatalogueServer(
   return {
     async close(): Promise<void> {
       for (const stream of streams) stream.end();
-      await new Promise<void>((resolve, reject) => {
+      const serverClosing = new Promise<void>((resolve, reject) => {
         server.close((error) => (error ? reject(error) : resolve()));
       });
+      const reviewClosing = reviewRoutes?.close() ?? Promise.resolve();
+      const results = await Promise.allSettled([serverClosing, reviewClosing]);
+      for (const result of results) {
+        if (result.status === "rejected") throw result.reason;
+      }
     },
     port: address.port,
     publishUpdate(version?: number): void {
