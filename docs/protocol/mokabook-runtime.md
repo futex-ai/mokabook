@@ -171,7 +171,10 @@ bind strictly rather than changing the published URL. Exhausting the valid port
 range or encountering another bind error exits non-zero without leaking
 watchers. An unexpected child failure after readiness reports its diagnostic,
 clears the dead process, and enqueues a restart through the same serialized
-action queue used for authored changes.
+action queue used for authored changes. Missing the readiness deadline is a
+failed startup: the supervisor requests graceful shutdown, escalates through
+SIGTERM and SIGKILL, and confirms child exit before a recovery attempt may bind
+the stable port.
 
 On a config-file change, the parent first loads and validates the candidate,
 starts a replacement watcher and waits for readiness, then transactionally

@@ -29,6 +29,12 @@ const DEFAULT_SHUTDOWN_TIMINGS: ChildShutdownTimings = {
   gracefulMilliseconds: 2_000,
   terminateMilliseconds: 2_000,
 };
+const DEFAULT_READINESS_MILLISECONDS = 15_000;
+
+interface SupervisedChild {
+  exited: Promise<void>;
+  handle: ChildHandle;
+}
 
 /** Factory seam for unit-testing child lifecycle ordering. */
 export interface ChildFactory {
@@ -84,7 +90,7 @@ export class NodeProcessSupervisorFactory implements ProcessSupervisorFactory {
 
 /** Child supervisor that waits for readiness and retains a resolved port. */
 export class ReadyProcessSupervisor implements ProcessSupervisor {
-  #child: ChildHandle | undefined;
+  #child: SupervisedChild | undefined;
   #unexpectedExit: ((error: Error) => void) | undefined;
   #resolvedPort: number | undefined;
   #updateVersion = 0;
@@ -94,6 +100,7 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
     private readonly baseArguments: readonly string[],
     private readonly requestedPort: number,
     private readonly shutdownTimings: ChildShutdownTimings = DEFAULT_SHUTDOWN_TIMINGS,
+    private readonly readinessMilliseconds = DEFAULT_READINESS_MILLISECONDS,
   ) {}
 
   async start(): Promise<number> {
@@ -105,27 +112,34 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
     const resolvedPort = this.#resolvedPort;
     const port = resolvedPort ?? this.requestedPort;
     this.#updateVersion += 1;
-    const child = this.factory.spawn([
-      ...this.baseArguments,
-      "--port",
-      String(port),
-      ...(resolvedPort === undefined ? [] : ["--strict-port"]),
-      "--update-version",
-      String(this.#updateVersion),
-    ]);
+    const child = superviseChild(
+      this.factory.spawn([
+        ...this.baseArguments,
+        "--port",
+        String(port),
+        ...(resolvedPort === undefined ? [] : ["--strict-port"]),
+        "--update-version",
+        String(this.#updateVersion),
+      ]),
+    );
     this.#child = child;
     try {
-      const readyPort = await waitForReady(child, (error) => {
-        if (this.#child !== child) return;
-        this.#child = undefined;
-        child.terminate();
-        this.#unexpectedExit?.(error);
-      });
+      const readyPort = await waitForReady(
+        child.handle,
+        (error) => {
+          if (this.#child !== child) return;
+          this.#child = undefined;
+          child.handle.terminate();
+          this.#unexpectedExit?.(error);
+        },
+        this.readinessMilliseconds,
+      );
       this.#resolvedPort = readyPort;
       return readyPort;
     } catch (error) {
-      if (this.#child === child) this.#child = undefined;
-      child.terminate();
+      if (this.#child !== child) throw error;
+      this.#child = undefined;
+      await stopChild(child, this.shutdownTimings);
       throw error;
     }
   }
@@ -138,7 +152,7 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
   notifyUpdate(): void {
     if (!this.#child) return;
     this.#updateVersion += 1;
-    this.#child.send({ type: "update", version: this.#updateVersion });
+    this.#child.handle.send({ type: "update", version: this.#updateVersion });
   }
 
   onUnexpectedExit(callback: (error: Error) => void): void {
@@ -154,41 +168,42 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
 }
 
 function stopChild(
-  child: ChildHandle,
+  child: SupervisedChild,
   timings: ChildShutdownTimings,
 ): Promise<void> {
-  return new Promise((resolve) => {
-    let exited = false;
-    let forceTimer: ReturnType<typeof setTimeout> | undefined;
-    const terminateTimer = setTimeout(() => {
-      child.terminate();
-      if (exited) return;
-      forceTimer = setTimeout(() => {
-        child.forceKill();
-      }, timings.terminateMilliseconds);
-      forceTimer.unref();
-    }, timings.gracefulMilliseconds);
-    terminateTimer.unref();
-    child.onExit(() => {
-      if (exited) return;
-      exited = true;
-      clearTimeout(terminateTimer);
-      if (forceTimer) clearTimeout(forceTimer);
-      resolve();
-    });
-    child.send({ type: "shutdown" });
+  let forceTimer: ReturnType<typeof setTimeout> | undefined;
+  const terminateTimer = setTimeout(() => {
+    child.handle.terminate();
+    forceTimer = setTimeout(() => {
+      child.handle.forceKill();
+    }, timings.terminateMilliseconds);
+    forceTimer.unref();
+  }, timings.gracefulMilliseconds);
+  terminateTimer.unref();
+  child.handle.send({ type: "shutdown" });
+  return child.exited.finally(() => {
+    clearTimeout(terminateTimer);
+    if (forceTimer) clearTimeout(forceTimer);
   });
+}
+
+function superviseChild(handle: ChildHandle): SupervisedChild {
+  return {
+    exited: new Promise((resolve) => handle.onExit(() => resolve())),
+    handle,
+  };
 }
 
 function waitForReady(
   child: ChildHandle,
   onUnexpectedFailure: (error: Error) => void,
+  readinessMilliseconds: number,
 ): Promise<number> {
   return new Promise((resolve, reject) => {
     let state: "failed" | "ready" | "waiting" = "waiting";
     const timer = setTimeout(
       () => fail(new Error("server child readiness timed out")),
-      15_000,
+      readinessMilliseconds,
     );
     timer.unref();
     const fail = (error: Error): void => {

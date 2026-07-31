@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { restartWithRecovery } from "../dist/server/serve.js";
 import {
   ReadyProcessSupervisor,
   type ChildFactory,
@@ -68,6 +69,43 @@ test(
   },
 );
 
+test(
+  "recovery reaps a readiness-stalled child before replacing it",
+  { timeout: 20_000 },
+  async () => {
+    const initial = new ResponsiveChild();
+    const stalled = new ForceKillResponsiveChild();
+    const replacement = new ResponsiveChild();
+    const factory = new SequencedChildFactory([initial, stalled, replacement]);
+    const supervisor = new ReadyProcessSupervisor(
+      factory,
+      ["__serve-child"],
+      0,
+      { gracefulMilliseconds: 10, terminateMilliseconds: 10 },
+      10,
+    );
+    const starting = supervisor.start();
+    initial.ready(48123);
+    await starting;
+
+    const recovery = restartWithRecovery(supervisor);
+    await waitFor(() => factory.arguments_.length === 3);
+    assert.equal(stalled.terminations, 1);
+    assert.equal(stalled.forceKills, 1);
+    assert.deepEqual(factory.arguments_[2], [
+      "__serve-child",
+      "--port",
+      "48123",
+      "--strict-port",
+      "--update-version",
+      "3",
+    ]);
+    replacement.ready(48123);
+    await assert.rejects(recovery, /server child readiness timed out/);
+    await supervisor.close();
+  },
+);
+
 class UnresponsiveChildFactory implements ChildFactory {
   readonly child = new UnresponsiveChild();
 
@@ -88,19 +126,34 @@ class ResponsiveChildFactory implements ChildFactory {
   }
 }
 
+class SequencedChildFactory implements ChildFactory {
+  readonly arguments_: string[][] = [];
+  private next = 0;
+
+  constructor(private readonly children: readonly ChildHandle[]) {}
+
+  spawn(arguments_: readonly string[]): ChildHandle {
+    const child = this.children[this.next];
+    if (!child) throw new Error("no child configured for spawn");
+    this.arguments_.push([...arguments_]);
+    this.next += 1;
+    return child;
+  }
+}
+
 class ResponsiveChild implements ChildHandle {
   readonly messages: Array<Record<string, string | number>> = [];
-  private exitCallback: ((code: number | null) => void) | undefined;
+  private readonly exitCallbacks: Array<(code: number | null) => void> = [];
   private messageCallback: ((message: unknown) => void) | undefined;
 
   forceKill(): void {
-    this.exitCallback?.(null);
+    this.exit(null);
   }
 
   onError(_callback: (error: Error) => void): void {}
 
   onExit(callback: (code: number | null) => void): void {
-    this.exitCallback = callback;
+    this.exitCallbacks.push(callback);
   }
 
   onMessage(callback: (message: unknown) => void): void {
@@ -109,16 +162,19 @@ class ResponsiveChild implements ChildHandle {
 
   send(message: Record<string, string | number>): void {
     this.messages.push(message);
-    if (message.type === "shutdown")
-      queueMicrotask(() => this.exitCallback?.(0));
+    if (message.type === "shutdown") queueMicrotask(() => this.exit(0));
   }
 
   terminate(): void {
-    this.exitCallback?.(null);
+    this.exit(null);
   }
 
   ready(port: number): void {
     this.messageCallback?.({ port, type: "ready" });
+  }
+
+  private exit(code: number | null): void {
+    for (const callback of this.exitCallbacks.splice(0)) callback(code);
   }
 }
 
@@ -156,6 +212,13 @@ class UnresponsiveChild implements ChildHandle {
     for (const callback of this.messageCallbacks) {
       callback({ port, type: "ready" });
     }
+  }
+}
+
+class ForceKillResponsiveChild extends UnresponsiveChild {
+  override forceKill(): void {
+    super.forceKill();
+    this.exit(null);
   }
 }
 

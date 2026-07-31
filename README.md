@@ -149,12 +149,15 @@ custom rule watches the repository root; an unowned public HTML file can still
 use an explicit watch rule, and configured stylesheets retain reload
 precedence. Shutdown interrupts replacement-watcher readiness, closes the
 candidate before draining the remaining lifecycle, and waits for child exit
-through graceful, terminate, and force-kill stages. Open Browse and Review pages
-connect to the versioned event stream and reload after a newer build or asset
-version arrives. Publishing a reload-only watch update invalidates the served
-Review cache, so the reloaded Review URL regenerates before it is served. A
-watched reload restores the current Browse search, filter, disclosures,
-viewport, drawer, and scroll state once on the same durable URL.
+through graceful, terminate, and force-kill stages. A child that misses its
+startup-readiness deadline is reaped through those same stages before recovery
+starts a replacement, so a stalled process cannot retain the stable port. Open
+Browse and Review pages connect to the versioned event stream and reload after a
+newer build or asset version arrives. Publishing a reload-only watch update
+invalidates the served Review cache, so the reloaded Review URL regenerates
+before it is served. A watched reload restores the current Browse search,
+filter, disclosures, viewport, drawer, and scroll state once on the same durable
+URL.
 Browse also retains each history entry's latest document position for Back and
 Forward.
 A rejected config or failed candidate build leaves the last-good watcher,
