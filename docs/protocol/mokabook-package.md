@@ -75,7 +75,8 @@ the following contract:
 - optional renderer-module path and declarative route-to-stylesheet rules;
 - optional consumer package roots, aliases, conditions, fields, extensions, and
   loaders for app-owned module resolution;
-- default Git base ref and Review output directory;
+- default Git base ref used to find the `HEAD` branch point, and Review output
+  directory;
 - shared-impact globs for Review;
 - additional authored inputs and static assets for watched Serve;
 - optional legacy link aliases and lint policy needed by that consumer.
@@ -138,7 +139,7 @@ interface MokabookConfig {
     };
   };
   review?: {
-    base?: string; // origin/main
+    base?: string; // origin/main; merge base with HEAD
     outDir?: string; // .context/mokabook-review
     sharedImpact?: readonly string[];
   };

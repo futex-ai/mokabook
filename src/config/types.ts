@@ -50,7 +50,7 @@ export interface WatchConfig {
 
 /** Git comparison and artifact configuration. */
 export interface ReviewConfig {
-  /** Default Git ref used by `mokabook review`. */
+  /** Git ref whose merge base with HEAD is the comparison branch point. */
   base?: string;
   /** Config-relative artifact directory. */
   outDir?: string;

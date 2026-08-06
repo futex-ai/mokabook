@@ -77,15 +77,15 @@ development dependency, `npx --no-install mokabook` guarantees npm does not
 fall back to the registry. After the first release, a clean machine may use
 `npx --package mokabook mokabook` without adding a dependency.
 
-| Command              | Outcome                                                 |
-| -------------------- | ------------------------------------------------------- |
-| `mokabook`           | Build, serve, and watch using a stable development URL  |
-| `mokabook serve`     | Serve Browse; add `--no-watch` for one child process    |
-| `mokabook build`     | Validate and transactionally write generated output     |
-| `mokabook check`     | Compare expected and committed bytes without writing    |
-| `mokabook review`    | Compare Git base/head screens and write a static Review |
-| `mokabook --help`    | Show commands and their supported options               |
-| `mokabook --version` | Print the installed package version                     |
+| Command              | Outcome                                                |
+| -------------------- | ------------------------------------------------------ |
+| `mokabook`           | Build, serve, and watch using a stable development URL |
+| `mokabook serve`     | Serve Browse; add `--no-watch` for one child process   |
+| `mokabook build`     | Validate and transactionally write generated output    |
+| `mokabook check`     | Compare expected and committed bytes without writing   |
+| `mokabook review`    | Compare branch-point/head screens and write a Review   |
+| `mokabook --help`    | Show commands and their supported options              |
+| `mokabook --version` | Print the installed package version                    |
 
 Serve starts at port `4173`. If that port, or a concrete `--port` value, is
 already occupied, Mokabook tries each following port in order until one is
@@ -104,11 +104,14 @@ fragment,
 header viewport controls, use-case flows, a details inspector that remembers
 its disclosure across routes and reloads, id redirects, and watched updates.
 The Changed filter compares route-level manifest metadata, generated fragments,
-and explicitly declared dependencies against the Git base. A registry module
-that defines many routes does not make every route appear changed merely because
-the module's imports or composition changed.
-Review provides summary, side-by-side, overlay, and difference views as a
-static artifact. Screens with shared or declared dependency impact
+and explicitly declared dependencies with the branch point shared by `HEAD` and
+the configured Git base. Commits added only to the base branch after divergence
+do not appear as branch changes; staged, unstaged, and untracked workspace edits
+still do. A registry module that defines many routes does not make every route
+appear changed merely because the module's imports or composition changed.
+Review uses the same branch-point baseline and provides summary, side-by-side,
+overlay, and difference views as a static artifact. Screens with shared or
+declared dependency impact
 remain linked in a distinct impacted group even when their generated views are
 byte-identical. A declared dependency may be a file or directory; a changed
 descendant of a directory is reported as the screen's impact evidence.
@@ -175,8 +178,8 @@ file and confined to `repoRoot`.
   excluded migration sources, and generic lints.
 - `watch` classifies additional consumer inputs after proven package-owned
   ignores and configured stylesheets; this includes authored static HTML under
-  `mockupsDir`. `review` selects the Git base, artifact directory, and
-  shared-impact globs.
+  `mockupsDir`. `review` selects the Git base ref used to find the branch point,
+  artifact directory, and shared-impact globs.
 - `compatibility.readManifestV2` reads Accounting's old manifest only when v3
   is absent. A temporary `compatibility.transformer` may deterministically
   repair already-authored documents during a consumer cutover; final links and

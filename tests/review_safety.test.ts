@@ -59,7 +59,7 @@ test("Review artifact paths are collision-free for distinct valid routes", async
         }
         throw new Error(`unexpected Git path ${repoPath}`);
       },
-      resolveRef: async () => "a".repeat(40),
+      mergeBase: async () => "a".repeat(40),
     },
     "HEAD",
   );

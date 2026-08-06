@@ -29,7 +29,9 @@ export interface ScreenReview {
 
 /** Deterministic machine-readable Review result. */
 export interface ReviewResult {
+  /** Common ancestor shared by HEAD and the configured base ref. */
   baseCommit: string;
+  /** Configured ref used to resolve the comparison branch point. */
   baseRef: string;
   changedPaths: readonly string[];
   ignoredImpact: readonly { count: number; id: string; viewport: Viewport }[];

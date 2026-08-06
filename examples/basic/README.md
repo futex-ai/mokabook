@@ -43,5 +43,5 @@ hand-authored stylesheets (`styles.css`, `design.css`, `design-stage.css`,
 public static root. `preview:build` snapshots this catalogue through the real
 server into `.context/mokabook-preview` for Cloudflare Pages; it is the same
 artifact used by the main and pull-request preview workflow. The snapshot
-compares the catalogue with `origin/main` and preserves Browse's All/Changed
-filter, including when no routes changed.
+compares the catalogue with its branch point on `origin/main` and preserves
+Browse's All/Changed filter, including when no routes changed.

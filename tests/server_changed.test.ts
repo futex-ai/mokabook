@@ -1,15 +1,29 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import fs from "node:fs";
 import test from "node:test";
+import { promisify } from "node:util";
 
 import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
+import { compareReview } from "../dist/review/compare.js";
+import {
+  NodeGitCommandRunner,
+  RepositoryGitClient,
+  type GitClient,
+} from "../dist/review/git.js";
 import {
   changedManifestRoutes,
   computeChangedRoutes,
 } from "../dist/server/changed.js";
-import type { GitClient } from "../dist/review/git.js";
-import { createFixture, removeFixture } from "./helpers/fixture.js";
+import {
+  createFixture,
+  removeFixture,
+  validEntrySource,
+} from "./helpers/fixture.js";
+
+const execFileAsync = promisify(execFile);
 
 test("changed routes match source, dependency, and fragment paths", async (context) => {
   const fixture = await createFixture();
@@ -102,6 +116,56 @@ test("shared entry changes do not mark unchanged sibling screens", async (contex
   );
 });
 
+test("branch comparisons exclude commits made only on the base branch", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  await writeCompilation(await compileCatalogue(config), config);
+  await git(fixture.root, ["init", "-q", "-b", "main"]);
+  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
+  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["add", "."]);
+  await git(fixture.root, ["commit", "-qm", "test: common catalogue"]);
+  const commonCommit = (await git(fixture.root, ["rev-parse", "HEAD"])).trim();
+
+  await git(fixture.root, ["checkout", "-qb", "feature"]);
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    validEntrySource({ body: "<p>Feature-only home</p>" }),
+  );
+  await writeCompilation(await compileCatalogue(config), config);
+  await git(fixture.root, ["add", "."]);
+  await git(fixture.root, ["commit", "-qm", "test: change feature home"]);
+
+  await git(fixture.root, ["checkout", "-q", "main"]);
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    validEntrySource().replaceAll(">Detail<", ">Main-only detail<"),
+  );
+  await writeCompilation(await compileCatalogue(config), config);
+  await git(fixture.root, ["add", "."]);
+  await git(fixture.root, ["commit", "-qm", "test: change main details"]);
+  await git(fixture.root, ["checkout", "-q", "feature"]);
+
+  const client = new RepositoryGitClient(
+    new NodeGitCommandRunner(fixture.root),
+  );
+  const changed = await computeChangedRoutes(config, "main", client);
+  const review = await compareReview(
+    await compileCatalogue(config),
+    config,
+    client,
+    "main",
+  );
+
+  assert.deepEqual(changed, ["screens/home.html", "user-flows/tour.html"]);
+  assert.equal(review.result.baseCommit, commonCommit);
+  assert.equal(
+    review.result.screens.find((screen) => screen.id === "details")?.state,
+    "unchanged",
+  );
+});
+
 test("changed routes match descendants of directory dependencies", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
@@ -138,7 +202,7 @@ test("changed-route detection degrades to undefined when Git fails", async (cont
     fileKind: () => Promise.reject(new Error("no repository")),
     readFile: () => Promise.reject(new Error("no repository")),
     readFileBytes: () => Promise.reject(new Error("no repository")),
-    resolveRef: () => Promise.reject(new Error("no repository")),
+    mergeBase: () => Promise.reject(new Error("no repository")),
   };
   assert.equal(
     await computeChangedRoutes(config, "origin/main", failing),
@@ -149,10 +213,17 @@ test("changed-route detection degrades to undefined when Git fails", async (cont
     changedPaths: () => Promise.resolve(["notes.md"]),
     fileExists: () => Promise.resolve(true),
     readFile: () => Promise.resolve(JSON.stringify(compilation.manifest)),
-    resolveRef: () => Promise.resolve("a".repeat(40)),
+    mergeBase: () => Promise.resolve("a".repeat(40)),
   };
   assert.deepEqual(
     await computeChangedRoutes(config, "origin/main", succeeding),
     ["screens/details.html", "screens/home.html", "user-flows/tour.html"],
   );
 });
+
+async function git(
+  cwd: string,
+  arguments_: readonly string[],
+): Promise<string> {
+  return (await execFileAsync("git", [...arguments_], { cwd })).stdout;
+}
