@@ -10,3 +10,22 @@ export const tokens = {
     mono: 'SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace',
   },
 } as const;
+
+/** Dark @firna/ui theme overrides for generated dark fragments. */
+export const darkTokens = {
+  ...tokens,
+  colors: {
+    bg: "#121514",
+    bg2: "#1b201d",
+    border: "#2a312d",
+    border2: "#2a312d",
+    controlBorder: "#2a312d",
+    faint: "#9aa39d",
+    ink: "#eef1ef",
+    ink2: "#c2cac4",
+    muted: "#9aa39d",
+    placeholder: "#9aa39d",
+    soft: "#1b201d",
+    surface: "#1b201d",
+  },
+} as const;

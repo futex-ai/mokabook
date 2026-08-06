@@ -168,9 +168,7 @@ export function classifyWatchPath(
     return "rebuild";
   const relative = toPosixPath(path.relative(config.repoRoot, absolute));
   if (isPackageOwnedIgnoredWatchPath(absolute, config)) return "ignore";
-  const stylesheetPaths = config.stylesheets.flatMap(
-    (rule) => rule.stylesheets,
-  );
+  const stylesheetPaths = configuredStylesheetPaths(config);
   if (
     stylesheetPaths.some(
       (value) =>
@@ -211,9 +209,7 @@ export function watchTargets(config: ResolvedConfig): string[] {
   if (config.legacy) targets.push(config.legacy.pagesDir);
   if (config.renderer) targets.push(config.renderer);
   if (config.legacy?.components) targets.push(config.legacy.components);
-  for (const stylesheet of config.stylesheets.flatMap(
-    (rule) => rule.stylesheets,
-  )) {
+  for (const stylesheet of configuredStylesheetPaths(config)) {
     if (!/^https?:\/\//.test(stylesheet))
       targets.push(path.resolve(config.mockupsDir, stylesheet));
   }
@@ -251,15 +247,21 @@ function isRequiredWatchPath(
     ...(config.legacy ? [config.legacy.pagesDir] : []),
     ...(config.renderer ? [config.renderer] : []),
     ...(config.legacy?.components ? [config.legacy.components] : []),
-    ...config.stylesheets.flatMap((rule) =>
-      rule.stylesheets.flatMap((stylesheet) =>
-        /^https?:\/\//.test(stylesheet)
-          ? []
-          : [path.resolve(config.mockupsDir, stylesheet)],
-      ),
+    ...configuredStylesheetPaths(config).flatMap((stylesheet) =>
+      /^https?:\/\//.test(stylesheet)
+        ? []
+        : [path.resolve(config.mockupsDir, stylesheet)],
     ),
   ];
   return required.some(
     (target) => isInside(candidate, target) || isInside(target, candidate),
   );
+}
+
+function configuredStylesheetPaths(config: ResolvedConfig): string[] {
+  return config.stylesheets.flatMap((rule) => [
+    ...rule.stylesheets,
+    ...(rule.lightStylesheets ?? []),
+    ...(rule.darkStylesheets ?? []),
+  ]);
 }

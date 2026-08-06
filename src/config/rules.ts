@@ -1,8 +1,43 @@
+import type { ColorScheme } from "../authoring/types.js";
 import { MokabookError } from "../errors.js";
 import { validateCatalogueRoute, validateRelativeRoute } from "./paths.js";
 import type { LegacyConfig, StylesheetRule, WatchRule } from "./types.js";
 
 const WATCH_ACTIONS = new Set(["ignore", "rebuild", "reload", "restart"]);
+
+/** Validate and normalize the configured color-scheme rendering targets. */
+export function validateColorSchemes(value: unknown): ColorScheme[] {
+  if (value === undefined) return ["light"];
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new MokabookError(
+      "config-invalid",
+      "colorSchemes must be a non-empty array",
+    );
+  }
+  const schemes = new Set<ColorScheme>();
+  for (const scheme of value) {
+    if (scheme !== "light" && scheme !== "dark") {
+      throw new MokabookError(
+        "config-invalid",
+        `colorSchemes contains an unknown value: ${String(scheme)}`,
+      );
+    }
+    if (schemes.has(scheme)) {
+      throw new MokabookError(
+        "config-invalid",
+        `duplicate colorSchemes value: ${scheme}`,
+      );
+    }
+    schemes.add(scheme);
+  }
+  if (!schemes.has("light")) {
+    throw new MokabookError(
+      "config-invalid",
+      'colorSchemes must include "light"',
+    );
+  }
+  return schemes.has("dark") ? ["light", "dark"] : ["light"];
+}
 
 /** Normalize configured legacy lint policy. */
 export function resolveLegacyLint(
@@ -76,13 +111,52 @@ export function validateStylesheets(
     }
     return {
       match: rule.match,
-      stylesheets: rule.stylesheets.map((stylesheet: string) => {
-        requireString(stylesheet, `stylesheets[${index}] path`);
-        return /^https?:\/\//.test(stylesheet)
-          ? stylesheet
-          : validateRelativeRoute(stylesheet, `stylesheets[${index}] path`);
-      }),
+      stylesheets: validateStylesheetPaths(
+        rule.stylesheets,
+        `stylesheets[${index}] path`,
+      ),
+      ...(rule.lightStylesheets !== undefined
+        ? {
+            lightStylesheets: validateOptionalStylesheetPaths(
+              rule.lightStylesheets,
+              index,
+              "lightStylesheets",
+            ),
+          }
+        : {}),
+      ...(rule.darkStylesheets !== undefined
+        ? {
+            darkStylesheets: validateOptionalStylesheetPaths(
+              rule.darkStylesheets,
+              index,
+              "darkStylesheets",
+            ),
+          }
+        : {}),
     };
+  });
+}
+
+function validateOptionalStylesheetPaths(
+  value: unknown,
+  index: number,
+  field: "darkStylesheets" | "lightStylesheets",
+): string[] {
+  if (!Array.isArray(value)) {
+    throw new MokabookError(
+      "config-invalid",
+      `stylesheets[${index}].${field} must be an array`,
+    );
+  }
+  return validateStylesheetPaths(value, `stylesheets[${index}].${field} path`);
+}
+
+function validateStylesheetPaths(value: unknown[], label: string): string[] {
+  return value.map((stylesheet) => {
+    requireString(stylesheet, label);
+    return /^https?:\/\//.test(stylesheet)
+      ? stylesheet
+      : validateRelativeRoute(stylesheet, label);
   });
 }
 

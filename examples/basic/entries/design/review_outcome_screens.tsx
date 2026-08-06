@@ -190,6 +190,7 @@ function DifferenceCompare({ viewport }: { viewport: CompareViewport }) {
 /** Review design screens for per-screen comparison outcomes. */
 export const reviewOutcomeScreens = [
   screen({
+    colorSchemes: ["light"],
     description: "A changed screen compared side by side with its base render.",
     desktop: <ChangedCompare viewport="desktop" />,
     id: "design-review-changed",
@@ -198,6 +199,7 @@ export const reviewOutcomeScreens = [
     title: "Changed screen",
   }),
   screen({
+    colorSchemes: ["light"],
     description: "An added screen with no base render to compare against.",
     desktop: <AddedCompare viewport="desktop" />,
     id: "design-review-added",
@@ -206,6 +208,7 @@ export const reviewOutcomeScreens = [
     title: "Added screen",
   }),
   screen({
+    colorSchemes: ["light"],
     description: "A removed screen keeping only its base render.",
     desktop: <RemovedCompare viewport="desktop" />,
     id: "design-review-removed",
@@ -214,6 +217,7 @@ export const reviewOutcomeScreens = [
     title: "Removed screen",
   }),
   screen({
+    colorSchemes: ["light"],
     description:
       "Difference mode highlighting changed and added regions in place.",
     desktop: <DifferenceCompare viewport="desktop" />,

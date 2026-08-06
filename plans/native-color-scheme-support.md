@@ -86,7 +86,7 @@ colorSchemes: readonly ColorScheme[];
 export function validateColorSchemes(value: unknown): ColorScheme[];
 ```
 
-- [ ] Write failing tests in `tests/config.test.ts`:
+- [x] Write failing tests in `tests/config.test.ts`:
 
 ```ts
 test("colorSchemes defaults to light and normalizes order", async () => {
@@ -105,17 +105,17 @@ test("colorSchemes rejects invalid sets", async () => {
 Follow the file's existing pattern of building a config object and asserting
 `assert.throws(() => resolveConfig(...), /message/)`.
 
-- [ ] Run `npm run build && npx tsx --test tests/config.test.ts` — new tests
+- [x] Run `npm run build && npx tsx --test tests/config.test.ts` — new tests
       FAIL (unknown field is currently ignored).
-- [ ] Implement `validateColorSchemes` in `src/config/rules.ts` (accepts
+- [x] Implement `validateColorSchemes` in `src/config/rules.ts` (accepts
       `undefined` → `["light"]`; validates array of `"light" | "dark"`, no
       duplicates, must include `"light"`; returns light-first). Call it in
       `resolveConfig` (`src/config/validate.ts`) and add `colorSchemes` to the
       returned literal. Add the field to both config types.
-- [ ] Export `ColorScheme` from `src/index.ts` (in the `authoring/types.js`
+- [x] Export `ColorScheme` from `src/index.ts` (in the `authoring/types.js`
       type export block).
-- [ ] Run `npm run build && npx tsx --test tests/config.test.ts` — PASS.
-- [ ] Commit: `feat(config): add colorSchemes validation`
+- [x] Run `npm run build && npx tsx --test tests/config.test.ts` — PASS.
+- [x] Commit: `feat(config): add colorSchemes validation`
 
 #### Task 1.2: Per-screen `colorSchemes` authoring + registry validation
 
@@ -143,7 +143,7 @@ export function effectiveColorSchemes(
 ): readonly ColorScheme[]; // entry.colorSchemes ?? catalogueSchemes
 ```
 
-- [ ] Write failing tests:
+- [x] Write failing tests:
   - `tests/authoring.test.tsx`: nested `screen({ colorSchemes: ["light"] })`
     markers survive `defineRoot` flattening onto the `ScreenDefinition`
     (extend an existing defineRoot test's assertions).
@@ -158,8 +158,8 @@ test("screen colorSchemes must be a subset of config", async (context) => {
 });
 ```
 
-- [ ] Run `npm run build && npx tsx --test tests/build.test.ts tests/authoring.test.tsx` — FAIL.
-- [ ] Implement: spread `colorSchemes` through `flattenChild`'s `defineScreen`
+- [x] Run `npm run build && npx tsx --test tests/build.test.ts tests/authoring.test.tsx` — FAIL.
+- [x] Implement: spread `colorSchemes` through `flattenChild`'s `defineScreen`
       call (`...(node.colorSchemes ? { colorSchemes: node.colorSchemes } : {})`
       — mirror the `rationale` pattern; no inheritance, per spec non-goal). In
       `validateEntry` (screen branch) add checks:
@@ -169,9 +169,9 @@ test("screen colorSchemes must be a subset of config", async (context) => {
   - subset (`unsupported-color-scheme`): every value present in
     `config.colorSchemes` — message
     `screen declares "dark" but config colorSchemes is light-only`.
-- [ ] Create `src/registry/views.ts` with the two exports above.
-- [ ] Run the tests — PASS. Run `npm run lint`.
-- [ ] Commit: `feat(authoring): per-screen colorSchemes opt-out`
+- [x] Create `src/registry/views.ts` with the two exports above.
+- [x] Run the tests — PASS. Run `npm run lint`.
+- [x] Commit: `feat(authoring): per-screen colorSchemes opt-out`
 
 #### Task 1.3: Fragment routes, rendering loop, renderer input
 
@@ -195,7 +195,7 @@ export function fragmentRoute(
 colorScheme: ColorScheme;
 ```
 
-- [ ] Write failing test in `tests/build.test.ts`:
+- [x] Write failing test in `tests/build.test.ts`:
 
 ```ts
 test("dark schemes render dark fragments per view", async (context) => {
@@ -207,8 +207,8 @@ test("dark schemes render dark fragments per view", async (context) => {
 });
 ```
 
-- [ ] Run — FAIL (dark routes absent).
-- [ ] Implement: add the `colorScheme` parameter to `fragmentRoute`;
+- [x] Run — FAIL (dark routes absent).
+- [x] Implement: add the `colorScheme` parameter to `fragmentRoute`;
       in `renderFragments` replace the viewport loop body with a nested loop:
 
 ```ts
@@ -223,9 +223,9 @@ Error messages include the view: `renderer failed for ${entry.id}
 (${viewport}, ${colorScheme})` and `renderer must return a complete HTML
 document for ${entry.id} (${viewport}, ${colorScheme})`.
 
-- [ ] Update the doc comments (`Mobile or desktop rendering target` style) and
+- [x] Update the doc comments (`Mobile or desktop rendering target` style) and
       run `npm run build && npx tsx --test tests/build.test.ts` — PASS.
-- [ ] Commit: `feat(build): render dark fragments per view`
+- [x] Commit: `feat(build): render dark fragments per view`
 
 #### Task 1.4: Scheme-aware mock links and compatibility transform
 
@@ -267,7 +267,7 @@ function routeView(route: string): {
 };
 ```
 
-- [ ] Write failing tests:
+- [x] Write failing tests:
   - `tests/build_links.test.ts`:
 
 ```ts
@@ -282,8 +282,8 @@ test("dark fragments link within dark and fall back to light-only", async () => 
   assert the transformer receives `colorScheme: "dark"` for a dark output and
   that `logicalRoutes` maps to `.dark` artifacts for dark documents.
 
-- [ ] Run — FAIL.
-- [ ] Implement: `artifactRouteForEntry` resolves the target screen (screens
+- [x] Run — FAIL.
+- [x] Implement: `artifactRouteForEntry` resolves the target screen (screens
       directly; use-cases via first step) and falls back:
       `const scheme = effectiveColorSchemes(screen, catalogueSchemes).includes(colorScheme) ? colorScheme : "light";`
       then `fragmentRoute(screen.route, viewport, scheme)`. Fix the filename
@@ -291,8 +291,8 @@ test("dark fragments link within dark and fall back to light-only", async () => 
       `.mobile.dark.html` → mobile/dark, `.desktop.dark.html` → desktop/dark,
       `.mobile.html` → mobile/light, else desktop/light. Thread
       `colorScheme` into the transformer input.
-- [ ] Run — PASS.
-- [ ] Commit: `feat(build): scheme-aware links and compat input`
+- [x] Run — PASS.
+- [x] Commit: `feat(build): scheme-aware links and compat input`
 
 #### Task 1.5: Manifest `darkFragments` emission and validation
 
@@ -320,7 +320,7 @@ export function createManifest(
 Update every existing `createManifest` call site (only `src/build/compile.ts`
 in `src/`, plus any test callers) to pass the scheme list.
 
-- [ ] Write failing tests in `tests/manifest_files.test.ts`:
+- [x] Write failing tests in `tests/manifest_files.test.ts`:
 
 ```ts
 test("manifest validates darkFragments names and collisions", () => {
@@ -340,8 +340,8 @@ test("disabling dark orphans committed dark fragments", async (context) => {
 });
 ```
 
-- [ ] Run — FAIL.
-- [ ] Implement: `toManifestEntry` inserts (alphabetical key position, after
+- [x] Run — FAIL.
+- [x] Implement: `toManifestEntry` inserts (alphabetical key position, after
       `address`, before `fragments`):
 
 ```ts
@@ -362,8 +362,8 @@ replace the two-element fragment array with
 `config.colorSchemes` to `createManifest`. `check.ts` needs no change (it
 iterates `compilation.outputs`).
 
-- [ ] Run `npm run build && npx tsx --test tests/manifest_files.test.ts tests/build.test.ts` — PASS.
-- [ ] Commit: `feat(manifest): additive darkFragments field`
+- [x] Run `npm run build && npx tsx --test tests/manifest_files.test.ts tests/build.test.ts` — PASS.
+- [x] Commit: `feat(manifest): additive darkFragments field`
 
 #### Task 1.6: Per-scheme stylesheet rules and watch classification
 
@@ -383,7 +383,7 @@ lightStylesheets?: readonly string[];
 darkStylesheets?: readonly string[];
 ```
 
-- [ ] Write failing tests:
+- [x] Write failing tests:
   - `tests/config.test.ts`: rules accept the two optional lists (validated
     like `stylesheets`: string entries, HTTP(S) pass-through, relative-route
     validation, `config-invalid` on bad entries).
@@ -394,16 +394,16 @@ darkStylesheets?: readonly string[];
     `build-invalid` "stylesheet does not exist: dark.css".
   - `tests/watch_config.test.ts`: a change to a `darkStylesheets` file
     classifies as `reload`.
-- [ ] Run — FAIL.
-- [ ] Implement: extend `validateStylesheets` to validate/return the optional
+- [x] Run — FAIL.
+- [x] Implement: extend `validateStylesheets` to validate/return the optional
       lists; give `stylesheetsFor` a `colorScheme` parameter appending the
       matching list after `stylesheets`; in `watch_events.ts` extract one
       helper that enumerates all configured sheet paths
       (`stylesheets`, `lightStylesheets`, `darkStylesheets`) and use it in the
       reload classification, `watchTargets`, and `isRequiredWatchPath` so all
       three stay aligned.
-- [ ] Run the three test files — PASS.
-- [ ] Commit: `feat(config): per-scheme stylesheet lists`
+- [x] Run the three test files — PASS.
+- [x] Commit: `feat(config): per-scheme stylesheet lists`
 
 #### Task 1.7: Fixture helper option + changed-route attribution
 
@@ -412,12 +412,12 @@ darkStylesheets?: readonly string[];
 - Modify: `tests/helpers/fixture.ts`, `src/server/changed.ts`
 - Test: `tests/build_attribution.test.ts`
 
-- [ ] Extend `createFixture` with an options parameter,
+- [x] Extend `createFixture` with an options parameter,
       `createFixture(entrySource?: string, options?: { extraConfig?: string })`,
       appending `options.extraConfig` lines (e.g.
       `colorSchemes: ["light", "dark"],`) inside the generated
       `mokabook.config.ts` object literal. Existing callers stay valid.
-- [ ] Write failing test in `tests/build_attribution.test.ts`:
+- [x] Write failing test in `tests/build_attribution.test.ts`:
 
 ```ts
 test("dark fragment changes attribute their screen", async (context) => {
@@ -428,8 +428,8 @@ test("dark fragment changes attribute their screen", async (context) => {
 });
 ```
 
-- [ ] Run — FAIL.
-- [ ] Implement in `changedPathCandidates` (`src/server/changed.ts`):
+- [x] Run — FAIL.
+- [x] Implement in `changedPathCandidates` (`src/server/changed.ts`):
 
 ```ts
 if (candidate.darkFragments) {
@@ -442,8 +442,8 @@ if (candidate.darkFragments) {
 
 (`isDeepStrictEqual` already covers the metadata diff.)
 
-- [ ] Run — PASS.
-- [ ] Commit: `feat(serve): attribute dark fragment changes`
+- [x] Run — PASS.
+- [x] Commit: `feat(serve): attribute dark fragment changes`
 
 #### Task 1.8: Example adoption (dark theme, opt-outs, regeneration)
 
@@ -458,33 +458,33 @@ if (candidate.darkFragments) {
   `examples/basic/README.md`
 - Test: `npm run example:check`, packed-consumer suites via `npm test`
 
-- [ ] Add `colorSchemes: ["light", "dark"]` to the example config.
-- [ ] Add a `darkTokens` export to `theme.ts`: copy the existing token object
+- [x] Add `colorSchemes: ["light", "dark"]` to the example config.
+- [x] Add a `darkTokens` export to `theme.ts`: copy the existing token object
       and override the surface/text families with the dark palette
       (background `#121514`, raised surface `#1b201d`, primary text `#eef1ef`,
       secondary text `#c2cac4`, muted `#9aa39d`, hairline `#2a312d`), keeping
       the existing accent family. Map onto whatever token keys `theme.ts`
       actually declares — do not invent new keys.
-- [ ] Update `renderer.tsx`: build both themes once
+- [x] Update `renderer.tsx`: build both themes once
       (`const themes = { dark: createSharedUiTheme(darkTokens), light: createSharedUiTheme(tokens) }`),
       select `themes[input.colorScheme]`, and emit the scheme on the document:
       `<html lang="en" data-color-scheme="${input.colorScheme}">` plus
       `color-scheme:${input.colorScheme}` and a matching body background in
       the inline style block.
-- [ ] Add `colorSchemes: ["light"]` to all 13 design `screen({...})` calls
+- [x] Add `colorSchemes: ["light"]` to all 13 design `screen({...})` calls
       (6 in `browse_screens.tsx`, 4 in `review_outcome_screens.tsx`, 3 in
       `review_impact_screens.tsx`) — the design catalogue depicts the
       light-only shell. The two `catalogue.mockup.tsx` screens stay
       catalogue-default and go dark.
-- [ ] Run `npm run build && npm run example:build`, inspect a generated
+- [x] Run `npm run build && npm run example:build`, inspect a generated
       `*.dark.html` fragment renders the dark palette, then
       `npm run example:check` — clean.
-- [ ] Open `examples/basic/generated/catalogue/welcome.mobile.dark.html` (and
+- [x] Open `examples/basic/generated/catalogue/welcome.mobile.dark.html` (and
       the desktop variant) directly from disk and visually smoke-test the dark
       render.
-- [ ] Update `examples/basic/README.md` (dark adoption + opt-out proof).
-- [ ] Run `npm test` — all pass (packed consumers exercise the new contract).
-- [ ] Commit: `feat(example): adopt dark color scheme`
+- [x] Update `examples/basic/README.md` (dark adoption + opt-out proof).
+- [x] Run `npm test` — all pass (packed consumers exercise the new contract).
+- [x] Commit: `feat(example): adopt dark color scheme`
 
 #### Task 1.9: Protocol docs + milestone gate
 
@@ -493,19 +493,19 @@ if (candidate.darkFragments) {
 - Modify: `docs/protocol/mokabook-package.md`, `README.md` (config/authoring
   usage), `plans/native-color-scheme-support.md` (tick boxes)
 
-- [ ] Update `mokabook-package.md`: config shape (`colorSchemes`,
+- [x] Update `mokabook-package.md`: config shape (`colorSchemes`,
       stylesheet rule lists), authoring (`colorSchemes` opt-out rule),
       rendering boundary (`RenderInput.colorScheme`,
       `CompatibilityTransformInput.colorScheme`), generated contract (dark
       fragment names, `darkFragments` in the normative v3 shape, orphan
       lifecycle when dark turns off).
-- [ ] Update the README "Use Mokabook" + Configuration sections with the
+- [x] Update the README "Use Mokabook" + Configuration sections with the
       two-step consumer story.
-- [ ] Run `cargo xtask check` (full gate; ~15 min; use a 1800000 ms timeout).
-- [ ] `git add -A`, commit
+- [x] Run `cargo xtask check` (full gate; ~15 min; use a 1800000 ms timeout).
+- [x] `git add -A`, commit
       (`feat(build): complete color-scheme build axis` if anything remains,
       else amend nothing), push the branch.
-- [ ] Run `cargo xtask review`; record findings for the final report, do not
+- [x] Run `cargo xtask review`; record findings for the final report, do not
       auto-fix.
 
 ---

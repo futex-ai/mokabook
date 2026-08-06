@@ -28,6 +28,10 @@ test("migration compatibility transforms documents and legacy id links", async (
     'export const source = () => "<!doctype html><html><body><a href=\\"mock:details\\">Details</a></body></html>";\n',
   );
   await fs.promises.writeFile(
+    path.join(legacyDir, "ambiguous.source.ts"),
+    'export const source = () => "<!doctype html><html><body><a href=\\"mock:details\\">Details</a></body></html>";\n',
+  );
+  await fs.promises.writeFile(
     path.join(legacyDir, "retired", "skip.source.ts"),
     'export const source = () => "<!doctype html><html><body>Skip</body></html>";\n',
   );
@@ -42,7 +46,7 @@ export default function transform(input: CompatibilityTransformInput): string {
     : "missing";
   return input.content
     .replace('href="./details.html"', \`href="./\${relative}"\`)
-    .replace("<body", \`<body data-output-path="\${input.outputPath}"\`);
+    .replace("<body", \`<body data-color-scheme="\${input.colorScheme}" data-logical-target="\${logicalTarget}" data-output-path="\${input.outputPath}" data-viewport="\${input.viewport}"\`);
 }
 `,
   );
@@ -50,8 +54,9 @@ export default function transform(input: CompatibilityTransformInput): string {
     fixture.configPath,
     `export default {
   compatibility: { transformer: "compatibility.ts" },
+  colorSchemes: ["light", "dark"],
   entriesDir: "entries",
-  legacy: { exclude: ["retired/**"], pagesDir: "legacy" },
+  legacy: { exclude: ["retired/**"], pagesDir: "legacy", routeAliases: { "ambiguous.source.ts": "archive/ambiguous.mobile.dark.html" } },
   mockupsDir: "mockups",
   repoRoot: "."
 };\n`,
@@ -59,7 +64,11 @@ export default function transform(input: CompatibilityTransformInput): string {
 
   const compilation = await compileCatalogue(await loadConfig(fixture.root));
   const mobile = compilation.outputs.get("screens/home.mobile.html") ?? "";
+  const mobileDark =
+    compilation.outputs.get("screens/home.mobile.dark.html") ?? "";
   const legacy = compilation.outputs.get("notice.html") ?? "";
+  const ambiguousLegacy =
+    compilation.outputs.get("archive/ambiguous.mobile.dark.html") ?? "";
 
   assert.match(mobile, /href="#"/);
   assert.match(mobile, /href="\.\/details\.mobile\.html"/);
@@ -68,7 +77,19 @@ export default function transform(input: CompatibilityTransformInput): string {
     mobile,
     /data-output-path="mockups\/screens\/home\.mobile\.html"/,
   );
+  assert.match(mobileDark, /data-color-scheme="dark"/);
+  assert.match(
+    mobileDark,
+    /data-logical-target="screens\/details\.mobile\.dark\.html"/,
+  );
   assert.match(legacy, /href="\.\/screens\/details\.desktop\.html"/);
+  assert.match(ambiguousLegacy, /data-color-scheme="light"/);
+  assert.match(ambiguousLegacy, /data-viewport="desktop"/);
+  assert.match(
+    ambiguousLegacy,
+    /data-logical-target="screens\/details\.desktop\.html"/,
+  );
+  assert.match(ambiguousLegacy, /href="\.\.\/screens\/details\.desktop\.html"/);
   assert.equal(compilation.outputs.has("retired/skip.html"), false);
 });
 

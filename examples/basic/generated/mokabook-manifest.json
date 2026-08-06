@@ -641,6 +641,10 @@
       "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
       "title": "Details",
       "address": "example.test/details",
+      "darkFragments": {
+        "desktop": "screens/details.desktop.dark.html",
+        "mobile": "screens/details.mobile.dark.html"
+      },
       "fragments": {
         "desktop": "screens/details.desktop.html",
         "mobile": "screens/details.mobile.html"
@@ -671,6 +675,10 @@
       "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
       "title": "Welcome",
       "address": "example.test/welcome",
+      "darkFragments": {
+        "desktop": "screens/welcome.desktop.dark.html",
+        "mobile": "screens/welcome.mobile.dark.html"
+      },
       "fragments": {
         "desktop": "screens/welcome.desktop.html",
         "mobile": "screens/welcome.mobile.html"

@@ -23,6 +23,7 @@ Create `mokabook.config.ts`:
 import { defineConfig } from "mokabook";
 
 export default defineConfig({
+  colorSchemes: ["light", "dark"],
   repoRoot: ".",
   entriesDir: "docs/mockups/src/entries",
   mockupsDir: "docs/mockups",
@@ -60,6 +61,22 @@ export const mockups = [
 `mobile` and `desktop` accept any React node; real screens usually wrap their
 content in a `<main>` landmark because each fragment is generated as its own
 standalone page.
+
+Color-scheme adoption has two steps: enable `colorSchemes: ["light", "dark"]`
+in the config, then select the consumer theme from `input.colorScheme` in the
+configured renderer. Mokabook re-renders the same mobile and desktop nodes for
+dark output; authors do not duplicate screen trees. A deliberately light-only
+screen opts out in either `defineScreen` or a nested `screen` marker:
+
+```tsx
+defineScreen({
+  // Other screen fields stay unchanged.
+  colorSchemes: ["light"],
+});
+```
+
+Light-only catalogues omit `colorSchemes`, keep their existing renderer, and
+produce the same fragment names and manifest bytes as before.
 
 Run the CLI through a local dependency or directly with npx:
 
@@ -167,7 +184,11 @@ upward from the current directory. Every filesystem path is relative to that
 file and confined to `repoRoot`.
 
 - `entriesDir` and `mockupsDir` select structured source and generated output.
-- `renderer` and ordered `stylesheets` keep product themes and CSS consumer-owned.
+- `colorSchemes` defaults to `["light"]`; `["light", "dark"]` enables dark
+  fragments catalogue-wide, with per-screen light-only opt-outs.
+- `renderer` and ordered `stylesheets` keep product themes and CSS
+  consumer-owned. A stylesheet rule may append `lightStylesheets` or
+  `darkStylesheets` after its shared list for the matching output.
 - `moduleResolution` configures package roots, aliases, export conditions,
   package fields, file extensions, and esbuild loaders for cross-platform
   component trees.

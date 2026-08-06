@@ -24,6 +24,7 @@ export { MockLink, mockLink } from "./authoring/links.js";
 export { ReviewIgnore, ReviewIgnoreScope } from "./authoring/review_ignore.js";
 export { reviewMaterialKey } from "./authoring/review_material.js";
 export type {
+  ColorScheme,
   CollectionDefinition,
   CollectionInput,
   EntryInput,

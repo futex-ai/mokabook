@@ -240,6 +240,7 @@ function NarrowNavigationMobile() {
 /** Browse shell design screens grouped by catalogue views and shell states. */
 export const browseViewScreens = [
   screen({
+    colorSchemes: ["light"],
     description:
       "The catalogue home with the navigation tree, search, and filter.",
     desktop: <HomeDesktop />,
@@ -249,6 +250,7 @@ export const browseViewScreens = [
     title: "Home",
   }),
   screen({
+    colorSchemes: ["light"],
     description:
       "A selected screen with viewport switching and framed fragments.",
     desktop: <SelectedScreenDesktop />,
@@ -258,6 +260,7 @@ export const browseViewScreens = [
     title: "Selected screen",
   }),
   screen({
+    colorSchemes: ["light"],
     description:
       "A selected use case rendering ordered steps of existing screens.",
     desktop: <UseCaseDesktop />,
@@ -271,6 +274,7 @@ export const browseViewScreens = [
 /** Browse shell design screens for secondary shell states. */
 export const browseStateScreens = [
   screen({
+    colorSchemes: ["light"],
     description: "The details panel expanded under a selected screen.",
     desktop: <DetailsOpenDesktop />,
     id: "design-browse-details",
@@ -279,6 +283,7 @@ export const browseStateScreens = [
     title: "Details panel",
   }),
   screen({
+    colorSchemes: ["light"],
     description: "The not-found view keeping catalogue navigation available.",
     desktop: <MissingRouteDesktop />,
     id: "design-browse-missing-route",
@@ -287,6 +292,7 @@ export const browseStateScreens = [
     title: "Missing route",
   }),
   screen({
+    colorSchemes: ["light"],
     description:
       "Collapsed navigation opening as a drawer on narrow viewports.",
     desktop: <NarrowNavigationDesktop />,

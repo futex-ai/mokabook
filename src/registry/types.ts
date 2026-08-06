@@ -30,6 +30,7 @@ export interface ManifestEntryBase {
 /** Serializable screen manifest entry. */
 export interface ManifestScreen extends ManifestEntryBase {
   address?: string;
+  darkFragments?: Record<Viewport, string>;
   fragments: Record<Viewport, string>;
   kind: "screen";
   route: string;

@@ -103,6 +103,12 @@ function changedPathCandidates(
       `${mockupsPrefix}/${candidate.fragments.mobile}`,
       `${mockupsPrefix}/${candidate.fragments.desktop}`,
     );
+    if (candidate.darkFragments) {
+      candidates.push(
+        `${mockupsPrefix}/${candidate.darkFragments.mobile}`,
+        `${mockupsPrefix}/${candidate.darkFragments.desktop}`,
+      );
+    }
   }
   return [...new Set(candidates)];
 }

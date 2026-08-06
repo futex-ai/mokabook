@@ -5,6 +5,7 @@ import test from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
 import { loadConfig } from "../dist/config/load.js";
+import { changedManifestRoutes } from "../dist/server/changed.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("definitions retain the module that invokes their helper", async (context) => {
@@ -52,6 +53,21 @@ export const mockups = [
   assert.equal(sources.get("shared-second"), "entries/shared.ts");
   assert.equal(sources.get("late"), "entries/late.ts");
   assert.equal(sources.get("second"), "entries/second.mockup.ts");
+});
+
+test("dark fragment changes attribute their screen", async (context) => {
+  const fixture = await createFixture(undefined, {
+    extraConfig: 'colorSchemes: ["light", "dark"],',
+  });
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const manifest = (await compileCatalogue(config)).manifest;
+
+  const routes = changedManifestRoutes(manifest, manifest, config, [
+    "mockups/screens/home.mobile.dark.html",
+  ]);
+  assert.ok(routes.includes("screens/home.html"));
+  assert.equal(routes.includes("screens/details.html"), false);
 });
 
 function screenSource(id: string, route: string, title: string): string {

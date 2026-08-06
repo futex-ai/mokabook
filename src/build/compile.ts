@@ -11,6 +11,8 @@ import {
 } from "../registry/manifest.js";
 import { prepareRegistry } from "../registry/prepare.js";
 import type { ManifestLegacyPage, ManifestV3 } from "../registry/types.js";
+import type { ArtifactView } from "../registry/views.js";
+import { effectiveColorSchemes, VIEWPORTS } from "../registry/views.js";
 import { normalizeSingleDocument } from "../review/ignore.js";
 import { validateHtmlLinks } from "./html_links.js";
 import { loadConsumerGraph } from "./load_graph.js";
@@ -29,7 +31,13 @@ export async function compileCatalogue(
 ): Promise<Compilation> {
   const graph = await loadConsumerGraph(config);
   const registry = prepareRegistry(graph.definitions, config);
-  const outputs = renderFragments(registry.entries, graph.renderer, config);
+  const fragmentViews = new Map<string, ArtifactView>();
+  const outputs = renderFragments(
+    registry.entries,
+    graph.renderer,
+    config,
+    fragmentViews,
+  );
   const legacy = renderLegacyPages(config, graph);
   const routedEntries = new Set(
     registry.entries.flatMap((entry) =>
@@ -39,10 +47,12 @@ export async function compileCatalogue(
   const fragmentRoutes = new Set(
     registry.entries.flatMap((entry) =>
       entry.kind === "screen"
-        ? [
-            fragmentRoute(entry.route, "mobile"),
-            fragmentRoute(entry.route, "desktop"),
-          ]
+        ? VIEWPORTS.flatMap((viewport) =>
+            effectiveColorSchemes(entry, config.colorSchemes).map(
+              (colorScheme) =>
+                fragmentRoute(entry.route, viewport, colorScheme),
+            ),
+          )
         : [],
     ),
   );
@@ -67,7 +77,13 @@ export async function compileCatalogue(
       );
     }
   }
-  transformCompatibilityDocuments(outputs, registry.entries, config, graph);
+  transformCompatibilityDocuments(
+    outputs,
+    registry.entries,
+    config,
+    graph,
+    fragmentViews,
+  );
   for (const [route, content] of outputs) {
     normalizeSingleDocument(content, route);
   }
@@ -75,7 +91,11 @@ export async function compileCatalogue(
     route: page.route,
     sourcePath: page.sourceRelativePath,
   }));
-  const manifest = createManifest(registry.entries, legacyManifest);
+  const manifest = createManifest(
+    registry.entries,
+    legacyManifest,
+    config.colorSchemes,
+  );
   parseManifest(manifest);
   outputs.set(MANIFEST_NAME, serializeManifest(manifest));
   validateHtmlLinks(outputs, config);

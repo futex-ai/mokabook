@@ -147,6 +147,24 @@ function validateScreen(entry: Record<string, unknown>): void {
     }
     validateRoute(fragment, `${String(entry.id)} ${viewport} fragment`);
   }
+  if (entry.darkFragments !== undefined) {
+    if (!record(entry.darkFragments)) {
+      throw new MokabookError(
+        "manifest-invalid",
+        `${String(entry.id)} has invalid darkFragments`,
+      );
+    }
+    for (const viewport of ["mobile", "desktop"] as const) {
+      const fragment = entry.darkFragments[viewport];
+      if (typeof fragment !== "string") {
+        throw new MokabookError(
+          "manifest-invalid",
+          `${String(entry.id)} has no ${viewport} dark fragment`,
+        );
+      }
+      validateRoute(fragment, `${String(entry.id)} ${viewport} dark fragment`);
+    }
+  }
   if (!stringArray(entry.useCaseIds)) {
     throw new MokabookError(
       "manifest-invalid",
@@ -214,6 +232,21 @@ function validateFragmentRoutes(
         throw new MokabookError(
           "manifest-invalid",
           `${String(entry.id)} has invalid or colliding ${viewport} fragment`,
+        );
+      }
+      outputRoutes.add(fragment);
+    }
+    if (!record(entry.darkFragments)) continue;
+    for (const viewport of ["mobile", "desktop"] as const) {
+      const fragment = entry.darkFragments[viewport] as string;
+      const expected = (entry.route as string).replace(
+        /\.html$/,
+        `.${viewport}.dark.html`,
+      );
+      if (fragment !== expected || outputRoutes.has(fragment)) {
+        throw new MokabookError(
+          "manifest-invalid",
+          `${String(entry.id)} has invalid or colliding ${viewport} dark fragment`,
         );
       }
       outputRoutes.add(fragment);

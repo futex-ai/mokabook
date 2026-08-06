@@ -105,6 +105,7 @@ function flattenChild(
   if (node.__nested === "screen") {
     const definition = defineScreen({
       ...(effective.address ? { address: effective.address } : {}),
+      ...(node.colorSchemes ? { colorSchemes: node.colorSchemes } : {}),
       dependencies: effective.dependencies ?? [],
       description: node.description,
       desktop: node.desktop,
