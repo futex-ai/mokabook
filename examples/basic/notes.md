@@ -24,6 +24,12 @@ in each entry's description and rationale, never inside the rendered screens:
 - The dark view compare screen shows the same `Welcome` comparison as the
   changed screen, in its dark view. Review compares one view at a time, so the
   two are separate pages reached from the comparison band's scheme segment.
+- The `Light | Dark` control sits in the top bar on the wide artboards and in
+  the screen head band, under the viewport control, on the narrow ones: a 390px
+  top bar has no room for a third control.
+- The comparison band keeps its comparison-mode segment when the scheme segment
+  joins it, so a dark view compare draws three segments rather than trading one
+  control for another.
 - The approved tokens, consumer-tunable accent properties, and responsive
   breakpoints are recorded in `docs/protocol/mokabook-shell-design.md`.
 

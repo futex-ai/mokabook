@@ -24,10 +24,13 @@ generated under `examples/basic/generated/design/`:
 | `design/browse/states/details.html`       | Expanded details inspector            |
 | `design/browse/states/missing-route.html` | Not-found view with navigation        |
 | `design/browse/states/navigation.html`    | Collapsed navigation drawer           |
+| `design/browse/states/dark-scheme.html`   | Dark selected, dark device screens    |
+| `design/browse/states/light-only.html`    | Light-only screen under dark          |
 | `design/review/outcomes/changed.html`     | Changed screen, side-by-side compare  |
 | `design/review/outcomes/added.html`       | Added screen with missing base pane   |
 | `design/review/outcomes/removed.html`     | Removed screen with missing head pane |
 | `design/review/outcomes/difference.html`  | Tinted in-place difference mode       |
+| `design/review/outcomes/dark-scheme.html` | Dark view compared side by side       |
 | `design/review/impact/shared-impact.html` | Summary with shared-impact card       |
 | `design/review/impact/ignored-only.html`  | Ignored-region-only classification    |
 | `design/review/impact/empty.html`         | Empty comparison result               |
@@ -54,8 +57,9 @@ recompute contrast at runtime.
 
 ## Package-Owned Tokens
 
-The shell is light-only (`color-scheme: light`) with the neutral sage-tinted
-chrome family:
+The shell chrome is light-only (`color-scheme: light`); only the inside of a
+device screen follows the selected color scheme (see Color Scheme below). The
+chrome family is neutral and sage-tinted:
 
 | Token                    | Value                            | Role                     |
 | ------------------------ | -------------------------------- | ------------------------ |
@@ -84,9 +88,10 @@ scrollable region scrolls internally:
 
 - **Top bar** — 48px, surface background, hairline bottom border: brand mark
   (24px rounded square in the accent with the `◫` glyph), the product name,
-  a centred search field (max-width 440px, `⌕` glyph), and a right-aligned
-  Browse/Review segmented mode switch. Below the breakpoint a menu button
-  precedes the brand and opens the navigation drawer.
+  a centred search field (max-width 440px, `⌕` glyph), the color-scheme
+  control when the catalogue has one, and a right-aligned Browse/Review
+  segmented mode switch. Below the breakpoint a menu button precedes the brand
+  and opens the navigation drawer.
 - **Navigation** — 248px column, `#fbfbfa` background, hairline right border.
   Head row `CATALOGUE` (uppercase, 11px) with a `Collapse all` text button;
   an All/Changed segmented filter (with a monospace changed count) when Git
@@ -114,20 +119,23 @@ scrollable region scrolls internally:
   routes and reloads: a bar with a rotating chevron, `Details`, and a muted
   hint; a two-column body (`1.35fr / 1fr`) with description and
   `Why this screen —` rationale on the left and uppercase-labelled metadata
-  rows (Source, Generated, Related docs, Dependencies, Used by) on the right.
-  Paths render as monospace chips; use cases render as pill chips with the flow
-  icon.
+  rows (Source, Generated, Schemes, Related docs, Dependencies, Used by) on the
+  right. Paths render as monospace chips; use cases render as pill chips with
+  the flow icon; the Schemes row is plain text naming the schemes the screen
+  renders in (`light, dark`).
 
 ## Device Chrome
 
 - **Phone frame** — 390×844, 12px bezel padding, `#171a18` body,
-  46px radius, floating notch (108×30 at top 22px), 36px-radius white screen,
-  and a bottom home pill (128×4). The screen is a column: a reserved status
-  band followed by the embedded mobile fragment, which takes the remaining
-  height and rounds only its bottom corners.
+  46px radius, floating notch (108×30 at top 22px), a 36px-radius screen that
+  is white unless the dark scheme is selected, and a bottom home pill (128×4).
+  The screen is a column: a reserved status band followed by the embedded
+  mobile fragment, which takes the remaining height and rounds only its bottom
+  corners.
 - **Phone status band** — the top 44px of the screen, padded `14px 28px 0` so
   its content clears the notch: a `9:41` clock on the left and cellular, Wi-Fi,
-  and battery glyphs on the right. Text is 13.5px/600 `--chrome-ink` with
+  and battery glyphs on the right. Text is 13.5px/600 in the screen ink
+  (`--chrome-ink`, or `--mbk-dark-screen-ink` when the screen is dark) with
   tabular numerals; glyphs are 16×11 except the 22×11 battery, drawn with
   `currentColor` on their own viewBoxes. The band is device chrome, so it
   reserves space above the fragment rather than covering screen content.
@@ -145,6 +153,47 @@ scrollable region scrolls internally:
   (height 640px) indented under the step head.
 - **Legacy embed** — a bordered, 12px-radius iframe pane on the dotted stage.
 
+## Color Scheme
+
+A catalogue may render dark fragments beside its light ones. The selection
+changes only what a device screen shows; every shell surface around the frames
+keeps the light chrome palette in both schemes.
+
+| Token                   | Value     | Role                             |
+| ----------------------- | --------- | -------------------------------- |
+| `--mbk-dark-screen-bg`  | `#121514` | Dark device-screen surface       |
+| `--mbk-dark-screen-ink` | `#eef1ef` | Text and glyphs on a dark screen |
+
+There is no third dark token: the secondary dark tones (status-band ink, home
+pill, screen hairline, and the depicted screen content) are `color-mix` blends
+of those two.
+
+- **Containment** — dark paints the phone screen surface, including its
+  status-band ink, its home pill, and the fragment it holds, and the browser
+  viewport surface. The phone body and notch, the browser bar with its traffic
+  lights and address pill, and every shell surface outside a device screen stay
+  light.
+- **Screen edge** — a dark screen inside the near-black phone body would lose
+  its edge, so the phone screen carries a 1px inset `box-shadow` hairline mixed
+  from the two dark tokens:
+  `color-mix(in srgb, var(--mbk-dark-screen-ink) 12%, var(--mbk-dark-screen-bg))`.
+  The browser viewport needs none; its light bar already draws that edge.
+- **Control** — a `Light | Dark` `mbk-seg`, shown only when the catalogue has
+  dark fragments. At or above the breakpoint it sits in the top bar between the
+  search field and the mode switch; below it the top bar has no room, so it
+  renders in the screen head band under the viewport control at full width.
+- **Light-only screens** — a screen with no dark render keeps its light frames
+  under a dark selection and states the fallback in its frame label, which
+  gains an `mbk-frame-scheme-note` span so the caption reads
+  `MOBILE — LIGHT ONLY` or `DESKTOP — LIGHT ONLY`. The note is the
+  lighter-weight tail of the same uppercase label, not a separate badge.
+- **Compare pages** — the comparison band carries the same control as a third
+  segment after the comparison-mode and viewport segments, with the viewport
+  and scheme pair kept together at the trailing edge. A screen with only light
+  views shows no scheme segment, and dark reaches the compared device screens
+  only: the changed-screens navigation, head band, classification badge, and
+  the segments themselves stay light.
+
 ## Responsive Behavior
 
 The shell has one breakpoint at **56.25rem (900px)**:
@@ -154,10 +203,11 @@ The shell has one breakpoint at **56.25rem (900px)**:
 - Below it, the navigation becomes a scrimmed overlay drawer (82% width, max
   20rem) opened by the top-bar menu button in both Browse and Review; the
   phone frame scales via `aspect-ratio: 390 / 844` within available width, the
-  browser frame drops to 560px height, flow connector lines hide, and the
-  details body stacks to one column. When a screen head cannot fit its title
-  and viewport control on one row, the control wraps beneath the title and
-  spans the available width.
+  browser frame drops to 560px height, flow connector lines hide, the details
+  body stacks to one column, and the color-scheme control moves from the top
+  bar into the screen head band. When a screen head cannot fit its title and
+  the controls on one row, they wrap beneath the title and span the available
+  width, stacking the scheme control under the viewport control.
 
 `prefers-reduced-motion: reduce` disables shell transitions.
 
@@ -171,10 +221,10 @@ also show the Browse pill. Each page has a changed-screens navigation column
 using the `mbk-chg-*` classes: group heads with classification dots and
 counts, title-and-route rows with the accent active state, and shared-impact
 and ignored-region cards. Compare pages reuse the screen head, `mbk-seg`
-segments for the comparison-mode and viewport controls, `mbk-status`
-classification badges, and a summary band. The drawer control and script
-remain inline so static artifacts retain narrow-viewport navigation without a
-running server. The index renders the complete navigation inline. Compare
+segments for the comparison-mode, viewport, and color-scheme controls,
+`mbk-status` classification badges, and a summary band. The drawer control and
+script remain inline so static artifacts retain narrow-viewport navigation
+without a running server. The index renders the complete navigation inline. Compare
 pages hydrate the same markup from the artifact-root `review-navigation.js`
 payload and retain an `Open Review index` fallback in the navigation column
 when JavaScript is unavailable, avoiding one full catalogue copy per viewport
