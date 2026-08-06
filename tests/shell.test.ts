@@ -110,6 +110,25 @@ function occurrences(haystack: string, needle: string): number {
   return haystack.split(needle).length - 1;
 }
 
+/**
+ * Collapse stylesheet whitespace so contract assertions pin selectors and
+ * declarations rather than the source module's line wrapping.
+ */
+function flatCss(css: string): string {
+  return css.replace(/\s+/g, " ").replace(/\(\s/g, "(").replace(/\s\)/g, ")");
+}
+
+/**
+ * The selector of every declaration block that reads a dark screen token, used
+ * to prove the dark palette cannot reach the light render.
+ */
+function darkTokenSelectors(css: string): string[] {
+  return css
+    .split("}")
+    .filter((block) => block.includes("var(--mbk-dark-screen-"))
+    .map((block) => block.slice(0, block.lastIndexOf("{")).trim());
+}
+
 function routePage(catalogue: Catalogue, route: string): string {
   const entry = catalogue.byRoute.get(route);
   assert.ok(entry);
@@ -439,6 +458,9 @@ test("filter renders in the nav only when changed routes are known", () => {
 test("shell stylesheet stays aligned with the design contract", () => {
   assert.match(SHELL_CSS, /--mokabook-accent: #4f7864/);
   assert.match(SHELL_CSS, /--mb-added: #1d7a3d/);
+  assert.match(SHELL_CSS, /--mbk-dark-screen-bg: #121514/);
+  assert.match(SHELL_CSS, /--mbk-dark-screen-ink: #eef1ef/);
+  assert.match(SHELL_CSS, /color-scheme: light/);
   assert.match(SHELL_CSS, /width: 390px/);
   assert.match(SHELL_CSS, /max-width: 1180px/);
   assert.match(SHELL_CSS, /max-width: 56\.25rem/);
@@ -459,4 +481,84 @@ test("shell stylesheet stays aligned with the design contract", () => {
     /\.mbk-idchip:active \{[\s\S]*transform: translateY\(1px\);/,
   );
   assert.equal(SHELL_CSS.includes("bookfolio"), false);
+});
+
+test("dark scheme paints device screens and leaves the chrome light", () => {
+  const css = flatCss(SHELL_CSS);
+  const scope =
+    'body[data-mokabook-color-scheme="dark"] ' +
+    ":is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback]) ";
+
+  assert.ok(
+    css.includes(
+      `${scope}.phone-screen { background: var(--mbk-dark-screen-bg); ` +
+        "box-shadow: inset 0 0 0 1px color-mix(in srgb, " +
+        "var(--mbk-dark-screen-ink) 12%, var(--mbk-dark-screen-bg)); }",
+    ),
+  );
+  assert.ok(
+    css.includes(
+      `${scope}.phone-status { color: var(--mbk-dark-screen-ink); }`,
+    ),
+  );
+  assert.ok(
+    css.includes(
+      `${scope}.phone-home { background: color-mix(in srgb, ` +
+        "var(--mbk-dark-screen-ink) 40%, transparent); }",
+    ),
+  );
+  assert.ok(
+    css.includes(
+      `${scope}.browser-viewport { background: var(--mbk-dark-screen-bg); }`,
+    ),
+  );
+
+  const selectors = darkTokenSelectors(SHELL_CSS).map(flatCss);
+  assert.equal(selectors.length, 4);
+  for (const selector of selectors) {
+    assert.ok(selector.startsWith(scope.trim()), selector);
+  }
+
+  assert.match(SHELL_CSS, /\.phone-screen \{[^}]*background: #ffffff;/);
+  assert.match(SHELL_CSS, /\.phone-status \{[^}]*color: var\(--chrome-ink\);/);
+  assert.match(
+    SHELL_CSS,
+    /\.phone-home \{[^}]*background: rgba\(20, 24, 20, 0\.4\);/,
+  );
+  assert.match(
+    SHELL_CSS,
+    /\.browser-viewport \{[^}]*background: var\(--chrome-surface\);/,
+  );
+});
+
+test("frame labels note a light-only screen only under a dark selection", () => {
+  const css = flatCss(SHELL_CSS);
+  assert.ok(
+    css.includes(".mbk-frame-scheme-note { display: none; font-weight: 500; }"),
+  );
+  assert.ok(
+    css.includes(
+      'body[data-mokabook-color-scheme="dark"] ' +
+        ".mbk-frame-wrap[data-color-scheme-fallback] " +
+        ".mbk-frame-scheme-note { display: inline; }",
+    ),
+  );
+});
+
+test("one scheme switch instance shows per side of the breakpoint", () => {
+  const css = flatCss(SHELL_CSS);
+  assert.ok(
+    css.includes(
+      ".mbk-screen-head > [data-mokabook-schemeswitch] " +
+        "{ display: none; margin-left: 0; }",
+    ),
+  );
+  assert.ok(
+    css.includes(
+      "@media (max-width: 56.25rem) { " +
+        ".mbk-topbar > [data-mokabook-schemeswitch] { display: none; } " +
+        ".mbk-screen-head > [data-mokabook-schemeswitch] " +
+        "{ display: inline-flex; } }",
+    ),
+  );
 });

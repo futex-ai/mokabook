@@ -31,6 +31,11 @@ export const SHELL_VIEW_CSS = `
   margin-left: auto;
 }
 
+.mbk-screen-head > [data-mokabook-schemeswitch] {
+  display: none;
+  margin-left: 0;
+}
+
 .mbk-crumbs {
   margin: 0;
   color: var(--chrome-muted);
@@ -162,6 +167,17 @@ export const SHELL_VIEW_CSS = `
   text-transform: uppercase;
 }
 
+.mbk-frame-scheme-note {
+  display: none;
+  font-weight: 500;
+}
+
+body[data-mokabook-color-scheme="dark"]
+  .mbk-frame-wrap[data-color-scheme-fallback]
+  .mbk-frame-scheme-note {
+  display: inline;
+}
+
 .mbk-live[data-viewport="mobile"] .mbk-frame-desktop {
   display: none;
 }
@@ -279,6 +295,16 @@ export const SHELL_VIEW_CSS = `
   height: auto;
   min-height: 0;
   border-radius: 0 0 36px 36px;
+}
+
+@media (max-width: 56.25rem) {
+  .mbk-topbar > [data-mokabook-schemeswitch] {
+    display: none;
+  }
+
+  .mbk-screen-head > [data-mokabook-schemeswitch] {
+    display: inline-flex;
+  }
 }
 
 @media (max-width: 760px) {
