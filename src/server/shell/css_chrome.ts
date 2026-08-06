@@ -296,6 +296,12 @@ body[data-mokabook-color-scheme="dark"]
   background: var(--mbk-dark-screen-bg);
 }
 
+body[data-mokabook-color-scheme="dark"]
+  :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
+  .mbk-frag {
+  background: var(--mbk-dark-screen-bg);
+}
+
 .flow-track {
   display: flex;
   flex-direction: column;

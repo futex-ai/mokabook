@@ -512,9 +512,14 @@ test("dark scheme paints device screens and leaves the chrome light", () => {
       `${scope}.browser-viewport { background: var(--mbk-dark-screen-bg); }`,
     ),
   );
+  assert.ok(
+    css.includes(
+      `${scope}.mbk-frag { background: var(--mbk-dark-screen-bg); }`,
+    ),
+  );
 
   const selectors = darkTokenSelectors(SHELL_CSS).map(flatCss);
-  assert.equal(selectors.length, 4);
+  assert.equal(selectors.length, 5);
   for (const selector of selectors) {
     assert.ok(selector.startsWith(scope.trim()), selector);
   }
