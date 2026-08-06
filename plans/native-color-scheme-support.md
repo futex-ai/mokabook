@@ -962,7 +962,7 @@ plan is filed complete.
       `npx --no-install wrangler pages dev .context/mokabook-preview` or any
       static file server; from-disk `file://` is not required for the
       snapshot).
-- [ ] Commit: `fix(preview): snapshot dark fragments` (or note no change was
+- [x] Commit: `fix(preview): snapshot dark fragments` (or note no change was
       needed in the plan file).
 
 #### Task 5.2: Docs consistency pass + final gate
@@ -983,8 +983,8 @@ plan is filed complete.
       (no conflicting statements; consumer story reads: config + renderer +
       build).
 - [x] Move this plan to Completed in `plans/README.md`; tick all boxes.
-- [ ] Run `cargo xtask check` (full gate).
-- [ ] `git add -A`, commit (`docs: finish color-scheme documentation`), push.
-- [ ] Run `cargo xtask review`; report all findings from every milestone with
+- [x] Run `cargo xtask check` (full gate).
+- [x] `git add -A`, commit (`docs: finish color-scheme documentation`), push.
+- [x] Run `cargo xtask review`; report all findings from every milestone with
       numbered items, severities, context, impact, lettered options, and
       recommendations — without auto-fixing.
