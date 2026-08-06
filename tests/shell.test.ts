@@ -475,7 +475,8 @@ test("shell stylesheet stays aligned with the design contract", () => {
   );
   assert.ok(
     flatCss(SHELL_CSS).includes(
-      '.mbk-cmp-toolbar > [aria-label="Viewport"] { margin-left: auto; }',
+      '.mbk-cmp-toolbar > [aria-label="Viewport"]:not(:last-child) ' +
+        "{ margin-left: auto; }",
     ),
   );
   assert.match(SHELL_CSS, /prefers-reduced-motion/);

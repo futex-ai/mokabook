@@ -188,7 +188,7 @@ export const SHELL_REVIEW_SHELL_CSS = `
   background: var(--chrome-surface);
 }
 
-.mbk-cmp-toolbar > [aria-label="Viewport"] {
+.mbk-cmp-toolbar > [aria-label="Viewport"]:not(:last-child) {
   margin-left: auto;
 }
 
