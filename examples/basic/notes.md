@@ -17,6 +17,10 @@ in each entry's description and rationale, never inside the rendered screens:
 - Links inside the design screens are drawn as styled text because the mockups
   are static pictures of the shell; real navigation behavior is specified in
   the runtime protocol.
+- The dark-scheme and light-only screens are light documents that draw a shell
+  with dark selected, so they opt out of dark generation like every other
+  design screen. Only the depicted device screens change; the shell chrome
+  around them stays light in both schemes.
 - The approved tokens, consumer-tunable accent properties, and responsive
   breakpoints are recorded in `docs/protocol/mokabook-shell-design.md`.
 

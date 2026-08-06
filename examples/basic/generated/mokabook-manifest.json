@@ -54,7 +54,7 @@
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
-      "description": "Browse states for details, missing routes, and narrow layouts.",
+      "description": "Browse states for details, missing routes, narrow layouts, and color schemes.",
       "id": "design-browse-states",
       "kind": "collection",
       "navPath": [
@@ -71,7 +71,9 @@
       "childIds": [
         "design-browse-details",
         "design-browse-missing-route",
-        "design-browse-navigation"
+        "design-browse-navigation",
+        "design-browse-dark-scheme",
+        "design-browse-light-only"
       ]
     },
     {
@@ -203,6 +205,39 @@
     },
     {
       "dependencies": [
+        "examples/basic/entries/design/browse_scheme_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The catalogue with the dark scheme selected and dark device screens.",
+      "id": "design-browse-dark-scheme",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Shell states"
+      ],
+      "rationale": "Dark applies inside the device screens only (--mbk-dark-screen-bg #121514, --mbk-dark-screen-ink #eef1ef); bezels, the browser bar, and every shell surface stay light so the catalogue frame reads the same in both schemes. Wide layouts carry the switch in the top bar beside the search field; narrow layouts move it into the screen head band beside the viewport control, where the top bar has no room.",
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_scheme_screens.tsx",
+      "title": "Dark scheme selected",
+      "fragments": {
+        "desktop": "design/browse/states/dark-scheme.desktop.html",
+        "mobile": "design/browse/states/dark-scheme.mobile.html"
+      },
+      "route": "design/browse/states/dark-scheme.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
         "examples/basic/entries/design/browse_screens.tsx",
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
@@ -227,6 +262,39 @@
         "mobile": "design/browse/states/details.mobile.html"
       },
       "route": "design/browse/states/details.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_scheme_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "A screen with no dark render keeping light device screens under the dark selection.",
+      "id": "design-browse-light-only",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Shell states"
+      ],
+      "rationale": "A screen that renders in light only keeps its light frames instead of being tinted, and its frame label states the fallback so a reviewer can tell a light render from a missing dark one. The selection itself stays on dark for the rest of the catalogue.",
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_scheme_screens.tsx",
+      "title": "Light-only screen under dark",
+      "fragments": {
+        "desktop": "design/browse/states/light-only.desktop.html",
+        "mobile": "design/browse/states/light-only.mobile.html"
+      },
+      "route": "design/browse/states/light-only.html",
       "useCaseIds": [],
       "viewports": [
         "mobile",

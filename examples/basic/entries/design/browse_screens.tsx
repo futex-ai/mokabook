@@ -17,7 +17,7 @@ function HomeBody() {
   return (
     <EmptyState
       title="Mokabook"
-      body="Browse the mockup catalogue. 15 screens and 1 use case are generated from this repository."
+      body="Browse the mockup catalogue. 17 screens and 1 use case are generated from this repository."
       linkLabel="Open the first screen"
     />
   );
