@@ -45,26 +45,68 @@ export const mockups = [
 `;
 }
 
-/** Resolve the served URL a spawned Mokabook server announces on startup. */
+/**
+ * Resolve the served URL a spawned Mokabook server announces on startup. Both
+ * pipes are drained for the process's whole life so a full pipe can never
+ * block the child, and the startup timer and exit listener are released once
+ * the URL arrives.
+ */
 function listeningUrl(child: ChildProcess): Promise<string> {
+  child.stderr?.resume();
   return new Promise<string>((resolve, reject) => {
     let buffered = "";
+    const finish = (settle: () => void): void => {
+      clearTimeout(timer);
+      child.off("exit", onExit);
+      settle();
+    };
+    const onExit = (code: number | null): void => {
+      finish(() =>
+        reject(new Error(`serve exited early with ${code}: ${buffered}`)),
+      );
+    };
     const timer = setTimeout(
-      () => reject(new Error(`serve did not start: ${buffered}`)),
+      () => finish(() => reject(new Error(`serve did not start: ${buffered}`))),
       30_000,
     );
     child.stdout?.on("data", (chunk: Buffer) => {
       buffered += chunk.toString();
-      const match = buffered.match(/Mokabook listening at (http:\/\/[^\s]+)/);
-      if (match?.[1]) {
-        clearTimeout(timer);
-        resolve(match[1]);
-      }
+      const url = buffered.match(
+        /Mokabook listening at (http:\/\/[^\s]+)/,
+      )?.[1];
+      if (url) finish(() => resolve(url));
     });
-    child.on("exit", (code) =>
-      reject(new Error(`serve exited early with ${code}: ${buffered}`)),
-    );
+    child.on("exit", onExit);
   });
+}
+
+/**
+ * Stop a spawned server and resolve only after the process has exited. Serve
+ * closes its HTTP server and Review artifacts asynchronously, so a teardown
+ * that merely signals the child can leave it running with the worker holding
+ * its stdio pipes; SIGKILL bounds a shutdown that stalls.
+ */
+async function stopServe(child: ChildProcess): Promise<void> {
+  const exited = new Promise<void>((resolve) => {
+    if (child.exitCode !== null || child.signalCode !== null) resolve();
+    else child.once("exit", () => resolve());
+  });
+  child.kill("SIGTERM");
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expired = new Promise<"expired">((resolve) => {
+    timer = setTimeout(() => resolve("expired"), 5_000);
+  });
+  const outcome = await Promise.race([
+    exited.then(() => "exited" as const),
+    expired,
+  ]);
+  clearTimeout(timer);
+  if (outcome === "expired") {
+    child.kill("SIGKILL");
+    await exited;
+  }
+  child.stdout?.destroy();
+  child.stderr?.destroy();
 }
 
 test.beforeAll(async () => {
@@ -271,7 +313,7 @@ test.describe("served review of a dark-capable catalogue", () => {
   });
 
   test.afterAll(async () => {
-    if (child && child.exitCode === null) child.kill("SIGTERM");
+    if (child) await stopServe(child);
     if (served) await removeFixture(served);
   });
 
