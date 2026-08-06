@@ -1,5 +1,6 @@
 /** Progressive Browse shell enhancement served at /__mokabook/client/browse.js. */
 
+import { createBrowserDetailsPreference } from "./browse_details.js";
 import {
   collapseFrame,
   expandedFrame,
@@ -77,6 +78,8 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
   const main = doc.querySelector<HTMLElement>("[data-mokabook-view]");
   if (!shell || !main) return;
+  const detailsPreference = createBrowserDetailsPreference(win);
+  detailsPreference.apply(doc);
   if (win.history.scrollRestoration) win.history.scrollRestoration = "manual";
   const sequencer = new NavigationSequencer();
   let restoringHistory = false;
@@ -148,6 +151,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     collapseFrame(doc, expandedFrame(doc));
     if (push) persistScroll();
     main.innerHTML = nextMain.innerHTML;
+    detailsPreference.apply(doc);
     doc.title = parsed.title || doc.title;
     const finalUrl = response.url || url;
     if (push)
@@ -248,6 +252,20 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     const target = event.target instanceof Element ? event.target : undefined;
     if (target?.matches("[data-mokabook-search]")) applyNavVisibility(doc);
   });
+
+  doc.addEventListener(
+    "toggle",
+    (event) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLDetailsElement &&
+        target.matches("[data-mokabook-details]")
+      ) {
+        detailsPreference.remember(target.open);
+      }
+    },
+    true,
+  );
 
   win.addEventListener("popstate", (event) => {
     const state = event.state as ScrollState | null;

@@ -118,8 +118,8 @@ All/Changed filter, linked breadcrumbs with hash-prefixed copyable ID chips,
 realistic browser chrome with an expand-to-overlay toggle, phone chrome whose
 screen reserves a clock, signal, Wi-Fi, and battery status band above the mobile
 fragment,
-header viewport controls, use-case flows, a details inspector, id redirects,
-and watched updates.
+header viewport controls, use-case flows, a details inspector that remembers
+its disclosure across routes and reloads, id redirects, and watched updates.
 The Changed filter compares route-level manifest metadata, generated fragments,
 and explicitly declared dependencies against the Git base. A registry module
 that defines many routes does not make every route appear changed merely because
