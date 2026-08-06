@@ -112,10 +112,15 @@ eligible unmodified same-origin Browse link, the client replaces only the
 route-owned main view and updates URL, title, active row, focus, and history.
 Search, disclosure, filters, and catalogue scroll remain mounted; searching
 temporarily force-opens navigation groups and restores their prior disclosure
-when cleared. The browser-frame expand toggle overlays one frame at a time and
-collapses on Escape, on an outside click, and on route navigation. Clicking a
-screen or use-case ID chip labelled `#<id>` copies the unprefixed ID without
-navigating. Clicking a frame address copies it to the clipboard.
+when cleared. The details inspector is open until the user changes it, then its
+disclosure is retained across in-shell navigation, durable navigation, and
+browser reloads for that origin. Unavailable or malformed browser storage
+leaves the server-rendered default intact; the latest choice still survives
+in-shell navigation when writes fail. The browser-frame expand toggle overlays
+one frame at a time and collapses on Escape, on an outside click, and on route
+navigation. Clicking a screen or use-case ID chip labelled `#<id>` copies the
+unprefixed ID without navigating. Clicking a frame address copies it to the
+clipboard.
 
 The shell scrolls inside its stage, flow, and embed regions rather than the
 document. Back and Forward restore the matching route and that history entry's
