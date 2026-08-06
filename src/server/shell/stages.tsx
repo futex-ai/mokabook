@@ -18,6 +18,11 @@ interface FragmentSources {
   light: string | undefined;
 }
 
+/**
+ * The served URL of one generated route. Every embedded frame — its `src` and
+ * the scheme attributes the Browse client assigns back into that `src` — is
+ * built here so the two can never drift apart.
+ */
 function fragmentSrc(route: string): string {
   return `/static/${encodeUrlPath(route)}`;
 }
@@ -62,7 +67,7 @@ function EmbedStage(props: { route: string; title: string }) {
       <iframe
         className="mbk-frag"
         sandbox=""
-        src={`/static/${encodeUrlPath(props.route)}`}
+        src={fragmentSrc(props.route)}
         title={props.title}
       />
     </div>
@@ -96,7 +101,7 @@ function FramesStage(props: {
             data-fragment-dark={mobile.dark}
             data-fragment-light={mobile.light}
             sandbox=""
-            src={`/static/${encodeUrlPath(screen.fragments.mobile)}`}
+            src={fragmentSrc(screen.fragments.mobile)}
             title={`${screen.title} — mobile`}
           />
         </PhoneFrame>
@@ -112,7 +117,7 @@ function FramesStage(props: {
             data-fragment-dark={desktop.dark}
             data-fragment-light={desktop.light}
             sandbox=""
-            src={`/static/${encodeUrlPath(screen.fragments.desktop)}`}
+            src={fragmentSrc(screen.fragments.desktop)}
             title={`${screen.title} — desktop`}
           />
         </BrowserFrame>
@@ -139,7 +144,7 @@ function FlowScreen(props: {
           data-fragment-dark={desktop.dark}
           data-fragment-light={desktop.light}
           sandbox=""
-          src={`/static/${encodeUrlPath(screen.fragments.desktop)}`}
+          src={fragmentSrc(screen.fragments.desktop)}
           title={`${screen.title} — desktop`}
         />
       </BrowserFrame>

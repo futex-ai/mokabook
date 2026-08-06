@@ -116,6 +116,22 @@ function routePage(catalogue: Catalogue, route: string): string {
   return viewPage(entry, catalogue, { ...context, activeRoute: route });
 }
 
+/**
+ * Every scheme-aware frame serves its light fragment until the client swaps it,
+ * so the rendered src must equal the light attribute the client assigns back.
+ */
+function assertLightSrcMatchesAttribute(html: string, frames: number): void {
+  const matches = [
+    ...html.matchAll(
+      /<iframe [^>]*data-fragment-light="([^"]*)"[^>]*src="([^"]*)"[^>]*>/g,
+    ),
+  ];
+  assert.equal(matches.length, frames);
+  for (const match of matches) {
+    assert.equal(match[2], match[1]);
+  }
+}
+
 test("nav tree nests collections and folds legacy directories", () => {
   const tree = buildNavTree(manifest.entries, manifest.legacyPages);
   const labels = tree.map((node) => node.label);
@@ -288,6 +304,7 @@ test("screen stage carries per-frame scheme fragment data", () => {
   );
   assert.equal(screen.includes("data-color-scheme-fallback"), false);
   assert.equal(screen.includes("mbk-frame-scheme-note"), false);
+  assertLightSrcMatchesAttribute(screen, 2);
 
   const fallback = routePage(dark, "screens/details.html");
   assert.match(
@@ -303,6 +320,7 @@ test("screen stage carries per-frame scheme fragment data", () => {
     /<iframe class="mbk-frag" data-fragment-light="\/static\/screens\/details\.mobile\.html" sandbox="" src="\/static\/screens\/details\.mobile\.html" title="Details — mobile"><\/iframe>/,
   );
   assert.equal(fallback.includes("data-fragment-dark"), false);
+  assertLightSrcMatchesAttribute(fallback, 2);
 
   const flow = routePage(dark, "user-flows/tour.html");
   assert.match(
@@ -314,6 +332,7 @@ test("screen stage carries per-frame scheme fragment data", () => {
     /<div class="mbk-flow-screen" data-color-scheme-fallback=""><div class="browser-frame">[\s\S]*?<iframe class="mbk-frag" data-fragment-light="\/static\/screens\/details\.desktop\.html" sandbox=""/,
   );
   assert.equal(flow.includes("mbk-frame-scheme-note"), false);
+  assertLightSrcMatchesAttribute(flow, 2);
 
   const lightOnly = createCatalogue(manifest);
   const lightScreen = routePage(lightOnly, "screens/welcome.html");
