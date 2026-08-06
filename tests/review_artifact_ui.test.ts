@@ -273,9 +273,9 @@ test("compare pages segment the color scheme for dark-capable screens", () => {
     }),
   });
 
-  const dark = files.get(
-    literalComparisonPagePath(screen.route, "mobile.dark"),
-  ) as string;
+  const dark = compareToolbar(
+    files.get(literalComparisonPagePath(screen.route, "mobile.dark")) as string,
+  );
   assert.ok(
     dark.indexOf('aria-label="Comparison mode"') <
       dark.indexOf('aria-label="Viewport"'),
@@ -294,20 +294,28 @@ test("compare pages segment the color scheme for dark-capable screens", () => {
   );
   assert.match(dark, /<span aria-current="page" class="active">Dark<\/span>/);
 
-  const light = files.get(
-    literalComparisonPagePath(screen.route, "desktop"),
-  ) as string;
+  const light = compareToolbar(
+    files.get(literalComparisonPagePath(screen.route, "desktop")) as string,
+  );
   assert.match(light, /<span aria-current="page" class="active">Light<\/span>/);
   assert.match(light, /<a href="\.\.\/desktop\.dark\/index\.html">Dark<\/a>/);
   assert.match(light, /<a href="\.\.\/mobile\/index\.html">Mobile<\/a>/);
 
-  const lightOnly = files.get(
-    literalComparisonPagePath("screens/light-only.html", "mobile"),
-  ) as string;
+  const lightOnly = compareToolbar(
+    files.get(
+      literalComparisonPagePath("screens/light-only.html", "mobile"),
+    ) as string,
+  );
   assert.match(lightOnly, /aria-label="Viewport"/);
   assert.doesNotMatch(lightOnly, /Color scheme/);
   assert.doesNotMatch(lightOnly, />Dark</);
 });
+
+/** The compare band markup alone, so assertions ignore the inlined shell CSS. */
+function compareToolbar(page: string): string {
+  const start = page.indexOf('<div class="mbk-cmp-toolbar">');
+  return page.slice(start, page.indexOf('<div class="mbk-rvw-stage">', start));
+}
 
 test("served render options add browse, recompute, and live-update hooks", () => {
   const artifact = {

@@ -473,6 +473,11 @@ test("shell stylesheet stays aligned with the design contract", () => {
     SHELL_CSS,
     /\.phone-screen \.mbk-frag \{[\s\S]*border-radius: 0 0 36px 36px;/,
   );
+  assert.ok(
+    flatCss(SHELL_CSS).includes(
+      '.mbk-cmp-toolbar > [aria-label="Viewport"] { margin-left: auto; }',
+    ),
+  );
   assert.match(SHELL_CSS, /prefers-reduced-motion/);
   assert.match(SHELL_CSS, /InterVariable\.woff2/);
   assert.match(SHELL_CSS, /\.mbk-idchip \{[\s\S]*cursor: pointer;/);
