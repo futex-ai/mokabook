@@ -310,6 +310,18 @@
   color: var(--mbk-dark-screen-ink);
 }
 
+/* A dark screen sits within a near-black bezel, so a hairline keeps the
+   screen edge readable. The browser viewport needs none: its light bar
+   already draws the edge. */
+.phone-screen.mbk-screen-dark {
+  box-shadow: inset 0 0 0 1px
+    color-mix(
+      in srgb,
+      var(--mbk-dark-screen-ink) 12%,
+      var(--mbk-dark-screen-bg)
+    );
+}
+
 .mbk-screen-dark .phone-status {
   color: var(--mbk-dark-screen-ink);
 }
