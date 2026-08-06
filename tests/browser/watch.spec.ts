@@ -19,7 +19,9 @@ let child: ChildProcess;
 let url: string;
 
 test.beforeAll(async () => {
-  fixture = await createFixture();
+  fixture = await createFixture(validEntrySource(), {
+    extraConfig: `colorSchemes: ["light", "dark"],`,
+  });
   child = spawn(
     "node",
     [cli, "serve", "--config", fixture.configPath, "--port", "0"],
@@ -59,6 +61,13 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   await expect(page.locator("#mb-main h2")).toHaveText("Home");
   await page.fill("[data-mokabook-search]", "home");
   await page.click('[data-viewport-option="mobile"]');
+  await page.click(
+    '.mbk-topbar [data-mokabook-schemeswitch] [data-color-scheme-option="dark"]',
+  );
+  await expect(page.locator(".mbk-frame-mobile iframe")).toHaveAttribute(
+    "src",
+    /screens\/home\.mobile\.dark\.html$/,
+  );
   await page.locator("[data-mokabook-details] summary").click();
   await expect(page.locator("[data-mokabook-details]")).not.toHaveAttribute(
     "open",
@@ -76,6 +85,19 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   await expect(page.locator("[data-mokabook-search]")).toHaveValue("home");
   await expect(page.locator(".mbk-frame-mobile")).toBeVisible();
   await expect(page.locator(".mbk-frame-desktop")).toBeHidden();
+  await expect(page.locator("body")).toHaveAttribute(
+    "data-mokabook-color-scheme",
+    "dark",
+  );
+  await expect(page.locator(".mbk-frame-mobile iframe")).toHaveAttribute(
+    "src",
+    /screens\/home\.mobile\.dark\.html$/,
+  );
+  await expect(
+    page.locator(
+      '.mbk-screen-head [data-mokabook-schemeswitch] [data-color-scheme-option="dark"]',
+    ),
+  ).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("[data-mokabook-details]")).not.toHaveAttribute(
     "open",
     "",

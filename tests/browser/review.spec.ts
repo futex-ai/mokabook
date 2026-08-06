@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -22,6 +22,49 @@ let outDir: string;
 
 async function git(cwd: string, ...args: string[]): Promise<void> {
   await run("git", args, { cwd });
+}
+
+/**
+ * Two-screen catalogue where the first screen renders in both schemes and the
+ * second opts out, so one comparison carries a scheme choice and one cannot.
+ */
+function darkEntrySource(
+  options: { firstTitle?: string; secondTitle?: string } = {},
+): string {
+  const firstTitle = JSON.stringify(options.firstTitle ?? "Home");
+  const secondTitle = JSON.stringify(options.secondTitle ?? "Details");
+  return `import { defineCollection, defineScreen, defineUseCase } from "mokabook";
+import React from "react";
+const metadata = { dependencies: ["notes.md"], navPath: ["Fixture"], relatedDocs: ["notes.md"] };
+export const mockups = [
+  defineCollection({ ...metadata, childIds: ["home", "details"], description: "Fixture collection", id: "fixture", title: "Fixture" }),
+  defineScreen({ ...metadata, description: "Home screen", desktop: <main id="home">Home</main>, id: "home", mobile: <main id="home-mobile">Home</main>, route: "screens/home.html", title: ${firstTitle}, useCaseIds: ["tour"] }),
+  defineScreen({ ...metadata, colorSchemes: ["light"], description: "Detail screen", desktop: <main id="details">Detail</main>, id: "details", mobile: <main id="details-mobile">Detail</main>, route: "screens/details.html", title: ${secondTitle}, useCaseIds: ["tour"] }),
+  defineUseCase({ ...metadata, description: "Fixture journey", id: "tour", route: "user-flows/tour.html", steps: [{ screenId: "home" }, { screenId: "details" }], title: "Tour" })
+];
+`;
+}
+
+/** Resolve the served URL a spawned Mokabook server announces on startup. */
+function listeningUrl(child: ChildProcess): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    let buffered = "";
+    const timer = setTimeout(
+      () => reject(new Error(`serve did not start: ${buffered}`)),
+      30_000,
+    );
+    child.stdout?.on("data", (chunk: Buffer) => {
+      buffered += chunk.toString();
+      const match = buffered.match(/Mokabook listening at (http:\/\/[^\s]+)/);
+      if (match?.[1]) {
+        clearTimeout(timer);
+        resolve(match[1]);
+      }
+    });
+    child.on("exit", (code) =>
+      reject(new Error(`serve exited early with ${code}: ${buffered}`)),
+    );
+  });
 }
 
 test.beforeAll(async () => {
@@ -181,4 +224,136 @@ test("narrow static review pages expose navigation and the index", async ({
 
   await page.getByRole("link", { exact: true, name: "Review" }).click();
   await expect(page.locator(".mbk-empty h2")).toHaveText("Mokabook review");
+});
+
+test.describe("served review of a dark-capable catalogue", () => {
+  const homeRow = '[data-mokabook-review-route="screens/home.html"]';
+  const detailsRow = '[data-mokabook-review-route="screens/details.html"]';
+  const schemeSegment = '.mbk-cmp-toolbar [aria-label="Color scheme"]';
+  const viewportSegment = '.mbk-cmp-toolbar [aria-label="Viewport"]';
+  let served: TestFixture;
+  let child: ChildProcess;
+  let url: string;
+
+  test.beforeAll(async () => {
+    served = await createFixture(darkEntrySource(), {
+      extraConfig: `colorSchemes: ["light", "dark"],`,
+    });
+    await run("node", [cli, "build", "--config", served.configPath]);
+    await git(served.root, "init", "--initial-branch=main");
+    await git(served.root, "config", "user.email", "fixture@example.test");
+    await git(served.root, "config", "user.name", "Fixture");
+    await git(served.root, "add", "-A");
+    await git(served.root, "commit", "-m", "base");
+    await fs.promises.writeFile(
+      served.entryPath,
+      darkEntrySource({
+        firstTitle: "Home Revised",
+        secondTitle: "Details Revised",
+      }),
+    );
+    child = spawn(
+      "node",
+      [
+        cli,
+        "serve",
+        "--config",
+        served.configPath,
+        "--base",
+        "main",
+        "--no-watch",
+        "--port",
+        "0",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    );
+    url = await listeningUrl(child);
+  });
+
+  test.afterAll(async () => {
+    if (child && child.exitCode === null) child.kill("SIGTERM");
+    if (served) await removeFixture(served);
+  });
+
+  test("a served compare page switches between compared schemes", async ({
+    page,
+  }) => {
+    await page.goto(`${url}/review`);
+    await expect(page.locator(".mbk-empty h2")).toHaveText("Mokabook review");
+    await page.click(homeRow);
+    await expect(page.locator(".mbk-screen-head h2")).toHaveText(
+      "Home Revised",
+    );
+
+    await expect(
+      page.locator('.mbk-cmp-toolbar [aria-label="Comparison mode"]'),
+    ).toBeVisible();
+    await expect(page.locator(viewportSegment)).toBeVisible();
+    const scheme = page.locator(schemeSegment);
+    await expect(scheme).toBeVisible();
+    await expect(scheme.locator('[aria-current="page"]')).toHaveText("Light");
+
+    await scheme.getByRole("link", { name: "Dark" }).click();
+    await expect(page).toHaveURL(/mobile\.dark\/index\.html$/);
+    await expect(
+      page.locator(`${schemeSegment} [aria-current="page"]`),
+    ).toHaveText("Dark");
+    await expect(
+      page.locator(`${viewportSegment} [aria-current="page"]`),
+    ).toHaveText("Mobile");
+    await expect(page.locator(".mb-pane--after iframe")).toHaveAttribute(
+      "src",
+      /home\.mobile\.dark\.html$/,
+    );
+  });
+
+  test("a light-only screen compares without a scheme choice", async ({
+    page,
+  }) => {
+    await page.goto(`${url}/review`);
+    await page.click(detailsRow);
+    await expect(page.locator(".mbk-screen-head h2")).toHaveText(
+      "Details Revised",
+    );
+    await expect(page.locator(viewportSegment)).toBeVisible();
+    await expect(page.locator(schemeSegment)).toHaveCount(0);
+  });
+
+  test("a narrow compare band leads alone and trails as a pair", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 844, width: 390 });
+    await page.goto(`${url}/review`);
+    await page
+      .getByRole("button", { name: "Open changed screens navigation" })
+      .click();
+    await page.click(detailsRow);
+    await expect(page.locator(".mbk-screen-head h2")).toHaveText(
+      "Details Revised",
+    );
+
+    const band = await page.locator(".mbk-cmp-toolbar").boundingBox();
+    const lone = await page.locator(viewportSegment).boundingBox();
+    if (!band || !lone) throw new Error("the compare band has no layout");
+    expect(lone.x - band.x).toBeLessThan(band.width / 2);
+
+    await page.goto(`${url}/review`);
+    await page
+      .getByRole("button", { name: "Open changed screens navigation" })
+      .click();
+    await page.click(homeRow);
+    await expect(page.locator(".mbk-screen-head h2")).toHaveText(
+      "Home Revised",
+    );
+    const pairBand = await page.locator(".mbk-cmp-toolbar").boundingBox();
+    const paired = await page.locator(viewportSegment).boundingBox();
+    const scheme = await page.locator(schemeSegment).boundingBox();
+    if (!pairBand || !paired || !scheme)
+      throw new Error("the compare band has no layout");
+    expect(paired.x - pairBand.x).toBeGreaterThan(lone.x - band.x);
+    expect(scheme.x - (paired.x + paired.width)).toBeLessThan(24);
+    expect(scheme.x + scheme.width).toBeGreaterThan(
+      pairBand.x + pairBand.width - 24,
+    );
+  });
 });

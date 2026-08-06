@@ -187,6 +187,8 @@ of those two.
   gains an `mbk-frame-scheme-note` span so the caption reads
   `MOBILE — LIGHT ONLY` or `DESKTOP — LIGHT ONLY`. The note is the
   lighter-weight tail of the same uppercase label, not a separate badge.
+  A use-case step frame carries the same fallback state but has no label, so it
+  shows no scheme caption.
 - **Compare pages** — the comparison band carries the same control as a third
   segment after the comparison-mode and viewport segments, with the viewport
   and scheme pair kept together at the trailing edge. A screen with only light

@@ -82,8 +82,9 @@ The package owns a neutral, responsive Mokabook shell: a top bar with brand,
 search, and Browse/Review modes; a catalogue navigation column with a
 `Collapse all` control, an All/Changed filter, nested disclosure groups with
 folder/screen/page/flow icons and indent guides; linked breadcrumbs with an id
-chip; viewport switching; realistic phone and browser device chrome; a
-per-frame expand-to-overlay toggle; and a collapsible details inspector.
+chip; viewport and color-scheme switching; realistic phone and browser device
+chrome; a per-frame expand-to-overlay toggle; and a collapsible details
+inspector.
 Consumer brand chrome does not appear in the shell. A small set of documented
 CSS custom properties may tune the shell accent without replacing its
 structural styles. The shell serves its packaged Inter variable font from
@@ -105,10 +106,23 @@ fragments and link back to their standalone screens. A legacy page embeds the
 whole generated document. Breadcrumb ancestors that resolve to a viewable
 route (a legacy directory's Overview page) are links; structural collection
 crumbs stay text. The details inspector may show description, rationale,
-source and fragment paths, related docs, dependencies, use cases, and
-comparison context.
+source and fragment paths including dark renders, the schemes a screen renders
+in, related docs, dependencies, use cases, and comparison context.
 Consumer fragments and legacy documents are sandboxed without script permission
 so they cannot alter the same-origin Browse shell.
+
+A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
+light-only catalogue offers none. One switch renders in the top bar and one in
+the screen head band, and the shell reveals whichever suits the width: the top
+bar at and above the breakpoint, the head band below it. The catalogue home has
+no head band, so below the breakpoint it carries no scheme control. Choosing a
+scheme marks the document, keeps every switch in sync, and swaps each embedded
+frame — screen frames and use-case steps alike — between its light and dark
+fragment URLs; only the inside of a device screen follows the selection, which
+then survives in-shell navigation, Back, and Forward. A screen with no dark
+render keeps its light fragments and names the fallback in its frame label
+(`MOBILE — LIGHT ONLY`), while a use-case step, which has no label, simply
+stays light.
 
 Browse is server rendered first and progressively enhanced. Direct URLs,
 refresh, missing routes, and JavaScript-disabled use remain functional. For an
@@ -195,12 +209,11 @@ Rebuilds are debounced and transactional. A failed rebuild keeps the last-good
 server and output, reports the error, and waits for another authored change. A
 successful rebuild or healthy restart publishes a new update version. Browsers
 reload their current durable URL and restore search, changed-only selection,
-collection and details disclosure, viewport selection, responsive drawer,
-catalogue scroll, and per-region stage scroll once. Recovery is strictly
-parsed,
-applies only when its durable URL exactly matches the reloaded page, and is
-removed before application; a later manual refresh cannot resurrect stale
-state.
+collection and details disclosure, viewport and color-scheme selection,
+responsive drawer, catalogue scroll, and per-region stage scroll once. Recovery
+is strictly parsed, applies only when its durable URL exactly matches the
+reloaded page, and is removed before application; a later manual refresh cannot
+resurrect stale state.
 
 Watch actions execute serially. Changes received during an active action are
 coalesced by impact before the next action starts, so two rebuilds cannot race
@@ -267,8 +280,9 @@ The engine emits a static, self-contained artifact directory with:
   byte-identical screens with shared or dependency evidence;
 - an explicit empty state only when no screen has either visual differences or
   impact evidence, with the same material/impacted totals in the CI summary;
-- one compare page per view, linked to same-scheme sibling viewports
-  through the page's viewport control;
+- one compare page per view, linked to same-scheme sibling viewports through
+  the page's viewport control and, for a screen compared in both schemes, to
+  the same-viewport sibling scheme through its scheme control;
 - one artifact-root navigation payload shared by all compare pages, while the
   index keeps complete inline navigation and a compare page without JavaScript
   keeps a direct fallback link to that index;
@@ -413,9 +427,9 @@ failures in the consumer's normal CI.
 Before publication, unit, integration, packed-consumer, and browser tests cover
 every contract in this document. At minimum they cover deterministic output,
 stale/orphan checks, path safety, registry links, legacy coexistence, deep
-links, no-JavaScript responses, progressive navigation, history/focus, watch
-recovery, shutdown, base extraction, per-view comparison, shared impact,
-Review ignore, and CI summary output.
+links, no-JavaScript responses, progressive navigation, history/focus,
+color-scheme switching, watch recovery, shutdown, base extraction, per-view
+comparison, shared impact, Review ignore, and CI summary output.
 
 ## Related Docs
 
