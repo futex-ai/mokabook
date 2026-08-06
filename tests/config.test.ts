@@ -119,6 +119,75 @@ test("scheme-specific stylesheet lists validate like shared stylesheets", async 
   }
 });
 
+test("stylesheet rules reject paths linked twice in one fragment", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const input = {
+    entriesDir: "entries",
+    mockupsDir: "mockups",
+    repoRoot: ".",
+  };
+
+  for (const [stylesheets, message] of [
+    [
+      [{ match: "**/*.html", stylesheets: ["shared.css", "shared.css"] }],
+      "duplicate stylesheet path in stylesheets[0].stylesheets: shared.css",
+    ],
+    [
+      [
+        {
+          darkStylesheets: ["dark.css", "dark.css"],
+          match: "**/*.html",
+          stylesheets: ["shared.css"],
+        },
+      ],
+      "duplicate stylesheet path in stylesheets[0].darkStylesheets: dark.css",
+    ],
+    [
+      [
+        {
+          darkStylesheets: ["shared.css"],
+          match: "**/*.html",
+          stylesheets: ["shared.css"],
+        },
+      ],
+      "duplicate stylesheet path in stylesheets[0].darkStylesheets: shared.css",
+    ],
+    [
+      [
+        { match: "design/**", stylesheets: ["design.css"] },
+        {
+          lightStylesheets: ["light.css", "light.css"],
+          match: "**/*.html",
+          stylesheets: ["design.css"],
+        },
+      ],
+      "duplicate stylesheet path in stylesheets[1].lightStylesheets: light.css",
+    ],
+  ] as const) {
+    assert.throws(
+      () => resolveConfig({ ...input, stylesheets }, fixture.configPath),
+      (error: Error & { code?: string }) =>
+        error.code === "config-invalid" && error.message.includes(message),
+    );
+  }
+
+  const reused = [
+    { match: "design/**", stylesheets: ["design.css"] },
+    {
+      darkStylesheets: ["theme.css"],
+      lightStylesheets: ["theme.css"],
+      match: "**/*.html",
+      stylesheets: ["design.css"],
+    },
+  ];
+  assert.deepEqual(
+    resolveConfig({ ...input, stylesheets: reused }, fixture.configPath)
+      .stylesheets,
+    reused,
+  );
+});
+
 test("missing config reports every attempted filename", () => {
   const root = path.join("/", "definitely-missing-mokabook-config");
   assert.throws(() => discoverConfig(root), /mokabook\.config\.ts/);

@@ -231,20 +231,27 @@ export function setViewport(doc: Document, value: string): void {
  * `data-fragment-dark` URLs; a screen rendered only for light keeps its light
  * fragment. Each source is compared with the current `src` attribute first,
  * because assigning `src` reloads the frame even when the URL is unchanged.
+ *
+ * A catalogue built without dark fragments renders no scheme control, so a
+ * requested dark scheme is clamped to light there: dark chrome around light
+ * fragments would otherwise have no switch to recover from.
  */
 export function setColorScheme(doc: Document, value: BrowseColorScheme): void {
-  doc.body.setAttribute("data-mokabook-color-scheme", value);
+  const scheme = doc.querySelector("[data-color-scheme-option]")
+    ? value
+    : "light";
+  doc.body.setAttribute("data-mokabook-color-scheme", scheme);
   for (const option of doc.querySelectorAll("[data-color-scheme-option]"))
     option.setAttribute(
       "aria-pressed",
-      option.getAttribute("data-color-scheme-option") === value
+      option.getAttribute("data-color-scheme-option") === scheme
         ? "true"
         : "false",
     );
   for (const frame of doc.querySelectorAll("iframe[data-fragment-light]")) {
     const dark = frame.getAttribute("data-fragment-dark");
     const light = frame.getAttribute("data-fragment-light");
-    const next = value === "dark" && dark ? dark : light;
+    const next = scheme === "dark" && dark ? dark : light;
     if (next && frame.getAttribute("src") !== next)
       frame.setAttribute("src", next);
   }

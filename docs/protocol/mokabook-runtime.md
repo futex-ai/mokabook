@@ -45,7 +45,8 @@ fails for:
 - missing stylesheets and declared dependencies;
 - invalid `colorSchemes` config, per-screen `colorSchemes` declarations, or
   color-scheme subsets unsupported by the catalogue config;
-- missing or duplicate `lightStylesheets` / `darkStylesheets` files;
+- missing `lightStylesheets` / `darkStylesheets` files, or a stylesheet path one
+  rule would link twice into the same fragment;
 - invalid or colliding `darkFragments` manifest routes;
 - stale, missing, or proven-orphan generated output;
 - malformed Review-ignore markers or material keys;

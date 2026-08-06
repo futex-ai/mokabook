@@ -90,13 +90,15 @@ test("setColorScheme swaps fragment sources and marks the body", () => {
   assert.deepEqual(pressedOptions(view), ["true", "false", "true", "false"]);
 });
 
-test("setColorScheme leaves a light-only catalogue alone", () => {
+test("setColorScheme clamps a light-only catalogue to light", () => {
   const embed = new FakeElement("iframe", { src: "/static/pages/notes.html" });
   const fake = new FakeDocument([embed]);
   const doc = asDocument(fake);
 
   assert.equal(currentColorScheme(doc), "light");
   setColorScheme(doc, "dark");
+  assert.equal(fake.body.getAttribute("data-mokabook-color-scheme"), "light");
+  assert.equal(currentColorScheme(doc), "light");
   assert.equal(embed.getAttribute("src"), "/static/pages/notes.html");
   assert.equal(embed.srcWrites, 0);
 
@@ -134,6 +136,23 @@ test("recovery state restores color scheme strictly", () => {
   const withoutScheme: Record<string, unknown> = { ...snapshot() };
   delete withoutScheme["colorScheme"];
   assert.equal(parseBrowseRecoveryState(withoutScheme), undefined);
+});
+
+test("restored dark stays light when a rebuild drops dark fragments", () => {
+  const embed = new FakeElement("iframe", { src: "/static/pages/notes.html" });
+  const fake = new FakeDocument([
+    new FakeElement("div", { "data-mokabook-shell": "" }),
+    embed,
+  ]);
+  const doc = asDocument(fake);
+
+  restoreBrowseState(doc, fakeWindow(), snapshot());
+
+  assert.equal(snapshot().colorScheme, "dark");
+  assert.equal(fake.body.getAttribute("data-mokabook-color-scheme"), "light");
+  assert.equal(currentColorScheme(doc), "light");
+  assert.equal(embed.getAttribute("src"), "/static/pages/notes.html");
+  assert.equal(embed.srcWrites, 0);
 });
 
 /** One dark-capable screen view: two switch instances and three frames. */

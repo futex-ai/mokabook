@@ -109,7 +109,7 @@ export function validateStylesheets(
         `stylesheets[${index}].stylesheets must be an array`,
       );
     }
-    return {
+    const normalized: StylesheetRule = {
       match: rule.match,
       stylesheets: validateStylesheetPaths(
         rule.stylesheets,
@@ -134,6 +134,8 @@ export function validateStylesheets(
           }
         : {}),
     };
+    validateRuleStylesheetLinks(normalized, index);
+    return normalized;
   });
 }
 
@@ -151,6 +153,32 @@ function validateOptionalStylesheetPaths(
   return validateStylesheetPaths(value, `stylesheets[${index}].${field} path`);
 }
 
+/**
+ * Reject stylesheet paths one rule would link twice into a single fragment.
+ * Every fragment links the shared list followed by the list for its own scheme,
+ * so a path repeated inside one list, or shared by the common list and a
+ * per-scheme list, double-links; the same path in both per-scheme lists is fine
+ * because no fragment links both. Separate rules may reuse a path freely.
+ */
+function validateRuleStylesheetLinks(
+  rule: StylesheetRule,
+  index: number,
+): void {
+  validateUniqueStylesheetPaths([], rule.stylesheets, index, "stylesheets");
+  validateUniqueStylesheetPaths(
+    rule.stylesheets,
+    rule.lightStylesheets ?? [],
+    index,
+    "lightStylesheets",
+  );
+  validateUniqueStylesheetPaths(
+    rule.stylesheets,
+    rule.darkStylesheets ?? [],
+    index,
+    "darkStylesheets",
+  );
+}
+
 function validateStylesheetPaths(value: unknown[], label: string): string[] {
   return value.map((stylesheet) => {
     requireString(stylesheet, label);
@@ -158,6 +186,24 @@ function validateStylesheetPaths(value: unknown[], label: string): string[] {
       ? stylesheet
       : validateRelativeRoute(stylesheet, label);
   });
+}
+
+function validateUniqueStylesheetPaths(
+  linked: readonly string[],
+  paths: readonly string[],
+  index: number,
+  field: "darkStylesheets" | "lightStylesheets" | "stylesheets",
+): void {
+  const seen = new Set(linked);
+  for (const stylesheet of paths) {
+    if (seen.has(stylesheet)) {
+      throw new MokabookError(
+        "config-invalid",
+        `duplicate stylesheet path in stylesheets[${index}].${field}: ${stylesheet}`,
+      );
+    }
+    seen.add(stylesheet);
+  }
 }
 
 /** Validate explicit watch classifications and reject ambiguity. */
