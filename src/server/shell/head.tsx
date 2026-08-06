@@ -61,6 +61,37 @@ export function ViewportSwitch() {
   );
 }
 
+/**
+ * Color scheme selection for catalogues that render dark fragments. The shell
+ * renders one instance in the top bar and one in the screen head band; the
+ * stylesheet reveals whichever fits the current width.
+ */
+export function SchemeSwitch() {
+  const options = [
+    ["light", "Light"],
+    ["dark", "Dark"],
+  ] as const;
+  return (
+    <span
+      aria-label="Color scheme"
+      className="mbk-seg"
+      data-mokabook-schemeswitch=""
+      role="group"
+    >
+      {options.map(([value, label]) => (
+        <button
+          aria-pressed={value === "light" ? "true" : "false"}
+          data-color-scheme-option={value}
+          key={value}
+          type="button"
+        >
+          {label}
+        </button>
+      ))}
+    </span>
+  );
+}
+
 /** The breadcrumb, title, and optional action rendered above a target view. */
 export function ScreenHead(props: {
   action?: ReactNode;

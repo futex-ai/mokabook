@@ -5,7 +5,12 @@
 import type { Catalogue } from "../catalogue.js";
 import type { ShellContext } from "./context.js";
 import { DetailsPanel } from "./details.js";
-import { ScreenHead, targetHead, ViewportSwitch } from "./head.js";
+import {
+  SchemeSwitch,
+  ScreenHead,
+  targetHead,
+  ViewportSwitch,
+} from "./head.js";
 import { EmptyStage, TargetStage } from "./stages.js";
 import type { RouteTarget } from "./target.js";
 
@@ -16,16 +21,30 @@ export type ShellView =
   | { kind: "review" }
   | { kind: "target"; target: RouteTarget };
 
+/**
+ * Head-band controls for a routed catalogue entry: the viewport switch for
+ * screens, and the narrow-width home of the scheme switch, which the top bar
+ * has no room for below the breakpoint.
+ */
+function HeadActions(props: { catalogue: Catalogue; target: RouteTarget }) {
+  if (props.target.kind !== "entry") {
+    return null;
+  }
+  return (
+    <>
+      {props.target.entry.kind === "screen" ? <ViewportSwitch /> : null}
+      {props.catalogue.hasDarkFragments ? <SchemeSwitch /> : null}
+    </>
+  );
+}
+
 function TargetView(props: { catalogue: Catalogue; target: RouteTarget }) {
   const head = targetHead(props.catalogue, props.target);
   return (
     <>
       <ScreenHead
         action={
-          props.target.kind === "entry" &&
-          props.target.entry.kind === "screen" ? (
-            <ViewportSwitch />
-          ) : null
+          <HeadActions catalogue={props.catalogue} target={props.target} />
         }
         crumbs={head.crumbs}
         heading={head.title}
