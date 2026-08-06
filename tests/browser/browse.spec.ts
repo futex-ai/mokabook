@@ -71,6 +71,23 @@ function computedStyle(
     .evaluate((element, name) => getComputedStyle(element)[name], property);
 }
 
+/**
+ * A dark screen paints its edge on an `::after` overlay above the fragment, so
+ * the hairline is read from the pseudo-element rather than the screen itself.
+ */
+function overlayStyle(
+  page: Page,
+  selector: string,
+  property: "boxShadow" | "position",
+): Promise<string> {
+  return page
+    .locator(selector)
+    .evaluate(
+      (element, name) => getComputedStyle(element, "::after")[name],
+      property,
+    );
+}
+
 test("durable links load complete server-rendered views", async ({ page }) => {
   await page.goto("/view/screens/welcome.html");
   await expect(page.locator("#mb-main h2")).toHaveText("Welcome");
@@ -306,12 +323,12 @@ test("dark device screens keep their surface and edge", async ({ page }) => {
   await page.setViewportSize({ height: 800, width: 1_280 });
   await page.goto("/view/screens/welcome.html");
   const phoneScreen = ".mbk-frame-mobile .phone-screen";
-  expect(await computedStyle(page, phoneScreen, "boxShadow")).toBe("none");
+  expect(await overlayStyle(page, phoneScreen, "boxShadow")).toBe("none");
 
   await chooseScheme(page, topBarScheme, "dark");
-  expect(await computedStyle(page, phoneScreen, "boxShadow")).toContain(
-    "inset",
-  );
+  expect(await computedStyle(page, phoneScreen, "boxShadow")).toBe("none");
+  expect(await overlayStyle(page, phoneScreen, "position")).toBe("absolute");
+  expect(await overlayStyle(page, phoneScreen, "boxShadow")).toContain("inset");
   expect(await computedStyle(page, mobileFrame, "backgroundColor")).toBe(
     darkSurface,
   );
@@ -356,7 +373,7 @@ test("a light-only screen keeps light frames and says so", async ({ page }) => {
     page.locator(".mbk-frame-desktop .mbk-frame-scheme-note"),
   ).toBeVisible();
   expect(
-    await computedStyle(page, ".mbk-frame-mobile .phone-screen", "boxShadow"),
+    await overlayStyle(page, ".mbk-frame-mobile .phone-screen", "boxShadow"),
   ).toBe("none");
 
   await chooseScheme(page, topBarScheme, "light");

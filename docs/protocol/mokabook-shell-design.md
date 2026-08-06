@@ -175,7 +175,8 @@ of those two.
   light.
 - **Screen edge** — a dark screen inside the near-black phone body would lose
   its edge, so the phone screen carries a 1px inset `box-shadow` hairline mixed
-  from the two dark tokens:
+  from the two dark tokens, painted on an overlay above the fragment so the
+  embedded document cannot occlude it:
   `color-mix(in srgb, var(--mbk-dark-screen-ink) 12%, var(--mbk-dark-screen-bg))`.
   The browser viewport needs none; its light bar already draws that edge.
 - **Control** — a `Light | Dark` `mbk-seg`, shown only when the catalogue has

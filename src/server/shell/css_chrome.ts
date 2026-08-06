@@ -270,12 +270,22 @@ body[data-mokabook-color-scheme="dark"]
   :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
   .phone-screen {
   background: var(--mbk-dark-screen-bg);
+}
+
+body[data-mokabook-color-scheme="dark"]
+  :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
+  .phone-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   box-shadow: inset 0 0 0 1px
     color-mix(
       in srgb,
       var(--mbk-dark-screen-ink) 12%,
       var(--mbk-dark-screen-bg)
     );
+  pointer-events: none;
 }
 
 body[data-mokabook-color-scheme="dark"]

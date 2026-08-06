@@ -497,9 +497,16 @@ test("dark scheme paints device screens and leaves the chrome light", () => {
 
   assert.ok(
     css.includes(
-      `${scope}.phone-screen { background: var(--mbk-dark-screen-bg); ` +
+      `${scope}.phone-screen { background: var(--mbk-dark-screen-bg); }`,
+    ),
+  );
+  assert.ok(
+    css.includes(
+      `${scope}.phone-screen::after { content: ""; position: absolute; ` +
+        "inset: 0; border-radius: inherit; " +
         "box-shadow: inset 0 0 0 1px color-mix(in srgb, " +
-        "var(--mbk-dark-screen-ink) 12%, var(--mbk-dark-screen-bg)); }",
+        "var(--mbk-dark-screen-ink) 12%, var(--mbk-dark-screen-bg)); " +
+        "pointer-events: none; }",
     ),
   );
   assert.ok(
@@ -525,7 +532,7 @@ test("dark scheme paints device screens and leaves the chrome light", () => {
   );
 
   const selectors = darkTokenSelectors(SHELL_CSS).map(flatCss);
-  assert.equal(selectors.length, 5);
+  assert.equal(selectors.length, 6);
   for (const selector of selectors) {
     assert.ok(selector.startsWith(scope.trim()), selector);
   }
