@@ -48,5 +48,9 @@ export default function render(input: RenderInput): string {
   const links = input.stylesheets
     .map((href) => `<link rel="stylesheet" href="${href}">`)
     .join("");
-  return `<!doctype html><html lang="en" data-color-scheme="${input.colorScheme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${input.entry.title}</title>${links}${nativeStyles}<style>html{color-scheme:${input.colorScheme}}body{margin:0;background:${theme.colors.bg}}</style></head><body>${body}</body></html>\n`;
+  const documentStyles =
+    input.colorScheme === "dark"
+      ? `html{color-scheme:dark}body{margin:0;background:${theme.colors.bg};color:${theme.colors.ink}}main a{color:${darkTokens.colors.accent}}`
+      : `html{color-scheme:light}body{margin:0;background:${theme.colors.bg}}`;
+  return `<!doctype html><html lang="en" data-color-scheme="${input.colorScheme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${input.entry.title}</title>${links}${nativeStyles}<style>${documentStyles}</style></head><body>${body}</body></html>\n`;
 }

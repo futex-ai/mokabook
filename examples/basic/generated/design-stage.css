@@ -355,6 +355,10 @@
   );
 }
 
+.mbk-screen-dark .mbk-shot-link {
+  color: #7fae95;
+}
+
 /* ---- Details inspector ------------------------------------------------ */
 
 .mbk-details {

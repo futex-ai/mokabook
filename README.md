@@ -110,25 +110,28 @@ free. `--port 0` instead asks the operating system to choose a free port.
 Watched Serve keeps the first resolved port for later child restarts so its URL
 stays stable.
 
-`build` writes viewport fragments and `mokabook-manifest.json` under
-`mockupsDir`. `check` calculates those bytes without writing and reports
-missing, stale, or orphan generated files. Browse serves the package-owned
-Mokabook shell — catalogue navigation with folder/screen/flow icons and an
-All/Changed filter, linked breadcrumbs with hash-prefixed copyable ID chips,
-realistic browser chrome with an expand-to-overlay toggle, phone chrome whose
-screen reserves a clock, signal, Wi-Fi, and battery status band above the mobile
-fragment,
-header viewport controls, use-case flows, a details inspector that remembers
-its disclosure across routes and reloads, id redirects, and watched updates.
-The Changed filter compares route-level manifest metadata, generated fragments,
-and explicitly declared dependencies against the Git base. A registry module
-that defines many routes does not make every route appear changed merely because
-the module's imports or composition changed.
+`build` writes one fragment per effective viewport and color-scheme view plus
+`mokabook-manifest.json` under `mockupsDir`. `check` calculates those bytes
+without writing and reports missing, stale, or orphan generated files. Browse
+serves the package-owned Mokabook shell — catalogue navigation with
+folder/screen/flow icons and an All/Changed filter, linked breadcrumbs with
+hash-prefixed copyable ID chips, realistic browser chrome with an
+expand-to-overlay toggle, phone chrome whose screen reserves a clock, signal,
+Wi-Fi, and battery status band above the mobile fragment, header viewport
+controls, a Light/Dark switch when the catalogue has dark fragments, use-case
+flows, a details inspector that remembers its disclosure across routes and
+reloads, id redirects, and watched updates. The Changed filter compares
+route-level manifest metadata, generated fragments, and explicitly declared
+dependencies against the Git base. A registry module that defines many routes
+does not make every route appear changed merely because the module's imports or
+composition changed.
 Review provides summary, side-by-side, overlay, and difference views as a
-static artifact. Screens with shared or declared dependency impact
-remain linked in a distinct impacted group even when their generated views are
-byte-identical. A declared dependency may be a file or directory; a changed
-descendant of a directory is reported as the screen's impact evidence.
+static artifact. When screens render in both schemes, Review compares each
+viewport and scheme view and links sibling light/dark compare pages. Screens
+with shared or declared dependency impact remain linked in a distinct impacted
+group even when their generated views are byte-identical. A declared dependency
+may be a file or directory; a changed descendant of a directory is reported as
+the screen's impact evidence.
 Review pages render in the Mokabook shell with a changed-screens navigation
 column beside each compare view. Every static or served page provides a mobile
 navigation drawer and a Review pill that returns an opened compare page to the

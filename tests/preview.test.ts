@@ -39,14 +39,30 @@ test("preview build snapshots a static Browse catalogue", async (context) => {
   assert.doesNotMatch(index, /href="\/view\/screens\/welcome\.html"/);
   const welcome = await read(output, "view/screens/welcome.html");
   assert.match(welcome, /Welcome · Mokabook/);
+  assert.match(welcome, /data-color-scheme-option="dark"/);
+  const frame = welcome.match(
+    /<iframe[^>]*data-fragment-light="([^"]+)"[^>]*src="([^"]+)"/,
+  );
+  assert.ok(frame);
+  assert.equal(frame[1], "/static/screens/welcome.mobile");
+  assert.equal(frame[2], frame[1]);
+  assert.match(
+    welcome,
+    /data-fragment-dark="\/static\/screens\/welcome\.mobile\.dark"/,
+  );
   assert.match(welcome, /src="\/static\/screens\/welcome\.desktop"/);
   assert.doesNotMatch(
     welcome,
     /src="\/static\/screens\/welcome\.desktop\.html"/,
   );
+  assert.doesNotMatch(welcome, /data-fragment-(?:light|dark)="[^"]+\.html"/);
   assert.match(
     await read(output, "static/screens/welcome.desktop.html"),
     /Welcome to Mokabook/,
+  );
+  assert.match(
+    await read(output, "static/screens/welcome.desktop.dark.html"),
+    /data-color-scheme="dark"/,
   );
   assert.match(await read(output, "__mokabook/shell.css"), /--mbk-/);
   assert.ok(

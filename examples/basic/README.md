@@ -13,6 +13,9 @@ component libraries: it wraps every screen in `SharedUiThemeProvider` (themed
 by `theme.ts`), selects the light or dark theme from `input.colorScheme`,
 renders one React tree with `react-dom/server`, collects react-native-web's
 atomic styles through `AppRegistry`, and injects them into the document head.
+The adapter also stamps the document's `data-color-scheme`/`color-scheme`
+hooks and, for dark fragments, emits dark-safe body text and link colors for
+plain HTML outside Firna components.
 `mokabook.config.ts` enables both schemes and pairs the renderer with the
 `moduleResolution` settings such a stack needs — the `react-native` →
 `react-native-web` alias, `react-native`-first conditions and main fields,
@@ -50,4 +53,5 @@ public static root. `preview:build` snapshots this catalogue through the real
 server into `.context/mokabook-preview` for Cloudflare Pages; it is the same
 artifact used by the main and pull-request preview workflow. The snapshot
 compares the catalogue with `origin/main` and preserves Browse's All/Changed
-filter, including when no routes changed.
+filter, Light/Dark switch, client assets, and light/dark fragment files,
+including when no routes changed.

@@ -1,7 +1,7 @@
 # Native Color Scheme (Dark Mode) Design
 
 - Date: 2026-08-06
-- Status: Proposed, awaiting review
+- Status: Implemented (plans/native-color-scheme-support.md, all milestones)
 - Scope: Mokabook package (authoring, config, build/check, Browse, Review,
   shell design, example)
 

@@ -952,11 +952,11 @@ plan is filed complete.
 
 - Inspect/modify: `scripts/preview/build.mjs`
 
-- [ ] Read the snapshot's route enumeration. If it derives fetched routes
+- [x] Read the snapshot's route enumeration. If it derives fetched routes
       from manifest fragment fields, extend it with `darkFragments`; if it
       crawls served documents, verify `data-fragment-dark` URLs are captured.
       Add/adjust so `.dark.html` fragments land in the artifact.
-- [ ] Run `npm run preview:build`; verify `.context/mokabook-preview`
+- [x] Run `npm run preview:build`; verify `.context/mokabook-preview`
       contains dark fragments and the scheme switch works when serving the
       artifact directory statically (e.g.
       `npx --no-install wrangler pages dev .context/mokabook-preview` or any
@@ -967,17 +967,22 @@ plan is filed complete.
 
 #### Task 5.2: Docs consistency pass + final gate
 
-- [ ] Tune `examples/basic/theme.ts` `darkTokens` with a dark-mode accent
+- [x] Tune `examples/basic/theme.ts` `darkTokens` with a dark-mode accent
       override so link text meets WCAG AA (the inherited light sage
-      `#4f7864` is 3.63:1 on `#121514`), then regenerate the example
-      (found during Task 2.1 review).
-- [ ] Re-read the spec end to end and verify each requirement has landed;
+      `#4f7864` is 3.63:1 on `#121514`), then regenerate the example, and
+      retune the design catalogue's dark depiction link tone
+      (`design-stage.css`) to match (found during Task 2.1/2.2 reviews).
+- [x] Widen the eslint ignore for generated review output from root-only
+      `.context/**` to `**/.context/**` in `eslint.config.js`, so nested
+      fixture review artifacts cannot fail `npm run lint` (found during
+      Task 4.5).
+- [x] Re-read the spec end to end and verify each requirement has landed;
       re-read `README.md`, `docs/protocol/mokabook-package.md`,
       `mokabook-runtime.md`, `mokabook-shell-design.md`,
       `examples/basic/README.md`, `examples/basic/notes.md` for consistency
       (no conflicting statements; consumer story reads: config + renderer +
       build).
-- [ ] Move this plan to Completed in `plans/README.md`; tick all boxes.
+- [x] Move this plan to Completed in `plans/README.md`; tick all boxes.
 - [ ] Run `cargo xtask check` (full gate).
 - [ ] `git add -A`, commit (`docs: finish color-scheme documentation`), push.
 - [ ] Run `cargo xtask review`; report all findings from every milestone with

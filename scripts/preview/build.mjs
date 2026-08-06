@@ -154,7 +154,10 @@ function redirects(entries) {
 function staticPage(html) {
   return html
     .replace(liveUpdateScript, "")
-    .replace(/(href|src)="\/(static|view)\/([^"]+)\.html"/g, '$1="/$2/$3"');
+    .replace(
+      /(href|src|data-fragment-light|data-fragment-dark)="\/(static|view)\/([^"]+)\.html"/g,
+      '$1="/$2/$3"',
+    );
 }
 
 async function installArtifact(stage, output) {

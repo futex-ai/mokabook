@@ -17,6 +17,7 @@ export const darkTokens = {
   colors: {
     bg: "#121514",
     bg2: "#1b201d",
+    accent: "#7fae95",
     border: "#2a312d",
     border2: "#2a312d",
     controlBorder: "#2a312d",
