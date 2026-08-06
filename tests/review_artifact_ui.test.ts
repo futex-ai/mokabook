@@ -35,6 +35,45 @@ function screenReview(overrides: Partial<ScreenReview>): ScreenReview {
   };
 }
 
+function schemedScreenReview(): ScreenReview {
+  return screenReview({
+    views: [
+      {
+        afterPath: "snapshots/after/screens/welcome.mobile.html",
+        beforePath: "snapshots/before/screens/welcome.mobile.html",
+        colorScheme: "light",
+        ignoredIds: [],
+        state: "changed",
+        viewport: "mobile",
+      },
+      {
+        afterPath: "snapshots/after/screens/welcome.mobile.dark.html",
+        beforePath: "snapshots/before/screens/welcome.mobile.dark.html",
+        colorScheme: "dark",
+        ignoredIds: [],
+        state: "changed",
+        viewport: "mobile",
+      },
+      {
+        afterPath: "snapshots/after/screens/welcome.desktop.html",
+        beforePath: "snapshots/before/screens/welcome.desktop.html",
+        colorScheme: "light",
+        ignoredIds: [],
+        state: "changed",
+        viewport: "desktop",
+      },
+      {
+        afterPath: "snapshots/after/screens/welcome.desktop.dark.html",
+        beforePath: "snapshots/before/screens/welcome.desktop.dark.html",
+        colorScheme: "dark",
+        ignoredIds: [],
+        state: "changed",
+        viewport: "desktop",
+      },
+    ],
+  });
+}
+
 function result(overrides: Partial<ReviewResult>): ReviewResult {
   return {
     baseCommit: "a".repeat(40),
@@ -194,42 +233,7 @@ test("compare pages render modes, viewport links, and missing panes", () => {
 });
 
 test("artifact emits one compare page per view", () => {
-  const screen = screenReview({
-    views: [
-      {
-        afterPath: "snapshots/after/screens/welcome.mobile.html",
-        beforePath: "snapshots/before/screens/welcome.mobile.html",
-        colorScheme: "light",
-        ignoredIds: [],
-        state: "changed",
-        viewport: "mobile",
-      },
-      {
-        afterPath: "snapshots/after/screens/welcome.mobile.dark.html",
-        beforePath: "snapshots/before/screens/welcome.mobile.dark.html",
-        colorScheme: "dark",
-        ignoredIds: [],
-        state: "changed",
-        viewport: "mobile",
-      },
-      {
-        afterPath: "snapshots/after/screens/welcome.desktop.html",
-        beforePath: "snapshots/before/screens/welcome.desktop.html",
-        colorScheme: "light",
-        ignoredIds: [],
-        state: "changed",
-        viewport: "desktop",
-      },
-      {
-        afterPath: "snapshots/after/screens/welcome.desktop.dark.html",
-        beforePath: "snapshots/before/screens/welcome.desktop.dark.html",
-        colorScheme: "dark",
-        ignoredIds: [],
-        state: "changed",
-        viewport: "desktop",
-      },
-    ],
-  });
+  const screen = schemedScreenReview();
   const files = renderReviewArtifact({
     files: new Map(),
     result: result({ screens: [screen] }),
@@ -248,8 +252,61 @@ test("artifact emits one compare page per view", () => {
     literalComparisonPagePath(screen.route, "mobile.dark"),
   ) as string;
   assert.match(dark, /<title>Welcome · mobile · dark<\/title>/);
-  assert.match(dark, /Mobile · Dark/);
   assert.match(dark, /href="\.\.\/desktop\.dark\/index\.html">Desktop/);
+  assert.match(dark, /mbk-review-facts">Mobile · Changed</);
+  assert.doesNotMatch(dark, /Mobile · Dark/);
+});
+
+test("compare pages segment the color scheme for dark-capable screens", () => {
+  const screen = schemedScreenReview();
+  const files = renderReviewArtifact({
+    files: new Map(),
+    result: result({
+      screens: [
+        screen,
+        screenReview({
+          id: "light-only",
+          route: "screens/light-only.html",
+          title: "Light only",
+        }),
+      ],
+    }),
+  });
+
+  const dark = files.get(
+    literalComparisonPagePath(screen.route, "mobile.dark"),
+  ) as string;
+  assert.ok(
+    dark.indexOf('aria-label="Comparison mode"') <
+      dark.indexOf('aria-label="Viewport"'),
+  );
+  assert.ok(
+    dark.indexOf('aria-label="Viewport"') <
+      dark.indexOf('aria-label="Color scheme"'),
+  );
+  assert.match(
+    dark,
+    /<span aria-label="Color scheme" class="mbk-seg" role="group">/,
+  );
+  assert.match(
+    dark,
+    /role="group"><a href="\.\.\/mobile\/index\.html">Light<\/a>/,
+  );
+  assert.match(dark, /<span aria-current="page" class="active">Dark<\/span>/);
+
+  const light = files.get(
+    literalComparisonPagePath(screen.route, "desktop"),
+  ) as string;
+  assert.match(light, /<span aria-current="page" class="active">Light<\/span>/);
+  assert.match(light, /<a href="\.\.\/desktop\.dark\/index\.html">Dark<\/a>/);
+  assert.match(light, /<a href="\.\.\/mobile\/index\.html">Mobile<\/a>/);
+
+  const lightOnly = files.get(
+    literalComparisonPagePath("screens/light-only.html", "mobile"),
+  ) as string;
+  assert.match(lightOnly, /aria-label="Viewport"/);
+  assert.doesNotMatch(lightOnly, /Color scheme/);
+  assert.doesNotMatch(lightOnly, />Dark</);
 });
 
 test("served render options add browse, recompute, and live-update hooks", () => {
