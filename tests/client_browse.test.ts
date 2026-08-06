@@ -5,6 +5,14 @@ import {
   isEligibleBrowseLink,
   NavigationSequencer,
 } from "../dist/client/browse.js";
+import {
+  captureBrowseState,
+  currentColorScheme,
+  parseBrowseRecoveryState,
+  restoreBrowseState,
+  setColorScheme,
+  type BrowseRecoveryState,
+} from "../dist/client/browse_state.js";
 
 const base = {
   download: false,
@@ -14,6 +22,12 @@ const base = {
   samePageHash: false,
   target: "",
 };
+
+const MOBILE_LIGHT = "/static/screens/welcome.mobile.html";
+const MOBILE_DARK = "/static/screens/welcome.mobile.dark.html";
+const DESKTOP_LIGHT = "/static/screens/welcome.desktop.html";
+const DESKTOP_DARK = "/static/screens/welcome.desktop.dark.html";
+const FALLBACK_LIGHT = "/static/screens/details.mobile.html";
 
 test("browse interception accepts only same-origin catalogue routes", () => {
   assert.equal(isEligibleBrowseLink(base), true);
@@ -46,3 +60,216 @@ test("navigation sequencing is latest-wins", () => {
   assert.equal(second.isCurrent(), true);
   assert.equal(second.signal.aborted, false);
 });
+
+test("setColorScheme swaps fragment sources and marks the body", () => {
+  const view = schemeView();
+  const doc = asDocument(view.doc);
+
+  setColorScheme(doc, "dark");
+  assert.equal(
+    view.doc.body.getAttribute("data-mokabook-color-scheme"),
+    "dark",
+  );
+  assert.equal(currentColorScheme(doc), "dark");
+  assert.equal(view.mobileFrame.getAttribute("src"), MOBILE_DARK);
+  assert.equal(view.desktopFrame.getAttribute("src"), DESKTOP_DARK);
+  assert.equal(view.fallbackFrame.getAttribute("src"), FALLBACK_LIGHT);
+  assert.equal(view.fallbackFrame.srcWrites, 0);
+  assert.deepEqual(pressedOptions(view), ["false", "true", "false", "true"]);
+
+  setColorScheme(doc, "dark");
+  assert.equal(view.mobileFrame.srcWrites, 1);
+  assert.equal(view.desktopFrame.srcWrites, 1);
+
+  setColorScheme(doc, "light");
+  assert.equal(currentColorScheme(doc), "light");
+  assert.equal(view.mobileFrame.getAttribute("src"), MOBILE_LIGHT);
+  assert.equal(view.desktopFrame.getAttribute("src"), DESKTOP_LIGHT);
+  assert.equal(view.mobileFrame.srcWrites, 2);
+  assert.equal(view.fallbackFrame.srcWrites, 0);
+  assert.deepEqual(pressedOptions(view), ["true", "false", "true", "false"]);
+});
+
+test("setColorScheme leaves a light-only catalogue alone", () => {
+  const embed = new FakeElement("iframe", { src: "/static/pages/notes.html" });
+  const fake = new FakeDocument([embed]);
+  const doc = asDocument(fake);
+
+  assert.equal(currentColorScheme(doc), "light");
+  setColorScheme(doc, "dark");
+  assert.equal(embed.getAttribute("src"), "/static/pages/notes.html");
+  assert.equal(embed.srcWrites, 0);
+
+  fake.body.setAttribute("data-mokabook-color-scheme", "sepia");
+  assert.equal(currentColorScheme(doc), "light");
+});
+
+test("recovery state restores color scheme strictly", () => {
+  const captured = schemeView();
+  setColorScheme(asDocument(captured.doc), "dark");
+  const state = captureBrowseState(asDocument(captured.doc), fakeWindow());
+  assert.ok(state);
+  assert.equal(state.colorScheme, "dark");
+
+  const reloaded = schemeView();
+  restoreBrowseState(asDocument(reloaded.doc), fakeWindow(), state);
+  assert.equal(
+    reloaded.doc.body.getAttribute("data-mokabook-color-scheme"),
+    "dark",
+  );
+  assert.equal(reloaded.mobileFrame.getAttribute("src"), MOBILE_DARK);
+  assert.equal(reloaded.fallbackFrame.getAttribute("src"), FALLBACK_LIGHT);
+  assert.deepEqual(pressedOptions(reloaded), [
+    "false",
+    "true",
+    "false",
+    "true",
+  ]);
+
+  assert.deepEqual(parseBrowseRecoveryState(snapshot()), snapshot());
+  assert.equal(
+    parseBrowseRecoveryState({ ...snapshot(), colorScheme: "sepia" }),
+    undefined,
+  );
+  const withoutScheme: Record<string, unknown> = { ...snapshot() };
+  delete withoutScheme["colorScheme"];
+  assert.equal(parseBrowseRecoveryState(withoutScheme), undefined);
+});
+
+/** One dark-capable screen view: two switch instances and three frames. */
+interface SchemeView {
+  desktopFrame: FakeElement;
+  doc: FakeDocument;
+  fallbackFrame: FakeElement;
+  headDark: FakeElement;
+  headLight: FakeElement;
+  mobileFrame: FakeElement;
+  topDark: FakeElement;
+  topLight: FakeElement;
+}
+
+function schemeView(): SchemeView {
+  const view = {
+    desktopFrame: fragmentFrame(DESKTOP_LIGHT, DESKTOP_DARK),
+    fallbackFrame: fragmentFrame(FALLBACK_LIGHT),
+    headDark: optionButton("dark", "false"),
+    headLight: optionButton("light", "true"),
+    mobileFrame: fragmentFrame(MOBILE_LIGHT, MOBILE_DARK),
+    topDark: optionButton("dark", "false"),
+    topLight: optionButton("light", "true"),
+  };
+  return {
+    ...view,
+    doc: new FakeDocument([
+      new FakeElement("div", { "data-mokabook-shell": "" }),
+      view.topLight,
+      view.topDark,
+      view.headLight,
+      view.headDark,
+      view.mobileFrame,
+      view.desktopFrame,
+      view.fallbackFrame,
+    ]),
+  };
+}
+
+function pressedOptions(view: SchemeView): (string | null)[] {
+  return [view.topLight, view.topDark, view.headLight, view.headDark].map(
+    (option) => option.getAttribute("aria-pressed"),
+  );
+}
+
+function optionButton(value: string, pressed: string): FakeElement {
+  return new FakeElement("button", {
+    "aria-pressed": pressed,
+    "data-color-scheme-option": value,
+  });
+}
+
+function fragmentFrame(light: string, dark?: string): FakeElement {
+  return new FakeElement("iframe", {
+    ...(dark === undefined ? {} : { "data-fragment-dark": dark }),
+    "data-fragment-light": light,
+    src: light,
+  });
+}
+
+function snapshot(): BrowseRecoveryState {
+  return {
+    changedOnly: true,
+    closedCollectionIds: ["fixture"],
+    colorScheme: "dark",
+    detailsOpen: true,
+    drawerOpen: false,
+    navScroll: 12,
+    query: "welcome",
+    regionScrolls: { stage: 42 },
+    viewport: "mobile",
+  };
+}
+
+function asDocument(doc: FakeDocument): Document {
+  return doc as unknown as Document;
+}
+
+function fakeWindow(): Window & typeof globalThis {
+  return {} as unknown as Window & typeof globalThis;
+}
+
+const SELECTOR = /^(?<tag>[a-z]*)\[(?<name>[a-z-]+)(?:="(?<value>[^"]*)")?\]$/;
+
+/** A flat stand-in for the served shell markup the Browse client mutates. */
+class FakeElement {
+  readonly dataset: Record<string, string> = {};
+  srcWrites = 0;
+  readonly #attributes = new Map<string, string>();
+
+  constructor(
+    private readonly tagName: string,
+    attributes: Readonly<Record<string, string>> = {},
+  ) {
+    for (const [name, value] of Object.entries(attributes))
+      this.#attributes.set(name, value);
+  }
+
+  getAttribute(name: string): string | null {
+    return this.#attributes.get(name) ?? null;
+  }
+
+  setAttribute(name: string, value: string): void {
+    if (name === "src") this.srcWrites += 1;
+    this.#attributes.set(name, value);
+  }
+
+  matches(selector: string): boolean {
+    const parts = SELECTOR.exec(selector)?.groups;
+    if (!parts) throw new Error(`unmodelled selector: ${selector}`);
+    const tag = parts["tag"] ?? "";
+    const value = this.#attributes.get(parts["name"] ?? "");
+    if (tag !== "" && tag !== this.tagName) return false;
+    if (value === undefined) return false;
+    return parts["value"] === undefined || parts["value"] === value;
+  }
+
+  querySelector(): FakeElement | null {
+    return null;
+  }
+
+  querySelectorAll(): FakeElement[] {
+    return [];
+  }
+}
+
+class FakeDocument {
+  readonly body = new FakeElement("body");
+
+  constructor(private readonly elements: readonly FakeElement[]) {}
+
+  querySelector(selector: string): FakeElement | null {
+    return this.elements.find((element) => element.matches(selector)) ?? null;
+  }
+
+  querySelectorAll(selector: string): FakeElement[] {
+    return this.elements.filter((element) => element.matches(selector));
+  }
+}
