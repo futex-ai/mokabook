@@ -161,7 +161,7 @@
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
-      "description": "Per-screen comparison pages for each classification outcome.",
+      "description": "Per-screen comparison pages for each classification outcome, mode, and color scheme.",
       "id": "design-review-outcomes",
       "kind": "collection",
       "navPath": [
@@ -179,7 +179,8 @@
         "design-review-changed",
         "design-review-added",
         "design-review-removed",
-        "design-review-difference"
+        "design-review-difference",
+        "design-review-dark-scheme"
       ]
     },
     {
@@ -620,6 +621,40 @@
         "mobile": "design/review/outcomes/changed.mobile.html"
       },
       "route": "design/review/outcomes/changed.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_outcome_screens.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The dark view of a changed screen compared side by side with its base render.",
+      "id": "design-review-dark-scheme",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Comparison outcomes"
+      ],
+      "rationale": "A screen with a dark render is compared one view at a time, so the comparison band carries a Light | Dark segment beside the viewport segment and both artboards keep it there. Dark reaches only inside the compared device screens (--mbk-dark-screen-bg #121514, --mbk-dark-screen-ink #eef1ef); the changed-screens navigation, head band, classification badge, and the segments themselves stay light. A screen that renders in light only shows no scheme segment, and the head band never repeats the selected scheme in its title.",
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_outcome_screens.tsx",
+      "title": "Dark view compare",
+      "fragments": {
+        "desktop": "design/review/outcomes/dark-scheme.desktop.html",
+        "mobile": "design/review/outcomes/dark-scheme.mobile.html"
+      },
+      "route": "design/review/outcomes/dark-scheme.html",
       "useCaseIds": [],
       "viewports": [
         "mobile",

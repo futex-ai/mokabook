@@ -43,7 +43,7 @@ export const mockups = defineRoot({
         collection({
           children: reviewOutcomeScreens,
           description:
-            "Per-screen comparison pages for each classification outcome.",
+            "Per-screen comparison pages for each classification outcome, mode, and color scheme.",
           id: "design-review-outcomes",
           segment: "outcomes",
           title: "Comparison outcomes",

@@ -81,7 +81,7 @@ function FrameLabel({ lightOnly, text }: FrameLabelProps) {
 
 interface PhoneFrameProps {
   children: ReactNode;
-  dark?: boolean;
+  dark?: boolean | undefined;
   label?: string;
   lightOnly?: boolean;
   small?: boolean;
@@ -160,7 +160,7 @@ export function PhoneFrame({
 interface BrowserFrameProps {
   address: string;
   children: ReactNode;
-  dark?: boolean;
+  dark?: boolean | undefined;
   label?: string;
   lightOnly?: boolean;
 }

@@ -11,7 +11,7 @@ import {
   ReviewSummary,
 } from "./parts/compare.js";
 import { ReviewNav, StatusBadge, type ReviewState } from "./parts/review.js";
-import { ScreenHead, Shell } from "./parts/shell.js";
+import { ScreenHead, Shell, type ShellColorScheme } from "./parts/shell.js";
 import {
   BrowserFrame,
   MiniDetails,
@@ -25,6 +25,7 @@ type CompareViewport = "desktop" | "mobile";
 interface ComparePageProps {
   activeTitle: string;
   children: ReactNode;
+  colorScheme?: ShellColorScheme | undefined;
   facts: string;
   idChip: string;
   mode?: "difference" | "overlay" | "side-by-side";
@@ -37,6 +38,7 @@ interface ComparePageProps {
 function ComparePage({
   activeTitle,
   children,
+  colorScheme,
   facts,
   idChip,
   mode,
@@ -60,7 +62,11 @@ function ComparePage({
         status={<StatusBadge state={state} />}
         title={title}
       />
-      <CompareToolbar mode={mode ?? "side-by-side"} viewport={viewport} />
+      <CompareToolbar
+        colorScheme={colorScheme}
+        mode={mode ?? "side-by-side"}
+        viewport={viewport}
+      />
       {children}
       <ReviewSummary facts={facts} pct={pct} state={state} />
     </Shell>
@@ -70,16 +76,26 @@ function ComparePage({
 function FramedShot({
   address,
   children,
+  dark,
   viewport,
 }: {
   address: string;
   children: ReactNode;
+  dark?: boolean;
   viewport: CompareViewport;
 }) {
   if (viewport === "desktop") {
-    return <BrowserFrame address={address}>{children}</BrowserFrame>;
+    return (
+      <BrowserFrame address={address} dark={dark}>
+        {children}
+      </BrowserFrame>
+    );
   }
-  return <PhoneFrame small>{children}</PhoneFrame>;
+  return (
+    <PhoneFrame dark={dark} small>
+      {children}
+    </PhoneFrame>
+  );
 }
 
 function ChangedCompare({ viewport }: { viewport: CompareViewport }) {
@@ -187,6 +203,35 @@ function DifferenceCompare({ viewport }: { viewport: CompareViewport }) {
   );
 }
 
+function DarkViewCompare({ viewport }: { viewport: CompareViewport }) {
+  const compact = viewport === "mobile";
+  return (
+    <ComparePage
+      activeTitle="Welcome"
+      colorScheme="dark"
+      facts="The dark view of this screen changed on this branch."
+      idChip="example-welcome"
+      pct="~5.1% of pixels differ"
+      state="changed"
+      title="Welcome"
+      viewport={viewport}
+    >
+      <CompareGrid>
+        <Pane label="Before · origin/main" side="before">
+          <FramedShot address="example.test/welcome" dark viewport={viewport}>
+            <MiniWelcome compact={compact} />
+          </FramedShot>
+        </Pane>
+        <Pane label="After · this branch" side="after">
+          <FramedShot address="example.test/welcome" dark viewport={viewport}>
+            <MiniWelcome compact={compact} revised />
+          </FramedShot>
+        </Pane>
+      </CompareGrid>
+    </ComparePage>
+  );
+}
+
 /** Review design screens for per-screen comparison outcomes. */
 export const reviewOutcomeScreens = [
   screen({
@@ -225,5 +270,17 @@ export const reviewOutcomeScreens = [
     mobile: <DifferenceCompare viewport="mobile" />,
     slug: "difference",
     title: "Difference mode",
+  }),
+  screen({
+    colorSchemes: ["light"],
+    description:
+      "The dark view of a changed screen compared side by side with its base render.",
+    desktop: <DarkViewCompare viewport="desktop" />,
+    id: "design-review-dark-scheme",
+    mobile: <DarkViewCompare viewport="mobile" />,
+    rationale:
+      "A screen with a dark render is compared one view at a time, so the comparison band carries a Light | Dark segment beside the viewport segment and both artboards keep it there. Dark reaches only inside the compared device screens (--mbk-dark-screen-bg #121514, --mbk-dark-screen-ink #eef1ef); the changed-screens navigation, head band, classification badge, and the segments themselves stay light. A screen that renders in light only shows no scheme segment, and the head band never repeats the selected scheme in its title.",
+    slug: "dark-scheme",
+    title: "Dark view compare",
   }),
 ];

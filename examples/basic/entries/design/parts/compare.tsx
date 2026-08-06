@@ -1,8 +1,14 @@
 import type { ReactNode } from "react";
 
 import { StatusBadge, type ReviewState } from "./review.js";
+import { SchemeSwitch, type ShellColorScheme } from "./shell.js";
 
 interface CompareToolbarProps {
+  /**
+   * Selected color scheme, shown as a segment beside the viewport control.
+   * Omitted for a screen compared in one scheme, which has nothing to switch.
+   */
+  colorScheme?: ShellColorScheme | undefined;
   mode: "difference" | "overlay" | "side-by-side";
   viewport: "desktop" | "mobile";
 }
@@ -22,8 +28,12 @@ const VIEWPORT_LABELS: readonly { key: string; label: string }[] = [
   { key: "both", label: "Both" },
 ];
 
-/** Comparison mode and viewport controls for one compare page. */
-export function CompareToolbar({ mode, viewport }: CompareToolbarProps) {
+/** Comparison mode, viewport, and color-scheme controls for a compare page. */
+export function CompareToolbar({
+  colorScheme,
+  mode,
+  viewport,
+}: CompareToolbarProps) {
   return (
     <div className="mbk-cmp-toolbar">
       <span className="mbk-seg" role="group" aria-label="Comparison mode">
@@ -46,6 +56,7 @@ export function CompareToolbar({ mode, viewport }: CompareToolbarProps) {
           </span>
         ))}
       </span>
+      {colorScheme ? <SchemeSwitch active={colorScheme} /> : null}
     </div>
   );
 }
