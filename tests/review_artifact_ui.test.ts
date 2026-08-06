@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
 import test from "node:test";
 
 import { renderReviewArtifact } from "../dist/review/artifact.js";
-import { comparisonPagePath } from "../dist/review/paths.js";
 import type { ReviewResult, ScreenReview } from "../dist/review/types.js";
 
 function screenReview(overrides: Partial<ScreenReview>): ScreenReview {
@@ -13,10 +13,11 @@ function screenReview(overrides: Partial<ScreenReview>): ScreenReview {
     sharedImpact: [],
     state: "changed",
     title: "Welcome",
-    viewports: [
+    views: [
       {
         afterPath: "snapshots/after/screens/welcome.mobile.html",
         beforePath: "snapshots/before/screens/welcome.mobile.html",
+        colorScheme: "light",
         ignoredIds: [],
         state: "changed",
         viewport: "mobile",
@@ -24,6 +25,7 @@ function screenReview(overrides: Partial<ScreenReview>): ScreenReview {
       {
         afterPath: "snapshots/after/screens/welcome.desktop.html",
         beforePath: "snapshots/before/screens/welcome.desktop.html",
+        colorScheme: "light",
         ignoredIds: ["example-nav"],
         state: "changed",
         viewport: "desktop",
@@ -40,7 +42,7 @@ function result(overrides: Partial<ReviewResult>): ReviewResult {
     changedPaths: [],
     ignoredImpact: [],
     screens: [],
-    schemaVersion: 1,
+    schemaVersion: 2,
     sharedImpact: [],
     ...overrides,
   };
@@ -50,7 +52,14 @@ test("review index groups outcomes and reports aggregate impact", () => {
   const files = renderReviewArtifact({
     files: new Map(),
     result: result({
-      ignoredImpact: [{ count: 2, id: "example-nav", viewport: "desktop" }],
+      ignoredImpact: [
+        {
+          colorScheme: "light",
+          count: 2,
+          id: "example-nav",
+          viewport: "desktop",
+        },
+      ],
       screens: [
         screenReview({}),
         screenReview({
@@ -92,8 +101,8 @@ test("empty review renders the no-visual-changes state", () => {
 });
 
 test("impact-only screens remain visible and material", () => {
-  const unchangedViewports = screenReview({}).viewports.map((viewport) => ({
-    ...viewport,
+  const unchangedViews = screenReview({}).views.map((view) => ({
+    ...view,
     state: "unchanged" as const,
   }));
   const files = renderReviewArtifact({
@@ -106,7 +115,7 @@ test("impact-only screens remain visible and material", () => {
           sharedImpact: ["styles.css"],
           state: "unchanged",
           title: "Shared only",
-          viewports: unchangedViewports,
+          views: unchangedViews,
         }),
         screenReview({
           dependencies: ["tokens.json"],
@@ -115,7 +124,7 @@ test("impact-only screens remain visible and material", () => {
           sharedImpact: ["tokens.json"],
           state: "unchanged",
           title: "Dependency only",
-          viewports: unchangedViewports,
+          views: unchangedViews,
         }),
       ],
       sharedImpact: ["styles.css"],
@@ -130,12 +139,12 @@ test("impact-only screens remain visible and material", () => {
   assert.match(index, /Dependency only/);
   assert.ok(
     index.includes(
-      `href="${comparisonPagePath("screens/shared-only.html", "mobile")}"`,
+      `href="${literalComparisonPagePath("screens/shared-only.html", "mobile")}"`,
     ),
   );
   assert.ok(
     index.includes(
-      `href="${comparisonPagePath("screens/dependency-only.html", "mobile")}"`,
+      `href="${literalComparisonPagePath("screens/dependency-only.html", "mobile")}"`,
     ),
   );
   assert.match(summary, /material: 2/);
@@ -153,9 +162,10 @@ test("compare pages render modes, viewport links, and missing panes", () => {
           route: "screens/added.html",
           state: "added",
           title: "Added",
-          viewports: [
+          views: [
             {
               afterPath: "snapshots/after/screens/added.mobile.html",
+              colorScheme: "light",
               ignoredIds: [],
               state: "added",
               viewport: "mobile",
@@ -166,21 +176,80 @@ test("compare pages render modes, viewport links, and missing panes", () => {
     }),
   });
   const changed = files.get(
-    comparisonPagePath("screens/welcome.html", "desktop"),
+    literalComparisonPagePath("screens/welcome.html", "desktop"),
   ) as string;
   assert.match(changed, /data-mode="side"/);
   assert.match(changed, /data-mode="overlay"/);
   assert.match(changed, /data-mode="difference"/);
   assert.match(changed, /aria-current="page"[^>]*>Desktop/);
-  assert.match(changed, /href="[^"]*mobile[^"]*">Mobile/);
+  assert.match(changed, /href="\.\.\/mobile\/index\.html">Mobile/);
   assert.match(changed, /mbk-status changed/);
   assert.match(changed, /Ignored regions/);
   assert.match(changed, /<iframe class="mb-frag" sandbox=""/);
   const added = files.get(
-    comparisonPagePath("screens/added.html", "mobile"),
+    literalComparisonPagePath("screens/added.html", "mobile"),
   ) as string;
   assert.match(added, /does not exist on origin\/main/);
   assert.match(added, /mb-pane-doc--added/);
+});
+
+test("artifact emits one compare page per view", () => {
+  const screen = screenReview({
+    views: [
+      {
+        afterPath: "snapshots/after/screens/welcome.mobile.html",
+        beforePath: "snapshots/before/screens/welcome.mobile.html",
+        colorScheme: "light",
+        ignoredIds: [],
+        state: "changed",
+        viewport: "mobile",
+      },
+      {
+        afterPath: "snapshots/after/screens/welcome.mobile.dark.html",
+        beforePath: "snapshots/before/screens/welcome.mobile.dark.html",
+        colorScheme: "dark",
+        ignoredIds: [],
+        state: "changed",
+        viewport: "mobile",
+      },
+      {
+        afterPath: "snapshots/after/screens/welcome.desktop.html",
+        beforePath: "snapshots/before/screens/welcome.desktop.html",
+        colorScheme: "light",
+        ignoredIds: [],
+        state: "changed",
+        viewport: "desktop",
+      },
+      {
+        afterPath: "snapshots/after/screens/welcome.desktop.dark.html",
+        beforePath: "snapshots/before/screens/welcome.desktop.dark.html",
+        colorScheme: "dark",
+        ignoredIds: [],
+        state: "changed",
+        viewport: "desktop",
+      },
+    ],
+  });
+  const files = renderReviewArtifact({
+    files: new Map(),
+    result: result({ screens: [screen] }),
+  });
+
+  for (const path of [
+    literalComparisonPagePath(screen.route, "mobile"),
+    literalComparisonPagePath(screen.route, "mobile.dark"),
+    literalComparisonPagePath(screen.route, "desktop"),
+    literalComparisonPagePath(screen.route, "desktop.dark"),
+  ]) {
+    assert.equal(path.split("/").length, 4);
+    assert.ok(files.has(path));
+  }
+  const dark = files.get(
+    literalComparisonPagePath(screen.route, "mobile.dark"),
+  ) as string;
+  assert.match(dark, /<title>Welcome · mobile · dark<\/title>/);
+  assert.match(dark, /Mobile · Dark/);
+  assert.match(dark, /href="\.\.\/desktop\.dark\/index\.html">Desktop/);
 });
 
 test("served render options add browse, recompute, and live-update hooks", () => {
@@ -194,7 +263,7 @@ test("served render options add browse, recompute, and live-update hooks", () =>
   assert.match(index, /index\.html\?refresh=1">Recompute the comparison/);
   assert.match(index, /\/__mokabook\/client\/browser\.js/);
   const compare = served.get(
-    comparisonPagePath("screens/welcome.html", "mobile"),
+    literalComparisonPagePath("screens/welcome.html", "mobile"),
   ) as string;
   assert.match(compare, /href="\/">Browse<\/a>/);
   assert.match(compare, /\/__mokabook\/client\/browser\.js/);
@@ -211,7 +280,7 @@ test("served render options add browse, recompute, and live-update hooks", () =>
     /aria-current="page" class="mbk-mode active" href="index\.html">Review/,
   );
   const staticCompare = staticArtifact.get(
-    comparisonPagePath("screens/welcome.html", "mobile"),
+    literalComparisonPagePath("screens/welcome.html", "mobile"),
   ) as string;
   assert.match(
     staticCompare,
@@ -220,3 +289,8 @@ test("served render options add browse, recompute, and live-update hooks", () =>
   assert.doesNotMatch(staticIndex, /refresh=1/);
   assert.doesNotMatch(staticIndex, /browser\.js/);
 });
+
+function literalComparisonPagePath(route: string, segment: string): string {
+  const digest = crypto.createHash("sha256").update(route).digest("hex");
+  return `comparisons/${digest}/${segment}/index.html`;
+}

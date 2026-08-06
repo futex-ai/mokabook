@@ -43,6 +43,10 @@ fails for:
 - unresolved `mock:` links, raw document links, local HTML/CSS resources, or
   anchors;
 - missing stylesheets and declared dependencies;
+- invalid `colorSchemes` config, per-screen `colorSchemes` declarations, or
+  color-scheme subsets unsupported by the catalogue config;
+- missing or duplicate `lightStylesheets` / `darkStylesheets` files;
+- invalid or colliding `darkFragments` manifest routes;
 - stale, missing, or proven-orphan generated output;
 - malformed Review-ignore markers or material keys;
 - configured source, screen-cap, stage-id, or legacy-policy violations.
@@ -235,20 +239,25 @@ Review inspects only the requested base paths, grouping exact literal pathspecs
 into count- and byte-bounded `ls-tree` operations, and reads regular-file blobs
 through output-byte- and object-count-bounded `cat-file` batches. A single blob
 that cannot fit the output budget fails explicitly after metadata inspection
-and before a `cat-file` content process is spawned. The initial viewport set is
-one logical batch request; transitively referenced assets are grouped by
+and before a `cat-file` content process is spawned. The initial view document
+set is one logical batch request; transitively referenced assets are grouped by
 dependency depth. File modes are still checked before any blob is accepted, so
 batching does not weaken symlink or non-regular-file rejection.
 
-Screens pair by stable manifest route. Mobile and desktop classify separately
-from their fragments. Added, removed, changed, and unchanged states handle
-version 2 and version 3 manifests during Accounting migration. Configured
-shared-impact globs and manifest dependencies identify changes that can affect
-many screens. A dependency is a repository file or directory root: its own
-change or any descendant change affects the entry, and Review records the
-matching changed path as evidence. The active Review artifact directory,
-including a `--out` override and its symlink-resolved in-repository target, is
-excluded before changed-path and shared-impact evidence is calculated.
+Screens pair by stable manifest route. Views pair by route, viewport, and color
+scheme, enumerated from the union of base and head manifest entries. Each side's
+view set is `["light", ...(screen.darkFragments ? ["dark"] : [])]`: a dark
+view present only in head is `added`, and one present only in base is
+`removed`. Mobile and desktop still classify separately from their fragments.
+Added, removed, changed, and unchanged states handle version 2 and version 3
+manifests during Accounting migration; pre-dark bases simply have no
+`darkFragments`. Configured shared-impact globs and manifest dependencies
+identify changes that can affect many screens. A dependency is a repository file
+or directory root: its own change or any descendant change affects the entry,
+and Review records the matching changed path as evidence. The active Review
+artifact directory, including a `--out` override and its symlink-resolved
+in-repository target, is excluded before changed-path and shared-impact evidence
+is calculated.
 
 The engine emits a static, self-contained artifact directory with:
 
@@ -258,8 +267,8 @@ The engine emits a static, self-contained artifact directory with:
   byte-identical screens with shared or dependency evidence;
 - an explicit empty state only when no screen has either visual differences or
   impact evidence, with the same material/impacted totals in the CI summary;
-- one designed compare page per screen viewport, linked to its sibling
-  viewport through the page's viewport control;
+- one compare page per view, linked to same-scheme sibling viewports
+  through the page's viewport control;
 - one artifact-root navigation payload shared by all compare pages, while the
   index keeps complete inline navigation and a compare page without JavaScript
   keeps a direct fallback link to that index;
@@ -268,14 +277,19 @@ The engine emits a static, self-contained artifact directory with:
 - side-by-side, opacity-overlay, and difference modes on every compare page;
 - before/head artifacts kept complete and unmodified;
 - aggregate shared-impact and ignored-region evidence in the navigation
-  column, screen impact evidence on compare pages, and per-viewport
-  ignored-region evidence;
+  column, screen impact evidence on compare pages, and per-view ignored-region
+  evidence;
 - deterministic `review.json` for CI summaries.
 
 Artifact pages inline the package-owned shell styles so the directory remains
 viewable without a server. Compare pages load their package-owned navigation
 payload by relative path from the same artifact directory, and every embedded
 pane stays in a script-disabled sandbox.
+Light comparison pages keep the existing
+`comparisons/<hash>/<viewport>/index.html` paths. Dark comparison pages use
+`comparisons/<hash>/<viewport>.dark/index.html`; the page depth remains three
+segments below the artifact root, so relative links and shared navigation paths
+stay stable.
 
 ## Served Review
 
@@ -332,7 +346,7 @@ generation errors fail the command.
 
 ```ts
 interface ReviewResult {
-  schemaVersion: 1;
+  schemaVersion: 2;
   baseRef: string;
   baseCommit: string;
   changedPaths: readonly string[];
@@ -340,6 +354,7 @@ interface ReviewResult {
   ignoredImpact: readonly {
     id: string;
     viewport: "mobile" | "desktop";
+    colorScheme: "light" | "dark";
     count: number;
   }[];
   screens: readonly {
@@ -349,8 +364,9 @@ interface ReviewResult {
     state: "added" | "removed" | "changed" | "ignored-only" | "unchanged";
     dependencies: readonly string[];
     sharedImpact: readonly string[];
-    viewports: readonly {
+    views: readonly {
       viewport: "mobile" | "desktop";
+      colorScheme: "light" | "dark";
       state: "added" | "removed" | "changed" | "ignored-only" | "unchanged";
       beforePath?: string;
       afterPath?: string;
@@ -360,10 +376,11 @@ interface ReviewResult {
 }
 ```
 
-Routes and viewports sort in deterministic catalogue order; changed and impact
-paths sort lexically. No timestamp or absolute checkout path enters the JSON.
-Before/after HTML remains unmodified in the artifact even when ignore
-normalization changes classification.
+Routes sort in deterministic catalogue order; views sort by viewport
+(`mobile`, then `desktop`) and then color scheme (`light`, then `dark`).
+Changed and impact paths sort lexically. No timestamp or absolute checkout path
+enters the JSON. Before/after HTML remains unmodified in the artifact even when
+ignore normalization changes classification.
 
 ## Review Ignore
 
@@ -379,8 +396,9 @@ real children. Malformed, duplicate, nested, overlapping, mismatched, or invalid
 signals fail closed with route context.
 
 Ignoring changes classification only. Stored fragments and compare panes keep
-the real content. Ignored-only changes aggregate by id and viewport instead of
-adding every consumer screen. Primary screen content must never be ignored.
+the real content. Ignored-only changes aggregate by id, viewport, and color
+scheme instead of adding every consumer screen. Primary screen content must
+never be ignored.
 
 ## CI Review Integration
 
@@ -396,7 +414,7 @@ Before publication, unit, integration, packed-consumer, and browser tests cover
 every contract in this document. At minimum they cover deterministic output,
 stale/orphan checks, path safety, registry links, legacy coexistence, deep
 links, no-JavaScript responses, progressive navigation, history/focus, watch
-recovery, shutdown, base extraction, per-viewport comparison, shared impact,
+recovery, shutdown, base extraction, per-view comparison, shared impact,
 Review ignore, and CI summary output.
 
 ## Related Docs

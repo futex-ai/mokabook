@@ -1,4 +1,4 @@
-/** The Review artifact's index and per-viewport compare pages, rendered in
+/** The Review artifact's index and per-view compare pages, rendered in
  * the Mokabook shell design: a changed-screens navigation column beside a
  * main view with the compare head, mode and viewport segments, panes, and
  * evidence cards. */
@@ -13,7 +13,7 @@ import type {
   ReviewResult,
   ReviewState,
   ScreenReview,
-  ViewportReview,
+  ViewReview,
 } from "./types.js";
 
 /** Presentation hooks for Review artifacts rendered behind a server. */
@@ -84,14 +84,18 @@ export function indexPage(
   });
 }
 
-/** Render one per-viewport comparison page inside the shell. */
+/** Render one per-view comparison page inside the shell. */
 export function comparePage(
   result: ReviewResult,
   screen: ScreenReview,
-  viewport: ViewportReview,
+  view: ViewReview,
   options: ReviewRenderOptions = {},
 ): string {
-  const pagePath = comparisonPagePath(screen.route, viewport.viewport);
+  const pagePath = comparisonPagePath(
+    screen.route,
+    view.viewport,
+    view.colorScheme,
+  );
   return reviewDocument({
     activeRoute: screen.route,
     browseHref: options.browseHref,
@@ -101,7 +105,7 @@ export function comparePage(
           <div className="mbk-screen-head-copy">
             <div className="mbk-title-row">
               <h2>{screen.title}</h2>
-              <StatusBadge state={viewport.state} />
+              <StatusBadge state={view.state} />
             </div>
             <code className="mbk-code">{screen.route}</code>
           </div>
@@ -120,44 +124,46 @@ export function comparePage(
             ))}
           </span>
           <span aria-label="Viewport" className="mbk-seg" role="group">
-            {screen.viewports.map((candidate) => (
-              <ViewportOption
-                active={candidate.viewport === viewport.viewport}
-                key={candidate.viewport}
-                pagePath={pagePath}
-                route={screen.route}
-                viewport={candidate.viewport}
-              />
-            ))}
+            {screen.views
+              .filter((candidate) => candidate.colorScheme === view.colorScheme)
+              .map((candidate) => (
+                <ViewportOption
+                  active={candidate.viewport === view.viewport}
+                  key={candidate.viewport}
+                  pagePath={pagePath}
+                  route={screen.route}
+                  colorScheme={candidate.colorScheme}
+                  viewport={candidate.viewport}
+                />
+              ))}
           </span>
         </div>
         <div className="mbk-rvw-stage">
           <div className="mb-panes" data-compare-mode="side">
             <Pane
-              artifactPath={viewport.beforePath}
+              artifactPath={view.beforePath}
               label={`Before — ${result.baseRef}`}
               missingMessage={`This screen does not exist on ${result.baseRef}.`}
               pagePath={pagePath}
               side="before"
-              tone={viewport.state === "removed" ? "removed" : undefined}
+              tone={view.state === "removed" ? "removed" : undefined}
             />
             <Pane
-              artifactPath={viewport.afterPath}
+              artifactPath={view.afterPath}
               label="After — this branch"
               missingMessage="This screen does not exist on this branch."
               pagePath={pagePath}
               side="after"
-              tone={viewport.state === "added" ? "added" : undefined}
+              tone={view.state === "added" ? "added" : undefined}
             />
           </div>
           <ImpactCard sharedImpact={screen.sharedImpact} />
-          <IgnoredCard ignoredIds={viewport.ignoredIds} />
+          <IgnoredCard ignoredIds={view.ignoredIds} />
         </div>
         <div className="mbk-review-summary">
-          <StatusBadge state={viewport.state} />
+          <StatusBadge state={view.state} />
           <span className="mbk-review-facts">
-            {viewport.viewport === "mobile" ? "Mobile" : "Desktop"} ·{" "}
-            {stateLabel(viewport.state)}
+            {viewLabel(view)} · {stateLabel(view.state)}
           </span>
         </div>
       </>
@@ -166,15 +172,19 @@ export function comparePage(
     rootPrefix: "../../../",
     navigation: "shared",
     script: MODE_SCRIPT,
-    title: `${screen.title} · ${viewport.viewport}`,
+    title:
+      view.colorScheme === "light"
+        ? `${screen.title} · ${view.viewport}`
+        : `${screen.title} · ${view.viewport} · ${view.colorScheme}`,
   });
 }
 
 function ViewportOption(props: {
   active: boolean;
+  colorScheme: ViewReview["colorScheme"];
   pagePath: string;
   route: string;
-  viewport: ViewportReview["viewport"];
+  viewport: ViewReview["viewport"];
 }) {
   const label = props.viewport === "mobile" ? "Mobile" : "Desktop";
   if (props.active) {
@@ -186,9 +196,14 @@ function ViewportOption(props: {
   }
   const target = relativeLink(
     props.pagePath,
-    comparisonPagePath(props.route, props.viewport),
+    comparisonPagePath(props.route, props.viewport, props.colorScheme),
   );
   return <a href={target}>{label}</a>;
+}
+
+function viewLabel(view: ViewReview): string {
+  const viewport = view.viewport === "mobile" ? "Mobile" : "Desktop";
+  return view.colorScheme === "light" ? viewport : `${viewport} · Dark`;
 }
 
 function Pane(props: {

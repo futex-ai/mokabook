@@ -646,7 +646,7 @@ export interface ReviewResult {
 }
 ```
 
-- [ ] Write failing tests in `tests/review.test.ts`:
+- [x] Write failing tests in `tests/review.test.ts`:
 
 ```ts
 test("dark views compare and classify against a pre-dark base", async () => {
@@ -664,8 +664,8 @@ Update every hand-built `ReviewResult`/`ScreenReview` literal across
 `tests/review*.test.ts` (`viewports:` → `views:` with
 `colorScheme: "light"`, `schemaVersion: 2`).
 
-- [ ] Run `npm run build && npx tsx --test tests/review.test.ts` — FAIL.
-- [ ] Implement in `compare.ts`: derive each side's scheme list from the
+- [x] Run `npm run build && npx tsx --test tests/review.test.ts` — FAIL.
+- [x] Implement in `compare.ts`: derive each side's scheme list from the
       manifest entry (`["light", ...(screen.darkFragments ? ["dark"] : [])]`),
       loop `for (const viewport of VIEWPORTS) for (const colorScheme of union)`,
       resolve the side's fragment
@@ -677,8 +677,8 @@ Update every hand-built `ReviewResult`/`ScreenReview` literal across
       (`const [viewport, colorScheme, ...idParts] = key.split(":")`).
       Deterministic order: route, then viewport (mobile, desktop), then scheme
       (light, dark).
-- [ ] Run review tests — PASS.
-- [ ] Commit: `feat(review): compare viewport-scheme views`
+- [x] Run review tests — PASS.
+- [x] Commit: `feat(review): compare viewport-scheme views`
 
 #### Task 3.2: Artifact pages per view (mechanical) + page paths
 
@@ -704,7 +704,7 @@ Depth stays 3, so the hardcoded `rootPrefix: "../../../"` in
 `artifact_pages.tsx` and `artifact_navigation.tsx` remains correct — do not
 touch it.
 
-- [ ] Write failing test in `tests/review_artifact_ui.test.ts`:
+- [x] Write failing test in `tests/review_artifact_ui.test.ts`:
 
 ```ts
 test("artifact emits one compare page per view", () => {
@@ -713,25 +713,25 @@ test("artifact emits one compare page per view", () => {
 });
 ```
 
-- [ ] Run — FAIL.
-- [ ] Implement: `artifact.ts` loops `screen.views`; page titles/labels append
+- [x] Run — FAIL.
+- [x] Implement: `artifact.ts` loops `screen.views`; page titles/labels append
       the scheme for dark views (`Mobile · Dark`); the existing viewport
       segment links to the _same-scheme_ sibling viewport via the new
       `comparisonPagePath`; navigation payload rows and `IgnoredImpactCard`
       keys include `colorScheme` (`${impact.id}-${impact.viewport}-${impact.colorScheme}`);
       screen rows link to their first material view in deterministic order.
       Path-collision behavior (`addArtifactFile`) is untouched.
-- [ ] Run `npm run build && npx tsx --test tests/review_artifact_ui.test.ts tests/review_safety.test.ts tests/review_performance.test.ts` — PASS.
-- [ ] Commit: `feat(review): per-view compare pages`
+- [x] Run `npm run build && npx tsx --test tests/review_artifact_ui.test.ts tests/review_safety.test.ts tests/review_performance.test.ts` — PASS.
+- [x] Commit: `feat(review): per-view compare pages`
 
 #### Task 3.3: Runtime protocol doc + gate
 
-- [ ] Update `docs/protocol/mokabook-runtime.md`: Review Comparison section
+- [x] Update `docs/protocol/mokabook-runtime.md`: Review Comparison section
       (view enumeration, union semantics, `.dark` page segment), the
       normative `review.json` schema (replace the v1 block with v2 exactly as
       in the spec), Check section (new failure classes from Milestone 1),
       Required Coverage (per-view comparison).
-- [ ] Run `cargo xtask check`; commit (`feat(review): review.json schema v2`),
+- [x] Run `cargo xtask check`; commit (`feat(review): review.json schema v2`),
       push, `cargo xtask review`; record findings.
 
 ---

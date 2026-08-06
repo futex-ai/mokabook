@@ -36,15 +36,15 @@ export function renderReviewArtifact(
     reviewNavigationScript(artifact.result),
   );
   for (const screen of artifact.result.screens) {
-    for (const viewport of screen.viewports) {
+    for (const view of screen.views) {
       addArtifactFile(
         files,
-        comparisonPagePath(screen.route, viewport.viewport),
-        comparePage(artifact.result, screen, viewport, options),
+        comparisonPagePath(screen.route, view.viewport, view.colorScheme),
+        comparePage(artifact.result, screen, view, options),
       );
     }
   }
-  addArtifactFile(files, ".mokabook-review-artifact", "schemaVersion=1\n");
+  addArtifactFile(files, ".mokabook-review-artifact", "schemaVersion=2\n");
   return files;
 }
 
