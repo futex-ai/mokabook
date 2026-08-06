@@ -532,26 +532,26 @@ implementation. No `src/` changes in this milestone.
 - Generated: `examples/basic/generated/design/browse/states/dark-scheme.*`,
   `.../light-only.*` (via `npm run example:build`)
 
-- [ ] Add a `SchemeSwitch` depiction (segmented `Light | Dark` control) to the
+- [x] Add a `SchemeSwitch` depiction (segmented `Light | Dark` control) to the
       design `TopBar`, shown right of the search field, matching the existing
       `mbk-seg` visual language.
-- [ ] Extend the depiction `PhoneFrame` with a `dark` prop: screen surface
+- [x] Extend the depiction `PhoneFrame` with a `dark` prop: screen surface
       `#121514`, status-band ink `#eef1ef`; extend `BrowserFrame` with a
       `dark` prop darkening only the viewport area. Record the two token
       values used as CSS custom properties in `design-stage.css`
       (`--mbk-dark-screen-bg: #121514; --mbk-dark-screen-ink: #eef1ef;`).
-- [ ] Add screen `design/browse/states/dark-scheme.html` ("Dark scheme
+- [x] Add screen `design/browse/states/dark-scheme.html` ("Dark scheme
       selected"): the shell with Dark active in the top bar and both frames
       rendering a dark mini-screen. Mobile and desktop variants; nav path
       under Design → Browse → States; `colorSchemes: ["light"]` like its
       siblings; description/rationale carry the implementation notes (never
       inside the screen area).
-- [ ] Add screen `design/browse/states/light-only.html` ("Light-only screen
+- [x] Add screen `design/browse/states/light-only.html` ("Light-only screen
       under dark"): Dark active, frames render the light mini-screen, frame
       labels read `MOBILE — LIGHT ONLY` / `DESKTOP — LIGHT ONLY`.
-- [ ] `npm run example:build && npm run example:check`; open both generated
+- [x] `npm run example:build && npm run example:check`; open both generated
       pages (all four fragments) directly from disk and visually smoke-test.
-- [ ] Commit: `feat(mockup): dark-scheme Browse design screens`
+- [x] Commit: `feat(mockup): dark-scheme Browse design screens`
 
 #### Task 2.2: Review compare scheme-control design screen
 
@@ -562,13 +562,13 @@ implementation. No `src/` changes in this milestone.
   screen), `design.mockup.tsx`, `examples/basic/generated/design-review.css`
 - Generated: `examples/basic/generated/design/review/outcomes/dark-scheme.*`
 
-- [ ] Add screen `design/review/outcomes/dark-scheme.html` ("Dark view
+- [x] Add screen `design/review/outcomes/dark-scheme.html` ("Dark view
       compare"): a compare page whose head band shows two `mbk-seg` groups —
       `Mobile | Desktop` and `Light | Dark` (Dark active) — over a
       side-by-side dark pane pair, with the changed classification badge.
       `colorSchemes: ["light"]`.
-- [ ] `npm run example:build && npm run example:check`; smoke-test from disk.
-- [ ] Commit: `feat(mockup): review scheme-control design screen`
+- [x] `npm run example:build && npm run example:check`; smoke-test from disk.
+- [x] Commit: `feat(mockup): review scheme-control design screen`
 
 #### Task 2.3: Shell design contract update + gate
 
@@ -576,7 +576,7 @@ implementation. No `src/` changes in this milestone.
 
 - Modify: `docs/protocol/mokabook-shell-design.md`
 
-- [ ] Extend the mockup table with the three new routes. Document: the
+- [x] Extend the mockup table with the three new routes. Document: the
       top-bar scheme control (placement, `mbk-seg`, appears only when the
       catalogue has dark fragments), the dark device-chrome tokens
       (`--mbk-dark-screen-bg: #121514`, `--mbk-dark-screen-ink: #eef1ef`,
@@ -585,8 +585,19 @@ implementation. No `src/` changes in this milestone.
       `— LIGHT ONLY` frame-label state, and the compare-page scheme segment.
       State explicitly that the shell chrome outside device screens remains
       light-only (`color-scheme: light`).
-- [ ] Run `cargo xtask check` (full gate).
-- [ ] `git add -A`, commit (`docs(design): record color-scheme shell design`),
+- [x] Document the Task 2.1 mockup decisions in the contract: below the
+      breakpoint the scheme control moves from the top bar into the screen
+      head band (the 390px top bar cannot fit it); dark device screens also
+      dim the phone home pill and depicted screen content surfaces; and the
+      dark phone screen carries a 1px inset hairline
+      (`color-mix(in srgb, var(--mbk-dark-screen-ink) 12%, var(--mbk-dark-screen-bg))`)
+      so the screen edge stays visible against the bezel and notch.
+- [x] Update the details-inspector state mockup
+      (`design/browse/states/details.html` and its depiction part) to show
+      the Schemes metadata row that Task 4.1 implements, so the row has an
+      approved mockup before UI work begins.
+- [x] Run `cargo xtask check` (full gate).
+- [x] `git add -A`, commit (`docs(design): record color-scheme shell design`),
       push, run `cargo xtask review`; record findings.
 
 ---
@@ -765,6 +776,10 @@ test("screen stage carries per-frame scheme fragment data", ...);
     `aria-pressed="true"` server-side. Render it in the `document.tsx` top
     bar (right of search, before the Browse/Review mode switch) when
     `catalogue.hasDarkFragments`.
+  - Responsive placement follows the approved Task 2.1 mockup: top bar at
+    and above the 56.25rem breakpoint; below it the control renders in the
+    screen head band beneath the viewport control instead (the 390px top
+    bar cannot fit it).
   - `stages.tsx`: every fragment iframe (screen frames and flow steps) gains
     `data-fragment-light={<light route>}` and, when present,
     `data-fragment-dark={<dark route>}`; the wrap of a dark-less screen gets
@@ -795,6 +810,12 @@ test("screen stage carries per-frame scheme fragment data", ...);
 }
 body[data-mokabook-color-scheme="dark"] .phone-screen {
   background: var(--mbk-dark-screen-bg);
+  box-shadow: inset 0 0 0 1px
+    color-mix(
+      in srgb,
+      var(--mbk-dark-screen-ink) 12%,
+      var(--mbk-dark-screen-bg)
+    );
 }
 body[data-mokabook-color-scheme="dark"] .phone-status {
   color: var(--mbk-dark-screen-ink);
@@ -941,6 +962,10 @@ plan is filed complete.
 
 #### Task 5.2: Docs consistency pass + final gate
 
+- [ ] Tune `examples/basic/theme.ts` `darkTokens` with a dark-mode accent
+      override so link text meets WCAG AA (the inherited light sage
+      `#4f7864` is 3.63:1 on `#121514`), then regenerate the example
+      (found during Task 2.1 review).
 - [ ] Re-read the spec end to end and verify each requirement has landed;
       re-read `README.md`, `docs/protocol/mokabook-package.md`,
       `mokabook-runtime.md`, `mokabook-shell-design.md`,
