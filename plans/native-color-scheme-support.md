@@ -755,7 +755,7 @@ persistence, and the designed compare-page scheme control. No engine changes.
   `src/server/shell/details.tsx` (Generated + Schemes rows)
 - Test: `tests/shell.test.ts`
 
-- [ ] Write failing tests in `tests/shell.test.ts`:
+- [x] Write failing tests in `tests/shell.test.ts`:
 
 ```ts
 test("scheme switch renders only for catalogues with dark fragments", ...);
@@ -766,8 +766,8 @@ test("screen stage carries per-frame scheme fragment data", ...);
 // fragment paths and a "Schemes" row "light, dark"
 ```
 
-- [ ] Run — FAIL.
-- [ ] Implement:
+- [x] Run — FAIL.
+- [x] Implement:
   - `Catalogue` gains `hasDarkFragments: boolean` (any screen entry with
     `darkFragments`).
   - `SchemeSwitch()` in `head.tsx`, mirroring `ViewportSwitch`:
@@ -788,8 +788,8 @@ test("screen stage carries per-frame scheme fragment data", ...);
   - `details.tsx`: Generated row values include dark fragments; add a
     `Schemes` MetaRow (text `light, dark` / `light`) when
     `catalogue.hasDarkFragments`.
-- [ ] Run `npm run build && npx tsx --test tests/shell.test.ts` — PASS.
-- [ ] Commit: `feat(shell): server-rendered scheme hooks`
+- [x] Run `npm run build && npx tsx --test tests/shell.test.ts` — PASS.
+- [x] Commit: `feat(shell): server-rendered scheme hooks`
 
 #### Task 4.2: Dark device-chrome CSS
 
@@ -800,7 +800,7 @@ test("screen stage carries per-frame scheme fragment data", ...);
   `src/server/shell/css_views.ts` (note visibility)
 - Test: `tests/shell.test.ts` (the `SHELL_CSS` design-contract test)
 
-- [ ] Extend the design-contract CSS assertions first (FAIL), then implement
+- [x] Extend the design-contract CSS assertions first (FAIL), then implement
       per the Milestone 2 contract:
 
 ```css
@@ -836,7 +836,7 @@ body[data-mokabook-color-scheme="dark"]
 The shell `color-scheme: light` declaration and every other chrome token are
 untouched.
 
-- [ ] Run shell tests — PASS. Commit: `feat(shell): dark device chrome`
+- [x] Run shell tests — PASS. Commit: `feat(shell): dark device chrome`
 
 #### Task 4.3: Client switching and state persistence
 
@@ -855,7 +855,7 @@ export function setColorScheme(doc: Document, value: BrowseColorScheme): void;
 export function currentColorScheme(doc: Document): BrowseColorScheme;
 ```
 
-- [ ] Write failing tests in `tests/client_browse.test.ts`:
+- [x] Write failing tests in `tests/client_browse.test.ts`:
 
 ```ts
 test("setColorScheme swaps fragment sources and marks the body", ...);
@@ -866,8 +866,8 @@ test("recovery state restores color scheme strictly", ...);
 // snapshot dropped, matching the viewport precedent)
 ```
 
-- [ ] Run — FAIL.
-- [ ] Implement: `setColorScheme` sets `body` `data-mokabook-color-scheme`,
+- [x] Run — FAIL.
+- [x] Implement: `setColorScheme` sets `body` `data-mokabook-color-scheme`,
       syncs `[data-color-scheme-option]` `aria-pressed`, and for every
       `iframe[data-fragment-light]` assigns
       `value === "dark" && data-fragment-dark ? data-fragment-dark : data-fragment-light`
@@ -879,8 +879,8 @@ test("recovery state restores color scheme strictly", ...);
       `setColorScheme(doc, currentColorScheme(doc))` so new iframes adopt the
       selection; extend `captureBrowseState`/`restoreBrowseState`/
       `parseBrowseRecoveryState` with the strict field.
-- [ ] Run `npm run build && npx tsx --test tests/client_browse.test.ts tests/client.test.ts` — PASS.
-- [ ] Commit: `feat(client): color scheme switching`
+- [x] Run `npm run build && npx tsx --test tests/client_browse.test.ts tests/client.test.ts` — PASS.
+- [x] Commit: `feat(client): color scheme switching`
 
 #### Task 4.4: Designed compare-page scheme control
 
@@ -889,17 +889,17 @@ test("recovery state restores color scheme strictly", ...);
 - Modify: `src/review/artifact_pages.tsx` (scheme segment per mockup)
 - Test: `tests/review_artifact_ui.test.ts`
 
-- [ ] Write failing test: compare pages for a screen with dark views render
+- [x] Write failing test: compare pages for a screen with dark views render
       two `mbk-seg` groups — viewport (`Mobile | Desktop`, same-scheme links)
       and color scheme (`Light | Dark`, same-viewport links,
       `aria-label="Color scheme"`); a light-only screen renders no scheme
       segment; the active option uses `aria-current="page"`.
-- [ ] Run — FAIL. Implement per the Milestone 2 mockup (labels `Light`/
+- [x] Run — FAIL. Implement per the Milestone 2 mockup (labels `Light`/
       `Dark`; sibling links via `comparisonPagePath(route, viewport, scheme)`
       and `relativeLink`). Drop the Task 3.2 interim `Mobile · Dark` title
       suffix in favor of the two-segment design (keep the scheme in the
       `<title>` text).
-- [ ] Run — PASS. Commit: `feat(review): compare-page scheme control`
+- [x] Run — PASS. Commit: `feat(review): compare-page scheme control`
 
 #### Task 4.5: Browser tests + runtime doc + gate
 
@@ -909,7 +909,12 @@ test("recovery state restores color scheme strictly", ...);
   `docs/protocol/mokabook-runtime.md` (Browse Shell + watched development
   state list)
 
-- [ ] Add Playwright tests (they run against the dark-enabled
+- [x] Browser-verify the dark phone screen's 1px inset hairline is actually
+      visible against the bezel with a dark fragment loaded (the fragment
+      surface must not occlude it), and that scheme swaps do not flash a
+      white fragment surface (found during Task 4.2 review).
+
+- [x] Add Playwright tests (they run against the dark-enabled
       `examples/basic`):
 
 ```ts
@@ -926,11 +931,11 @@ Extend the existing watched-reload state restoration test in
 `tests/browser/watch.spec.ts` to assert the scheme survives a reload (or add
 one matching its pattern).
 
-- [ ] Run `npm run test:browser` — PASS.
-- [ ] Update `mokabook-runtime.md` Browse Shell section (scheme switch,
+- [x] Run `npm run test:browser` — PASS.
+- [x] Update `mokabook-runtime.md` Browse Shell section (scheme switch,
       fallback label, details rows) and the watched-reload restored-state
       list (add color scheme).
-- [ ] Run `cargo xtask check`; commit with title
+- [x] Run `cargo xtask check`; commit with title
       `feat(shell): browse dark mode switching`; push; run
       `cargo xtask review`; record findings.
 
