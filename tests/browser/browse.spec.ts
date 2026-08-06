@@ -123,6 +123,27 @@ test("search state is retained across in-shell navigation", async ({
   expect(await hasMarker(page)).toBe(true);
 });
 
+test("details disclosure is remembered across routes and reloads", async ({
+  page,
+}) => {
+  const details = page.locator("[data-mokabook-details]");
+  await page.goto("/view/screens/welcome.html");
+  await details.locator("summary").click();
+  await expect(details).not.toHaveAttribute("open", "");
+
+  await page.click(detailsRow);
+  await expect(page.locator("#mb-main h2")).toHaveText("Details");
+  await expect(details).not.toHaveAttribute("open", "");
+
+  await page.reload();
+  await expect(details).not.toHaveAttribute("open", "");
+  await details.locator("summary").click();
+  await expect(details).toHaveAttribute("open", "");
+
+  await page.goto("/view/screens/welcome.html");
+  await expect(details).toHaveAttribute("open", "");
+});
+
 test("searching opens groups and clearing restores their disclosure", async ({
   page,
 }) => {
