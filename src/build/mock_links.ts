@@ -2,10 +2,15 @@ import path from "node:path";
 
 import { parse } from "parse5";
 
-import type { ResolvedRegistryEntry, Viewport } from "../authoring/types.js";
+import type {
+  ColorScheme,
+  ResolvedRegistryEntry,
+  Viewport,
+} from "../authoring/types.js";
 import { encodeUrlPath } from "../config/paths.js";
 import { MokabookError } from "../errors.js";
 import { fragmentRoute } from "../registry/manifest.js";
+import { effectiveColorSchemes } from "../registry/views.js";
 
 interface HtmlAttribute {
   name: string;
@@ -37,7 +42,9 @@ export function rewriteMockLinks(
   html: string,
   sourceRoute: string,
   viewport: Viewport,
+  colorScheme: ColorScheme,
   byId: ReadonlyMap<string, ResolvedRegistryEntry>,
+  catalogueSchemes: readonly ColorScheme[],
 ): string {
   const replacements: Replacement[] = [];
   const document = parse(html, {
@@ -60,7 +67,13 @@ export function rewriteMockLinks(
           `${sourceRoute} links to unknown id: ${id}`,
         );
       }
-      const targetRoute = artifactRouteForEntry(target, viewport, byId);
+      const targetRoute = artifactRouteForEntry(
+        target,
+        viewport,
+        colorScheme,
+        byId,
+        catalogueSchemes,
+      );
       if (!targetRoute) {
         throw new MokabookError(
           "build-invalid",
@@ -125,31 +138,47 @@ function attributeValueRange(source: string): HtmlLocation | undefined {
   return endOffset === startOffset ? undefined : { endOffset, startOffset };
 }
 
-/** Resolve a registry entry to the static artifact appropriate for a viewport. */
+/** Resolve a registry entry to the static artifact appropriate for a view. */
 export function artifactRouteForEntry(
   entry: ResolvedRegistryEntry,
   viewport: Viewport,
+  colorScheme: ColorScheme,
   byId: ReadonlyMap<string, ResolvedRegistryEntry>,
+  catalogueSchemes: readonly ColorScheme[],
 ): string | undefined {
-  if (entry.kind === "screen") return fragmentRoute(entry.route, viewport);
-  if (entry.kind === "collection") return undefined;
-  const first = entry.steps[0];
-  const screen = first ? byId.get(first.screenId) : undefined;
-  return screen?.kind === "screen"
-    ? fragmentRoute(screen.route, viewport)
-    : undefined;
+  const screen =
+    entry.kind === "screen"
+      ? entry
+      : entry.kind === "use-case" && entry.steps[0]
+        ? byId.get(entry.steps[0].screenId)
+        : undefined;
+  if (screen?.kind !== "screen") return undefined;
+  const targetScheme = effectiveColorSchemes(screen, catalogueSchemes).includes(
+    colorScheme,
+  )
+    ? colorScheme
+    : "light";
+  return fragmentRoute(screen.route, viewport, targetScheme);
 }
 
-/** Map logical catalogue routes to concrete viewport artifacts. */
+/** Map logical catalogue routes to concrete view artifacts. */
 export function logicalArtifactRoutes(
   entries: readonly ResolvedRegistryEntry[],
   viewport: Viewport,
+  colorScheme: ColorScheme,
+  catalogueSchemes: readonly ColorScheme[],
 ): Readonly<Record<string, string>> {
   const byId = new Map(entries.map((entry) => [entry.id, entry]));
   return Object.fromEntries(
     entries.flatMap((entry) => {
       if (entry.kind === "collection") return [];
-      const artifact = artifactRouteForEntry(entry, viewport, byId);
+      const artifact = artifactRouteForEntry(
+        entry,
+        viewport,
+        colorScheme,
+        byId,
+        catalogueSchemes,
+      );
       return artifact ? [[entry.route, artifact] as const] : [];
     }),
   );

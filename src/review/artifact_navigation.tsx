@@ -17,11 +17,11 @@ const NAV_GROUPS: readonly { label: string; state: ReviewState }[] = [
 
 /** The artifact-relative compare page a nav row opens for one screen. */
 export function screenPagePath(screen: ScreenReview): string | undefined {
-  const viewport =
-    screen.viewports.find((candidate) => candidate.state !== "unchanged") ??
-    screen.viewports[0];
-  if (!viewport) return undefined;
-  return comparisonPagePath(screen.route, viewport.viewport);
+  const view =
+    screen.views.find((candidate) => candidate.state !== "unchanged") ??
+    screen.views[0];
+  if (!view) return undefined;
+  return comparisonPagePath(screen.route, view.viewport, view.colorScheme);
 }
 
 function ChangedRow(props: {
@@ -103,7 +103,7 @@ function IgnoredImpactCard(props: { result: ReviewResult }) {
       {props.result.ignoredImpact.map((impact) => (
         <div
           className="mbk-chg-ignored-head"
-          key={`${impact.id}-${impact.viewport}`}
+          key={`${impact.id}-${impact.viewport}-${impact.colorScheme}`}
         >
           <code>{impact.id}</code>
           <span>Ignored</span>

@@ -31,6 +31,19 @@ test("consumer configuration is a reconfiguration watch target", async (context)
   assert.equal(classifyWatchPath(config.configPath, config), "reconfigure");
 });
 
+test("dark stylesheet changes classify as reload", async (context) => {
+  const fixture = await createFixture(undefined, {
+    extraConfig:
+      'stylesheets: [{ match: "**/*.html", stylesheets: [], darkStylesheets: ["dark.css"] }],',
+  });
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const darkStylesheet = `${fixture.mockupsDir}/dark.css`;
+
+  assert.ok(watchTargets(config).includes(darkStylesheet));
+  assert.equal(classifyWatchPath(darkStylesheet, config), "reload");
+});
+
 test("watched Serve reloads config with a ready replacement watcher", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

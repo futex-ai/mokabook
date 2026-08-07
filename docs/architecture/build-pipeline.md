@@ -15,13 +15,13 @@ one esbuild graph, with React resolved from the consumer
 validate definitions and cross-references in memory
         |
         v
-renderer({ node, entry, viewport, stylesheets })
+renderer({ node, entry, viewport, colorScheme, stylesheets })
         |
         v
 resolve mock:id links -> compatibility bridge -> validate markers/links/resources
         |
         v
-mobile/desktop HTML + schema-v3 manifest in memory
+mobile/desktop light and optional dark HTML + schema-v3 manifest in memory
         |
         +---- check: compare with committed bytes, write nothing
         |
@@ -61,10 +61,10 @@ sticky process-global state or an absolute checkout path.
 ## 3. Rendering
 
 Each screen owns a mobile and desktop React node. Mokabook selects the first
-stylesheet rule matching the screen's catalogue route, applies it to both
-viewports, and resolves each emitted URL relative to that viewport's generated
-fragment route. It then calls the configured renderer, or its neutral default.
-The renderer receives:
+stylesheet rule matching the screen's catalogue route, applies it to each
+effective viewport/color-scheme view, and resolves each emitted URL relative to
+that view's generated fragment route. It then calls the configured renderer, or
+its neutral default. The renderer receives:
 
 ```ts
 interface RenderInput {
@@ -72,6 +72,7 @@ interface RenderInput {
   node: ReactNode;
   stylesheets: readonly string[];
   viewport: "mobile" | "desktop";
+  colorScheme: "light" | "dark";
 }
 
 type Renderer = (input: RenderInput) => string;
@@ -80,16 +81,17 @@ type Renderer = (input: RenderInput) => string;
 The returned string must be a complete HTML document. Mokabook then converts
 `ReviewIgnore` templates into inert comments and resolves every complete value
 of the form `mock:<id>` in `href` and `data-nav-href` to viewport-matched
-fragments. Both attributes are resolved when they coexist on one element, and
-the validator independently rejects any logical navigation value left by a
-compatibility transform. The same pass covers legacy pages. Text, scripts,
-styles, and unrelated attributes containing the same characters remain
-unchanged. A use-case link resolves through its first screen; collections are
-intentionally not linkable.
+fragments in the same color scheme, falling back to light when the destination
+screen has no dark view. Both attributes are resolved when they coexist on one
+element, and the validator independently rejects any logical navigation value
+left by a compatibility transform. The same pass covers legacy pages, which
+remain light-only. Text, scripts, styles, and unrelated attributes containing
+the same characters remain unchanged. A use-case link resolves through its
+first screen; collections are intentionally not linkable.
 
 During a staged migration only, a configured consumer transformer receives the
-complete document, current route/viewport, repository-relative output path,
-available static/output routes, and viewport-resolved logical routes. The
+complete document, current route/viewport/color scheme, repository-relative
+output path, available static/output routes, and view-resolved logical routes. The
 transformed document must remain complete and then passes every normal
 Review-marker, link, resource, path, and ownership check.
 

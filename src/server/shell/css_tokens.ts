@@ -28,6 +28,8 @@ export const SHELL_TOKENS_CSS = `
   --mokabook-accent-contrast: #ffffff;
   --mokabook-accent-soft: rgba(79, 120, 100, 0.1);
   --mbk-accent-deep: #2f5945;
+  --mbk-dark-screen-bg: #121514;
+  --mbk-dark-screen-ink: #eef1ef;
   --mb-bg: var(--chrome-bg);
   --mb-surface: var(--chrome-surface);
   --mb-border: var(--chrome-border);

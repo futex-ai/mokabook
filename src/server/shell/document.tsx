@@ -7,11 +7,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import type { Catalogue } from "../catalogue.js";
 import type { ShellContext } from "./context.js";
+import { SchemeSwitch } from "./head.js";
 import { CatalogueNav } from "./nav.js";
 import { ShellMain, viewTitle } from "./views.js";
 import type { ShellView } from "./views.js";
 
-function TopBar(props: { context: ShellContext }) {
+function TopBar(props: { catalogue: Catalogue; context: ShellContext }) {
   const browse = props.context.mode === "browse";
   return (
     <header className="mbk-topbar">
@@ -42,6 +43,7 @@ function TopBar(props: { context: ShellContext }) {
           />
         </div>
       ) : null}
+      {props.catalogue.hasDarkFragments ? <SchemeSwitch /> : null}
       <nav aria-label="Mokabook modes" className="mbk-modes">
         <a
           aria-current={browse ? "page" : undefined}
@@ -83,7 +85,7 @@ export function renderShellPage(
           <a className="mbk-skip-link" href="#mb-main">
             Skip to content
           </a>
-          <TopBar context={context} />
+          <TopBar catalogue={catalogue} context={context} />
           <div className="mbk-body">
             <CatalogueNav context={context} manifest={catalogue.manifest} />
             <ShellMain catalogue={catalogue} context={context} view={view} />

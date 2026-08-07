@@ -1,5 +1,8 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
+/** Color scheme selection applied to fragment frames and device chrome. */
+export type BrowseColorScheme = "dark" | "light";
+
 /** Viewport selection applied to screen and use-case stages. */
 export type BrowseViewport = "both" | "desktop" | "mobile";
 
@@ -7,6 +10,7 @@ export type BrowseViewport = "both" | "desktop" | "mobile";
 export interface BrowseRecoveryState {
   changedOnly: boolean;
   closedCollectionIds: readonly string[];
+  colorScheme: BrowseColorScheme;
   detailsOpen: boolean;
   drawerOpen: boolean;
   navScroll: number;
@@ -61,6 +65,7 @@ export function captureBrowseState(
         .querySelector('[data-filter="changed"]')
         ?.getAttribute("aria-pressed") === "true",
     closedCollectionIds,
+    colorScheme: currentColorScheme(doc),
     detailsOpen:
       doc.querySelector<HTMLDetailsElement>("[data-mokabook-details]")?.open ??
       false,
@@ -106,6 +111,7 @@ export function restoreBrowseState(
   if (details) details.open = state.detailsOpen;
   setDrawer(shell, state.drawerOpen);
   setViewport(doc, state.viewport);
+  setColorScheme(doc, state.colorScheme);
   applyNavVisibility(doc);
   const nav = doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]");
   if (nav) nav.scrollTop = state.navScroll;
@@ -117,10 +123,12 @@ export function parseBrowseRecoveryState(
   value: unknown,
 ): BrowseRecoveryState | undefined {
   if (!record(value)) return undefined;
+  const colorScheme = value["colorScheme"];
   const viewport = value["viewport"];
   if (
     typeof value["changedOnly"] !== "boolean" ||
     !stringArray(value["closedCollectionIds"]) ||
+    (colorScheme !== "dark" && colorScheme !== "light") ||
     typeof value["detailsOpen"] !== "boolean" ||
     typeof value["drawerOpen"] !== "boolean" ||
     !nonNegativeNumber(value["navScroll"]) ||
@@ -133,6 +141,7 @@ export function parseBrowseRecoveryState(
   return {
     changedOnly: value["changedOnly"],
     closedCollectionIds: [...new Set(value["closedCollectionIds"])],
+    colorScheme,
     detailsOpen: value["detailsOpen"],
     drawerOpen: value["drawerOpen"],
     navScroll: value["navScroll"],
@@ -214,6 +223,45 @@ export function setViewport(doc: Document, value: string): void {
       "aria-pressed",
       option.getAttribute("data-viewport-option") === value ? "true" : "false",
     );
+}
+
+/**
+ * Apply one color scheme to the body, every scheme control, and every fragment
+ * frame. A frame swaps between the server-rendered `data-fragment-light` and
+ * `data-fragment-dark` URLs; a screen rendered only for light keeps its light
+ * fragment. Each source is compared with the current `src` attribute first,
+ * because assigning `src` reloads the frame even when the URL is unchanged.
+ *
+ * A catalogue built without dark fragments renders no scheme control, so a
+ * requested dark scheme is clamped to light there: dark chrome around light
+ * fragments would otherwise have no switch to recover from.
+ */
+export function setColorScheme(doc: Document, value: BrowseColorScheme): void {
+  const scheme = doc.querySelector("[data-color-scheme-option]")
+    ? value
+    : "light";
+  doc.body.setAttribute("data-mokabook-color-scheme", scheme);
+  for (const option of doc.querySelectorAll("[data-color-scheme-option]"))
+    option.setAttribute(
+      "aria-pressed",
+      option.getAttribute("data-color-scheme-option") === scheme
+        ? "true"
+        : "false",
+    );
+  for (const frame of doc.querySelectorAll("iframe[data-fragment-light]")) {
+    const dark = frame.getAttribute("data-fragment-dark");
+    const light = frame.getAttribute("data-fragment-light");
+    const next = scheme === "dark" && dark ? dark : light;
+    if (next && frame.getAttribute("src") !== next)
+      frame.setAttribute("src", next);
+  }
+}
+
+/** Read the color scheme the document currently shows, defaulting to light. */
+export function currentColorScheme(doc: Document): BrowseColorScheme {
+  return doc.body.getAttribute("data-mokabook-color-scheme") === "dark"
+    ? "dark"
+    : "light";
 }
 
 function selectedViewport(doc: Document): BrowseViewport {

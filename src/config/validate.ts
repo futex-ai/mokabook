@@ -16,6 +16,7 @@ import { resolveModuleResolution } from "./module_resolution.js";
 import {
   requireString,
   resolveLegacyLint,
+  validateColorSchemes,
   validateDebounce,
   validateStringArray,
   validateStylesheets,
@@ -79,6 +80,7 @@ export function resolveConfig(
     configDir,
   );
   validateSourceRoots(repoRoot, entriesDir, mockupsDir, legacy?.pagesDir);
+  const colorSchemes = validateColorSchemes(input.colorSchemes);
   const stylesheets = validateStylesheets(input.stylesheets ?? []);
   const watchRules = validateWatchRules(input.watch?.rules ?? []);
   if (input.review?.base !== undefined)
@@ -105,6 +107,7 @@ export function resolveConfig(
     repoRoot,
   });
   return {
+    colorSchemes,
     compatibility: {
       readManifestV2: input.compatibility?.readManifestV2 ?? false,
       ...(compatibilityTransformer

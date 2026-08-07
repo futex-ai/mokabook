@@ -128,6 +128,13 @@ body {
   padding: 0 12px;
 }
 
+/* The color-scheme switch sits right of the search field. It never
+   compresses, and its tighter pad matches the mode switch height. */
+.mbk-topbar > .mbk-seg {
+  flex-shrink: 0;
+  padding: 2px;
+}
+
 .mbk-modes {
   background: var(--chrome-bg);
   border-radius: 8px;

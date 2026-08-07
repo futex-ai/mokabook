@@ -31,6 +31,7 @@ function DetailsBody() {
         <MetaRow label="Generated">
           <code className="mbk-code">screens/welcome.html</code>
         </MetaRow>
+        <MetaRow label="Schemes">light, dark</MetaRow>
         <MetaRow label="Related docs">
           <span className="mbk-meta-link">Example notes</span>
         </MetaRow>

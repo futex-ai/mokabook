@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 
+/** Light or dark color-scheme rendering target. */
+export type ColorScheme = "dark" | "light";
+
 /** Mobile or desktop rendering target. */
 export type Viewport = "desktop" | "mobile";
 
@@ -22,6 +25,7 @@ export interface RoutedEntryInput extends EntryInput {
 /** One screen with distinct mobile and desktop renders. */
 export interface ScreenInput extends RoutedEntryInput {
   address?: string;
+  colorSchemes?: readonly ColorScheme[];
   desktop: ReactNode;
   mobile: ReactNode;
   useCaseIds?: readonly string[];
@@ -78,6 +82,7 @@ export interface NestedInherited {
 
 /** A screen in a nested definition tree. */
 export interface NestedScreenInput extends NestedInherited {
+  colorSchemes?: readonly ColorScheme[];
   description: string;
   desktop: ReactNode;
   id: string;

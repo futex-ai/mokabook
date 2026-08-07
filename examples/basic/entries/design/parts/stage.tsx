@@ -59,9 +59,31 @@ export function MiniFarewell({ compact }: MiniScreenProps) {
   );
 }
 
+interface FrameLabelProps {
+  lightOnly?: boolean | undefined;
+  text?: string | undefined;
+}
+
+/** Uppercase caption above a device chrome, with its color-scheme state. */
+function FrameLabel({ lightOnly, text }: FrameLabelProps) {
+  if (text === undefined) {
+    return null;
+  }
+  return (
+    <p className="mbk-frame-label">
+      {text}
+      {lightOnly ? (
+        <span className="mbk-frame-scheme-note">{" — Light only"}</span>
+      ) : null}
+    </p>
+  );
+}
+
 interface PhoneFrameProps {
   children: ReactNode;
+  dark?: boolean | undefined;
   label?: string;
+  lightOnly?: boolean;
   small?: boolean;
 }
 
@@ -113,13 +135,19 @@ function PhoneStatusBar() {
 }
 
 /** Realistic phone chrome around a mobile fragment depiction. */
-export function PhoneFrame({ children, label, small }: PhoneFrameProps) {
+export function PhoneFrame({
+  children,
+  dark,
+  label,
+  lightOnly,
+  small,
+}: PhoneFrameProps) {
   return (
     <div className="mbk-frame-wrap mbk-frame-mobile">
-      {label ? <p className="mbk-frame-label">{label}</p> : null}
+      <FrameLabel lightOnly={lightOnly} text={label} />
       <div className={small ? "phone-frame phone-frame--sm" : "phone-frame"}>
         <div className="phone-notch" aria-hidden="true" />
-        <div className="phone-screen">
+        <div className={dark ? "phone-screen mbk-screen-dark" : "phone-screen"}>
           <PhoneStatusBar />
           {children}
           <div className="phone-home" aria-hidden="true" />
@@ -132,14 +160,22 @@ export function PhoneFrame({ children, label, small }: PhoneFrameProps) {
 interface BrowserFrameProps {
   address: string;
   children: ReactNode;
+  dark?: boolean | undefined;
   label?: string;
+  lightOnly?: boolean;
 }
 
 /** Browser chrome with traffic lights, address, and expand control. */
-export function BrowserFrame({ address, children, label }: BrowserFrameProps) {
+export function BrowserFrame({
+  address,
+  children,
+  dark,
+  label,
+  lightOnly,
+}: BrowserFrameProps) {
   return (
     <div className="mbk-frame-wrap mbk-frame-desktop">
-      {label ? <p className="mbk-frame-label">{label}</p> : null}
+      <FrameLabel lightOnly={lightOnly} text={label} />
       <div className="browser-frame">
         <div className="browser-bar">
           <span className="lights" aria-hidden="true">
@@ -152,7 +188,13 @@ export function BrowserFrame({ address, children, label }: BrowserFrameProps) {
             ⤢
           </span>
         </div>
-        <div className="browser-viewport">{children}</div>
+        <div
+          className={
+            dark ? "browser-viewport mbk-screen-dark" : "browser-viewport"
+          }
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

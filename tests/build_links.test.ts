@@ -193,6 +193,20 @@ test("stylesheet rules match catalogue routes for every viewport", async (contex
   }
 });
 
+test("dark fragments link within dark and fall back to light-only", async (context) => {
+  const fixture = await createFixture(darkLinkSource(), {
+    extraConfig: 'colorSchemes: ["light", "dark"],',
+  });
+  context.after(() => removeFixture(fixture));
+
+  const compilation = await compileCatalogue(await loadConfig(fixture.root));
+  const mobileDark =
+    compilation.outputs.get("screens/a.mobile.dark.html") ?? "";
+
+  assert.match(mobileDark, /href="\.\/b\.mobile\.dark\.html"/);
+  assert.match(mobileDark, /href="\.\/c\.mobile\.html"/);
+});
+
 function routeSource(route: string): string {
   return `import { defineScreen } from "mokabook";
 import React from "react";
@@ -216,5 +230,17 @@ export const mockups = [
   defineScreen({ ...metadata, description: "Home", desktop: <a href="./details.desktop.html">Details</a>, id: "home", mobile: <a href="./details.mobile.html">Details</a>, route: "screens/home.html", title: "Home" }),
   ${target}
 ].filter(Boolean);
+`;
+}
+
+function darkLinkSource(): string {
+  return `import { defineScreen } from "mokabook";
+import React from "react";
+const metadata = { dependencies: [], navPath: ["Fixture"], relatedDocs: [], useCaseIds: [] };
+export const mockups = [
+  defineScreen({ ...metadata, description: "A", desktop: <main><a href="mock:b">B</a><a href="mock:c">C</a></main>, id: "a", mobile: <main><a href="mock:b">B</a><a href="mock:c">C</a></main>, route: "screens/a.html", title: "A" }),
+  defineScreen({ ...metadata, description: "B", desktop: <main>B</main>, id: "b", mobile: <main>B</main>, route: "screens/b.html", title: "B" }),
+  defineScreen({ ...metadata, colorSchemes: ["light"], description: "C", desktop: <main>C</main>, id: "c", mobile: <main>C</main>, route: "screens/c.html", title: "C" })
+];
 `;
 }

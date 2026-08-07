@@ -5,6 +5,10 @@ import { isPublicStaticFile } from "../../dist/config/public_files.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { readManifest } from "../../dist/registry/manifest.js";
 import { computeChangedRoutes } from "../../dist/server/changed.js";
+import {
+  loadBrowserClientModules,
+  loadShellFontAssets,
+} from "../../dist/server/client_modules.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
@@ -79,14 +83,7 @@ async function buildPreview(output) {
 }
 
 async function captureAssets(serverUrl, stage) {
-  for (const asset of [
-    "/__mokabook/shell.css",
-    "/__mokabook/client/browse.js",
-    "/__mokabook/client/browse_frames.js",
-    "/__mokabook/client/browse_state.js",
-    "/__mokabook/fonts/InterVariable.woff2",
-    "/__mokabook/fonts/Inter-OFL.txt",
-  ]) {
+  for (const asset of shellAssets()) {
     const response = await fetch(`${serverUrl}${asset}`);
     if (!response.ok)
       throw new Error(`preview asset ${asset} returned ${response.status}`);
@@ -96,6 +93,18 @@ async function captureAssets(serverUrl, stage) {
       Buffer.from(await response.arrayBuffer()),
     );
   }
+}
+
+function shellAssets() {
+  return [
+    "/__mokabook/shell.css",
+    ...[...loadBrowserClientModules().keys()].map(
+      (name) => `/__mokabook/client/${name}`,
+    ),
+    ...[...loadShellFontAssets().keys()].map(
+      (name) => `/__mokabook/fonts/${name}`,
+    ),
+  ];
 }
 
 async function capturePage(
@@ -154,7 +163,10 @@ function redirects(entries) {
 function staticPage(html) {
   return html
     .replace(liveUpdateScript, "")
-    .replace(/(href|src)="\/(static|view)\/([^"]+)\.html"/g, '$1="/$2/$3"');
+    .replace(
+      /(href|src|data-fragment-light|data-fragment-dark)="\/(static|view)\/([^"]+)\.html"/g,
+      '$1="/$2/$3"',
+    );
 }
 
 async function installArtifact(stage, output) {

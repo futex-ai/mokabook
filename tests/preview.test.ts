@@ -29,6 +29,7 @@ test("preview build snapshots a static Browse catalogue", async (context) => {
     { cwd: repositoryRoot },
   );
 
+  await assertClientGraphIsComplete(output);
   const index = await read(output, "index.html");
   assert.match(index, /<title>Mokabook<\/title>/);
   assert.match(index, /data-mokabook-filter/);
@@ -39,14 +40,30 @@ test("preview build snapshots a static Browse catalogue", async (context) => {
   assert.doesNotMatch(index, /href="\/view\/screens\/welcome\.html"/);
   const welcome = await read(output, "view/screens/welcome.html");
   assert.match(welcome, /Welcome · Mokabook/);
+  assert.match(welcome, /data-color-scheme-option="dark"/);
+  const frame = welcome.match(
+    /<iframe[^>]*data-fragment-light="([^"]+)"[^>]*src="([^"]+)"/,
+  );
+  assert.ok(frame);
+  assert.equal(frame[1], "/static/screens/welcome.mobile");
+  assert.equal(frame[2], frame[1]);
+  assert.match(
+    welcome,
+    /data-fragment-dark="\/static\/screens\/welcome\.mobile\.dark"/,
+  );
   assert.match(welcome, /src="\/static\/screens\/welcome\.desktop"/);
   assert.doesNotMatch(
     welcome,
     /src="\/static\/screens\/welcome\.desktop\.html"/,
   );
+  assert.doesNotMatch(welcome, /data-fragment-(?:light|dark)="[^"]+\.html"/);
   assert.match(
     await read(output, "static/screens/welcome.desktop.html"),
     /Welcome to Mokabook/,
+  );
+  assert.match(
+    await read(output, "static/screens/welcome.desktop.dark.html"),
+    /data-color-scheme="dark"/,
   );
   assert.match(await read(output, "__mokabook/shell.css"), /--mbk-/);
   assert.ok(
@@ -85,6 +102,31 @@ test("preview build refuses to replace an unowned directory", async (context) =>
   assert.equal(await read(output, "keep.txt"), "owned by user\n");
 });
 
+async function assertClientGraphIsComplete(output: string): Promise<void> {
+  const clientDir = path.join(output, "__mokabook", "client");
+  const copied = (await fs.promises.readdir(clientDir)).filter((name) =>
+    name.endsWith(".js"),
+  );
+  assert.ok(copied.length > 0);
+  for (const module of copied) {
+    for (const target of relativeImports(await read(clientDir, module))) {
+      assert.ok(
+        copied.includes(target),
+        `${module} imports missing preview module ${target}`,
+      );
+    }
+  }
+}
+
 async function read(root: string, relative: string): Promise<string> {
   return await fs.promises.readFile(path.join(root, relative), "utf8");
+}
+
+function relativeImports(source: string): string[] {
+  const targets: string[] = [];
+  const pattern = /(?:^|\s)(?:from|import)\s+"\.\/([^"]+)"/g;
+  for (const match of source.matchAll(pattern)) {
+    if (match[1] !== undefined) targets.push(match[1]);
+  }
+  return targets;
 }

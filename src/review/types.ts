@@ -1,16 +1,17 @@
-import type { Viewport } from "../authoring/types.js";
+import type { ColorScheme, Viewport } from "../authoring/types.js";
 
 /** Text or binary bytes retained in one static Review artifact. */
 export type ReviewArtifactContent = string | Uint8Array;
 
-/** Classification for one viewport or aggregate screen. */
+/** Classification for one view or aggregate screen. */
 export type ReviewState =
   "added" | "changed" | "ignored-only" | "removed" | "unchanged";
 
-/** One viewport comparison and its retained artifact paths. */
-export interface ViewportReview {
+/** One view comparison and its retained artifact paths. */
+export interface ViewReview {
   afterPath?: string;
   beforePath?: string;
+  colorScheme: ColorScheme;
   ignoredIds: readonly string[];
   state: ReviewState;
   viewport: Viewport;
@@ -24,7 +25,7 @@ export interface ScreenReview {
   sharedImpact: readonly string[];
   state: ReviewState;
   title: string;
-  viewports: readonly ViewportReview[];
+  views: readonly ViewReview[];
 }
 
 /** Deterministic machine-readable Review result. */
@@ -32,9 +33,14 @@ export interface ReviewResult {
   baseCommit: string;
   baseRef: string;
   changedPaths: readonly string[];
-  ignoredImpact: readonly { count: number; id: string; viewport: Viewport }[];
+  ignoredImpact: readonly {
+    colorScheme: ColorScheme;
+    count: number;
+    id: string;
+    viewport: Viewport;
+  }[];
   screens: readonly ScreenReview[];
-  schemaVersion: 1;
+  schemaVersion: 2;
   sharedImpact: readonly string[];
 }
 

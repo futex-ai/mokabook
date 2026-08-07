@@ -1,6 +1,7 @@
 import { defineConfig } from "mokabook";
 
 export default defineConfig({
+  colorSchemes: ["light", "dark"],
   entriesDir: "entries",
   mockupsDir: "generated",
   moduleResolution: {

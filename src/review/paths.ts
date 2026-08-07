@@ -1,13 +1,18 @@
 import crypto from "node:crypto";
 
-import type { Viewport } from "../authoring/types.js";
+import type { ColorScheme, Viewport } from "../authoring/types.js";
 import { MokabookError } from "../errors.js";
 import type { ReviewArtifactContent } from "./types.js";
 
 /** Create a bounded, cross-platform comparison-page path for one route. */
-export function comparisonPagePath(route: string, viewport: Viewport): string {
+export function comparisonPagePath(
+  route: string,
+  viewport: Viewport,
+  colorScheme: ColorScheme,
+): string {
   const digest = crypto.createHash("sha256").update(route).digest("hex");
-  return `comparisons/${digest}/${viewport}/index.html`;
+  const view = colorScheme === "light" ? viewport : `${viewport}.dark`;
+  return `comparisons/${digest}/${view}/index.html`;
 }
 
 /** Preserve a source route beneath one isolated Review snapshot. */

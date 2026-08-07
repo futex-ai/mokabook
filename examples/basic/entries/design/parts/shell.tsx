@@ -6,7 +6,15 @@ export type ArtboardViewport = "desktop" | "mobile";
 /** Top-level Browse/Review mode depicted by a shell mockup. */
 export type ShellMode = "browse" | "review";
 
+/** Color scheme depicted as selected for the fragments on the stage. */
+export type ShellColorScheme = "dark" | "light";
+
 interface TopBarProps {
+  /**
+   * Selected color scheme. Wide artboards show it as a top-bar switch; narrow
+   * artboards leave the switch to the screen head band, which has the room.
+   */
+  colorScheme?: ShellColorScheme | undefined;
   mode: ShellMode;
   viewport: ArtboardViewport;
 }
@@ -20,8 +28,28 @@ function BaseWatch() {
   );
 }
 
+/** Color scheme selection shown once a catalogue has dark fragments. */
+export function SchemeSwitch({ active }: { active: ShellColorScheme }) {
+  const options: readonly { key: ShellColorScheme; label: string }[] = [
+    { key: "light", label: "Light" },
+    { key: "dark", label: "Dark" },
+  ];
+  return (
+    <span className="mbk-seg" role="group" aria-label="Color scheme">
+      {options.map((option) => (
+        <span
+          key={option.key}
+          className={option.key === active ? "active" : undefined}
+        >
+          {option.label}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 /** The 48px shell header: brand mark, search or base ref, mode switch. */
-export function TopBar({ mode, viewport }: TopBarProps) {
+export function TopBar({ colorScheme, mode, viewport }: TopBarProps) {
   return (
     <header className="mbk-topbar">
       {viewport === "mobile" ? (
@@ -52,6 +80,9 @@ export function TopBar({ mode, viewport }: TopBarProps) {
           </span>
         )
       ) : null}
+      {colorScheme !== undefined && viewport === "desktop" ? (
+        <SchemeSwitch active={colorScheme} />
+      ) : null}
       <nav className="mbk-modes" aria-label="Mokabook modes">
         <span className={mode === "browse" ? "mbk-mode active" : "mbk-mode"}>
           Browse
@@ -67,17 +98,25 @@ export function TopBar({ mode, viewport }: TopBarProps) {
 interface ShellProps {
   aside?: ReactNode;
   children: ReactNode;
+  colorScheme?: ShellColorScheme | undefined;
   mode: ShellMode;
   nav: ReactNode;
   viewport: ArtboardViewport;
 }
 
 /** The Mokabook shell scaffold for one design mockup. */
-export function Shell({ aside, children, mode, nav, viewport }: ShellProps) {
+export function Shell({
+  aside,
+  children,
+  colorScheme,
+  mode,
+  nav,
+  viewport,
+}: ShellProps) {
   if (viewport === "desktop") {
     return (
       <div className="mbk-shell mbk-shell--desktop">
-        <TopBar mode={mode} viewport={viewport} />
+        <TopBar colorScheme={colorScheme} mode={mode} viewport={viewport} />
         <div className="mbk-body">
           {nav}
           <main className="mbk-main">{children}</main>
@@ -87,7 +126,7 @@ export function Shell({ aside, children, mode, nav, viewport }: ShellProps) {
   }
   return (
     <div className="mbk-shell mbk-shell--mobile">
-      <TopBar mode={mode} viewport={viewport} />
+      <TopBar colorScheme={colorScheme} mode={mode} viewport={viewport} />
       <main className="mbk-main">{children}</main>
       {aside}
     </div>

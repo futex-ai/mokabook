@@ -23,6 +23,7 @@ Create `mokabook.config.ts`:
 import { defineConfig } from "mokabook";
 
 export default defineConfig({
+  colorSchemes: ["light", "dark"],
   repoRoot: ".",
   entriesDir: "docs/mockups/src/entries",
   mockupsDir: "docs/mockups",
@@ -61,6 +62,22 @@ export const mockups = [
 content in a `<main>` landmark because each fragment is generated as its own
 standalone page.
 
+Color-scheme adoption has two steps: enable `colorSchemes: ["light", "dark"]`
+in the config, then select the consumer theme from `input.colorScheme` in the
+configured renderer. Mokabook re-renders the same mobile and desktop nodes for
+dark output; authors do not duplicate screen trees. A deliberately light-only
+screen opts out in either `defineScreen` or a nested `screen` marker:
+
+```tsx
+defineScreen({
+  // Other screen fields stay unchanged.
+  colorSchemes: ["light"],
+});
+```
+
+Light-only catalogues omit `colorSchemes`, keep their existing renderer, and
+produce the same fragment names and manifest bytes as before.
+
 Run the CLI through a local dependency or directly with npx:
 
 ```bash
@@ -93,25 +110,28 @@ free. `--port 0` instead asks the operating system to choose a free port.
 Watched Serve keeps the first resolved port for later child restarts so its URL
 stays stable.
 
-`build` writes viewport fragments and `mokabook-manifest.json` under
-`mockupsDir`. `check` calculates those bytes without writing and reports
-missing, stale, or orphan generated files. Browse serves the package-owned
-Mokabook shell — catalogue navigation with folder/screen/flow icons and an
-All/Changed filter, linked breadcrumbs with hash-prefixed copyable ID chips,
-realistic browser chrome with an expand-to-overlay toggle, phone chrome whose
-screen reserves a clock, signal, Wi-Fi, and battery status band above the mobile
-fragment,
-header viewport controls, use-case flows, a details inspector that remembers
-its disclosure across routes and reloads, id redirects, and watched updates.
-The Changed filter compares route-level manifest metadata, generated fragments,
-and explicitly declared dependencies against the Git base. A registry module
-that defines many routes does not make every route appear changed merely because
-the module's imports or composition changed.
+`build` writes one fragment per effective viewport and color-scheme view plus
+`mokabook-manifest.json` under `mockupsDir`. `check` calculates those bytes
+without writing and reports missing, stale, or orphan generated files. Browse
+serves the package-owned Mokabook shell — catalogue navigation with
+folder/screen/flow icons and an All/Changed filter, linked breadcrumbs with
+hash-prefixed copyable ID chips, realistic browser chrome with an
+expand-to-overlay toggle, phone chrome whose screen reserves a clock, signal,
+Wi-Fi, and battery status band above the mobile fragment, header viewport
+controls, a Light/Dark switch when the catalogue has dark fragments, use-case
+flows, a details inspector that remembers its disclosure across routes and
+reloads, id redirects, and watched updates. The Changed filter compares
+route-level manifest metadata, generated fragments, and explicitly declared
+dependencies against the Git base. A registry module that defines many routes
+does not make every route appear changed merely because the module's imports or
+composition changed.
 Review provides summary, side-by-side, overlay, and difference views as a
-static artifact. Screens with shared or declared dependency impact
-remain linked in a distinct impacted group even when their generated views are
-byte-identical. A declared dependency may be a file or directory; a changed
-descendant of a directory is reported as the screen's impact evidence.
+static artifact. When screens render in both schemes, Review compares each
+viewport and scheme view and links sibling light/dark compare pages. Screens
+with shared or declared dependency impact remain linked in a distinct impacted
+group even when their generated views are byte-identical. A declared dependency
+may be a file or directory; a changed descendant of a directory is reported as
+the screen's impact evidence.
 Review pages render in the Mokabook shell with a changed-screens navigation
 column beside each compare view. Every static or served page provides a mobile
 navigation drawer and a Review pill that returns an opened compare page to the
@@ -167,7 +187,11 @@ upward from the current directory. Every filesystem path is relative to that
 file and confined to `repoRoot`.
 
 - `entriesDir` and `mockupsDir` select structured source and generated output.
-- `renderer` and ordered `stylesheets` keep product themes and CSS consumer-owned.
+- `colorSchemes` defaults to `["light"]`; `["light", "dark"]` enables dark
+  fragments catalogue-wide, with per-screen light-only opt-outs.
+- `renderer` and ordered `stylesheets` keep product themes and CSS
+  consumer-owned. A stylesheet rule may append `lightStylesheets` or
+  `darkStylesheets` after its shared list for the matching output.
 - `moduleResolution` configures package roots, aliases, export conditions,
   package fields, file extensions, and esbuild loaders for cross-platform
   component trees.

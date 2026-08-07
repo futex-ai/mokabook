@@ -1,9 +1,11 @@
-import type { Viewport } from "../authoring/types.js";
+import type { ColorScheme, Viewport } from "../authoring/types.js";
 
 /** Context supplied to a temporary consumer-owned document transformer. */
 export interface CompatibilityTransformInput {
   /** Every generated and existing public route visible to the build. */
   availableRoutes: readonly string[];
+  /** Color scheme used when resolving logical screen and use-case targets. */
+  colorScheme: ColorScheme;
   /** Complete rendered document before final link and resource validation. */
   content: string;
   /** Catalogue routes mapped to their viewport-compatible artifacts. */

@@ -1,11 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import type { ResolvedRegistryEntry } from "../authoring/types.js";
+import type {
+  ColorScheme,
+  ResolvedRegistryEntry,
+  Viewport,
+} from "../authoring/types.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import { validateManifest } from "./manifest_validation.js";
 import type { ManifestEntry, ManifestLegacyPage, ManifestV3 } from "./types.js";
+import { effectiveColorSchemes } from "./views.js";
 
 /** Canonical generated manifest filename. */
 export const MANIFEST_NAME = "mokabook-manifest.json";
@@ -13,21 +18,24 @@ export const MANIFEST_NAME = "mokabook-manifest.json";
 /** Legacy version 2 manifest filename accepted only during migration. */
 export const LEGACY_MANIFEST_NAME = "mockbook-manifest.json";
 
-/** Derive one viewport fragment route from a screen route. */
+/** Derive one viewport and color-scheme fragment route from a screen route. */
 export function fragmentRoute(
   route: string,
-  viewport: "desktop" | "mobile",
+  viewport: Viewport,
+  colorScheme: ColorScheme = "light",
 ): string {
-  return route.replace(/\.html$/, `.${viewport}.html`);
+  const schemeSuffix = colorScheme === "dark" ? ".dark" : "";
+  return route.replace(/\.html$/, `.${viewport}${schemeSuffix}.html`);
 }
 
 /** Create deterministic manifest data from prepared entries and legacy pages. */
 export function createManifest(
   entries: readonly ResolvedRegistryEntry[],
   legacyPages: readonly ManifestLegacyPage[],
+  catalogueSchemes: readonly ColorScheme[],
 ): ManifestV3 {
   return {
-    entries: entries.map(toManifestEntry),
+    entries: entries.map((entry) => toManifestEntry(entry, catalogueSchemes)),
     generatedBy: "mokabook",
     legacyPages: [...legacyPages].sort((left, right) =>
       left.route.localeCompare(right.route),
@@ -86,7 +94,10 @@ export function parseManifest(value: unknown, allowV2 = false): ManifestV3 {
   return validateManifest(value, allowV2);
 }
 
-function toManifestEntry(entry: ResolvedRegistryEntry): ManifestEntry {
+function toManifestEntry(
+  entry: ResolvedRegistryEntry,
+  catalogueSchemes: readonly ColorScheme[],
+): ManifestEntry {
   const common = {
     dependencies: [
       ...new Set([entry.sourceRelativePath, ...entry.dependencies]),
@@ -113,6 +124,14 @@ function toManifestEntry(entry: ResolvedRegistryEntry): ManifestEntry {
   return {
     ...common,
     ...(entry.address ? { address: entry.address } : {}),
+    ...(effectiveColorSchemes(entry, catalogueSchemes).includes("dark")
+      ? {
+          darkFragments: {
+            desktop: fragmentRoute(entry.route, "desktop", "dark"),
+            mobile: fragmentRoute(entry.route, "mobile", "dark"),
+          },
+        }
+      : {}),
     fragments: {
       desktop: fragmentRoute(entry.route, "desktop"),
       mobile: fragmentRoute(entry.route, "mobile"),

@@ -1,7 +1,7 @@
-/** The Review artifact's index and per-viewport compare pages, rendered in
+/** The Review artifact's index and per-view compare pages, rendered in
  * the Mokabook shell design: a changed-screens navigation column beside a
- * main view with the compare head, mode and viewport segments, panes, and
- * evidence cards. */
+ * main view with the compare head, the mode, viewport, and color-scheme
+ * segments, panes, and evidence cards. */
 
 import path from "node:path";
 
@@ -13,7 +13,7 @@ import type {
   ReviewResult,
   ReviewState,
   ScreenReview,
-  ViewportReview,
+  ViewReview,
 } from "./types.js";
 
 /** Presentation hooks for Review artifacts rendered behind a server. */
@@ -26,6 +26,11 @@ const COMPARE_MODES = [
   ["side", "Side by side"],
   ["overlay", "Overlay"],
   ["difference", "Difference"],
+] as const;
+
+const COLOR_SCHEMES = [
+  ["light", "Light"],
+  ["dark", "Dark"],
 ] as const;
 
 const MODE_SCRIPT =
@@ -84,14 +89,18 @@ export function indexPage(
   });
 }
 
-/** Render one per-viewport comparison page inside the shell. */
+/** Render one per-view comparison page inside the shell. */
 export function comparePage(
   result: ReviewResult,
   screen: ScreenReview,
-  viewport: ViewportReview,
+  view: ViewReview,
   options: ReviewRenderOptions = {},
 ): string {
-  const pagePath = comparisonPagePath(screen.route, viewport.viewport);
+  const pagePath = comparisonPagePath(
+    screen.route,
+    view.viewport,
+    view.colorScheme,
+  );
   return reviewDocument({
     activeRoute: screen.route,
     browseHref: options.browseHref,
@@ -101,7 +110,7 @@ export function comparePage(
           <div className="mbk-screen-head-copy">
             <div className="mbk-title-row">
               <h2>{screen.title}</h2>
-              <StatusBadge state={viewport.state} />
+              <StatusBadge state={view.state} />
             </div>
             <code className="mbk-code">{screen.route}</code>
           </div>
@@ -119,45 +128,35 @@ export function comparePage(
               </button>
             ))}
           </span>
-          <span aria-label="Viewport" className="mbk-seg" role="group">
-            {screen.viewports.map((candidate) => (
-              <ViewportOption
-                active={candidate.viewport === viewport.viewport}
-                key={candidate.viewport}
-                pagePath={pagePath}
-                route={screen.route}
-                viewport={candidate.viewport}
-              />
-            ))}
-          </span>
+          <ViewportSegment pagePath={pagePath} screen={screen} view={view} />
+          <SchemeSegment pagePath={pagePath} screen={screen} view={view} />
         </div>
         <div className="mbk-rvw-stage">
           <div className="mb-panes" data-compare-mode="side">
             <Pane
-              artifactPath={viewport.beforePath}
+              artifactPath={view.beforePath}
               label={`Before — ${result.baseRef}`}
               missingMessage={`This screen does not exist on ${result.baseRef}.`}
               pagePath={pagePath}
               side="before"
-              tone={viewport.state === "removed" ? "removed" : undefined}
+              tone={view.state === "removed" ? "removed" : undefined}
             />
             <Pane
-              artifactPath={viewport.afterPath}
+              artifactPath={view.afterPath}
               label="After — this branch"
               missingMessage="This screen does not exist on this branch."
               pagePath={pagePath}
               side="after"
-              tone={viewport.state === "added" ? "added" : undefined}
+              tone={view.state === "added" ? "added" : undefined}
             />
           </div>
           <ImpactCard sharedImpact={screen.sharedImpact} />
-          <IgnoredCard ignoredIds={viewport.ignoredIds} />
+          <IgnoredCard ignoredIds={view.ignoredIds} />
         </div>
         <div className="mbk-review-summary">
-          <StatusBadge state={viewport.state} />
+          <StatusBadge state={view.state} />
           <span className="mbk-review-facts">
-            {viewport.viewport === "mobile" ? "Mobile" : "Desktop"} ·{" "}
-            {stateLabel(viewport.state)}
+            {viewportLabel(view.viewport)} · {stateLabel(view.state)}
           </span>
         </div>
       </>
@@ -166,29 +165,93 @@ export function comparePage(
     rootPrefix: "../../../",
     navigation: "shared",
     script: MODE_SCRIPT,
-    title: `${screen.title} · ${viewport.viewport}`,
+    title:
+      view.colorScheme === "light"
+        ? `${screen.title} · ${view.viewport}`
+        : `${screen.title} · ${view.viewport} · ${view.colorScheme}`,
   });
 }
 
-function ViewportOption(props: {
+function ViewportSegment(props: {
+  pagePath: string;
+  screen: ScreenReview;
+  view: ViewReview;
+}) {
+  const siblings = props.screen.views.filter(
+    (candidate) => candidate.colorScheme === props.view.colorScheme,
+  );
+  return (
+    <span aria-label="Viewport" className="mbk-seg" role="group">
+      {siblings.map((candidate) => (
+        <ViewOption
+          active={candidate.viewport === props.view.viewport}
+          colorScheme={props.view.colorScheme}
+          key={candidate.viewport}
+          label={viewportLabel(candidate.viewport)}
+          pagePath={props.pagePath}
+          route={props.screen.route}
+          viewport={candidate.viewport}
+        />
+      ))}
+    </span>
+  );
+}
+
+/** Scheme choice for screens compared in both schemes; absent for light-only. */
+function SchemeSegment(props: {
+  pagePath: string;
+  screen: ScreenReview;
+  view: ViewReview;
+}) {
+  const siblings = COLOR_SCHEMES.filter(([colorScheme]) =>
+    props.screen.views.some(
+      (candidate) =>
+        candidate.viewport === props.view.viewport &&
+        candidate.colorScheme === colorScheme,
+    ),
+  );
+  if (siblings.length < 2) return null;
+  return (
+    <span aria-label="Color scheme" className="mbk-seg" role="group">
+      {siblings.map(([colorScheme, label]) => (
+        <ViewOption
+          active={colorScheme === props.view.colorScheme}
+          colorScheme={colorScheme}
+          key={colorScheme}
+          label={label}
+          pagePath={props.pagePath}
+          route={props.screen.route}
+          viewport={props.view.viewport}
+        />
+      ))}
+    </span>
+  );
+}
+
+function ViewOption(props: {
   active: boolean;
+  colorScheme: ViewReview["colorScheme"];
+  label: string;
   pagePath: string;
   route: string;
-  viewport: ViewportReview["viewport"];
+  viewport: ViewReview["viewport"];
 }) {
-  const label = props.viewport === "mobile" ? "Mobile" : "Desktop";
   if (props.active) {
     return (
       <span aria-current="page" className="active">
-        {label}
+        {props.label}
       </span>
     );
   }
   const target = relativeLink(
     props.pagePath,
-    comparisonPagePath(props.route, props.viewport),
+    comparisonPagePath(props.route, props.viewport, props.colorScheme),
   );
-  return <a href={target}>{label}</a>;
+  return <a href={target}>{props.label}</a>;
+}
+
+function viewportLabel(viewport: ViewReview["viewport"]): string {
+  return viewport === "mobile" ? "Mobile" : "Desktop";
 }
 
 function Pane(props: {
