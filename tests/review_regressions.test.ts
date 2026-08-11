@@ -259,7 +259,7 @@ function fakeGit(files: ReadonlyMap<string, string>): GitClient {
         throw new Error(`missing fake Git path ${repoPath}`);
       return Buffer.from(value);
     },
-    resolveRef: async () => "a".repeat(40),
+    mergeBase: async () => "a".repeat(40),
   };
 }
 

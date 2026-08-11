@@ -64,8 +64,8 @@ test("Git failures keep typed operation context", async () => {
     },
   });
   await assert.rejects(
-    () => git.resolveRef("origin/main"),
-    /resolve origin\/main.*not a repository/,
+    () => git.mergeBase("origin/main", "HEAD"),
+    /find merge base of origin\/main and HEAD.*not a repository/,
   );
 });
 
@@ -134,7 +134,7 @@ test("Review classifies added, removed, and unchanged routes independently", asy
           throw new Error(`missing fake Git path ${repoPath}`);
         return Buffer.from(content);
       },
-      resolveRef: async () => "a".repeat(40),
+      mergeBase: async () => "a".repeat(40),
     },
     "HEAD",
   );
@@ -461,7 +461,7 @@ function fakeGit(files: ReadonlyMap<string, string>): GitClient {
         throw new Error(`missing fake Git path ${repoPath}`);
       return Buffer.from(content);
     },
-    resolveRef: async () => "a".repeat(40),
+    mergeBase: async () => "a".repeat(40),
   };
 }
 

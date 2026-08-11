@@ -11,12 +11,12 @@ Commands:
   serve    Build and serve Browse; watch by default
   build    Generate static HTML fragments and the version 3 manifest
   check    Validate source and committed generated output without writing
-  review   Compare checked output with a Git base and write a static artifact
+  review   Compare branch output with its Git branch point and write an artifact
 
 Options:
   --config <path>  Use an explicit mokabook.config file
   --port <port>    Starting port; advances if occupied, 0 selects any free port
-  --base <ref>     Git base used by Browse Review or review
+  --base <ref>     Git base ref used to find the branch point
   --watch          Watch consumer inputs (serve default)
   --no-watch       Serve one deterministic snapshot
   --out <path>     Review artifact directory

@@ -89,10 +89,13 @@ inspector.
 Consumer brand chrome does not appear in the shell. A small set of documented
 CSS custom properties may tune the shell accent without replacing its
 structural styles. The shell serves its packaged Inter variable font from
-`/__mokabook/fonts/`. The All/Changed filter lives at the top of the
-navigation column, shows the changed count, and derives from Git changes
-against the serve base ref; when the repository or base cannot be resolved,
-Browse omits the filter and shows the full catalogue.
+`/__mokabook/fonts/`. The All/Changed filter lives at the top of the navigation
+column, shows the changed count, and derives from Git changes between the
+current workspace and the merge base shared by `HEAD` and the serve base ref.
+Commits reachable only from the base ref are not branch changes. Staged,
+unstaged, and untracked workspace changes remain eligible. When the repository,
+base ref, or common ancestor cannot be resolved, Browse omits the filter and
+shows the full catalogue.
 Route attribution compares each current manifest entry with its base entry and
 matches changed generated fragments plus explicitly declared dependencies. The
 automatically recorded registry source module is attribution metadata, not a
@@ -246,9 +249,11 @@ the child exit notification arrives.
 ## Review Comparison
 
 `mokabook review` compares the workspace with a configured base ref, defaulting
-to `origin/main`. It resolves the base to a commit and reads the committed
-`mockupsDir` tree from Git without checking out or rebuilding the base. Head
-artifacts come from the current working tree after `mokabook check` succeeds.
+to `origin/main`. It resolves the merge base shared by `HEAD` and that ref, then
+reads the committed `mockupsDir` tree at that branch point without checking it
+out or rebuilding it. Commits reachable only from the configured base do not
+enter the comparison. Head artifacts come from the current working tree after
+`mokabook check` succeeds.
 Review inspects only the requested base paths, grouping exact literal pathspecs
 into count- and byte-bounded `ls-tree` operations, and reads regular-file blobs
 through output-byte- and object-count-bounded `cat-file` batches. A single blob
@@ -363,7 +368,7 @@ generation errors fail the command.
 interface ReviewResult {
   schemaVersion: 2;
   baseRef: string;
-  baseCommit: string;
+  baseCommit: string; // merge base shared by HEAD and baseRef
   changedPaths: readonly string[];
   sharedImpact: readonly string[];
   ignoredImpact: readonly {

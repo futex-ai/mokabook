@@ -77,11 +77,12 @@ and every manifest-backed route. It copies the shell stylesheet, browser
 navigation modules, fonts, id redirects, and every validated public consumer
 asset into `.context/mokabook-preview`. Preview shell links use Cloudflare
 Pages' canonical extensionless HTML routes, and static deployments omit the
-watched server's live-update module. The builder computes route changes against
-`origin/main`, and both deployment jobs fetch complete Git history so the
-static Browse shell always includes the All/Changed filter, including a zero
-count. Artifact replacement is transactional and refuses to overwrite a
-directory without Mokabook's ownership marker.
+watched server's live-update module. The builder computes route changes from the
+branch point shared with `origin/main`, and both deployment jobs fetch complete
+Git history so that common ancestor can be resolved and the static Browse shell
+always includes the All/Changed filter, including a zero count. Artifact
+replacement is transactional and refuses to overwrite a directory without
+Mokabook's ownership marker.
 
 Closing a same-repository pull request marks its sticky comment inactive and
 attempts to delete all Cloudflare deployments carrying that PR branch alias.

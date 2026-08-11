@@ -70,7 +70,7 @@ test("Review batches base viewport reads", async (context) => {
         ]),
       );
     },
-    resolveRef: async () => "a".repeat(40),
+    mergeBase: async () => "a".repeat(40),
   };
 
   await compareReview(compilation, config, git, "HEAD");

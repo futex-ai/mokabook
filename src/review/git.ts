@@ -11,7 +11,7 @@ export type GitFile =
   | { readonly bytes: Uint8Array; readonly kind: "regular" }
   | { readonly kind: Exclude<GitFileKind, "regular"> };
 
-/** Git operations required by Review without checking out the base tree. */
+/** Git operations required by Review without checking out the branch point. */
 export interface GitClient {
   changedPaths(
     commit: string,
@@ -25,7 +25,7 @@ export interface GitClient {
     commit: string,
     repoRelativePaths: readonly string[],
   ): Promise<ReadonlyMap<string, GitFile>>;
-  resolveRef(reference: string): Promise<string>;
+  mergeBase(baseReference: string, headReference: string): Promise<string>;
 }
 
 /** Injected subprocess runner for Git commands. */
@@ -98,16 +98,19 @@ export class NodeGitCommandRunner implements GitCommandRunner {
 export class RepositoryGitClient implements GitClient {
   constructor(private readonly runner: GitCommandRunner) {}
 
-  async resolveRef(reference: string): Promise<string> {
+  async mergeBase(
+    baseReference: string,
+    headReference: string,
+  ): Promise<string> {
     const output = await this.run(
-      ["rev-parse", "--verify", `${reference}^{commit}`],
-      `resolve ${reference}`,
+      ["merge-base", "--", baseReference, headReference],
+      `find merge base of ${baseReference} and ${headReference}`,
     );
     const commit = output.trim();
     if (!/^[a-f0-9]{40,64}$/.test(commit)) {
       throw new MokabookError(
         "git-failed",
-        `Git returned an invalid commit for ${reference}`,
+        `Git returned an invalid merge base for ${baseReference} and ${headReference}`,
       );
     }
     return commit;

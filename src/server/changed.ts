@@ -13,7 +13,7 @@ import { reviewChangedPaths } from "../review/changed_paths.js";
 import type { GitClient } from "../review/git.js";
 import { NodeGitCommandRunner, RepositoryGitClient } from "../review/git.js";
 
-/** Compute routes affected against the base, or undefined when unavailable. */
+/** Compute routes affected since the base branch point, if available. */
 export async function computeChangedRoutes(
   config: ResolvedConfig,
   base: string,
@@ -30,7 +30,7 @@ export async function computeChangedRoutes(
         return undefined;
       client = new RepositoryGitClient(runner);
     }
-    const commit = await client.resolveRef(base);
+    const commit = await client.mergeBase(base, "HEAD");
     const changed = await reviewChangedPaths(
       client,
       commit,

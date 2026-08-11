@@ -37,7 +37,7 @@ import type {
   ViewReview,
 } from "./types.js";
 
-/** Compare checked head output to a Git base and retain complete pane artifacts. */
+/** Compare checked head output to its Git branch point and retain pane artifacts. */
 export async function compareReview(
   compilation: Compilation,
   config: ResolvedConfig,
@@ -47,7 +47,7 @@ export async function compareReview(
   assetReader: ReviewAssetReader = new FileSystemReviewAssetReader(config),
   changedPathExclusions: readonly string[] = [],
 ): Promise<ReviewArtifact> {
-  const baseCommit = await git.resolveRef(baseRef);
+  const baseCommit = await git.mergeBase(baseRef, "HEAD");
   const baseManifest = await readBaseManifest(git, baseCommit, config);
   const changedPaths = await reviewChangedPaths(
     git,
