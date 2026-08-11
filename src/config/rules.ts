@@ -1,8 +1,43 @@
+import type { ColorScheme } from "../authoring/types.js";
 import { MokabookError } from "../errors.js";
 import { validateCatalogueRoute, validateRelativeRoute } from "./paths.js";
 import type { LegacyConfig, StylesheetRule, WatchRule } from "./types.js";
 
 const WATCH_ACTIONS = new Set(["ignore", "rebuild", "reload", "restart"]);
+
+/** Validate and normalize the configured color-scheme rendering targets. */
+export function validateColorSchemes(value: unknown): ColorScheme[] {
+  if (value === undefined) return ["light"];
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new MokabookError(
+      "config-invalid",
+      "colorSchemes must be a non-empty array",
+    );
+  }
+  const schemes = new Set<ColorScheme>();
+  for (const scheme of value) {
+    if (scheme !== "light" && scheme !== "dark") {
+      throw new MokabookError(
+        "config-invalid",
+        `colorSchemes contains an unknown value: ${String(scheme)}`,
+      );
+    }
+    if (schemes.has(scheme)) {
+      throw new MokabookError(
+        "config-invalid",
+        `duplicate colorSchemes value: ${scheme}`,
+      );
+    }
+    schemes.add(scheme);
+  }
+  if (!schemes.has("light")) {
+    throw new MokabookError(
+      "config-invalid",
+      'colorSchemes must include "light"',
+    );
+  }
+  return schemes.has("dark") ? ["light", "dark"] : ["light"];
+}
 
 /** Normalize configured legacy lint policy. */
 export function resolveLegacyLint(
@@ -74,16 +109,101 @@ export function validateStylesheets(
         `stylesheets[${index}].stylesheets must be an array`,
       );
     }
-    return {
+    const normalized: StylesheetRule = {
       match: rule.match,
-      stylesheets: rule.stylesheets.map((stylesheet: string) => {
-        requireString(stylesheet, `stylesheets[${index}] path`);
-        return /^https?:\/\//.test(stylesheet)
-          ? stylesheet
-          : validateRelativeRoute(stylesheet, `stylesheets[${index}] path`);
-      }),
+      stylesheets: validateStylesheetPaths(
+        rule.stylesheets,
+        `stylesheets[${index}] path`,
+      ),
+      ...(rule.lightStylesheets !== undefined
+        ? {
+            lightStylesheets: validateOptionalStylesheetPaths(
+              rule.lightStylesheets,
+              index,
+              "lightStylesheets",
+            ),
+          }
+        : {}),
+      ...(rule.darkStylesheets !== undefined
+        ? {
+            darkStylesheets: validateOptionalStylesheetPaths(
+              rule.darkStylesheets,
+              index,
+              "darkStylesheets",
+            ),
+          }
+        : {}),
     };
+    validateRuleStylesheetLinks(normalized, index);
+    return normalized;
   });
+}
+
+function validateOptionalStylesheetPaths(
+  value: unknown,
+  index: number,
+  field: "darkStylesheets" | "lightStylesheets",
+): string[] {
+  if (!Array.isArray(value)) {
+    throw new MokabookError(
+      "config-invalid",
+      `stylesheets[${index}].${field} must be an array`,
+    );
+  }
+  return validateStylesheetPaths(value, `stylesheets[${index}].${field} path`);
+}
+
+/**
+ * Reject stylesheet paths one rule would link twice into a single fragment.
+ * Every fragment links the shared list followed by the list for its own scheme,
+ * so a path repeated inside one list, or shared by the common list and a
+ * per-scheme list, double-links; the same path in both per-scheme lists is fine
+ * because no fragment links both. Separate rules may reuse a path freely.
+ */
+function validateRuleStylesheetLinks(
+  rule: StylesheetRule,
+  index: number,
+): void {
+  validateUniqueStylesheetPaths([], rule.stylesheets, index, "stylesheets");
+  validateUniqueStylesheetPaths(
+    rule.stylesheets,
+    rule.lightStylesheets ?? [],
+    index,
+    "lightStylesheets",
+  );
+  validateUniqueStylesheetPaths(
+    rule.stylesheets,
+    rule.darkStylesheets ?? [],
+    index,
+    "darkStylesheets",
+  );
+}
+
+function validateStylesheetPaths(value: unknown[], label: string): string[] {
+  return value.map((stylesheet) => {
+    requireString(stylesheet, label);
+    return /^https?:\/\//.test(stylesheet)
+      ? stylesheet
+      : validateRelativeRoute(stylesheet, label);
+  });
+}
+
+function validateUniqueStylesheetPaths(
+  linked: readonly string[],
+  paths: readonly string[],
+  index: number,
+  field: "darkStylesheets" | "lightStylesheets" | "stylesheets",
+): void {
+  const seen = new Set(linked);
+  for (const stylesheet of paths) {
+    if (seen.has(stylesheet)) {
+      throw new MokabookError(
+        "config-invalid",
+        `duplicate stylesheet path in stylesheets[${index}].${field}: ${stylesheet}`,
+      );
+    }
+    seen.add(stylesheet);
+  }
 }
 
 /** Validate explicit watch classifications and reject ambiguity. */

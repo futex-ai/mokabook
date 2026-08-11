@@ -72,6 +72,7 @@ the following contract:
 - `mockupsDir`: output/catalogue root, such as `docs/mockups`;
 - `entriesDir`: structured `*.mockup.ts` and `*.mockup.tsx` source directory;
 - optional legacy page discovery and rendering settings;
+- a light-only or light-and-dark catalogue rendering set;
 - optional renderer-module path and declarative route-to-stylesheet rules;
 - optional consumer package roots, aliases, conditions, fields, extensions, and
   loaders for app-owned module resolution;
@@ -96,6 +97,8 @@ explicit initializer or documented example, not hidden in runtime logic.
 The normative configuration shape is:
 
 ```ts
+type ColorScheme = "dark" | "light";
+
 type ModuleLoader =
   | "base64"
   | "binary"
@@ -111,6 +114,7 @@ type ModuleLoader =
   | "tsx";
 
 interface MokabookConfig {
+  colorSchemes?: readonly ColorScheme[]; // ["light"]
   entriesDir: string;
   mockupsDir: string;
   repoRoot?: string; // config directory
@@ -126,6 +130,8 @@ interface MokabookConfig {
   stylesheets?: readonly {
     match: string;
     stylesheets: readonly string[];
+    lightStylesheets?: readonly string[];
+    darkStylesheets?: readonly string[];
   }[];
   legacy?: {
     pagesDir: string;
@@ -161,6 +167,11 @@ Filesystem fields (`repoRoot`, `entriesDir`, `mockupsDir`, `renderer`, legacy
 page/component paths, compatibility transformer, module-resolution package
 roots, and Review `outDir`) are config-relative. Stylesheet file paths are
 relative to `mockupsDir`; HTTP(S) stylesheet URLs are allowed.
+`colorSchemes` is a non-empty, duplicate-free subset of `"light" | "dark"`
+that must include `"light"`; it defaults to `["light"]` and normalizes to
+light-first order. Shared `stylesheets` apply to every generated view, with a
+matching `lightStylesheets` or `darkStylesheets` list appended in declaration
+order.
 `watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
 globs, while stylesheet `match` and legacy aliases/lint routes match catalogue
 routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
@@ -199,6 +210,8 @@ The root package export supplies typed, documented authoring helpers:
 - `mockLink` and `MockLink` for id-addressed links;
 - `ReviewIgnore`, `ReviewIgnoreScope`, and `reviewMaterialKey`.
 
+The root also exports the `ColorScheme` type, exactly `"dark" | "light"`.
+
 A screen owns one mobile React node and one desktop React node. A collection is
 structural and owns child ids but no route. A use case owns ordered references
 to existing screens and never defines a screen inline. Ids are explicit,
@@ -212,6 +225,12 @@ cases provide a stable relative `.html` route; use cases live under
 `user-flows/`. Screens may provide an address-bar label and use-case
 membership. Nested definitions inherit declared metadata, but ids never derive
 from tree position.
+
+`defineScreen` and nested `screen` inputs may declare `colorSchemes`. When
+omitted, a screen inherits the catalogue set; `colorSchemes: ["light"]` is the
+supported opt-out from a dark-enabled catalogue. A declaration must be
+non-empty, duplicate-free, include `"light"`, and be a subset of the config.
+Nested trees do not inherit this field from their collections or root.
 
 Imports of `mokabook` from modules beneath `entriesDir` bind the authoring
 helpers to that importing module. Definitions created at module evaluation or
@@ -255,9 +274,10 @@ contract:
 
 ```ts
 import type { ReactNode } from "react";
-import type { ScreenDefinition, Viewport } from "mokabook";
+import type { ColorScheme, ScreenDefinition, Viewport } from "mokabook";
 
 interface RenderInput {
+  colorScheme: ColorScheme;
   entry: ScreenDefinition;
   node: ReactNode;
   stylesheets: readonly string[];
@@ -277,6 +297,11 @@ output. The package declares `react` and `react-dom`
 both peers and their subpaths from consumer config, then bundles every
 React-bearing input in one internal graph.
 
+The builder invokes the renderer once for every effective viewport and color
+scheme. Light stays the default and canonical render. The consumer renderer
+uses `colorScheme` to select its theme and may stamp `color-scheme` or a data
+hook on the complete document; Mokabook does not own product theme state.
+
 All entry modules and the renderer are bundled into one build-time graph with
 one React instance. This must work when Mokabook is installed locally and when
 it is fetched into npm's npx cache. Consumer dependencies resolve from the
@@ -295,6 +320,7 @@ and default-exports this contract:
 ```ts
 interface CompatibilityTransformInput {
   availableRoutes: readonly string[];
+  colorScheme: "dark" | "light";
   content: string;
   logicalRoutes: Readonly<Record<string, string>>;
   outputPath: string;
@@ -308,17 +334,21 @@ type CompatibilityTransformer = (input: CompatibilityTransformInput) => string;
 `availableRoutes` contains the complete pending output plus retained existing
 public static files; generated files scheduled for orphan removal are excluded.
 `logicalRoutes` maps screen/use-case catalogue routes to concrete artifacts for
-the current viewport. `outputPath` is repository-relative; no absolute checkout
-path is exposed. Mokabook applies the transformer after id links resolve and
-before Review-marker, link, resource, and ownership validation. It must return
-a complete document, remain deterministic, and stay consumer-owned. It cannot
+the current viewport and color scheme. A dark document targets dark fragments
+when the destination supports them and otherwise falls back to the light
+fragment. `outputPath` is repository-relative; no absolute checkout path is
+exposed. Mokabook applies the transformer after id links resolve and before
+Review-marker, link, resource, and ownership validation. It must return a
+complete document, remain deterministic, and stay consumer-owned. It cannot
 weaken final validation. New catalogues should author portable links directly
 and leave this option unset.
 
 Stylesheet rules are ordered, declarative consumer configuration. Their globs
 match the catalogue route before viewport fragments are derived, so one exact
-screen-route rule applies to both viewports. Generated fragment links are
-relative to the fragment route and URL-encoded by segment.
+screen-route rule applies to both viewports and every enabled scheme. Shared
+stylesheets come first, followed by the matching scheme-specific list.
+Generated fragment links are relative to the fragment route and URL-encoded by
+segment.
 Shell and device-frame CSS is package-owned and self-contained; product CSS is
 never copied into the npm package.
 
@@ -327,12 +357,17 @@ never copied into the npm package.
 `mokabook build` writes deterministic output under `mockupsDir`:
 
 - `<screen>.mobile.html` and `<screen>.desktop.html` fragments for each screen;
+- `<screen>.mobile.dark.html` and `<screen>.desktop.dark.html` when that screen's
+  effective schemes include dark;
 - legacy HTML only when legacy support is configured;
 - `mokabook-manifest.json` using schema version 3.
 
 Screen and use-case routes are durable identifiers and do not imply a composed
 HTML file. A screen's fragments are bare product renders with required head
 content but without Mokabook shell chrome. Collections generate no page.
+Light fragments remain canonical and unsuffixed. Turning dark off makes the
+previous dark documents proven generated orphans: `check` reports them and
+`build` removes them through the normal ownership-safe lifecycle.
 
 Manifest source and output paths are repository-relative; routes are relative
 to `mockupsDir`. The manifest includes every entry, fragment, legacy page,
@@ -374,6 +409,7 @@ type ManifestEntry =
       kind: "screen";
       route: string;
       address?: string;
+      darkFragments?: { mobile: string; desktop: string };
       fragments: { mobile: string; desktop: string };
       viewports: readonly ["mobile", "desktop"];
       useCaseIds: readonly string[];
@@ -395,6 +431,11 @@ type ManifestEntry =
 
 Entries sort by route then id; legacy pages, dependencies, and generated files
 sort lexically. Optional properties are omitted, not emitted as `null`.
+`darkFragments` is present exactly when the screen's effective schemes include
+dark. Its routes use the `.mobile.dark.html` and `.desktop.dark.html` names and
+participate in the same safe-route and collision validation as light fragments.
+Light-only manifests omit the field and remain byte-identical to pre-axis
+schema-v3 output.
 `sourcePath`, related docs, and dependencies use repo-relative POSIX paths.
 Manifest dependencies retain the file-or-directory-root matching semantics of
 the authoring API.

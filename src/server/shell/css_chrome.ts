@@ -1,7 +1,8 @@
-/** Device chrome styles: the phone body, browser window, expand overlay, and
- * the numbered flow track shared by use-case views. */
+/** Device chrome styles: the phone body, browser window, expand overlay, the
+ * dark device screens of a dark color-scheme selection, and the numbered flow
+ * track shared by use-case views. */
 
-/** Phone, browser, expand-overlay, and flow-track styles. */
+/** Phone, browser, expand-overlay, dark-screen, and flow-track styles. */
 export const SHELL_CHROME_CSS = `
 .phone-frame {
   position: relative;
@@ -263,6 +264,52 @@ body.frame-expanded::before {
   max-width: none;
   height: auto;
   box-shadow: 0 40px 120px rgba(20, 28, 22, 0.4);
+}
+
+body[data-mokabook-color-scheme="dark"]
+  :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
+  .phone-screen {
+  background: var(--mbk-dark-screen-bg);
+}
+
+body[data-mokabook-color-scheme="dark"]
+  :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
+  .phone-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px
+    color-mix(
+      in srgb,
+      var(--mbk-dark-screen-ink) 12%,
+      var(--mbk-dark-screen-bg)
+    );
+  pointer-events: none;
+}
+
+body[data-mokabook-color-scheme="dark"]
+  :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
+  .phone-status {
+  color: var(--mbk-dark-screen-ink);
+}
+
+body[data-mokabook-color-scheme="dark"]
+  :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
+  .phone-home {
+  background: color-mix(in srgb, var(--mbk-dark-screen-ink) 40%, transparent);
+}
+
+body[data-mokabook-color-scheme="dark"]
+  :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
+  .browser-viewport {
+  background: var(--mbk-dark-screen-bg);
+}
+
+body[data-mokabook-color-scheme="dark"]
+  :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
+  .mbk-frag {
+  background: var(--mbk-dark-screen-bg);
 }
 
 .flow-track {

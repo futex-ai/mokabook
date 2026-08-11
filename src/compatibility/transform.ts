@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import type { ResolvedRegistryEntry, Viewport } from "../authoring/types.js";
+import type { ResolvedRegistryEntry } from "../authoring/types.js";
 import {
   rewriteMockLinks,
   logicalArtifactRoutes,
@@ -13,6 +13,7 @@ import { MokabookError, errorMessage } from "../errors.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
 import type { LoadedGraph } from "../build/load_graph.js";
 import { pendingGeneratedOrphanRoutes } from "../build/ownership.js";
+import type { ArtifactView } from "../registry/views.js";
 
 /** Resolve legacy id links and apply an explicitly configured migration bridge. */
 export function transformCompatibilityDocuments(
@@ -20,13 +21,22 @@ export function transformCompatibilityDocuments(
   entries: readonly ResolvedRegistryEntry[],
   config: ResolvedConfig,
   graph: LoadedGraph,
+  fragmentViews: ReadonlyMap<string, ArtifactView>,
 ): void {
   const byId = new Map(entries.map((entry) => [entry.id, entry]));
   const outputRoutes = [...outputs.keys()];
   const availableRoutes = availablePublicRoutes(outputRoutes, config);
   for (const [route, original] of outputs) {
-    const viewport = routeViewport(route);
-    const linked = rewriteMockLinks(original, route, viewport, byId);
+    const { colorScheme, viewport } =
+      fragmentViews.get(route) ?? legacyRouteView(route);
+    const linked = rewriteMockLinks(
+      original,
+      route,
+      viewport,
+      colorScheme,
+      byId,
+      config.colorSchemes,
+    );
     const transformer = graph.compatibilityTransformer;
     if (!transformer) {
       outputs.set(route, linked);
@@ -36,8 +46,14 @@ export function transformCompatibilityDocuments(
     try {
       transformed = transformer({
         availableRoutes,
+        colorScheme,
         content: linked,
-        logicalRoutes: logicalArtifactRoutes(entries, viewport),
+        logicalRoutes: logicalArtifactRoutes(
+          entries,
+          viewport,
+          colorScheme,
+          config.colorSchemes,
+        ),
         outputPath: toPosixPath(
           path.relative(config.repoRoot, path.join(config.mockupsDir, route)),
         ),
@@ -81,6 +97,9 @@ function availablePublicRoutes(
   return [...new Set([...nextRoutes, ...publicRoutes])].sort();
 }
 
-function routeViewport(route: string): Viewport {
-  return route.endsWith(".mobile.html") ? "mobile" : "desktop";
+function legacyRouteView(route: string): ArtifactView {
+  if (route.endsWith(".mobile.html")) {
+    return { colorScheme: "light", viewport: "mobile" };
+  }
+  return { colorScheme: "light", viewport: "desktop" };
 }

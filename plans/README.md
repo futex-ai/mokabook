@@ -7,4 +7,4 @@
 
 ## Completed
 
-None yet.
+- [Native Color Scheme (Dark Mode) Support](./native-color-scheme-support.md)

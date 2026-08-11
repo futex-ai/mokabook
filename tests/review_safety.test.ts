@@ -64,7 +64,7 @@ test("Review artifact paths are collision-free for distinct valid routes", async
     "HEAD",
   );
   const afterPaths = artifact.result.screens.flatMap((screen) =>
-    screen.viewports.flatMap((viewport) => viewport.afterPath ?? []),
+    screen.views.flatMap((view) => view.afterPath ?? []),
   );
 
   assert.equal(afterPaths.length, 4);
@@ -102,7 +102,7 @@ test("Review comparison panes are sandboxed without script permission", () => {
       baseRef: "HEAD",
       changedPaths: [],
       ignoredImpact: [],
-      schemaVersion: 1,
+      schemaVersion: 2,
       screens: [
         {
           dependencies: [],
@@ -111,10 +111,11 @@ test("Review comparison panes are sandboxed without script permission", () => {
           sharedImpact: [],
           state: "changed",
           title: "Home",
-          viewports: [
+          views: [
             {
               afterPath: "screens/screens/home/mobile/after.html",
               beforePath: "screens/screens/home/mobile/before.html",
+              colorScheme: "light",
               ignoredIds: [],
               state: "changed",
               viewport: "mobile",

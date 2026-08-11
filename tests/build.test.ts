@@ -41,8 +41,58 @@ test("custom renderer shares consumer React context and injects collected styles
   const compilation = await compileCatalogue(config);
   const mobile = compilation.outputs.get("screens/welcome.mobile.html") ?? "";
   assert.match(mobile, /data-example-renderer="mobile"/);
-  assert.match(mobile, /<style>body\{margin:0\}<\/style>/);
+  assert.match(mobile, /data-color-scheme="light"/);
+  assert.match(
+    mobile,
+    /<style>html\{color-scheme:light\}body\{margin:0;background:#f7f7f3\}<\/style>/,
+  );
   assert.equal(mobile.includes(repositoryRoot), false);
+});
+
+test("dark schemes render dark fragments per view", async (context) => {
+  const fixture = await createFixture(
+    validEntrySource().replace(
+      'defineScreen({ ...metadata, description: "Detail screen"',
+      'defineScreen({ ...metadata, colorSchemes: ["light"], description: "Detail screen"',
+    ),
+    { extraConfig: 'colorSchemes: ["light", "dark"],' },
+  );
+  context.after(() => removeFixture(fixture));
+
+  const compilation = await compileCatalogue(await loadConfig(fixture.root));
+  for (const route of [
+    "screens/home.mobile.html",
+    "screens/home.desktop.html",
+    "screens/home.mobile.dark.html",
+    "screens/home.desktop.dark.html",
+  ]) {
+    assert.ok(compilation.outputs.has(route), `missing ${route}`);
+  }
+  assert.equal(
+    compilation.outputs.get("screens/home.mobile.dark.html"),
+    compilation.outputs.get("screens/home.mobile.html"),
+  );
+  const home = compilation.manifest.entries.find(
+    (entry) => entry.id === "home",
+  );
+  const details = compilation.manifest.entries.find(
+    (entry) => entry.id === "details",
+  );
+  assert.equal(home?.kind, "screen");
+  assert.deepEqual(home?.kind === "screen" ? home.darkFragments : undefined, {
+    desktop: "screens/home.desktop.dark.html",
+    mobile: "screens/home.mobile.dark.html",
+  });
+  assert.equal(
+    details?.kind === "screen" ? details.darkFragments : undefined,
+    undefined,
+  );
+  assert.deepEqual(
+    [...compilation.outputs.keys()].filter((route) =>
+      route.startsWith("screens/details."),
+    ),
+    ["screens/details.mobile.html", "screens/details.desktop.html"],
+  );
 });
 
 test("manifest readers accept version 2 only through explicit compatibility", async (context) => {
@@ -164,6 +214,29 @@ export const mockups = [defineCollection({
   );
 });
 
+test("screen colorSchemes must be a subset of config", async (context) => {
+  const fixture = await createFixture(
+    screenWithColorSchemes('["light", "dark"]'),
+  );
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+
+  await assert.rejects(
+    () => compileCatalogue(config),
+    /unsupported-color-scheme[\s\S]*screen declares "dark" but config colorSchemes is light-only/,
+  );
+  for (const colorSchemes of ["[]", '["dark"]', '["light", "light"]']) {
+    await fs.promises.writeFile(
+      fixture.entryPath,
+      screenWithColorSchemes(colorSchemes),
+    );
+    await assert.rejects(
+      () => compileCatalogue(config),
+      /invalid-color-schemes[\s\S]*colorSchemes must be a non-empty subset of \["light", "dark"\] that includes "light"/,
+    );
+  }
+});
+
 test("missing declared dependencies and stylesheets are actionable", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
@@ -185,6 +258,35 @@ test("missing declared dependencies and stylesheets are actionable", async (cont
   await assert.rejects(
     () => compileCatalogue(stylesheetConfig),
     /stylesheet does not exist/,
+  );
+});
+
+test("scheme-specific stylesheets append after shared stylesheets", async (context) => {
+  const fixture = await createFixture(undefined, {
+    extraConfig: `colorSchemes: ["light", "dark"],
+  stylesheets: [{ match: "**/*.html", stylesheets: ["shared.css"], darkStylesheets: ["dark.css"] }],`,
+  });
+  context.after(() => removeFixture(fixture));
+  await fs.promises.writeFile(
+    path.join(fixture.mockupsDir, "shared.css"),
+    "body { margin: 0; }\n",
+  );
+  await fs.promises.writeFile(
+    path.join(fixture.mockupsDir, "dark.css"),
+    "body { color: white; }\n",
+  );
+  const config = await loadConfig(fixture.root);
+
+  const compilation = await compileCatalogue(config);
+  const light = compilation.outputs.get("screens/home.mobile.html") ?? "";
+  const dark = compilation.outputs.get("screens/home.mobile.dark.html") ?? "";
+  assert.deepEqual(stylesheetHrefs(light), ["../shared.css"]);
+  assert.deepEqual(stylesheetHrefs(dark), ["../shared.css", "../dark.css"]);
+
+  await fs.promises.rm(path.join(fixture.mockupsDir, "dark.css"));
+  await assert.rejects(
+    () => compileCatalogue(config),
+    /stylesheet does not exist: dark\.css/,
   );
 });
 
@@ -264,6 +366,30 @@ async function treeDigest(root: string): Promise<string> {
     hash.update(await fs.promises.readFile(file));
   }
   return hash.digest("hex");
+}
+
+function stylesheetHrefs(html: string): string[] {
+  return [...html.matchAll(/<link rel="stylesheet" href="([^"]+)">/g)].map(
+    (match) => match[1] ?? "",
+  );
+}
+
+function screenWithColorSchemes(colorSchemes: string): string {
+  return `import { defineScreen } from "mokabook";
+import React from "react";
+export const mockups = [defineScreen({
+  colorSchemes: ${colorSchemes} as ("dark" | "light")[],
+  dependencies: [],
+  description: "Scheme screen",
+  desktop: <main>Desktop</main>,
+  id: "scheme-screen",
+  mobile: <main>Mobile</main>,
+  navPath: ["Fixture"],
+  relatedDocs: [],
+  route: "screens/scheme.html",
+  title: "Scheme screen"
+})];
+`;
 }
 
 async function listFiles(root: string): Promise<string[]> {

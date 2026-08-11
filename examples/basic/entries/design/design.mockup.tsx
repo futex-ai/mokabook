@@ -1,5 +1,6 @@
 import { collection, defineRoot } from "mokabook";
 
+import { browseSchemeScreens } from "./browse_scheme_screens.js";
 import { browseStateScreens, browseViewScreens } from "./browse_screens.js";
 import { reviewOutcomeScreens } from "./review_outcome_screens.js";
 import { reviewImpactScreens } from "./review_impact_screens.js";
@@ -23,9 +24,9 @@ export const mockups = defineRoot({
           title: "Catalogue views",
         }),
         collection({
-          children: browseStateScreens,
+          children: [...browseStateScreens, ...browseSchemeScreens],
           description:
-            "Browse states for details, missing routes, and narrow layouts.",
+            "Browse states for details, missing routes, narrow layouts, and color schemes.",
           id: "design-browse-states",
           segment: "states",
           title: "Shell states",
@@ -42,7 +43,7 @@ export const mockups = defineRoot({
         collection({
           children: reviewOutcomeScreens,
           description:
-            "Per-screen comparison pages for each classification outcome.",
+            "Per-screen comparison pages for each classification outcome, mode, and color scheme.",
           id: "design-review-outcomes",
           segment: "outcomes",
           title: "Comparison outcomes",

@@ -16,6 +16,7 @@ export interface TestFixture {
 /** Create a clean synthetic consumer that resolves package peers from this repo. */
 export async function createFixture(
   entrySource = validEntrySource(),
+  options?: { extraConfig?: string },
 ): Promise<TestFixture> {
   const contextRoot = path.join(repositoryRoot, ".context");
   await fs.promises.mkdir(contextRoot, { recursive: true });
@@ -37,7 +38,7 @@ export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
   repoRoot: ".",
-  review: { outDir: ".review", sharedImpact: ["notes.md"] }
+${options?.extraConfig ? `  ${options.extraConfig}\n` : ""}  review: { outDir: ".review", sharedImpact: ["notes.md"] }
 });
 `,
   );

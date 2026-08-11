@@ -1,3 +1,5 @@
+import type { ColorScheme } from "../authoring/types.js";
+
 /** Filesystem changes understood by the watched development runtime. */
 export type WatchAction = "ignore" | "rebuild" | "reload" | "restart";
 
@@ -7,6 +9,10 @@ export interface StylesheetRule {
   match: string;
   /** Paths relative to `mockupsDir`, or absolute HTTP(S) URLs. */
   stylesheets: readonly string[];
+  /** Additional stylesheets appended for light fragments. */
+  lightStylesheets?: readonly string[];
+  /** Additional stylesheets appended for dark fragments. */
+  darkStylesheets?: readonly string[];
 }
 
 /** Optional support for pre-registry source pages during consumer migration. */
@@ -99,6 +105,8 @@ export interface ModuleResolutionConfig {
 
 /** Public, serializable host configuration. */
 export interface MokabookConfig {
+  /** Color schemes rendered for screens; defaults to light only. */
+  colorSchemes?: readonly ColorScheme[];
   /** Config-relative structured mockup source directory. */
   entriesDir: string;
   /** Config-relative generated catalogue/output root. */
@@ -123,6 +131,7 @@ export interface MokabookConfig {
 
 /** Absolute, validated configuration consumed by runtime engines. */
 export interface ResolvedConfig {
+  colorSchemes: readonly ColorScheme[];
   compatibility: {
     readManifestV2: boolean;
     transformer?: string;

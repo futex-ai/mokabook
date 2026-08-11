@@ -1,6 +1,11 @@
 /* The Mokabook design stage: device chromes on the dotted stage, the mini
    screen sketches, the details inspector, and the use-case flow track. */
 
+:root {
+  --mbk-dark-screen-bg: #121514;
+  --mbk-dark-screen-ink: #eef1ef;
+}
+
 .mbk-stage {
   align-items: flex-start;
   background: radial-gradient(
@@ -47,6 +52,12 @@
   letter-spacing: 0.06em;
   margin: 0 0 10px;
   text-transform: uppercase;
+}
+
+/* The color-scheme state of a frame reads as a lighter second half of the
+   label rather than a separate badge. */
+.mbk-frame-scheme-note {
+  font-weight: 500;
 }
 
 /* ---- Phone chrome ----------------------------------------------------- */
@@ -284,6 +295,68 @@
   display: inline-block;
   font-size: 12.5px;
   font-weight: 600;
+}
+
+/* ---- Dark device screens ---------------------------------------------- */
+
+/* The dark scheme reaches only inside a depicted device screen: the phone
+   screen surface and the browser viewport. Bezels, the notch, the browser
+   bar, its traffic lights, the address pill, and every shell surface around
+   the frames stay light. */
+
+.phone-screen.mbk-screen-dark,
+.browser-viewport.mbk-screen-dark {
+  background: var(--mbk-dark-screen-bg);
+  color: var(--mbk-dark-screen-ink);
+}
+
+/* A dark screen sits within a near-black bezel, so a hairline keeps the
+   screen edge readable. The browser viewport needs none: its light bar
+   already draws the edge. */
+.phone-screen.mbk-screen-dark {
+  box-shadow: inset 0 0 0 1px
+    color-mix(
+      in srgb,
+      var(--mbk-dark-screen-ink) 12%,
+      var(--mbk-dark-screen-bg)
+    );
+}
+
+.mbk-screen-dark .phone-status {
+  color: var(--mbk-dark-screen-ink);
+}
+
+.mbk-screen-dark .phone-home {
+  background: color-mix(in srgb, var(--mbk-dark-screen-ink) 40%, transparent);
+}
+
+.mbk-screen-dark .mbk-shot {
+  background: transparent;
+}
+
+.mbk-screen-dark .mbk-shot-nav {
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--mbk-dark-screen-ink) 12%,
+    var(--mbk-dark-screen-bg)
+  );
+  color: color-mix(
+    in srgb,
+    var(--mbk-dark-screen-ink) 62%,
+    var(--mbk-dark-screen-bg)
+  );
+}
+
+.mbk-screen-dark .mbk-shot p {
+  color: color-mix(
+    in srgb,
+    var(--mbk-dark-screen-ink) 78%,
+    var(--mbk-dark-screen-bg)
+  );
+}
+
+.mbk-screen-dark .mbk-shot-link {
+  color: #7fae95;
 }
 
 /* ---- Details inspector ------------------------------------------------ */

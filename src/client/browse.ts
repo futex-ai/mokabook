@@ -10,7 +10,9 @@ import {
 import {
   applyNavVisibility,
   captureRegionScrolls,
+  currentColorScheme,
   restoreRegionScrolls,
+  setColorScheme,
   setDrawer,
   setViewport,
 } from "./browse_state.js";
@@ -152,6 +154,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     if (push) persistScroll();
     main.innerHTML = nextMain.innerHTML;
     detailsPreference.apply(doc);
+    setColorScheme(doc, currentColorScheme(doc));
     doc.title = parsed.title || doc.title;
     const finalUrl = response.url || url;
     if (push)
@@ -196,6 +199,13 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
         "details[data-nav-collection]",
       ))
         group.open = false;
+      return;
+    }
+    const schemeOption = target
+      .closest("[data-color-scheme-option]")
+      ?.getAttribute("data-color-scheme-option");
+    if (schemeOption === "dark" || schemeOption === "light") {
+      setColorScheme(doc, schemeOption);
       return;
     }
     const viewportOption = target

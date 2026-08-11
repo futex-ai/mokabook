@@ -75,6 +75,29 @@ export function validateEntry(
     validateRoute(entry, violations);
   }
   if (entry.kind === "screen") {
+    if (entry.colorSchemes !== undefined) {
+      const validSchemes = validColorSchemes(entry.colorSchemes);
+      if (!validSchemes) {
+        violations.push(
+          problem(
+            entry,
+            "invalid-color-schemes",
+            'colorSchemes must be a non-empty subset of ["light", "dark"] that includes "light"',
+          ),
+        );
+      } else if (
+        entry.colorSchemes.includes("dark") &&
+        !config.colorSchemes.includes("dark")
+      ) {
+        violations.push(
+          problem(
+            entry,
+            "unsupported-color-scheme",
+            'screen declares "dark" but config colorSchemes is light-only',
+          ),
+        );
+      }
+    }
     if (entry.mobile === null || entry.mobile === undefined) {
       violations.push(
         problem(entry, "missing-render", "mobile render is required"),
@@ -225,6 +248,18 @@ function validateTextList(
 
 function nonEmpty(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
+}
+
+function validColorSchemes(
+  value: unknown,
+): value is readonly ("dark" | "light")[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((scheme) => scheme === "light" || scheme === "dark") &&
+    new Set(value).size === value.length &&
+    value.includes("light")
+  );
 }
 
 function record(value: unknown): value is Record<string, unknown> {

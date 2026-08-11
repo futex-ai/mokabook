@@ -43,6 +43,11 @@ fails for:
 - unresolved `mock:` links, raw document links, local HTML/CSS resources, or
   anchors;
 - missing stylesheets and declared dependencies;
+- invalid `colorSchemes` config, per-screen `colorSchemes` declarations, or
+  color-scheme subsets unsupported by the catalogue config;
+- missing `lightStylesheets` / `darkStylesheets` files, or a stylesheet path one
+  rule would link twice into the same fragment;
+- invalid or colliding `darkFragments` manifest routes;
 - stale, missing, or proven-orphan generated output;
 - malformed Review-ignore markers or material keys;
 - configured source, screen-cap, stage-id, or legacy-policy violations.
@@ -78,8 +83,9 @@ The package owns a neutral, responsive Mokabook shell: a top bar with brand,
 search, and Browse/Review modes; a catalogue navigation column with a
 `Collapse all` control, an All/Changed filter, nested disclosure groups with
 folder/screen/page/flow icons and indent guides; linked breadcrumbs with an id
-chip; viewport switching; realistic phone and browser device chrome; a
-per-frame expand-to-overlay toggle; and a collapsible details inspector.
+chip; viewport and color-scheme switching; realistic phone and browser device
+chrome; a per-frame expand-to-overlay toggle; and a collapsible details
+inspector.
 Consumer brand chrome does not appear in the shell. A small set of documented
 CSS custom properties may tune the shell accent without replacing its
 structural styles. The shell serves its packaged Inter variable font from
@@ -104,10 +110,23 @@ fragments and link back to their standalone screens. A legacy page embeds the
 whole generated document. Breadcrumb ancestors that resolve to a viewable
 route (a legacy directory's Overview page) are links; structural collection
 crumbs stay text. The details inspector may show description, rationale,
-source and fragment paths, related docs, dependencies, use cases, and
-comparison context.
+source and fragment paths including dark renders, the schemes a screen renders
+in, related docs, dependencies, use cases, and comparison context.
 Consumer fragments and legacy documents are sandboxed without script permission
 so they cannot alter the same-origin Browse shell.
+
+A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
+light-only catalogue offers none. One switch renders in the top bar and one in
+the screen head band, and the shell reveals whichever suits the width: the top
+bar at and above the breakpoint, the head band below it. The catalogue home has
+no head band, so below the breakpoint it carries no scheme control. Choosing a
+scheme marks the document, keeps every switch in sync, and swaps each embedded
+frame — screen frames and use-case steps alike — between its light and dark
+fragment URLs; only the inside of a device screen follows the selection, which
+then survives in-shell navigation, Back, and Forward. A screen with no dark
+render keeps its light fragments and names the fallback in its frame label
+(`MOBILE — LIGHT ONLY`), while a use-case step, which has no label, simply
+stays light.
 
 Browse is server rendered first and progressively enhanced. Direct URLs,
 refresh, missing routes, and JavaScript-disabled use remain functional. For an
@@ -194,12 +213,11 @@ Rebuilds are debounced and transactional. A failed rebuild keeps the last-good
 server and output, reports the error, and waits for another authored change. A
 successful rebuild or healthy restart publishes a new update version. Browsers
 reload their current durable URL and restore search, changed-only selection,
-collection and details disclosure, viewport selection, responsive drawer,
-catalogue scroll, and per-region stage scroll once. Recovery is strictly
-parsed,
-applies only when its durable URL exactly matches the reloaded page, and is
-removed before application; a later manual refresh cannot resurrect stale
-state.
+collection and details disclosure, viewport and color-scheme selection,
+responsive drawer, catalogue scroll, and per-region stage scroll once. Recovery
+is strictly parsed, applies only when its durable URL exactly matches the
+reloaded page, and is removed before application; a later manual refresh cannot
+resurrect stale state.
 
 Watch actions execute serially. Changes received during an active action are
 coalesced by impact before the next action starts, so two rebuilds cannot race
@@ -240,20 +258,25 @@ Review inspects only the requested base paths, grouping exact literal pathspecs
 into count- and byte-bounded `ls-tree` operations, and reads regular-file blobs
 through output-byte- and object-count-bounded `cat-file` batches. A single blob
 that cannot fit the output budget fails explicitly after metadata inspection
-and before a `cat-file` content process is spawned. The initial viewport set is
-one logical batch request; transitively referenced assets are grouped by
+and before a `cat-file` content process is spawned. The initial view document
+set is one logical batch request; transitively referenced assets are grouped by
 dependency depth. File modes are still checked before any blob is accepted, so
 batching does not weaken symlink or non-regular-file rejection.
 
-Screens pair by stable manifest route. Mobile and desktop classify separately
-from their fragments. Added, removed, changed, and unchanged states handle
-version 2 and version 3 manifests during Accounting migration. Configured
-shared-impact globs and manifest dependencies identify changes that can affect
-many screens. A dependency is a repository file or directory root: its own
-change or any descendant change affects the entry, and Review records the
-matching changed path as evidence. The active Review artifact directory,
-including a `--out` override and its symlink-resolved in-repository target, is
-excluded before changed-path and shared-impact evidence is calculated.
+Screens pair by stable manifest route. Views pair by route, viewport, and color
+scheme, enumerated from the union of base and head manifest entries. Each side's
+view set is `["light", ...(screen.darkFragments ? ["dark"] : [])]`: a dark
+view present only in head is `added`, and one present only in base is
+`removed`. Mobile and desktop still classify separately from their fragments.
+Added, removed, changed, and unchanged states handle version 2 and version 3
+manifests during Accounting migration; pre-dark bases simply have no
+`darkFragments`. Configured shared-impact globs and manifest dependencies
+identify changes that can affect many screens. A dependency is a repository file
+or directory root: its own change or any descendant change affects the entry,
+and Review records the matching changed path as evidence. The active Review
+artifact directory, including a `--out` override and its symlink-resolved
+in-repository target, is excluded before changed-path and shared-impact evidence
+is calculated.
 
 The engine emits a static, self-contained artifact directory with:
 
@@ -263,8 +286,9 @@ The engine emits a static, self-contained artifact directory with:
   byte-identical screens with shared or dependency evidence;
 - an explicit empty state only when no screen has either visual differences or
   impact evidence, with the same material/impacted totals in the CI summary;
-- one designed compare page per screen viewport, linked to its sibling
-  viewport through the page's viewport control;
+- one compare page per view, linked to same-scheme sibling viewports through
+  the page's viewport control and, for a screen compared in both schemes, to
+  the same-viewport sibling scheme through its scheme control;
 - one artifact-root navigation payload shared by all compare pages, while the
   index keeps complete inline navigation and a compare page without JavaScript
   keeps a direct fallback link to that index;
@@ -273,14 +297,19 @@ The engine emits a static, self-contained artifact directory with:
 - side-by-side, opacity-overlay, and difference modes on every compare page;
 - before/head artifacts kept complete and unmodified;
 - aggregate shared-impact and ignored-region evidence in the navigation
-  column, screen impact evidence on compare pages, and per-viewport
-  ignored-region evidence;
+  column, screen impact evidence on compare pages, and per-view ignored-region
+  evidence;
 - deterministic `review.json` for CI summaries.
 
 Artifact pages inline the package-owned shell styles so the directory remains
 viewable without a server. Compare pages load their package-owned navigation
 payload by relative path from the same artifact directory, and every embedded
 pane stays in a script-disabled sandbox.
+Light comparison pages keep the existing
+`comparisons/<hash>/<viewport>/index.html` paths. Dark comparison pages use
+`comparisons/<hash>/<viewport>.dark/index.html`; the page depth remains three
+segments below the artifact root, so relative links and shared navigation paths
+stay stable.
 
 ## Served Review
 
@@ -337,7 +366,7 @@ generation errors fail the command.
 
 ```ts
 interface ReviewResult {
-  schemaVersion: 1;
+  schemaVersion: 2;
   baseRef: string;
   baseCommit: string; // merge base shared by HEAD and baseRef
   changedPaths: readonly string[];
@@ -345,6 +374,7 @@ interface ReviewResult {
   ignoredImpact: readonly {
     id: string;
     viewport: "mobile" | "desktop";
+    colorScheme: "light" | "dark";
     count: number;
   }[];
   screens: readonly {
@@ -354,8 +384,9 @@ interface ReviewResult {
     state: "added" | "removed" | "changed" | "ignored-only" | "unchanged";
     dependencies: readonly string[];
     sharedImpact: readonly string[];
-    viewports: readonly {
+    views: readonly {
       viewport: "mobile" | "desktop";
+      colorScheme: "light" | "dark";
       state: "added" | "removed" | "changed" | "ignored-only" | "unchanged";
       beforePath?: string;
       afterPath?: string;
@@ -365,10 +396,11 @@ interface ReviewResult {
 }
 ```
 
-Routes and viewports sort in deterministic catalogue order; changed and impact
-paths sort lexically. No timestamp or absolute checkout path enters the JSON.
-Before/after HTML remains unmodified in the artifact even when ignore
-normalization changes classification.
+Routes sort in deterministic catalogue order; views sort by viewport
+(`mobile`, then `desktop`) and then color scheme (`light`, then `dark`).
+Changed and impact paths sort lexically. No timestamp or absolute checkout path
+enters the JSON. Before/after HTML remains unmodified in the artifact even when
+ignore normalization changes classification.
 
 ## Review Ignore
 
@@ -384,8 +416,9 @@ real children. Malformed, duplicate, nested, overlapping, mismatched, or invalid
 signals fail closed with route context.
 
 Ignoring changes classification only. Stored fragments and compare panes keep
-the real content. Ignored-only changes aggregate by id and viewport instead of
-adding every consumer screen. Primary screen content must never be ignored.
+the real content. Ignored-only changes aggregate by id, viewport, and color
+scheme instead of adding every consumer screen. Primary screen content must
+never be ignored.
 
 ## CI Review Integration
 
@@ -400,9 +433,9 @@ failures in the consumer's normal CI.
 Before publication, unit, integration, packed-consumer, and browser tests cover
 every contract in this document. At minimum they cover deterministic output,
 stale/orphan checks, path safety, registry links, legacy coexistence, deep
-links, no-JavaScript responses, progressive navigation, history/focus, watch
-recovery, shutdown, base extraction, per-viewport comparison, shared impact,
-Review ignore, and CI summary output.
+links, no-JavaScript responses, progressive navigation, history/focus,
+color-scheme switching, watch recovery, shutdown, base extraction, per-view
+comparison, shared impact, Review ignore, and CI summary output.
 
 ## Related Docs
 

@@ -54,7 +54,7 @@
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
-      "description": "Browse states for details, missing routes, and narrow layouts.",
+      "description": "Browse states for details, missing routes, narrow layouts, and color schemes.",
       "id": "design-browse-states",
       "kind": "collection",
       "navPath": [
@@ -71,7 +71,9 @@
       "childIds": [
         "design-browse-details",
         "design-browse-missing-route",
-        "design-browse-navigation"
+        "design-browse-navigation",
+        "design-browse-dark-scheme",
+        "design-browse-light-only"
       ]
     },
     {
@@ -159,7 +161,7 @@
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
-      "description": "Per-screen comparison pages for each classification outcome.",
+      "description": "Per-screen comparison pages for each classification outcome, mode, and color scheme.",
       "id": "design-review-outcomes",
       "kind": "collection",
       "navPath": [
@@ -177,7 +179,8 @@
         "design-review-changed",
         "design-review-added",
         "design-review-removed",
-        "design-review-difference"
+        "design-review-difference",
+        "design-review-dark-scheme"
       ]
     },
     {
@@ -199,6 +202,39 @@
       "childIds": [
         "example-welcome",
         "example-details"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_scheme_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "The catalogue with the dark scheme selected and dark device screens.",
+      "id": "design-browse-dark-scheme",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Shell states"
+      ],
+      "rationale": "Dark applies inside the device screens only (--mbk-dark-screen-bg #121514, --mbk-dark-screen-ink #eef1ef); bezels, the browser bar, and every shell surface stay light so the catalogue frame reads the same in both schemes. Wide layouts carry the switch in the top bar beside the search field; narrow layouts move it into the screen head band beside the viewport control, where the top bar has no room.",
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_scheme_screens.tsx",
+      "title": "Dark scheme selected",
+      "fragments": {
+        "desktop": "design/browse/states/dark-scheme.desktop.html",
+        "mobile": "design/browse/states/dark-scheme.mobile.html"
+      },
+      "route": "design/browse/states/dark-scheme.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
       ]
     },
     {
@@ -227,6 +263,39 @@
         "mobile": "design/browse/states/details.mobile.html"
       },
       "route": "design/browse/states/details.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_scheme_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "A screen with no dark render keeping light device screens under the dark selection.",
+      "id": "design-browse-light-only",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Shell states"
+      ],
+      "rationale": "A screen that renders in light only keeps its light frames instead of being tinted, and its frame label states the fallback so a reviewer can tell a light render from a missing dark one. The selection itself stays on dark for the rest of the catalogue.",
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_scheme_screens.tsx",
+      "title": "Light-only screen under dark",
+      "fragments": {
+        "desktop": "design/browse/states/light-only.desktop.html",
+        "mobile": "design/browse/states/light-only.mobile.html"
+      },
+      "route": "design/browse/states/light-only.html",
       "useCaseIds": [],
       "viewports": [
         "mobile",
@@ -565,6 +634,40 @@
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
+      "description": "The dark view of a changed screen compared side by side with its base render.",
+      "id": "design-review-dark-scheme",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Review",
+        "Comparison outcomes"
+      ],
+      "rationale": "A screen with a dark render is compared one view at a time, so the comparison band carries a Light | Dark segment beside the viewport segment and both artboards keep it there. Dark reaches only inside the compared device screens (--mbk-dark-screen-bg #121514, --mbk-dark-screen-ink #eef1ef); the changed-screens navigation, head band, classification badge, and the segments themselves stay light. A screen that renders in light only shows no scheme segment, and the head band never repeats the selected scheme in its title.",
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/review_outcome_screens.tsx",
+      "title": "Dark view compare",
+      "fragments": {
+        "desktop": "design/review/outcomes/dark-scheme.desktop.html",
+        "mobile": "design/review/outcomes/dark-scheme.mobile.html"
+      },
+      "route": "design/review/outcomes/dark-scheme.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/review_outcome_screens.tsx",
+        "examples/basic/generated/design-review.css",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
       "description": "Difference mode highlighting changed and added regions in place.",
       "id": "design-review-difference",
       "kind": "screen",
@@ -641,6 +744,10 @@
       "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
       "title": "Details",
       "address": "example.test/details",
+      "darkFragments": {
+        "desktop": "screens/details.desktop.dark.html",
+        "mobile": "screens/details.mobile.dark.html"
+      },
       "fragments": {
         "desktop": "screens/details.desktop.html",
         "mobile": "screens/details.mobile.html"
@@ -671,6 +778,10 @@
       "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
       "title": "Welcome",
       "address": "example.test/welcome",
+      "darkFragments": {
+        "desktop": "screens/welcome.desktop.dark.html",
+        "mobile": "screens/welcome.mobile.dark.html"
+      },
       "fragments": {
         "desktop": "screens/welcome.desktop.html",
         "mobile": "screens/welcome.mobile.html"

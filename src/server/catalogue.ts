@@ -8,6 +8,8 @@ import type {
 export interface Catalogue {
   byId: ReadonlyMap<string, ManifestEntry>;
   byRoute: ReadonlyMap<string, ManifestEntry | ManifestLegacyPage>;
+  /** Whether any screen in the catalogue was rendered in the dark scheme. */
+  hasDarkFragments: boolean;
   manifest: ManifestV3;
 }
 
@@ -19,5 +21,8 @@ export function createCatalogue(manifest: ManifestV3): Catalogue {
     if (entry.kind !== "collection") byRoute.set(entry.route, entry);
   }
   for (const page of manifest.legacyPages) byRoute.set(page.route, page);
-  return { byId, byRoute, manifest };
+  const hasDarkFragments = manifest.entries.some(
+    (entry) => entry.kind === "screen" && entry.darkFragments !== undefined,
+  );
+  return { byId, byRoute, hasDarkFragments, manifest };
 }

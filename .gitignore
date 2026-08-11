@@ -10,3 +10,4 @@ target/
 *.tgz
 test-results/
 playwright-report/
+.superpowers/

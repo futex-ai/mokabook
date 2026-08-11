@@ -6,8 +6,9 @@
 
 import type { ReactNode } from "react";
 
+import type { ColorScheme } from "../../authoring/types.js";
 import { encodeUrlPath } from "../../config/paths.js";
-import type { ManifestUseCase } from "../../registry/types.js";
+import type { ManifestScreen, ManifestUseCase } from "../../registry/types.js";
 import type { Catalogue } from "../catalogue.js";
 import { ChevronIcon, FlowIcon } from "./icons.js";
 import type { RoutedEntry, RouteTarget } from "./target.js";
@@ -31,6 +32,23 @@ function PathChips(props: { values: readonly string[] }) {
       ))}
     </span>
   );
+}
+
+/** Generated fragment routes for a screen, dark renders after the light ones. */
+function generatedPaths(screen: ManifestScreen): string[] {
+  const paths = [screen.fragments.mobile, screen.fragments.desktop];
+  if (screen.darkFragments) {
+    paths.push(screen.darkFragments.mobile, screen.darkFragments.desktop);
+  }
+  return paths;
+}
+
+/** The schemes a screen renders in, named for the reader. */
+function schemeNames(screen: ManifestScreen): string {
+  const schemes: readonly ColorScheme[] = screen.darkFragments
+    ? ["light", "dark"]
+    : ["light"];
+  return schemes.join(", ");
 }
 
 function UsedByChips(props: {
@@ -85,10 +103,11 @@ function EntryDetailsBody(props: { catalogue: Catalogue; entry: RoutedEntry }) {
         </MetaRow>
         {entry.kind === "screen" ? (
           <MetaRow label="Generated">
-            <PathChips
-              values={[entry.fragments.mobile, entry.fragments.desktop]}
-            />
+            <PathChips values={generatedPaths(entry)} />
           </MetaRow>
+        ) : null}
+        {entry.kind === "screen" && props.catalogue.hasDarkFragments ? (
+          <MetaRow label="Schemes">{schemeNames(entry)}</MetaRow>
         ) : null}
         {entry.relatedDocs.length > 0 ? (
           <MetaRow label="Related docs">

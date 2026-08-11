@@ -117,6 +117,7 @@ function EmptyReview({ viewport }: { viewport: ReviewViewport }) {
 /** Review design screens for aggregate and empty comparison states. */
 export const reviewImpactScreens = [
   screen({
+    colorSchemes: ["light"],
     description:
       "The review summary when shared files can affect unchanged screens.",
     desktop: <SharedImpactSummary viewport="desktop" />,
@@ -126,6 +127,7 @@ export const reviewImpactScreens = [
     title: "Shared impact",
   }),
   screen({
+    colorSchemes: ["light"],
     description: "A screen whose only differences fall inside ignored regions.",
     desktop: <IgnoredOnlyCompare viewport="desktop" />,
     id: "design-review-ignored-only",
@@ -134,6 +136,7 @@ export const reviewImpactScreens = [
     title: "Ignored only",
   }),
   screen({
+    colorSchemes: ["light"],
     description: "The empty comparison when no screen differs from the base.",
     desktop: <EmptyReview viewport="desktop" />,
     id: "design-review-empty",
