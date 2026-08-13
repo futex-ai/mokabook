@@ -54,12 +54,10 @@ export interface WatchConfig {
   rules?: readonly WatchRule[];
 }
 
-/** Git comparison and artifact configuration. */
+/** Git comparison configuration. */
 export interface ReviewConfig {
   /** Git ref whose merge base with HEAD is the comparison branch point. */
   base?: string;
-  /** Config-relative artifact directory. */
-  outDir?: string;
   /** Repository-relative POSIX globs whose changes can affect many screens. */
   sharedImpact?: readonly string[];
 }

@@ -5,13 +5,11 @@ Usage:
   mokabook [serve] [--config <path>] [--port <port>] [--base <ref>] [--no-watch]
   mokabook build [--config <path>]
   mokabook check [--config <path>]
-  mokabook review [--config <path>] [--base <ref>] [--out <directory>]
 
 Commands:
   serve    Build and serve Browse; watch by default
   build    Generate static HTML fragments and the version 3 manifest
   check    Validate source and committed generated output without writing
-  review   Compare branch output with its Git branch point and write an artifact
 
 Options:
   --config <path>  Use an explicit mokabook.config file
@@ -19,7 +17,6 @@ Options:
   --base <ref>     Git base ref used to find the branch point
   --watch          Watch consumer inputs (serve default)
   --no-watch       Serve one deterministic snapshot
-  --out <path>     Review artifact directory
   -h, --help       Show help
   -v, --version    Show installed version
 `;

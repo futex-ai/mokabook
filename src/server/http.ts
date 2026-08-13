@@ -15,7 +15,6 @@ import {
 import { homePage, notFoundPage, viewPage } from "./pages.js";
 import { listenOnAvailablePort } from "./ports.js";
 import { contentType, safeDecode, safeDecodePath, send } from "./respond.js";
-import { ReviewRoutes, type ServedReview } from "./review_routes.js";
 import type { ShellContext } from "./shell/context.js";
 import { SHELL_CSS } from "./shell/css.js";
 
@@ -24,8 +23,6 @@ export interface ServerOptions {
   base: string;
   changedRoutes?: readonly string[];
   port: number;
-  /** When set, `/review` serves this comparison instead of the launcher. */
-  review?: ServedReview;
   strictPort?: boolean;
   updateVersion?: number;
 }
@@ -47,9 +44,6 @@ export async function startCatalogueServer(
   const clientModules = loadBrowserClientModules();
   const fontAssets = loadShellFontAssets();
   const streams = new Set<ServerResponse>();
-  const reviewRoutes = options.review
-    ? new ReviewRoutes(options.review)
-    : undefined;
   let updateVersion = options.updateVersion ?? 1;
   const server = http.createServer((request, response) => {
     handleRequest(
@@ -62,7 +56,6 @@ export async function startCatalogueServer(
       streams,
       { clientModules, fontAssets },
       () => updateVersion,
-      reviewRoutes,
     );
   });
   await listenOnAvailablePort(
@@ -81,14 +74,9 @@ export async function startCatalogueServer(
   return {
     async close(): Promise<void> {
       for (const stream of streams) stream.end();
-      const serverClosing = new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         server.close((error) => (error ? reject(error) : resolve()));
       });
-      const reviewClosing = reviewRoutes?.close() ?? Promise.resolve();
-      const results = await Promise.allSettled([serverClosing, reviewClosing]);
-      for (const result of results) {
-        if (result.status === "rejected") throw result.reason;
-      }
     },
     port: address.port,
     publishUpdate(version?: number): void {
@@ -96,7 +84,6 @@ export async function startCatalogueServer(
       if (!Number.isSafeInteger(nextVersion) || nextVersion <= updateVersion)
         return;
       updateVersion = nextVersion;
-      reviewRoutes?.invalidate();
       const payload = `event: update\ndata: ${updateVersion}\n\n`;
       for (const stream of streams) stream.write(payload);
     },
@@ -119,7 +106,6 @@ function handleRequest(
   streams: Set<ServerResponse>,
   assets: ServedAssets,
   currentVersion: () => number,
-  reviewRoutes?: ReviewRoutes,
 ): void {
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed");
@@ -133,13 +119,6 @@ function handleRequest(
       homePage(catalogue, context),
       method,
     );
-  if (
-    reviewRoutes &&
-    (url.pathname === "/review" || url.pathname.startsWith("/review/"))
-  ) {
-    void reviewRoutes.handle(url, response, method);
-    return;
-  }
   if (url.pathname === "/__mokabook/shell.css")
     return send(response, 200, "text/css", SHELL_CSS, method);
   if (url.pathname === "/__mokabook/events")

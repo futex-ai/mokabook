@@ -1,20 +1,20 @@
-# Mokabook Build, Browse, And Review Runtime
+# Mokabook Build And Browse Runtime
 
 ## Source Of Truth
 
 Consumer-authored registry modules and legacy page modules are the source of
 truth. Generated fragments, legacy HTML, and the manifest remain committed in
-consumer repositories so they can be reviewed without a server. Browse and
-Review consume those same artifacts and definitions; neither may introduce a
+consumer repositories so they can be reviewed without a server. Browse
+consumes those same artifacts and definitions; it may not introduce a
 second screen renderer or catalogue.
 
 ## Delivery Status
 
 This document defines the release-ready runtime contract. The Build, Check,
-watch, server, and Review engines, the responsive package-owned Browse shell,
-the designed Review artifact pages, packed-package consumers, CI/release
-automation, and Playwright browser coverage are implemented. The irreversible
-first publication and downstream consumer cutover remain external steps.
+watch, and server engines, the responsive package-owned Browse shell,
+packed-package consumers, CI/release automation, and Playwright browser
+coverage are implemented. The irreversible first publication and downstream
+consumer cutover remain external steps.
 
 ## Build
 
@@ -63,9 +63,6 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/view/<route>` for screens, use cases, and configured legacy pages;
 - `/id/<id>` as a canonical redirect for routed registry entries;
 - `/static/<path>` for generated fragments, legacy pages, and consumer assets;
-- `/review` for the configured Git comparison, redirecting to the artifact
-  index, with stable `/review/<path>` routes redirecting to immutable
-  `/review/__generations/<version>/<path>` artifact files;
 - package-owned client and update endpoints under `/__mokabook/`.
 
 All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
@@ -164,7 +161,7 @@ shipped shell are recorded beside the design catalogue in the example notes.
 ## Watched Development
 
 `mokabook serve` watches by default; `--no-watch` serves one deterministic
-snapshot. Every Browse and Review document loads the package-owned browser client,
+snapshot. Every Browse document loads the package-owned browser client,
 which connects to the versioned event stream and reloads its current durable
 URL after a higher version arrives. Watch classification derives only from
 resolved config:
@@ -175,7 +172,7 @@ resolved config:
 - an input shared with shell metadata rebuilds before restarting the child;
 - configured CSS/fonts/images reload the browser without rebuilding;
 - header-proven generated output plus `.git`, `.context`, `node_modules`,
-  `dist`, `target`, coverage, browser-test output, Review output, and Mokabook
+  `dist`, `target`, coverage, browser-test output, and Mokabook
   transaction trees are pruned from broad watches and classify as ignored;
 - additional inputs use the explicit action declared in config.
 
@@ -207,7 +204,7 @@ new resolved config, close the old watcher, and restart the child. A load,
 watcher-readiness, or candidate-build failure closes the candidate watcher and
 retains the previous config, watcher, output, and child. An explicit CLI
 `--base` remains pinned; without one, the restarted child uses the newly loaded
-config's Review base.
+config's comparison base.
 
 Rebuilds are debounced and transactional. A failed rebuild keeps the last-good
 server and output, reports the error, and waits for another authored change. A
@@ -227,12 +224,6 @@ stream's first `ready` version establishes the page baseline; a higher version
 after reconnection or an `update` event triggers one reload and one-shot state
 recovery.
 
-Publishing an update without restarting the child marks its cached served
-Review artifact stale before notifying browsers. The first reloaded Review
-top-level document request serially regenerates the artifact, while concurrent
-requests reuse that regeneration and subresources remain pinned to their
-document's immutable generation.
-
 Shutdown first stops queued work and waits for any active configuration
 transaction, then closes the final adopted watcher, timers, child processes,
 HTTP servers, event streams, and ports. A candidate watcher is discarded if
@@ -246,168 +237,41 @@ shutdown first requests graceful IPC closure, then sends SIGTERM and SIGKILL at
 bounded intervals when necessary; the supervisor does not finish closing until
 the child exit notification arrives.
 
-## Review Comparison
+## Change Comparison Core
 
-`mokabook review` compares the workspace with a configured base ref, defaulting
-to `origin/main`. It resolves the merge base shared by `HEAD` and that ref, then
-reads the committed `mockupsDir` tree at that branch point without checking it
-out or rebuilding it. Commits reachable only from the configured base do not
-enter the comparison. Head artifacts come from the current working tree after
-`mokabook check` succeeds.
-Review inspects only the requested base paths, grouping exact literal pathspecs
-into count- and byte-bounded `ls-tree` operations, and reads regular-file blobs
+The package keeps an internal comparison engine shared by change detection: it
+resolves the merge base shared by `HEAD` and the configured base ref, reads the
+committed `mockupsDir` tree at that branch point without checking it out or
+rebuilding it, and classifies each screen view. Commits reachable only from
+the configured base do not enter a comparison.
+Base reads inspect only the requested paths, grouping exact literal pathspecs
+into count- and byte-bounded `ls-tree` operations, and read regular-file blobs
 through output-byte- and object-count-bounded `cat-file` batches. A single blob
 that cannot fit the output budget fails explicitly after metadata inspection
-and before a `cat-file` content process is spawned. The initial view document
-set is one logical batch request; transitively referenced assets are grouped by
-dependency depth. File modes are still checked before any blob is accepted, so
-batching does not weaken symlink or non-regular-file rejection.
+and before a `cat-file` content process is spawned. File modes are checked
+before any blob is accepted, so batching does not weaken symlink or
+non-regular-file rejection. Base documents must be regular Git files under the
+public `mockupsDir` tree, never configured entry or legacy source roots.
 
 Screens pair by stable manifest route. Views pair by route, viewport, and color
 scheme, enumerated from the union of base and head manifest entries. Each side's
 view set is `["light", ...(screen.darkFragments ? ["dark"] : [])]`: a dark
 view present only in head is `added`, and one present only in base is
 `removed`. Mobile and desktop still classify separately from their fragments.
-Added, removed, changed, and unchanged states handle version 2 and version 3
-manifests during Accounting migration; pre-dark bases simply have no
-`darkFragments`. Configured shared-impact globs and manifest dependencies
-identify changes that can affect many screens. A dependency is a repository file
-or directory root: its own change or any descendant change affects the entry,
-and Review records the matching changed path as evidence. The active Review
-artifact directory, including a `--out` override and its symlink-resolved
-in-repository target, is excluded before changed-path and shared-impact evidence
-is calculated.
-
-The engine emits a static, self-contained artifact directory with:
-
-- a deterministic index, with every page rendered in the Mokabook shell
-  beside a changed-screens navigation column that groups changed, added,
-  removed, and ignored-only screens, plus an impacted group for
-  byte-identical screens with shared or dependency evidence;
-- an explicit empty state only when no screen has either visual differences or
-  impact evidence, with the same material/impacted totals in the CI summary;
-- one compare page per view, linked to same-scheme sibling viewports through
-  the page's viewport control and, for a screen compared in both schemes, to
-  the same-viewport sibling scheme through its scheme control;
-- one artifact-root navigation payload shared by all compare pages, while the
-  index keeps complete inline navigation and a compare page without JavaScript
-  keeps a direct fallback link to that index;
-- a responsive changed-screens drawer opened by the top-bar menu button, plus
-  a Review pill that links every compare page back to the artifact index;
-- side-by-side, opacity-overlay, and difference modes on every compare page;
-- before/head artifacts kept complete and unmodified;
-- aggregate shared-impact and ignored-region evidence in the navigation
-  column, screen impact evidence on compare pages, and per-view ignored-region
-  evidence;
-- deterministic `review.json` for CI summaries.
-
-Artifact pages inline the package-owned shell styles so the directory remains
-viewable without a server. Compare pages load their package-owned navigation
-payload by relative path from the same artifact directory, and every embedded
-pane stays in a script-disabled sandbox.
-Light comparison pages keep the existing
-`comparisons/<hash>/<viewport>/index.html` paths. Dark comparison pages use
-`comparisons/<hash>/<viewport>.dark/index.html`; the page depth remains three
-segments below the artifact root, so relative links and shared navigation paths
-stay stable.
-
-## Served Review
-
-Serve exposes the same comparison in the shell's Review mode. The server
-generates the artifact into the configured Review output directory lazily on
-the first `/review` request and again when a request carries `?refresh=1`, so
-the comparison reflects the workspace when viewed. A published watch update
-also invalidates the cached artifact before browsers reload; generations
-serialize so neither invalidation nor refresh races an in-flight run. Refresh
-and invalidation requests that arrive during an unrelated run coalesce into one
-follow-up generation. Every stable artifact path redirects to a server-owned
-immutable generation URL.
-Relative scripts, panes, and resources therefore stay pinned to that
-generation. Replaced directories remain available for a bounded idle window,
-and a watched top-level reload advances to the latest generation without
-redirecting an old document's concurrent subresources. Package-owned archive
-roots are passed into changed-path collection as explicit exclusions, so
-consumer ignore policy cannot turn retained output into impact evidence. Every
-artifact page includes the Review/index pill and self-contained responsive
-drawer. Pages generated behind the server additionally add the Browse pill, a
-recompute link, and the package-owned browser client for watched reloads;
-static `mokabook review` artifacts omit those server-only hooks. Successful
-redirects and artifact responses use `Cache-Control: no-store`. A generation
-failure restores the previous served directory, answers with a retryable error
-page, and leaves the server running; the next request retries the generation.
-Server shutdown stops new Review work, waits for active or queued generation to
-settle, then removes retained temporary generations but not the configured
-current output. Before archiving a current output, the server requires its
-regular-file Review ownership marker and refuses an unowned replacement
-without moving or deleting it. Failed-generation recovery likewise removes
-only marker-owned incomplete output before restoring the prior artifact. A
-server constructed without a Review provider serves no `/review` route and
-returns the catalogue not-found page there.
-
-Base and head panes live under separate route-preserving snapshot roots. Local
-resources referenced by pane HTML or CSS are copied transitively, including
-binary fonts and images, while explicit HTTP(S)/data resources remain external.
-Root-absolute, protocol-relative, and other scheme-qualified resource URLs are
-not portable in a disk-viewable artifact and fail Review instead of being
-silently omitted.
-Current-worktree resources must resolve to regular public files. Every base
-resource, including the pane document itself and each transitive dependency,
-must be a regular Git file. Neither side may read from configured entry or
-legacy source roots. Pane documents remain byte-unmodified and run in
-script-disabled sandboxes.
-Comparison-page routes use bounded route hashes and fail on any artifact-path
-collision rather than overwriting an earlier screen.
-
-Visual differences are review information, not a failing check. Invalid input,
-missing base data, unsafe Git paths, malformed ignore markers, or artifact
-generation errors fail the command.
-
-`review.json` is the normative machine-readable result:
-
-```ts
-interface ReviewResult {
-  schemaVersion: 2;
-  baseRef: string;
-  baseCommit: string; // merge base shared by HEAD and baseRef
-  changedPaths: readonly string[];
-  sharedImpact: readonly string[];
-  ignoredImpact: readonly {
-    id: string;
-    viewport: "mobile" | "desktop";
-    colorScheme: "light" | "dark";
-    count: number;
-  }[];
-  screens: readonly {
-    id: string;
-    route: string;
-    title: string;
-    state: "added" | "removed" | "changed" | "ignored-only" | "unchanged";
-    dependencies: readonly string[];
-    sharedImpact: readonly string[];
-    views: readonly {
-      viewport: "mobile" | "desktop";
-      colorScheme: "light" | "dark";
-      state: "added" | "removed" | "changed" | "ignored-only" | "unchanged";
-      beforePath?: string;
-      afterPath?: string;
-      ignoredIds: readonly string[];
-    }[];
-  }[];
-}
-```
-
-Routes sort in deterministic catalogue order; views sort by viewport
-(`mobile`, then `desktop`) and then color scheme (`light`, then `dark`).
-Changed and impact paths sort lexically. No timestamp or absolute checkout path
-enters the JSON. Before/after HTML remains unmodified in the artifact even when
-ignore normalization changes classification.
+Added, removed, changed, ignored-only, and unchanged states handle version 2
+and version 3 manifests during Accounting migration; pre-dark bases simply have
+no `darkFragments`. Configured shared-impact globs and manifest dependencies
+identify changes that can affect many screens. A dependency is a repository
+file or directory root: its own change or any descendant change affects the
+entry, and the comparison records the matching changed path as evidence.
 
 ## Review Ignore
 
 `ReviewIgnore` marks repeated shell chrome with paired inert boundaries and no
-layout wrapper. A stable kebab-case id is unique per generated document. Review
-normalizes a region only when both sides contain one valid matching boundary.
-One-sided adoption removes marker syntax but compares the real children.
+layout wrapper. A stable kebab-case id is unique per generated document. A
+comparison normalizes a region only when both sides contain one valid matching
+boundary. One-sided adoption removes marker syntax but compares the real
+children.
 
 Stateful repeated chrome supplies a deterministic material key derived from the
 complete typed props used to render it. The signal remains outside the ignored
@@ -415,18 +279,9 @@ region and part of classification. One-sided material-signal adoption compares
 real children. Malformed, duplicate, nested, overlapping, mismatched, or invalid
 signals fail closed with route context.
 
-Ignoring changes classification only. Stored fragments and compare panes keep
-the real content. Ignored-only changes aggregate by id, viewport, and color
-scheme instead of adding every consumer screen. Primary screen content must
-never be ignored.
-
-## CI Review Integration
-
-Consumer repositories may run Review only when configured mockup paths change.
-The job uses the pull request merge base, uploads the artifact, and appends a
-compact `review.json` summary. Tool errors fail the job; expected visual changes
-do not. Generated-output, registry, and link errors remain blocking `check`
-failures in the consumer's normal CI.
+Ignoring changes classification only. Generated fragments keep the real
+content. Ignored-only changes aggregate by id, viewport, and color scheme.
+Primary screen content must never be ignored.
 
 ## Required Coverage
 
@@ -435,7 +290,7 @@ every contract in this document. At minimum they cover deterministic output,
 stale/orphan checks, path safety, registry links, legacy coexistence, deep
 links, no-JavaScript responses, progressive navigation, history/focus,
 color-scheme switching, watch recovery, shutdown, base extraction, per-view
-comparison, shared impact, Review ignore, and CI summary output.
+comparison, shared impact, and Review ignore.
 
 ## Related Docs
 

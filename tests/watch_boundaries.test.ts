@@ -32,8 +32,6 @@ test("package-owned watch rules precede broad consumer rules", async (context) =
   };
   for (const candidate of [
     "node_modules/package/index.js",
-    ".context/mokabook-review/index.html",
-    ".review/index.html",
     "coverage/lcov.info",
     "dist/cli/bin.js",
     "playwright-report/index.html",

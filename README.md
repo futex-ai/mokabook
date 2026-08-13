@@ -1,9 +1,10 @@
 # Mokabook
 
 Mokabook turns React-authored mobile and desktop mockups into committed static
-HTML, serves the resulting catalogue during development, and creates Git-based
-Review artifacts. It is app-independent: product screens, component libraries,
-themes, styles, and compatibility adapters stay in the consuming repository.
+HTML and serves the resulting catalogue during development, with Git-based
+change detection built into Browse. It is app-independent: product screens,
+component libraries, themes, styles, and compatibility adapters stay in the
+consuming repository.
 
 The public [npm package](https://www.npmjs.com/package/mokabook) and executable
 are both named `mokabook`. Releases remain pre-1.0 while the consumer contract
@@ -31,7 +32,6 @@ export default defineConfig({
   stylesheets: [{ match: "app/**/*.html", stylesheets: ["app.css"] }],
   review: {
     base: "origin/main",
-    outDir: ".context/mokabook-review",
     sharedImpact: ["src/components/**", "src/tokens/**"],
   },
 });
@@ -85,7 +85,6 @@ npx mokabook                         # build, serve, and watch
 npx mokabook serve --no-watch --port 0
 npx mokabook build
 npx mokabook check
-npx mokabook review --base origin/main
 ```
 
 Options follow the command, so an explicit config is
@@ -100,7 +99,6 @@ fall back to the registry. After the first release, a clean machine may use
 | `mokabook serve`     | Serve Browse; add `--no-watch` for one child process   |
 | `mokabook build`     | Validate and transactionally write generated output    |
 | `mokabook check`     | Compare expected and committed bytes without writing   |
-| `mokabook review`    | Compare branch-point/head screens and write a Review   |
 | `mokabook --help`    | Show commands and their supported options              |
 | `mokabook --version` | Print the installed package version                    |
 
@@ -127,37 +125,10 @@ base. Commits added only to the base branch after divergence do not appear as
 branch changes; staged, unstaged, and untracked workspace edits still do. A
 registry module that defines many routes does not make every route appear
 changed merely because the module's imports or composition changed.
-Review uses the same branch-point baseline and provides summary, side-by-side,
-overlay, and difference views as a static artifact. When screens render in both
-schemes, Review compares each viewport and scheme view and links sibling
-light/dark compare pages. Screens with shared or declared dependency impact
-remain linked in a distinct impacted group even when their generated views are
-byte-identical. A declared dependency may be a file or directory; a changed
-descendant of a directory is reported as the screen's impact evidence.
-Review pages render in the Mokabook shell with a changed-screens navigation
-column beside each compare view. Every static or served page provides a mobile
-navigation drawer and a Review pill that returns an opened compare page to the
-artifact index. Large catalogues keep Review generation proportional to their
-size by reading base fragments from Git in bounded batches and sharing one
-navigation payload across compare pages. The served shell exposes the same
-comparison in its Review mode: `/review` generates the artifact on first visit,
-redirects each page to an immutable generation URL, and offers a recompute link
-that refreshes the comparison against the current workspace. Superseded
-generations remain available briefly for their pages' scripts, panes, and
-assets. Refreshes and watched updates that arrive during generation coalesce
-into one follow-up run. Served Review files disable HTTP caching, so one
-document cannot combine files from different artifact generations, and the
-server refuses to archive a current output whose ownership marker is missing.
-Retained-generation directories are excluded from changed-path evidence
-independently of consumer ignore rules. Shutdown prevents queued Review work
-from starting, drains active work, and then cleans retained directories.
+A declared dependency may be a file or directory; a changed descendant of a
+directory is reported as the screen's change evidence.
 
-Consumer documents run in sandboxed frames. Review keeps unmodified base/head
-documents in separate snapshot trees and copies their referenced local CSS,
-fonts, and images so comparison artifacts do not depend on the live workspace.
-Base resources must use portable relative URLs or explicit HTTP(S)/data URLs;
-root-absolute, protocol-relative, and unsupported-scheme URLs fail Review.
-Copied base resources must be regular Git files outside configured source roots.
+Consumer documents run in sandboxed frames.
 Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and
 logical screen routes are not portable links in generated static files. Build
 and check rewrite and validate every supported `href` and `data-nav-href`, plus
@@ -166,15 +137,14 @@ resolved port, transactionally reloads a changed consumer config with a ready
 replacement watcher, and serially replaces a child that exits unexpectedly
 after readiness. A watched child also closes its server when the parent IPC
 channel disconnects. Header-proven generated output plus package-owned
-dependency, build, test, Review, and transaction paths are pruned even when a
+dependency, build, test, and transaction paths are pruned even when a
 custom rule watches the repository root; an unowned public HTML file can still
 use an explicit watch rule, and configured stylesheets retain reload
 precedence. Shutdown interrupts replacement-watcher readiness, closes the
 candidate before draining the remaining lifecycle, and waits for child exit
-through graceful, terminate, and force-kill stages. Open Browse and Review pages
+through graceful, terminate, and force-kill stages. Open Browse pages
 connect to the versioned event stream and reload after a newer build or asset
-version arrives. Publishing a reload-only watch update invalidates the served
-Review cache, so the reloaded Review URL regenerates before it is served. A
+version arrives. A
 watched reload restores the current Browse search, filter, disclosures,
 viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and
@@ -201,8 +171,8 @@ file and confined to `repoRoot`.
   excluded migration sources, and generic lints.
 - `watch` classifies additional consumer inputs after proven package-owned
   ignores and configured stylesheets; this includes authored static HTML under
-  `mockupsDir`. `review` selects the Git base ref used to find the branch point,
-  artifact directory, and shared-impact globs.
+  `mockupsDir`. `review` selects the Git base ref used to find the branch
+  point and the shared-impact globs.
 - `compatibility.readManifestV2` reads Accounting's old manifest only when v3
   is absent. A temporary `compatibility.transformer` may deterministically
   repair already-authored documents during a consumer cutover; final links and
@@ -267,7 +237,7 @@ npm run example:check
 cargo xtask check
 ```
 
-`npm run test:browser` drives the served Browse shell and static Review pages
+`npm run test:browser` drives the served Browse shell
 in Chromium via Playwright; it uses the installed Chrome channel by default and
 honors `PLAYWRIGHT_CHANNEL` for an alternative browser install. Parallel
 workspaces can set `MOKABOOK_PLAYWRIGHT_PORT` to an available port.
@@ -326,7 +296,7 @@ custom rendering, stylesheets, id links, collections, use cases, and
 Review-ignore markers without importing an application. Its screens use
 `@firna/ui` through a react-native-web renderer adapter, so the example also
 proves the consumer contract against a real cross-platform component stack.
-Its `Design` catalogue holds the approved Browse and Review shell mockups
+Its `Design` catalogue holds the approved Browse shell mockups
 recorded by the
 [shell design contract](./docs/protocol/mokabook-shell-design.md).
 
@@ -340,8 +310,8 @@ recorded by the
   and the watched child lifecycle.
 - [`src/client`](./src/client) — progressive Browse navigation and versioned
   live updates served to the browser.
-- [`src/review`](./src/review) — Git extraction, comparison, ignore normalization,
-  and static artifacts.
+- [`src/review`](./src/review) — Git extraction, comparison, and ignore
+  normalization for change detection.
 - [`src/legacy`](./src/legacy) — opt-in migration sources and component expansion.
 - [`xtask`](./xtask/README.md) — full repository checks and post-push review.
 

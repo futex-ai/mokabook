@@ -30,7 +30,6 @@ export default defineConfig({
   repoRoot: ".",
   review: {
     base: "HEAD",
-    outDir: ".context/mokabook-review",
     sharedImpact: ["packages/firna-ui/**", "shared/**"],
   },
   stylesheets: [

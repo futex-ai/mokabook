@@ -9,7 +9,6 @@ import {
 import {
   optionalModule,
   requireDirectory,
-  validateReviewOut,
   validateSourceRoots,
 } from "./path_validation.js";
 import { resolveModuleResolution } from "./module_resolution.js";
@@ -94,18 +93,6 @@ export function resolveConfig(
       "compatibility.readManifestV2 must be boolean",
     );
   }
-  const reviewOut = resolveInside(
-    repoRoot,
-    configDir,
-    input.review?.outDir ?? ".context/mokabook-review",
-    "review.outDir",
-  );
-  validateReviewOut(reviewOut, {
-    entriesDir,
-    ...(legacy ? { legacy } : {}),
-    mockupsDir,
-    repoRoot,
-  });
   return {
     colorSchemes,
     compatibility: {
@@ -123,7 +110,6 @@ export function resolveConfig(
     repoRoot,
     review: {
       base: input.review?.base ?? "origin/main",
-      outDir: reviewOut,
       sharedImpact: validateStringArray(
         input.review?.sharedImpact ?? [],
         "review.sharedImpact",

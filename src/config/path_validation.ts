@@ -1,15 +1,8 @@
 import fs from "node:fs";
 
-import { MokabookError, type MokabookErrorCode } from "../errors.js";
-import { isInside, projectRealPath, resolveInside } from "./paths.js";
+import { MokabookError } from "../errors.js";
+import { isInside, resolveInside } from "./paths.js";
 import { requireString } from "./rules.js";
-
-interface ReviewOutBoundary {
-  entriesDir: string;
-  legacy?: { pagesDir: string };
-  mockupsDir: string;
-  repoRoot: string;
-}
 
 /** Resolve an optional consumer module and require a regular file. */
 export function optionalModule(
@@ -85,55 +78,6 @@ export function validateSourceRoots(
     throw new MokabookError(
       "config-invalid",
       "entriesDir and legacy.pagesDir must not overlap through symlinks",
-    );
-  }
-}
-
-/** Keep destructive Review replacement away from source and output roots. */
-export function validateReviewOut(
-  reviewOut: string,
-  boundary: ReviewOutBoundary,
-  label = "review.outDir",
-  code: MokabookErrorCode = "config-invalid",
-): void {
-  const { entriesDir, mockupsDir, repoRoot } = boundary;
-  const legacyDir = boundary.legacy?.pagesDir;
-  const protectedRoots = [
-    mockupsDir,
-    entriesDir,
-    ...(legacyDir ? [legacyDir] : []),
-  ];
-  const realRepoRoot = fs.realpathSync(repoRoot);
-  const realReviewOut = projectRealPath(reviewOut);
-  const realProtectedRoots = protectedRoots.map((root) =>
-    fs.realpathSync(root),
-  );
-  if (
-    reviewOut === repoRoot ||
-    !isInside(repoRoot, reviewOut) ||
-    !isInside(realRepoRoot, realReviewOut) ||
-    protectedRoots.some(
-      (root) =>
-        reviewOut === root ||
-        isInside(reviewOut, root) ||
-        isInside(root, reviewOut),
-    ) ||
-    realProtectedRoots.some(
-      (root) =>
-        realReviewOut === root ||
-        isInside(realReviewOut, root) ||
-        isInside(root, realReviewOut),
-    )
-  ) {
-    if (!isInside(realRepoRoot, realReviewOut)) {
-      throw new MokabookError(
-        code,
-        `${label} resolves outside repoRoot through a symlink`,
-      );
-    }
-    throw new MokabookError(
-      code,
-      `${label} must not overlap repository, mockup, or source roots`,
     );
   }
 }

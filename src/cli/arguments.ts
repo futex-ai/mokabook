@@ -1,8 +1,7 @@
 import { MokabookError } from "../errors.js";
 
 /** Supported user-visible and hidden process commands. */
-export type CliCommand =
-  "__serve-child" | "build" | "check" | "review" | "serve";
+export type CliCommand = "__serve-child" | "build" | "check" | "serve";
 
 /** Fully validated CLI arguments. */
 export interface CliArguments {
@@ -10,7 +9,6 @@ export interface CliArguments {
   command: CliCommand;
   config?: string;
   help: boolean;
-  out?: string;
   port?: number;
   strictPort?: boolean;
   updateVersion?: number;
@@ -22,7 +20,6 @@ const COMMANDS = new Set<CliCommand>([
   "__serve-child",
   "build",
   "check",
-  "review",
   "serve",
 ]);
 
@@ -47,7 +44,6 @@ export function parseArguments(argv: readonly string[]): CliArguments {
     else if (option === "--strict-port") parsed.strictPort = true;
     else if (option === "--config") parsed.config = takeValue(option, values);
     else if (option === "--base") parsed.base = takeValue(option, values);
-    else if (option === "--out") parsed.out = takeValue(option, values);
     else if (option === "--port")
       parsed.port = parsePort(takeValue(option, values));
     else if (option === "--update-version")
@@ -101,9 +97,6 @@ function validateCommandOptions(arguments_: CliArguments): void {
       "--port and --watch options belong to serve",
     );
   }
-  if (arguments_.command !== "review" && arguments_.out !== undefined) {
-    throw new MokabookError("cli-invalid", "--out belongs to review");
-  }
   if (
     arguments_.command !== "__serve-child" &&
     arguments_.updateVersion !== undefined
@@ -124,9 +117,6 @@ function validateCommandOptions(arguments_: CliArguments): void {
   }
   if (arguments_.command === "build" || arguments_.command === "check") {
     if (arguments_.base !== undefined)
-      throw new MokabookError(
-        "cli-invalid",
-        "--base belongs to serve or review",
-      );
+      throw new MokabookError("cli-invalid", "--base belongs to serve");
   }
 }

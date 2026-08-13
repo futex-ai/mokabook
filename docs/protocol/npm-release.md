@@ -32,9 +32,9 @@ to deterministic npm scripts and includes:
 - packed-tarball installs in clean ESM, NodeNext, Accounting-shaped, and
   Juno-shaped consumers;
 - local-npx and clean-cache npx-style execution from the packed artifact;
-- source-tree ESM, declaration, CLI, workspace-resolution, server, Review, and
+- source-tree ESM, declaration, CLI, workspace-resolution, server, and
   watched-runtime regressions;
-- Playwright Browse and Review regressions using Chromium; and
+- Playwright Browse regressions using Chromium; and
 - Rust formatting, Clippy, tests, and file-length audits for `xtask`.
 
 Tests that mutate files use isolated temporary directories and clean up child
@@ -72,7 +72,7 @@ receive Cloudflare credentials or write-capable execution.
 
 `npm run preview:build` first rebuilds Mokabook and its committed basic
 consumer. The repository-only preview builder starts the real Browse server on
-an ephemeral loopback port and snapshots the home, review launcher, not-found,
+an ephemeral loopback port and snapshots the home, not-found,
 and every manifest-backed route. It copies the shell stylesheet, browser
 navigation modules, fonts, id redirects, and every validated public consumer
 asset into `.context/mokabook-preview`. Preview shell links use Cloudflare
@@ -228,4 +228,4 @@ provenance automatically on supported GitHub-hosted runners.
 ## Related Docs
 
 - [Package and authoring contract](./mokabook-package.md)
-- [Build, Browse, and Review runtime](./mokabook-runtime.md)
+- [Build and Browse runtime](./mokabook-runtime.md)

@@ -52,14 +52,11 @@ export async function smokeEsmConsumer(context) {
     entry.replaceAll("Packed home", "Updated packed home"),
   );
   await runBin(root, ["build"]);
-  await runBin(root, ["review", "--base", "HEAD"]);
-  const review = JSON.parse(
-    await fs.promises.readFile(path.join(root, ".review/review.json"), "utf8"),
+  const rebuilt = await fs.promises.readFile(
+    path.join(root, "mockups/screens/home.desktop.html"),
+    "utf8",
   );
-  assert.equal(
-    review.screens.find((screen) => screen.id === "packed-home")?.state,
-    "changed",
-  );
+  assert.match(rebuilt, /Updated packed home/);
 }
 
 export async function smokeNodeNextConsumer(context) {
@@ -160,15 +157,6 @@ export async function smokeAccountingFixture(context) {
     'export const accent = "#6b4eff";\n',
   );
   await runBin(root, ["build"]);
-  await runBin(root, ["review", "--base", "HEAD"]);
-  const review = JSON.parse(
-    await fs.promises.readFile(
-      path.join(root, ".context/mokabook-review/review.json"),
-      "utf8",
-    ),
-  );
-  assert.deepEqual(review.sharedImpact, ["shared/tokens.ts"]);
-  assert.ok(review.screens.every((screen) => screen.sharedImpact.length === 1));
 }
 
 export async function smokeJunoFixture(context) {

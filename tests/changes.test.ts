@@ -1,38 +1,20 @@
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
 import fs from "node:fs";
-import path from "node:path";
 import test from "node:test";
-import { promisify } from "node:util";
 
+import type { Compilation } from "../dist/build/compile.js";
 import { compileCatalogue } from "../dist/build/compile.js";
-import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { compareReview } from "../dist/review/compare.js";
-import { renderReviewArtifact } from "../dist/review/artifact.js";
-import {
-  NodeGitCommandRunner,
-  RepositoryGitClient,
-  type GitClient,
-} from "../dist/review/git.js";
+import { RepositoryGitClient, type GitClient } from "../dist/review/git.js";
 import {
   normalizeReviewPair,
   normalizeSingleDocument,
 } from "../dist/review/ignore.js";
-import { runReview } from "../dist/review/run.js";
-import { writeReviewArtifact } from "../dist/review/write.js";
-import type { ReviewResult } from "../dist/review/types.js";
-import type { Compilation } from "../dist/build/compile.js";
 import type { ManifestScreen, ManifestV3 } from "../dist/registry/types.js";
-import {
-  createFixture,
-  removeFixture,
-  validEntrySource,
-} from "./helpers/fixture.js";
+import { createFixture, removeFixture } from "./helpers/fixture.js";
 
-const execFileAsync = promisify(execFile);
-
-test("Review ignore normalizes paired regions and retains malformed content", () => {
+test("review ignore normalizes paired regions and retains malformed content", () => {
   const base =
     "<main><!--mokabook-review-ignore:start:nav--><nav>A</nav><!--mokabook-review-ignore:end:nav--><p>Body</p></main>";
   const head =
@@ -69,7 +51,7 @@ test("Git failures keep typed operation context", async () => {
   );
 });
 
-test("Review classifies added, removed, and unchanged routes independently", async (context) => {
+test("comparison classifies added, removed, and unchanged routes", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
   const config = await loadConfig(fixture.root);
@@ -114,40 +96,22 @@ test("Review classifies added, removed, and unchanged routes independently", asy
       "<html><body>Old desktop</body></html>",
     ],
   ]);
-  const artifact = await compareReview(
+  const result = await compareReview(
     compilation,
     config,
-    {
-      changedPaths: async () => [],
-      fileExists: async (_commit, repoPath) => gitFiles.has(repoPath),
-      fileKind: async (_commit, repoPath) =>
-        gitFiles.has(repoPath) ? "regular" : "missing",
-      readFile: async (_commit, repoPath) => {
-        const content = gitFiles.get(repoPath);
-        if (content === undefined)
-          throw new Error(`missing fake Git path ${repoPath}`);
-        return content;
-      },
-      readFileBytes: async (_commit, repoPath) => {
-        const content = gitFiles.get(repoPath);
-        if (content === undefined)
-          throw new Error(`missing fake Git path ${repoPath}`);
-        return Buffer.from(content);
-      },
-      mergeBase: async () => "a".repeat(40),
-    },
+    fakeGit(gitFiles),
     "HEAD",
   );
   assert.equal(
-    artifact.result.screens.find((screen) => screen.id === "home")?.state,
+    result.screens.find((screen) => screen.id === "home")?.state,
     "added",
   );
   assert.equal(
-    artifact.result.screens.find((screen) => screen.id === "old-screen")?.state,
+    result.screens.find((screen) => screen.id === "old-screen")?.state,
     "removed",
   );
   assert.equal(
-    artifact.result.screens.find((screen) => screen.id === "details")?.state,
+    result.screens.find((screen) => screen.id === "details")?.state,
     "unchanged",
   );
 });
@@ -163,80 +127,42 @@ test("dark views compare and classify against a pre-dark base", async (context) 
   const baseCompilation = withHomeIgnoredRegions(rawCompilation, "before");
   const baseManifest = withoutDarkFragments(baseCompilation.manifest);
 
-  const artifact = await compareReview(
+  const result = await compareReview(
     compilation,
     config,
     fakeGit(filesForCompilation(baseManifest, baseCompilation)),
     "HEAD",
   );
 
-  const home = artifact.result.screens.find((screen) => screen.id === "home");
+  const home = result.screens.find((screen) => screen.id === "home");
   assert.ok(home);
   assert.deepEqual(
-    home.views.map(({ colorScheme, state, viewport }) => ({
+    home.views.map(({ colorScheme, ignoredIds, state, viewport }) => ({
       colorScheme,
+      ignoredIds,
       state,
       viewport,
     })),
     [
-      { colorScheme: "light", state: "ignored-only", viewport: "mobile" },
-      { colorScheme: "dark", state: "added", viewport: "mobile" },
-      { colorScheme: "light", state: "ignored-only", viewport: "desktop" },
-      { colorScheme: "dark", state: "added", viewport: "desktop" },
-    ],
-  );
-  const reviewJson = JSON.parse(
-    renderReviewArtifact(artifact).get("review.json") as string,
-  ) as ReviewResult;
-  assert.equal(reviewJson.schemaVersion, 2);
-  const jsonHome = reviewJson.screens.find((screen) => screen.id === "home");
-  assert.ok(jsonHome);
-  assert.deepEqual(
-    jsonHome.views.map(
-      ({
-        afterPath,
-        beforePath,
-        colorScheme,
-        ignoredIds,
-        state,
-        viewport,
-      }) => ({
-        after: Boolean(afterPath),
-        before: Boolean(beforePath),
-        colorScheme,
-        ignoredIds,
-        state,
-        viewport,
-      }),
-    ),
-    [
       {
-        after: true,
-        before: true,
         colorScheme: "light",
         ignoredIds: ["nav"],
         state: "ignored-only",
         viewport: "mobile",
       },
       {
-        after: true,
-        before: false,
         colorScheme: "dark",
         ignoredIds: [],
         state: "added",
         viewport: "mobile",
       },
       {
-        after: true,
-        before: true,
         colorScheme: "light",
         ignoredIds: ["nav"],
         state: "ignored-only",
         viewport: "desktop",
       },
       {
-        after: true,
-        before: false,
         colorScheme: "dark",
         ignoredIds: [],
         state: "added",
@@ -244,7 +170,7 @@ test("dark views compare and classify against a pre-dark base", async (context) 
       },
     ],
   );
-  assert.deepEqual(reviewJson.ignoredImpact, [
+  assert.deepEqual(result.ignoredImpact, [
     { colorScheme: "light", count: 1, id: "nav", viewport: "mobile" },
     { colorScheme: "light", count: 1, id: "nav", viewport: "desktop" },
   ]);
@@ -264,21 +190,21 @@ export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
   repoRoot: ".",
-  review: { outDir: ".review", sharedImpact: ["notes.md"] }
+  review: { sharedImpact: ["notes.md"] }
 });
 `,
   );
   const lightConfig = await loadConfig(fixture.root);
   const lightCompilation = await compileCatalogue(lightConfig);
 
-  const artifact = await compareReview(
+  const result = await compareReview(
     lightCompilation,
     lightConfig,
     fakeGit(filesForCompilation(darkCompilation.manifest, darkCompilation)),
     "HEAD",
   );
 
-  const home = artifact.result.screens.find((screen) => screen.id === "home");
+  const home = result.screens.find((screen) => screen.id === "home");
   assert.ok(home);
   assert.deepEqual(
     home.views.map(({ colorScheme, state, viewport }) => ({
@@ -311,14 +237,14 @@ test("ignoredImpact sorts by viewport then scheme then id", async (context) => {
     "a-nav",
   ]);
 
-  const artifact = await compareReview(
+  const result = await compareReview(
     headCompilation,
     config,
     fakeGit(filesForCompilation(baseCompilation.manifest, baseCompilation)),
     "HEAD",
   );
 
-  assert.deepEqual(artifact.result.ignoredImpact, [
+  assert.deepEqual(result.ignoredImpact, [
     { colorScheme: "light", count: 1, id: "a-nav", viewport: "mobile" },
     { colorScheme: "light", count: 1, id: "z-nav", viewport: "mobile" },
     { colorScheme: "dark", count: 1, id: "a-nav", viewport: "mobile" },
@@ -329,119 +255,6 @@ test("ignoredImpact sorts by viewport then scheme then id", async (context) => {
     { colorScheme: "dark", count: 1, id: "z-nav", viewport: "desktop" },
   ]);
 });
-
-test("Review compares Git base without checkout and writes deterministic artifacts", async (context) => {
-  const fixture = await createFixture();
-  context.after(() => removeFixture(fixture));
-  const config = await loadConfig(fixture.root);
-  await writeCompilation(await compileCatalogue(config), config);
-  await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
-  await git(fixture.root, ["add", "."]);
-  await git(fixture.root, ["commit", "-qm", "test: base catalogue"]);
-
-  await fs.promises.writeFile(
-    fixture.entryPath,
-    validEntrySource({ firstTitle: "Updated Home" }),
-  );
-  await fs.promises.writeFile(
-    path.join(fixture.root, "notes.md"),
-    "# Updated fixture notes\n",
-  );
-  await writeCompilation(await compileCatalogue(config), config);
-  const result = await runReview(
-    config,
-    "HEAD",
-    config.review.outDir,
-    new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
-  );
-  assert.equal(
-    result.screens.find((screen) => screen.route === "screens/home.html")
-      ?.state,
-    "changed",
-  );
-  assert.deepEqual(result.sharedImpact, ["notes.md"]);
-  assert.ok(
-    result.screens.every((screen) => screen.sharedImpact.includes("notes.md")),
-  );
-  const reviewJson = JSON.parse(
-    await fs.promises.readFile(
-      path.join(config.review.outDir, "review.json"),
-      "utf8",
-    ),
-  ) as { baseCommit: string; schemaVersion: number };
-  assert.equal(reviewJson.schemaVersion, 2);
-  assert.match(reviewJson.baseCommit, /^[a-f0-9]{40}$/);
-  assert.equal(
-    fs.existsSync(path.join(config.review.outDir, "index.html")),
-    true,
-  );
-  assert.equal(
-    fs.existsSync(path.join(config.review.outDir, "summary.md")),
-    true,
-  );
-});
-
-test("Review reports descendants of directory dependencies", async (context) => {
-  const fixture = await createFixture(
-    validEntrySource().replace(
-      'dependencies: ["notes.md"]',
-      'dependencies: ["src/components"]',
-    ),
-  );
-  context.after(() => removeFixture(fixture));
-  const component = path.join(fixture.root, "src/components/Button.tsx");
-  await fs.promises.mkdir(path.dirname(component), { recursive: true });
-  await fs.promises.writeFile(component, "export const label = 'Before';\n");
-  const config = await loadConfig(fixture.root);
-  await writeCompilation(await compileCatalogue(config), config);
-  await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
-  await git(fixture.root, ["add", "."]);
-  await git(fixture.root, ["commit", "-qm", "test: base directory dependency"]);
-  await fs.promises.writeFile(component, "export const label = 'After';\n");
-
-  const result = await runReview(
-    config,
-    "HEAD",
-    config.review.outDir,
-    new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
-  );
-
-  assert.ok(
-    result.screens.every((screen) =>
-      screen.sharedImpact.includes("src/components/Button.tsx"),
-    ),
-  );
-});
-
-test("Review writer will not replace an unowned directory or repository root", async (context) => {
-  const fixture = await createFixture();
-  context.after(() => removeFixture(fixture));
-  const config = await loadConfig(fixture.root);
-  const out = path.join(fixture.root, "existing");
-  await fs.promises.mkdir(out);
-  await fs.promises.writeFile(path.join(out, "keep.txt"), "keep\n");
-  await assert.rejects(
-    () => writeReviewArtifact(new Map([["index.html", "safe"]]), out, config),
-    /unowned Review directory/,
-  );
-  await assert.rejects(
-    () =>
-      writeReviewArtifact(
-        new Map([["index.html", "safe"]]),
-        fixture.root,
-        config,
-      ),
-    /must not overlap/,
-  );
-});
-
-async function git(cwd: string, arguments_: readonly string[]): Promise<void> {
-  await execFileAsync("git", [...arguments_], { cwd });
-}
 
 function fakeGit(files: ReadonlyMap<string, string>): GitClient {
   return {

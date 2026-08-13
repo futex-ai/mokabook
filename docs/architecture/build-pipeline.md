@@ -112,7 +112,7 @@ validated before output changes. All expected bytes are held in memory.
 proven-orphan paths.
 
 Declared dependency paths may be files or directories. The manifest preserves
-that declaration, and downstream Browse/Review impact matching treats a
+that declaration, and downstream Browse impact matching treats a
 directory as a root containing every changed descendant rather than requiring
 an exact Git path match.
 

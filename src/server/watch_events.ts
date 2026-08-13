@@ -194,7 +194,6 @@ export function isPackageOwnedIgnoredWatchPath(
   if (!isInside(config.repoRoot, absolute)) return false;
   if (isRequiredWatchPath(absolute, config)) return false;
   if (isGeneratedOutputPath(absolute, config)) return true;
-  if (isInside(config.review.outDir, absolute)) return true;
   const parts = path.relative(config.repoRoot, absolute).split(path.sep);
   return parts.some(
     (part) =>

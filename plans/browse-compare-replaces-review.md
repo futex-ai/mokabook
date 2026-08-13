@@ -103,28 +103,28 @@ Remove the batch-comparison product: the static artifact renderer, the served
 scripts, and docs. The comparison core (Git client, batch reads, base
 manifest, ignore normalization, compare kernel) stays for the Changed filter.
 
-- [ ] Delete `src/review/artifact.ts`, `artifact_pages.tsx`,
+- [x] Delete `src/review/artifact.ts`, `artifact_pages.tsx`,
       `artifact_shell.tsx`, `artifact_navigation.tsx`, `write.ts`, `paths.ts`,
       `run.ts`, and the snapshot-copying portion of `assets.ts`
       (`FileSystemReviewAssetReader`, `copySnapshotDependencies`,
       `referencedRoutes`, `resolveReference`), keeping `GitReviewAssetReader`.
-- [ ] Delete `src/server/review_routes.ts` and
+- [x] Delete `src/server/review_routes.ts` and
       `src/server/review_generations.ts`; strip their wiring from
       `src/server/http.ts`, `serve.ts`, and `child.ts`; drop the
       `review.outDir` pruning in `src/server/watch_events.ts:197` (keep the
       `.mokabook-review-` temp-prefix ignore until Milestone 4 renames it).
-- [ ] Remove the `review` command from `src/cli/arguments.ts`, `run.ts`, and
+- [x] Remove the `review` command from `src/cli/arguments.ts`, `run.ts`, and
       `help.ts` (`--base` stays for serve).
-- [ ] Remove `outDir` from the review config schema
+- [x] Remove `outDir` from the review config schema
       (`src/config/types.ts`, `validate.ts`) and delete `validateReviewOut`
       from `src/config/path_validation.ts`; update `tests/helpers/fixture.ts`.
-- [ ] Delete `src/server/shell/css_review.ts` and the deletable portion of
+- [x] Delete `src/server/shell/css_review.ts` and the deletable portion of
       `css_review_shell.ts` (keep `.mbk-status`, `.mbk-cmp-toolbar`,
       `.mbk-rvw-stage` only if the Milestone 1 contract reuses them; otherwise
       delete and re-add fresh in Milestone 6); also delete the `.mbk-mode*`
       and `.mbk-basewatch` rules deferred from Milestone 2; update `css.ts`
       assembly.
-- [ ] Delete the dedicated test files: `tests/review.test.ts`,
+- [x] Delete the dedicated test files: `tests/review.test.ts`,
       `tests/browser/review.spec.ts`, `tests/review_performance.test.ts`,
       `tests/review_artifact_ui.test.ts`, `tests/server_review.test.ts`,
       `tests/review_regressions.test.ts`,
@@ -133,22 +133,22 @@ manifest, ignore normalization, compare kernel) stays for the Changed filter.
       `tests/server_review_shutdown.test.ts`; move still-relevant comparison
       and Git-batch coverage into kept suites first
       (`tests/server_changed.test.ts` or a new `tests/changes.test.ts`).
-- [ ] Update `scripts/package/consumer_cases.mjs` to drop the packed review
+- [x] Update `scripts/package/consumer_cases.mjs` to drop the packed review
       smoke cases; update `tests/preview.test.ts`, `tests/deployment.test.ts`,
       `tests/package.test.ts`, `tests/watch_boundaries.test.ts`, and
       `tests/config.test.ts`. The `tests/server.test.ts` config-reload probe
       polls `/review` for the reloaded base ref and must switch to a
       different reload-visible signal.
-- [ ] Update docs: `docs/protocol/mokabook-runtime.md` (drop Review
+- [x] Update docs: `docs/protocol/mokabook-runtime.md` (drop Review
       Comparison, Served Review, `review.json`, CI Review Integration
       sections; keep Review Ignore semantics under change detection),
       `docs/protocol/mokabook-package.md` (CLI table, config), `README.md`,
       `docs/architecture/package-boundary.md`, `docs/protocol/npm-release.md`
       gate descriptions.
-- [ ] Mark plan `accounting-shell-design-parity.md` Milestone 6 as obsolete
+- [x] Mark plan `accounting-shell-design-parity.md` Milestone 6 as obsolete
       with a pointer to this plan (do not re-open or edit its history
       otherwise).
-- [ ] Run `cargo xtask check`; commit (breaking-change footer for the CLI
+- [x] Run `cargo xtask check`; commit (breaking-change footer for the CLI
       removal) and push.
 
 ## Milestone 4 — Rename to `changes` and upgrade change detection

@@ -31,12 +31,7 @@ export async function computeChangedRoutes(
       client = new RepositoryGitClient(runner);
     }
     const commit = await client.mergeBase(base, "HEAD");
-    const changed = await reviewChangedPaths(
-      client,
-      commit,
-      config,
-      config.review.outDir,
-    );
+    const changed = await reviewChangedPaths(client, commit, config);
     const manifest = readManifest(config);
     const baseManifest = await readBaseManifest(client, commit, config);
     return changedManifestRoutes(manifest, baseManifest, config, changed);

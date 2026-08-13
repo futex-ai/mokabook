@@ -11,17 +11,11 @@ import { MokabookError } from "../errors.js";
 import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
 import type { ManifestScreen, ManifestV3 } from "../registry/types.js";
 import { VIEWPORTS } from "../registry/views.js";
-import {
-  copySnapshotDependencies,
-  FileSystemReviewAssetReader,
-  GitReviewAssetReader,
-  type ReviewAssetReader,
-} from "./assets.js";
+import { GitReviewAssetReader } from "./assets.js";
 import { readBaseManifest } from "./base_manifest.js";
 import { reviewChangedPaths } from "./changed_paths.js";
 import type { GitClient } from "./git.js";
 import { normalizeReviewPair, normalizeSingleDocument } from "./ignore.js";
-import { addArtifactFile, snapshotPath } from "./paths.js";
 import {
   aggregateIgnored,
   fragmentForView,
@@ -29,33 +23,22 @@ import {
   unionColorSchemes,
 } from "./screen_views.js";
 import type {
-  ReviewArtifact,
-  ReviewArtifactContent,
   ReviewResult,
   ReviewState,
   ScreenReview,
   ViewReview,
 } from "./types.js";
 
-/** Compare checked head output to its Git branch point and retain pane artifacts. */
+/** Compare checked head output to its Git branch point. */
 export async function compareReview(
   compilation: Compilation,
   config: ResolvedConfig,
   git: GitClient,
   baseRef: string,
-  outDir = config.review.outDir,
-  assetReader: ReviewAssetReader = new FileSystemReviewAssetReader(config),
-  changedPathExclusions: readonly string[] = [],
-): Promise<ReviewArtifact> {
+): Promise<ReviewResult> {
   const baseCommit = await git.mergeBase(baseRef, "HEAD");
   const baseManifest = await readBaseManifest(git, baseCommit, config);
-  const changedPaths = await reviewChangedPaths(
-    git,
-    baseCommit,
-    config,
-    outDir,
-    changedPathExclusions,
-  );
+  const changedPaths = await reviewChangedPaths(git, baseCommit, config);
   const mockupsPrefix = toPosixPath(
     path.relative(config.repoRoot, config.mockupsDir),
   );
@@ -65,9 +48,6 @@ export async function compareReview(
     baseCommit,
     mockupsPrefix,
   );
-  const files = new Map<string, ReviewArtifactContent>();
-  const baseSeeds = new Set<string>();
-  const headSeeds = new Set<string>();
   const baseByRoute = screenMap(baseManifest);
   const headByRoute = screenMap(compilation.manifest);
   const baseDocuments = await baseAssetReader.readMany(
@@ -86,31 +66,17 @@ export async function compareReview(
     const base = baseByRoute.get(route);
     const head = headByRoute.get(route);
     screens.push(
-      await compareScreen(
+      compareScreen(
         base,
         head,
         baseDocuments,
         compilation,
         changedPaths,
         sharedImpact,
-        files,
-        baseSeeds,
-        headSeeds,
       ),
     );
   }
-  await copySnapshotDependencies(
-    files,
-    "before",
-    baseSeeds,
-    (route) => baseAssetReader.read(route),
-    (routes) => baseAssetReader.readMany(routes),
-  );
-  await copySnapshotDependencies(files, "after", headSeeds, async (route) => {
-    const generated = compilation.outputs.get(route);
-    return generated ?? assetReader.read(route);
-  });
-  const result: ReviewResult = {
+  return {
     baseCommit,
     baseRef,
     changedPaths,
@@ -119,20 +85,16 @@ export async function compareReview(
     screens,
     sharedImpact,
   };
-  return { files, result };
 }
 
-async function compareScreen(
+function compareScreen(
   base: ManifestScreen | undefined,
   head: ManifestScreen | undefined,
   baseDocuments: ReadonlyMap<string, Uint8Array>,
   compilation: Compilation,
   changedPaths: readonly string[],
   sharedImpact: readonly string[],
-  files: Map<string, ReviewArtifactContent>,
-  baseSeeds: Set<string>,
-  headSeeds: Set<string>,
-): Promise<ScreenReview> {
+): ScreenReview {
   const entry = head ?? base;
   if (!entry)
     throw new MokabookError("review-invalid", "comparison route has no screen");
@@ -166,30 +128,8 @@ async function compareScreen(
           `head fragment is missing: ${headFragment}`,
         );
       }
-      const beforePath = baseFragment
-        ? snapshotPath("before", baseFragment)
-        : undefined;
-      const afterPath = headFragment
-        ? snapshotPath("after", headFragment)
-        : undefined;
-      if (before !== undefined && beforePath && baseFragment) {
-        addArtifactFile(files, beforePath, before);
-        baseSeeds.add(baseFragment);
-      }
-      if (after !== undefined && afterPath && headFragment) {
-        addArtifactFile(files, afterPath, after);
-        headSeeds.add(headFragment);
-      }
       views.push(
-        compareView(
-          before,
-          after,
-          entry.route,
-          viewport,
-          colorScheme,
-          beforePath,
-          afterPath,
-        ),
+        compareView(before, after, entry.route, viewport, colorScheme),
       );
     }
   }
@@ -218,8 +158,6 @@ function compareView(
   route: string,
   viewport: Viewport,
   colorScheme: ColorScheme,
-  beforePath: string | undefined,
-  afterPath: string | undefined,
 ): ViewReview {
   const context = `${route} (${viewport}, ${colorScheme})`;
   const normalizedBefore =
@@ -227,28 +165,14 @@ function compareView(
   const normalizedAfter =
     after === undefined ? undefined : normalizeSingleDocument(after, context);
   if (before === undefined)
-    return {
-      ...(afterPath ? { afterPath } : {}),
-      colorScheme,
-      ignoredIds: [],
-      state: "added",
-      viewport,
-    };
+    return { colorScheme, ignoredIds: [], state: "added", viewport };
   if (after === undefined)
-    return {
-      ...(beforePath ? { beforePath } : {}),
-      colorScheme,
-      ignoredIds: [],
-      state: "removed",
-      viewport,
-    };
+    return { colorScheme, ignoredIds: [], state: "removed", viewport };
   const normalized = normalizeReviewPair(before, after, context);
   const normalizedEqual = digest(normalized.base) === digest(normalized.head);
   const rawEqual =
     digest(normalizedBefore ?? "") === digest(normalizedAfter ?? "");
   return {
-    ...(afterPath ? { afterPath } : {}),
-    ...(beforePath ? { beforePath } : {}),
     colorScheme,
     ignoredIds: normalized.ignoredIds,
     state: rawEqual

@@ -159,9 +159,9 @@ test("branch comparisons exclude commits made only on the base branch", async (c
   );
 
   assert.deepEqual(changed, ["screens/home.html", "user-flows/tour.html"]);
-  assert.equal(review.result.baseCommit, commonCommit);
+  assert.equal(review.baseCommit, commonCommit);
   assert.equal(
-    review.result.screens.find((screen) => screen.id === "details")?.state,
+    review.screens.find((screen) => screen.id === "details")?.state,
     "unchanged",
   );
 });

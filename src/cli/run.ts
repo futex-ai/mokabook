@@ -1,13 +1,10 @@
 import fs from "node:fs";
-import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { compileCatalogue } from "../build/compile.js";
 import { FileSystemGeneratedOutputStore } from "../build/output_store.js";
 import { loadConfig } from "../config/load.js";
-import { validateReviewOut } from "../config/path_validation.js";
 import { MokabookError } from "../errors.js";
-import { runReview } from "../review/run.js";
 import { runServerChild } from "../server/child.js";
 import { serve, type RunningServe } from "../server/serve.js";
 import { parseArguments } from "./arguments.js";
@@ -47,17 +44,6 @@ export async function run(
     return 0;
   }
   const base = arguments_.base ?? config.review.base;
-  if (arguments_.command === "review") {
-    const outDir = arguments_.out
-      ? path.resolve(config.repoRoot, arguments_.out)
-      : config.review.outDir;
-    validateReviewOut(outDir, config, "--out", "cli-invalid");
-    const result = await runReview(config, base, outDir);
-    process.stdout.write(
-      `Review compared ${result.screens.length} screens in ${outDir}.\n`,
-    );
-    return 0;
-  }
   const port = arguments_.port ?? 4173;
   if (arguments_.command === "__serve-child") {
     await runServerChild(

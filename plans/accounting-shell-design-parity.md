@@ -117,6 +117,11 @@ package proves the consumer contract against the real Firna stack.
 
 Tags: ui
 
+Status: obsolete — the static Review artifact was removed by
+[Browse Compare Replaces Review](./browse-compare-replaces-review.md), so no
+artifact chrome remains to restyle. The TODOs below are intentionally left
+unchecked and require no work.
+
 The static Review artifact pages keep their `mb-*` structure and inherit the
 new palette and typography through shared stylesheet tokens. Full parity with
 the restyled Review design mockups (browser-frame compare panes, seg-control

@@ -242,5 +242,5 @@ it — comparing an unchanged screen composes two identical renders.
 
 ## Related Docs
 
-- [Build, Browse, and Review runtime](./mokabook-runtime.md)
+- [Build and Browse runtime](./mokabook-runtime.md)
 - [Package and authoring contract](./mokabook-package.md)

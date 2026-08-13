@@ -23,7 +23,6 @@ export default defineConfig({
   renderer: "renderer.tsx",
   repoRoot: "../..",
   review: {
-    outDir: ".context/basic-review",
     sharedImpact: [
       "examples/basic/generated/design-compare.css",
       "examples/basic/generated/design-stage.css",

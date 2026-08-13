@@ -255,12 +255,12 @@ test(
     await waitFor(async () => (await fetch(url)).status === 200);
     await fs.promises.writeFile(
       fixture.configPath,
-      `export default { entriesDir: "entries", mockupsDir: "mockups", repoRoot: ".", review: { base: "config-reloaded", outDir: ".review" } };\n`,
+      `export default { colorSchemes: ["light", "dark"], entriesDir: "entries", mockupsDir: "mockups", repoRoot: "." };\n`,
     );
     await waitFor(
       async () =>
-        (await (await fetch(`${url}/review`)).text()).includes(
-          "config-reloaded",
+        (await (await fetch(url)).text()).includes(
+          "data-mokabook-schemeswitch",
         ),
       20_000,
     );

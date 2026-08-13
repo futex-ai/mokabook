@@ -4,7 +4,7 @@
 
 Mokabook is shared developer tooling for repositories that keep visual mockups
 as code and committed static artifacts. The package owns catalogue definitions,
-generation, validation, Browse, and Review behavior. A consumer owns all product
+generation, validation, and Browse behavior. A consumer owns all product
 screens, product copy, product components, styling, theme setup, and generated
 product output.
 
@@ -35,16 +35,15 @@ The public commands are:
 
 ```text
 mokabook                 Alias for `mokabook serve`
-mokabook serve           Serve Browse and Review; watch by default
+mokabook serve           Serve Browse; watch by default
 mokabook build           Generate static artifacts and the manifest
 mokabook check           Validate source and committed generated output
-mokabook review          Generate a static comparison artifact
 mokabook --help          Show commands, options, and config discovery
 mokabook --version       Show the installed package version
 ```
 
 Common options include `--config <path>`. Serve accepts `--port`, `--base`,
-`--watch`, and `--no-watch`. Review accepts `--base` and `--out`. A flag after
+`--watch`, and `--no-watch`. A flag after
 the package name belongs to Mokabook; docs must show npx arguments in a form
 that is unambiguous to current npm.
 
@@ -76,9 +75,8 @@ the following contract:
 - optional renderer-module path and declarative route-to-stylesheet rules;
 - optional consumer package roots, aliases, conditions, fields, extensions, and
   loaders for app-owned module resolution;
-- default Git base ref used to find the `HEAD` branch point, and Review output
-  directory;
-- shared-impact globs for Review;
+- default Git base ref used to find the `HEAD` branch point;
+- shared-impact globs for change comparison;
 - additional authored inputs and static assets for watched Serve;
 - optional legacy link aliases and lint policy needed by that consumer.
 - an optional temporary document transformer for an existing consumer cutover.
@@ -146,7 +144,6 @@ interface MokabookConfig {
   };
   review?: {
     base?: string; // origin/main; merge base with HEAD
-    outDir?: string; // .context/mokabook-review
     sharedImpact?: readonly string[];
   };
   watch?: {
@@ -164,28 +161,27 @@ interface MokabookConfig {
 ```
 
 Filesystem fields (`repoRoot`, `entriesDir`, `mockupsDir`, `renderer`, legacy
-page/component paths, compatibility transformer, module-resolution package
-roots, and Review `outDir`) are config-relative. Stylesheet file paths are
+page/component paths, compatibility transformer, and module-resolution package
+roots) are config-relative. Stylesheet file paths are
 relative to `mockupsDir`; HTTP(S) stylesheet URLs are allowed.
 `colorSchemes` is a non-empty, duplicate-free subset of `"light" | "dark"`
 that must include `"light"`; it defaults to `["light"]` and normalizes to
 light-first order. Shared `stylesheets` apply to every generated view, with a
 matching `lightStylesheets` or `darkStylesheets` list appended in declaration
 order.
-`watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
+`watch.rules[].paths` and `review.sharedImpact` are repository-relative POSIX
 globs, while stylesheet `match` and legacy aliases/lint routes match catalogue
 routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
 matches and watch paths are invalid. Additional watch rules cannot override
 configured source/module rebuilds, configured stylesheet reloads, or
-package-owned ignores for dependency, build, test, Review, header-proven
+package-owned ignores for dependency, build, test, header-proven
 generated, and transaction paths. An unowned public HTML file below
 `mockupsDir` remains consumer-authored and can match an explicit watch rule.
 Authored source directories may sit below `mockupsDir` for a `docs/mockups/src`
 layout, but they may not equal each other or the output root; generated routes
-are collision-checked against those sources before writing. Review output must
-not overlap a source or output root in either direction. That rule applies
-equally to configured output, a CLI `--out` override, and the transactional
-writer boundary.
+are collision-checked against those sources before writing. Generated output
+must not overlap a source root in either direction at the transactional writer
+boundary.
 
 `moduleResolution` has no defaults beyond esbuild's platform behavior. Package
 roots must be in-repository directories containing `package.json`; their
@@ -219,8 +215,8 @@ globally unique kebab-case values and remain stable across navigation changes.
 
 Each entry provides a title, description, navigation path, related docs, and
 dependency paths. A dependency may identify an existing repository file or
-directory; Browse and Review match the path itself and every descendant, while
-Review reports the concrete changed descendant as evidence. Screens and use
+directory; change detection matches the path itself and every descendant and
+reports the concrete changed descendant as evidence. Screens and use
 cases provide a stable relative `.html` route; use cases live under
 `user-flows/`. Screens may provide an address-bar label and use-case
 membership. Nested definitions inherit declared metadata, but ids never derive
@@ -371,7 +367,7 @@ previous dark documents proven generated orphans: `check` reports them and
 
 Manifest source and output paths are repository-relative; routes are relative
 to `mockupsDir`. The manifest includes every entry, fragment, legacy page,
-relationship, related doc, and dependency needed by Browse and Review. It is
+relationship, related doc, and dependency needed by Browse. It is
 stable across operating systems and independent of absolute checkout paths.
 Repository paths are canonical POSIX paths with no empty, dot, parent, drive,
 or backslash segments; generated manifests are self-validated before writing.
@@ -470,5 +466,5 @@ fallback.
 
 ## Related Docs
 
-- [Build, Browse, and Review runtime](./mokabook-runtime.md)
+- [Build and Browse runtime](./mokabook-runtime.md)
 - [CI and npm release](./npm-release.md)
