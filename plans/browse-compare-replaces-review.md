@@ -77,18 +77,24 @@ Take Review out of the Browse chrome so the served product is Browse-only.
 The `/review` HTTP surface keeps working unlinked until Milestone 3; the only
 non-shell edit is deleting the dead launcher dispatch glue.
 
-- [ ] Remove the Browse/Review mode nav from
-      `src/server/shell/document.tsx` top bar and the `.mbk-mode*` rules from
-      `src/server/shell/css_nav.ts`.
-- [ ] Remove `ReviewLauncherView` and the `{ kind: "review" }` shell view from
+- [x] Remove the Browse/Review mode nav from
+      `src/server/shell/document.tsx` (the `.mbk-mode*` and `.mbk-basewatch`
+      CSS rules stay until Milestone 3 because generated static artifacts
+      still inline `SHELL_CSS` and use those classes).
+- [x] Remove `ReviewLauncherView` and the `{ kind: "review" }` shell view from
       `src/server/shell/views.tsx`, `reviewPage` from `src/server/pages.ts`,
       and `mode` from `src/server/shell/context.ts` (the All/Changed filter
       renders whenever `changedRoutes` is defined).
-- [ ] Delete the launcher fallback branch in `src/server/http.ts` so an
+- [x] Delete the launcher fallback branch in `src/server/http.ts` so an
       unprovisioned `/review` request 404s like any unknown route.
-- [ ] Update `tests/shell.test.ts` (launcher and mode-pill assertions) and
-      any browser assertions on the top-bar pills.
-- [ ] Run `cargo xtask check`; commit and push.
+- [x] Stop snapshotting `/review` in `scripts/preview/build.mjs`: the preview
+      captured the launcher page, which no longer exists (moved forward from
+      Milestone 3).
+- [x] Update `tests/shell.test.ts` (launcher and mode-pill assertions),
+      `tests/server_review.test.ts` (unprovisioned `/review` now 404s),
+      `tests/server_live_updates.test.ts` (route list), and the runtime
+      protocol's Browse Shell and launcher statements.
+- [x] Run `cargo xtask check`; commit and push.
 
 ## Milestone 3 — Delete the Review artifact, served mode, and CLI command
 
@@ -115,7 +121,9 @@ manifest, ignore normalization, compare kernel) stays for the Changed filter.
 - [ ] Delete `src/server/shell/css_review.ts` and the deletable portion of
       `css_review_shell.ts` (keep `.mbk-status`, `.mbk-cmp-toolbar`,
       `.mbk-rvw-stage` only if the Milestone 1 contract reuses them; otherwise
-      delete and re-add fresh in Milestone 6); update `css.ts` assembly.
+      delete and re-add fresh in Milestone 6); also delete the `.mbk-mode*`
+      and `.mbk-basewatch` rules deferred from Milestone 2; update `css.ts`
+      assembly.
 - [ ] Delete the dedicated test files: `tests/review.test.ts`,
       `tests/browser/review.spec.ts`, `tests/review_performance.test.ts`,
       `tests/review_artifact_ui.test.ts`, `tests/server_review.test.ts`,
@@ -125,11 +133,12 @@ manifest, ignore normalization, compare kernel) stays for the Changed filter.
       `tests/server_review_shutdown.test.ts`; move still-relevant comparison
       and Git-batch coverage into kept suites first
       (`tests/server_changed.test.ts` or a new `tests/changes.test.ts`).
-- [ ] Update `scripts/preview/build.mjs` to stop snapshotting `/review`, and
-      `scripts/package/consumer_cases.mjs` to drop the packed review smoke
-      cases; update `tests/preview.test.ts`, `tests/deployment.test.ts`,
+- [ ] Update `scripts/package/consumer_cases.mjs` to drop the packed review
+      smoke cases; update `tests/preview.test.ts`, `tests/deployment.test.ts`,
       `tests/package.test.ts`, `tests/watch_boundaries.test.ts`, and
-      `tests/config.test.ts`.
+      `tests/config.test.ts`. The `tests/server.test.ts` config-reload probe
+      polls `/review` for the reloaded base ref and must switch to a
+      different reload-visible signal.
 - [ ] Update docs: `docs/protocol/mokabook-runtime.md` (drop Review
       Comparison, Served Review, `review.json`, CI Review Integration
       sections; keep Review Ignore semantics under change detection),

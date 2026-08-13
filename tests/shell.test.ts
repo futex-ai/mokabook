@@ -4,12 +4,7 @@ import test from "node:test";
 import type { ManifestV3 } from "../dist/registry/types.js";
 import type { Catalogue } from "../dist/server/catalogue.js";
 import { createCatalogue } from "../dist/server/catalogue.js";
-import {
-  homePage,
-  notFoundPage,
-  reviewPage,
-  viewPage,
-} from "../dist/server/pages.js";
+import { homePage, notFoundPage, viewPage } from "../dist/server/pages.js";
 import { SHELL_CSS } from "../dist/server/shell/css.js";
 import { buildNavTree } from "../dist/server/shell/nav_tree.js";
 
@@ -98,7 +93,7 @@ const darkManifest: ManifestV3 = {
   ),
 };
 
-const context = { base: "origin/main", mode: "browse" as const };
+const context = { base: "origin/main" };
 
 const SCHEME_SWITCH =
   '<span aria-label="Color scheme" class="mbk-seg" data-mokabook-schemeswitch="" role="group">' +
@@ -283,7 +278,7 @@ test("scheme switch renders only for catalogues with dark fragments", () => {
   assert.equal(occurrences(home, "data-mokabook-schemeswitch"), 1);
   assert.match(
     home,
-    /data-mokabook-search[\s\S]*?<\/div><span aria-label="Color scheme"[\s\S]*?<\/span><nav aria-label="Mokabook modes"/,
+    /data-mokabook-search[\s\S]*?<\/div><span aria-label="Color scheme"[\s\S]*?<\/span><\/header>/,
   );
 
   const screen = routePage(dark, "screens/welcome.html");
@@ -303,11 +298,6 @@ test("scheme switch renders only for catalogues with dark fragments", () => {
 
   const legacy = routePage(dark, "legacy/old.html");
   assert.equal(occurrences(legacy, "data-mokabook-schemeswitch"), 1);
-  const review = reviewPage("origin/main", dark, {
-    ...context,
-    mode: "review",
-  });
-  assert.equal(occurrences(review, "data-mokabook-schemeswitch"), 1);
 });
 
 test("screen stage carries per-frame scheme fragment data", () => {
@@ -422,18 +412,12 @@ test("details inspector lists dark fragments and the schemes row", () => {
   );
 });
 
-test("missing routes and review keep the catalogue shell", () => {
+test("missing routes keep the catalogue shell", () => {
   const catalogue = createCatalogue(manifest);
   const missing = notFoundPage("view/unknown.html", catalogue, context);
   assert.match(missing, /Screen not found/);
   assert.match(missing, /aria-label="Catalogue"/);
-  const review = reviewPage("origin/main", catalogue, {
-    ...context,
-    mode: "review",
-  });
-  assert.match(review, /mokabook review --base origin\/main/);
-  assert.match(review, /aria-current="page"[^>]*href="\/review"/);
-  assert.match(review, /class="mbk-basewatch"/);
+  assert.equal(missing.includes("mbk-mode"), false);
 });
 
 test("filter renders in the nav only when changed routes are known", () => {

@@ -43,7 +43,6 @@ async function buildPreview(output) {
     });
     try {
       await capturePage(server.url, "/", stage, "index.html");
-      await capturePage(server.url, "/review", stage, "review/index.html");
       for (const entry of manifest.entries) {
         if (entry.kind === "collection") continue;
         await capturePage(

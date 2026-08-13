@@ -79,8 +79,8 @@ outside configured public roots.
 
 ## Browse Shell
 
-The package owns a neutral, responsive Mokabook shell: a top bar with brand,
-search, and Browse/Review modes; a catalogue navigation column with a
+The package owns a neutral, responsive Mokabook shell: a top bar with brand
+and search; a catalogue navigation column with a
 `Collapse all` control, an All/Changed filter, nested disclosure groups with
 folder/screen/page/flow icons and indent guides; linked breadcrumbs with an id
 chip; viewport and color-scheme switching; realistic phone and browser device
@@ -341,8 +341,8 @@ current output. Before archiving a current output, the server requires its
 regular-file Review ownership marker and refuses an unowned replacement
 without moving or deleting it. Failed-generation recovery likewise removes
 only marker-owned incomplete output before restoring the prior artifact. A
-server constructed without a Review provider keeps the launcher view that
-points at the `mokabook review` command.
+server constructed without a Review provider serves no `/review` route and
+returns the catalogue not-found page there.
 
 Base and head panes live under separate route-preserving snapshot roots. Local
 resources referenced by pane HTML or CSS are copied transitively, including

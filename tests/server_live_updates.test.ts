@@ -18,7 +18,7 @@ test("every served document loads the browser update client", async (context) =>
   });
   context.after(() => server.close());
 
-  for (const route of ["/", "/review", "/view/screens/home.html", "/absent"]) {
+  for (const route of ["/", "/view/screens/home.html", "/absent"]) {
     const document = await (await fetch(`${server.url}${route}`)).text();
     assert.match(
       document,

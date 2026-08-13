@@ -12,7 +12,7 @@ import {
   loadBrowserClientModules,
   loadShellFontAssets,
 } from "./client_modules.js";
-import { homePage, notFoundPage, reviewPage, viewPage } from "./pages.js";
+import { homePage, notFoundPage, viewPage } from "./pages.js";
 import { listenOnAvailablePort } from "./ports.js";
 import { contentType, safeDecode, safeDecodePath, send } from "./respond.js";
 import { ReviewRoutes, type ServedReview } from "./review_routes.js";
@@ -124,7 +124,7 @@ function handleRequest(
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed");
   const url = new URL(rawUrl, "http://mokabook.invalid");
-  const context = shellContext(options, "browse");
+  const context = shellContext(options);
   if (url.pathname === "/")
     return send(
       response,
@@ -140,14 +140,6 @@ function handleRequest(
     void reviewRoutes.handle(url, response, method);
     return;
   }
-  if (url.pathname === "/review")
-    return send(
-      response,
-      200,
-      "text/html",
-      reviewPage(options.base, catalogue, shellContext(options, "review")),
-      method,
-    );
   if (url.pathname === "/__mokabook/shell.css")
     return send(response, 200, "text/css", SHELL_CSS, method);
   if (url.pathname === "/__mokabook/events")
@@ -189,14 +181,10 @@ function handleRequest(
   );
 }
 
-function shellContext(
-  options: ServerOptions,
-  mode: ShellContext["mode"],
-): ShellContext {
+function shellContext(options: ServerOptions): ShellContext {
   return {
     base: options.base,
     ...(options.changedRoutes ? { changedRoutes: options.changedRoutes } : {}),
-    mode,
   };
 }
 

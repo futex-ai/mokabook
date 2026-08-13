@@ -141,7 +141,7 @@ function NavRows(props: {
 
 function NavFilter(props: { context: ShellContext }) {
   const changed = props.context.changedRoutes;
-  if (!changed || props.context.mode !== "browse") {
+  if (!changed) {
     return null;
   }
   return (

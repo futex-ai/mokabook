@@ -4,10 +4,8 @@
 export interface ShellContext {
   /** Route of the currently selected catalogue entry, when one is active. */
   activeRoute?: string;
-  /** Review comparison base ref for the serve session. */
+  /** Comparison base ref for the serve session. */
   base: string;
   /** Routes changed since the base-ref branch point; absent when unknown. */
   changedRoutes?: readonly string[];
-  /** Which top-level mode the requested page belongs to. */
-  mode: "browse" | "review";
 }

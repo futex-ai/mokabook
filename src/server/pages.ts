@@ -37,12 +37,3 @@ export function notFoundPage(
     context,
   );
 }
-
-/** Render the served Review launcher page. */
-export function reviewPage(
-  base: string,
-  catalogue: Catalogue,
-  context: ShellContext,
-): string {
-  return renderShellPage(catalogue, { kind: "review" }, { ...context, base });
-}

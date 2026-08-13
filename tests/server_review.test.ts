@@ -246,15 +246,15 @@ test("a failed recompute restores the served generation", async (context) => {
   );
 });
 
-test("a server without a review provider keeps the launcher view", async (context) => {
+test("a server without a review provider serves no /review route", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
   const server = await startedFixtureServer(fixture);
   context.after(() => server.close());
 
-  const launcher = await fetch(`${server.url}/review`);
-  assert.equal(launcher.status, 200);
-  assert.match(await launcher.text(), /mokabook review --base origin\/main/);
+  const unprovisioned = await fetch(`${server.url}/review`);
+  assert.equal(unprovisioned.status, 404);
+  assert.match(await unprovisioned.text(), /Screen not found/);
   assert.equal((await fetch(`${server.url}/review/index.html`)).status, 404);
 });
 
