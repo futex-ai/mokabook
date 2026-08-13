@@ -257,15 +257,15 @@ any screen, both viewports, dark-aware.
 
 ## Milestone 7 — Verification and handoff
 
-- [ ] Run `npm test`, `npm run test:browser`, `npm run example:build`,
+- [x] Run `npm test`, `npm run test:browser`, `npm run example:build`,
       `npm run example:check`, and `npm run preview:build`; smoke-test the
       served shell end to end (serve the example, exercise the Changed
       filter, all four compare modes, dark scheme, added-screen placeholder,
       watched-reload recovery).
-- [ ] Sweep `README.md`, `docs/protocol/README.md`, and remaining docs for
+- [x] Sweep `README.md`, `docs/protocol/README.md`, and remaining docs for
       stale Review references; confirm `plans/README.md` reflects this plan's
       completion state.
-- [ ] Run `cargo xtask check`.
-- [ ] Commit with Conventional Commits and push the branch.
-- [ ] Run `cargo xtask review` after the push and report findings with
+- [x] Run `cargo xtask check`.
+- [x] Commit with Conventional Commits and push the branch.
+- [x] Run `cargo xtask review` after the push and report findings with
       numbered items, severities, and recommendations, without auto-fixing.
