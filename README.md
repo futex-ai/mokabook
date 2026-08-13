@@ -30,7 +30,7 @@ export default defineConfig({
   mockupsDir: "docs/mockups",
   renderer: "docs/mockups/src/renderer.tsx",
   stylesheets: [{ match: "app/**/*.html", stylesheets: ["app.css"] }],
-  review: {
+  changes: {
     base: "origin/main",
     sharedImpact: ["src/components/**", "src/tokens/**"],
   },
@@ -171,7 +171,7 @@ file and confined to `repoRoot`.
   excluded migration sources, and generic lints.
 - `watch` classifies additional consumer inputs after proven package-owned
   ignores and configured stylesheets; this includes authored static HTML under
-  `mockupsDir`. `review` selects the Git base ref used to find the branch
+  `mockupsDir`. `changes` selects the Git base ref used to find the branch
   point and the shared-impact globs.
 - `compatibility.readManifestV2` reads Accounting's old manifest only when v3
   is absent. A temporary `compatibility.transformer` may deterministically

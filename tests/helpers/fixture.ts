@@ -38,7 +38,7 @@ export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
   repoRoot: ".",
-${options?.extraConfig ? `  ${options.extraConfig}\n` : ""}  review: { sharedImpact: ["notes.md"] }
+${options?.extraConfig ? `  ${options.extraConfig}\n` : ""}  changes: { sharedImpact: ["notes.md"] }
 });
 `,
   );

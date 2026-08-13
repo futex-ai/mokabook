@@ -98,6 +98,14 @@ matches changed generated fragments plus explicitly declared dependencies. The
 automatically recorded registry source module is attribution metadata, not a
 route dependency: changing a shared registry module alone must not mark its
 unchanged sibling routes.
+A screen whose only evidence is generated-fragment changes is confirmed
+against its branch-point documents: both sides are normalized with the
+review-ignore rules, and a screen whose changed views are byte-equal after
+normalization does not count as changed. Manifest-metadata differences and
+declared-dependency matches count without reading base documents.
+A changed path matching a `changes.sharedImpact` glob marks every route that
+links it as a configured stylesheet; a shared-impact path that is no route's
+stylesheet marks every route changed.
 When a screen is directly affected, every use case that embeds that screen's
 fragments is affected too and remains visible in the changed-only filter.
 

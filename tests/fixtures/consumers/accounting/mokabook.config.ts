@@ -28,7 +28,7 @@ export default defineConfig({
   },
   renderer: "catalogue/renderer.tsx",
   repoRoot: ".",
-  review: {
+  changes: {
     base: "HEAD",
     sharedImpact: ["packages/firna-ui/**", "shared/**"],
   },

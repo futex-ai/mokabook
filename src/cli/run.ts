@@ -43,7 +43,7 @@ export async function run(
     );
     return 0;
   }
-  const base = arguments_.base ?? config.review.base;
+  const base = arguments_.base ?? config.changes.base;
   const port = arguments_.port ?? 4173;
   if (arguments_.command === "__serve-child") {
     await runServerChild(

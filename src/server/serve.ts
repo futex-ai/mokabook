@@ -75,7 +75,7 @@ export async function serve(
       await compileCatalogue(config),
       config,
     );
-    const base = options.base ?? config.review.base;
+    const base = options.base ?? config.changes.base;
     const server = await dependencies.serverFactory.start(config, {
       base,
       port: options.port,

@@ -82,8 +82,8 @@ export function resolveConfig(
   const colorSchemes = validateColorSchemes(input.colorSchemes);
   const stylesheets = validateStylesheets(input.stylesheets ?? []);
   const watchRules = validateWatchRules(input.watch?.rules ?? []);
-  if (input.review?.base !== undefined)
-    requireString(input.review.base, "review.base");
+  if (input.changes?.base !== undefined)
+    requireString(input.changes.base, "changes.base");
   if (
     input.compatibility?.readManifestV2 !== undefined &&
     typeof input.compatibility.readManifestV2 !== "boolean"
@@ -108,12 +108,12 @@ export function resolveConfig(
     moduleResolution,
     ...(renderer ? { renderer } : {}),
     repoRoot,
-    review: {
-      base: input.review?.base ?? "origin/main",
+    changes: {
+      base: input.changes?.base ?? "origin/main",
       sharedImpact: validateStringArray(
-        input.review?.sharedImpact ?? [],
-        "review.sharedImpact",
-      ).map((glob) => validateRelativeRoute(glob, "review.sharedImpact")),
+        input.changes?.sharedImpact ?? [],
+        "changes.sharedImpact",
+      ).map((glob) => validateRelativeRoute(glob, "changes.sharedImpact")),
     },
     stylesheets,
     watch: {

@@ -142,7 +142,7 @@ interface MokabookConfig {
       requireStageIds?: boolean;
     };
   };
-  review?: {
+  changes?: {
     base?: string; // origin/main; merge base with HEAD
     sharedImpact?: readonly string[];
   };
@@ -169,7 +169,7 @@ that must include `"light"`; it defaults to `["light"]` and normalizes to
 light-first order. Shared `stylesheets` apply to every generated view, with a
 matching `lightStylesheets` or `darkStylesheets` list appended in declaration
 order.
-`watch.rules[].paths` and `review.sharedImpact` are repository-relative POSIX
+`watch.rules[].paths` and `changes.sharedImpact` are repository-relative POSIX
 globs, while stylesheet `match` and legacy aliases/lint routes match catalogue
 routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
 matches and watch paths are invalid. Additional watch rules cannot override

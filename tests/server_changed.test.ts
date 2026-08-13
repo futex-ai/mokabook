@@ -1,18 +1,19 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
 import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
-import { compareReview } from "../dist/review/compare.js";
+import { compareReview } from "../dist/changes/compare.js";
 import {
   NodeGitCommandRunner,
   RepositoryGitClient,
   type GitClient,
-} from "../dist/review/git.js";
+} from "../dist/changes/git.js";
 import {
   changedManifestRoutes,
   computeChangedRoutes,
@@ -32,27 +33,39 @@ test("changed routes match source, dependency, and fragment paths", async (conte
   const compilation = await compileCatalogue(config);
   await writeCompilation(compilation, config);
   assert.deepEqual(
-    changedManifestRoutes(compilation.manifest, compilation.manifest, config, [
-      "entries/fixture.mockup.tsx",
-    ]),
+    await changedManifestRoutes(
+      compilation.manifest,
+      compilation.manifest,
+      config,
+      ["entries/fixture.mockup.tsx"],
+    ),
     [],
   );
   assert.deepEqual(
-    changedManifestRoutes(compilation.manifest, compilation.manifest, config, [
-      "notes.md",
-    ]),
+    await changedManifestRoutes(
+      compilation.manifest,
+      compilation.manifest,
+      config,
+      ["notes.md"],
+    ),
     ["screens/details.html", "screens/home.html", "user-flows/tour.html"],
   );
   assert.deepEqual(
-    changedManifestRoutes(compilation.manifest, compilation.manifest, config, [
-      "mockups/screens/home.mobile.html",
-    ]),
+    await changedManifestRoutes(
+      compilation.manifest,
+      compilation.manifest,
+      config,
+      ["mockups/screens/home.mobile.html"],
+    ),
     ["screens/home.html", "user-flows/tour.html"],
   );
   assert.deepEqual(
-    changedManifestRoutes(compilation.manifest, compilation.manifest, config, [
-      "unrelated.txt",
-    ]),
+    await changedManifestRoutes(
+      compilation.manifest,
+      compilation.manifest,
+      config,
+      ["unrelated.txt"],
+    ),
     [],
   );
 });
@@ -68,7 +81,7 @@ test("manifest entry changes are attributed to their route", async (context) => 
   baseHome.title = "Previous home";
 
   assert.deepEqual(
-    changedManifestRoutes(manifest, baseManifest, config, [
+    await changedManifestRoutes(manifest, baseManifest, config, [
       "entries/fixture.mockup.tsx",
       "mockups/mokabook-manifest.json",
     ]),
@@ -92,7 +105,7 @@ test("changed screens propagate to use cases authored separately", async (contex
   tour.dependencies = [tour.sourcePath];
 
   assert.deepEqual(
-    changedManifestRoutes(manifest, manifest, config, [
+    await changedManifestRoutes(manifest, manifest, config, [
       `mockups/${home.fragments.mobile}`,
     ]),
     ["screens/home.html", "user-flows/tour.html"],
@@ -108,7 +121,7 @@ test("shared entry changes do not mark unchanged sibling screens", async (contex
   if (!home || home.kind !== "screen") throw new Error("fixture home missing");
 
   assert.deepEqual(
-    changedManifestRoutes(manifest, manifest, config, [
+    await changedManifestRoutes(manifest, manifest, config, [
       home.sourcePath,
       `mockups/${home.fragments.mobile}`,
     ]),
@@ -176,7 +189,7 @@ test("changed routes match descendants of directory dependencies", async (contex
   home.dependencies = ["src/components"];
 
   assert.deepEqual(
-    changedManifestRoutes(manifest, manifest, config, [
+    await changedManifestRoutes(manifest, manifest, config, [
       "src/components/Button.tsx",
     ]),
     ["screens/home.html", "user-flows/tour.html"],
@@ -219,6 +232,132 @@ test("changed-route detection degrades to undefined when Git fails", async (cont
     await computeChangedRoutes(config, "origin/main", succeeding),
     ["screens/details.html", "screens/home.html", "user-flows/tour.html"],
   );
+});
+
+test("ignored-only fragment churn is not marked with a base reader", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const compilation = await compileCatalogue(config);
+  await writeCompilation(compilation, config);
+  const home = compilation.manifest.entries.find(
+    (entry) => entry.id === "home",
+  );
+  if (!home || home.kind !== "screen") throw new Error("fixture home missing");
+  const fragmentRoute = home.fragments.mobile;
+  const fragmentPath = path.join(fixture.mockupsDir, fragmentRoute);
+  const region = (label: string): string =>
+    "<!--mokabook-review-ignore:start:nav-->" +
+    `<span>${label}</span>` +
+    "<!--mokabook-review-ignore:end:nav-->";
+  const document = await fs.promises.readFile(fragmentPath, "utf8");
+  await fs.promises.writeFile(
+    fragmentPath,
+    document.replace("</main>", `${region("after")}</main>`),
+  );
+  const baseDocument = document.replace(
+    "</main>",
+    `${region("before")}</main>`,
+  );
+  const reader = {
+    readMany: async (routes: readonly string[]) =>
+      new Map(routes.map((route) => [route, Buffer.from(baseDocument)])),
+  };
+
+  assert.deepEqual(
+    await changedManifestRoutes(
+      compilation.manifest,
+      compilation.manifest,
+      config,
+      [`mockups/${fragmentRoute}`],
+      reader,
+    ),
+    [],
+  );
+
+  await fs.promises.writeFile(
+    fragmentPath,
+    document.replace("</main>", `${region("after")}<p>Material</p></main>`),
+  );
+  assert.deepEqual(
+    await changedManifestRoutes(
+      compilation.manifest,
+      compilation.manifest,
+      config,
+      [`mockups/${fragmentRoute}`],
+      reader,
+    ),
+    ["screens/home.html", "user-flows/tour.html"],
+  );
+});
+
+test("stylesheet-only edits mark the routes that link the stylesheet", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const manifest = (await compileCatalogue(config)).manifest;
+  const styled = {
+    ...config,
+    changes: { base: "origin/main", sharedImpact: ["mockups/app.css"] },
+    stylesheets: [{ match: "screens/**", stylesheets: ["app.css"] }],
+  };
+
+  assert.deepEqual(
+    await changedManifestRoutes(manifest, manifest, styled, [
+      "mockups/app.css",
+    ]),
+    ["screens/details.html", "screens/home.html", "user-flows/tour.html"],
+  );
+  assert.deepEqual(
+    await changedManifestRoutes(manifest, manifest, styled, ["unrelated.css"]),
+    [],
+  );
+});
+
+test("a shared-impact path that is no stylesheet affects every route", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const manifest = (await compileCatalogue(config)).manifest;
+  const shared = {
+    ...config,
+    changes: { base: "origin/main", sharedImpact: ["renderer.tsx"] },
+  };
+
+  assert.deepEqual(
+    await changedManifestRoutes(manifest, manifest, shared, ["renderer.tsx"]),
+    ["screens/details.html", "screens/home.html", "user-flows/tour.html"],
+  );
+});
+
+test("metadata evidence needs no base documents", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const manifest = (await compileCatalogue(config)).manifest;
+  const baseManifest = structuredClone(manifest);
+  const baseHome = baseManifest.entries.find((entry) => entry.id === "home");
+  if (!baseHome) throw new Error("fixture base home missing");
+  baseHome.title = "Previous home";
+  let reads = 0;
+  const reader = {
+    readMany: async (): Promise<ReadonlyMap<string, Uint8Array>> => {
+      reads += 1;
+      throw new Error("metadata evidence must not read base documents");
+    },
+  };
+
+  assert.deepEqual(
+    await changedManifestRoutes(
+      manifest,
+      baseManifest,
+      config,
+      ["mockups/mokabook-manifest.json"],
+      reader,
+    ),
+    ["screens/home.html", "user-flows/tour.html"],
+  );
+  assert.equal(reads, 0);
 });
 
 async function git(

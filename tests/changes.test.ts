@@ -5,12 +5,12 @@ import test from "node:test";
 import type { Compilation } from "../dist/build/compile.js";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { loadConfig } from "../dist/config/load.js";
-import { compareReview } from "../dist/review/compare.js";
-import { RepositoryGitClient, type GitClient } from "../dist/review/git.js";
+import { compareReview } from "../dist/changes/compare.js";
+import { RepositoryGitClient, type GitClient } from "../dist/changes/git.js";
 import {
   normalizeReviewPair,
   normalizeSingleDocument,
-} from "../dist/review/ignore.js";
+} from "../dist/changes/ignore.js";
 import type { ManifestScreen, ManifestV3 } from "../dist/registry/types.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
@@ -190,7 +190,7 @@ export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
   repoRoot: ".",
-  review: { sharedImpact: ["notes.md"] }
+  changes: { sharedImpact: ["notes.md"] }
 });
 `,
   );

@@ -156,39 +156,39 @@ manifest, ignore normalization, compare kernel) stays for the Changed filter.
 Rehome the kept comparison core under the new name and make the Changed
 filter's evidence accurate per decision 2.
 
-- [ ] Rename the config section `review` → `changes` (`base`,
+- [x] Rename the config section `review` → `changes` (`base`,
       `sharedImpact`), breaking-change commit; update `defineConfig` types,
       validation defaults, `src/index.ts` exports (`ReviewConfig` →
       `ChangesConfig`), the example config, and the consumer fixtures under
       `tests/fixtures/consumers/{esm,accounting,juno}`.
-- [ ] Move the kept modules from `src/review/` to `src/changes/` (`git.ts`,
+- [x] Move the kept modules from `src/review/` to `src/changes/` (`git.ts`,
       `git_batch.ts`, `base_manifest.ts`, `changed_paths.ts`, `ignore.ts`,
       `screen_views.ts`, `compare.ts`, `types.ts`, `materiality.ts`, and the
       `GitReviewAssetReader` as `base_assets.ts`); update importers
       (`src/server/changed.ts`, `src/build/compile.ts`) and delete the empty
       `src/review/` directory. Rename the watcher temp-prefix ignore to a
       neutral name alongside.
-- [ ] Slim `src/changes/compare.ts` to a pure comparison kernel: drop
+- [x] Slim `src/changes/compare.ts` to a pure comparison kernel: drop
       artifact snapshot emission (`beforePath`/`afterPath`, seed files) and
       return per-view classification plus base/head bytes on request.
-- [ ] Upgrade `computeChangedRoutes` in `src/server/changed.ts`: when a
+- [x] Upgrade `computeChangedRoutes` in `src/server/changed.ts`: when a
       route's only evidence is generated-fragment path changes, read the base
       fragments (bounded batch), normalize both sides with the review-ignore
       rules, and drop the route when every view is byte-equal after
       normalization; manifest-metadata differences and declared-dependency
       hits keep counting without byte reads.
-- [ ] Add `sharedImpact` evidence to `computeChangedRoutes`: a changed path
+- [x] Add `sharedImpact` evidence to `computeChangedRoutes`: a changed path
       matching a `changes.sharedImpact` glob marks a route changed when that
       path is one of the route's configured stylesheets (per the config
       `stylesheets` rules); a sharedImpact path that is no route's stylesheet
       marks every route changed.
-- [ ] Cover the new semantics in `tests/server_changed.test.ts` (ignored-only
+- [x] Cover the new semantics in `tests/server_changed.test.ts` (ignored-only
       fragment churn stays unchanged; stylesheet-only edits mark their
       routes; metadata-only changes need no Git byte reads).
-- [ ] Update `docs/protocol/mokabook-runtime.md` change-detection section and
+- [x] Update `docs/protocol/mokabook-runtime.md` change-detection section and
       `docs/protocol/mokabook-package.md` config docs; refresh crate/module
       README references.
-- [ ] Run `cargo xtask check`; commit and push.
+- [x] Run `cargo xtask check`; commit and push.
 
 ## Milestone 5 — Served base-fragment subtree
 

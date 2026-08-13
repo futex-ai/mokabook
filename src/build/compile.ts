@@ -13,7 +13,7 @@ import { prepareRegistry } from "../registry/prepare.js";
 import type { ManifestLegacyPage, ManifestV3 } from "../registry/types.js";
 import type { ArtifactView } from "../registry/views.js";
 import { effectiveColorSchemes, VIEWPORTS } from "../registry/views.js";
-import { normalizeSingleDocument } from "../review/ignore.js";
+import { normalizeSingleDocument } from "../changes/ignore.js";
 import { validateHtmlLinks } from "./html_links.js";
 import { loadConsumerGraph } from "./load_graph.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";

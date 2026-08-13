@@ -63,7 +63,7 @@ test("dark fragment changes attribute their screen", async (context) => {
   const config = await loadConfig(fixture.root);
   const manifest = (await compileCatalogue(config)).manifest;
 
-  const routes = changedManifestRoutes(manifest, manifest, config, [
+  const routes = await changedManifestRoutes(manifest, manifest, config, [
     "mockups/screens/home.mobile.dark.html",
   ]);
   assert.ok(routes.includes("screens/home.html"));

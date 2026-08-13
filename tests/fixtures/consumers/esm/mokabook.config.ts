@@ -4,7 +4,7 @@ export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
   repoRoot: ".",
-  review: {
+  changes: {
     base: "HEAD",
     sharedImpact: ["notes.md"],
   },

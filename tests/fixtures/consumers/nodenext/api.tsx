@@ -27,7 +27,7 @@ import {
   type RegistryDefinition,
   type Renderer,
   type RenderInput,
-  type ReviewConfig,
+  type ChangesConfig,
   type RootInput,
   type RoutedEntryInput,
   type ScreenDefinition,
@@ -87,7 +87,7 @@ type PublicTypes =
   | ModuleResolutionConfig
   | RegistryDefinition
   | RenderInput
-  | ReviewConfig
+  | ChangesConfig
   | RootInput
   | RoutedEntryInput
   | ScreenDefinition

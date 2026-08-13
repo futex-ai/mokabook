@@ -6,7 +6,7 @@ export type {
   ModuleLoader,
   ModuleResolutionConfig,
   MokabookConfig,
-  ReviewConfig,
+  ChangesConfig,
   StylesheetRule,
   WatchAction,
   WatchConfig,

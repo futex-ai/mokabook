@@ -22,7 +22,7 @@ export default defineConfig({
   },
   renderer: "renderer.tsx",
   repoRoot: "../..",
-  review: {
+  changes: {
     sharedImpact: [
       "examples/basic/generated/design-compare.css",
       "examples/basic/generated/design-stage.css",

@@ -8,11 +8,11 @@ import { promisify } from "node:util";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
-import { compareReview } from "../dist/review/compare.js";
+import { compareReview } from "../dist/changes/compare.js";
 import {
   NodeGitCommandRunner,
   RepositoryGitClient,
-} from "../dist/review/git.js";
+} from "../dist/changes/git.js";
 import type { ManifestScreen } from "../dist/registry/types.js";
 import {
   createFixture,

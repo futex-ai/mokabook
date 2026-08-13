@@ -54,8 +54,8 @@ export interface WatchConfig {
   rules?: readonly WatchRule[];
 }
 
-/** Git comparison configuration. */
-export interface ReviewConfig {
+/** Git change-comparison configuration. */
+export interface ChangesConfig {
   /** Git ref whose merge base with HEAD is the comparison branch point. */
   base?: string;
   /** Repository-relative POSIX globs whose changes can affect many screens. */
@@ -119,8 +119,8 @@ export interface MokabookConfig {
   stylesheets?: readonly StylesheetRule[];
   /** Optional legacy source support. */
   legacy?: LegacyConfig;
-  /** Review settings. */
-  review?: ReviewConfig;
+  /** Change-comparison settings. */
+  changes?: ChangesConfig;
   /** Watch settings. */
   watch?: WatchConfig;
   /** Temporary manifest compatibility. */
@@ -141,7 +141,7 @@ export interface ResolvedConfig {
   moduleResolution: ResolvedModuleResolutionConfig;
   renderer?: string;
   repoRoot: string;
-  review: Required<ReviewConfig>;
+  changes: Required<ChangesConfig>;
   stylesheets: readonly StylesheetRule[];
   watch: Required<Pick<WatchConfig, "debounceMs">> & {
     rules: readonly WatchRule[];

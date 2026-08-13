@@ -37,7 +37,6 @@ test("package-owned watch rules precede broad consumer rules", async (context) =
     "playwright-report/index.html",
     "target/debug/mokabook",
     "test-results/results.json",
-    ".mokabook-review-123/stage/index.html",
     ".mokabook-write-123/stage/screen.html",
   ]) {
     assert.equal(

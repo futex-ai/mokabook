@@ -3,8 +3,8 @@ import test from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
 import { loadConfig } from "../dist/config/load.js";
-import { compareReview } from "../dist/review/compare.js";
-import { RepositoryGitClient, type GitClient } from "../dist/review/git.js";
+import { compareReview } from "../dist/changes/compare.js";
+import { RepositoryGitClient, type GitClient } from "../dist/changes/git.js";
 import type { ManifestScreen } from "../dist/registry/types.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 

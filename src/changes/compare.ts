@@ -11,7 +11,7 @@ import { MokabookError } from "../errors.js";
 import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
 import type { ManifestScreen, ManifestV3 } from "../registry/types.js";
 import { VIEWPORTS } from "../registry/views.js";
-import { GitReviewAssetReader } from "./assets.js";
+import { GitReviewAssetReader } from "./base_assets.js";
 import { readBaseManifest } from "./base_manifest.js";
 import { reviewChangedPaths } from "./changed_paths.js";
 import type { GitClient } from "./git.js";
@@ -57,7 +57,7 @@ export async function compareReview(
     ...new Set([...baseByRoute.keys(), ...headByRoute.keys()]),
   ].sort();
   const sharedImpact = changedPaths.filter((changed) =>
-    config.review.sharedImpact.some((glob) =>
+    config.changes.sharedImpact.some((glob) =>
       minimatch(changed, glob, { dot: true }),
     ),
   );
