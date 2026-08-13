@@ -1,5 +1,12 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
+import {
+  isCompareMode,
+  selectedCompareMode,
+  setCompareMode,
+  type BrowseCompareMode,
+} from "./browse_compare.js";
+
 /** Color scheme selection applied to fragment frames and device chrome. */
 export type BrowseColorScheme = "dark" | "light";
 
@@ -11,6 +18,7 @@ export interface BrowseRecoveryState {
   changedOnly: boolean;
   closedCollectionIds: readonly string[];
   colorScheme: BrowseColorScheme;
+  compare: BrowseCompareMode;
   detailsOpen: boolean;
   drawerOpen: boolean;
   navScroll: number;
@@ -66,6 +74,7 @@ export function captureBrowseState(
         ?.getAttribute("aria-pressed") === "true",
     closedCollectionIds,
     colorScheme: currentColorScheme(doc),
+    compare: selectedCompareMode(doc),
     detailsOpen:
       doc.querySelector<HTMLDetailsElement>("[data-mokabook-details]")?.open ??
       false,
@@ -112,6 +121,7 @@ export function restoreBrowseState(
   setDrawer(shell, state.drawerOpen);
   setViewport(doc, state.viewport);
   setColorScheme(doc, state.colorScheme);
+  setCompareMode(doc, state.compare);
   applyNavVisibility(doc);
   const nav = doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]");
   if (nav) nav.scrollTop = state.navScroll;
@@ -124,11 +134,13 @@ export function parseBrowseRecoveryState(
 ): BrowseRecoveryState | undefined {
   if (!record(value)) return undefined;
   const colorScheme = value["colorScheme"];
+  const compare = value["compare"];
   const viewport = value["viewport"];
   if (
     typeof value["changedOnly"] !== "boolean" ||
     !stringArray(value["closedCollectionIds"]) ||
     (colorScheme !== "dark" && colorScheme !== "light") ||
+    !isCompareMode(compare) ||
     typeof value["detailsOpen"] !== "boolean" ||
     typeof value["drawerOpen"] !== "boolean" ||
     !nonNegativeNumber(value["navScroll"]) ||
@@ -142,6 +154,7 @@ export function parseBrowseRecoveryState(
     changedOnly: value["changedOnly"],
     closedCollectionIds: [...new Set(value["closedCollectionIds"])],
     colorScheme,
+    compare,
     detailsOpen: value["detailsOpen"],
     drawerOpen: value["drawerOpen"],
     navScroll: value["navScroll"],

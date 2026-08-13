@@ -33,6 +33,39 @@ function Crumbs(props: { items: readonly CrumbLink[] }) {
   );
 }
 
+/**
+ * Compare-mode selection shown in the header of a screen route when Git
+ * change detection resolved a branch point. `Current` is the default and
+ * loads nothing; the other modes lazily load branch-point documents.
+ */
+export function CompareSwitch(props: { base: string }) {
+  const options = [
+    ["current", "Current"],
+    ["base", "Base"],
+    ["overlay", "Overlay"],
+    ["difference", "Difference"],
+  ] as const;
+  return (
+    <span
+      aria-label={`Compare with ${props.base}`}
+      className="mbk-seg"
+      data-mokabook-compareswitch=""
+      role="group"
+    >
+      {options.map(([value, label]) => (
+        <button
+          aria-pressed={value === "current" ? "true" : "false"}
+          data-compare-option={value}
+          key={value}
+          type="button"
+        >
+          {label}
+        </button>
+      ))}
+    </span>
+  );
+}
+
 /** Viewport selection shown in the header of a screen route. */
 export function ViewportSwitch() {
   const options = [

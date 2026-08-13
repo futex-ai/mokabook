@@ -127,6 +127,12 @@ registry module that defines many routes does not make every route appear
 changed merely because the module's imports or composition changed.
 A declared dependency may be a file or directory; a changed descendant of a
 directory is reported as the screen's change evidence.
+Every screen page adds a compare segment
+(`Current | Base | Overlay | Difference`) when change detection resolves: the
+branch-point version renders on demand inside the same device chrome, loaded
+straight from Git only when a non-Current mode is selected, with overlay and
+difference compositions and a placeholder for renders that are new on the
+branch.
 
 Consumer documents run in sandboxed frames.
 Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and

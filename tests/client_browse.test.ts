@@ -218,6 +218,7 @@ function snapshot(): BrowseRecoveryState {
     changedOnly: true,
     closedCollectionIds: ["fixture"],
     colorScheme: "dark",
+    compare: "current",
     detailsOpen: true,
     drawerOpen: false,
     navScroll: 12,

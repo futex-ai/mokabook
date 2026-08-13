@@ -224,18 +224,18 @@ Tags: ui
 Implement the approved compare design in the served shell: on-demand only,
 any screen, both viewports, dark-aware.
 
-- [ ] Add the compare segment to the screen head via
+- [x] Add the compare segment to the screen head via
       `src/server/shell/views.tsx` `HeadActions` and a new `CompareSwitch` in
       `src/server/shell/head.tsx`, rendered for screen routes when
       `baseCommit` is present; stage markup in `src/server/shell/stages.tsx`
       gains `data-compare="current"` plus per-frame base-document URLs as
       data attributes (no base iframe server-rendered).
-- [ ] Add compare CSS per the contract (new module in `src/server/shell/`,
+- [x] Add compare CSS per the contract (new module in `src/server/shell/`,
       `mbk-*` classes): stacked base/head documents inside the existing
       phone-screen and browser viewports for `data-compare` values `base`,
       `overlay` (head at 0.5 opacity over base), and `difference`
       (blend-mode), plus the placeholder pane styling.
-- [ ] Add `src/client/browse_compare.ts` (register in
+- [x] Add `src/client/browse_compare.ts` (register in
       `src/server/client_modules.ts`): delegated segment clicks, lazy base
       iframe injection on first non-`current` activation, scheme-switch
       integration (swap base and head sources together), viewport
@@ -243,17 +243,17 @@ any screen, both viewports, dark-aware.
       field in `BrowseRecoveryState`
       (`capture`/`restore`/`parse` in `src/client/browse_state.ts`) so the
       mode survives watched reloads.
-- [ ] Ensure zero Git reads and zero base requests while the segment stays on
+- [x] Ensure zero Git reads and zero base requests while the segment stays on
       `Current` (assert no base-subtree fetches in tests).
-- [ ] Unit tests in `tests/shell.test.ts` / `tests/client_browse.test.ts`
+- [x] Unit tests in `tests/shell.test.ts` / `tests/client_browse.test.ts`
       (markup, allowlist, recovery state) and Playwright coverage in
       `tests/browser/browse.spec.ts` or a new `tests/browser/compare.spec.ts`
       (mode switching, lazy loading, added-screen placeholder, dark
       composition) matching the approved mockups.
-- [ ] Update `docs/protocol/mokabook-runtime.md` Browse Shell section and the
+- [x] Update `docs/protocol/mokabook-runtime.md` Browse Shell section and the
       shell design contract if implementation surfaced deviations; update
       `README.md` feature description.
-- [ ] Run `cargo xtask check`; commit and push.
+- [x] Run `cargo xtask check`; commit and push.
 
 ## Milestone 7 — Verification and handoff
 

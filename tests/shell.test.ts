@@ -130,6 +130,21 @@ function routePage(catalogue: Catalogue, route: string): string {
   return viewPage(entry, catalogue, { ...context, activeRoute: route });
 }
 
+function comparePage(
+  catalogue: Catalogue,
+  route: string,
+  baseFragments: readonly string[],
+): string {
+  const entry = catalogue.byRoute.get(route);
+  assert.ok(entry);
+  return viewPage(entry, catalogue, {
+    ...context,
+    activeRoute: route,
+    baseCommit: "a".repeat(40),
+    baseFragments,
+  });
+}
+
 /**
  * Every scheme-aware frame serves its light fragment until the client swaps it,
  * so the rendered src must equal the light attribute the client assigns back.
@@ -410,6 +425,71 @@ test("details inspector lists dark fragments and the schemes row", () => {
         '<div class="mbk-meta-row"><span class="mbk-meta-k">Related docs</span>',
     ),
   );
+});
+
+test("screen pages render the compare segment with a branch point", () => {
+  const catalogue = createCatalogue(manifest);
+  const plain = routePage(catalogue, "screens/welcome.html");
+  assert.equal(plain.includes("data-mokabook-compareswitch"), false);
+  assert.equal(plain.includes("mbk-cmp-stack"), false);
+  assert.equal(plain.includes("data-compare"), false);
+
+  const compared = comparePage(catalogue, "screens/welcome.html", [
+    "screens/welcome.desktop.html",
+    "screens/welcome.mobile.html",
+  ]);
+  assert.match(
+    compared,
+    /aria-label="Compare with origin\/main"[^>]*data-mokabook-compareswitch/,
+  );
+  assert.match(compared, /aria-pressed="true" data-compare-option="current"/);
+  for (const mode of ["base", "overlay", "difference"]) {
+    assert.match(
+      compared,
+      new RegExp(`aria-pressed="false" data-compare-option="${mode}"`),
+    );
+  }
+  assert.match(
+    compared,
+    /data-mokabook-compareswitch[\s\S]*?data-mokabook-viewswitch/,
+  );
+  assert.match(compared, /data-compare="current"[^>]*data-mokabook-stage/);
+  assert.equal(occurrences(compared, 'class="mbk-cmp-stack"'), 2);
+  assert.match(
+    compared,
+    new RegExp(
+      `data-fragment-base="/__mokabook/base/${"a".repeat(40)}/screens/welcome\\.mobile\\.html"`,
+    ),
+  );
+  assert.equal(compared.includes("mbk-frag--base"), false);
+  assert.equal(compared.includes("data-base-missing-light"), false);
+
+  const added = comparePage(catalogue, "screens/welcome.html", []);
+  assert.equal(occurrences(added, "data-base-missing-light"), 2);
+});
+
+test("dark screens mark a base without dark renders", () => {
+  const catalogue = createCatalogue(darkManifest);
+  const compared = comparePage(catalogue, "screens/welcome.html", [
+    "screens/welcome.desktop.html",
+    "screens/welcome.mobile.html",
+  ]);
+  assert.equal(occurrences(compared, "data-base-missing-dark"), 2);
+  assert.equal(compared.includes("data-base-missing-light"), false);
+  assert.match(
+    compared,
+    new RegExp(
+      `data-fragment-base-dark="/__mokabook/base/${"a".repeat(40)}/screens/welcome\\.mobile\\.dark\\.html"`,
+    ),
+  );
+
+  const fullBase = comparePage(catalogue, "screens/welcome.html", [
+    "screens/welcome.desktop.dark.html",
+    "screens/welcome.desktop.html",
+    "screens/welcome.mobile.dark.html",
+    "screens/welcome.mobile.html",
+  ]);
+  assert.equal(fullBase.includes("data-base-missing-dark"), false);
 });
 
 test("missing routes keep the catalogue shell", () => {

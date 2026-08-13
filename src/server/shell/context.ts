@@ -8,6 +8,8 @@ export interface ShellContext {
   base: string;
   /** Pinned branch-point commit backing base-document routes, when known. */
   baseCommit?: string;
+  /** Fragment routes that exist in the branch-point manifest. */
+  baseFragments?: readonly string[];
   /** Routes changed since the base-ref branch point; absent when unknown. */
   changedRoutes?: readonly string[];
 }

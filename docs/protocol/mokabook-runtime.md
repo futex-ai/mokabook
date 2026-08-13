@@ -111,6 +111,20 @@ stylesheet marks every route changed.
 When a screen is directly affected, every use case that embeds that screen's
 fragments is affected too and remains visible in the changed-only filter.
 
+A screen page carries a compare segment (`Current | Base | Overlay |
+Difference`) in its head band whenever change detection resolved a branch
+point; its group names the configured base ref. `Current` is the default,
+renders the head documents alone, and requests nothing. The first non-Current
+activation creates a base document frame under each head frame, loaded from
+the served base subtree; the shared color-scheme switch swaps base and head
+documents together, so a dark selection compares dark renders. `Base` shows
+the branch-point document alone, `Overlay` composes the head document at half
+opacity above it, and `Difference` composites the two with a difference
+blend. A render absent at the branch point shows the no-base placeholder
+document alone in every non-Current mode. The selection applies to the stage
+in place, resets to `Current` on navigation, and survives a watched reload
+through the one-shot recovery state.
+
 A screen embeds its generated mobile and desktop fragments inside package-owned
 device frames. A use case renders ordered steps that reference those same
 fragments and link back to their standalone screens. A legacy page embeds the

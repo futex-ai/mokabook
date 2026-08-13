@@ -1,6 +1,7 @@
 /** Assembled package-owned stylesheet served at /__mokabook/shell.css. */
 
 import { SHELL_CHROME_CSS } from "./css_chrome.js";
+import { SHELL_COMPARE_CSS } from "./css_compare.js";
 import { SHELL_DETAILS_CSS } from "./css_details.js";
 import { SHELL_NAV_CSS } from "./css_nav.js";
 import { SHELL_TOKENS_CSS } from "./css_tokens.js";
@@ -12,4 +13,5 @@ export const SHELL_CSS =
   SHELL_NAV_CSS +
   SHELL_VIEW_CSS +
   SHELL_DETAILS_CSS +
-  SHELL_CHROME_CSS;
+  SHELL_CHROME_CSS +
+  SHELL_COMPARE_CSS;

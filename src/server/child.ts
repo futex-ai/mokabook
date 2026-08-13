@@ -14,7 +14,11 @@ export async function runServerChild(
   const server = await startCatalogueServer(config, {
     base,
     ...(context
-      ? { baseCommit: context.baseCommit, changedRoutes: context.changedRoutes }
+      ? {
+          baseCommit: context.baseCommit,
+          baseFragments: context.baseFragments,
+          changedRoutes: context.changedRoutes,
+        }
       : {}),
     port,
     strictPort,

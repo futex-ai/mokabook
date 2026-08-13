@@ -26,6 +26,8 @@ import type {
 /** Changed routes plus the branch-point commit backing them. */
 export interface ChangeContext {
   baseCommit: string;
+  /** Fragment routes that exist in the branch-point manifest. */
+  baseFragments: readonly string[];
   changedRoutes: readonly string[];
 }
 
@@ -77,7 +79,11 @@ export async function computeChangeContext(
       changed,
       reader,
     );
-    return { baseCommit: commit, changedRoutes };
+    return {
+      baseCommit: commit,
+      baseFragments: manifestFragmentRoutes(baseManifest),
+      changedRoutes,
+    };
   } catch {
     return undefined;
   }
@@ -296,6 +302,16 @@ function declaredDependencies(entry: ManifestEntry): readonly string[] {
   return entry.dependencies.filter(
     (dependency) => dependency !== entry.sourcePath,
   );
+}
+
+function manifestFragmentRoutes(manifest: ManifestV3): readonly string[] {
+  return [
+    ...new Set(
+      manifest.entries.flatMap((entry) =>
+        entry.kind === "screen" ? fragmentPaths(entry, "") : [],
+      ),
+    ),
+  ].sort();
 }
 
 function mockupsPrefix(config: ResolvedConfig): string {

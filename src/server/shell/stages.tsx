@@ -9,6 +9,7 @@ import type { Viewport } from "../../authoring/types.js";
 import { encodeUrlPath } from "../../config/paths.js";
 import type { ManifestScreen, ManifestUseCase } from "../../registry/types.js";
 import type { Catalogue } from "../catalogue.js";
+import type { ShellContext } from "./context.js";
 import { BrowserFrame, PhoneFrame } from "./frames.js";
 import type { RouteTarget } from "./target.js";
 
@@ -40,6 +41,44 @@ function fragmentSources(
     dark: dark === undefined ? undefined : fragmentSrc(dark),
     light: fragmentSrc(screen.fragments[viewport]),
   };
+}
+
+/** Branch-point document URLs for one screen viewport, when comparable. */
+interface BaseSources {
+  dark: string | undefined;
+  light: string | undefined;
+  missingDark: boolean;
+  missingLight: boolean;
+}
+
+function baseSrc(commit: string, route: string): string {
+  return `/__mokabook/base/${commit}/${encodeUrlPath(route)}`;
+}
+
+function baseSources(
+  screen: ManifestScreen,
+  viewport: Viewport,
+  context: ShellContext,
+): BaseSources | undefined {
+  const commit = context.baseCommit;
+  if (!commit) return undefined;
+  const known = new Set(context.baseFragments ?? []);
+  const light = screen.fragments[viewport];
+  const dark = screen.darkFragments?.[viewport];
+  return {
+    dark: dark === undefined ? undefined : baseSrc(commit, dark),
+    light: baseSrc(commit, light),
+    missingDark: dark !== undefined && !known.has(dark),
+    missingLight: !known.has(light),
+  };
+}
+
+function CompareFrame(props: {
+  base: BaseSources | undefined;
+  children: ReactNode;
+}) {
+  if (!props.base) return <>{props.children}</>;
+  return <div className="mbk-cmp-stack">{props.children}</div>;
 }
 
 /** Whether the screen keeps its light render under a dark selection. */
@@ -75,6 +114,7 @@ function EmbedStage(props: { route: string; title: string }) {
 }
 
 function FramesStage(props: {
+  context: ShellContext;
   hasDarkFragments: boolean;
   screen: ManifestScreen;
 }) {
@@ -82,44 +122,59 @@ function FramesStage(props: {
   const address = screen.address ?? screen.route;
   const mobile = fragmentSources(screen, "mobile", props.hasDarkFragments);
   const desktop = fragmentSources(screen, "desktop", props.hasDarkFragments);
+  const mobileBase = baseSources(screen, "mobile", props.context);
+  const desktopBase = baseSources(screen, "desktop", props.context);
   const fallback = isSchemeFallback(screen, props.hasDarkFragments);
   return (
     <div
       className="mbk-stage mbk-live"
+      data-compare={mobileBase ? "current" : undefined}
       data-mokabook-scroll="stage"
       data-mokabook-stage=""
       data-viewport="both"
     >
       <div
         className="mbk-frame-wrap mbk-frame-mobile"
+        data-base-missing-dark={mobileBase?.missingDark ? "" : undefined}
+        data-base-missing-light={mobileBase?.missingLight ? "" : undefined}
         data-color-scheme-fallback={fallback ? "" : undefined}
       >
         <FrameLabel fallback={fallback} text="Mobile" />
         <PhoneFrame>
-          <iframe
-            className="mbk-frag"
-            data-fragment-dark={mobile.dark}
-            data-fragment-light={mobile.light}
-            sandbox=""
-            src={fragmentSrc(screen.fragments.mobile)}
-            title={`${screen.title} — mobile`}
-          />
+          <CompareFrame base={mobileBase}>
+            <iframe
+              className="mbk-frag"
+              data-fragment-base={mobileBase?.light}
+              data-fragment-base-dark={mobileBase?.dark}
+              data-fragment-dark={mobile.dark}
+              data-fragment-light={mobile.light}
+              sandbox=""
+              src={fragmentSrc(screen.fragments.mobile)}
+              title={`${screen.title} — mobile`}
+            />
+          </CompareFrame>
         </PhoneFrame>
       </div>
       <div
         className="mbk-frame-wrap mbk-frame-desktop"
+        data-base-missing-dark={desktopBase?.missingDark ? "" : undefined}
+        data-base-missing-light={desktopBase?.missingLight ? "" : undefined}
         data-color-scheme-fallback={fallback ? "" : undefined}
       >
         <FrameLabel fallback={fallback} text="Desktop" />
         <BrowserFrame address={address}>
-          <iframe
-            className="mbk-frag"
-            data-fragment-dark={desktop.dark}
-            data-fragment-light={desktop.light}
-            sandbox=""
-            src={fragmentSrc(screen.fragments.desktop)}
-            title={`${screen.title} — desktop`}
-          />
+          <CompareFrame base={desktopBase}>
+            <iframe
+              className="mbk-frag"
+              data-fragment-base={desktopBase?.light}
+              data-fragment-base-dark={desktopBase?.dark}
+              data-fragment-dark={desktop.dark}
+              data-fragment-light={desktop.light}
+              sandbox=""
+              src={fragmentSrc(screen.fragments.desktop)}
+              title={`${screen.title} — desktop`}
+            />
+          </CompareFrame>
         </BrowserFrame>
       </div>
     </div>
@@ -206,6 +261,7 @@ export function EmptyStage(props: { children: ReactNode; heading: string }) {
 /** Render the route-specific preview below the shell-owned heading. */
 export function TargetStage(props: {
   catalogue: Catalogue;
+  context: ShellContext;
   legacyTitle: string;
   target: RouteTarget;
 }) {
@@ -217,6 +273,7 @@ export function TargetStage(props: {
   const entry = props.target.entry;
   return entry.kind === "screen" ? (
     <FramesStage
+      context={props.context}
       hasDarkFragments={props.catalogue.hasDarkFragments}
       screen={entry}
     />

@@ -27,7 +27,9 @@ export const SHELL_VIEW_CSS = `
   min-width: 0;
 }
 
-.mbk-screen-head > .mbk-seg {
+/* The head-band controls cluster at the trailing edge: the first segment
+   takes the free space, later segments follow at the band gap. */
+.mbk-screen-head > .mbk-screen-head-copy + .mbk-seg {
   margin-left: auto;
 }
 

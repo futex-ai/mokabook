@@ -67,7 +67,7 @@ export function renderShellPage(
           <TopBar catalogue={catalogue} />
           <div className="mbk-body">
             <CatalogueNav context={context} manifest={catalogue.manifest} />
-            <ShellMain catalogue={catalogue} view={view} />
+            <ShellMain catalogue={catalogue} context={context} view={view} />
           </div>
           <p
             aria-atomic="true"

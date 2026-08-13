@@ -1,5 +1,6 @@
 /** Progressive Browse shell enhancement served at /__mokabook/client/browse.js. */
 
+import { isCompareMode, setCompareMode } from "./browse_compare.js";
 import { createBrowserDetailsPreference } from "./browse_details.js";
 import {
   collapseFrame,
@@ -213,6 +214,13 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
       ?.getAttribute("data-viewport-option");
     if (viewportOption) {
       setViewport(doc, viewportOption);
+      return;
+    }
+    const compareOption = target
+      .closest("[data-compare-option]")
+      ?.getAttribute("data-compare-option");
+    if (isCompareMode(compareOption)) {
+      setCompareMode(doc, compareOption);
       return;
     }
     const filterButton = target.closest("[data-filter]");

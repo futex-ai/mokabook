@@ -3,8 +3,10 @@
 // helpers the document scaffold and progressive navigation use.
 
 import type { Catalogue } from "../catalogue.js";
+import type { ShellContext } from "./context.js";
 import { DetailsPanel } from "./details.js";
 import {
+  CompareSwitch,
   SchemeSwitch,
   ScreenHead,
   targetHead,
@@ -20,29 +22,46 @@ export type ShellView =
   | { kind: "target"; target: RouteTarget };
 
 /**
- * Head-band controls for a routed catalogue entry: the viewport switch for
- * screens, and the narrow-width home of the scheme switch, which the top bar
- * has no room for below the breakpoint.
+ * Head-band controls for a routed catalogue entry: the compare switch when a
+ * branch point resolved, the viewport switch for screens, and the
+ * narrow-width home of the scheme switch, which the top bar has no room for
+ * below the breakpoint.
  */
-function HeadActions(props: { catalogue: Catalogue; target: RouteTarget }) {
+function HeadActions(props: {
+  catalogue: Catalogue;
+  context: ShellContext;
+  target: RouteTarget;
+}) {
   if (props.target.kind !== "entry") {
     return null;
   }
+  const screen = props.target.entry.kind === "screen";
   return (
     <>
-      {props.target.entry.kind === "screen" ? <ViewportSwitch /> : null}
+      {screen && props.context.baseCommit ? (
+        <CompareSwitch base={props.context.base} />
+      ) : null}
+      {screen ? <ViewportSwitch /> : null}
       {props.catalogue.hasDarkFragments ? <SchemeSwitch /> : null}
     </>
   );
 }
 
-function TargetView(props: { catalogue: Catalogue; target: RouteTarget }) {
+function TargetView(props: {
+  catalogue: Catalogue;
+  context: ShellContext;
+  target: RouteTarget;
+}) {
   const head = targetHead(props.catalogue, props.target);
   return (
     <>
       <ScreenHead
         action={
-          <HeadActions catalogue={props.catalogue} target={props.target} />
+          <HeadActions
+            catalogue={props.catalogue}
+            context={props.context}
+            target={props.target}
+          />
         }
         crumbs={head.crumbs}
         heading={head.title}
@@ -50,6 +69,7 @@ function TargetView(props: { catalogue: Catalogue; target: RouteTarget }) {
       />
       <TargetStage
         catalogue={props.catalogue}
+        context={props.context}
         legacyTitle={head.title}
         target={props.target}
       />
@@ -119,7 +139,11 @@ export function viewTitle(catalogue: Catalogue, view: ShellView): string {
 }
 
 /** Render the only region replaced by client-side Browse navigation. */
-export function ShellMain(props: { catalogue: Catalogue; view: ShellView }) {
+export function ShellMain(props: {
+  catalogue: Catalogue;
+  context: ShellContext;
+  view: ShellView;
+}) {
   return (
     <main className="mbk-main" data-mokabook-view="" id="mb-main" tabIndex={-1}>
       {props.view.kind === "home" ? (
@@ -129,7 +153,11 @@ export function ShellMain(props: { catalogue: Catalogue; view: ShellView }) {
         <MissingView requested={props.view.requested} />
       ) : null}
       {props.view.kind === "target" ? (
-        <TargetView catalogue={props.catalogue} target={props.view.target} />
+        <TargetView
+          catalogue={props.catalogue}
+          context={props.context}
+          target={props.view.target}
+        />
       ) : null}
     </main>
   );

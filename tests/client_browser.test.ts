@@ -75,6 +75,7 @@ function browseState(): BrowseRecoveryState {
     changedOnly: false,
     closedCollectionIds: ["fixture"],
     colorScheme: "dark",
+    compare: "current",
     detailsOpen: true,
     drawerOpen: true,
     navScroll: 12,

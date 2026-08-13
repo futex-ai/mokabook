@@ -26,6 +26,8 @@ export interface ServerOptions {
   base: string;
   /** Pinned branch-point commit backing base-document routes. */
   baseCommit?: string;
+  /** Fragment routes that exist in the branch-point manifest. */
+  baseFragments?: readonly string[];
   changedRoutes?: readonly string[];
   port: number;
   strictPort?: boolean;
@@ -180,6 +182,7 @@ function shellContext(options: ServerOptions): ShellContext {
   return {
     base: options.base,
     ...(options.baseCommit ? { baseCommit: options.baseCommit } : {}),
+    ...(options.baseFragments ? { baseFragments: options.baseFragments } : {}),
     ...(options.changedRoutes ? { changedRoutes: options.changedRoutes } : {}),
   };
 }
