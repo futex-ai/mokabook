@@ -23,6 +23,12 @@ import type {
   ManifestV3,
 } from "../registry/types.js";
 
+/** Changed routes plus the branch-point commit backing them. */
+export interface ChangeContext {
+  baseCommit: string;
+  changedRoutes: readonly string[];
+}
+
 /** Reader returning base documents for fragment-change confirmation. */
 export interface BaseDocumentReader {
   readMany(routes: readonly string[]): Promise<ReadonlyMap<string, Uint8Array>>;
@@ -34,6 +40,15 @@ export async function computeChangedRoutes(
   base: string,
   git?: GitClient,
 ): Promise<readonly string[] | undefined> {
+  return (await computeChangeContext(config, base, git))?.changedRoutes;
+}
+
+/** Resolve the branch point and its changed routes, if available. */
+export async function computeChangeContext(
+  config: ResolvedConfig,
+  base: string,
+  git?: GitClient,
+): Promise<ChangeContext | undefined> {
   try {
     let client = git;
     if (!client) {
@@ -55,13 +70,14 @@ export async function computeChangedRoutes(
       commit,
       mockupsPrefix(config),
     );
-    return await changedManifestRoutes(
+    const changedRoutes = await changedManifestRoutes(
       manifest,
       baseManifest,
       config,
       changed,
       reader,
     );
+    return { baseCommit: commit, changedRoutes };
   } catch {
     return undefined;
   }

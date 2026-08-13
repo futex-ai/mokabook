@@ -63,6 +63,8 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/view/<route>` for screens, use cases, and configured legacy pages;
 - `/id/<id>` as a canonical redirect for routed registry entries;
 - `/static/<path>` for generated fragments, legacy pages, and consumer assets;
+- `/__mokabook/base/<commit>/<route>` for branch-point documents when change
+  detection resolved;
 - package-owned client and update endpoints under `/__mokabook/`.
 
 All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
@@ -272,6 +274,22 @@ no `darkFragments`. Configured shared-impact globs and manifest dependencies
 identify changes that can affect many screens. A dependency is a repository
 file or directory root: its own change or any descendant change affects the
 entry, and the comparison records the matching changed path as evidence.
+
+## Served Base Documents
+
+When change detection resolves, the server pins the branch-point commit for
+its lifetime and serves the committed catalogue tree at that commit below
+`/__mokabook/base/<commit>/<route>`. Only the pinned commit is addressable;
+any other commit is not found, and a server without a resolved branch point
+serves no base routes. Responses are immutable-cacheable because the commit
+names the content. A base document's relative stylesheet, font, and image
+references resolve inside the same subtree, so a compared document renders
+with its branch-point resources rather than the live workspace's. Requests are
+confined to the public catalogue tree: traversal, configured entry and legacy
+source roots, and non-regular Git files are rejected. A missing base document
+renders the no-base placeholder document; a missing non-document resource is
+not found. A watched rebuild restarts the child, which re-resolves the branch
+point, so base routes always match the served changed-filter baseline.
 
 ## Review Ignore
 

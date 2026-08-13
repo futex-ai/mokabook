@@ -310,7 +310,7 @@ recorded by the
   and the watched child lifecycle.
 - [`src/client`](./src/client) — progressive Browse navigation and versioned
   live updates served to the browser.
-- [`src/review`](./src/review) — Git extraction, comparison, and ignore
+- [`src/changes`](./src/changes) — Git extraction, comparison, and ignore
   normalization for change detection.
 - [`src/legacy`](./src/legacy) — opt-in migration sources and component expansion.
 - [`xtask`](./xtask/README.md) — full repository checks and post-push review.

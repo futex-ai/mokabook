@@ -6,6 +6,8 @@ export interface ShellContext {
   activeRoute?: string;
   /** Comparison base ref for the serve session. */
   base: string;
+  /** Pinned branch-point commit backing base-document routes, when known. */
+  baseCommit?: string;
   /** Routes changed since the base-ref branch point; absent when unknown. */
   changedRoutes?: readonly string[];
 }

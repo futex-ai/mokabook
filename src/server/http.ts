@@ -2,11 +2,14 @@ import fs from "node:fs";
 import http, { type ServerResponse } from "node:http";
 import path from "node:path";
 
-import { encodeUrlPath } from "../config/paths.js";
+import { GitReviewAssetReader } from "../changes/base_assets.js";
+import { NodeGitCommandRunner, RepositoryGitClient } from "../changes/git.js";
+import { encodeUrlPath, toPosixPath } from "../config/paths.js";
 import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import { readManifest } from "../registry/manifest.js";
+import { BaseRoutes } from "./base_routes.js";
 import { createCatalogue, type Catalogue } from "./catalogue.js";
 import {
   loadBrowserClientModules,
@@ -21,6 +24,8 @@ import { SHELL_CSS } from "./shell/css.js";
 /** Options for one deterministic server child. */
 export interface ServerOptions {
   base: string;
+  /** Pinned branch-point commit backing base-document routes. */
+  baseCommit?: string;
   changedRoutes?: readonly string[];
   port: number;
   strictPort?: boolean;
@@ -44,6 +49,7 @@ export async function startCatalogueServer(
   const clientModules = loadBrowserClientModules();
   const fontAssets = loadShellFontAssets();
   const streams = new Set<ServerResponse>();
+  const baseRoutes = configuredBaseRoutes(config, options);
   let updateVersion = options.updateVersion ?? 1;
   const server = http.createServer((request, response) => {
     handleRequest(
@@ -56,6 +62,7 @@ export async function startCatalogueServer(
       streams,
       { clientModules, fontAssets },
       () => updateVersion,
+      baseRoutes,
     );
   });
   await listenOnAvailablePort(
@@ -106,6 +113,7 @@ function handleRequest(
   streams: Set<ServerResponse>,
   assets: ServedAssets,
   currentVersion: () => number,
+  baseRoutes?: BaseRoutes,
 ): void {
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed");
@@ -119,6 +127,14 @@ function handleRequest(
       homePage(catalogue, context),
       method,
     );
+  if (baseRoutes && url.pathname.startsWith("/__mokabook/base/")) {
+    void baseRoutes.handle(
+      url.pathname.slice("/__mokabook/base/".length),
+      response,
+      method,
+    );
+    return;
+  }
   if (url.pathname === "/__mokabook/shell.css")
     return send(response, 200, "text/css", SHELL_CSS, method);
   if (url.pathname === "/__mokabook/events")
@@ -163,8 +179,23 @@ function handleRequest(
 function shellContext(options: ServerOptions): ShellContext {
   return {
     base: options.base,
+    ...(options.baseCommit ? { baseCommit: options.baseCommit } : {}),
     ...(options.changedRoutes ? { changedRoutes: options.changedRoutes } : {}),
   };
+}
+
+function configuredBaseRoutes(
+  config: ResolvedConfig,
+  options: ServerOptions,
+): BaseRoutes | undefined {
+  if (!options.baseCommit) return undefined;
+  const reader = new GitReviewAssetReader(
+    config,
+    new RepositoryGitClient(new NodeGitCommandRunner(config.repoRoot)),
+    options.baseCommit,
+    toPosixPath(path.relative(config.repoRoot, config.mockupsDir)),
+  );
+  return new BaseRoutes(options.baseCommit, reader);
 }
 
 function serveClientModule(

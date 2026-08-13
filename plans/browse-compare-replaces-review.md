@@ -195,27 +195,27 @@ filter's evidence accurate per decision 2.
 Give Browse an on-demand source of branch-point documents so the compare view
 needs no artifact, no snapshot trees, and no retention lifecycle.
 
-- [ ] Pin the merge-base commit once per server child (same startup pass as
+- [x] Pin the merge-base commit once per server child (same startup pass as
       `computeChangedRoutes` in `src/server/child.ts`) and expose it on
       `ServerOptions` / the shell context as `baseCommit`.
-- [ ] Add a `src/server/base_routes.ts` handler for
+- [x] Add a `src/server/base_routes.ts` handler for
       `/__mokabook/base/<baseCommit>/<repo-path>`: only active when change
       detection resolved; 404 for any commit other than the pinned one; read
       blobs at the pinned commit via the batch Git reader; reject non-regular
       file modes and paths under configured source roots; content-type by
       extension; `Cache-Control: public, max-age=31536000, immutable`.
-- [ ] Serve a styled "No base version" placeholder document (per the
+- [x] Serve a styled "No base version" placeholder document (per the
       Milestone 1 contract) when a requested base _document_ does not exist
       at the pinned commit; plain 404 for missing non-document resources.
-- [ ] Base documents referencing relative CSS/font/image URLs resolve inside
+- [x] Base documents referencing relative CSS/font/image URLs resolve inside
       the subtree automatically; add tests proving a base document renders
       with base-commit stylesheets while the live catalogue serves newer
       ones.
-- [ ] Unit-test the handler (pinned-commit guard, confinement, placeholder,
+- [x] Unit-test the handler (pinned-commit guard, confinement, placeholder,
       caching headers) in `tests/server_base_routes.test.ts`.
-- [ ] Document the subtree in `docs/protocol/mokabook-runtime.md` (routes,
+- [x] Document the subtree in `docs/protocol/mokabook-runtime.md` (routes,
       lifetime, caching, confinement).
-- [ ] Run `cargo xtask check`; commit and push.
+- [x] Run `cargo xtask check`; commit and push.
 
 ## Milestone 6 — Per-screen compare segment in Browse
 

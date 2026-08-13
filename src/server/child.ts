@@ -1,5 +1,5 @@
 import type { ResolvedConfig } from "../config/types.js";
-import { computeChangedRoutes } from "./changed.js";
+import { computeChangeContext } from "./changed.js";
 import { startCatalogueServer } from "./http.js";
 
 /** Run the hidden deterministic server child until its parent shuts it down. */
@@ -10,10 +10,12 @@ export async function runServerChild(
   updateVersion: number,
   strictPort: boolean,
 ): Promise<void> {
-  const changedRoutes = await computeChangedRoutes(config, base);
+  const context = await computeChangeContext(config, base);
   const server = await startCatalogueServer(config, {
     base,
-    ...(changedRoutes ? { changedRoutes } : {}),
+    ...(context
+      ? { baseCommit: context.baseCommit, changedRoutes: context.changedRoutes }
+      : {}),
     port,
     strictPort,
     updateVersion,
