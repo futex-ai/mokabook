@@ -3,9 +3,6 @@ import type { ReactNode } from "react";
 /** Rendering target for a design mockup artboard. */
 export type ArtboardViewport = "desktop" | "mobile";
 
-/** Top-level Browse/Review mode depicted by a shell mockup. */
-export type ShellMode = "browse" | "review";
-
 /** Color scheme depicted as selected for the fragments on the stage. */
 export type ShellColorScheme = "dark" | "light";
 
@@ -15,17 +12,7 @@ interface TopBarProps {
    * artboards leave the switch to the screen head band, which has the room.
    */
   colorScheme?: ShellColorScheme | undefined;
-  mode: ShellMode;
   viewport: ArtboardViewport;
-}
-
-function BaseWatch() {
-  return (
-    <span className="mbk-basewatch">
-      <span className="mbk-basewatch-dot" aria-hidden="true" />
-      Comparing this branch with <strong>origin/main</strong>
-    </span>
-  );
 }
 
 /** Color scheme selection shown once a catalogue has dark fragments. */
@@ -48,19 +35,15 @@ export function SchemeSwitch({ active }: { active: ShellColorScheme }) {
   );
 }
 
-/** The 48px shell header: brand mark, search or base ref, mode switch. */
-export function TopBar({ colorScheme, mode, viewport }: TopBarProps) {
+/** The 48px shell header: brand mark, search, and the scheme control. */
+export function TopBar({ colorScheme, viewport }: TopBarProps) {
   return (
     <header className="mbk-topbar">
       {viewport === "mobile" ? (
         <button
           className="mbk-menu-btn"
           type="button"
-          aria-label={
-            mode === "review"
-              ? "Open changed screens navigation"
-              : "Open catalogue navigation"
-          }
+          aria-label="Open catalogue navigation"
         >
           ☰
         </button>
@@ -72,25 +55,13 @@ export function TopBar({ colorScheme, mode, viewport }: TopBarProps) {
         Mokabook
       </span>
       {viewport === "desktop" ? (
-        mode === "review" ? (
-          <BaseWatch />
-        ) : (
-          <span className="mbk-search">
-            <span aria-hidden="true">⌕</span>Search screens…
-          </span>
-        )
+        <span className="mbk-search">
+          <span aria-hidden="true">⌕</span>Search screens…
+        </span>
       ) : null}
       {colorScheme !== undefined && viewport === "desktop" ? (
         <SchemeSwitch active={colorScheme} />
       ) : null}
-      <nav className="mbk-modes" aria-label="Mokabook modes">
-        <span className={mode === "browse" ? "mbk-mode active" : "mbk-mode"}>
-          Browse
-        </span>
-        <span className={mode === "review" ? "mbk-mode active" : "mbk-mode"}>
-          Review
-        </span>
-      </nav>
     </header>
   );
 }
@@ -99,7 +70,6 @@ interface ShellProps {
   aside?: ReactNode;
   children: ReactNode;
   colorScheme?: ShellColorScheme | undefined;
-  mode: ShellMode;
   nav: ReactNode;
   viewport: ArtboardViewport;
 }
@@ -109,14 +79,13 @@ export function Shell({
   aside,
   children,
   colorScheme,
-  mode,
   nav,
   viewport,
 }: ShellProps) {
   if (viewport === "desktop") {
     return (
       <div className="mbk-shell mbk-shell--desktop">
-        <TopBar colorScheme={colorScheme} mode={mode} viewport={viewport} />
+        <TopBar colorScheme={colorScheme} viewport={viewport} />
         <div className="mbk-body">
           {nav}
           <main className="mbk-main">{children}</main>
@@ -126,7 +95,7 @@ export function Shell({
   }
   return (
     <div className="mbk-shell mbk-shell--mobile">
-      <TopBar colorScheme={colorScheme} mode={mode} viewport={viewport} />
+      <TopBar colorScheme={colorScheme} viewport={viewport} />
       <main className="mbk-main">{children}</main>
       {aside}
     </div>

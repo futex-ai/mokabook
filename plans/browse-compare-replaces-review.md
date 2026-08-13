@@ -43,7 +43,7 @@ approved design no longer contains a Review mode and instead specifies the
 per-screen compare segment. New compare panes use `mbk-*` class names; the
 legacy `mb-*` compare contract is dropped from the spec.
 
-- [ ] Rewrite `docs/protocol/mokabook-shell-design.md`: remove the Review
+- [x] Rewrite `docs/protocol/mokabook-shell-design.md`: remove the Review
       pill from the top-bar spec and the whole Review Pages section; respec
       the screen head to carry the compare segment
       (`Current | Base | Overlay | Difference`) ahead of the viewport control
@@ -52,21 +52,21 @@ legacy `mb-*` compare contract is dropped from the spec.
       existing phone/browser chrome via `data-compare` states (opacity
       overlay, blend-mode difference), the added-screen "no base version"
       placeholder pane, and dark-scheme composition.
-- [ ] Update the mockup table in the contract: drop the eight
+- [x] Update the mockup table in the contract: drop the eight
       `design/review/**` states, add the compare states
       (`design/browse/compare/{base,overlay,difference,added,dark}`), and
       show the compare segment on the standard screen state.
-- [ ] Delete `examples/basic/entries/design/review_outcome_screens.tsx`,
+- [x] Delete `examples/basic/entries/design/review_outcome_screens.tsx`,
       `review_impact_screens.tsx`, and `parts/review.tsx`; repurpose
       `parts/compare.tsx` into the head-band segment depiction; add the five
       compare-state screens; update `design.mockup.tsx` registrations,
       `examples/basic/notes.md`, the design stylesheets
       (`examples/basic/generated/design*.css`), and the example config's
       `design/review/**` stylesheet rule.
-- [ ] Update browser regressions that assert the removed `design/review/**`
+- [x] Update browser regressions that assert the removed `design/review/**`
       mockup routes (`tests/browser/review.spec.ts:193` area) to target the
       new compare-state mockups.
-- [ ] Rebuild the example catalogue and commit regenerated fragments; run
+- [x] Rebuild the example catalogue and commit regenerated fragments; run
       `cargo xtask check`; commit (Conventional Commits) and push.
 
 ## Milestone 2 — Remove Review entry points from the served shell
@@ -126,10 +126,10 @@ manifest, ignore normalization, compare kernel) stays for the Changed filter.
       and Git-batch coverage into kept suites first
       (`tests/server_changed.test.ts` or a new `tests/changes.test.ts`).
 - [ ] Update `scripts/preview/build.mjs` to stop snapshotting `/review`, and
-      `scripts/package/consumer_cases.mjs` to drop the packed `mokabook
-      review` smoke cases; update `tests/preview.test.ts`,
-      `tests/deployment.test.ts`, `tests/package.test.ts`,
-      `tests/watch_boundaries.test.ts`, `tests/config.test.ts`.
+      `scripts/package/consumer_cases.mjs` to drop the packed review smoke
+      cases; update `tests/preview.test.ts`, `tests/deployment.test.ts`,
+      `tests/package.test.ts`, `tests/watch_boundaries.test.ts`, and
+      `tests/config.test.ts`.
 - [ ] Update docs: `docs/protocol/mokabook-runtime.md` (drop Review
       Comparison, Served Review, `review.json`, CI Review Integration
       sections; keep Review Ignore semantics under change detection),
@@ -196,7 +196,7 @@ needs no artifact, no snapshot trees, and no retention lifecycle.
       file modes and paths under configured source roots; content-type by
       extension; `Cache-Control: public, max-age=31536000, immutable`.
 - [ ] Serve a styled "No base version" placeholder document (per the
-      Milestone 1 contract) when a requested base *document* does not exist
+      Milestone 1 contract) when a requested base _document_ does not exist
       at the pinned commit; plain 404 for missing non-document resources.
 - [ ] Base documents referencing relative CSS/font/image URLs resolve inside
       the subtree automatically; add tests proving a base document renders

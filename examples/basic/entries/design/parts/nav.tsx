@@ -20,9 +20,8 @@ const NAV_TREE: readonly NavNode[] = [
   { depth: 2, kind: "screen", label: "Welcome" },
   { depth: 2, kind: "screen", label: "Details" },
   { depth: 1, kind: "flow", label: "Example tour" },
-  { count: 2, depth: 0, kind: "collection", label: "Design", open: true },
+  { count: 1, depth: 0, kind: "collection", label: "Design", open: true },
   { depth: 1, kind: "collection", label: "Browse shell" },
-  { depth: 1, kind: "collection", label: "Review" },
 ];
 
 /** Left padding applied to a top-level (depth 0) row, in pixels. */

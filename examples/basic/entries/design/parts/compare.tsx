@@ -1,145 +1,86 @@
 import type { ReactNode } from "react";
 
-import { StatusBadge, type ReviewState } from "./review.js";
-import { SchemeSwitch, type ShellColorScheme } from "./shell.js";
+/** Compare mode depicted as selected in the screen-head segment. */
+export type CompareMode = "base" | "current" | "difference" | "overlay";
 
-interface CompareToolbarProps {
-  /**
-   * Selected color scheme, shown as a segment beside the viewport control.
-   * Omitted for a screen compared in one scheme, which has nothing to switch.
-   */
-  colorScheme?: ShellColorScheme | undefined;
-  mode: "difference" | "overlay" | "side-by-side";
-  viewport: "desktop" | "mobile";
-}
-
-const MODE_LABELS: readonly {
-  key: CompareToolbarProps["mode"];
-  label: string;
-}[] = [
-  { key: "side-by-side", label: "Side by side" },
+const MODE_LABELS: readonly { key: CompareMode; label: string }[] = [
+  { key: "current", label: "Current" },
+  { key: "base", label: "Base" },
   { key: "overlay", label: "Overlay" },
   { key: "difference", label: "Difference" },
 ];
 
-const VIEWPORT_LABELS: readonly { key: string; label: string }[] = [
-  { key: "mobile", label: "Mobile" },
-  { key: "desktop", label: "Desktop" },
-  { key: "both", label: "Both" },
-];
-
-/** Comparison mode, viewport, and color-scheme controls for a compare page. */
-export function CompareToolbar({
-  colorScheme,
-  mode,
-  viewport,
-}: CompareToolbarProps) {
+/** The per-screen compare segment shown beside the viewport control. */
+export function CompareSwitch({ active }: { active: CompareMode }) {
   return (
-    <div className="mbk-cmp-toolbar">
-      <span className="mbk-seg" role="group" aria-label="Comparison mode">
-        {MODE_LABELS.map((option) => (
-          <span
-            key={option.key}
-            className={option.key === mode ? "active" : undefined}
-          >
-            {option.label}
-          </span>
-        ))}
-      </span>
-      <span className="mbk-seg" role="group" aria-label="Viewport">
-        {VIEWPORT_LABELS.map((option) => (
-          <span
-            key={option.key}
-            className={option.key === viewport ? "active" : undefined}
-          >
-            {option.label}
-          </span>
-        ))}
-      </span>
-      {colorScheme ? <SchemeSwitch active={colorScheme} /> : null}
-    </div>
+    <span
+      className="mbk-seg"
+      role="group"
+      aria-label="Compare with origin/main"
+    >
+      {MODE_LABELS.map((option) => (
+        <span
+          key={option.key}
+          className={option.key === active ? "active" : undefined}
+        >
+          {option.label}
+        </span>
+      ))}
+    </span>
   );
 }
 
-/** The before/after comparison grid on the dotted stage. */
-export function CompareGrid({ children }: { children: ReactNode }) {
-  return <div className="mbk-compare">{children}</div>;
-}
-
-interface PaneProps {
+interface CompareStackProps {
   children: ReactNode;
-  label: string;
-  side: "after" | "before";
-  tone?: "added" | "changed" | "removed";
+  mode: Exclude<CompareMode, "current">;
 }
 
-/** One labeled before or after comparison pane. */
-export function Pane({ children, label, side, tone }: PaneProps) {
-  const dot = tone ?? (side === "before" ? "base" : "changed");
+/** The one-cell grid stacking base and head documents in a device screen. */
+export function CompareStack({ children, mode }: CompareStackProps) {
   return (
-    <div className="mbk-compare-side">
-      <p className={`mbk-compare-label ${side}`}>
-        <span className={`mbk-chg-dot ${dot}`} aria-hidden="true" />
-        {label}
-      </p>
+    <div className="mbk-cmp-stack" data-compare={mode}>
       {children}
     </div>
   );
 }
 
-/** Placeholder pane for a screen absent on one side. */
-export function MissingPane({
-  label,
-  message,
+/** One document layer inside the compare stack. */
+export function CompareDoc({
+  children,
   side,
 }: {
-  label: string;
-  message: string;
-  side: "after" | "before";
+  children: ReactNode;
+  side: "base" | "head";
 }) {
+  return <div className={`mbk-cmp-doc mbk-cmp-doc--${side}`}>{children}</div>;
+}
+
+/** The placeholder filling a device screen when no base version exists. */
+export function MissingBase() {
   return (
-    <div className="mbk-compare-side">
-      <p className={`mbk-compare-label ${side}`}>
-        <span className="mbk-chg-dot base" aria-hidden="true" />
-        {label}
-      </p>
-      <div className="mbk-pane-missing">{message}</div>
+    <div className="mbk-cmp-missing">
+      No base version — this screen is new on this branch.
     </div>
   );
 }
 
-/** Legend for tinted difference regions. */
-export function DiffLegend() {
+/**
+ * Illustration of the difference blend: identical regions read near-black
+ * while the lines that differ from the base render read bright.
+ */
+export function DiffScreen({ compact }: { compact?: boolean }) {
   return (
-    <p className="mbk-diff-legend">
-      <span>
-        <i className="changed" aria-hidden="true" />
-        Changed
-      </span>
-      <span>
-        <i className="added" aria-hidden="true" />
-        Added
-      </span>
-      <span className="mbk-diff-legend-note">
-        After · this branch, with the differences from origin/main marked.
-      </span>
-    </p>
-  );
-}
-
-interface ReviewSummaryProps {
-  facts: string;
-  pct?: string | undefined;
-  state: ReviewState;
-}
-
-/** The foot summary band naming what changed on the compared screen. */
-export function ReviewSummary({ facts, pct, state }: ReviewSummaryProps) {
-  return (
-    <div className="mbk-review-summary">
-      <StatusBadge state={state} />
-      <span className="mbk-review-facts">{facts}</span>
-      {pct ? <span className="mbk-review-pct">{pct}</span> : null}
+    <div className="mbk-cmp-diffshot">
+      <div className="mbk-cmp-diffrow dim">
+        {compact ? "Menu" : "Example navigation"}
+      </div>
+      <div className="mbk-cmp-diffrow bright">
+        {compact ? "Welcome" : "Welcome to the Mokabook example"}
+      </div>
+      <div className="mbk-cmp-diffrow bright small">
+        A short introduction now welcomes new readers.
+      </div>
+      <div className="mbk-cmp-diffrow dim small">Open the details screen</div>
     </div>
   );
 }

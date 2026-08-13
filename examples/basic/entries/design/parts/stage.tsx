@@ -46,19 +46,6 @@ export function MiniDetails({ compact }: MiniScreenProps) {
   );
 }
 
-/** Miniature depiction of a retired synthetic screen. */
-export function MiniFarewell({ compact }: MiniScreenProps) {
-  return (
-    <div className="mbk-shot">
-      <div className="mbk-shot-pad">
-        <h2>{compact ? "Goodbye" : "Goodbye for now"}</h2>
-        <p>Sign back in at any time to continue.</p>
-        <span className="mbk-shot-link">Return to welcome</span>
-      </div>
-    </div>
-  );
-}
-
 interface FrameLabelProps {
   lightOnly?: boolean | undefined;
   text?: string | undefined;

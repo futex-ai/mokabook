@@ -1,0 +1,83 @@
+/* Mokabook per-screen compare modes: the document stack inside a device
+   screen, the overlay composition, the no-base placeholder, and the
+   difference-blend illustration. */
+
+/* ---- Document stack ---------------------------------------------------- */
+
+.mbk-cmp-stack {
+  display: grid;
+}
+
+.phone-screen .mbk-cmp-stack {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.browser-viewport .mbk-cmp-stack {
+  height: 100%;
+}
+
+.mbk-cmp-stack > * {
+  grid-area: 1 / 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.mbk-cmp-doc {
+  overflow: hidden;
+}
+
+.mbk-cmp-doc .mbk-shot {
+  height: 100%;
+}
+
+[data-compare="overlay"] .mbk-cmp-doc--head {
+  opacity: 0.5;
+}
+
+/* ---- No base version --------------------------------------------------- */
+
+.mbk-cmp-missing {
+  align-items: center;
+  border: 1px dashed var(--chrome-border-strong);
+  border-radius: 8px;
+  color: var(--chrome-muted);
+  display: flex;
+  font-size: 12.5px;
+  justify-content: center;
+  margin: 14px;
+  padding: 16px;
+  text-align: center;
+}
+
+/* ---- Difference illustration ------------------------------------------- */
+
+/* Identical regions cancel to near-black in the difference blend; only the
+   lines that differ from the base render read bright. */
+.mbk-cmp-diffshot {
+  background: #050705;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  padding: 18px 20px;
+}
+
+.mbk-cmp-diffrow {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mbk-cmp-diffrow.small {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.mbk-cmp-diffrow.dim {
+  color: rgba(238, 241, 239, 0.16);
+}
+
+.mbk-cmp-diffrow.bright {
+  color: #d9f2e2;
+  text-shadow: 0 0 12px rgba(140, 220, 170, 0.8);
+}

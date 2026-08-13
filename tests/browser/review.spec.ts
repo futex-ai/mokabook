@@ -190,26 +190,6 @@ test("impact-only screens stay linked from the review index", async ({
   }
 });
 
-test("approved impact mockups show the impacted group", async ({ page }) => {
-  for (const viewport of ["mobile", "desktop"]) {
-    const mockup = path.join(
-      repositoryRoot,
-      "examples/basic/generated/design/review/impact",
-      `shared-impact.${viewport}.html`,
-    );
-    await page.goto(pathToFileURL(mockup).href);
-    await expect(
-      page.locator(".mbk-chg-grouphead", { hasText: "Impacted" }).first(),
-    ).toBeVisible();
-    expect(await page.locator(".mbk-chg-dot.impacted").count()).toBeGreaterThan(
-      0,
-    );
-    await expect(
-      page.getByText(/2 impacted against origin\/main/),
-    ).toBeVisible();
-  }
-});
-
 test("compare pages switch modes and viewports", async ({ page }) => {
   await page.goto(pathToFileURL(path.join(outDir, "index.html")).href);
   await page.locator(".mbk-chg-row").first().click();

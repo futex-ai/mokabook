@@ -25,7 +25,7 @@ export default defineConfig({
   review: {
     outDir: ".context/basic-review",
     sharedImpact: [
-      "examples/basic/generated/design-review.css",
+      "examples/basic/generated/design-compare.css",
       "examples/basic/generated/design-stage.css",
       "examples/basic/generated/design.css",
       "examples/basic/renderer.tsx",
@@ -34,8 +34,8 @@ export default defineConfig({
   },
   stylesheets: [
     {
-      match: "design/review/**",
-      stylesheets: ["design.css", "design-stage.css", "design-review.css"],
+      match: "design/browse/compare/**",
+      stylesheets: ["design.css", "design-stage.css", "design-compare.css"],
     },
     { match: "design/**", stylesheets: ["design.css", "design-stage.css"] },
     { match: "**/*.html", stylesheets: ["styles.css"] },
@@ -45,7 +45,7 @@ export default defineConfig({
       {
         action: "reload",
         paths: [
-          "examples/basic/generated/design-review.css",
+          "examples/basic/generated/design-compare.css",
           "examples/basic/generated/design-stage.css",
           "examples/basic/generated/design.css",
           "examples/basic/generated/styles.css",

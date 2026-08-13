@@ -128,34 +128,12 @@ body {
   padding: 0 12px;
 }
 
-/* The color-scheme switch sits right of the search field. It never
-   compresses, and its tighter pad matches the mode switch height. */
+/* The color-scheme switch sits at the trailing edge after the search field.
+   It never compresses. */
 .mbk-topbar > .mbk-seg {
   flex-shrink: 0;
-  padding: 2px;
-}
-
-.mbk-modes {
-  background: var(--chrome-bg);
-  border-radius: 8px;
-  display: flex;
-  gap: 4px;
   margin-left: auto;
-  padding: 3px;
-}
-
-.mbk-mode {
-  border-radius: 6px;
-  color: var(--chrome-muted);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 12px;
-}
-
-.mbk-mode.active {
-  background: var(--chrome-surface);
-  box-shadow: 0 1px 2px rgba(20, 28, 22, 0.08);
-  color: var(--chrome-ink);
+  padding: 2px;
 }
 
 /* ---- Body split ------------------------------------------------------- */
@@ -359,7 +337,9 @@ body {
   padding: 14px 24px 13px;
 }
 
-.mbk-screen-head > .mbk-seg {
+/* The head-band controls cluster at the trailing edge: the first segment
+   takes the free space, later segments follow at the band gap. */
+.mbk-screen-head > div + .mbk-seg {
   margin-left: auto;
 }
 

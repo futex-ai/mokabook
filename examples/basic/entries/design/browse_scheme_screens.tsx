@@ -1,5 +1,6 @@
 import { screen } from "mokabook";
 
+import { CompareSwitch } from "./parts/compare.js";
 import { DetailsPanel } from "./parts/details.js";
 import { NavTree } from "./parts/nav.js";
 import { SchemeSwitch, ScreenHead, Shell, ViewSwitch } from "./parts/shell.js";
@@ -26,9 +27,13 @@ function SchemeHead({
     <ScreenHead
       action={
         viewport === "desktop" ? (
-          <ViewSwitch active="both" />
+          <>
+            <CompareSwitch active="current" />
+            <ViewSwitch active="both" />
+          </>
         ) : (
           <>
+            <CompareSwitch active="current" />
             <ViewSwitch active="mobile" />
             <SchemeSwitch active="dark" />
           </>
@@ -45,7 +50,6 @@ function DarkSchemeDesktop() {
   return (
     <Shell
       colorScheme="dark"
-      mode="browse"
       viewport="desktop"
       nav={<NavTree activeLabel="Welcome" />}
     >
@@ -65,7 +69,7 @@ function DarkSchemeDesktop() {
 
 function DarkSchemeMobile() {
   return (
-    <Shell colorScheme="dark" mode="browse" viewport="mobile" nav={null}>
+    <Shell colorScheme="dark" viewport="mobile" nav={null}>
       <SchemeHead idChip="example-welcome" title="Welcome" viewport="mobile" />
       <Stage>
         <PhoneFrame dark label="Mobile" small>
@@ -81,7 +85,6 @@ function LightOnlyDesktop() {
   return (
     <Shell
       colorScheme="dark"
-      mode="browse"
       viewport="desktop"
       nav={<NavTree activeLabel="Details" />}
     >
@@ -101,7 +104,7 @@ function LightOnlyDesktop() {
 
 function LightOnlyMobile() {
   return (
-    <Shell colorScheme="dark" mode="browse" viewport="mobile" nav={null}>
+    <Shell colorScheme="dark" viewport="mobile" nav={null}>
       <SchemeHead idChip="example-details" title="Details" viewport="mobile" />
       <Stage>
         <PhoneFrame label="Mobile" lightOnly small>

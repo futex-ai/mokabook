@@ -2,8 +2,8 @@
 
 ## Scope
 
-This document records the approved design for the package-owned Browse shell
-and the legacy styling contract the static Review artifact keeps. The design is
+This document records the approved design for the package-owned Browse shell,
+including its per-screen compare modes. The design is
 the refined Mockbook shell originally shipped inside the Accounting repository,
 ported here without any Accounting or Bookfolio content. The visual source of
 truth is the design catalogue in the basic example under the `design/` routes;
@@ -19,21 +19,18 @@ generated under `examples/basic/generated/design/`:
 | Route                                     | State                                 |
 | ----------------------------------------- | ------------------------------------- |
 | `design/browse/views/home.html`           | Catalogue home with navigation tree   |
-| `design/browse/views/screen.html`         | Selected screen with framed fragments |
+| `design/browse/views/screen.html`         | Selected screen, compare on Current   |
 | `design/browse/views/use-case.html`       | Selected use case with ordered steps  |
 | `design/browse/states/details.html`       | Expanded details inspector            |
 | `design/browse/states/missing-route.html` | Not-found view with navigation        |
 | `design/browse/states/navigation.html`    | Collapsed navigation drawer           |
 | `design/browse/states/dark-scheme.html`   | Dark selected, dark device screens    |
 | `design/browse/states/light-only.html`    | Light-only screen under dark          |
-| `design/review/outcomes/changed.html`     | Changed screen, side-by-side compare  |
-| `design/review/outcomes/added.html`       | Added screen with missing base pane   |
-| `design/review/outcomes/removed.html`     | Removed screen with missing head pane |
-| `design/review/outcomes/difference.html`  | Tinted in-place difference mode       |
-| `design/review/outcomes/dark-scheme.html` | Dark view compared side by side       |
-| `design/review/impact/shared-impact.html` | Summary with shared-impact card       |
-| `design/review/impact/ignored-only.html`  | Ignored-region-only classification    |
-| `design/review/impact/empty.html`         | Empty comparison result               |
+| `design/browse/compare/base.html`         | Base mode showing branch-point render |
+| `design/browse/compare/overlay.html`      | Overlay mode ghosting head over base  |
+| `design/browse/compare/difference.html`   | Difference mode blending both renders |
+| `design/browse/compare/added.html`        | New screen with no base version pane  |
+| `design/browse/compare/dark-scheme.html`  | Dark scheme compared in overlay mode  |
 
 Every screen ships one mobile and one desktop variant. Mockup implementation
 notes live in entry descriptions, rationale, and related docs — never inside
@@ -88,10 +85,9 @@ scrollable region scrolls internally:
 
 - **Top bar** — 48px, surface background, hairline bottom border: brand mark
   (24px rounded square in the accent with the `◫` glyph), the product name,
-  a centred search field (max-width 440px, `⌕` glyph), the color-scheme
-  control when the catalogue has one, and a right-aligned Browse/Review
-  segmented mode switch. Below the breakpoint a menu button precedes the brand
-  and opens the navigation drawer.
+  a centred search field (max-width 440px, `⌕` glyph), and the right-aligned
+  color-scheme control when the catalogue has one. Below the breakpoint a menu
+  button precedes the brand and opens the navigation drawer.
 - **Navigation** — 248px column, `#fbfbfa` background, hairline right border.
   Head row `CATALOGUE` (uppercase, 11px) with a `Collapse all` text button;
   an All/Changed segmented filter (with a monospace changed count) when Git
@@ -109,8 +105,10 @@ scrollable region scrolls internally:
   a title row: 19px heading plus a monospace ID button labelled `#<id>`. The
   button uses the standard pointer cursor, moves down 1px with an inset shadow
   while pressed, and copies the unprefixed ID without navigating.
-  Screen routes place the right-aligned Mobile/Desktop/Both segmented viewport
-  control in this band.
+  Screen routes place the right-aligned controls in this band: the
+  `Current | Base | Overlay | Difference` compare segment when Git change
+  detection is available, then the Mobile/Desktop/Both segmented viewport
+  control.
 - **Stage** — dotted-grid background (22px radial dots), centred frames with
   40px gap, internal `overflow: auto`, `MOBILE` / `DESKTOP` uppercase frame
   labels, and no separate toolbar above the grid.
@@ -180,8 +178,8 @@ of those two.
   `color-mix(in srgb, var(--mbk-dark-screen-ink) 12%, var(--mbk-dark-screen-bg))`.
   The browser viewport needs none; its light bar already draws that edge.
 - **Control** — a `Light | Dark` `mbk-seg`, shown only when the catalogue has
-  dark fragments. At or above the breakpoint it sits in the top bar between the
-  search field and the mode switch; below it the top bar has no room, so it
+  dark fragments. At or above the breakpoint it sits at the trailing edge of
+  the top bar after the search field; below it the top bar has no room, so it
   renders in the screen head band under the viewport control at full width.
 - **Light-only screens** — a screen with no dark render keeps its light frames
   under a dark selection and states the fallback in its frame label, which
@@ -190,12 +188,10 @@ of those two.
   lighter-weight tail of the same uppercase label, not a separate badge.
   A use-case step frame carries the same fallback state but has no label, so it
   shows no scheme caption.
-- **Compare pages** — the comparison band carries the same control as a third
-  segment after the comparison-mode and viewport segments, with the viewport
-  and scheme pair kept together at the trailing edge. A screen with only light
-  views shows no scheme segment, and dark reaches the compared device screens
-  only: the changed-screens navigation, head band, classification badge, and
-  the segments themselves stay light.
+- **Compare modes** — the selected scheme reaches both compared documents: a
+  non-Current mode composes the base and head renders of the same scheme, so
+  a dark selection compares dark base against dark head. The compare segment,
+  head band, and every other shell surface stay light.
 
 ## Responsive Behavior
 
@@ -204,43 +200,45 @@ The shell has one breakpoint at **56.25rem (900px)**:
 - At or above it, the navigation column is persistent and the layout is the
   fixed two-column split above.
 - Below it, the navigation becomes a scrimmed overlay drawer (82% width, max
-  20rem) opened by the top-bar menu button in both Browse and Review; the
+  20rem) opened by the top-bar menu button; the
   phone frame scales via `aspect-ratio: 390 / 844` within available width, the
   browser frame drops to 560px height, flow connector lines hide, the details
   body stacks to one column, and the color-scheme control moves from the top
   bar into the screen head band. When a screen head cannot fit its title and
   the controls on one row, they wrap beneath the title and span the available
-  width, stacking the scheme control under the viewport control.
+  width, stacking in compare, viewport, scheme order.
 
 `prefers-reduced-motion: reduce` disables shell transitions.
 
-## Review Pages
+## Compare Modes
 
-Review pages render in the same shell scaffold as Browse and inline the shell
-stylesheet so the static artifact stays viewable from disk. Each page has the
-top bar with the drawer button, brand mark, base-comparison indicator, and a
-Review pill that returns compare pages to the artifact index. Served pages
-also show the Browse pill. Each page has a changed-screens navigation column
-using the `mbk-chg-*` classes: group heads with classification dots and
-counts, title-and-route rows with the accent active state, and shared-impact
-and ignored-region cards. Compare pages reuse the screen head, `mbk-seg`
-segments for the comparison-mode, viewport, and color-scheme controls,
-`mbk-status` classification badges, and a summary band. The drawer control and
-script remain inline so static artifacts retain narrow-viewport navigation
-without a running server. The index renders the complete navigation inline. Compare
-pages hydrate the same markup from the artifact-root `review-navigation.js`
-payload and retain an `Open Review index` fallback in the navigation column
-when JavaScript is unavailable, avoiding one full catalogue copy per viewport
-page without changing the rendered design.
+A screen page can compare its current render with the branch-point base
+version in place, inside the same device chrome, with no separate section or
+page. The compare segment in the screen head offers `Current`, `Base`,
+`Overlay`, and `Difference`; its group carries an accessible
+`Compare with <base ref>` label naming the configured Git base. The segment
+appears only when Git change detection is available, and every screen shows
+it — comparing an unchanged screen composes two identical renders.
 
-The compare stage keeps its `mb-*` classes and the `--mb-*` token set
-(`--mb-bg`, `--mb-surface`, `--mb-border`, `--mb-text`, `--mb-muted`,
-`--mb-radius`, `--mb-shadow`) mapped onto the chrome palette, plus the review
-classification pairs: added `#1d7a3d`/`#e3f0e7`, changed `#9a6b00`/`#f6ecd4`,
-removed `#b3261e`/`#f7e2e0`, ignored `#6c6862`/`#edebe8`. The pane grid
-(`mb-panes`, `mb-pane`, `mb-pane-doc`, `mb-pane-missing`, `mb-frag`) drives
-the side-by-side, opacity-overlay, and blend-mode difference modes through
-its `data-compare-mode` attribute.
+- **Stack** — the stage carries the selected mode in a `data-compare`
+  attribute (`current`, `base`, `overlay`, `difference`). Inside each device
+  screen the fragment area is a one-cell grid (`mbk-cmp-stack`) whose head
+  document (`mbk-cmp-doc mbk-cmp-doc--head`) and base document
+  (`mbk-cmp-doc mbk-cmp-doc--base`) both occupy `grid-area: 1 / 1`. The base
+  document exists only after the first non-Current activation; `Current`
+  renders the head document alone and loads nothing else.
+- **Base** — the base document alone, in the same chrome; frame labels and
+  every shell surface are unchanged.
+- **Overlay** — the head document at `opacity: 0.5` above the base document.
+- **Difference** — the head document composited over the base document with
+  `mix-blend-mode: difference`, so identical regions read near-black and
+  differing regions read bright.
+- **No base version** — a screen absent at the branch point fills the device
+  screen with a bordered placeholder pane (`mbk-cmp-missing`) reading
+  `No base version — this screen is new on this branch.` in every
+  non-Current mode.
+- Base documents keep their branch-point stylesheets, fonts, and images; the
+  compared render must not mix base markup with current resources.
 
 ## Related Docs
 
