@@ -119,9 +119,11 @@ in, related docs, dependencies, use cases, and comparison context.
 Consumer fragments and legacy documents are sandboxed without script permission
 so they cannot alter the same-origin Browse shell. The planned navigation
 extension will permit package-owned same-origin inspection and outer navigation
-after explicit user activation, without granting consumer scripts, forms,
-popups, or automatic top navigation. Review panes retain their stricter
-sandbox.
+after explicit user activation. Before enabling that iframe-wide sandbox token,
+the served/preview adapter will neutralize every unmarked `_top`, `_parent`, and
+`<base target>` route, so only a validated marked link can use it. Consumer
+scripts, forms, popups, and automatic top navigation remain forbidden. Review
+panes retain their stricter sandbox and byte-unmodified documents.
 
 A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
 light-only catalogue offers none. One switch renders in the top bar and one in
@@ -168,7 +170,10 @@ navigation plan completes, Review, static, iframe, download, external, target,
 hash-only, and modified-click links retain native browser behavior. The target
 exception is a marked catalogue link inside a Browse frame: trusted parent code
 will own primary and new-context navigation, while only default/`_self`
-activation has native outer-navigation fallback.
+activation has native outer-navigation fallback. Served Browse applies a
+request-visible logical fragment during server rendering. The static deployed
+preview applies it progressively; with JavaScript disabled, that preview still
+opens the canonical page but does not promise anchor scrolling.
 
 The shell meets keyboard, focus, reduced-motion, contrast, semantics, and status
 announcement requirements. Mobile and desktop shell variants are specified by

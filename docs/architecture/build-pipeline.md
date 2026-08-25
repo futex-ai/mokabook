@@ -80,22 +80,23 @@ type Renderer = (input: RenderInput) => string;
 
 The returned string must be a complete HTML document. Mokabook then converts
 `ReviewIgnore` templates into inert comments and resolves every complete value
-of the form `mock:<id>` in `href` and `data-nav-href` to viewport-matched
-fragments in the same color scheme, falling back to light when the destination
-screen has no dark view. Both attributes are resolved when they coexist on one
-element, and the validator independently rejects any logical navigation value
-left by a compatibility transform. The same pass covers legacy pages, which
-remain light-only. Text, scripts, styles, and unrelated attributes containing
-the same characters remain unchanged. A use-case link resolves through its
-first screen; collections are intentionally not linkable.
+of the form `mock:<id>[#fragment]` in `href` and `data-nav-href` to
+viewport-matched fragments in the same color scheme, falling back to light when
+the destination screen has no dark view. Both attributes are resolved when they
+coexist on one element, and the validator independently rejects any logical
+navigation value left by a compatibility transform. The same pass covers legacy
+pages, which remain light-only. Text, scripts, styles, and unrelated attributes
+containing the same characters remain unchanged. A use-case link resolves
+through its first screen; collections are intentionally not linkable.
 
 The approved, not-yet-implemented
 [catalogue navigation extension](../protocol/mokabook-navigation.md) will also
 retain the stable id and optional fragment in a reserved `data-mokabook-link`
 marker. It will validate matching destinations when both navigation attributes
-coexist, reject consumer-authored markers, and verify fragment anchors across
-every target view. Until the active plan completes, generated documents do not
-contain this marker.
+coexist, reject consumer-authored markers, verify fragment anchors across every
+target view, and bind each marker to the exact portable navigation attributes
+produced for that element. Until the active plan completes, generated documents
+do not contain this marker.
 
 During a staged migration only, a configured consumer transformer receives the
 complete document, current route/viewport/color scheme, repository-relative
@@ -103,9 +104,11 @@ output path, available static/output routes, and view-resolved logical routes. T
 transformed document must remain complete and then passes every normal
 Review-marker, link, resource, path, and ownership check.
 
-Once the navigation extension ships, this boundary will also preserve and
-validate catalogue-link markers; a transformer will not be permitted to remove
-or alter a logical link's reserved identity.
+Once the navigation extension ships, this boundary will preserve complete
+catalogue-link records rather than markers alone. A transformer will not be
+permitted to add, remove, or alter a marker, the set of navigation attributes
+that carried its logical destination, or those attributes' resolved portable
+values. This keeps Browse, standalone, and Review navigation aligned.
 
 React Native Web style collection is not a second conversion stage. If an app
 uses it, its renderer wraps the node in the app provider, registers or renders

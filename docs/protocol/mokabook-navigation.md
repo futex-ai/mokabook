@@ -46,6 +46,15 @@ The builder must:
 - reject a reserved marker supplied by consumer output or conflicting logical
   destinations carried by two navigation attributes on one element.
 
+Before invoking a compatibility transformer, the builder records a multiset of
+complete logical-link records: marker value, which of `href` and
+`data-nav-href` carried the logical destination, and each such attribute's
+resolved portable value. It reparses the transformed document and requires the
+same multiset. Adding or removing a marked element, preserving a marker while
+changing its portable destination, or moving logical identity between
+navigation attributes fails the build. Unrelated attributes remain
+consumer-owned.
+
 The marker is inert metadata, not a second resource URL. HTML escaping must be
 deterministic, and link/resource validation continues to inspect the portable
 attributes rather than treating the marker as a file reference.
@@ -74,20 +83,40 @@ trusted parent enhancement described below, but the frame is not granted popup
 permission. A `download` link is not promoted.
 
 The portable file on disk must not be mutated. The development server and
-preview builder share one deterministic adaptation path so local and deployed
-Browse cannot disagree. The server validates marker values against the loaded
-manifest and never promotes unmarked relative links.
+preview builder share one deterministic Browse-document adapter for canonical
+link rewriting and top-navigation sanitization. The server validates marker
+values against the loaded manifest and neither environment promotes an unmarked
+relative link.
 
-The `/id/<id>` redirect preserves the optional request-visible `fragment`
-query on `/view/<route>?fragment=<encoded-fragment>`. The server accepts at
-most one `fragment` value, decodes it exactly once, checks the grammar and
-cross-view anchor existence above, and returns HTTP 400 without injecting a
-fragment when validation fails. It renders the validated value as an encoded
-hash on every current screen iframe source and its light/dark swap sources. A
-use-case page applies it only to the first step, matching the portable fallback.
-The query remains on the outer history URL while scheme changes retain the
-iframe hashes. A top-level `#fragment` is not logical-fragment transport because
-URL hashes are never sent in an HTTP request.
+Before Browse frames receive user-activated top-navigation permission, that
+adapter removes `target` from every `<base>` element and normalizes `_top` or
+`_parent` on every unmarked navigation element to `_self`. It preserves a
+`<base href>`, ordinary self/frame navigation, and non-top targets, but no
+consumer-authored base or unmarked target may authorize outer navigation. Only
+a validated, non-download marked default/`_self` link may receive the
+package-owned `_top` target. Explicit non-self targets remain available only to
+trusted parent enhancement and the sandbox denies frame-created popups. The
+portable and Review documents retain their original bytes and stricter sandbox.
+
+In served Browse, the `/id/<id>` redirect preserves the optional
+request-visible `fragment` query on
+`/view/<route>?fragment=<encoded-fragment>`. The server accepts at most one
+value, decodes it exactly once, checks the grammar and cross-view anchor
+existence above, and returns HTTP 400 without injecting a fragment when
+validation fails. It renders the validated value as an encoded hash on every
+current screen iframe source and its light/dark swap sources. A use-case page
+applies it only to the first step, matching the portable fallback. The query
+remains on the outer history URL while scheme changes retain the iframe hashes.
+
+The deployed preview is a static snapshot and has no request handler that can
+render query-dependent HTML. Its progressive parent client reads at most one
+`fragment` value, validates the grammar, and applies the encoded hash to the
+appropriate same-origin iframe sources; authored links already carry the
+builder's cross-view anchor proof. A direct preview URL whose syntactically
+valid fragment names no anchor simply remains at the top of that frame. Without
+JavaScript, preview links still reach the correct canonical Mokabook page but do
+not promise anchor scrolling. A top-level `#fragment` is never logical-fragment
+transport because URL hashes are not sent in an HTTP request.
 
 ## Enhanced And Native Navigation
 
@@ -115,8 +144,10 @@ popup, or automatic top-navigation capabilities to consumer documents. Review
 panes retain their stricter existing sandbox.
 
 External, raw relative, download, same-document hash, and unmarked links retain
-their existing behavior. Mokabook must not infer product navigation from their
-URLs or visible labels.
+their existing frame-owned behavior. Consumer-authored `_top`/`_parent` and
+`<base target>` values are the security exception: the adapted Browse copy
+neutralizes them so they cannot replace the shell. Mokabook must not infer
+product navigation from URLs or visible labels.
 
 ## Active Catalogue Visibility
 
@@ -151,14 +182,19 @@ Coverage must prove:
 - portable output, stable markers, dual navigation attributes, hashes,
   use-case ids, dark-to-light fallback, conflicts, and reserved-marker errors;
 - served and preview adaptation without mutating committed fragments, including
-  request-visible fragment transport and cross-view anchor validation;
+  secure top-target sanitization and request-visible fragment transport;
+- served cross-view fragment validation and JavaScript-disabled anchor
+  injection, plus enhanced static-preview injection and its documented
+  page-level no-JavaScript fallback;
 - enhanced primary, keyboard, modified, non-self, Back, and Forward navigation
   from mobile, desktop, flow, and legacy frames where supported;
-- JavaScript-disabled default/`_self` outer navigation without popup capability;
+- JavaScript-disabled served default/`_self` outer navigation without popup
+  capability;
 - active-row selection, ancestor disclosure, conditional filter/search reset,
   nearest scrolling, responsive drawer closure, and preserved shell state; and
-- continued script denial and unchanged behavior for unmarked, external,
-  download, same-document, and Review-pane links.
+- continued script denial, top-navigation denial for unmarked targets and base
+  targets, frame-owned external/download/hash behavior, and unchanged
+  Review-pane links.
 
 ## Related Docs
 
