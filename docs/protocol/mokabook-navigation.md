@@ -28,6 +28,14 @@ the stable entry id, while `fragment` is a bare HTML id without `#` or
 percent-encoding. The helpers emit a complete `mock:<id>[#fragment]` value, and
 authors may still use that raw form in supported navigation attributes.
 
+A complete document that contains an activatable logical `href` must not
+contain an HTML `<base href>` element. The base URL would change the browser's
+effective portable destination without changing the link attribute bytes that
+Browse authenticates. The builder enforces this restriction both before and
+after compatibility transformation. A metadata-only `data-nav-href` does not
+activate the restriction, and `<base target>` remains supported under the
+target rules below.
+
 A logical `href` is valid only on an HTML `<a>`/`<area>` or SVG `<a>` and makes
 that native link eligible for Browse activation. A logical `href` on every
 other element, including HTML resource elements and SVG `use`/`image`, fails the
@@ -55,9 +63,10 @@ The builder must:
   artifact for the source viewport and color scheme, retaining light fallback;
 - add one package-owned `data-mokabook-link` marker containing the original
   `<id>[#fragment]` destination only to an activatable native link; and
-- reject a logical `href` on any other element, a reserved marker supplied by
-  consumer output, or conflicting logical destinations carried by two
-  navigation attributes on one element.
+- reject a logical `href` on any other element, a `<base href>` in a document
+  with an activatable logical link, a reserved marker supplied by consumer
+  output, or conflicting logical destinations carried by two navigation
+  attributes on one element.
 
 Before invoking a compatibility transformer, the builder records a multiset of
 complete logical-reference records: expected marker presence and value, the
@@ -68,11 +77,13 @@ requires the same multiset. Adding or removing a marker, preserving a marker
 while changing its portable destination, element kind, or namespace, changing
 a metadata-only reference into an activatable link, or moving logical identity
 between navigation attributes fails the build. Unrelated attributes remain
-consumer-owned. After every document has been transformed, the builder indexes
-anchors from the final documents and repeats cross-view fragment validation for
-every retained logical-reference record. A transformer that removes or renames
-an anchor in any destination viewport or scheme therefore fails the build even
-when the source link record itself is unchanged.
+consumer-owned. A transformer that adds `<base href>` to a document retaining
+an activatable record also fails the build. After every document has been
+transformed, the builder indexes anchors from the final documents and repeats
+cross-view fragment validation for every retained logical-reference record. A
+transformer that removes or renames an anchor in any destination viewport or
+scheme therefore fails the build even when the source link record itself is
+unchanged.
 
 The marker is inert metadata, not a second resource URL. HTML escaping must be
 deterministic, and link/resource validation continues to inspect the portable
@@ -121,9 +132,10 @@ consumer-authored unowned files, it removes `data-mokabook-link` and
 `data-mokabook-target` from the adapted copy and never promotes them. A missing
 or mismatched ownership header, malformed or manifest-invalid marker, or
 mismatched portable `href` on a trusted route yields HTTP 500 without serving
-that document and fails the preview build. Neither environment promotes an
-unmarked relative link or rewrites a live `href`, `target`, `formtarget`, or
-`base` target.
+that document and fails the preview build. A trusted document that carries an
+activatable marker and `<base href>` fails closed by the same rule, defending
+against post-build tampering. Neither environment promotes an unmarked relative
+link or rewrites a live `href`, `target`, `formtarget`, or `<base target>`.
 
 One pure target parser is shared by the adapter and parent client. It does not
 trim its input and returns exactly one typed state:
@@ -236,6 +248,7 @@ Coverage must prove:
 
 - portable output, eligible native-link markers, metadata-only
   `data-nav-href`, rejection of logical `href` on resource/non-link elements,
+  rejection of `<base href>` before and after compatibility transformation,
   dual navigation attributes, hashes, use-case ids, dark-to-light fallback,
   conflicts, and reserved-marker errors;
 - served and preview adaptation without mutating committed fragments, including
@@ -245,7 +258,8 @@ Coverage must prove:
   injection, plus enhanced static-preview current/swap-source injection,
   scheme-toggle retention, and first-step use-case scoping;
 - enhanced primary, keyboard, modified, non-self, Back, and Forward navigation
-  from mobile, desktop, flow, and legacy frames where supported;
+  from `MockLink`, raw HTML anchors and areas, SVG anchors, mobile and desktop
+  frames, flow steps, and generated legacy embeds;
 - safe failed/disabled-enhancement degradation without outer navigation;
 - active-row selection, ancestor disclosure, conditional filter/search reset,
   nearest scrolling, responsive drawer closure, and preserved shell state; and

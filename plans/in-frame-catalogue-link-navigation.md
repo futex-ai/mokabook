@@ -31,6 +31,24 @@ filter-visible, and scrolled into view.
 runner through `tsx`, Playwright Chromium, the synthetic basic consumer, and
 Rust `xtask` repository gates.
 
+## Mainline Preservation Record
+
+The latest plan-maintenance audit ran on 2026-08-25 before implementation:
+
+- source tip before the ninth review corrections:
+  `54b231e538f01d2f510f26e4accd2b81643587f5`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty; and
+- deletion audit against `origin/main`: empty.
+
+Milestone 1 must append a fresh dated pre-implementation audit rather than
+overwriting this evidence. Milestone 4 must append the final pre-commit audit,
+including each explicitly approved removal and its cleanup or an explicit
+`no deletions` result.
+
 ## Constraints And Design Decisions
 
 - Promote only complete logical `mock:<id>[#fragment]` links. Never infer
@@ -54,6 +72,10 @@ Rust `xtask` repository gates.
 - Promote only an HTML `<a>`/`<area>` or SVG `<a>` whose `href` carried the
   logical destination. Reject logical `href` on every other element and require
   `data-nav-href` for metadata-only intent.
+- Reject `<base href>` whenever a document contains an activatable logical
+  link, both before and after compatibility transformation. Continue to support
+  `<base target>` and permit a base URL in documents whose only logical
+  references are metadata-only.
 - Default and `_self` catalogue links navigate the outer shell. Downloads stay
   portable/native; the adapter retains explicit non-self requests only in
   trusted inert metadata without changing live targets. Parent code handles
@@ -233,14 +255,35 @@ At completion, parent enhancement is limited to each shell-owned frame's
 immediate document, and the protocol index's delivery-status rule holds for
 every protocol touched by this plan.
 
+## Milestone 0I: Base URL, Surface, Preview, And Audit Corrections
+
+Summary: close the base-URL authentication, supported-link coverage,
+static-preview ownership, and durable-audit gaps found by the ninth review
+pass.
+
+- [x] Reject `<base href>` before and after compatibility transformation when a
+      document contains an activatable logical link, and fail closed if a
+      trusted adapted document violates the same invariant.
+- [x] Require positive client and browser coverage for `MockLink`, raw HTML
+      anchors and areas, SVG anchors, and generated legacy embeds.
+- [x] Separate static-preview fragment-query enhancement into its own tagged UI
+      milestone instead of claiming it complete with served query transport.
+- [x] Commit immutable mainline-audit evidence in this plan and require future
+      implementation/final audits to append their results here.
+
+At completion, portable-link authentication accounts for the effective base
+URL, all supported link owners have positive coverage, milestone completion is
+honest, and preservation evidence survives outside ignored scratch files.
+
 ## Milestone 1: Portable Logical-Link Identity
 
 Summary: generated documents retain stable catalogue intent alongside their
 existing portable artifact links; Browse behavior is not activated yet.
 
 - [ ] Before implementation, fetch `origin/main`, capture the unrevised source
-      tip and its merge base, audit `base..origin/main` additions, and record
-      the immutable values under `.context/` for the final preservation audit.
+      tip, fetched main tip, and merge base, audit `base..origin/main`
+      additions, and append the dated immutable values and result to the
+      Mainline Preservation Record above.
 - [ ] Add failure-first public API cases to `tests/package.test.ts`, the
       NodeNext fixture, and the packed ESM smoke fixture for
       `mockLink(id, fragment?)` and `<MockLink to={id} fragment={fragment}>`.
@@ -252,7 +295,10 @@ existing portable artifact links; Browse behavior is not activated yet.
       anchors/areas and SVG anchors; prove a `data-nav-href`-only span remains
       marker-free; reject logical `href` values on an arbitrary HTML element,
       HTML `link`, and SVG `use`/`image`; prove `data-nav-href` on those owners
-      remains marker-free; and cover both attribute orders on one eligible link.
+      remains marker-free; reject `<base href>` in generated and legacy
+      documents with an activatable logical link while allowing `<base target>`
+      and metadata-only logical references; and cover both attribute orders on
+      one eligible link.
 - [ ] Cover screen and use-case ids, optional target fragments, mobile and
       desktop output, dark-to-dark resolution, dark-to-light fallback, exact
       fragment grammar, and the requirement that a target anchor exists in
@@ -261,13 +307,15 @@ existing portable artifact links; Browse behavior is not activated yet.
       different logical destinations on one element, unknown ids, collection
       ids, malformed fragments, and compatibility transformers that add/remove
       a marker, change element namespace/native-link class, or change/remove
-      only its portable `href`/`data-nav-href`. Include a transformer that
-      removes the requested anchor only from a non-current destination view.
+      only its portable `href`/`data-nav-href`. Include transformers that add
+      `<base href>` to an activatable document and remove the requested anchor
+      only from a non-current destination view.
 - [ ] Extend `src/build/mock_links.ts` with typed logical-target parsing and
       deterministic marker insertion for eligible HTML `a`/`area` and SVG `a`
       hrefs while preserving the byte-targeted rewrite and portable relative
       URL for every supported navigation attribute. Reject a logical `href` on
-      any other element before it can be rewritten as a resource URL.
+      any other element before it can be rewritten as a resource URL, and
+      reject an activatable logical link in a document with `<base href>`.
 - [ ] Extend `src/authoring/links.tsx` with an optional bare `fragment` argument
       on `mockLink` and prop on `MockLink`; validate it with the shared logical
       fragment grammar before composing `mock:<id>#<fragment>`, and never pass
@@ -301,10 +349,11 @@ At completion, every explicit catalogue link has portable fallback bytes and
 stable, validated identity, while all existing Browse and Review pages remain
 functional.
 
-## Milestone 2: Safe Browse Authentication And Query Transport
+## Milestone 2: Safe Browse Authentication And Served Query Transport
 
 Summary: served and preview copies authenticate generated link intent without
-granting consumer frames native outer-navigation capability.
+granting consumer frames native outer-navigation capability, while served
+Browse carries logical fragments through request-visible queries.
 
 - [ ] Add failure-first adapter/server tests for preserved portable hrefs and
       live targets, derived explicit/inherited-base target metadata and explicit
@@ -312,7 +361,9 @@ granting consumer frames native outer-navigation capability.
       metadata-only references, manifest-owned fragments/legacy pages, and
       unowned HTML with reserved-looking metadata; fail closed when a trusted
       route loses or swaps its generated source header, or its marker and
-      expected portable href diverge.
+      expected portable href diverge. Also fail closed when a trusted document
+      with an activatable marker contains `<base href>`, including a
+      post-build-tampering fixture.
 - [ ] Add security cases for unmarked external, raw relative, same-document,
       `_top`, `_parent`, HTML/SVG anchors and areas, `<base target>`, forms and
       `formtarget`, plus marked targets, mixed-case keywords, matching names,
@@ -360,12 +411,39 @@ granting consumer frames native outer-navigation capability.
       waits for the child restart on the same resolved port, verifies the
       latest manifest and adapted HTML, and proves shutdown leaves no orphan
       child.
-- [ ] Run focused server/preview tests, `npm run preview:build`, watched and
-      no-watch Serve smoke tests, and a query-preserving
-      `wrangler pages dev` preview smoke test without orphan processes.
+- [ ] Run focused server/preview tests, `npm run preview:build`, and watched and
+      no-watch Serve smoke tests without orphan processes.
 
-At completion, adapter trust and fragment transport are functional, degraded
-links remain safely frame-owned, and the UI milestone can inspect trusted frames.
+At completion, adapter trust and served fragment transport are functional,
+degraded links remain safely frame-owned, and the UI milestones can inspect
+trusted frames. Static-preview query application remains owned by Milestone 2A.
+
+## Milestone 2A: Static Preview Fragment Enhancement
+
+Tags: ui
+
+Summary: the deployed static preview progressively applies one validated
+logical-fragment query to every applicable current and light/dark frame source,
+without adding a request handler.
+
+- [ ] Add failure-first pure client tests for absent, single, and duplicate
+      `fragment` query values; decode-once and grammar validation; encoded
+      current/light/dark source updates; first-use-case-step scope; and invalid
+      or selector-shaped values failing closed without DOM mutation.
+- [ ] Implement the static-preview query applier in a focused parent-client
+      helper/module. Update `src`, `data-fragment-light`, and
+      `data-fragment-dark` wherever present, and add no backend or static
+      request-time rendering path.
+- [ ] Add direct-URL Playwright coverage for a valid fragment on a screen and
+      use-case preview page, light/dark toggling, every current and swap source,
+      first-step-only scoping, invalid and duplicate query no-ops, and the
+      JavaScript-disabled static fallback remaining at the top of the frame.
+- [ ] Run the focused client/preview tests, `npm run preview:build`, and a
+      query-preserving `wrangler pages dev` smoke test without orphan processes.
+
+At completion, direct static-preview URLs apply and retain validated logical
+fragments progressively, while JavaScript-disabled preview remains a safe
+portable fallback.
 
 ## Milestone 3: Outer Navigation And Active-Tree UI
 
@@ -376,11 +454,12 @@ outer route transition, and every outer route change reveals its catalogue row.
 No backend response transformation is included in this milestone.
 
 - [ ] Add failure-first client tests in new focused test files for frame-link
-      candidate classification, event-source validation, primary and keyboard
-      activation, Meta/Ctrl/Shift-modified click, middle-button `auxclick`
-      (`button === 1`), explicit target handling, latest-wins delegation,
-      inaccessible/cross-origin frame fallback, and unchanged unmarked,
-      download, external, hash, and metadata-only behavior.
+      candidate classification across `MockLink`, raw HTML anchor and area,
+      SVG anchor, and generated legacy output; event-source validation; primary
+      and keyboard activation; Meta/Ctrl/Shift-modified click; middle-button
+      `auxclick` (`button === 1`); explicit target handling; latest-wins
+      delegation; inaccessible/cross-origin frame fallback; and unchanged
+      unmarked, download, external, hash, and metadata-only behavior.
 - [ ] Extract navigation candidate/sequencing code from
       `src/client/browse.ts` into a focused module before adding frame behavior;
       keep imports and public internal test seams typed.
@@ -394,10 +473,6 @@ No backend response transformation is included in this milestone.
       package-owned parent code read only adapter-produced target metadata,
       route `_top`/`_parent` through the outer transition, and open new or named
       contexts with `noopener`; never delegate popup creation to frame content.
-- [ ] In a static preview, read and grammar-check the reserved `fragment` query
-      in parent code; apply encoded hashes to `src`, `data-fragment-light`, and
-      `data-fragment-dark` on every current screen frame or only the first
-      use-case step; and fail closed without interpreting it as a selector.
 - [ ] Extract catalogue-tree client state from the near-limit
       `browse_state.ts` into a focused navigation module. Replace
       `markActiveRow` with one `selectAndRevealRoute` operation used by primary
@@ -410,10 +485,11 @@ No backend response transformation is included in this milestone.
       focus/status behavior, and frame-collapse behavior across the new route
       transition.
 - [ ] Add Playwright regressions in a new
-      `tests/browser/browse_navigation.spec.ts` that click `MockLink` from the
-      mobile frame, desktop frame, and use-case step; assert the outer URL,
-      heading, breadcrumbs, active row, disclosed ancestors, Back/Forward, and
-      preserved shell state.
+      `tests/browser/browse_navigation.spec.ts` that positively activate
+      `MockLink`, a raw HTML anchor, raw HTML area, SVG anchor, and generated
+      legacy-page link across the mobile frame, desktop frame, and use-case
+      step. Assert the outer URL, heading, breadcrumbs, active row, disclosed
+      ancestors, Back/Forward, and preserved shell state.
 - [ ] In the same spec, prove modified and explicit non-self activation opens
       the canonical Mokabook page through parent enhancement. Cover Meta/Ctrl/
       Shift-click, middle-button `auxclick`, `_blank`, and a named target, while
@@ -423,9 +499,10 @@ No backend response transformation is included in this milestone.
       inside `srcdoc`, same-origin local, generated-fragment, and cross-origin
       nested frames. Assert the outer URL, active row, and shell view do not
       change and no new context opens.
-- [ ] Add static-preview coverage that follows a fragment link, toggles light
-      and dark, and proves the current source and every swap source retain the
-      encoded hash; cover first-step-only use-case behavior.
+- [ ] Add static-preview integration coverage that follows a fragment link into
+      the Milestone 2A query applier, toggles light and dark, and proves the
+      current source and every swap source retain the encoded hash; cover
+      first-step-only use-case behavior.
 - [ ] Cover an active destination initially hidden by search and Changed,
       plus a destination already visible so unrelated user state is retained.
 - [ ] Run the focused client tests and navigation Playwright spec after
@@ -467,7 +544,10 @@ post-push review findings.
       from the captured pre-integration source tip. Inspect
       `git diff --name-status origin/main`, the deletion-only diff, the full
       patch, and `git diff --check`; stop for approval before any unplanned
-      mainline removal.
+      mainline removal. Append the dated source/main tips, merge base,
+      `base..origin/main` additions result, and either `no deletions` or every
+      explicitly user-approved removal plus its cleanup to the Mainline
+      Preservation Record above.
 - [ ] Update this plan's TODOs and move its link from Active to Completed in
       `plans/README.md` only after every implementation and verification item
       is complete.

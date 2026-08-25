@@ -16,8 +16,8 @@ may exist only under examples and test fixtures.
 
 This document describes implemented pre-release package and authoring behavior
 except for the optional fragment helper API, element-aware logical-link rules,
-and Browse marker behavior explicitly identified below as target behavior. Those
-additions are tracked by the active
+the portable `<base href>` restriction, and Browse marker behavior explicitly
+identified below as target behavior. Those additions are tracked by the active
 [in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
 
 ## Package Identity
@@ -267,7 +267,10 @@ a bare HTML id without `#` or percent-encoding. That API, marker, and the rule
 reserving logical `href` for native HTML/SVG links are target behavior and are
 not enforced until the active implementation plan completes. Under the target
 contract, metadata-only references use `data-nav-href`, and resource elements
-must keep real resource URLs.
+must keep real resource URLs. A document with an activatable logical `href`
+must not contain `<base href>`; the target builder rejects that combination
+before and after compatibility transformation while continuing to support
+`<base target>`.
 Local resource URLs in HTML source attributes, `srcset`, inline/style-block
 CSS, and transitively referenced HTML/CSS must likewise resolve to public
 static files beneath `mockupsDir` that remain after the pending build. An owned
@@ -314,11 +317,11 @@ function returns, including when one element has both attributes. The current
 rewrite is attribute-based and applies to legacy output. The approved
 navigation extension will make the rewrite element-aware: logical `href` will
 be valid only on native HTML/SVG links, every other owner will fail the build,
-and final compatibility output will be checked through that fail-closed
-contract. The package declares `react` and `react-dom` `>=19.0.0` as peers and
-does not ship a private runtime. The builder resolves both peers and their
-subpaths from consumer config, then bundles every React-bearing input in one
-internal graph.
+documents with an activatable logical link will reject `<base href>`, and final
+compatibility output will be checked through that fail-closed contract. The
+package declares `react` and `react-dom` `>=19.0.0` as peers and does not ship a
+private runtime. The builder resolves both peers and their subpaths from
+consumer config, then bundles every React-bearing input in one internal graph.
 
 The builder invokes the renderer once for every effective viewport and color
 scheme. Light stays the default and canonical render. The consumer renderer

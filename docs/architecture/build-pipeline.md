@@ -95,13 +95,14 @@ retain the stable id and optional fragment in a reserved `data-mokabook-link`
 marker when an HTML `<a>`/`<area>` or SVG `<a>` has a logical `href`. A
 `data-nav-href`-only reference remains validated portable metadata and does not
 gain Browse interaction. The extension will reject logical `href` on every
-non-link or resource element, validate matching destinations when both
+non-link or resource element and reject `<base href>` in a document containing
+an activatable logical link. It will validate matching destinations when both
 navigation attributes coexist, reject consumer-authored markers, verify
 fragment anchors across every target view, and bind expected marker presence,
 element namespace/native-link class, and each logical attribute to the exact
 portable value produced for that element. Until the active plan completes,
-generated documents do not contain this marker or enforce that owner-based
-`href` restriction.
+generated documents do not contain this marker or enforce those owner and base
+URL restrictions.
 
 During a staged migration only, a configured consumer transformer receives the
 complete document, current route/viewport/color scheme, repository-relative
@@ -115,8 +116,9 @@ be permitted to add, remove, or alter an expected marker, change a
 metadata-only reference into an activatable link, change the owning element's
 namespace or native-link class, change the set of navigation attributes that
 carried its logical destination, or alter those attributes' resolved portable
-values. After transforming the complete output set, the build will re-index
-anchors from those final documents and repeat every logical fragment's
+values. Adding `<base href>` to a document that retains an activatable record
+will also fail. After transforming the complete output set, the build will
+re-index anchors from those final documents and repeat every logical fragment's
 cross-view check. This keeps Browse, standalone, and Review navigation aligned.
 
 React Native Web style collection is not a second conversion stage. If an app

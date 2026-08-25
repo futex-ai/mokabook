@@ -127,11 +127,13 @@ screen fragments and generated legacy pages whose ownership header names that
 entry's manifest `sourcePath`. Unowned HTML loses package-reserved metadata in
 the adapted copy; a trusted route with missing/mismatched ownership, invalid
 markers, or a marker/portable-href mismatch fails closed. One strict typed
-target parser supplies inert metadata only to trusted parent enhancement;
+target parser supplies inert metadata only to trusted parent enhancement. A
+trusted document that carries an activatable marker and `<base href>` also
+fails closed, including if post-build tampering introduced the base URL;
 consumer-authored `href`, `<base target>`, `target`, and `formtarget` values
-remain portable and sandbox-confined. Consumer scripts, forms, popups,
-downloads, and top navigation remain forbidden. Review panes retain their
-stricter sandbox and byte-unmodified documents.
+otherwise remain portable and sandbox-confined. Consumer scripts, forms,
+popups, downloads, and top navigation remain forbidden. Review panes retain
+their stricter sandbox and byte-unmodified documents.
 
 A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
 light-only catalogue offers none. One switch renders in the top bar and one in
