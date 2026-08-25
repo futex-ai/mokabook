@@ -7,8 +7,8 @@ import { expect, test } from "@playwright/test";
 import {
   createFixture,
   removeFixture,
+  reparentedEntrySource,
   repositoryRoot,
-  validEntrySource,
   type TestFixture,
 } from "../helpers/fixture.js";
 
@@ -19,7 +19,7 @@ let child: ChildProcess;
 let url: string;
 
 test.beforeAll(async () => {
-  fixture = await createFixture(validEntrySource(), {
+  fixture = await createFixture(reparentedEntrySource("screens"), {
     extraConfig: `colorSchemes: ["light", "dark"],`,
   });
   child = spawn(
@@ -89,7 +89,7 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   await page.click("[data-mokabook-menu]");
   await fs.promises.writeFile(
     fixture.entryPath,
-    validEntrySource({
+    reparentedEntrySource("screens", {
       body: '<a href="mock:details">Details</a><p data-watch-version="2">Reloaded</p>',
     }),
   );
@@ -135,6 +135,79 @@ test("watched serve rebuilds and reloads after an authored change", async ({
     "data-drawer",
     "open",
   );
+});
+
+test("watched reparenting moves navigation and crumbs together", async ({
+  page,
+}) => {
+  await page.goto(`${url}/view/screens/home.html`);
+  await expect(page.locator(".mbk-crumbs")).toHaveText("Fixture›Screens");
+  const screens = page.locator(
+    'details[data-nav-collection="collection:screens"]',
+  );
+  const archive = page.locator(
+    'details[data-nav-collection="collection:archive"]',
+  );
+  await screens.locator("summary").click();
+  await expect(screens).not.toHaveAttribute("open", "");
+
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    reparentedEntrySource("archive", { firstTitle: "Home Reloaded" }),
+  );
+
+  await expect(page.locator(".mbk-crumbs")).toHaveText("Fixture›Archive", {
+    timeout: 45_000,
+  });
+  await expect(
+    archive.locator('a[data-route="screens/home.html"]'),
+  ).toHaveAttribute("aria-current", "page");
+  await expect(
+    screens.locator('a[data-route="screens/home.html"]'),
+  ).toHaveCount(0);
+  await expect(screens).not.toHaveAttribute("open", "");
+});
+
+test("duplicate titles retain independent disclosure across reloads", async ({
+  page,
+}) => {
+  await page.goto(`${url}/view/screens/home.html`);
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    reparentedEntrySource("archive", {
+      archiveTitle: "Same title",
+      firstTitle: "Home Reloaded",
+      screensTitle: "Same title",
+    }),
+  );
+  const screens = page.locator(
+    'details[data-nav-collection="collection:screens"]',
+  );
+  const archive = page.locator(
+    'details[data-nav-collection="collection:archive"]',
+  );
+  await expect(screens.locator("summary .mbk-nav-label")).toHaveText(
+    "Same title",
+    { timeout: 45_000 },
+  );
+  await expect(archive.locator("summary .mbk-nav-label")).toHaveText(
+    "Same title",
+  );
+
+  await screens.locator("summary").click();
+  await expect(screens).toHaveAttribute("open", "");
+  await screens.locator("summary").click();
+  await expect(screens).not.toHaveAttribute("open", "");
+  await expect(archive).toHaveAttribute("open", "");
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("mokabook:nav-disclosure:v2")),
+    )
+    .toContain("collection:screens");
+
+  await page.reload();
+  await expect(screens).not.toHaveAttribute("open", "");
+  await expect(archive).toHaveAttribute("open", "");
 });
 
 test("watched serve shuts down cleanly", async () => {

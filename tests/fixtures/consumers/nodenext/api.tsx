@@ -59,7 +59,6 @@ const definitions: RegistryDefinition[] = [
     desktop: node,
     id: "typed-screen",
     mobile: <ReviewIgnore id="typed-ignore">{node}</ReviewIgnore>,
-    navPath: [],
     relatedDocs: [],
     route: "typed/screen.html",
     title: "Typed screen",

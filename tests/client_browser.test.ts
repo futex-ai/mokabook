@@ -75,7 +75,7 @@ test("browser adapter consumes stale-URL recovery without applying it", () => {
 function browseState(): BrowseRecoveryState {
   return {
     changedOnly: false,
-    closedCollectionIds: ["fixture"],
+    closedCollectionIds: ["collection:fixture"],
     colorScheme: "dark",
     detailsOpen: true,
     drawerOpen: true,

@@ -58,7 +58,7 @@ export async function startNavigationFixture(): Promise<NavigationFixture> {
 function navigationSource(): string {
   return `import { defineCollection, defineScreen, defineUseCase, MockLink } from "mokabook";
 import React from "react";
-const metadata = { dependencies: [], navPath: ["Catalogue"], relatedDocs: [] };
+const metadata = { dependencies: [], relatedDocs: [] };
 function Home({ compact }) {
   const nestedGenerated = compact ? "./details.mobile.html" : "./details.desktop.html";
   return <main id="home">
@@ -90,7 +90,7 @@ export const mockups = [
   defineCollection({ ...metadata, childIds: ["home", "details", "tour"], description: "Nested", id: "nested", title: "Nested" }),
   defineCollection({ ...metadata, childIds: ["extra"], description: "Other", id: "other", title: "Other" }),
   defineScreen({ ...metadata, description: "Home", desktop: <Home compact={false} />, id: "home", mobile: <Home compact />, route: "screens/home.html", title: "Home", useCaseIds: ["tour"] }),
-  defineScreen({ ...metadata, description: "Details", desktop: <Details />, id: "details", mobile: <Details />, navPath: ["Catalogue", "Nested"], route: "screens/details.html", title: "Details", useCaseIds: ["tour"] }),
+  defineScreen({ ...metadata, description: "Details", desktop: <Details />, id: "details", mobile: <Details />, route: "screens/details.html", title: "Details", useCaseIds: ["tour"] }),
   defineScreen({ ...metadata, description: "Extra", desktop: <main>Extra</main>, id: "extra", mobile: <main>Extra</main>, route: "screens/extra.html", title: "Extra", useCaseIds: [] }),
   defineUseCase({ ...metadata, description: "Tour", id: "tour", route: "user-flows/tour.html", steps: [{ screenId: "home" }, { screenId: "details" }], title: "Tour" })
 ];

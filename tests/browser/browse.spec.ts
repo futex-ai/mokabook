@@ -29,7 +29,9 @@ function hasMarker(page: Page): Promise<boolean> {
  * same gesture a reader uses.
  */
 async function openScreensGroup(page: Page): Promise<void> {
-  const group = page.locator('details[data-nav-collection="/Example/Screens"]');
+  const group = page.locator(
+    'details[data-nav-collection="collection:example-screens"]',
+  );
   if ((await group.getAttribute("open")) === null) {
     await group.locator("summary").click();
   }
@@ -129,6 +131,23 @@ test("progressive navigation swaps the main view without reloads", async ({
   expect(await hasMarker(page)).toBe(true);
 });
 
+test("breadcrumbs track hierarchy through progressive history", async ({
+  page,
+}) => {
+  await page.goto("/view/screens/welcome.html");
+  const crumbs = page.getByLabel("Catalogue location");
+  await expect(crumbs).toHaveText("Example›Screens");
+  await expect(crumbs.locator("a")).toHaveCount(0);
+
+  await page.click(tourRow);
+  await expect(page.locator("#mb-main h2")).toHaveText("Example tour");
+  await expect(crumbs).toHaveText("Example");
+  await page.goBack();
+  await expect(crumbs).toHaveText("Example›Screens");
+  await page.goForward();
+  await expect(crumbs).toHaveText("Example");
+});
+
 test("Back and Forward restore each route's stage scroll", async ({ page }) => {
   await page.setViewportSize({ height: 500, width: 1_280 });
   await page.goto("/view/screens/welcome.html");
@@ -208,7 +227,8 @@ test("searching opens groups and clearing restores their disclosure", async ({
   page,
 }) => {
   await page.goto("/");
-  const screensGroup = 'details[data-nav-collection="/Example/Screens"]';
+  const screensGroup =
+    'details[data-nav-collection="collection:example-screens"]';
   await page.evaluate((selector) => {
     document.querySelector<HTMLDetailsElement>(selector)!.open = false;
   }, screensGroup);
@@ -588,7 +608,9 @@ test("the shell works without JavaScript", async ({ baseURL, browser }) => {
   const page = await context.newPage();
   await page.goto("/");
   await page
-    .locator('details[data-nav-collection="/Example/Screens"] summary')
+    .locator(
+      'details[data-nav-collection="collection:example-screens"] summary',
+    )
     .click();
   await page.click(welcomeRow);
   await expect(page).toHaveURL(/welcome\.html$/);

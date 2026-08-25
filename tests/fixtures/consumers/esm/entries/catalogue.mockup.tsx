@@ -10,11 +10,17 @@ import {
 
 const metadata = {
   dependencies: ["notes.md"],
-  navPath: ["Packed ESM"],
   relatedDocs: ["notes.md"],
 };
 
 export const mockups = [
+  defineCollection({
+    ...metadata,
+    childIds: ["packed-pages", "packed-tour"],
+    description: "Packed ESM consumer catalogue.",
+    id: "packed-esm",
+    title: "Packed ESM",
+  }),
   defineCollection({
     ...metadata,
     childIds: ["packed-home", "packed-detail"],

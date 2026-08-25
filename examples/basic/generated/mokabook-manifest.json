@@ -185,6 +185,44 @@
     },
     {
       "dependencies": [
+        "examples/basic/entries/design/design.mockup.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "Neutral design references for the Mokabook package.",
+      "id": "design-root",
+      "kind": "collection",
+      "navPath": [],
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/design.mockup.tsx",
+      "title": "Design",
+      "childIds": [
+        "design"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/catalogue.mockup.tsx",
+        "examples/basic/generated/styles.css"
+      ],
+      "description": "Synthetic examples for the reusable Mokabook package.",
+      "id": "example",
+      "kind": "collection",
+      "navPath": [],
+      "relatedDocs": [
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/catalogue.mockup.tsx",
+      "title": "Example",
+      "childIds": [
+        "example-screens",
+        "example-tour"
+      ]
+    },
+    {
+      "dependencies": [
         "examples/basic/entries/catalogue.mockup.tsx",
         "examples/basic/generated/styles.css"
       ],
@@ -736,7 +774,8 @@
       "id": "example-details",
       "kind": "screen",
       "navPath": [
-        "Example"
+        "Example",
+        "Screens"
       ],
       "relatedDocs": [
         "examples/basic/notes.md"
@@ -770,7 +809,8 @@
       "id": "example-welcome",
       "kind": "screen",
       "navPath": [
-        "Example"
+        "Example",
+        "Screens"
       ],
       "relatedDocs": [
         "examples/basic/notes.md"

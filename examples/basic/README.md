@@ -6,6 +6,14 @@ collections, one use case, id-addressed links, a Firna renderer adapter, local
 stylesheets, light and dark product fragments, and a safe Review-ignore region.
 It contains no Accounting or Juno product screen.
 
+The entry definitions use collection membership as their only navigation
+hierarchy. The real `Example` collection owns `Screens` and the example tour;
+the real `Design` collection owns the `Mokabook design` tree. Those parent
+collections preserve the intended visible groups and automatically produce
+the same breadcrumb ancestry. Consumer code does not provide `navPath`; when
+migrating an older catalogue, keep a former synthetic group only by adding an
+equivalent parent collection.
+
 The Welcome screen uses
 `<MockLink to="example-details" fragment="details">` to prove that generated
 HTML keeps a portable relative artifact link while served and deployed Browse

@@ -13,6 +13,7 @@ export function loadBrowserClientModules(): ReadonlyMap<string, Buffer> {
     "browse.js",
     "browse_details.js",
     "browse_frames.js",
+    "browse_navigation.js",
     "browse_navigation_state.js",
     "frame_navigation.js",
     "browse_state.js",

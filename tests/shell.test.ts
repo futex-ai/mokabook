@@ -16,6 +16,17 @@ import { buildNavTree } from "../dist/server/shell/nav_tree.js";
 const manifest: ManifestV3 = {
   entries: [
     {
+      childIds: ["screens", "tour"],
+      dependencies: [],
+      description: "Example catalogue",
+      id: "example",
+      kind: "collection",
+      navPath: [],
+      relatedDocs: [],
+      sourcePath: "entries/fixture.mockup.tsx",
+      title: "Example",
+    },
+    {
       childIds: ["welcome", "details"],
       dependencies: [],
       description: "Screens",
@@ -156,7 +167,8 @@ function assertLightSrcMatchesAttribute(html: string, frames: number): void {
 }
 
 test("nav tree nests collections and folds legacy directories", () => {
-  const tree = buildNavTree(manifest.entries, manifest.legacyPages);
+  const catalogue = createCatalogue(manifest);
+  const tree = buildNavTree(catalogue.hierarchy, manifest.legacyPages);
   const labels = tree.map((node) => node.label);
   assert.deepEqual(labels, ["Example", "Legacy"]);
   const example = tree[0];
@@ -206,7 +218,7 @@ test("catalogue nav marks active, changed, and iconed rows", () => {
     /aria-current="page"[^>]*data-route="screens\/welcome\.html"/,
   );
   assert.match(html, /data-changed="true"/);
-  assert.match(html, /data-nav-collection="\/Example\/Screens"/);
+  assert.match(html, /data-nav-collection="collection:screens"/);
   assert.match(html, /class="mbk-nav-ico folder"><svg/);
   assert.match(html, /class="mbk-nav-count">2</);
   assert.match(html, /Collapse all/);

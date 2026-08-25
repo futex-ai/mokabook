@@ -1,6 +1,7 @@
 /** Progressive Browse shell enhancement served at /__mokabook/client/browse.js. */
 
 import { createBrowserDetailsPreference } from "./browse_details.js";
+import { createBrowserNavPreference } from "./browse_navigation.js";
 import {
   collapseFrame,
   expandedFrame,
@@ -50,7 +51,9 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
   if (!shell || !main) return;
   applyPreviewFragmentQuery(doc, win.location.search);
   const detailsPreference = createBrowserDetailsPreference(win);
+  const navPreference = createBrowserNavPreference(win);
   detailsPreference.apply(doc);
+  navPreference.apply(doc);
   if (win.history.scrollRestoration) win.history.scrollRestoration = "manual";
   const sequencer = new NavigationSequencer();
   let restoringHistory = false;
@@ -74,6 +77,17 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
       });
     },
     { capture: true, passive: true },
+  );
+  doc.addEventListener(
+    "toggle",
+    (event) => {
+      const group =
+        event.target instanceof HTMLDetailsElement ? event.target : undefined;
+      if (!group?.hasAttribute("data-nav-collection")) return;
+      if (group.dataset["filterOpen"] !== undefined) return;
+      navPreference.remember(doc);
+    },
+    true,
   );
   const announce = (message: string): void => {
     const status = doc.getElementById("mb-status");

@@ -87,7 +87,7 @@ export function renderShellPage(
           </a>
           <TopBar catalogue={catalogue} context={context} />
           <div className="mbk-body">
-            <CatalogueNav context={context} manifest={catalogue.manifest} />
+            <CatalogueNav catalogue={catalogue} context={context} />
             <ShellMain catalogue={catalogue} context={context} view={view} />
           </div>
           <p

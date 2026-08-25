@@ -11,7 +11,6 @@ export interface EntryInput {
   dependencies: readonly string[];
   description: string;
   id: string;
-  navPath: readonly string[];
   rationale?: string;
   relatedDocs: readonly string[];
   title: string;
@@ -108,15 +107,14 @@ export interface RootCollectionInput extends NestedInherited {
   description: string;
   id: string;
   rationale?: string;
+  title: string;
 }
 
 /** Root position and children for a nested definition tree. */
 export interface RootInput {
   children: readonly NestedChild[];
   collection?: RootCollectionInput;
-  navPath: readonly string[];
   path: string;
-  title: string;
 }
 
 /** Marker returned by `screen` for nested composition. */

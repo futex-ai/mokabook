@@ -1,4 +1,4 @@
-import { collection, defineRoot } from "mokabook";
+import { collection, defineCollection, defineRoot } from "mokabook";
 
 import { browseSchemeScreens } from "./browse_scheme_screens.js";
 import { browseStateScreens, browseViewScreens } from "./browse_screens.js";
@@ -10,8 +10,7 @@ const DESIGN_DEPENDENCIES = [
   "examples/basic/generated/design.css",
 ];
 
-/** The neutral Mokabook Browse and Review design catalogue. */
-export const mockups = defineRoot({
+const designMockups = defineRoot({
   children: [
     collection({
       children: [
@@ -79,8 +78,20 @@ export const mockups = defineRoot({
       "docs/protocol/mokabook-shell-design.md",
       "examples/basic/notes.md",
     ],
+    title: "Mokabook design",
   },
-  navPath: ["Design"],
   path: "design",
-  title: "Mokabook design",
 });
+
+/** The neutral Mokabook Browse and Review design catalogue. */
+export const mockups = [
+  defineCollection({
+    childIds: ["design"],
+    dependencies: DESIGN_DEPENDENCIES,
+    description: "Neutral design references for the Mokabook package.",
+    id: "design-root",
+    relatedDocs: ["docs/protocol/mokabook-shell-design.md"],
+    title: "Design",
+  }),
+  ...designMockups,
+];

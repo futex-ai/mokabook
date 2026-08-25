@@ -73,23 +73,16 @@ export function defineRoot(input: RootInput): RegistryDefinition[] {
         dependencies: input.collection.dependencies ?? [],
         description: input.collection.description,
         id: input.collection.id,
-        navPath: [...input.navPath],
         ...(input.collection.rationale
           ? { rationale: input.collection.rationale }
           : {}),
         relatedDocs: input.collection.relatedDocs ?? [],
-        title: input.title,
+        title: input.collection.title,
       }),
     );
   }
   for (const child of input.children) {
-    flattenChild(
-      child,
-      input.path,
-      [...input.navPath, input.title],
-      inherited,
-      definitions,
-    );
+    flattenChild(child, input.path, inherited, definitions);
   }
   return definitions;
 }
@@ -97,7 +90,6 @@ export function defineRoot(input: RootInput): RegistryDefinition[] {
 function flattenChild(
   node: NestedChild,
   directory: string,
-  navPath: readonly string[],
   inherited: NestedInherited,
   definitions: RegistryDefinition[],
 ): void {
@@ -111,7 +103,6 @@ function flattenChild(
       desktop: node.desktop,
       id: node.id,
       mobile: node.mobile,
-      navPath: [...navPath],
       ...(node.rationale ? { rationale: node.rationale } : {}),
       relatedDocs: effective.relatedDocs ?? [],
       route: `${directory}/${node.slug}.html`,
@@ -127,7 +118,6 @@ function flattenChild(
     dependencies: effective.dependencies ?? [],
     description: node.description,
     id: node.id,
-    navPath: [...navPath],
     ...(node.rationale ? { rationale: node.rationale } : {}),
     relatedDocs: effective.relatedDocs ?? [],
     title: node.title,
@@ -135,13 +125,7 @@ function flattenChild(
   if (node.definedIn) definition.definedIn = node.definedIn;
   definitions.push(definition);
   for (const child of node.children) {
-    flattenChild(
-      child,
-      `${directory}/${node.segment}`,
-      [...navPath, node.title],
-      effective,
-      definitions,
-    );
+    flattenChild(child, `${directory}/${node.segment}`, effective, definitions);
   }
 }
 

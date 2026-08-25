@@ -155,6 +155,29 @@ test("restored dark stays light when a rebuild drops dark fragments", () => {
   assert.equal(embed.srcWrites, 0);
 });
 
+test("recovery matches stable keys and ignores old label paths", () => {
+  const shell = new FakeElement("div", { "data-mokabook-shell": "" });
+  const alpha = new FakeElement("details", {
+    "data-nav-collection": "collection:alpha",
+  });
+  const beta = new FakeElement("details", {
+    "data-nav-collection": "collection:beta",
+  });
+  const fake = new FakeDocument([shell, alpha, beta]);
+  const doc = asDocument(fake);
+
+  restoreBrowseState(doc, fakeWindow(), {
+    ...snapshot(),
+    closedCollectionIds: ["/Same title", "collection:alpha"],
+  });
+
+  assert.equal(alpha.open, false);
+  assert.equal(beta.open, true);
+  assert.deepEqual(captureBrowseState(doc, fakeWindow())?.closedCollectionIds, [
+    "collection:alpha",
+  ]);
+});
+
 /** One dark-capable screen view: two switch instances and three frames. */
 interface SchemeView {
   desktopFrame: FakeElement;
@@ -216,7 +239,7 @@ function fragmentFrame(light: string, dark?: string): FakeElement {
 function snapshot(): BrowseRecoveryState {
   return {
     changedOnly: true,
-    closedCollectionIds: ["fixture"],
+    closedCollectionIds: ["collection:fixture"],
     colorScheme: "dark",
     detailsOpen: true,
     drawerOpen: false,
@@ -240,6 +263,8 @@ const SELECTOR = /^(?<tag>[a-z]*)\[(?<name>[a-z-]+)(?:="(?<value>[^"]*)")?\]$/;
 /** A flat stand-in for the served shell markup the Browse client mutates. */
 class FakeElement {
   readonly dataset: Record<string, string> = {};
+  hidden = false;
+  open = true;
   srcWrites = 0;
   readonly #attributes = new Map<string, string>();
 

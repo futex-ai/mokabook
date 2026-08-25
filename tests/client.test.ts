@@ -83,7 +83,7 @@ test("Browse recovery parsing rejects malformed session state", () => {
 function browseState(): BrowseRecoveryState {
   return {
     changedOnly: true,
-    closedCollectionIds: ["fixture"],
+    closedCollectionIds: ["collection:fixture"],
     colorScheme: "dark",
     detailsOpen: true,
     drawerOpen: true,

@@ -181,7 +181,6 @@ export const mockups = [defineScreen({
   desktop: <main>Home</main>,
   id: "home",
   mobile: <main>Home</main>,
-  navPath: ["Fixture"],
   relatedDocs: [],
   route: "screens/home.html",
   title: "Home"

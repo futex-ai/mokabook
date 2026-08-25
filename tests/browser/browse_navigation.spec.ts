@@ -25,7 +25,7 @@ test("MockLink navigation reveals the destination and preserves shell state", as
   if ((await detailsPanel.getAttribute("open")) !== null) {
     await detailsPanel.locator("summary").click();
   }
-  const other = page.locator('details[data-nav-collection$="/Other"]');
+  const other = page.locator('details[data-nav-collection="collection:other"]');
   await other.evaluate((element: HTMLDetailsElement) => {
     element.open = true;
   });

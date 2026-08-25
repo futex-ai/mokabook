@@ -1,10 +1,8 @@
-// Builds the Mokabook navigation tree. Structured entries nest through their
-// collection membership (`childIds`), root entries group under their first
-// navPath label, and legacy pages fall back to their route directories with
-// title-cased labels. A hub page whose basename matches a sibling directory is
-// folded into that group as its "Overview" leaf so the tree never shows the
-// same label twice at one level.
+// Builds one navigation model from structured collection membership and a
+// separate route-derived legacy tree. Stable ids own disclosure identity;
+// display labels never act as structural keys.
 
+import type { CatalogueHierarchy } from "../../registry/hierarchy.js";
 import type {
   ManifestEntry,
   ManifestLegacyPage,
@@ -12,15 +10,18 @@ import type {
 
 /** A leaf navigation row linking to one viewable route. */
 export interface NavLeafNode {
+  entryId?: string;
   entryKind: "screen" | "use-case" | "page";
+  key: string;
   kind: "leaf";
   label: string;
   route: string;
 }
 
-/** A collapsible navigation group with no navigation destination of its own. */
+/** A collapsible navigation group with no destination of its own. */
 export interface NavGroupNode {
   children: NavNode[];
+  key: string;
   kind: "group";
   label: string;
 }
@@ -28,92 +29,142 @@ export interface NavGroupNode {
 /** One rendered navigation node. */
 export type NavNode = NavGroupNode | NavLeafNode;
 
-/**
- * One breadcrumb segment. `route` is set when that level has a viewable page
- * of its own — a legacy "Overview" leaf — so the breadcrumb can link up the
- * hierarchy. Structured collection levels resolve to `undefined` and render as
- * text.
- */
+/** One breadcrumb segment, optionally linked to a real legacy Overview page. */
 export interface CrumbLink {
   label: string;
   route?: string;
 }
 
-interface MutableGroup {
-  groups: Map<string, MutableGroup>;
+interface MutableLegacyGroup {
+  groups: Map<string, MutableLegacyGroup>;
+  key: string;
   label: string;
   leaves: NavLeafNode[];
 }
 
-/** Build the nested navigation tree over structured entries and legacy pages. */
-export function buildNavTree(
-  entries: readonly ManifestEntry[],
-  legacyPages: readonly ManifestLegacyPage[],
-): NavNode[] {
-  const byId = new Map(entries.map((entry) => [entry.id, entry]));
-  const claimed = new Set<string>();
-  for (const entry of entries) {
-    if (entry.kind !== "collection") continue;
-    for (const childId of entry.childIds) claimed.add(childId);
-  }
-  const root = newGroup("");
-  for (const entry of entries) {
-    if (claimed.has(entry.id)) continue;
-    const group = groupAt(root, [entry.navPath[0] ?? "Catalogue"]);
-    placeEntry(group, entry, byId);
-  }
-  placeLegacyPages(root, legacyPages);
-  return finalizeChildren(root);
+interface LegacyPageDetails {
+  groupSegments: readonly string[];
+  label: string;
 }
 
-/** Place one unclaimed entry (and, for collections, its subtree) in a group. */
-function placeEntry(
-  group: MutableGroup,
+/** Build the nested navigation tree over structured entries and legacy pages. */
+export function buildNavTree(
+  hierarchy: CatalogueHierarchy<ManifestEntry>,
+  legacyPages: readonly ManifestLegacyPage[],
+): NavNode[] {
+  const structured = hierarchy.roots.map((entry) =>
+    structuredNode(entry, hierarchy, new Set()),
+  );
+  return sortNodes([...structured, ...legacyTree(legacyPages)]);
+}
+
+/** Derive text-only crumbs for a structured entry from its real ancestors. */
+export function structuredCrumbTrail(
+  hierarchy: CatalogueHierarchy<ManifestEntry>,
+  entryId: string,
+): CrumbLink[] {
+  return (hierarchy.ancestorsById.get(entryId) ?? []).map((ancestor) => ({
+    label: ancestor.title,
+  }));
+}
+
+/** Derive legacy directory crumbs and link only real Overview pages. */
+export function legacyCrumbTrail(
+  pages: readonly ManifestLegacyPage[],
+  activeRoute: string,
+): CrumbLink[] {
+  const directories = legacyDirectories(pages);
+  const details = legacyPageDetails(activeRoute, directories);
+  const overviewRoutes = new Map<string, string>();
+  for (const page of pages) {
+    const pageDetails = legacyPageDetails(page.route, directories);
+    if (pageDetails.label === "Overview") {
+      overviewRoutes.set(pageDetails.groupSegments.join("/"), page.route);
+    }
+  }
+  return details.groupSegments.map((segment, index) => {
+    const route = overviewRoutes.get(
+      details.groupSegments.slice(0, index + 1).join("/"),
+    );
+    const label = titleCase(segment);
+    return route && route !== activeRoute ? { label, route } : { label };
+  });
+}
+
+/** Derive the displayed title for one legacy page route. */
+export function legacyPageTitle(
+  pages: readonly ManifestLegacyPage[],
+  route: string,
+): string {
+  return legacyPageDetails(route, legacyDirectories(pages)).label;
+}
+
+function structuredNode(
   entry: ManifestEntry,
-  byId: ReadonlyMap<string, ManifestEntry>,
-): void {
+  hierarchy: CatalogueHierarchy<ManifestEntry>,
+  ancestors: ReadonlySet<string>,
+): NavNode {
   if (entry.kind !== "collection") {
-    group.leaves.push({
+    return {
+      entryId: entry.id,
       entryKind: entry.kind,
+      key: `entry:${entry.id}`,
       kind: "leaf",
       label: entry.title,
       route: entry.route,
-    });
-    return;
+    };
   }
-  const nested = groupAt(group, [entry.title]);
-  for (const childId of entry.childIds) {
-    const child = byId.get(childId);
-    if (child) placeEntry(nested, child, byId);
-  }
+  const visited = new Set(ancestors);
+  visited.add(entry.id);
+  const children = (hierarchy.childrenById.get(entry.id) ?? [])
+    .filter((child) => !visited.has(child.id))
+    .map((child) => structuredNode(child, hierarchy, visited));
+  return {
+    children: sortNodes(children),
+    key: `collection:${entry.id}`,
+    kind: "group",
+    label: entry.title,
+  };
 }
 
-function placeLegacyPages(
-  root: MutableGroup,
-  legacyPages: readonly ManifestLegacyPage[],
-): void {
-  const directories = new Set(
-    legacyPages.flatMap((page) => parentPaths(page.route)),
-  );
-  for (const page of legacyPages) {
-    const segments = page.route.split("/");
-    const file = segments.pop() ?? page.route;
-    const stem = file.replace(/\.html$/, "");
-    const isOverview =
-      stem === "index" || directories.has([...segments, stem].join("/"));
-    const groupSegments =
-      isOverview && stem !== "index" ? [...segments, stem] : segments;
-    const label =
-      isOverview && groupSegments.length > 0
-        ? "Overview"
-        : titleCase(stem === "index" ? "home" : stem);
-    groupAt(root, groupSegments.map(titleCase)).leaves.push({
+function legacyTree(pages: readonly ManifestLegacyPage[]): NavNode[] {
+  const root = newLegacyGroup("", "legacy:");
+  const directories = legacyDirectories(pages);
+  for (const page of pages) {
+    const details = legacyPageDetails(page.route, directories);
+    legacyGroupAt(root, details.groupSegments).leaves.push({
       entryKind: "page",
+      key: `page:${page.route}`,
       kind: "leaf",
-      label,
+      label: details.label,
       route: page.route,
     });
   }
+  return finalizeLegacyChildren(root);
+}
+
+function legacyDirectories(
+  pages: readonly ManifestLegacyPage[],
+): ReadonlySet<string> {
+  return new Set(pages.flatMap((page) => parentPaths(page.route)));
+}
+
+function legacyPageDetails(
+  route: string,
+  directories: ReadonlySet<string>,
+): LegacyPageDetails {
+  const segments = route.split("/");
+  const file = segments.pop() ?? route;
+  const stem = file.replace(/\.html$/, "");
+  const matchingDirectory = [...segments, stem].join("/");
+  const isOverview = stem === "index" || directories.has(matchingDirectory);
+  const groupSegments =
+    isOverview && stem !== "index" ? [...segments, stem] : segments;
+  const label =
+    isOverview && groupSegments.length > 0
+      ? "Overview"
+      : titleCase(stem === "index" ? "home" : stem);
+  return { groupSegments, label };
 }
 
 function parentPaths(route: string): string[] {
@@ -121,107 +172,56 @@ function parentPaths(route: string): string[] {
   return segments.map((_, index) => segments.slice(0, index + 1).join("/"));
 }
 
-function newGroup(label: string): MutableGroup {
-  return { groups: new Map(), label, leaves: [] };
+function newLegacyGroup(label: string, key: string): MutableLegacyGroup {
+  return { groups: new Map(), key, label, leaves: [] };
 }
 
-function groupAt(root: MutableGroup, labels: readonly string[]): MutableGroup {
+function legacyGroupAt(
+  root: MutableLegacyGroup,
+  segments: readonly string[],
+): MutableLegacyGroup {
   let current = root;
-  for (const label of labels) {
-    const key = label.toLowerCase();
-    let next = current.groups.get(key);
+  const path: string[] = [];
+  for (const segment of segments) {
+    path.push(segment);
+    let next = current.groups.get(segment);
     if (!next) {
-      next = newGroup(label);
-      current.groups.set(key, next);
-    } else if (
-      next.label !== label &&
-      next.label === titleCase(next.label.toLowerCase())
-    ) {
-      next.label = label;
+      next = newLegacyGroup(titleCase(segment), `legacy:${path.join("/")}`);
+      current.groups.set(segment, next);
     }
     current = next;
   }
   return current;
 }
 
-function finalizeChildren(group: MutableGroup): NavNode[] {
-  const overviewLeaves = group.leaves.filter(
-    (leaf) => leaf.label === "Overview",
+function finalizeLegacyChildren(group: MutableLegacyGroup): NavNode[] {
+  const children: NavNode[] = [...group.groups.values()].map((child) => ({
+    children: finalizeLegacyChildren(child),
+    key: child.key,
+    kind: "group",
+    label: child.label,
+  }));
+  return sortNodes([...children, ...group.leaves]);
+}
+
+function sortNodes(nodes: readonly NavNode[]): NavNode[] {
+  return [...nodes].sort(
+    (left, right) =>
+      nodeRank(left) - nodeRank(right) ||
+      left.label.localeCompare(right.label) ||
+      left.key.localeCompare(right.key),
   );
-  const normalLeaves = group.leaves
-    .filter((leaf) => leaf.label !== "Overview")
-    .sort((left, right) => left.label.localeCompare(right.label));
-  const childGroups = [...group.groups.values()]
-    .sort((left, right) => left.label.localeCompare(right.label))
-    .map((child): NavGroupNode => ({
-      children: finalizeChildren(child),
-      kind: "group",
-      label: child.label,
-    }));
-  return [...overviewLeaves, ...childGroups, ...normalLeaves];
 }
 
-/**
- * Resolve each level of a breadcrumb label path to the route a reader lands on
- * when clicking it. Reusing the navigation tree keeps the destinations honest:
- * a segment resolves to a route only when its group carries a legacy
- * "Overview" leaf, never a structural collection or invented target.
- */
-export function resolveCrumbTrail(
-  nodes: readonly NavNode[],
-  labels: readonly string[],
-): CrumbLink[] {
-  const routes = crumbRouteMap(nodes);
-  return labels.map((label, index) => {
-    const route = routes.get(crumbKey(labels.slice(0, index + 1)));
-    return route === undefined ? { label } : { label, route };
-  });
-}
-
-const crumbRouteCache = new WeakMap<readonly NavNode[], Map<string, string>>();
-
-/** Map each group's label path to the route its breadcrumb should link to. */
-function crumbRouteMap(nodes: readonly NavNode[]): Map<string, string> {
-  const cached = crumbRouteCache.get(nodes);
-  if (cached) {
-    return cached;
+function nodeRank(node: NavNode): number {
+  if (
+    node.kind === "leaf" &&
+    node.entryKind === "page" &&
+    node.label === "Overview"
+  ) {
+    return 0;
   }
-  const routes = new Map<string, string>();
-  collectCrumbRoutes(nodes, [], routes);
-  crumbRouteCache.set(nodes, routes);
-  return routes;
-}
-
-function collectCrumbRoutes(
-  nodes: readonly NavNode[],
-  prefix: readonly string[],
-  routes: Map<string, string>,
-): void {
-  for (const node of nodes) {
-    if (node.kind !== "group") {
-      continue;
-    }
-    const trail = [...prefix, node.label];
-    const key = crumbKey(trail);
-    const route = overviewRoute(node);
-    if (route !== undefined && !routes.has(key)) {
-      routes.set(key, route);
-    }
-    collectCrumbRoutes(node.children, trail, routes);
-  }
-}
-
-/** A legacy directory group's own page is its "Overview" leaf, when present. */
-function overviewRoute(group: NavGroupNode): string | undefined {
-  const overview = group.children.find(
-    (child): child is NavLeafNode =>
-      child.kind === "leaf" && child.label === "Overview",
-  );
-  return overview?.route;
-}
-
-function crumbKey(labels: readonly string[]): string {
-  return labels.map((label) => label.toLowerCase()).join("/");
+  return node.kind === "group" ? 1 : 2;
 }
 
 /** Turn a kebab/underscore route segment into a display label. */

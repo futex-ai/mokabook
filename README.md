@@ -40,14 +40,21 @@ export default defineConfig({
 An entry module ends in `.mockup.ts` or `.mockup.tsx` and exports `mockups`:
 
 ```tsx
-import { defineScreen, MockLink } from "mokabook";
+import { defineCollection, defineScreen, MockLink } from "mokabook";
 
 export const mockups = [
+  defineCollection({
+    id: "account",
+    title: "Account",
+    description: "Account product screens.",
+    childIds: ["account-home"],
+    relatedDocs: ["docs/account.md"],
+    dependencies: ["src/account"],
+  }),
   defineScreen({
     id: "account-home",
     title: "Account home",
     description: "The account landing screen.",
-    navPath: ["Account"],
     route: "account/home.html",
     mobile: (
       <MockLink fragment="summary" to="account-detail">
@@ -68,7 +75,9 @@ export const mockups = [
 
 `mobile` and `desktop` accept any React node; real screens usually wrap their
 content in a `<main>` landmark because each fragment is generated as its own
-standalone page.
+standalone page. Collection membership is also the navigation hierarchy:
+Mokabook infers the screen's `Account` breadcrumb from `childIds`, so authors
+do not maintain a separate breadcrumb path.
 
 `MockLink` accepts a lowercase kebab-case entry id and an optional bare HTML id
 through its separate `fragment` prop. The equivalent string helper is
@@ -141,7 +150,8 @@ stays stable.
 `mokabook-manifest.json` under `mockupsDir`. `check` calculates those bytes
 without writing and reports missing, stale, or orphan generated files. Browse
 serves the package-owned Mokabook shell — catalogue navigation with
-folder/screen/flow icons and an All/Changed filter, linked breadcrumbs with
+folder/screen/flow icons and an All/Changed filter, hierarchy-derived
+breadcrumbs with
 hash-prefixed copyable ID chips, realistic browser chrome with an
 expand-to-overlay toggle, phone chrome whose screen reserves a clock, signal,
 Wi-Fi, and battery status band above the mobile fragment, header viewport

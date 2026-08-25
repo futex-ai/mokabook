@@ -43,7 +43,9 @@ fails for:
 
 - invalid config or registry metadata;
 - duplicate ids/routes or route/fragment/legacy collisions;
-- missing collection children, use-case screens, or reciprocal memberships;
+- missing collection children, duplicate child references, children claimed by
+  multiple collections, collection cycles, missing use-case screens, or
+  reciprocal memberships;
 - unresolved `mock:` links, raw document links, local HTML/CSS resources, or
   anchors;
 - missing stylesheets and declared dependencies;
@@ -86,6 +88,14 @@ outside configured public roots. The shared relative-path decoder rejects
 malformed encoding, absolute and empty paths, dot segments, and forward or
 backslash separators introduced by decoding one original URL segment before
 any filesystem resolution.
+
+Browse caches the validated collection forest from manifest `childIds`.
+Structured roots, nested navigation, and breadcrumbs all consume that one
+model; serialized `navPath` labels from current or historical manifests never
+override it. An unclaimed screen or use case renders directly at the catalogue
+root with no invented `Catalogue` group or breadcrumb. Legacy pages remain a
+separate route-directory tree because they have no structured collection
+entries.
 
 ## Browse Shell
 
@@ -147,6 +157,13 @@ otherwise remain portable and sandbox-confined. Consumer scripts, forms,
 popups, downloads, and top navigation remain forbidden. Review panes retain
 their stricter sandbox and byte-unmodified documents.
 
+Every structured disclosure group uses `collection:<id>` as its rendered and
+persisted identity. Legacy directory groups use
+`legacy:<route-directory>`. Labels remain presentation only, so collections or
+legacy directories with the same displayed title retain independent state.
+Recovery data containing the former label-path values does not match a current
+group and is ignored rather than risking application to the wrong collection.
+
 A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
 light-only catalogue offers none. One switch renders in the top bar and one in
 the screen head band, and the shell reveals whichever suits the width: the top
@@ -173,12 +190,12 @@ sandbox, fragment, and active-tree behavior is defined by the
 [catalogue navigation contract](./mokabook-navigation.md).
 Search, disclosure, filters, and catalogue scroll remain mounted; searching
 temporarily force-opens navigation groups and restores their prior disclosure
-when cleared. The details inspector is open until the user changes it, then its
-disclosure is retained across in-shell navigation, durable navigation, and
-browser reloads for that origin. Unavailable or malformed browser storage
-leaves the server-rendered default intact; the latest choice still survives
-in-shell navigation when writes fail. The browser-frame expand toggle overlays
-one frame at a time and collapses on Escape, on an outside click, and on route
+when cleared. Navigation groups and the details inspector retain explicit
+disclosure choices across in-shell navigation, durable navigation, and browser
+reloads for that origin. Unavailable or malformed browser storage leaves the
+server-rendered default intact; the latest choice still survives in-shell
+navigation when writes fail. The browser-frame expand toggle overlays one
+frame at a time and collapses on Escape, on an outside click, and on route
 navigation. Clicking a screen or use-case ID chip labelled `#<id>` copies the
 unprefixed ID without navigating. Clicking a frame address copies it to the
 clipboard.
@@ -265,6 +282,11 @@ responsive drawer, catalogue scroll, and per-region stage scroll once. Recovery
 is strictly parsed, applies only when its durable URL exactly matches the
 reloaded page, and is removed before application; a later manual refresh cannot
 resurrect stale state.
+
+When an authored rebuild reparents an entry, the new manifest relationships
+move its navigation row and ancestor crumbs in the same reload. Disclosure
+recovery still applies to every unchanged stable collection id; removed ids and
+obsolete label-path keys have no target and are ignored.
 
 When a successful rebuild leaves the manifest structure unchanged, or an
 explicit watch rule requests a reload, the parent keeps the ready child and

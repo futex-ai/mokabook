@@ -1,24 +1,21 @@
 import { MokabookError } from "../errors.js";
+import { analyzeHierarchy, type HierarchyEntry } from "./hierarchy.js";
+
+type ValidatedManifestEntry = Record<string, unknown> & HierarchyEntry;
 
 /** Validate manifest relationship targets and reciprocal memberships. */
 export function validateManifestRelationships(
   entries: readonly Record<string, unknown>[],
   byId: ReadonlyMap<string, Record<string, unknown>>,
 ): void {
-  for (const entry of entries) {
-    if (entry.kind === "collection") validateCollection(entry, byId);
-    else if (entry.kind === "screen") validateScreen(entry, byId);
-    else validateUseCase(entry, byId);
+  const hierarchyEntries = entries as readonly ValidatedManifestEntry[];
+  const hierarchyIssue = analyzeHierarchy(hierarchyEntries).issues[0];
+  if (hierarchyIssue) {
+    relationshipError(hierarchyIssue.entry, hierarchyIssue.message);
   }
-}
-
-function validateCollection(
-  entry: Record<string, unknown>,
-  byId: ReadonlyMap<string, Record<string, unknown>>,
-): void {
-  for (const childId of entry.childIds as string[]) {
-    if (!byId.has(childId))
-      relationshipError(entry, `unknown child ${childId}`);
+  for (const entry of entries) {
+    if (entry.kind === "screen") validateScreen(entry, byId);
+    else if (entry.kind === "use-case") validateUseCase(entry, byId);
   }
 }
 

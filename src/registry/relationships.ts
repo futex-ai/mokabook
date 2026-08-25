@@ -1,5 +1,6 @@
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
 import { problem } from "./entry_validation.js";
+import { analyzeHierarchy } from "./hierarchy.js";
 import type { RegistryViolation } from "./types.js";
 
 /** Validate collection and reciprocal use-case references. */
@@ -7,21 +8,14 @@ export function crossReferenceViolations(
   entries: readonly ResolvedRegistryEntry[],
 ): RegistryViolation[] {
   const byId = new Map(entries.map((entry) => [entry.id, entry]));
-  const violations: RegistryViolation[] = [];
+  const violations: RegistryViolation[] = analyzeHierarchy(entries).issues.map(
+    (issue) => problem(issue.entry, issue.code, issue.message),
+  );
   for (const entry of entries) {
-    if (entry.kind === "collection") {
-      if (!Array.isArray(entry.childIds)) continue;
-      for (const childId of entry.childIds) {
-        if (!byId.has(childId)) {
-          violations.push(
-            problem(entry, "missing-child", `unknown child id: ${childId}`),
-          );
-        }
-      }
-    } else if (entry.kind === "use-case") {
+    if (entry.kind === "use-case") {
       if (!Array.isArray(entry.steps)) continue;
       validateUseCase(entry, byId, violations);
-    } else {
+    } else if (entry.kind === "screen") {
       if (!Array.isArray(entry.useCaseIds)) continue;
       validateScreen(entry, byId, violations);
     }

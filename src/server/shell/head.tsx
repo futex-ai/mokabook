@@ -7,8 +7,12 @@ import type { ReactNode } from "react";
 
 import { encodeUrlPath } from "../../config/paths.js";
 import type { Catalogue } from "../catalogue.js";
-import { buildNavTree, resolveCrumbTrail, titleCase } from "./nav_tree.js";
-import type { CrumbLink, NavNode } from "./nav_tree.js";
+import {
+  legacyCrumbTrail,
+  legacyPageTitle,
+  structuredCrumbTrail,
+} from "./nav_tree.js";
+import type { CrumbLink } from "./nav_tree.js";
 import type { RouteTarget } from "./target.js";
 
 function Crumbs(props: { items: readonly CrumbLink[] }) {
@@ -127,52 +131,15 @@ export function targetHead(
   catalogue: Catalogue,
   target: RouteTarget,
 ): { crumbs: CrumbLink[]; id?: string; title: string } {
-  const tree = navTreeFor(catalogue);
   if (target.kind === "entry") {
     return {
-      crumbs: crumbsFor(tree, target.entry.navPath, target.entry.route),
+      crumbs: structuredCrumbTrail(catalogue.hierarchy, target.entry.id),
       id: target.entry.id,
       title: target.entry.title,
     };
   }
-  const segments = target.page.route.split("/");
-  const stem = (segments.pop() ?? "").replace(/\.html$/, "");
-  const labels = segments.map(titleCase);
-  const title =
-    stem === "index"
-      ? labels.length > 0
-        ? "Overview"
-        : "Home"
-      : titleCase(stem);
-  return { crumbs: crumbsFor(tree, labels, target.page.route), title };
-}
-
-const navTreeCache = new WeakMap<Catalogue, NavNode[]>();
-
-function navTreeFor(catalogue: Catalogue): NavNode[] {
-  const cached = navTreeCache.get(catalogue);
-  if (cached) {
-    return cached;
-  }
-  const tree = buildNavTree(
-    catalogue.manifest.entries,
-    catalogue.manifest.legacyPages,
-  );
-  navTreeCache.set(catalogue, tree);
-  return tree;
-}
-
-/**
- * Resolve the trail and drop the link on any crumb that resolves to the page
- * being viewed — a legacy directory's Overview crumb would otherwise point at
- * itself when that Overview page is the current target.
- */
-function crumbsFor(
-  tree: readonly NavNode[],
-  labels: readonly string[],
-  activeRoute: string,
-): CrumbLink[] {
-  return resolveCrumbTrail(tree, labels).map((crumb) =>
-    crumb.route === activeRoute ? { label: crumb.label } : crumb,
-  );
+  return {
+    crumbs: legacyCrumbTrail(catalogue.manifest.legacyPages, target.page.route),
+    title: legacyPageTitle(catalogue.manifest.legacyPages, target.page.route),
+  };
 }

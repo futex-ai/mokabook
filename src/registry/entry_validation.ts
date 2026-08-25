@@ -50,13 +50,6 @@ export function validateEntry(
       ),
     );
   }
-  validateTextList(
-    entry,
-    "navPath",
-    entry.navPath,
-    entry.kind === "collection",
-    violations,
-  );
   validatePaths(entry, "relatedDocs", entry.relatedDocs, config, violations);
   validatePaths(entry, "dependencies", entry.dependencies, config, violations);
   if (entry.rationale !== undefined && !nonEmpty(entry.rationale)) {
