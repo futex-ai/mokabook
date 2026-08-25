@@ -1,5 +1,7 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
+import { isNavDisclosureKey } from "./browse_navigation.js";
+
 /** Color scheme selection applied to fragment frames and device chrome. */
 export type BrowseColorScheme = "dark" | "light";
 
@@ -98,7 +100,7 @@ export function restoreBrowseState(
       changed === state.changedOnly ? "true" : "false",
     );
   }
-  const closed = new Set(state.closedCollectionIds);
+  const closed = new Set(state.closedCollectionIds.filter(isNavDisclosureKey));
   for (const collection of doc.querySelectorAll<HTMLDetailsElement>(
     "[data-nav-collection]",
   )) {

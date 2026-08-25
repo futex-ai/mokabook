@@ -12,7 +12,6 @@ import {
 
 const metadata = {
   dependencies: ["examples/basic/generated/styles.css"],
-  navPath: ["Example"],
   relatedDocs: ["examples/basic/notes.md"],
 };
 
@@ -72,6 +71,13 @@ function Details({ compact }: { compact: boolean }) {
 }
 
 export const mockups = [
+  defineCollection({
+    ...metadata,
+    childIds: ["example-screens", "example-tour"],
+    description: "Synthetic examples for the reusable Mokabook package.",
+    id: "example",
+    title: "Example",
+  }),
   defineCollection({
     ...metadata,
     childIds: ["example-welcome", "example-details"],

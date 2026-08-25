@@ -42,9 +42,7 @@ test("public helpers retain stable authoring semantics", () => {
         title: "Group",
       }),
     ],
-    navPath: ["Example"],
     path: "screens",
-    title: "Root",
   });
   assert.deepEqual(
     definitions.map((entry) => entry.id),
@@ -54,6 +52,34 @@ test("public helpers retain stable authoring semantics", () => {
     definitions[1]?.kind === "screen" ? definitions[1].route : "",
     "screens/group/screen.html",
   );
+  assert.equal(Object.hasOwn(definitions[1] ?? {}, "navPath"), false);
+
+  const rooted = defineRoot({
+    children: [
+      screen({
+        description: "Rooted screen",
+        desktop: "desktop",
+        id: "rooted-screen",
+        mobile: "mobile",
+        slug: "rooted",
+        title: "Rooted screen",
+      }),
+    ],
+    collection: {
+      description: "Visible root",
+      id: "visible-root",
+      title: "Visible root",
+    },
+    path: "screens",
+  });
+  assert.deepEqual(
+    rooted.map(({ id }) => id),
+    ["visible-root", "rooted-screen"],
+  );
+  assert.deepEqual(rooted[0]?.kind === "collection" ? rooted[0].childIds : [], [
+    "rooted-screen",
+  ]);
+  assert.equal(rooted[0]?.title, "Visible root");
 });
 
 test("CLI defaults to watched serve and rejects misplaced options", () => {

@@ -10,7 +10,7 @@
 // default; top-level groups start open so the catalogue is scannable.
 
 import { encodeUrlPath } from "../../config/paths.js";
-import type { ManifestV3 } from "../../registry/types.js";
+import type { Catalogue } from "../catalogue.js";
 import type { ShellContext } from "./context.js";
 import {
   FlowIcon,
@@ -75,7 +75,6 @@ function LeafRow(props: {
 function GroupRow(props: {
   context: ShellContext;
   depth: number;
-  navKey: string;
   node: NavGroupNode;
 }) {
   const node = props.node;
@@ -84,7 +83,7 @@ function GroupRow(props: {
   return (
     <details
       className="mbk-nav-group"
-      data-nav-collection={props.navKey}
+      data-nav-collection={node.key}
       open={open ? true : undefined}
     >
       <summary className="mbk-nav-row" style={navRowStyle(props.depth)}>
@@ -101,7 +100,6 @@ function GroupRow(props: {
         context={props.context}
         depth={props.depth + 1}
         nodes={node.children}
-        parentKey={props.navKey}
       />
     </details>
   );
@@ -111,26 +109,22 @@ function NavRows(props: {
   context: ShellContext;
   depth: number;
   nodes: readonly NavNode[];
-  parentKey: string;
 }) {
   return (
     <>
-      {props.nodes.map((node, index) => {
-        const segment = node.kind === "group" ? node.label : node.route;
-        const key = `${props.parentKey}/${segment}`;
+      {props.nodes.map((node) => {
         return node.kind === "group" ? (
           <GroupRow
             context={props.context}
             depth={props.depth}
-            key={`${node.label}-${index}`}
-            navKey={key}
+            key={node.key}
             node={node}
           />
         ) : (
           <LeafRow
             context={props.context}
             depth={props.depth}
-            key={`${node.label}-${index}`}
+            key={node.key}
             node={node}
           />
         );
@@ -174,12 +168,12 @@ function NavFilter(props: { context: ShellContext }) {
 
 /** The served catalogue navigation column. */
 export function CatalogueNav(props: {
+  catalogue: Catalogue;
   context: ShellContext;
-  manifest: ManifestV3;
 }) {
   const nodes = buildNavTree(
-    props.manifest.entries,
-    props.manifest.legacyPages,
+    props.catalogue.hierarchy,
+    props.catalogue.manifest.legacyPages,
   );
   return (
     <nav
@@ -200,7 +194,7 @@ export function CatalogueNav(props: {
       </div>
       <NavFilter context={props.context} />
       <div className="mbk-nav-scroll" data-mokabook-nav-scroll="">
-        <NavRows context={props.context} depth={0} nodes={nodes} parentKey="" />
+        <NavRows context={props.context} depth={0} nodes={nodes} />
       </div>
     </nav>
   );

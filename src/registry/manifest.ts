@@ -8,6 +8,7 @@ import type {
 } from "../authoring/types.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
+import { analyzeHierarchy } from "./hierarchy.js";
 import { validateManifest } from "./manifest_validation.js";
 import type { ManifestEntry, ManifestLegacyPage, ManifestV3 } from "./types.js";
 import { effectiveColorSchemes } from "./views.js";
@@ -34,8 +35,17 @@ export function createManifest(
   legacyPages: readonly ManifestLegacyPage[],
   catalogueSchemes: readonly ColorScheme[],
 ): ManifestV3 {
+  const hierarchy = analyzeHierarchy(entries).hierarchy;
   return {
-    entries: entries.map((entry) => toManifestEntry(entry, catalogueSchemes)),
+    entries: entries.map((entry) =>
+      toManifestEntry(
+        entry,
+        catalogueSchemes,
+        hierarchy.ancestorsById
+          .get(entry.id)
+          ?.map((ancestor) => ancestor.title) ?? [],
+      ),
+    ),
     generatedBy: "mokabook",
     legacyPages: [...legacyPages].sort((left, right) =>
       left.route.localeCompare(right.route),
@@ -97,6 +107,7 @@ export function parseManifest(value: unknown, allowV2 = false): ManifestV3 {
 function toManifestEntry(
   entry: ResolvedRegistryEntry,
   catalogueSchemes: readonly ColorScheme[],
+  navPath: readonly string[],
 ): ManifestEntry {
   const common = {
     dependencies: [
@@ -105,7 +116,7 @@ function toManifestEntry(
     description: entry.description,
     id: entry.id,
     kind: entry.kind,
-    navPath: [...entry.navPath],
+    navPath: [...navPath],
     ...(entry.rationale ? { rationale: entry.rationale } : {}),
     relatedDocs: [...entry.relatedDocs],
     sourcePath: entry.sourceRelativePath,

@@ -217,14 +217,61 @@ structural and owns child ids but no route. A use case owns ordered references
 to existing screens and never defines a screen inline. Ids are explicit,
 globally unique kebab-case values and remain stable across navigation changes.
 
-Each entry provides a title, description, navigation path, related docs, and
-dependency paths. A dependency may identify an existing repository file or
-directory; Browse and Review match the path itself and every descendant, while
-Review reports the concrete changed descendant as evidence. Screens and use
-cases provide a stable relative `.html` route; use cases live under
-`user-flows/`. Screens may provide an address-bar label and use-case
-membership. Nested definitions inherit declared metadata, but ids never derive
-from tree position.
+Each entry provides a title, description, related docs, and dependency paths.
+A dependency may identify an existing repository file or directory; Browse and
+Review match the path itself and every descendant, while Review reports the
+concrete changed descendant as evidence. Screens and use cases provide a
+stable relative `.html` route; use cases live under `user-flows/`. Screens may
+provide an address-bar label and use-case membership. Nested definitions
+inherit declared metadata, but ids never derive from tree position.
+
+Collection `childIds` are the only structured navigation hierarchy. Each child
+may have at most one collection parent. A collection cannot repeat one child,
+reference itself, participate in a longer collection cycle, or reference an
+unknown id. Entries that no collection claims are catalogue roots. Breadcrumbs
+are the root-to-parent sequence of ancestor collection titles; authors never
+provide a separate breadcrumb or navigation-label path.
+
+The common and nested-root input boundary is:
+
+```ts
+interface EntryInput {
+  dependencies: readonly string[];
+  description: string;
+  id: string;
+  rationale?: string;
+  relatedDocs: readonly string[];
+  title: string;
+}
+
+interface CollectionInput extends EntryInput {
+  childIds: readonly string[];
+}
+
+interface RootCollectionInput {
+  address?: string;
+  dependencies?: readonly string[];
+  description: string;
+  id: string;
+  rationale?: string;
+  relatedDocs?: readonly string[];
+  title: string;
+}
+
+interface RootInput {
+  children: readonly NestedChild[];
+  collection?: RootCollectionInput;
+  path: string;
+}
+```
+
+`defineRoot` always flattens nested children into ordinary definitions and
+preserves their real `childIds` relationships. With `collection` metadata it
+also emits that titled collection as the parent of every direct child. Without
+`collection`, its direct children remain catalogue roots. A migration that
+previously used a synthetic path label must add a real parent collection if
+that visible group and breadcrumb should remain; genuinely top-level entries
+stay unclaimed.
 
 `defineScreen` and nested `screen` inputs may declare `colorSchemes`. When
 omitted, a screen inherits the catalogue set; `colorSchemes: ["light"]` is the
@@ -431,6 +478,9 @@ type ManifestEntry =
 
 Entries sort by route then id; legacy pages, dependencies, and generated files
 sort lexically. Optional properties are omitted, not emitted as `null`.
+`navPath` is schema-v3 compatibility output derived from collection ancestry;
+it contains the ordered ancestor collection titles and is empty for catalogue
+roots. It is not an authoring input and it is not a second source of hierarchy.
 `darkFragments` is present exactly when the screen's effective schemes include
 dark. Its routes use the `.mobile.dark.html` and `.desktop.dark.html` names and
 participate in the same safe-route and collision validation as light fragments.
@@ -459,6 +509,11 @@ fails validation instead of falling back to potentially stale version 2 data.
 Every new build emits `mokabook-manifest.json` version 3. Compatibility code
 has explicit fixtures and a removal policy; it is not an undocumented
 fallback.
+
+Validated version 2 and version 3 manifests keep their serialized `navPath`
+values available to older comparison readers, but current Browse derives its
+structured tree and breadcrumbs from collection relationships. A historical
+label array therefore cannot override ancestry or block cross-version Review.
 
 ## Non-Goals
 

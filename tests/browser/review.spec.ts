@@ -35,9 +35,9 @@ function darkEntrySource(
   const secondTitle = JSON.stringify(options.secondTitle ?? "Details");
   return `import { defineCollection, defineScreen, defineUseCase } from "mokabook";
 import React from "react";
-const metadata = { dependencies: ["notes.md"], navPath: ["Fixture"], relatedDocs: ["notes.md"] };
+const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"] };
 export const mockups = [
-  defineCollection({ ...metadata, childIds: ["home", "details"], description: "Fixture collection", id: "fixture", title: "Fixture" }),
+  defineCollection({ ...metadata, childIds: ["home", "details", "tour"], description: "Fixture collection", id: "fixture", title: "Fixture" }),
   defineScreen({ ...metadata, description: "Home screen", desktop: <main id="home">Home</main>, id: "home", mobile: <main id="home-mobile">Home</main>, route: "screens/home.html", title: ${firstTitle}, useCaseIds: ["tour"] }),
   defineScreen({ ...metadata, colorSchemes: ["light"], description: "Detail screen", desktop: <main id="details">Detail</main>, id: "details", mobile: <main id="details-mobile">Detail</main>, route: "screens/details.html", title: ${secondTitle}, useCaseIds: ["tour"] }),
   defineUseCase({ ...metadata, description: "Fixture journey", id: "tour", route: "user-flows/tour.html", steps: [{ screenId: "home" }, { screenId: "details" }], title: "Tour" })

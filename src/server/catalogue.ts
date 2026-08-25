@@ -3,6 +3,10 @@ import type {
   ManifestLegacyPage,
   ManifestV3,
 } from "../registry/types.js";
+import {
+  analyzeHierarchy,
+  type CatalogueHierarchy,
+} from "../registry/hierarchy.js";
 
 /** Validated lookup model used by server routes. */
 export interface Catalogue {
@@ -10,6 +14,7 @@ export interface Catalogue {
   byRoute: ReadonlyMap<string, ManifestEntry | ManifestLegacyPage>;
   /** Whether any screen in the catalogue was rendered in the dark scheme. */
   hasDarkFragments: boolean;
+  hierarchy: CatalogueHierarchy<ManifestEntry>;
   manifest: ManifestV3;
 }
 
@@ -24,5 +29,6 @@ export function createCatalogue(manifest: ManifestV3): Catalogue {
   const hasDarkFragments = manifest.entries.some(
     (entry) => entry.kind === "screen" && entry.darkFragments !== undefined,
   );
-  return { byId, byRoute, hasDarkFragments, manifest };
+  const hierarchy = analyzeHierarchy(manifest.entries).hierarchy;
+  return { byId, byRoute, hasDarkFragments, hierarchy, manifest };
 }

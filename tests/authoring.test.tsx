@@ -58,9 +58,7 @@ test("nested screens retain colorSchemes through root flattening", () => {
         title: "Nested screen",
       }),
     ],
-    navPath: ["Fixture"],
     path: "screens",
-    title: "Nested",
   });
 
   const definition = definitions[0];

@@ -201,7 +201,6 @@ export const mockups = [defineCollection({
   dependencies: [],
   description: "Malformed collection",
   id: "malformed",
-  navPath: [],
   relatedDocs: [],
   title: "Malformed"
 })];
@@ -211,6 +210,45 @@ export const mockups = [defineCollection({
   await assert.rejects(
     () => compileCatalogue(config),
     /childIds must be a non-empty array of strings/,
+  );
+});
+
+test("registry reports source-attributed collection forest violations", async (context) => {
+  const fixture = await createFixture(`
+import { defineCollection, defineScreen } from "mokabook";
+import React from "react";
+const metadata = { dependencies: [], relatedDocs: [] };
+export const mockups = [
+  defineCollection({ ...metadata, childIds: ["shared", "shared", "missing"], description: "First parent", id: "a-parent", title: "First" }),
+  defineCollection({ ...metadata, childIds: ["shared"], description: "Second parent", id: "z-parent", title: "Second" }),
+  defineCollection({ ...metadata, childIds: ["cycle-b"], description: "Cycle A", id: "cycle-a", title: "Cycle A" }),
+  defineCollection({ ...metadata, childIds: ["cycle-a"], description: "Cycle B", id: "cycle-b", title: "Cycle B" }),
+  defineCollection({ ...metadata, childIds: ["self"], description: "Self cycle", id: "self", title: "Self" }),
+  defineScreen({ ...metadata, description: "Shared screen", desktop: <main>Shared</main>, id: "shared", mobile: <main>Shared</main>, route: "shared.html", title: "Shared" })
+];
+`);
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+
+  await assert.rejects(
+    () => compileCatalogue(config),
+    (error: Error) => {
+      assert.match(
+        error.message,
+        /\[duplicate-child\] entries\/fixture\.mockup\.tsx \(a-parent\)/,
+      );
+      assert.match(
+        error.message,
+        /\[missing-child\].*unknown child id: missing/,
+      );
+      assert.match(error.message, /\[multiple-parents\].*\(z-parent\)/);
+      assert.match(
+        error.message,
+        /collection cycle: cycle-a -> cycle-b -> cycle-a/,
+      );
+      assert.match(error.message, /collection cycle: self -> self/);
+      return true;
+    },
   );
 });
 
@@ -384,7 +422,6 @@ export const mockups = [defineScreen({
   desktop: <main>Desktop</main>,
   id: "scheme-screen",
   mobile: <main>Mobile</main>,
-  navPath: ["Fixture"],
   relatedDocs: [],
   route: "screens/scheme.html",
   title: "Scheme screen"

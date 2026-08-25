@@ -54,13 +54,47 @@ export async function removeFixture(fixture: TestFixture): Promise<void> {
 export function validEntrySource(
   options: { body?: string; firstTitle?: string } = {},
 ): string {
+  return fixtureEntrySource(
+    `defineCollection({ ...metadata, childIds: ["home", "details", "tour"], description: "Fixture collection", id: "fixture", title: "Fixture" })`,
+    options,
+  );
+}
+
+/** Valid watched fixture whose Home screen can move between two collections. */
+export function reparentedEntrySource(
+  homeParent: "archive" | "screens",
+  options: {
+    archiveTitle?: string;
+    body?: string;
+    firstTitle?: string;
+    screensTitle?: string;
+  } = {},
+): string {
+  const screenChildren =
+    homeParent === "screens" ? '["home", "details"]' : '["details"]';
+  const archiveChildren =
+    homeParent === "archive" ? '["tour", "home"]' : '["tour"]';
+  const screensTitle = JSON.stringify(options.screensTitle ?? "Screens");
+  const archiveTitle = JSON.stringify(options.archiveTitle ?? "Archive");
+  return fixtureEntrySource(
+    `defineCollection({ ...metadata, childIds: ["screens", "archive"], description: "Fixture root", id: "fixture", title: "Fixture" }),
+  defineCollection({ ...metadata, childIds: ${screenChildren}, description: "Fixture screens", id: "screens", title: ${screensTitle} }),
+  defineCollection({ ...metadata, childIds: ${archiveChildren}, description: "Fixture archive", id: "archive", title: ${archiveTitle} })`,
+    options,
+  );
+}
+
+function fixtureEntrySource(
+  collections: string,
+  options: { body?: string; firstTitle?: string },
+): string {
   const body = options.body ?? `<a href="mock:details">Details</a>`;
   const firstTitle = options.firstTitle ?? "Home";
   return `import { defineCollection, defineScreen, defineUseCase } from "mokabook";
 import React from "react";
-const metadata = { dependencies: ["notes.md"], navPath: ["Fixture"], relatedDocs: ["notes.md"] };
+const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"] };
 export const mockups = [
-  defineCollection({ ...metadata, childIds: ["home", "details"], description: "Fixture collection", id: "fixture", title: "Fixture" }),
+  ${collections},
   defineScreen({ ...metadata, description: "Home screen", desktop: <main id="home">${body}</main>, id: "home", mobile: <main id="home-mobile">${body}</main>, route: "screens/home.html", title: ${JSON.stringify(firstTitle)}, useCaseIds: ["tour"] }),
   defineScreen({ ...metadata, description: "Detail screen", desktop: <main id="details">Detail</main>, id: "details", mobile: <main id="details-mobile">Detail</main>, route: "screens/details.html", title: "Details", useCaseIds: ["tour"] }),
   defineUseCase({ ...metadata, description: "Fixture journey", id: "tour", route: "user-flows/tour.html", steps: [{ screenId: "home" }, { screenId: "details" }], title: "Tour" })

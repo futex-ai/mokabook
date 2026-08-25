@@ -14,7 +14,7 @@ test("definitions retain the module that invokes their helper", async (context) 
   await fs.promises.writeFile(
     path.join(fixture.entriesDir, "shared.ts"),
     `import { defineScreen } from "mokabook";
-const metadata = { dependencies: ["notes.md"], navPath: ["Fixture"], relatedDocs: ["notes.md"], useCaseIds: [] };
+const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"], useCaseIds: [] };
 export function makeShared(id: string, route: string, title: string) {
   return defineScreen({ ...metadata, description: title, desktop: title, id, mobile: title, route, title });
 }
@@ -35,7 +35,7 @@ export const mockups = [makeShared("shared-first", "screens/shared-first.html", 
     `import { defineScreen } from "mokabook";
 import { late } from "./late.js";
 import { makeShared } from "./shared.js";
-const metadata = { dependencies: ["notes.md"], navPath: ["Fixture"], relatedDocs: ["notes.md"], useCaseIds: [] };
+const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"], useCaseIds: [] };
 export const mockups = [
   defineScreen({ ...metadata, description: "Second", desktop: "Second", id: "second", mobile: "Second", route: "screens/second.html", title: "Second" }),
   makeShared("shared-second", "screens/shared-second.html", "Shared second"),
@@ -72,7 +72,7 @@ test("dark fragment changes attribute their screen", async (context) => {
 
 function screenSource(id: string, route: string, title: string): string {
   return `import { defineScreen } from "mokabook";
-const metadata = { dependencies: ["notes.md"], navPath: ["Fixture"], relatedDocs: ["notes.md"], useCaseIds: [] };
+const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"], useCaseIds: [] };
 export const ${id} = defineScreen({ ...metadata, description: ${JSON.stringify(title)}, desktop: ${JSON.stringify(title)}, id: ${JSON.stringify(id)}, mobile: ${JSON.stringify(title)}, route: ${JSON.stringify(route)}, title: ${JSON.stringify(title)} });
 `;
 }

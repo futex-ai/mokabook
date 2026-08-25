@@ -12,7 +12,7 @@ test("consumer module resolution supports package roots, aliases, and web condit
 import { defineScreen } from "mokabook";
 import React from "react";
 import { FixturePanel } from "fixture-ui";
-const metadata = { dependencies: [], navPath: ["Resolution"], relatedDocs: [], useCaseIds: [] };
+const metadata = { dependencies: [], relatedDocs: [], useCaseIds: [] };
 export const mockups = [defineScreen({
   ...metadata,
   description: "Consumer resolution fixture",

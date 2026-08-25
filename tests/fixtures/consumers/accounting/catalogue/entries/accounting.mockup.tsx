@@ -31,10 +31,16 @@ function Dashboard({ compact }: { compact: boolean }) {
 export const mockups = [
   defineCollection({
     ...common,
+    childIds: ["accounting-tour"],
+    description: "Synthetic Accounting user flows.",
+    id: "accounting-flows",
+    title: "Flows",
+  }),
+  defineCollection({
+    ...common,
     childIds: ["accounting-dashboard", "accounting-campaign"],
     description: "An Accounting-shaped nested catalogue.",
     id: "accounting-fixture",
-    navPath: ["Accounting fixture"],
     title: "Accounting fixture",
   }),
   defineScreen({
@@ -43,7 +49,6 @@ export const mockups = [
     desktop: <Dashboard compact={false} />,
     id: "accounting-dashboard",
     mobile: <Dashboard compact />,
-    navPath: ["Accounting fixture", "Application"],
     route: "app/dashboard.html",
     title: "Accounts overview",
     useCaseIds: ["accounting-tour"],
@@ -54,7 +59,6 @@ export const mockups = [
     desktop: <main data-campaign="desktop">Campaign desktop</main>,
     id: "accounting-campaign",
     mobile: <main data-campaign="mobile">Campaign mobile</main>,
-    navPath: ["Accounting fixture", "Marketing"],
     route: "marketing/campaign.html",
     title: "Campaign",
     useCaseIds: ["accounting-tour"],
@@ -63,7 +67,6 @@ export const mockups = [
     ...common,
     description: "A synthetic cross-style journey.",
     id: "accounting-tour",
-    navPath: ["Accounting fixture", "Flows"],
     route: "user-flows/accounting-tour.html",
     steps: [
       { screenId: "accounting-dashboard" },
