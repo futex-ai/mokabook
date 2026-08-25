@@ -120,10 +120,14 @@ Consumer fragments and legacy documents are sandboxed without script permission
 so they cannot alter the same-origin Browse shell. The planned navigation
 extension will permit package-owned same-origin inspection and outer navigation
 after explicit user activation. Before enabling that iframe-wide sandbox token,
-the served/preview adapter will neutralize every unmarked `_top`, `_parent`, and
-`<base target>` route, so only a validated marked link can use it. Consumer
-scripts, forms, popups, and automatic top navigation remain forbidden. Review
-panes retain their stricter sandbox and byte-unmodified documents.
+the served/preview adapter will neutralize every consumer-authored non-self and
+`<base target>` route, including targets on marked and download links, so a
+named target cannot select the outer context either. It will retain an eligible
+marked link's explicit target only as trusted inert metadata for parent
+enhancement; only a validated default/`_self` link can receive the
+package-owned live `_top` target. Consumer scripts, forms, popups, and automatic
+top navigation remain forbidden. Review panes retain their stricter sandbox and
+byte-unmodified documents.
 
 A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
 light-only catalogue offers none. One switch renders in the top bar and one in

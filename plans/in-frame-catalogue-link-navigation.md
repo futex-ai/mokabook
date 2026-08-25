@@ -14,16 +14,17 @@ output, sandboxing, and progressive navigation.
 
 **Architecture:** Preserve two representations of one logical link. Generated
 HTML keeps its viewport- and color-scheme-compatible relative artifact `href`
-for standalone and Review portability, plus a reserved marker containing the
-stable entry id and optional fragment. Browse adapts only the served/preview
-representation to `/id/<id>`, using a reserved `fragment` query when an anchor
-must survive a server request. The parent client recognizes marked links in
-same-origin, script-disabled frames, invokes the existing latest-wins route
-transition for current-context navigation, and exclusively handles validated
-new-context requests. Native user-activated top navigation remains the
-no-JavaScript and failed-enhancement fallback only for default and `_self`
-links. One client helper owns the invariant that the active navigation row is
-selected, disclosed, filter-visible, and scrolled into view.
+for standalone and Review portability. Eligible native hyperlinks also carry a
+reserved marker containing the stable entry id and optional fragment; a
+`data-nav-href`-only reference stays inert metadata. Browse adapts only the
+served/preview representation to `/id/<id>`, using a reserved `fragment` query
+when an anchor must survive a server request. The parent client recognizes
+marked links in same-origin, script-disabled frames, invokes the existing
+latest-wins route transition for current-context navigation, and exclusively
+handles validated new-context requests. Native user-activated top navigation
+remains the no-JavaScript and failed-enhancement fallback only for default and
+`_self` links. One client helper owns the invariant that the active navigation
+row is selected, disclosed, filter-visible, and scrolled into view.
 
 **Tech stack:** TypeScript ESM, React 19 static rendering, parse5, Node 22 test
 runner through `tsx`, Playwright Chromium, the synthetic basic consumer, and
@@ -43,13 +44,18 @@ Rust `xtask` repository gates.
   without mutating their files on disk.
 - Consumer scripts remain disabled. Browse may add only the sandbox abilities
   needed for trusted parent inspection and explicit user-activated top
-  navigation, after its adapted HTML neutralizes every unmarked top/parent/base
-  target. Review panes remain unchanged.
+  navigation, after its adapted HTML neutralizes every consumer-authored
+  non-self/base target, including marked and download links. Review panes remain
+  unchanged.
+- Promote only a native `<a>` or `<area>` whose `href` carried the logical
+  destination. Continue rewriting and validating `data-nav-href`, but do not
+  infer interaction semantics from that metadata alone.
 - Default and `_self` catalogue links navigate the outer shell. Downloads stay
-  portable/native; trusted parent code handles explicit non-self targets and
-  modified activation against the adapted canonical destination with
-  `noopener`. No-JavaScript new-context activation is intentionally unsupported
-  rather than granting iframe popup permission.
+  portable/native; the adapter retains explicit non-self requests only in
+  trusted inert metadata and gives them a popup-denied live target. Parent code
+  handles those requests and modified activation against the canonical
+  destination with `noopener` where a new context is opened. No-JavaScript
+  new-context activation is intentionally unsupported.
 - If search or Changed filtering hides the new active row, clear only the
   hiding constraint. Preserve those controls when the row is already visible.
 - The selected-screen, active-navigation, and narrow-drawer visuals already
@@ -60,9 +66,9 @@ Rust `xtask` repository gates.
 - Keep growing files short. Add focused client/server modules rather than
   extending `src/client/browse.ts`, `src/client/browse_state.ts`, or
   `src/server/http.ts` beyond their current near-300-line size.
-- Treat any post-transform change to a logical-link record as a contract
-  failure: marker, logical attribute names, and their portable values remain
-  one invariant rather than independent metadata.
+- Treat any post-transform change to a logical-reference record as a contract
+  failure: marker expectation, native-link class, logical attribute names, and
+  portable values remain one invariant rather than independent metadata.
 - Do not change Review-pane link behavior or enable consumer application
   scripts as part of this work.
 
@@ -120,6 +126,24 @@ implementation begins.
 At completion, the plan closes all four second-pass review findings without
 adding dynamic preview infrastructure.
 
+## Milestone 0C: Activation And Target Corrections
+
+Summary: close the native-link and top-target gaps found by the third review
+pass before implementation begins.
+
+- [x] Limit Browse activation to native `a`/`area` elements whose logical
+      destination came from `href`; keep `data-nav-href`-only records as
+      portable metadata.
+- [x] Neutralize every consumer-authored non-self and base target, including
+      marked, download, and named targets, retaining eligible explicit requests
+      only in adapter-produced inert metadata for trusted parent handling.
+- [x] Add failure-first coverage for metadata-only records, marked top/parent
+      targets, matching named contexts, target keyword casing, spoofed target
+      metadata, and download targets to the implementation milestones.
+
+At completion, no logical metadata becomes an invented interaction and no
+consumer-authored target can bypass parent-owned navigation.
+
 ## Milestone 1: Portable Logical-Link Identity
 
 Summary: generated documents retain stable catalogue intent alongside their
@@ -129,8 +153,9 @@ existing portable artifact links; Browse behavior is not activated yet.
       tip and its merge base, audit `base..origin/main` additions, and record
       the immutable values under `.context/` for the final preservation audit.
 - [ ] Add failure-first cases to `tests/build_links.test.ts` for a reserved
-      `data-mokabook-link` marker on `MockLink`, raw `mock:` hrefs, and
-      `data-nav-href`, including both attribute orders on one anchor.
+      `data-mokabook-link` marker on `MockLink` and native raw `mock:` hrefs;
+      prove a `data-nav-href`-only span remains marker-free, and cover both
+      attribute orders on one eligible anchor.
 - [ ] Cover screen and use-case ids, optional target fragments, mobile and
       desktop output, dark-to-dark resolution, dark-to-light fallback, exact
       fragment grammar, and the requirement that a target anchor exists in
@@ -138,17 +163,20 @@ existing portable artifact links; Browse behavior is not activated yet.
 - [ ] Add failure-first cases for a consumer-authored reserved marker,
       different logical destinations on one element, unknown ids, collection
       ids, malformed fragments, and compatibility transformers that add/remove
-      a marker or change/remove only its portable `href`/`data-nav-href`.
+      a marker, change `a`/`area`/metadata-only class, or change/remove only its
+      portable `href`/`data-nav-href`.
 - [ ] Extend `src/build/mock_links.ts` with typed logical-target parsing and
-      deterministic marker insertion while preserving the existing
-      byte-targeted attribute rewrite and portable relative URL.
+      deterministic marker insertion for eligible `a`/`area` hrefs while
+      preserving the existing byte-targeted attribute rewrite and portable
+      relative URL for every supported navigation attribute.
 - [ ] Validate one logical destination per element and reserve the marker from
       consumer output. Keep raw relative, external, asset, and same-document
       links marker-free.
-- [ ] Preserve and validate a multiset of complete logical-link records across
-      `transformCompatibilityDocuments`: marker, logical attribute names, and
-      their exact resolved portable values. Fail through the existing typed
-      `MokabookError` contract on any divergence.
+- [ ] Preserve and validate a multiset of complete logical-reference records
+      across `transformCompatibilityDocuments`: expected marker presence and
+      value, native-link class, logical attribute names, and their exact
+      resolved portable values. Fail through the existing typed `MokabookError`
+      contract on divergence.
 - [ ] Ensure HTML/resource validation ignores the inert marker as a URL while
       continuing to validate the rewritten `href` and `data-nav-href`.
 - [ ] Add Review artifact and served Review regressions proving marker-bearing
@@ -170,17 +198,22 @@ functional.
 ## Milestone 2: Safe Browse Adaptation And Native Fallback
 
 Summary: served and preview copies gain canonical marked links while the same
-adapter closes every unmarked route to iframe-wide top navigation.
+adapter closes every consumer-authored route to iframe-wide top navigation.
 
 - [ ] Add failure-first adapter/server tests for canonical id destinations,
-      default/`_self` outer targeting, explicit target preservation, download
-      exclusion, malformed markers, and unchanged unmarked destinations.
+      default/empty/`_self` outer targeting, explicit target metadata and safe
+      live targets, download exclusion, malformed markers, metadata-only
+      references, and unchanged unmarked destinations.
 - [ ] Add security cases for unmarked external, raw relative, same-document,
-      `_top`, `_parent`, `<area target>`, and `<base target>` navigation; retain
-      `<base href>` and prove only validated marked links can target the shell.
+      `_top`, `_parent`, `<area target>`, and `<base target>` navigation, plus
+      marked `_top`/`_parent`, mixed-case keywords, named targets that match the
+      outer context, invalid target names, spoofed `data-mokabook-target`, and
+      `download target="_top"`; retain `<base href>` and prove only a validated
+      default/`_self` link can target the shell.
 - [ ] Create one typed Browse-document adapter that validates markers against
-      `Catalogue`, rewrites marked links, removes base targets, normalizes
-      unmarked top/parent targets to `_self`, and never mutates disk.
+      `Catalogue`, rewrites eligible marked hrefs, removes base targets,
+      normalizes every unauthorized non-self target, derives trusted inert
+      target metadata for eligible explicit requests, and never mutates disk.
 - [ ] Extract `/static/` serving from the over-target `src/server/http.ts` and
       adapt only Browse HTML responses while preserving HEAD, content type,
       confinement, ownership, and non-HTML bytes.
@@ -219,7 +252,7 @@ No backend response transformation is included in this milestone.
       candidate classification, event-source validation, primary and keyboard
       activation, modified activation, explicit target handling, latest-wins
       delegation, inaccessible/cross-origin frame fallback, and unchanged
-      unmarked/download/external/hash behavior.
+      unmarked/download/external/hash/metadata-only behavior.
 - [ ] Extract navigation candidate/sequencing code from
       `src/client/browse.ts` into a focused module before adding frame behavior;
       keep imports and public internal test seams typed.
@@ -228,8 +261,9 @@ No backend response transformation is included in this milestone.
       must read only validated `data-mokabook-link` markers and delegate to the
       outer route navigator through `/id/<id>`.
 - [ ] For a validated modified activation or explicit non-self target, have
-      package-owned parent code open the canonical Mokabook URL in the requested
-      context with `noopener`; never delegate popup creation to frame content.
+      package-owned parent code read only adapter-produced target metadata,
+      route `_top`/`_parent` through the outer transition, and open new or named
+      contexts with `noopener`; never delegate popup creation to frame content.
 - [ ] In a static preview, read and grammar-check the reserved `fragment` query
       in parent code, apply encoded hashes to the intended iframe sources, and
       fail closed without interpreting it as a selector.

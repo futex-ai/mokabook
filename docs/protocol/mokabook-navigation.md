@@ -22,11 +22,16 @@ asset, external, download, and same-document links.
 ## Logical Catalogue Links
 
 `MockLink`, `mockLink`, and complete `mock:<id>[#fragment]` values in supported
-`href` or `data-nav-href` attributes express catalogue navigation. The id is
-stable authoring identity; the entry's `route` is its current Browse location.
-A collection remains an invalid destination. A use-case destination opens the
-use-case page, even though its portable fragment fallback resolves through the
-first screen in that use case.
+`href` or `data-nav-href` attributes express catalogue references. Only an
+`<a>` or `<area>` whose own `href` carried the logical value is an activatable
+catalogue link in Browse. `data-nav-href` on any element, and `href` on any
+other element, remains validated portable metadata; Mokabook does not invent
+click or keyboard semantics for it. A logical `data-nav-href` may coexist with
+an activatable logical `href`, in which case both must name the same
+destination. The id is stable authoring identity; the entry's `route` is its
+current Browse location. A collection remains an invalid destination. A
+use-case destination opens the use-case page, even though its portable fragment
+fallback resolves through the first screen in that use case.
 
 A logical fragment begins with an ASCII letter and then contains only ASCII
 letters, digits, `_`, `:`, `.`, or `-`. It names an HTML `id`, not a CSS
@@ -42,18 +47,19 @@ The builder must:
 - rewrite the actual `href` and `data-nav-href` to the relative generated
   artifact for the source viewport and color scheme, retaining light fallback;
 - add one package-owned `data-mokabook-link` marker containing the original
-  `<id>[#fragment]` destination to the element; and
+  `<id>[#fragment]` destination only to an activatable native link; and
 - reject a reserved marker supplied by consumer output or conflicting logical
   destinations carried by two navigation attributes on one element.
 
 Before invoking a compatibility transformer, the builder records a multiset of
-complete logical-link records: marker value, which of `href` and
+complete logical-reference records: expected marker presence and value, the
+native-link class (`a`, `area`, or metadata-only), which of `href` and
 `data-nav-href` carried the logical destination, and each such attribute's
 resolved portable value. It reparses the transformed document and requires the
-same multiset. Adding or removing a marked element, preserving a marker while
-changing its portable destination, or moving logical identity between
-navigation attributes fails the build. Unrelated attributes remain
-consumer-owned.
+same multiset. Adding or removing a marker, preserving a marker while changing
+its portable destination or element kind, changing a metadata-only reference
+into an activatable link, or moving logical identity between navigation
+attributes fails the build. Unrelated attributes remain consumer-owned.
 
 The marker is inert metadata, not a second resource URL. HTML escaping must be
 deterministic, and link/resource validation continues to inspect the portable
@@ -73,14 +79,22 @@ pane retains the existing sandbox behavior.
 
 ## Browse Presentation
 
-When a marked anchor is presented beneath `/static/` in served Browse or in the
-deployed Browse preview, Mokabook adapts its navigation destination to the
-stable `/id/<id>` route. Without a fragment, that is the complete destination.
-With a fragment, the destination is
-`/id/<encoded-id>?fragment=<encoded-fragment>`. The default and `_self` cases
-target the outer Browse page. An explicit non-self target is retained for the
-trusted parent enhancement described below, but the frame is not granted popup
-permission. A `download` link is not promoted.
+When an eligible marked `<a>` or `<area>` is presented beneath `/static/` in
+served Browse or in the deployed Browse preview, Mokabook adapts its `href` to
+the stable `/id/<id>` route. Without a fragment, that is the complete
+destination. With a fragment, the destination is
+`/id/<encoded-id>?fragment=<encoded-fragment>`. An absent, empty, or `_self`
+target receives the package-owned `_top` target for native fallback. Any other
+valid requested target is copied into adapter-produced inert
+`data-mokabook-target` metadata while its live target becomes `_blank`; the
+popup-denying sandbox means only trusted parent enhancement can honor that
+request. Target keywords are matched ASCII-case-insensitively, and a named
+target must satisfy the HTML navigable-target-name grammar. An invalid target
+also receives the inert live `_blank` value but no trusted metadata, so parent
+enhancement declines it. The adapter removes any consumer-authored copy of its
+target metadata before deriving this value. A `download` link is not promoted,
+and `data-nav-href` without an eligible logical `href` stays portable metadata
+rather than becoming a Browse interaction.
 
 The portable file on disk must not be mutated. The development server and
 preview builder share one deterministic Browse-document adapter for canonical
@@ -89,14 +103,16 @@ values against the loaded manifest and neither environment promotes an unmarked
 relative link.
 
 Before Browse frames receive user-activated top-navigation permission, that
-adapter removes `target` from every `<base>` element and normalizes `_top` or
-`_parent` on every unmarked navigation element to `_self`. It preserves a
-`<base href>`, ordinary self/frame navigation, and non-top targets, but no
-consumer-authored base or unmarked target may authorize outer navigation. Only
-a validated, non-download marked default/`_self` link may receive the
-package-owned `_top` target. Explicit non-self targets remain available only to
-trusted parent enhancement and the sandbox denies frame-created popups. The
-portable and Review documents retain their original bytes and stricter sandbox.
+adapter removes `target` from every `<base>` element and neutralizes every
+consumer-authored non-self target. On unmarked, metadata-only, and download
+elements it maps `_top`/`_parent` to `_self` and every other non-self value to
+`_blank`, which the popup-denying sandbox makes inert. This prevents a named
+target from selecting an existing outer browsing context. On an eligible
+marked link it retains a valid request only in the trusted metadata above and
+uses the same popup-denied live target. It preserves a `<base href>` and
+ordinary unmarked self navigation. Only a validated, non-download marked
+default/`_self` link may receive the package-owned `_top` target. The portable
+and Review documents retain their original bytes and stricter sandbox.
 
 In served Browse, the `/id/<id>` redirect preserves the optional
 request-visible `fragment` query on
@@ -121,33 +137,35 @@ transport because URL hashes are not sent in an HTTP request.
 ## Enhanced And Native Navigation
 
 With Browse enhancement available, an unmodified primary or keyboard activation
-of a marked link asks the outer shell to navigate through its existing
-latest-wins route transition. The resulting history entry has the canonical
-`/view/<route>[?fragment=...]` URL; the title, breadcrumbs, heading, details
-inspector, frames, focus, and status announcement all describe the destination.
-Back and Forward return through those outer route entries and restore their
-route-owned scroll.
+of a default/`_self` marked link asks the outer shell to navigate through its
+existing latest-wins route transition. The resulting history entry has the
+canonical `/view/<route>[?fragment=...]` URL; the title, breadcrumbs, heading,
+details inspector, frames, focus, and status announcement all describe the
+destination. Back and Forward return through those outer route entries and
+restore their route-owned scroll.
 
 The same trusted parent enhancement exclusively handles modified activation
 and explicit non-self targets after validating the marker and canonical
-destination. When a new browsing context is requested, package-owned parent
-code opens the canonical Mokabook URL with `noopener`; it never delegates popup
-creation to the consumer frame. If enhancement is absent or fails, an
+destination. A requested `_top` or `_parent` uses the normal outer route
+transition. When a new or named browsing context is requested, package-owned
+parent code opens the canonical Mokabook URL with `noopener`; it never delegates
+popup creation to the consumer frame. If enhancement is absent or fails, an
 unmodified user activation of a default or `_self` marked link may navigate the
 outer browsing context natively. Modified and non-self activation is
-intentionally not guaranteed in that fallback, because relaxing the sandbox is
-less safe than declining the new context.
+intentionally declined by the popup-denying fallback.
 
 Consumer scripts remain disabled: Browse may permit same-origin inspection and
 top navigation by explicit user activation, but must not grant script, form,
 popup, or automatic top-navigation capabilities to consumer documents. Review
 panes retain their stricter existing sandbox.
 
-External, raw relative, download, same-document hash, and unmarked links retain
-their existing frame-owned behavior. Consumer-authored `_top`/`_parent` and
-`<base target>` values are the security exception: the adapted Browse copy
-neutralizes them so they cannot replace the shell. Mokabook must not infer
-product navigation from URLs or visible labels.
+External, raw relative, download, same-document hash, metadata-only, and
+unmarked links retain their existing frame-owned behavior subject to the
+sandbox. Consumer-authored non-self and `<base target>` values are the security
+exception: the adapted Browse copy neutralizes them on marked, unmarked, and
+download elements so a reserved keyword or matching named context cannot
+replace the shell. Mokabook must not infer product navigation from URLs,
+`data-nav-href`, or visible labels.
 
 ## Active Catalogue Visibility
 
@@ -179,8 +197,9 @@ Filters and search remain unchanged when the destination is already visible.
 
 Coverage must prove:
 
-- portable output, stable markers, dual navigation attributes, hashes,
-  use-case ids, dark-to-light fallback, conflicts, and reserved-marker errors;
+- portable output, eligible native-link markers, metadata-only
+  `data-nav-href`, dual navigation attributes, hashes, use-case ids,
+  dark-to-light fallback, conflicts, and reserved-marker errors;
 - served and preview adaptation without mutating committed fragments, including
   secure top-target sanitization and request-visible fragment transport;
 - served cross-view fragment validation and JavaScript-disabled anchor
@@ -192,9 +211,9 @@ Coverage must prove:
   capability;
 - active-row selection, ancestor disclosure, conditional filter/search reset,
   nearest scrolling, responsive drawer closure, and preserved shell state; and
-- continued script denial, top-navigation denial for unmarked targets and base
-  targets, frame-owned external/download/hash behavior, and unchanged
-  Review-pane links.
+- continued script denial; ancestor/named-context denial for marked, unmarked,
+  download, and base targets; frame-owned external/download/hash behavior; and
+  unchanged Review-pane links.
 
 ## Related Docs
 
