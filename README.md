@@ -158,12 +158,13 @@ Wi-Fi, and battery status band above the mobile fragment, header viewport
 controls, a Light/Dark switch when the catalogue has dark fragments, use-case
 flows, a details inspector that remembers its disclosure across routes and
 reloads, id redirects, and watched updates. The Changed filter compares
-route-level manifest metadata, generated fragments, and explicitly declared
-dependencies with the branch point shared by `HEAD` and the configured Git
-base. Commits added only to the base branch after divergence do not appear as
-branch changes; staged, unstaged, and untracked workspace edits still do. A
-registry module that defines many routes does not make every route appear
-changed merely because the module's imports or composition changed.
+an explicit projection of route-level manifest metadata, generated fragments,
+and explicitly declared dependencies with the branch point shared by `HEAD`
+and the configured Git base. Compatibility-only `navPath` labels are excluded
+from that projection. Commits added only to the base branch after divergence do
+not appear as branch changes; staged, unstaged, and untracked workspace edits
+still do. A registry module that defines many routes does not make every route
+appear changed merely because the module's imports or composition changed.
 Lightweight watched updates recompute this route snapshot before notifying the
 browser, so the Changed rows and count match the files that triggered each
 reload without restarting the server child.

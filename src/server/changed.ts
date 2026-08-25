@@ -65,7 +65,10 @@ export function changedManifestRoutes(
     const baseEntry = baseEntries.get(entry.id);
     const candidates = changedPathCandidates(entry, baseEntry, mockupsPrefix);
     if (
-      isDeepStrictEqual(entry, baseEntry) &&
+      isDeepStrictEqual(
+        routeChangeProjection(entry),
+        routeChangeProjection(baseEntry),
+      ) &&
       !candidates.some((candidate) =>
         changedPaths.some((changedPath) =>
           dependencyContainsChangedPath(candidate, changedPath),
@@ -86,6 +89,36 @@ export function changedManifestRoutes(
     }
   }
   return [...routes].sort();
+}
+
+/** Select manifest metadata whose changes can affect a routed Browse entry. */
+function routeChangeProjection(entry: ManifestEntry | undefined): unknown {
+  if (!entry) return undefined;
+  const common = {
+    dependencies: entry.dependencies,
+    description: entry.description,
+    id: entry.id,
+    kind: entry.kind,
+    rationale: entry.rationale,
+    relatedDocs: entry.relatedDocs,
+    sourcePath: entry.sourcePath,
+    title: entry.title,
+  };
+  if (entry.kind === "collection") {
+    return { ...common, childIds: entry.childIds };
+  }
+  if (entry.kind === "use-case") {
+    return { ...common, route: entry.route, steps: entry.steps };
+  }
+  return {
+    ...common,
+    address: entry.address,
+    darkFragments: entry.darkFragments,
+    fragments: entry.fragments,
+    route: entry.route,
+    useCaseIds: entry.useCaseIds,
+    viewports: entry.viewports,
+  };
 }
 
 function changedPathCandidates(

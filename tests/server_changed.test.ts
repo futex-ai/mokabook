@@ -76,6 +76,22 @@ test("manifest entry changes are attributed to their route", async (context) => 
   );
 });
 
+test("compatibility nav paths do not mark routes as changed", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const manifest = (await compileCatalogue(config)).manifest;
+  const baseManifest = structuredClone(manifest);
+  for (const entry of baseManifest.entries) {
+    if (entry.kind !== "collection") entry.navPath = ["Historical label"];
+  }
+
+  assert.deepEqual(
+    changedManifestRoutes(manifest, baseManifest, config, []),
+    [],
+  );
+});
+
 test("changed screens propagate to use cases authored separately", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
