@@ -180,6 +180,10 @@ assets. Refreshes and watched updates that arrive during generation coalesce
 into one follow-up run. Served Review files disable HTTP caching, so one
 document cannot combine files from different artifact generations, and the
 server refuses to archive a current output whose ownership marker is missing.
+Only Review shell pages receive live-update metadata; archived snapshot panes
+and their resources are served byte-for-byte, while an open generation-failure
+page stays connected and reloads automatically after a successful watched
+update.
 Retained-generation directories are excluded from changed-path evidence
 independently of consumer ignore rules. Shutdown prevents queued Review work
 from starting, drains active work, and then cleans retained directories.
@@ -211,13 +215,14 @@ custom rule watches the repository root; an unowned public HTML file can still
 use an explicit watch rule, and configured stylesheets retain reload
 precedence. Shutdown interrupts replacement-watcher readiness, closes the
 candidate before draining the remaining lifecycle, and waits for child exit
-through graceful, terminate, and force-kill stages. Every served Browse shell
-and Review document records the update version captured when its request
-begins. Open pages compare that snapshot with the versioned event stream and
-reload after a newer build or asset version arrives, including when the build
-completes before the initial stream connection. Publishing a reload-only watch
-update invalidates the served Review cache, so the reloaded Review URL
-regenerates before it is served. A watched reload restores the current Browse
+through graceful, terminate, and force-kill stages. Every served Browse shell,
+Review shell page, and retryable Review failure page records the update version
+captured when its request begins. Open shell and failure pages compare that
+snapshot with the versioned event stream and reload after a newer build or
+asset version arrives, including when the build completes before the initial
+stream connection. Publishing a reload-only watch update invalidates the served
+Review cache, so the reloaded Review URL regenerates before it is served. A
+watched reload restores the current Browse
 search, filter, disclosures,
 viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and

@@ -15,6 +15,10 @@ import {
   type LogicalTarget,
 } from "../navigation/logical.js";
 import {
+  duplicateReservedAttributeName,
+  type HtmlSourceLocation,
+} from "../navigation/reserved_attributes.js";
+import {
   logicalNamespace,
   nativeLinkClass,
   type LogicalAttributeRecord,
@@ -27,24 +31,19 @@ interface HtmlAttribute {
   value: string;
 }
 
-interface HtmlLocation {
-  endOffset: number;
-  startOffset: number;
-}
-
 interface HtmlNode {
   attrs?: HtmlAttribute[];
   childNodes?: HtmlNode[];
   content?: HtmlNode;
   namespaceURI?: string;
   sourceCodeLocation?: {
-    attrs?: Readonly<Record<string, HtmlLocation>>;
-    startTag?: HtmlLocation;
+    attrs?: Readonly<Record<string, HtmlSourceLocation>>;
+    startTag?: HtmlSourceLocation;
   } | null;
   tagName?: string;
 }
 
-interface Replacement extends HtmlLocation {
+interface Replacement extends HtmlSourceLocation {
   value: string;
 }
 
@@ -71,6 +70,16 @@ export function rewriteMockLinks(
   }) as unknown as HtmlNode;
   visit(document, (node) => {
     const attributes = node.attrs ?? [];
+    const duplicate = duplicateReservedAttributeName(
+      html,
+      node.sourceCodeLocation?.startTag,
+    );
+    if (duplicate) {
+      throw invalid(
+        sourceRoute,
+        `contains duplicate reserved ${duplicate} metadata`,
+      );
+    }
     if (
       attributes.some((attribute) => attribute.name === "data-mokabook-link")
     ) {
@@ -240,7 +249,7 @@ function markerInsertion(
   };
 }
 
-function attributeValueRange(source: string): HtmlLocation | undefined {
+function attributeValueRange(source: string): HtmlSourceLocation | undefined {
   const equals = source.indexOf("=");
   if (equals < 0) return undefined;
   let startOffset = equals + 1;

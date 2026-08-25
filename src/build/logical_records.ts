@@ -3,6 +3,10 @@ import { parse } from "parse5";
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
 import { MokabookError } from "../errors.js";
 import { extractHtmlReferences } from "../html_references.js";
+import {
+  duplicateReservedAttributeName,
+  type HtmlSourceLocation,
+} from "../navigation/reserved_attributes.js";
 import { fragmentRoute } from "../registry/manifest.js";
 import { effectiveColorSchemes, VIEWPORTS } from "../registry/views.js";
 import type { ResolvedConfig } from "../config/types.js";
@@ -24,6 +28,9 @@ interface HtmlNode {
   childNodes?: HtmlNode[];
   content?: HtmlNode;
   namespaceURI?: string;
+  sourceCodeLocation?: {
+    startTag?: HtmlSourceLocation;
+  } | null;
   tagName?: string;
 }
 
@@ -42,7 +49,20 @@ export function validateCompatibilityRecords(
 ): void {
   const nodes: ParsedNode[] = [];
   let hasBaseHref = false;
-  visit(parse(content) as unknown as HtmlNode, (node) => {
+  const document = parse(content, {
+    sourceCodeLocationInfo: true,
+  }) as unknown as HtmlNode;
+  visit(document, (node) => {
+    const duplicate = duplicateReservedAttributeName(
+      content,
+      node.sourceCodeLocation?.startTag,
+    );
+    if (duplicate) {
+      throw new MokabookError(
+        "build-invalid",
+        `${route} contains duplicate reserved ${duplicate} metadata after compatibility transform`,
+      );
+    }
     const attributes = new Map(
       (node.attrs ?? []).map((attribute) => [attribute.name, attribute.value]),
     );

@@ -45,7 +45,7 @@ function countingReview(
       });
       await fs.promises.writeFile(
         path.join(outDir, "snapshots", "head", "pane.html"),
-        `<h1>Generation ${this.generations}</h1>`,
+        paneDocument(this.generations),
       );
       await fs.promises.writeFile(
         path.join(outDir, ".mokabook-review-artifact"),
@@ -55,6 +55,10 @@ function countingReview(
     generations: 0,
     outDir,
   };
+}
+
+function paneDocument(generation: number): string {
+  return `<!doctype html><html data-review-pane="original"><body><h1>Generation ${generation}</h1></body></html>`;
 }
 
 async function startedFixtureServer(
@@ -97,7 +101,7 @@ test("served review generates lazily, recomputes on refresh, and stays safe", as
   const firstNavigation = await fetch(firstNavigationUrl);
   assert.equal(firstNavigation.headers.get("cache-control"), "no-store");
   assert.match(await firstNavigation.text(), /Generation 1/);
-  assert.match(await (await fetch(firstPaneUrl)).text(), /Generation 1/);
+  assert.equal(await (await fetch(firstPaneUrl)).text(), paneDocument(1));
   assert.equal(review.generations, 1);
 
   const refreshed = await fetch(`${server.url}/review?refresh=1`);
@@ -188,6 +192,10 @@ test("a failed review generation answers a retryable page and then recovers", as
   assert.match(failedHtml, /Comparing this branch with <strong>origin\/main/);
   assert.match(failedHtml, /base ref is unavailable/);
   assert.match(failedHtml, /\/review\/index\.html\?refresh=1/);
+  assert.match(
+    failedHtml,
+    /<script src="\/__mokabook\/client\/browser\.js" type="module"><\/script>/,
+  );
 
   shouldFail = false;
   const recovered = await fetch(`${server.url}/review/index.html`);

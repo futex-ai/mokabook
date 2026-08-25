@@ -106,11 +106,37 @@ test("Browse strips reserved metadata from unowned HTML", () => {
     legacyPages: [],
     schemaVersion: 3,
   });
-  const original = `<!doctype html><html><body><a data-mokabook-link="home" data-mokabook-target="_top" href="./home.html">Home</a></body></html>`;
+  const original = `<!doctype html><html><body><a data-mokabook-link="home" DATA-MOKABOOK-LINK="details" data-mokabook-target="_top" DATA-MOKABOOK-TARGET="_blank" href="./home.html">Home</a></body></html>`;
   const adapted = adaptBrowseDocument(original, "unowned.html", catalogue);
 
   assert.match(adapted, /href="\.\/home\.html"/);
-  assert.doesNotMatch(adapted, /data-mokabook-(?:link|target)/);
+  assert.doesNotMatch(adapted, /data-mokabook-(?:link|target)/i);
+});
+
+test("Browse rejects duplicate reserved metadata in trusted HTML", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const compilation = await compileCatalogue(await loadConfig(fixture.root));
+  const catalogue = createCatalogue(compilation.manifest);
+  const route = "screens/home.mobile.html";
+  const original = compilation.outputs.get(route) ?? "";
+  const mutations = [
+    original.replace(
+      'data-mokabook-link="details"',
+      'data-mokabook-link="details" data-mokabook-link="home"',
+    ),
+    original.replace(
+      'data-mokabook-link="details"',
+      'data-mokabook-link="details" data-mokabook-target="_self" data-mokabook-target="_blank"',
+    ),
+  ];
+
+  for (const content of mutations) {
+    assert.throws(
+      () => adaptBrowseDocument(content, route, catalogue),
+      /duplicate reserved data-mokabook-(?:link|target)/,
+    );
+  }
 });
 
 test("Browse fails closed when trusted ownership or marker bytes diverge", async (context) => {

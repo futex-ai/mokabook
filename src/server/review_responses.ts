@@ -27,6 +27,7 @@ export function serveReviewArtifactFile(
   response: ServerResponse,
   method: string,
   updateVersion: number,
+  liveUpdateDocument: boolean,
 ): void {
   const rootPath = path.resolve(directory);
   const filePath = path.resolve(rootPath, relative);
@@ -43,7 +44,7 @@ export function serveReviewArtifactFile(
     "content-type": contentType(filePath),
     "x-content-type-options": "nosniff",
   });
-  const body = isHtmlFile(relative)
+  const body = liveUpdateDocument
     ? Buffer.from(
         stampDocumentUpdateVersion(content.toString("utf8"), updateVersion),
       )
@@ -68,11 +69,6 @@ export function sendReviewFailure(
   );
 }
 
-function isHtmlFile(relative: string): boolean {
-  const extension = path.extname(relative).toLowerCase();
-  return extension === ".html" || extension === ".htm";
-}
-
 function failedPage(error: unknown, base: string): string {
   return (
     `<!doctype html><html lang="en"><head><meta charset="utf-8">` +
@@ -82,7 +78,9 @@ function failedPage(error: unknown, base: string): string {
     `not complete.</p>` +
     `<p>${escapeHtml(errorMessage(error))}</p>` +
     `<p><a href="/review/index.html?refresh=1">Try again</a> · ` +
-    `<a href="/">Browse the catalogue</a></p></main></body></html>\n`
+    `<a href="/">Browse the catalogue</a></p></main>` +
+    `<script src="/__mokabook/client/browser.js" type="module"></script>` +
+    `</body></html>\n`
   );
 }
 

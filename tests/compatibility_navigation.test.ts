@@ -52,6 +52,24 @@ test("compatibility transforms preserve complete logical-link records", async ()
   }
 });
 
+test("compatibility transforms cannot duplicate reserved Browse metadata", async () => {
+  for (const mutation of [
+    `.replace('data-mokabook-link="details"', 'data-mokabook-link="details" data-mokabook-link="home"')`,
+    `.replace('data-mokabook-link="details"', 'data-mokabook-link="details" data-mokabook-target="_self" data-mokabook-target="_blank"')`,
+  ]) {
+    const fixture = await createFixture();
+    try {
+      await writeTransformer(fixture.root, mutation);
+      await assert.rejects(
+        async () => compileCatalogue(await loadConfig(fixture.root)),
+        /duplicate reserved data-mokabook-(?:link|target)/,
+      );
+    } finally {
+      await removeFixture(fixture);
+    }
+  }
+});
+
 test("compatibility transforms preserve every generated ownership header", async () => {
   const cases = [
     {

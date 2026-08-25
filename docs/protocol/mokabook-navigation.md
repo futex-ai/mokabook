@@ -67,8 +67,9 @@ The builder must:
   `<id>[#fragment]` destination only to an activatable native link; and
 - reject a logical `href` on any other element, a `<base href>` in a document
   with an activatable logical link, a reserved marker supplied by consumer
-  output, or conflicting logical destinations carried by two navigation
-  attributes on one element.
+  output, duplicate occurrences of either reserved navigation attribute, or
+  conflicting logical destinations carried by two navigation attributes on
+  one element.
 
 Before invoking a compatibility transformer, the builder records a multiset of
 complete logical-reference records: expected marker presence and value, the
@@ -79,13 +80,15 @@ requires the same multiset. Adding or removing a marker, preserving a marker
 while changing its portable destination, element kind, or namespace, changing
 a metadata-only reference into an activatable link, or moving logical identity
 between navigation attributes fails the build. Unrelated attributes remain
-consumer-owned. A transformer that adds `<base href>` to a document retaining
-an activatable record also fails the build. After every document has been
-transformed, the builder indexes anchors from the final documents and repeats
-cross-view fragment validation for every retained logical-reference record. A
-transformer that removes or renames an anchor in any destination viewport or
-scheme therefore fails the build even when the source link record itself is
-unchanged.
+consumer-owned. Duplicate reserved attributes are detected from the raw start
+tag rather than the parser-normalized attribute map, so a transformer cannot
+hide a second marker or target through HTML's first-attribute-wins parsing. A
+transformer that adds `<base href>` to a document retaining an activatable
+record also fails the build. After every document has been transformed, the
+builder indexes anchors from the final documents and repeats cross-view
+fragment validation for every retained logical-reference record. A transformer
+that removes or renames an anchor in any destination viewport or scheme
+therefore fails the build even when the source link record itself is unchanged.
 The builder also requires every transformed screen fragment and legacy document
 to retain a generated ownership header that decodes to its expected source
 path. The versioned header encodes that identity with canonical base64 so no
@@ -139,13 +142,15 @@ whose bytes retain that matching ownership header may promote a marker. The
 adapter recomputes the source view's expected portable `href` and requires the
 marked link to match it exactly. On any other HTML route, including
 consumer-authored unowned files, it removes `data-mokabook-link` and
-`data-mokabook-target` from the adapted copy and never promotes them. A missing
-or mismatched ownership header, malformed or manifest-invalid marker, or
-mismatched portable `href` on a trusted route yields HTTP 500 without serving
-that document and fails the preview build. A trusted document that carries an
-activatable marker and `<base href>` fails closed by the same rule, defending
-against post-build tampering. Neither environment promotes an unmarked relative
-link or rewrites a live `href`, `target`, `formtarget`, or `<base target>`.
+`data-mokabook-target` from the adapted copy and never promotes them; removal
+covers every raw occurrence even when HTML parsing hides duplicates. A missing
+or mismatched ownership header, duplicate reserved attribute, malformed or
+manifest-invalid marker, or mismatched portable `href` on a trusted route
+yields HTTP 500 without serving that document and fails the preview build. A
+trusted document that carries an activatable marker and `<base href>` fails
+closed by the same rule, defending against post-build tampering. Neither
+environment promotes an unmarked relative link or rewrites a live `href`,
+`target`, `formtarget`, or `<base target>`.
 
 One pure target parser is shared by the adapter and parent client. It does not
 trim its input and returns exactly one typed state:

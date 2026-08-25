@@ -210,10 +210,11 @@ shipped shell are recorded beside the design catalogue in the example notes.
 ## Watched Development
 
 `mokabook serve` watches by default; `--no-watch` serves one deterministic
-snapshot. Every Browse and Review document loads the package-owned browser client,
-which connects to the versioned event stream and reloads its current durable
-URL after a higher version arrives. Watch classification derives only from
-resolved config:
+snapshot. Every Browse shell, served Review shell document, and retryable
+Review failure page loads the package-owned browser client, which connects to
+the versioned event stream and reloads its current durable URL after a higher
+version arrives. Snapshot panes do not run this client. Watch classification
+derives only from resolved config:
 
 - the discovered or explicit config file reloads configuration, generated
   output, watch targets, and the child;
@@ -278,12 +279,13 @@ Watch actions execute serially. Changes received during an active action are
 coalesced by impact before the next action starts, so two rebuilds cannot race
 to replace generated output or restart the same child. The parent assigns a
 monotonic integer update version to each child and asset reload. Every served
-Browse shell and Review HTML document carries the update version captured when
-its request began. The client seeds its page baseline from that stamp: an equal
-event-stream `ready` version is a no-op, while a higher `ready` version or
-`update` event triggers one reload and one-shot state recovery. A document
-without a valid stamp retains compatibility behavior in which its first
-`ready` version establishes the baseline.
+Browse shell, server-owned Review shell document, and retryable Review failure
+page carries the update version captured when its request began. The client
+seeds its page baseline from that stamp: an equal event-stream `ready` version
+is a no-op, while a higher `ready` version or `update` event triggers one reload
+and one-shot state recovery. A document without a valid stamp retains
+compatibility behavior in which its first `ready` version establishes the
+baseline.
 
 Publishing an update without restarting the child marks its cached served
 Review artifact stale before notifying browsers. The first reloaded Review
@@ -390,9 +392,14 @@ artifact page includes the Review/index pill and self-contained responsive
 drawer. Pages generated behind the server additionally add the Browse pill, a
 recompute link, and the package-owned browser client for watched reloads;
 static `mokabook review` artifacts omit those server-only hooks. Successful
-redirects and artifact responses use `Cache-Control: no-store`. A generation
-failure restores the previous served directory, answers with a retryable error
-page, and leaves the server running; the next request retries the generation.
+redirects and artifact responses use `Cache-Control: no-store`. The server
+stamps only top-level Review index and comparison documents with the request's
+update version; snapshot panes and their resources are served from the retained
+generation as their exact archived bytes. A generation failure restores the
+previous served directory, answers with a version-stamped retryable error page
+that remains connected to watched updates, and leaves the server running. The
+next request retries the generation, while a later successful watched update
+automatically reloads an already-open failure page into the recovered artifact.
 Server shutdown stops new Review work, waits for active or queued generation to
 settle, then removes retained temporary generations but not the configured
 current output. Before archiving a current output, the server requires its

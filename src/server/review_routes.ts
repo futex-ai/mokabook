@@ -236,6 +236,7 @@ export class ReviewRoutes {
         response,
         method,
         updateVersion,
+        isReviewDocument(requested.relative),
       );
     }
     if (!isReviewDocument(requested.relative))

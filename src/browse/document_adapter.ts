@@ -4,6 +4,13 @@ import { hasGeneratedOwnershipHeader } from "../build/ownership.js";
 import { MokabookError } from "../errors.js";
 import { logicalMarker, parseLogicalMarker } from "../navigation/logical.js";
 import {
+  duplicateReservedAttributeName,
+  reservedAttributesInStartTag,
+  type HtmlSourceLocation,
+  type ReservedAttributeName,
+  type ReservedAttributeOccurrence,
+} from "../navigation/reserved_attributes.js";
+import {
   parseBrowsingTarget,
   serializeBrowsingTarget,
 } from "../navigation/target.js";
@@ -15,24 +22,18 @@ interface HtmlAttribute {
   value: string;
 }
 
-interface HtmlLocation {
-  endOffset: number;
-  startOffset: number;
-}
-
 interface HtmlNode {
   attrs?: HtmlAttribute[];
   childNodes?: HtmlNode[];
   content?: HtmlNode;
   namespaceURI?: string;
   sourceCodeLocation?: {
-    attrs?: Readonly<Record<string, HtmlLocation>>;
-    startTag?: HtmlLocation;
+    startTag?: HtmlSourceLocation;
   } | null;
   tagName?: string;
 }
 
-interface Replacement extends HtmlLocation {
+interface Replacement extends HtmlSourceLocation {
   value: string;
 }
 
@@ -49,7 +50,7 @@ export function adaptBrowseDocument(
   const document = parse(content, {
     sourceCodeLocationInfo: true,
   }) as unknown as HtmlNode;
-  if (!trusted) return stripUntrustedMetadata(content, document, route);
+  if (!trusted) return stripUntrustedMetadata(content, document);
   if (!hasGeneratedOwnershipHeader(content, trusted.sourcePath)) {
     throw invalid(
       route,
@@ -62,6 +63,13 @@ export function adaptBrowseDocument(
   let hasBaseHref = false;
   visit(document, (node) => {
     nodes.push(node);
+    const duplicate = duplicateReservedAttributeName(
+      content,
+      node.sourceCodeLocation?.startTag,
+    );
+    if (duplicate) {
+      throw invalid(route, `duplicate reserved ${duplicate} metadata`);
+    }
     const attributes = attributesOf(node);
     if (
       node.namespaceURI === HTML_NAMESPACE &&
@@ -92,7 +100,7 @@ export function adaptBrowseDocument(
     const attributes = attributesOf(node);
     if (attributes.has("data-mokabook-target")) {
       replacements.push(
-        removeAttribute(content, route, node, "data-mokabook-target"),
+        removeReservedAttribute(content, route, node, "data-mokabook-target"),
       );
     }
     const marker = attributes.get("data-mokabook-link");
@@ -122,7 +130,7 @@ export function adaptBrowseDocument(
     const target = parseBrowsingTarget(ownTarget);
     if (attributes.has("download") || target.kind === "invalid") {
       replacements.push(
-        removeAttribute(content, route, node, "data-mokabook-link"),
+        removeReservedAttribute(content, route, node, "data-mokabook-link"),
       );
       continue;
     }
@@ -141,18 +149,12 @@ export function adaptBrowseDocument(
   return applyReplacements(content, replacements);
 }
 
-function stripUntrustedMetadata(
-  content: string,
-  document: HtmlNode,
-  route: string,
-): string {
+function stripUntrustedMetadata(content: string, document: HtmlNode): string {
   const replacements: Replacement[] = [];
   visit(document, (node) => {
-    const attributes = attributesOf(node);
-    for (const name of ["data-mokabook-link", "data-mokabook-target"]) {
-      if (attributes.has(name)) {
-        replacements.push(removeAttribute(content, route, node, name));
-      }
+    const startTag = node.sourceCodeLocation?.startTag;
+    for (const occurrence of reservedAttributesInStartTag(content, startTag)) {
+      replacements.push(removeLocatedAttribute(content, startTag, occurrence));
     }
   });
   return applyReplacements(content, replacements);
@@ -172,20 +174,36 @@ function isNativeLink(node: HtmlNode): boolean {
   );
 }
 
-function removeAttribute(
+function removeReservedAttribute(
   content: string,
   route: string,
   node: HtmlNode,
-  name: string,
+  name: ReservedAttributeName,
 ): Replacement {
-  const location = node.sourceCodeLocation?.attrs?.[name];
-  if (!location)
+  const startTag = node.sourceCodeLocation?.startTag;
+  const occurrence = reservedAttributesInStartTag(content, startTag).find(
+    (candidate) => candidate.name === name,
+  );
+  if (!occurrence) {
     throw invalid(route, `cannot locate reserved ${name} metadata`);
-  let startOffset = location.startOffset;
-  while (startOffset > 0 && /\s/.test(content[startOffset - 1] ?? "")) {
+  }
+  return removeLocatedAttribute(content, startTag, occurrence);
+}
+
+function removeLocatedAttribute(
+  content: string,
+  startTag: HtmlSourceLocation | undefined,
+  occurrence: ReservedAttributeOccurrence,
+): Replacement {
+  let startOffset = occurrence.startOffset;
+  const lowerBound = (startTag?.startOffset ?? 0) + 1;
+  while (
+    startOffset > lowerBound &&
+    /[\t\n\f\r ]/.test(content[startOffset - 1] ?? "")
+  ) {
     startOffset -= 1;
   }
-  return { endOffset: location.endOffset, startOffset, value: "" };
+  return { endOffset: occurrence.endOffset, startOffset, value: "" };
 }
 
 function insertAttribute(
