@@ -104,9 +104,10 @@ scrollable region scrolls internally:
     1px vertical guide per ancestor depth. The hover/active highlight is an
     inset pill starting at the row's indent (`--mbk-indent`), so guides stay
     visible; the active row uses the accent with contrast text.
-  - Route navigation opens every collection on the active row's path and
-    scrolls that row into view. Search and Changed filtering may stay selected
-    only while the active row remains visible.
+  - Planned catalogue-link navigation opens every collection on the active
+    row's path and scrolls that row into view. Search and Changed filtering may
+    stay selected only while the active row remains visible. The active
+    navigation plan tracks this target behavior.
 - **Screen head** — surface band with the breadcrumb trail (11.5px, `›`
   separators; ancestor crumbs that resolve to a viewable route are links) and
   a title row: 19px heading plus a monospace ID button labelled `#<id>`. The

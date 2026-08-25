@@ -16,12 +16,14 @@ output, sandboxing, and progressive navigation.
 HTML keeps its viewport- and color-scheme-compatible relative artifact `href`
 for standalone and Review portability, plus a reserved marker containing the
 stable entry id and optional fragment. Browse adapts only the served/preview
-representation to `/id/<id>`. The parent client recognizes marked links in
-same-origin, script-disabled frames and invokes the existing latest-wins route
-transition. Native user-activated top navigation remains the no-JavaScript and
-failed-enhancement fallback. One client helper owns the invariant that the
-active navigation row is selected, disclosed, filter-visible, and scrolled
-into view.
+representation to `/id/<id>`, using a reserved `fragment` query when an anchor
+must survive a server request. The parent client recognizes marked links in
+same-origin, script-disabled frames, invokes the existing latest-wins route
+transition for current-context navigation, and exclusively handles validated
+new-context requests. Native user-activated top navigation remains the
+no-JavaScript and failed-enhancement fallback only for default and `_self`
+links. One client helper owns the invariant that the active navigation row is
+selected, disclosed, filter-visible, and scrolled into view.
 
 **Tech stack:** TypeScript ESM, React 19 static rendering, parse5, Node 22 test
 runner through `tsx`, Playwright Chromium, the synthetic basic consumer, and
@@ -33,14 +35,19 @@ Rust `xtask` repository gates.
   catalogue intent from a raw relative URL or visible label.
 - Use the stable id route for Browse adaptation so renaming a catalogue route
   does not invalidate generated navigation intent.
+- Carry a logical anchor through `/id` and `/view` as one percent-encoded
+  `fragment` query value, then render it as an encoded hash on each target
+  iframe source. A top-level hash cannot be the server-visible transport.
 - Keep the committed fragment bytes portable and adapt responses/copies
   without mutating their files on disk.
 - Consumer scripts remain disabled. Browse may add only the sandbox abilities
   needed for trusted parent inspection and explicit user-activated top
   navigation; Review panes remain unchanged.
 - Default and `_self` catalogue links navigate the outer shell. Downloads stay
-  portable/native; explicit non-self targets and modified activation use the
-  adapted canonical destination with their normal semantics.
+  portable/native; trusted parent code handles explicit non-self targets and
+  modified activation against the adapted canonical destination with
+  `noopener`. No-JavaScript new-context activation is intentionally unsupported
+  rather than granting iframe popup permission.
 - If search or Changed filtering hides the new active row, clear only the
   hiding constraint. Preserve those controls when the row is already visible.
 - The selected-screen, active-navigation, and narrow-drawer visuals already
@@ -75,6 +82,25 @@ plan before changing generated output or runtime behavior.
 At completion, the protocol is internally consistent and implementation can
 proceed without inventing product behavior.
 
+## Milestone 0A: Post-Review Contract Corrections
+
+Summary: resolve every finding from the first post-push review without
+reopening the completed protocol baseline milestone.
+
+- [x] Replace top-level hash transport with a request-visible `fragment` query,
+      define its grammar and cross-view anchor validation, and specify iframe
+      hash rendering.
+- [x] Keep `allow-popups` forbidden and assign modified/non-self activation
+      exclusively to trusted parent enhancement.
+- [x] Mark build, package, runtime, shell, and architecture passages as planned
+      wherever the current implementation does not yet provide link markers or
+      outer frame navigation.
+- [x] Move Review compatibility coverage into the marker milestone and add a
+      watched-serve lifecycle regression to the server milestone.
+
+At completion, the approved contract and implementation plan incorporate all
+five initial review recommendations.
+
 ## Milestone 1: Portable Logical-Link Identity
 
 Summary: generated documents retain stable catalogue intent alongside their
@@ -87,7 +113,9 @@ existing portable artifact links; Browse behavior is not activated yet.
       `data-mokabook-link` marker on `MockLink`, raw `mock:` hrefs, and
       `data-nav-href`, including both attribute orders on one anchor.
 - [ ] Cover screen and use-case ids, optional target fragments, mobile and
-      desktop output, dark-to-dark resolution, and dark-to-light fallback.
+      desktop output, dark-to-dark resolution, dark-to-light fallback, exact
+      fragment grammar, and the requirement that a target anchor exists in
+      every generated destination view Browse can show.
 - [ ] Add failure-first cases for a consumer-authored reserved marker,
       different logical destinations on one element, unknown ids, collection
       ids, malformed fragments, and a compatibility transformer that removes
@@ -103,8 +131,14 @@ existing portable artifact links; Browse behavior is not activated yet.
       `MokabookError` contract when compatibility output violates it.
 - [ ] Ensure HTML/resource validation ignores the inert marker as a URL while
       continuing to validate the rewritten `href` and `data-nav-href`.
+- [ ] Add Review artifact and served Review regressions proving marker-bearing
+      portable pane documents remain byte-unmodified, retain relative links,
+      receive no Browse adaptation, and stay inside the existing strict
+      sandbox.
 - [ ] Run the focused link and compatibility tests with
       `npm run build && npx tsx --test tests/build_links.test.ts tests/compatibility.test.ts`.
+- [ ] Run the focused Review regressions in `tests/review_safety.test.ts` and
+      `tests/server_review.test.ts` before marking marker output complete.
 - [ ] Regenerate and check
       `examples/basic/generated/**` with `npm run example:build` and
       `npm run example:check`.
@@ -123,8 +157,9 @@ No backend response transformation is included in this milestone.
 
 - [ ] Add failure-first client tests in new focused test files for frame-link
       candidate classification, event-source validation, primary and keyboard
-      activation, latest-wins delegation, inaccessible/cross-origin frame
-      fallback, and unchanged unmarked/download/external/hash behavior.
+      activation, modified activation, explicit target handling, latest-wins
+      delegation, inaccessible/cross-origin frame fallback, and unchanged
+      unmarked/download/external/hash behavior.
 - [ ] Extract navigation candidate/sequencing code from
       `src/client/browse.ts` into a focused module before adding frame behavior;
       keep imports and public internal test seams typed.
@@ -132,6 +167,9 @@ No backend response transformation is included in this milestone.
       swaps, flow frames, legacy embeds, and progressively installed views. It
       must read only validated `data-mokabook-link` markers and delegate to the
       outer route navigator through `/id/<id>`.
+- [ ] For a validated modified activation or explicit non-self target, have
+      package-owned parent code open the canonical Mokabook URL in the requested
+      context with `noopener`; never delegate popup creation to frame content.
 - [ ] Update Browse iframe sandbox markup to permit same-origin parent
       inspection and top navigation by explicit user activation only. Do not
       add script, form, popup, download, or automatic top-navigation tokens;
@@ -152,26 +190,31 @@ No backend response transformation is included in this milestone.
       mobile frame, desktop frame, and use-case step; assert the outer URL,
       heading, breadcrumbs, active row, disclosed ancestors, Back/Forward, and
       preserved shell state.
+- [ ] In the same spec, prove modified and explicit non-self activation opens
+      the canonical Mokabook page through parent enhancement, while the iframe
+      sandbox still lacks popup and script permissions.
 - [ ] Cover an active destination initially hidden by search and Changed,
       plus a destination already visible so unrelated user state is retained.
 - [ ] Run the focused client tests and navigation Playwright spec after
       `npm run build`; run the existing `tests/browser/browse.spec.ts` to catch
       regressions in the persistent shell.
 
-At completion, JavaScript-enabled Browse navigation is coherent and the active
-catalogue entry is always visible. Portable/no-JavaScript links still retain
-their pre-existing fragment fallback until Milestone 3.
+At completion, JavaScript-enabled Browse navigation, including trusted
+new-context activation, is coherent and the active catalogue entry is always
+visible. Portable/no-JavaScript links still retain their pre-existing fragment
+fallback until Milestone 3.
 
 ## Milestone 3: Served And Preview Native Fallback
 
 Summary: the development server and deployed preview adapt marked links to
-canonical outer routes, completing modified-click, direct, and
-JavaScript-disabled behavior without changing committed or Review documents.
+canonical outer routes, completing direct and JavaScript-disabled default/self
+behavior without changing committed or Review documents.
 
 - [ ] Add failure-first pure/server tests in new focused files for adapting a
-      marked anchor to `/id/<encoded-id>`, default/`_self` top targeting,
-      explicit target preservation, download exclusion, unknown/malformed
-      marker rejection, and unchanged unmarked HTML.
+      marked anchor to `/id/<encoded-id>[?fragment=<encoded-fragment>]`,
+      default/`_self` top targeting, explicit target preservation for parent
+      enhancement, download exclusion, unknown/malformed marker rejection, and
+      unchanged unmarked HTML.
 - [ ] Create a typed Browse-document adapter that parses HTML, validates ids
       against `Catalogue`, rewrites only marked anchors, preserves safe
       attributes, and returns deterministic bytes without modifying disk.
@@ -179,27 +222,35 @@ JavaScript-disabled behavior without changing committed or Review documents.
       into a focused server module and apply the adapter only to Browse HTML
       responses beneath `/static/`. Preserve HEAD, content type, confinement,
       generated ownership, and non-HTML byte behavior.
-- [ ] Carry a validated optional logical fragment through `/id/<id>` and the
-      canonical `/view/<route>` response. Apply it to screen fragment sources
-      (including scheme swaps) and only the first use-case step.
+- [ ] Carry a validated optional logical fragment as exactly one percent-encoded
+      `fragment` query through `/id/<id>` and the canonical `/view/<route>`
+      response. Decode once, enforce the documented grammar and cross-view
+      anchor existence, return HTTP 400 for invalid input, and apply the value
+      as an encoded hash to every screen source (including scheme swaps) or only
+      the first use-case step.
 - [ ] Reuse the same adapter from `scripts/preview/build.mjs` when copying HTML
       into `.context/mokabook-preview`; do not duplicate a regex-only second
       implementation. Keep Cloudflare extensionless route rewriting and id
       redirects intact.
-- [ ] Add JavaScript-disabled Playwright coverage proving a fragment link
-      navigates the top page, plus modified-click coverage proving the new tab
-      opens the canonical Mokabook route. Assert consumer scripts remain
-      blocked and Review panes retain their sandbox and link behavior.
+- [ ] Add JavaScript-disabled Playwright coverage proving default and `_self`
+      links navigate the top page and request-visible fragments reach the
+      target iframe anchor. Assert popup capability remains absent; do not
+      promise modified or non-self fallback without parent enhancement.
 - [ ] Extend `tests/preview.test.ts` to assert adapted static fragment links,
       stable `/id` targets, optional fragments, and absence of mutations in
       `examples/basic/generated/**` after preview creation.
+- [ ] Add a watched-serve regression that changes a `MockLink` destination id
+      or route, waits for rebuild and reload, and proves `/static/` adaptation
+      uses the latest manifest without stale transformed HTML or orphaned child
+      processes.
 - [ ] Run focused server/preview tests, `npm run preview:build`, and the full
-      navigation browser spec. Smoke-test both `mokabook serve --no-watch` and
-      the generated preview through an HTTP server.
+      navigation browser spec. Smoke-test watched `mokabook serve`,
+      `mokabook serve --no-watch`, and the generated preview through an HTTP
+      server.
 
 At completion, local Browse, deployed Browse, JavaScript-enabled navigation,
-native fallback, modified activation, and optional fragments share one
-canonical destination contract.
+safe default/self native fallback, and optional fragments share one canonical
+destination contract.
 
 ## Milestone 4: Documentation, Verification, And Handoff
 

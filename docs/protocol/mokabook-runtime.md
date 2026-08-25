@@ -117,10 +117,11 @@ crumbs stay text. The details inspector may show description, rationale,
 source and fragment paths including dark renders, the schemes a screen renders
 in, related docs, dependencies, use cases, and comparison context.
 Consumer fragments and legacy documents are sandboxed without script permission
-so they cannot alter the same-origin Browse shell. Browse may inspect
-same-origin frame links and permit outer navigation only after explicit user
-activation; it does not grant consumer scripts, forms, popups, or automatic
-top navigation. Review panes retain their stricter sandbox.
+so they cannot alter the same-origin Browse shell. The planned navigation
+extension will permit package-owned same-origin inspection and outer navigation
+after explicit user activation, without granting consumer scripts, forms,
+popups, or automatic top navigation. Review panes retain their stricter
+sandbox.
 
 A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
 light-only catalogue offers none. One switch renders in the top bar and one in
@@ -139,12 +140,12 @@ Browse is server rendered first and progressively enhanced. Direct URLs,
 refresh, missing routes, and JavaScript-disabled use remain functional. For an
 eligible unmodified same-origin Browse link, the client replaces only the
 route-owned main view and updates URL, title, active row, focus, and history.
-Logical links activated inside a consumer frame navigate that same outer route
-model rather than replacing only the iframe document. After any route change,
-the shell opens the active row's ancestor collections, conditionally clears a
-search or Changed filter that would hide it, and scrolls it into view. The
-complete portable-link, native-fallback, sandbox, fragment, and active-tree
-behavior is defined by the
+After the active navigation plan completes, logical links activated inside a
+consumer frame will navigate that same outer route model rather than replacing
+only the iframe document. The shell will open the active row's ancestor
+collections, conditionally clear a search or Changed filter that would hide it,
+and scroll it into view. The complete target portable-link, native-fallback,
+sandbox, fragment, and active-tree behavior is defined by the
 [catalogue navigation contract](./mokabook-navigation.md).
 Search, disclosure, filters, and catalogue scroll remain mounted; searching
 temporarily force-opens navigation groups and restores their prior disclosure
@@ -162,11 +163,12 @@ The shell scrolls inside its stage, flow, and embed regions rather than the
 document. Back and Forward restore the matching route and that history entry's
 latest per-region scroll positions. Scroll persistence is limited to one
 leading update per animation frame, and route-change focus never overrides the
-restored positions. Overlapping requests are latest-wins. Review, static,
-download, external, unmarked, hash-only, and modified-click links retain native
-browser behavior. Marked catalogue links inside Browse frames are the explicit
-exception. A failed enhancement falls back to normal outer document
-navigation.
+restored positions. Overlapping requests are latest-wins. Until the active
+navigation plan completes, Review, static, iframe, download, external, target,
+hash-only, and modified-click links retain native browser behavior. The target
+exception is a marked catalogue link inside a Browse frame: trusted parent code
+will own primary and new-context navigation, while only default/`_self`
+activation has native outer-navigation fallback.
 
 The shell meets keyboard, focus, reduced-motion, contrast, semantics, and status
 announcement requirements. Mobile and desktop shell variants are specified by

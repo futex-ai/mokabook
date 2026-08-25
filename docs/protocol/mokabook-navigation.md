@@ -28,6 +28,14 @@ A collection remains an invalid destination. A use-case destination opens the
 use-case page, even though its portable fragment fallback resolves through the
 first screen in that use case.
 
+A logical fragment begins with an ASCII letter and then contains only ASCII
+letters, digits, `_`, `:`, `.`, or `-`. It names an HTML `id`, not a CSS
+selector. The builder validates that it exists in every generated mobile,
+desktop, light, and applicable dark artifact that Browse may show for the
+destination screen. For a use case, this requirement applies to its first
+screen. This cross-view rule lets one canonical outer route drive every visible
+frame without silently losing the anchor in another viewport or color scheme.
+
 The builder must:
 
 - validate the destination id and optional fragment before writing output;
@@ -58,37 +66,53 @@ pane retains the existing sandbox behavior.
 
 When a marked anchor is presented beneath `/static/` in served Browse or in the
 deployed Browse preview, Mokabook adapts its navigation destination to the
-stable `/id/<id>` route. The default and `_self` cases target the outer Browse
-page. An explicit non-self target keeps its native target semantics but uses
-the canonical catalogue destination. A `download` link is not promoted.
+stable `/id/<id>` route. Without a fragment, that is the complete destination.
+With a fragment, the destination is
+`/id/<encoded-id>?fragment=<encoded-fragment>`. The default and `_self` cases
+target the outer Browse page. An explicit non-self target is retained for the
+trusted parent enhancement described below, but the frame is not granted popup
+permission. A `download` link is not promoted.
 
 The portable file on disk must not be mutated. The development server and
 preview builder share one deterministic adaptation path so local and deployed
 Browse cannot disagree. The server validates marker values against the loaded
 manifest and never promotes unmarked relative links.
 
-An optional logical fragment is carried through the id redirect to the
-canonical view route. Screen pages apply it to every currently shown viewport
-fragment and retain it when the color scheme changes. A use-case destination
-applies it to the first step, matching the portable fallback. Invalid fragment
-input fails closed rather than becoming an unchecked selector or URL.
+The `/id/<id>` redirect preserves the optional request-visible `fragment`
+query on `/view/<route>?fragment=<encoded-fragment>`. The server accepts at
+most one `fragment` value, decodes it exactly once, checks the grammar and
+cross-view anchor existence above, and returns HTTP 400 without injecting a
+fragment when validation fails. It renders the validated value as an encoded
+hash on every current screen iframe source and its light/dark swap sources. A
+use-case page applies it only to the first step, matching the portable fallback.
+The query remains on the outer history URL while scheme changes retain the
+iframe hashes. A top-level `#fragment` is not logical-fragment transport because
+URL hashes are never sent in an HTTP request.
 
 ## Enhanced And Native Navigation
 
-With Browse enhancement available, an unmodified primary activation of a
-marked link asks the outer shell to navigate through its existing latest-wins
-route transition. The resulting history entry has the canonical
-`/view/<route>` URL; the title, breadcrumbs, heading, details inspector, frames,
-focus, and status announcement all describe the destination. Back and Forward
-return through those outer route entries and restore their route-owned scroll.
+With Browse enhancement available, an unmodified primary or keyboard activation
+of a marked link asks the outer shell to navigate through its existing
+latest-wins route transition. The resulting history entry has the canonical
+`/view/<route>[?fragment=...]` URL; the title, breadcrumbs, heading, details
+inspector, frames, focus, and status announcement all describe the destination.
+Back and Forward return through those outer route entries and restore their
+route-owned scroll.
 
-Modified activation retains browser behavior against the adapted canonical
-link, including opening a Mokabook page in a new tab. If enhancement is absent
-or fails, a user-activated link may navigate the outer browsing context
-natively. Consumer scripts remain disabled: Browse may permit same-origin
-inspection and top navigation by explicit user activation, but must not grant
-script, form, popup, or automatic top-navigation capabilities to consumer
-documents. Review panes retain their stricter existing sandbox.
+The same trusted parent enhancement exclusively handles modified activation
+and explicit non-self targets after validating the marker and canonical
+destination. When a new browsing context is requested, package-owned parent
+code opens the canonical Mokabook URL with `noopener`; it never delegates popup
+creation to the consumer frame. If enhancement is absent or fails, an
+unmodified user activation of a default or `_self` marked link may navigate the
+outer browsing context natively. Modified and non-self activation is
+intentionally not guaranteed in that fallback, because relaxing the sandbox is
+less safe than declining the new context.
+
+Consumer scripts remain disabled: Browse may permit same-origin inspection and
+top navigation by explicit user activation, but must not grant script, form,
+popup, or automatic top-navigation capabilities to consumer documents. Review
+panes retain their stricter existing sandbox.
 
 External, raw relative, download, same-document hash, and unmarked links retain
 their existing behavior. Mokabook must not infer product navigation from their
@@ -126,9 +150,11 @@ Coverage must prove:
 
 - portable output, stable markers, dual navigation attributes, hashes,
   use-case ids, dark-to-light fallback, conflicts, and reserved-marker errors;
-- served and preview adaptation without mutating committed fragments;
-- primary, keyboard, modified, JavaScript-disabled, Back, and Forward
-  navigation from mobile, desktop, flow, and legacy frames where supported;
+- served and preview adaptation without mutating committed fragments, including
+  request-visible fragment transport and cross-view anchor validation;
+- enhanced primary, keyboard, modified, non-self, Back, and Forward navigation
+  from mobile, desktop, flow, and legacy frames where supported;
+- JavaScript-disabled default/`_self` outer navigation without popup capability;
 - active-row selection, ancestor disclosure, conditional filter/search reset,
   nearest scrolling, responsive drawer closure, and preserved shell state; and
 - continued script denial and unchanged behavior for unmarked, external,

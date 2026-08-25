@@ -248,11 +248,12 @@ Logical screen and use-case routes are catalogue identifiers, not generated
 documents. Fragment links must target a generated fragment or public static
 asset with a relative URL; root-absolute links are rejected as non-portable.
 Authors use `MockLink` for id-addressed catalogue navigation. Generated
-documents retain a portable relative target plus the stable logical destination
-metadata defined by the
-[catalogue navigation contract](./mokabook-navigation.md), allowing Browse to
-open the canonical catalogue page without changing standalone fragment
-behavior.
+documents currently retain only its portable relative target. The approved
+[catalogue navigation contract](./mokabook-navigation.md) will additionally
+retain stable logical-destination metadata so Browse can open the canonical
+catalogue page without changing standalone fragment behavior. That marker is
+target behavior and is not emitted until the active implementation plan
+completes.
 Local resource URLs in HTML source attributes, `srcset`, inline/style-block
 CSS, and transitively referenced HTML/CSS must likewise resolve to public
 static files beneath `mockupsDir` that remain after the pending build. An owned
