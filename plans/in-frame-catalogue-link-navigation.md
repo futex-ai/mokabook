@@ -218,6 +218,21 @@ At completion, current and target behavior are distinct, the public helper API
 does not overload entry ids with fragment syntax, and every common browser
 new-context gesture is named by the implementation plan.
 
+## Milestone 0H: Nested-Source And Status Corrections
+
+Summary: close the nested activation-source and protocol-status gaps found by
+the eighth review pass.
+
+- [x] Require marked and unmarked links in `srcdoc`, same-origin local,
+      generated-fragment, and cross-origin nested frames to remain ignored by
+      outer navigation as well as sandboxed from native shell navigation.
+- [x] Add document-level delivery status to the package and shell-design
+      protocols that contain planned navigation behavior.
+
+At completion, parent enhancement is limited to each shell-owned frame's
+immediate document, and the protocol index's delivery-status rule holds for
+every protocol touched by this plan.
+
 ## Milestone 1: Portable Logical-Link Identity
 
 Summary: generated documents retain stable catalogue intent alongside their
@@ -307,7 +322,10 @@ granting consumer frames native outer-navigation capability.
 - [ ] Add browser security regressions for `_top`/`_parent` activation from the
       immediate document and from `srcdoc`, same-origin local, and cross-origin
       nested frames. Assert none replace the shell and no nested context gains a
-      popup, script, form, download, or top-navigation capability.
+      popup, script, form, download, or top-navigation capability. In `srcdoc`,
+      same-origin local, generated-fragment, and cross-origin nested frames,
+      activate both marked-looking and unmarked links and prove neither triggers
+      parent-owned outer navigation.
 - [ ] Add table-driven unit tests for the shared typed target parser: absent,
       empty, keyword casing, safe named grammar, case preservation, whitespace,
       controls, leading underscore, and punctuation outside the allowlist.
@@ -369,7 +387,9 @@ No backend response transformation is included in this milestone.
 - [ ] Add a frame-navigation module that attaches on initial load, scheme
       swaps, flow frames, legacy embeds, and progressively installed views. It
       must read only validated `data-mokabook-link` markers and delegate to the
-      outer route navigator through `/id/<id>`.
+      outer route navigator through `/id/<id>`. Attach only to the immediate
+      document of each shell-owned frame; never traverse or bind descendant
+      iframe documents.
 - [ ] For a validated modified activation or explicit non-self target, have
       package-owned parent code read only adapter-produced target metadata,
       route `_top`/`_parent` through the outer transition, and open new or named
@@ -399,6 +419,10 @@ No backend response transformation is included in this milestone.
       Shift-click, middle-button `auxclick`, `_blank`, and a named target, while
       the iframe sandbox still lacks popup, script, and top-navigation
       permissions.
+- [ ] In the same spec, activate syntactically valid marked and ordinary links
+      inside `srcdoc`, same-origin local, generated-fragment, and cross-origin
+      nested frames. Assert the outer URL, active row, and shell view do not
+      change and no new context opens.
 - [ ] Add static-preview coverage that follows a fragment link, toggles light
       and dark, and proves the current source and every swap source retain the
       encoded hash; cover first-step-only use-case behavior.

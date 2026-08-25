@@ -12,6 +12,14 @@ The package must be usable by Accounting and Juno without importing either
 application or recognizing application-specific route names. Synthetic screens
 may exist only under examples and test fixtures.
 
+## Delivery Status
+
+This document describes implemented pre-release package and authoring behavior
+except for the optional fragment helper API, element-aware logical-link rules,
+and Browse marker behavior explicitly identified below as target behavior. Those
+additions are tracked by the active
+[in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
+
 ## Package Identity
 
 - The public package name is `mokabook`.

@@ -11,6 +11,13 @@ this contract fixes the tokens, dimensions, and responsive behavior that
 implementation and tests must preserve. Runtime behavior stays in
 [mokabook-runtime.md](./mokabook-runtime.md).
 
+## Delivery Status
+
+This document describes the implemented shell design except for the explicitly
+planned active-row ancestor disclosure, conditional filter clearing, and
+nearest-row scrolling behavior below. That target is tracked by the active
+[in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
+
 ## Design Mockups
 
 The approved screens are authored in `examples/basic/entries/design/` and

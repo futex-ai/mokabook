@@ -252,6 +252,7 @@ Coverage must prove:
 - continued script denial and top-navigation denial across direct, `srcdoc`,
   local, and cross-origin nested contexts; ancestor/named-context denial across
   HTML and SVG links, forms, marked, unmarked, download, and base targets;
+  marked and unmarked links in every nested context ignored by outer navigation;
   frame-owned external/download/hash behavior; and unchanged Review-pane links.
 
 ## Related Docs
