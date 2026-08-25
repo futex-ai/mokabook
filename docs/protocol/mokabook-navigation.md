@@ -60,7 +60,11 @@ requires the same multiset. Adding or removing a marker, preserving a marker
 while changing its portable destination, element kind, or namespace, changing
 a metadata-only reference into an activatable link, or moving logical identity
 between navigation attributes fails the build. Unrelated attributes remain
-consumer-owned.
+consumer-owned. After every document has been transformed, the builder indexes
+anchors from the final documents and repeats cross-view fragment validation for
+every retained logical-reference record. A transformer that removes or renames
+an anchor in any destination viewport or scheme therefore fails the build even
+when the source link record itself is unchanged.
 
 The marker is inert metadata, not a second resource URL. HTML escaping must be
 deterministic, and link/resource validation continues to inspect the portable

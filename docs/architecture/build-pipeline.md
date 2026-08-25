@@ -113,7 +113,9 @@ be permitted to add, remove, or alter an expected marker, change a
 metadata-only reference into an activatable link, change the owning element's
 namespace or native-link class, change the set of navigation attributes that
 carried its logical destination, or alter those attributes' resolved portable
-values. This keeps Browse, standalone, and Review navigation aligned.
+values. After transforming the complete output set, the build will re-index
+anchors from those final documents and repeat every logical fragment's
+cross-view check. This keeps Browse, standalone, and Review navigation aligned.
 
 React Native Web style collection is not a second conversion stage. If an app
 uses it, its renderer wraps the node in the app provider, registers or renders

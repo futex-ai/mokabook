@@ -167,6 +167,22 @@ found by the fourth review pass.
 At completion, marker trust follows generated ownership, preview anchors are
 durable, and the sandbox sanitizer has one testable parsing boundary.
 
+## Milestone 0E: Transform, Metadata, And Lifecycle Corrections
+
+Summary: close the post-transform, metadata-owner, watch-lifecycle, and preview
+documentation gaps found by the fifth review pass.
+
+- [x] Require final-document anchor indexing and cross-view fragment validation
+      after all compatibility transforms.
+- [x] Add marker-free HTML resource and SVG non-anchor `href` owners to the
+      implementation coverage.
+- [x] Split watched Serve coverage into content reload and manifest restart
+      lifecycle regressions.
+- [x] Add the preview deployment protocol to final documentation alignment.
+
+At completion, later milestones must prove every final transformed anchor,
+metadata-only owner, watch lifecycle, and preview documentation boundary.
+
 ## Milestone 1: Portable Logical-Link Identity
 
 Summary: generated documents retain stable catalogue intent alongside their
@@ -178,7 +194,9 @@ existing portable artifact links; Browse behavior is not activated yet.
 - [ ] Add failure-first cases to `tests/build_links.test.ts` for a reserved
       `data-mokabook-link` marker on `MockLink` and raw `mock:` hrefs in HTML
       anchors/areas and SVG anchors; prove a `data-nav-href`-only span remains
-      marker-free, and cover both attribute orders on one eligible link.
+      marker-free; prove logical `href` values on an HTML `link` and SVG
+      `use`/`image` remain metadata-only and marker-free; and cover both
+      attribute orders on one eligible link.
 - [ ] Cover screen and use-case ids, optional target fragments, mobile and
       desktop output, dark-to-dark resolution, dark-to-light fallback, exact
       fragment grammar, and the requirement that a target anchor exists in
@@ -187,7 +205,8 @@ existing portable artifact links; Browse behavior is not activated yet.
       different logical destinations on one element, unknown ids, collection
       ids, malformed fragments, and compatibility transformers that add/remove
       a marker, change element namespace/native-link class, or change/remove
-      only its portable `href`/`data-nav-href`.
+      only its portable `href`/`data-nav-href`. Include a transformer that
+      removes the requested anchor only from a non-current destination view.
 - [ ] Extend `src/build/mock_links.ts` with typed logical-target parsing and
       deterministic marker insertion for eligible HTML `a`/`area` and SVG `a`
       hrefs while preserving the byte-targeted rewrite and portable relative
@@ -200,6 +219,9 @@ existing portable artifact links; Browse behavior is not activated yet.
       value, namespace/native-link class, logical attribute names, and their
       exact resolved portable values. Fail through the existing typed
       `MokabookError` contract on divergence.
+- [ ] After all compatibility transforms, index anchors from the final output
+      documents and repeat cross-view anchor validation for every logical
+      reference, including sibling viewports and applicable dark output.
 - [ ] Ensure HTML/resource validation ignores the inert marker as a URL while
       continuing to validate the rewritten `href` and `data-nav-href`.
 - [ ] Add Review artifact and served Review regressions proving marker-bearing
@@ -262,9 +284,13 @@ adapter closes every consumer-authored route to iframe-wide top navigation.
 - [ ] Test served JavaScript-disabled default/`_self` navigation and anchors.
       Test that JavaScript-disabled preview reaches the canonical page without
       promising anchor scroll, and that neither environment grants popups.
-- [ ] Add a watched-serve regression that changes a `MockLink` destination or
-      route, waits for reload, verifies the latest manifest/HTML is used, and
-      proves shutdown leaves no orphan child.
+- [ ] Add a watched-serve regression that changes only a `MockLink`
+      destination, waits for rebuild and reload without a child restart, and
+      verifies the newly adapted HTML is served.
+- [ ] Add a separate watched-serve regression that changes a route/manifest,
+      waits for the child restart on the same resolved port, verifies the
+      latest manifest and adapted HTML, and proves shutdown leaves no orphan
+      child.
 - [ ] Run focused server/preview tests, `npm run preview:build`, watched and
       no-watch Serve smoke tests, and a query-preserving
       `wrangler pages dev` preview smoke test without orphan processes.
@@ -341,10 +367,11 @@ post-push review findings.
 
 - [ ] Update `README.md` and `examples/basic/README.md` so `MockLink` documents
       both portable generated behavior and canonical Browse navigation. Update
-      the navigation protocol and nearby architecture docs for any behavior
-      clarified during implementation; remove contradictions rather than
-      appending exceptions. Mark the navigation contract implemented and
-      remove its temporary delivery-status gap only after the behavior passes.
+      `docs/protocol/npm-release.md`, the navigation protocol, and nearby
+      architecture docs for the final preview adapter and any behavior clarified
+      during implementation; remove contradictions rather than appending
+      exceptions. Mark the navigation contract implemented and remove its
+      temporary delivery-status gap only after the behavior passes.
 - [ ] Review `examples/basic/notes.md` and the Design catalogue against the
       final implementation. If pixels changed despite the constraint above,
       stop, add a new `Tags: mockup` milestone before a new `Tags: ui`
