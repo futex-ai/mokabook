@@ -33,10 +33,22 @@ Rust `xtask` repository gates.
 
 ## Mainline Preservation Record
 
-The latest plan-maintenance audit ran on 2026-08-25 before implementation:
+The ninth-pass plan-maintenance audit ran on 2026-08-25 before implementation:
 
 - source tip before the ninth review corrections:
   `54b231e538f01d2f510f26e4accd2b81643587f5`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty; and
+- deletion audit against `origin/main`: empty.
+
+The tenth-pass remediation audit ran later on 2026-08-25, still before
+implementation:
+
+- source tip before the final review corrections:
+  `07adc8861f7ca4d79e4048c3ff287af7676b8e9e`;
 - fetched `origin/main` tip:
   `9fa89d33a0453a943675348086f1d068df5154ca`;
 - merge base:
@@ -275,6 +287,24 @@ At completion, portable-link authentication accounts for the effective base
 URL, all supported link owners have positive coverage, milestone completion is
 honest, and preservation evidence survives outside ignored scratch files.
 
+## Milestone 0J: Helper, Preview, And Review Corrections
+
+Summary: close the helper-boundary, absent-anchor, and late Review-regression
+gaps found by the tenth and final review pass.
+
+- [x] Require one shared catalogue-id grammar at helper, builder, registry, and
+      manifest boundaries, with explicit rejection of overloaded fragment or
+      logical-scheme syntax passed through the helper id/`to` input.
+- [x] Add pure-client and browser coverage for a syntactically valid static-
+      preview fragment that names no anchor.
+- [x] Repeat unit, server, and browser Review safety coverage after the frame-
+      navigation client is introduced, at the milestone where that regression
+      risk first exists.
+
+At completion, helper inputs cannot bypass the separate fragment API, every
+specified static-preview outcome has a direct regression, and later client work
+cannot silently promote links inside Review panes.
+
 ## Milestone 1: Portable Logical-Link Identity
 
 Summary: generated documents retain stable catalogue intent alongside their
@@ -289,7 +319,9 @@ existing portable artifact links; Browse behavior is not activated yet.
       `mockLink(id, fragment?)` and `<MockLink to={id} fragment={fragment}>`.
       Prove the helpers emit `mock:<id>[#fragment]`, keep id and bare fragment
       separate, do not percent-encode or accept a leading `#`, and preserve the
-      existing id-only calls.
+      existing id-only calls. Explicitly reject non-kebab-case ids and
+      overloaded inputs such as `id#fragment`, `id%23fragment`, and `mock:id`
+      through both the function argument and component `to` prop.
 - [ ] Add failure-first cases to `tests/build_links.test.ts` for a reserved
       `data-mokabook-link` marker on `MockLink` and raw `mock:` hrefs in HTML
       anchors/areas and SVG anchors; prove a `data-nav-href`-only span remains
@@ -316,8 +348,11 @@ existing portable artifact links; Browse behavior is not activated yet.
       URL for every supported navigation attribute. Reject a logical `href` on
       any other element before it can be rewritten as a resource URL, and
       reject an activatable logical link in a document with `<base href>`.
-- [ ] Extend `src/authoring/links.tsx` with an optional bare `fragment` argument
-      on `mockLink` and prop on `MockLink`; validate it with the shared logical
+- [ ] Extract or reuse one pure catalogue-id grammar validator across the
+      authoring helpers, builder parser, registry validation, and manifest
+      validation rather than duplicating the regular expression. Extend
+      `src/authoring/links.tsx` with an optional bare `fragment` argument on
+      `mockLink` and prop on `MockLink`; validate the id and shared logical
       fragment grammar before composing `mock:<id>#<fragment>`, and never pass
       the package-only prop through to the rendered anchor.
 - [ ] Validate one logical destination per element and reserve the marker from
@@ -429,7 +464,10 @@ without adding a request handler.
 - [ ] Add failure-first pure client tests for absent, single, and duplicate
       `fragment` query values; decode-once and grammar validation; encoded
       current/light/dark source updates; first-use-case-step scope; and invalid
-      or selector-shaped values failing closed without DOM mutation.
+      or selector-shaped values failing closed without DOM mutation. Include a
+      syntactically valid but absent anchor and prove the client still applies
+      its encoded hash without querying or interpreting the fragment as a DOM
+      selector.
 - [ ] Implement the static-preview query applier in a focused parent-client
       helper/module. Update `src`, `data-fragment-light`, and
       `data-fragment-dark` wherever present, and add no backend or static
@@ -437,7 +475,9 @@ without adding a request handler.
 - [ ] Add direct-URL Playwright coverage for a valid fragment on a screen and
       use-case preview page, light/dark toggling, every current and swap source,
       first-step-only scoping, invalid and duplicate query no-ops, and the
-      JavaScript-disabled static fallback remaining at the top of the frame.
+      JavaScript-disabled static fallback remaining at the top of the frame. A
+      valid-but-absent anchor must retain its hash while the frame remains
+      scrolled to the top in both light and dark sources.
 - [ ] Run the focused client/preview tests, `npm run preview:build`, and a
       query-preserving `wrangler pages dev` smoke test without orphan processes.
 
@@ -499,6 +539,13 @@ No backend response transformation is included in this milestone.
       inside `srcdoc`, same-origin local, generated-fragment, and cross-origin
       nested frames. Assert the outer URL, active row, and shell view do not
       change and no new context opens.
+- [ ] After the frame-navigation client lands, rerun
+      `tests/review_safety.test.ts` and `tests/server_review.test.ts`, then extend
+      `tests/browser/review.spec.ts` with static and served Review cases that
+      activate a marker-bearing portable pane link. Prove the pane retains its
+      existing sandboxed behavior while the outer Review URL, mode, navigation,
+      and open-context count stay unchanged and no Browse-derived target
+      metadata appears.
 - [ ] Add static-preview integration coverage that follows a fragment link into
       the Milestone 2A query applier, toggles light and dark, and proves the
       current source and every swap source retain the encoded hash; cover
@@ -506,8 +553,9 @@ No backend response transformation is included in this milestone.
 - [ ] Cover an active destination initially hidden by search and Changed,
       plus a destination already visible so unrelated user state is retained.
 - [ ] Run the focused client tests and navigation Playwright spec after
-      `npm run build`; run the existing `tests/browser/browse.spec.ts` to catch
-      regressions in the persistent shell.
+      `npm run build`; run the existing `tests/browser/browse.spec.ts` and the
+      focused cases in `tests/browser/review.spec.ts` to catch regressions in
+      the persistent Browse and Review shells.
 
 At completion, JavaScript-enabled Browse navigation, including trusted
 new-context activation, is coherent and the active catalogue entry is always

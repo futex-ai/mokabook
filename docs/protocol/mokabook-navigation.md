@@ -25,8 +25,12 @@ The target helper API is `mockLink(id, fragment?)` and
 `<MockLink to={id} fragment={fragment}>`. The id and optional fragment remain
 separate authoring concepts: `to` and the first function argument contain only
 the stable entry id, while `fragment` is a bare HTML id without `#` or
-percent-encoding. The helpers emit a complete `mock:<id>[#fragment]` value, and
-authors may still use that raw form in supported navigation attributes.
+percent-encoding. The helper id must match the registry's lowercase kebab-case
+grammar. The helpers reject overloaded or encoded target syntax such as
+`id#fragment`, `id%23fragment`, or `mock:id` in `to` or the id argument; an
+unknown but well-formed id fails later during the catalogue build. The helpers
+emit a complete `mock:<id>[#fragment]` value, and authors may still use that raw
+form in supported navigation attributes.
 
 A complete document that contains an activatable logical `href` must not
 contain an HTML `<base href>` element. The base URL would change the browser's
@@ -246,11 +250,11 @@ Filters and search remain unchanged when the destination is already visible.
 
 Coverage must prove:
 
-- portable output, eligible native-link markers, metadata-only
-  `data-nav-href`, rejection of logical `href` on resource/non-link elements,
-  rejection of `<base href>` before and after compatibility transformation,
-  dual navigation attributes, hashes, use-case ids, dark-to-light fallback,
-  conflicts, and reserved-marker errors;
+- helper-level id/fragment separation and id grammar, portable output, eligible
+  native-link markers, metadata-only `data-nav-href`, rejection of logical
+  `href` on resource/non-link elements, rejection of `<base href>` before and
+  after compatibility transformation, dual navigation attributes, hashes,
+  use-case ids, dark-to-light fallback, conflicts, and reserved-marker errors;
 - served and preview adaptation without mutating committed fragments, including
   ownership-gated promotion, unowned reserved-metadata removal, secure target
   parsing, portable live attributes, and request-visible fragment transport;

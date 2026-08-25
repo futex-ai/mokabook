@@ -266,11 +266,14 @@ catalogue page without changing standalone fragment behavior. The fragment is
 a bare HTML id without `#` or percent-encoding. That API, marker, and the rule
 reserving logical `href` for native HTML/SVG links are target behavior and are
 not enforced until the active implementation plan completes. Under the target
-contract, metadata-only references use `data-nav-href`, and resource elements
-must keep real resource URLs. A document with an activatable logical `href`
-must not contain `<base href>`; the target builder rejects that combination
-before and after compatibility transformation while continuing to support
-`<base target>`.
+contract, both helpers immediately apply the registry's lowercase kebab-case id
+grammar and reject fragment, percent-encoded, or `mock:` syntax in the id/`to`
+value; only the separate fragment input or complete raw logical attribute form
+may carry a fragment. Metadata-only references use `data-nav-href`, and resource
+elements must keep real resource URLs. A document with an activatable logical
+`href` must not contain `<base href>`; the target builder rejects that
+combination before and after compatibility transformation while continuing to
+support `<base target>`.
 Local resource URLs in HTML source attributes, `srcset`, inline/style-block
 CSS, and transitively referenced HTML/CSS must likewise resolve to public
 static files beneath `mockupsDir` that remain after the pending build. An owned
