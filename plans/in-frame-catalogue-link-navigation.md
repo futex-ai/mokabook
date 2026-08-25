@@ -131,6 +131,19 @@ delivery commit:
 - full working patch and whitespace audits: inspected and clean; and
 - deletion audit against `origin/main`: no deletions.
 
+The canonical-path and update-coherence follow-up audit ran on 2026-08-25
+before its delivery commit:
+
+- captured pre-integration source tip:
+  `bfcd06010fc4a25b22f138ce76636f27f7747ab8`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty;
+- full working patch and whitespace audits: inspected and clean; and
+- deletion audit against `origin/main`: no deletions.
+
 Milestone 1 must append a fresh dated pre-implementation audit rather than
 overwriting this evidence. Milestone 4 must append the final pre-commit audit,
 including each explicitly approved removal and its cleanup or an explicit
@@ -801,7 +814,41 @@ loop.
 - [ ] Mark this milestone and plan completed and return its index link to
       Completed only after the final review has no valid findings.
 
+## Milestone 9: Canonical Paths And Update Coherence
+
+Summary: close review pass 8's remaining path-canonicalization and live-update
+race at shared boundaries, including served Review documents, then repeat the
+complete delivery and independent-review loop.
+
+- [x] Add failure-first regressions proving encoded forward-slash aliases are
+      rejected, a first SSE `ready` version newer than the rendered page causes
+      an immediate recovery reload, and served Browse and Review HTML carries
+      its request-snapshot update version.
+- [x] Add a deterministic watched-browser regression that delays the initial
+      event-stream connection across a successful rebuild and proves the stale
+      page reloads to the new output while restoring Browse state.
+- [x] Decode each original path segment independently and reject any decoded
+      forward or backslash separator before reconstructing the relative path.
+- [x] Stamp every served Browse shell and served Review document with the
+      update version captured for that request, initialize the live-update
+      controller from that stamp, and retain first-ready baseline behavior only
+      for intentionally unstamped documents.
+- [x] Align the README and runtime protocol with canonical decoded-separator
+      rejection and request-version/SSE coherence, and record review pass 8 in
+      the review ledger.
+- [x] Run focused tests and the authoritative `cargo xtask check`, continuing
+      until the complete gate passes.
+- [ ] Fetch `origin/main`, repeat the required preservation and deletion audit,
+      commit all review fixes with a Conventional Commit title of at most 50
+      characters, and push the current branch without renaming it.
+- [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
+      check, commit, push, and review loop for every valid finding, stopping
+      after at most ten total review cycles.
+- [ ] Mark this milestone and plan completed and return its index link to
+      Completed only after the final review has no valid findings.
+
 At completion, generated ownership proofs are valid HTML comments for every
 supported source path, all ordinary HTTP response helpers require explicit
-method semantics, every served relative path rejects decoded backslash
-separators, and the final pushed diff has no valid review findings.
+method semantics, every served relative path rejects decoded separators, every
+live-update client can compare its rendered page snapshot with the event-stream
+version, and the final pushed diff has no valid review findings.

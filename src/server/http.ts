@@ -133,7 +133,13 @@ function handleRequest(
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed", method);
   const url = new URL(rawUrl, "http://mokabook.invalid");
-  const context = shellContext(base, currentChangedRoutes(), "browse");
+  const requestVersion = currentVersion();
+  const context = shellContext(
+    base,
+    currentChangedRoutes(),
+    "browse",
+    requestVersion,
+  );
   if (url.pathname === "/")
     return send(
       response,
@@ -146,7 +152,7 @@ function handleRequest(
     reviewRoutes &&
     (url.pathname === "/review" || url.pathname.startsWith("/review/"))
   ) {
-    void reviewRoutes.handle(url, response, method);
+    void reviewRoutes.handle(url, response, method, requestVersion);
     return;
   }
   if (url.pathname === "/review")
@@ -157,14 +163,14 @@ function handleRequest(
       reviewPage(
         base,
         catalogue,
-        shellContext(base, currentChangedRoutes(), "review"),
+        shellContext(base, currentChangedRoutes(), "review", requestVersion),
       ),
       method,
     );
   if (url.pathname === "/__mokabook/shell.css")
     return send(response, 200, "text/css", SHELL_CSS, method);
   if (url.pathname === "/__mokabook/events")
-    return openEventStream(response, streams, currentVersion(), method);
+    return openEventStream(response, streams, requestVersion, method);
   if (url.pathname.startsWith("/__mokabook/client/")) {
     return serveClientModule(
       response,

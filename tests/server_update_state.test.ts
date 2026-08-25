@@ -20,6 +20,7 @@ test("published updates replace or clear changed-route shell state", async (cont
   context.after(() => server.close());
 
   const initial = await (await fetch(server.url)).text();
+  assert.match(initial, /data-mokabook-update-version="1"/);
   assert.match(initial, /class="mbk-nav-filter-count">1</);
   assert.match(
     initial,
@@ -28,6 +29,7 @@ test("published updates replace or clear changed-route shell state", async (cont
 
   server.publishUpdate({ changedRoutes: [], version: 2 });
   const noChanges = await (await fetch(server.url)).text();
+  assert.match(noChanges, /data-mokabook-update-version="2"/);
   assert.match(noChanges, /class="mbk-nav-filter-count">0</);
   assert.doesNotMatch(noChanges, /data-changed="true"/);
 

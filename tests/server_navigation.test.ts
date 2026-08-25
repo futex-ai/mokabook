@@ -53,6 +53,13 @@ test("served Browse adapts current HTML without mutating portable files", async 
   assert.equal(head.status, 200);
   assert.match(head.headers.get("content-type") ?? "", /text\/html/);
   assert.equal(await head.text(), "");
+
+  for (const encodedPath of [
+    "/static/screens%2Fhome.mobile.html",
+    "/static/screens%5Chome.mobile.html",
+  ]) {
+    assert.equal((await fetch(`${server.url}${encodedPath}`)).status, 400);
+  }
 });
 
 test("served fragment queries validate once and reach every applicable frame", async (context) => {
@@ -132,8 +139,10 @@ test("HEAD id errors omit bodies on a reused connection", async (context) => {
   assert.match(home.body, /data-mokabook-shell/);
 });
 
-test("safe URL paths reject decoded backslash separators", () => {
+test("safe URL paths reject decoded path separators", () => {
   for (const candidate of [
+    "screens%2Fhome.mobile.html",
+    "screens%2f..%2fpackage.json",
     "screens%5Chome.mobile.html",
     "screens/%5c..%5c/package.json",
     "%5C%5Cserver%5Cshare",

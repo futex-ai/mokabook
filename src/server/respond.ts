@@ -21,17 +21,19 @@ export function send(
 /** Decode an encoded relative URL path, rejecting traversal and separators. */
 export function safeDecodePath(value: string): string | undefined {
   try {
-    const decoded = value.split("/").map(decodeURIComponent).join("/");
+    const segments = value.split("/").map(decodeURIComponent);
     if (
-      decoded === "" ||
-      decoded.startsWith("/") ||
-      decoded.includes("\\") ||
-      decoded
-        .split("/")
-        .some((part) => part === ".." || part === "." || part === "")
+      segments.some(
+        (part) =>
+          part === "" ||
+          part === "." ||
+          part === ".." ||
+          part.includes("/") ||
+          part.includes("\\"),
+      )
     )
       return undefined;
-    return decoded;
+    return segments.join("/");
   } catch {
     return undefined;
   }

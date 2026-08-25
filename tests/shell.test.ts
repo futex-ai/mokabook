@@ -98,7 +98,11 @@ const darkManifest: ManifestV3 = {
   ),
 };
 
-const context = { base: "origin/main", mode: "browse" as const };
+const context = {
+  base: "origin/main",
+  mode: "browse" as const,
+  updateVersion: 1,
+};
 
 const SCHEME_SWITCH =
   '<span aria-label="Color scheme" class="mbk-seg" data-mokabook-schemeswitch="" role="group">' +

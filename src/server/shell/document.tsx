@@ -73,7 +73,7 @@ export function renderShellPage(
   context: ShellContext,
 ): string {
   const markup = renderToStaticMarkup(
-    <html lang="en">
+    <html data-mokabook-update-version={context.updateVersion} lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />

@@ -81,9 +81,9 @@ Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
 Static path handling rejects traversal and does not expose repository files
 outside configured public roots. The shared relative-path decoder rejects
-malformed encoding, absolute and empty paths, dot segments, and every decoded
-backslash before any filesystem resolution, including on platforms where a
-backslash is a path separator.
+malformed encoding, absolute and empty paths, dot segments, and forward or
+backslash separators introduced by decoding one original URL segment before
+any filesystem resolution.
 
 ## Browse Shell
 
@@ -275,10 +275,13 @@ requiring a child restart.
 Watch actions execute serially. Changes received during an active action are
 coalesced by impact before the next action starts, so two rebuilds cannot race
 to replace generated output or restart the same child. The parent assigns a
-monotonic integer update version to each child and asset reload. An event
-stream's first `ready` version establishes the page baseline; a higher version
-after reconnection or an `update` event triggers one reload and one-shot state
-recovery.
+monotonic integer update version to each child and asset reload. Every served
+Browse shell and Review HTML document carries the update version captured when
+its request began. The client seeds its page baseline from that stamp: an equal
+event-stream `ready` version is a no-op, while a higher `ready` version or
+`update` event triggers one reload and one-shot state recovery. A document
+without a valid stamp retains compatibility behavior in which its first
+`ready` version establishes the baseline.
 
 Publishing an update without restarting the child marks its cached served
 Review artifact stale before notifying browsers. The first reloaded Review

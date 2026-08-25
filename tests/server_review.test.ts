@@ -34,7 +34,7 @@ function countingReview(
       await fs.promises.mkdir(outDir, { recursive: true });
       await fs.promises.writeFile(
         path.join(outDir, "index.html"),
-        `<h1>Generation ${this.generations}</h1>`,
+        `<!doctype html><html><body><h1>Generation ${this.generations}</h1><script src="/__mokabook/client/browser.js" type="module"></script></body></html>`,
       );
       await fs.promises.writeFile(
         path.join(outDir, "review-navigation.js"),
@@ -85,7 +85,9 @@ test("served review generates lazily, recomputes on refresh, and stays safe", as
   assert.equal(first.status, 200);
   assert.match(first.url, /\/review\/__generations\/[a-f0-9-]+\/index\.html$/);
   assert.match(first.headers.get("content-type") ?? "", /text\/html/);
-  assert.match(await first.text(), /Generation 1/);
+  const firstHtml = await first.text();
+  assert.match(firstHtml, /Generation 1/);
+  assert.match(firstHtml, /data-mokabook-update-version="1"/);
   assert.match(
     await (await fetch(`${server.url}/review/index.html`)).text(),
     /Generation 1/,
@@ -100,7 +102,9 @@ test("served review generates lazily, recomputes on refresh, and stays safe", as
 
   const refreshed = await fetch(`${server.url}/review?refresh=1`);
   assert.notEqual(refreshed.url, first.url);
-  assert.match(await refreshed.text(), /Generation 2/);
+  const refreshedHtml = await refreshed.text();
+  assert.match(refreshedHtml, /Generation 2/);
+  assert.match(refreshedHtml, /data-mokabook-update-version="1"/);
   assert.equal(review.generations, 2);
   const refreshedNavigation = await fetch(
     new URL("review-navigation.js", refreshed.url),
@@ -146,6 +150,7 @@ test("published updates invalidate the served review artifact", async (context) 
   ]);
   for (const result of regenerated) {
     assert.match(result.body, /Generation 2/);
+    assert.match(result.body, /data-mokabook-update-version="2"/);
     assert.notEqual(result.url, initial.url);
   }
   assert.equal(review.generations, 2);
@@ -179,6 +184,7 @@ test("a failed review generation answers a retryable page and then recovers", as
   assert.equal(failed.status, 500);
   const failedHtml = await failed.text();
   assert.match(failedHtml, /Review comparison failed/);
+  assert.match(failedHtml, /data-mokabook-update-version="1"/);
   assert.match(failedHtml, /Comparing this branch with <strong>origin\/main/);
   assert.match(failedHtml, /base ref is unavailable/);
   assert.match(failedHtml, /\/review\/index\.html\?refresh=1/);

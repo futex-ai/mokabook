@@ -34,7 +34,8 @@ const RECOVERY_KEY = "mokabook:live-update-recovery";
 
 /** Coordinate latest-wins reloads and one-shot directory-state recovery. */
 export class LiveUpdateController {
-  #lastVersion = 0;
+  #lastVersion: number;
+  readonly #pageVersionKnown: boolean;
 
   constructor(
     private readonly stream: UpdateEventStream,
@@ -42,7 +43,12 @@ export class LiveUpdateController {
     private readonly location: ReloadLocation,
     private readonly captureBrowseState: () =>
       BrowseRecoveryState | undefined = () => undefined,
-  ) {}
+    pageVersion?: number,
+  ) {
+    const knownPageVersion = isUpdateVersion(pageVersion) ? pageVersion : 0;
+    this.#pageVersionKnown = knownPageVersion > 0;
+    this.#lastVersion = knownPageVersion;
+  }
 
   /** Begin receiving server update versions. */
   start(): void {
@@ -84,8 +90,9 @@ export class LiveUpdateController {
   }
 
   private receive(version: number, forceReload: boolean): void {
-    if (!Number.isSafeInteger(version) || version <= this.#lastVersion) return;
-    const initialReady = this.#lastVersion === 0 && !forceReload;
+    if (!isUpdateVersion(version) || version <= this.#lastVersion) return;
+    const initialReady =
+      !this.#pageVersionKnown && this.#lastVersion === 0 && !forceReload;
     this.#lastVersion = version;
     if (initialReady) return;
     const browse = this.captureBrowseState();
@@ -97,4 +104,8 @@ export class LiveUpdateController {
     this.storage.setItem(RECOVERY_KEY, JSON.stringify(recovery));
     this.location.reload();
   }
+}
+
+function isUpdateVersion(value: number | undefined): value is number {
+  return Number.isSafeInteger(value) && value !== undefined && value > 0;
 }

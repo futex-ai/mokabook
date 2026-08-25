@@ -186,8 +186,9 @@ Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.
 Filesystem-backed Browse and Review routes reject malformed encoding,
-traversal segments, absolute paths, and percent-decoded backslashes before
-resolving a consumer file.
+traversal segments, absolute paths, and forward or backslash separators
+introduced by decoding one original URL segment before resolving a consumer
+file.
 Base resources must use portable relative URLs or explicit HTTP(S)/data URLs;
 root-absolute, protocol-relative, and unsupported-scheme URLs fail Review.
 Browse authenticates catalogue-link metadata only on current manifest-owned
@@ -208,11 +209,14 @@ custom rule watches the repository root; an unowned public HTML file can still
 use an explicit watch rule, and configured stylesheets retain reload
 precedence. Shutdown interrupts replacement-watcher readiness, closes the
 candidate before draining the remaining lifecycle, and waits for child exit
-through graceful, terminate, and force-kill stages. Open Browse and Review pages
-connect to the versioned event stream and reload after a newer build or asset
-version arrives. Publishing a reload-only watch update invalidates the served
-Review cache, so the reloaded Review URL regenerates before it is served. A
-watched reload restores the current Browse search, filter, disclosures,
+through graceful, terminate, and force-kill stages. Every served Browse shell
+and Review document records the update version captured when its request
+begins. Open pages compare that snapshot with the versioned event stream and
+reload after a newer build or asset version arrives, including when the build
+completes before the initial stream connection. Publishing a reload-only watch
+update invalidates the served Review cache, so the reloaded Review URL
+regenerates before it is served. A watched reload restores the current Browse
+search, filter, disclosures,
 viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and
 Forward.

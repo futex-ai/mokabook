@@ -6,20 +6,23 @@
  * reflects the workspace when viewed. Generated pages link back to Browse.
  */
 
-import fs from "node:fs";
-import path from "node:path";
 import type { ServerResponse } from "node:http";
 
 import { encodeUrlPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MokabookError } from "../errors.js";
 import { runReview } from "../review/run.js";
 import {
   ReviewGenerationStore,
   type ReviewArtifactProvider,
   type ReviewGeneration,
 } from "./review_generations.js";
-import { contentType, safeDecodePath, send } from "./respond.js";
+import {
+  redirectReview,
+  sendReviewFailure,
+  serveReviewArtifactFile,
+} from "./review_responses.js";
+import { safeDecodePath, send } from "./respond.js";
 
 const GENERATION_ROUTE = "/review/__generations/";
 
@@ -81,17 +84,24 @@ export class ReviewRoutes {
     url: URL,
     response: ServerResponse,
     method: string,
+    updateVersion: number,
   ): Promise<void> {
     if (url.pathname === "/review" || url.pathname === "/review/") {
       const refresh =
         url.searchParams.get("refresh") === "1" ? "?refresh=1" : "";
-      return redirect(response, `/review/index.html${refresh}`);
+      return redirectReview(response, `/review/index.html${refresh}`);
     }
     if (url.pathname.startsWith(GENERATION_ROUTE)) {
       const requested = generationPath(url.pathname);
       if (!requested)
         return send(response, 404, "text/plain", "Not found", method);
-      await this.handleGeneration(requested, url, response, method);
+      await this.handleGeneration(
+        requested,
+        url,
+        response,
+        method,
+        updateVersion,
+      );
       return;
     }
     const relative = safeDecodePath(url.pathname.slice("/review/".length));
@@ -101,14 +111,14 @@ export class ReviewRoutes {
       const generation = await this.ensureGenerated(
         url.searchParams.get("refresh") === "1",
       );
-      redirect(response, generationUrl(generation, relative));
+      redirectReview(response, generationUrl(generation, relative));
     } catch (error) {
-      return send(
+      return sendReviewFailure(
         response,
-        500,
-        "text/html",
-        failedPage(error, this.review.base),
+        error,
+        this.review.base,
         method,
+        updateVersion,
       );
     }
   }
@@ -186,6 +196,7 @@ export class ReviewRoutes {
     url: URL,
     response: ServerResponse,
     method: string,
+    updateVersion: number,
   ): Promise<void> {
     const generation = this.generations.get(requested.version);
     const current = this.generations.current();
@@ -204,63 +215,46 @@ export class ReviewRoutes {
             ? await this.ensureGenerated(refresh)
             : current;
         if (latest)
-          return redirect(response, generationUrl(latest, requested.relative));
+          return redirectReview(
+            response,
+            generationUrl(latest, requested.relative),
+          );
       } catch (error) {
-        return send(
+        return sendReviewFailure(
           response,
-          500,
-          "text/html",
-          failedPage(error, this.review.base),
+          error,
+          this.review.base,
           method,
+          updateVersion,
         );
       }
     }
     if (generation) {
-      return this.serveArtifactFile(
+      return serveReviewArtifactFile(
         generation.directory,
         requested.relative,
         response,
         method,
+        updateVersion,
       );
     }
     if (!isReviewDocument(requested.relative))
       return send(response, 404, "text/plain", "Not found", method);
     try {
       const latest = await this.ensureGenerated(false);
-      return redirect(response, generationUrl(latest, requested.relative));
-    } catch (error) {
-      return send(
+      return redirectReview(
         response,
-        500,
-        "text/html",
-        failedPage(error, this.review.base),
+        generationUrl(latest, requested.relative),
+      );
+    } catch (error) {
+      return sendReviewFailure(
+        response,
+        error,
+        this.review.base,
         method,
+        updateVersion,
       );
     }
-  }
-
-  private serveArtifactFile(
-    directory: string,
-    relative: string,
-    response: ServerResponse,
-    method: string,
-  ): void {
-    const rootPath = path.resolve(directory);
-    const filePath = path.resolve(rootPath, relative);
-    if (!filePath.startsWith(rootPath + path.sep))
-      return send(response, 404, "text/plain", "Not found", method);
-    let content: Buffer;
-    try {
-      content = fs.readFileSync(filePath);
-    } catch {
-      return send(response, 404, "text/plain", "Not found", method);
-    }
-    response.writeHead(200, {
-      "cache-control": "no-store",
-      "content-type": contentType(filePath),
-      "x-content-type-options": "nosniff",
-    });
-    response.end(method === "HEAD" ? undefined : content);
   }
 }
 
@@ -286,35 +280,6 @@ function isReviewDocument(relative: string): boolean {
 
 function generationUrl(generation: ReviewGeneration, relative: string): string {
   return `${GENERATION_ROUTE}${generation.version}/${encodeUrlPath(relative)}`;
-}
-
-function redirect(response: ServerResponse, location: string): void {
-  response.writeHead(302, {
-    "cache-control": "no-store",
-    location,
-  });
-  response.end();
-}
-
-function failedPage(error: unknown, base: string): string {
-  return (
-    `<!doctype html><html lang="en"><head><meta charset="utf-8">` +
-    `<title>Review comparison failed · Mokabook</title></head><body>` +
-    `<main><h1>Review comparison failed</h1>` +
-    `<p>Comparing this branch with <strong>${escapeHtml(base)}</strong> did ` +
-    `not complete.</p>` +
-    `<p>${escapeHtml(errorMessage(error))}</p>` +
-    `<p><a href="/review/index.html?refresh=1">Try again</a> · ` +
-    `<a href="/">Browse the catalogue</a></p></main></body></html>\n`
-  );
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 }
 
 function reviewServerClosing(): MokabookError {
