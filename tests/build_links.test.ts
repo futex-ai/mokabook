@@ -53,6 +53,33 @@ test("id-link rewriting uses parsed encoded href values", async (context) => {
   assert.doesNotMatch(mobile, /mock&#58;details/);
 });
 
+test("renderer output cannot duplicate reserved Browse metadata", async () => {
+  for (const markup of [
+    '<a data-mokabook-link="details" DATA-MOKABOOK-LINK="home" href="mock:details">Details</a>',
+    '<a data-mokabook-target="_self" DATA-MOKABOOK-TARGET="_blank" href="mock:details">Details</a>',
+  ]) {
+    const fixture = await createFixture();
+    try {
+      await fs.promises.writeFile(
+        path.join(fixture.root, "renderer.ts"),
+        `export default function render() { return ${JSON.stringify(`<!doctype html><html><body>${markup}</body></html>`)}; }\n`,
+      );
+      await fs.promises.writeFile(
+        fixture.configPath,
+        'export default { entriesDir: "entries", mockupsDir: "mockups", renderer: "renderer.ts", repoRoot: "." };\n',
+      );
+      const config = await loadConfig(fixture.root);
+
+      await assert.rejects(
+        () => compileCatalogue(config),
+        /duplicate reserved data-mokabook-(?:link|target)/,
+      );
+    } finally {
+      await removeFixture(fixture);
+    }
+  }
+});
+
 test("id-link rewriting resolves both navigation attributes", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

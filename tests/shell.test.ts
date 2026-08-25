@@ -98,7 +98,11 @@ const darkManifest: ManifestV3 = {
   ),
 };
 
-const context = { base: "origin/main", mode: "browse" as const };
+const context = {
+  base: "origin/main",
+  mode: "browse" as const,
+  updateVersion: 1,
+};
 
 const SCHEME_SWITCH =
   '<span aria-label="Color scheme" class="mbk-seg" data-mokabook-schemeswitch="" role="group">' +
@@ -218,8 +222,14 @@ test("screen page renders device chrome, viewport switch, and details", () => {
     ...context,
     activeRoute: "screens/welcome.html",
   });
-  assert.match(html, /class="mbk-frag" sandbox=""[^>]*welcome\.mobile/);
-  assert.match(html, /class="mbk-frag" sandbox=""[^>]*welcome\.desktop/);
+  assert.match(
+    html,
+    /class="mbk-frag"[^>]*sandbox="allow-same-origin"[^>]*welcome\.mobile/,
+  );
+  assert.match(
+    html,
+    /class="mbk-frag"[^>]*sandbox="allow-same-origin"[^>]*welcome\.desktop/,
+  );
   assert.match(html, /class="phone-frame"/);
   assert.match(html, /class="phone-notch"/);
   assert.match(
@@ -315,11 +325,11 @@ test("screen stage carries per-frame scheme fragment data", () => {
   const screen = routePage(dark, "screens/welcome.html");
   assert.match(
     screen,
-    /<iframe class="mbk-frag" data-fragment-dark="\/static\/screens\/welcome\.mobile\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.mobile\.html" sandbox="" src="\/static\/screens\/welcome\.mobile\.html" title="Welcome — mobile"><\/iframe>/,
+    /<iframe class="mbk-frag" data-mokabook-fragment-frame="" data-fragment-dark="\/static\/screens\/welcome\.mobile\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.mobile\.html" sandbox="allow-same-origin" src="\/static\/screens\/welcome\.mobile\.html" title="Welcome — mobile"><\/iframe>/,
   );
   assert.match(
     screen,
-    /<iframe class="mbk-frag" data-fragment-dark="\/static\/screens\/welcome\.desktop\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.desktop\.html" sandbox="" src="\/static\/screens\/welcome\.desktop\.html" title="Welcome — desktop"><\/iframe>/,
+    /<iframe class="mbk-frag" data-mokabook-fragment-frame="" data-fragment-dark="\/static\/screens\/welcome\.desktop\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.desktop\.html" sandbox="allow-same-origin" src="\/static\/screens\/welcome\.desktop\.html" title="Welcome — desktop"><\/iframe>/,
   );
   assert.equal(screen.includes("data-color-scheme-fallback"), false);
   assert.equal(screen.includes("mbk-frame-scheme-note"), false);
@@ -336,7 +346,7 @@ test("screen stage carries per-frame scheme fragment data", () => {
   );
   assert.match(
     fallback,
-    /<iframe class="mbk-frag" data-fragment-light="\/static\/screens\/details\.mobile\.html" sandbox="" src="\/static\/screens\/details\.mobile\.html" title="Details — mobile"><\/iframe>/,
+    /<iframe class="mbk-frag" data-mokabook-fragment-frame="" data-fragment-light="\/static\/screens\/details\.mobile\.html" sandbox="allow-same-origin" src="\/static\/screens\/details\.mobile\.html" title="Details — mobile"><\/iframe>/,
   );
   assert.equal(fallback.includes("data-fragment-dark"), false);
   assertLightSrcMatchesAttribute(fallback, 2);
@@ -344,11 +354,11 @@ test("screen stage carries per-frame scheme fragment data", () => {
   const flow = routePage(dark, "user-flows/tour.html");
   assert.match(
     flow,
-    /<div class="mbk-flow-screen"><div class="browser-frame">[\s\S]*?<iframe class="mbk-frag" data-fragment-dark="\/static\/screens\/welcome\.desktop\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.desktop\.html" sandbox=""/,
+    /<div class="mbk-flow-screen"><div class="browser-frame">[\s\S]*?<iframe class="mbk-frag" data-mokabook-fragment-frame="" data-fragment-dark="\/static\/screens\/welcome\.desktop\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.desktop\.html" sandbox="allow-same-origin"/,
   );
   assert.match(
     flow,
-    /<div class="mbk-flow-screen" data-color-scheme-fallback=""><div class="browser-frame">[\s\S]*?<iframe class="mbk-frag" data-fragment-light="\/static\/screens\/details\.desktop\.html" sandbox=""/,
+    /<div class="mbk-flow-screen" data-color-scheme-fallback=""><div class="browser-frame">[\s\S]*?<iframe class="mbk-frag" data-fragment-light="\/static\/screens\/details\.desktop\.html" sandbox="allow-same-origin"/,
   );
   assert.equal(flow.includes("mbk-frame-scheme-note"), false);
   assertLightSrcMatchesAttribute(flow, 2);
@@ -361,7 +371,7 @@ test("screen stage carries per-frame scheme fragment data", () => {
   );
   assert.match(
     lightScreen,
-    /<iframe class="mbk-frag" sandbox="" src="\/static\/screens\/welcome\.mobile\.html" title="Welcome — mobile"><\/iframe>/,
+    /<iframe class="mbk-frag" data-mokabook-fragment-frame="" sandbox="allow-same-origin" src="\/static\/screens\/welcome\.mobile\.html" title="Welcome — mobile"><\/iframe>/,
   );
   assert.equal(lightScreen.includes("data-fragment-"), false);
   assert.equal(lightScreen.includes("data-color-scheme-fallback"), false);

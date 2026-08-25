@@ -78,22 +78,49 @@ interface RenderInput {
 type Renderer = (input: RenderInput) => string;
 ```
 
-The returned string must be a complete HTML document. Mokabook then converts
-`ReviewIgnore` templates into inert comments and resolves every complete value
-of the form `mock:<id>` in `href` and `data-nav-href` to viewport-matched
-fragments in the same color scheme, falling back to light when the destination
-screen has no dark view. Both attributes are resolved when they coexist on one
-element, and the validator independently rejects any logical navigation value
-left by a compatibility transform. The same pass covers legacy pages, which
-remain light-only. Text, scripts, styles, and unrelated attributes containing
-the same characters remain unchanged. A use-case link resolves through its
-first screen; collections are intentionally not linkable.
+The returned string must be a complete HTML document. Mokabook
+converts `ReviewIgnore` templates into inert comments and resolves every
+complete value of the form `mock:<id>[#fragment]` found in `href` or
+`data-nav-href` to viewport-matched fragments in the same color scheme, falling
+back to light when the destination screen has no dark view. Both
+attributes are resolved when they coexist, and the same pass covers legacy
+pages, which remain light-only. Text, scripts, styles, and unrelated attributes
+containing the same characters remain unchanged. A use-case link resolves
+through its first screen; collections are intentionally not linkable.
+
+The [catalogue navigation contract](../protocol/mokabook-navigation.md) retains
+the stable id and optional fragment in a reserved `data-mokabook-link`
+marker when an HTML `<a>`/`<area>` or SVG `<a>` has a logical `href`. A
+`data-nav-href`-only reference remains validated portable metadata and does not
+gain Browse interaction. The builder rejects logical `href` on every non-link
+or resource element and rejects `<base href>` in a document containing an
+activatable logical link. It validates matching destinations when both
+navigation attributes coexist, rejects consumer-authored markers, verifies
+fragment anchors across every target view, and binds expected marker presence,
+element namespace/native-link class, and each logical attribute to the exact
+portable value produced for that element.
 
 During a staged migration only, a configured consumer transformer receives the
 complete document, current route/viewport/color scheme, repository-relative
 output path, available static/output routes, and view-resolved logical routes. The
 transformed document must remain complete and then passes every normal
 Review-marker, link, resource, path, and ownership check.
+The final ownership header must still decode to the route's expected source.
+Its versioned canonical-base64 field keeps the source path comment-safe, and
+the shared parser accepts either an LF or CRLF line ending. Final transformed
+output must retain this current encoding; safe legacy raw-path headers remain
+readable only so existing files can be recognized and migrated.
+
+This boundary preserves complete catalogue-reference records rather than
+markers alone. A transformer cannot add, remove, or alter an expected marker,
+change a
+metadata-only reference into an activatable link, change the owning element's
+namespace or native-link class, change the set of navigation attributes that
+carried its logical destination, or alter those attributes' resolved portable
+values. Adding `<base href>` to a document that retains an activatable record
+also fails. After transforming the complete output set, the build
+re-indexes anchors from those final documents and repeats every logical fragment's
+cross-view check. This keeps Browse, standalone, and Review navigation aligned.
 
 React Native Web style collection is not a second conversion stage. If an app
 uses it, its renderer wraps the node in the app provider, registers or renders
@@ -122,9 +149,10 @@ compatibility route inventory exclude those routes before any write begins, so
 a document cannot validate against a file that the successful transaction will
 remove.
 
-Watched Serve reuses that header-based ownership proof when pruning generated
-HTML. Public HTML without the header remains a consumer-owned static input and
-may be classified by an explicit watch rule.
+Watched Serve and Browse authentication reuse that same versioned,
+comment-safe, newline-portable ownership proof when pruning or presenting
+generated HTML. Public HTML without the header remains a consumer-owned static
+input and may be classified by an explicit watch rule.
 
 Catalogue routes use portable URL-unreserved segments, reject Windows device
 filename stems, and end in `.html`. Framework-generated links and redirects

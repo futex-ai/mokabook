@@ -49,8 +49,16 @@ export const mockups = [
     description: "The account landing screen.",
     navPath: ["Account"],
     route: "account/home.html",
-    mobile: <MockLink to="account-detail">Details</MockLink>,
-    desktop: <MockLink to="account-detail">Details</MockLink>,
+    mobile: (
+      <MockLink fragment="summary" to="account-detail">
+        Details
+      </MockLink>
+    ),
+    desktop: (
+      <MockLink fragment="summary" to="account-detail">
+        Details
+      </MockLink>
+    ),
     relatedDocs: ["docs/account.md"],
     dependencies: ["src/account/home.tsx"],
     useCaseIds: [],
@@ -61,6 +69,25 @@ export const mockups = [
 `mobile` and `desktop` accept any React node; real screens usually wrap their
 content in a `<main>` landmark because each fragment is generated as its own
 standalone page.
+
+`MockLink` accepts a lowercase kebab-case entry id and an optional bare HTML id
+through its separate `fragment` prop. The equivalent string helper is
+`mockLink(id, fragment?)`; both produce `mock:<id>[#fragment]`. Raw complete
+logical values remain available for an HTML/SVG link `href`, while
+`data-nav-href="mock:<id>[#fragment]"` records metadata without inventing an
+interaction. Generated files retain portable relative links, so standalone and
+Review documents continue to work. In Browse, an eligible link opens the
+destination's canonical catalogue page, carries its fragment, and reveals the
+active item in the navigation tree. Untyped JavaScript calls are validated at
+runtime as well: ids and fragments must be strings before their respective
+grammars are applied.
+
+```tsx
+import { mockLink } from "mokabook";
+
+const detailsHref = mockLink("account-detail", "summary");
+// "mock:account-detail#summary"
+```
 
 Color-scheme adoption has two steps: enable `colorSchemes: ["light", "dark"]`
 in the config, then select the consumer theme from `input.colorScheme` in the
@@ -97,7 +124,7 @@ fall back to the registry. After the first release, a clean machine may use
 | Command              | Outcome                                                |
 | -------------------- | ------------------------------------------------------ |
 | `mokabook`           | Build, serve, and watch using a stable development URL |
-| `mokabook serve`     | Serve Browse; add `--no-watch` for one child process   |
+| `mokabook serve`     | Serve Browse and Review; watch by default              |
 | `mokabook build`     | Validate and transactionally write generated output    |
 | `mokabook check`     | Compare expected and committed bytes without writing   |
 | `mokabook review`    | Compare branch-point/head screens and write a Review   |
@@ -127,6 +154,11 @@ base. Commits added only to the base branch after divergence do not appear as
 branch changes; staged, unstaged, and untracked workspace edits still do. A
 registry module that defines many routes does not make every route appear
 changed merely because the module's imports or composition changed.
+Lightweight watched updates recompute this route snapshot before notifying the
+browser, so the Changed rows and count match the files that triggered each
+reload without restarting the server child.
+Served `/static/` files use `Cache-Control: no-store`, so a watched reload reads
+the rebuilt fragments and resources even when their URLs remain unchanged.
 Review uses the same branch-point baseline and provides summary, side-by-side,
 overlay, and difference views as a static artifact. When screens render in both
 schemes, Review compares each viewport and scheme view and links sibling
@@ -148,6 +180,10 @@ assets. Refreshes and watched updates that arrive during generation coalesce
 into one follow-up run. Served Review files disable HTTP caching, so one
 document cannot combine files from different artifact generations, and the
 server refuses to archive a current output whose ownership marker is missing.
+Only Review shell pages receive live-update metadata; archived snapshot panes
+and their resources are served byte-for-byte, while an open generation-failure
+page stays connected and reloads automatically after a successful watched
+update.
 Retained-generation directories are excluded from changed-path evidence
 independently of consumer ignore rules. Shutdown prevents queued Review work
 from starting, drains active work, and then cleans retained directories.
@@ -155,8 +191,16 @@ from starting, drains active work, and then cleans retained directories.
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.
+Filesystem-backed Browse and Review routes reject malformed encoding,
+traversal segments, absolute paths, and forward or backslash separators
+introduced by decoding one original URL segment before resolving a consumer
+file.
 Base resources must use portable relative URLs or explicit HTTP(S)/data URLs;
 root-absolute, protocol-relative, and unsupported-scheme URLs fail Review.
+Browse authenticates catalogue-link metadata only on current manifest-owned
+generated fragments and legacy pages. It reads only each shell-owned frame's
+immediate same-origin document, while scripts, forms, downloads, popups, and
+top navigation remain unavailable to consumer content and nested frames.
 Copied base resources must be regular Git files outside configured source roots.
 Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and
 logical screen routes are not portable links in generated static files. Build
@@ -171,11 +215,15 @@ custom rule watches the repository root; an unowned public HTML file can still
 use an explicit watch rule, and configured stylesheets retain reload
 precedence. Shutdown interrupts replacement-watcher readiness, closes the
 candidate before draining the remaining lifecycle, and waits for child exit
-through graceful, terminate, and force-kill stages. Open Browse and Review pages
-connect to the versioned event stream and reload after a newer build or asset
-version arrives. Publishing a reload-only watch update invalidates the served
+through graceful, terminate, and force-kill stages. Every served Browse shell,
+Review shell page, and retryable Review failure page records the update version
+captured when its request begins. Open shell and failure pages compare that
+snapshot with the versioned event stream and reload after a newer build or
+asset version arrives, including when the build completes before the initial
+stream connection. Publishing a reload-only watch update invalidates the served
 Review cache, so the reloaded Review URL regenerates before it is served. A
-watched reload restores the current Browse search, filter, disclosures,
+watched reload restores the current Browse
+search, filter, disclosures,
 viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and
 Forward.
@@ -205,8 +253,8 @@ file and confined to `repoRoot`.
   artifact directory, and shared-impact globs.
 - `compatibility.readManifestV2` reads Accounting's old manifest only when v3
   is absent. A temporary `compatibility.transformer` may deterministically
-  repair already-authored documents during a consumer cutover; final links and
-  resources are still validated.
+  repair already-authored documents during a consumer cutover; final links,
+  resources, and the comment-safe generated source proof are still validated.
 
 Use `MockLink` for catalogue destinations. Raw relative links remain suitable
 for real static assets and legacy documents, but logical screen/use-case routes
@@ -241,8 +289,9 @@ forcing React peers to the consumer's one runtime.
 - **A generated file is stale:** run `mokabook build`, inspect the diff, then
   rerun `mokabook check`.
 - **Mokabook refuses an overwrite:** the existing HTML lacks a valid Mokabook
-  ownership header. Move it or choose a non-colliding route; the tool will not
-  delete an authored file.
+  ownership header. Current headers encode their source identity so every valid
+  repository filename remains safe inside an HTML comment. Move an unowned file
+  or choose a non-colliding route; the tool will not delete authored output.
 - **A package or React peer cannot resolve:** install React/React DOM in the
   consumer and configure the correct `moduleResolution.packageRoots` for a
   nested npm workspace.
@@ -282,10 +331,13 @@ consumers, Chromium tests, and all Rust checks.
 `npm run preview:build` turns the real `examples/basic` Browse catalogue into a
 static Cloudflare Pages artifact at `.context/mokabook-preview`. It snapshots
 every catalogue route through Mokabook's HTTP server, copies the package shell
-and public example assets, preserves id redirects, and excludes the
-development-only live-reload connection. The snapshot compares the catalogue
-with `origin/main`, so Browse includes its All/Changed filter even when the
-changed count is zero. The artifact is not part of the npm package.
+and adapted public example assets, preserves id redirects, and excludes the
+development-only live-reload connection. Static routes authenticate the same
+generated link markers as served Browse, and a single validated `fragment`
+query is applied progressively to current and light/dark frame sources. The
+snapshot compares the catalogue with `origin/main`, so Browse includes its
+All/Changed filter even when the changed count is zero. The artifact is not
+part of the npm package.
 
 The Preview workflow deploys `main` to the Cloudflare Pages project `mokabook`
 at `https://mokabook.pages.dev`. Same-repository, non-release pull requests use
@@ -340,6 +392,8 @@ recorded by the
   and the watched child lifecycle.
 - [`src/client`](./src/client) — progressive Browse navigation and versioned
   live updates served to the browser.
+- [`src/navigation`](./src/navigation) and [`src/browse`](./src/browse) — shared
+  logical-target grammar and ownership-aware HTML adaptation.
 - [`src/review`](./src/review) — Git extraction, comparison, ignore normalization,
   and static artifacts.
 - [`src/legacy`](./src/legacy) — opt-in migration sources and component expansion.

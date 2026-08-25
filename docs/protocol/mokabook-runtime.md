@@ -15,6 +15,10 @@ watch, server, and Review engines, the responsive package-owned Browse shell,
 the designed Review artifact pages, packed-package consumers, CI/release
 automation, and Playwright browser coverage are implemented. The irreversible
 first publication and downstream consumer cutover remain external steps.
+Canonical outer navigation from links inside fragment frames, request-visible
+fragment transport, ownership-aware preview adaptation, and active-tree
+disclosure are implemented. Their delivery history is recorded in the completed
+[in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
 
 ## Build
 
@@ -62,20 +66,26 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/` for the catalogue home;
 - `/view/<route>` for screens, use cases, and configured legacy pages;
 - `/id/<id>` as a canonical redirect for routed registry entries;
-- `/static/<path>` for generated fragments, legacy pages, and consumer assets;
+- `/static/<path>` for generated fragments, legacy pages, and consumer assets,
+  always delivered with `Cache-Control: no-store` because watched rebuilds
+  replace bytes at stable URLs;
 - `/review` for the configured Git comparison, redirecting to the artifact
   index, with stable `/review/<path>` routes redirecting to immutable
   `/review/__generations/<version>/<path>` artifact files;
 - package-owned client and update endpoints under `/__mokabook/`.
 
-All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
-returns its response headers and completes without opening or registering an
-event stream.
+All ordinary routes support GET and HEAD. HEAD returns the same status and
+headers without a body, including `/id` not-found and fragment-validation
+errors. A HEAD request to the update endpoint completes without opening or
+registering an event stream.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
 Static path handling rejects traversal and does not expose repository files
-outside configured public roots.
+outside configured public roots. The shared relative-path decoder rejects
+malformed encoding, absolute and empty paths, dot segments, and forward or
+backslash separators introduced by decoding one original URL segment before
+any filesystem resolution.
 
 ## Browse Shell
 
@@ -113,7 +123,29 @@ crumbs stay text. The details inspector may show description, rationale,
 source and fragment paths including dark renders, the schemes a screen renders
 in, related docs, dependencies, use cases, and comparison context.
 Consumer fragments and legacy documents are sandboxed without script permission
-so they cannot alter the same-origin Browse shell.
+so they cannot alter the same-origin Browse shell. Package-owned same-origin
+inspection permits parent-owned outer navigation after explicit user
+activation. Browse does not grant either
+top-navigation sandbox token, so direct and nested consumer contexts retain the
+active restriction that prevents them from replacing the shell. The
+served/preview adapter authenticates markers only for current-manifest
+screen fragments and generated legacy pages whose ownership header names that
+entry's manifest `sourcePath`. The versioned header stores that identity as
+canonical base64, keeping arbitrary repository filename bytes out of the HTML
+comment grammar. The adapter shares the strict build/cleanup decoder and
+accepts either LF or CRLF after that exact header. During migration it also
+recognizes the former raw-path header only when its source is valid comment
+content. Unowned HTML loses
+package-reserved metadata in the adapted copy; a trusted route with
+missing/mismatched ownership, invalid markers, or a marker/portable-href
+mismatch fails closed. One strict typed
+target parser supplies inert metadata only to trusted parent enhancement. A
+trusted document that carries an activatable marker and `<base href>` also
+fails closed, including if post-build tampering introduced the base URL;
+consumer-authored `href`, `<base target>`, `target`, and `formtarget` values
+otherwise remain portable and sandbox-confined. Consumer scripts, forms,
+popups, downloads, and top navigation remain forbidden. Review panes retain
+their stricter sandbox and byte-unmodified documents.
 
 A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
 light-only catalogue offers none. One switch renders in the top bar and one in
@@ -132,6 +164,13 @@ Browse is server rendered first and progressively enhanced. Direct URLs,
 refresh, missing routes, and JavaScript-disabled use remain functional. For an
 eligible unmodified same-origin Browse link, the client replaces only the
 route-owned main view and updates URL, title, active row, focus, and history.
+Logical links activated inside a consumer frame navigate that same outer route
+model rather than replacing only the iframe document. The shell opens the active
+row's ancestor collections, conditionally clears a search or Changed filter
+that would hide it, and scrolls it into view. The complete target,
+portable-link, safe-degradation,
+sandbox, fragment, and active-tree behavior is defined by the
+[catalogue navigation contract](./mokabook-navigation.md).
 Search, disclosure, filters, and catalogue scroll remain mounted; searching
 temporarily force-opens navigation groups and restores their prior disclosure
 when cleared. The details inspector is open until the user changes it, then its
@@ -148,10 +187,17 @@ The shell scrolls inside its stage, flow, and embed regions rather than the
 document. Back and Forward restore the matching route and that history entry's
 latest per-region scroll positions. Scroll persistence is limited to one
 leading update per animation frame, and route-change focus never overrides the
-restored positions. Overlapping requests are latest-wins. Review, static,
-iframe, download, external, target, hash-only, and modified-click links retain
-native browser behavior. A failed enhancement falls back to normal document
-navigation.
+restored positions. Overlapping requests are latest-wins. Review, download,
+external, hash-only, metadata-only, and unmarked links retain their existing
+frame-owned behavior. Trusted parent code owns primary and new-context
+navigation for a marked catalogue link inside a Browse frame when enhancement
+is available.
+There is no native outer-navigation fallback; failed or disabled enhancement
+keeps the portable link frame-owned and the sandbox prevents direct or nested
+content from replacing the shell. Served Browse applies a request-visible
+logical fragment during server rendering. The static deployed preview applies
+it progressively to each current and light/dark swap source so scheme changes
+retain the anchor.
 
 The shell meets keyboard, focus, reduced-motion, contrast, semantics, and status
 announcement requirements. Mobile and desktop shell variants are specified by
@@ -164,10 +210,11 @@ shipped shell are recorded beside the design catalogue in the example notes.
 ## Watched Development
 
 `mokabook serve` watches by default; `--no-watch` serves one deterministic
-snapshot. Every Browse and Review document loads the package-owned browser client,
-which connects to the versioned event stream and reloads its current durable
-URL after a higher version arrives. Watch classification derives only from
-resolved config:
+snapshot. Every Browse shell, served Review shell document, and retryable
+Review failure page loads the package-owned browser client, which connects to
+the versioned event stream and reloads its current durable URL after a higher
+version arrives. Snapshot panes do not run this client. Watch classification
+derives only from resolved config:
 
 - the discovered or explicit config file reloads configuration, generated
   output, watch targets, and the child;
@@ -219,13 +266,26 @@ is strictly parsed, applies only when its durable URL exactly matches the
 reloaded page, and is removed before application; a later manual refresh cannot
 resurrect stale state.
 
+When a successful rebuild leaves the manifest structure unchanged, or an
+explicit watch rule requests a reload, the parent keeps the ready child and
+recomputes the complete optional changed-route snapshot. One typed update
+message replaces the child's shell snapshot before the event-stream version is
+published. An available empty list keeps the filter visible at zero; an
+unavailable comparison removes it. The following browser reload therefore
+observes Changed rows and counts from the same successful watch action without
+requiring a child restart.
+
 Watch actions execute serially. Changes received during an active action are
 coalesced by impact before the next action starts, so two rebuilds cannot race
 to replace generated output or restart the same child. The parent assigns a
-monotonic integer update version to each child and asset reload. An event
-stream's first `ready` version establishes the page baseline; a higher version
-after reconnection or an `update` event triggers one reload and one-shot state
-recovery.
+monotonic integer update version to each child and asset reload. Every served
+Browse shell, server-owned Review shell document, and retryable Review failure
+page carries the update version captured when its request began. The client
+seeds its page baseline from that stamp: an equal event-stream `ready` version
+is a no-op, while a higher `ready` version or `update` event triggers one reload
+and one-shot state recovery. A document without a valid stamp retains
+compatibility behavior in which its first `ready` version establishes the
+baseline.
 
 Publishing an update without restarting the child marks its cached served
 Review artifact stale before notifying browsers. The first reloaded Review
@@ -332,9 +392,14 @@ artifact page includes the Review/index pill and self-contained responsive
 drawer. Pages generated behind the server additionally add the Browse pill, a
 recompute link, and the package-owned browser client for watched reloads;
 static `mokabook review` artifacts omit those server-only hooks. Successful
-redirects and artifact responses use `Cache-Control: no-store`. A generation
-failure restores the previous served directory, answers with a retryable error
-page, and leaves the server running; the next request retries the generation.
+redirects and artifact responses use `Cache-Control: no-store`. The server
+stamps only top-level Review index and comparison documents with the request's
+update version; snapshot panes and their resources are served from the retained
+generation as their exact archived bytes. A generation failure restores the
+previous served directory, answers with a version-stamped retryable error page
+that remains connected to watched updates, and leaves the server running. The
+next request retries the generation, while a later successful watched update
+automatically reloads an already-open failure page into the recovered artifact.
 Server shutdown stops new Review work, waits for active or queued generation to
 settle, then removes retained temporary generations but not the configured
 current output. Before archiving a current output, the server requires its

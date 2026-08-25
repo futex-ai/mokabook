@@ -9,7 +9,7 @@ export function send(
   status: number,
   type: string,
   body: string,
-  method = "GET",
+  method: string,
 ): void {
   response.writeHead(status, {
     "content-type": `${type}; charset=utf-8`,
@@ -18,19 +18,22 @@ export function send(
   response.end(method === "HEAD" ? undefined : body);
 }
 
-/** Decode an encoded relative URL path, rejecting traversal and absolutes. */
+/** Decode an encoded relative URL path, rejecting traversal and separators. */
 export function safeDecodePath(value: string): string | undefined {
   try {
-    const decoded = value.split("/").map(decodeURIComponent).join("/");
+    const segments = value.split("/").map(decodeURIComponent);
     if (
-      decoded === "" ||
-      decoded.startsWith("/") ||
-      decoded
-        .split("/")
-        .some((part) => part === ".." || part === "." || part === "")
+      segments.some(
+        (part) =>
+          part === "" ||
+          part === "." ||
+          part === ".." ||
+          part.includes("/") ||
+          part.includes("\\"),
+      )
     )
       return undefined;
-    return decoded;
+    return segments.join("/");
   } catch {
     return undefined;
   }
@@ -48,7 +51,7 @@ export function safeDecode(value: string): string {
 /** The response content type for a served artifact or static file. */
 export function contentType(candidate: string): string {
   const extension = path.extname(candidate).toLowerCase();
-  return extension === ".html"
+  return extension === ".html" || extension === ".htm"
     ? "text/html; charset=utf-8"
     : extension === ".js"
       ? "text/javascript; charset=utf-8"

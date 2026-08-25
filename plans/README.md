@@ -7,4 +7,5 @@
 
 ## Completed
 
+- [In-Frame Catalogue Link Navigation](./in-frame-catalogue-link-navigation.md)
 - [Native Color Scheme (Dark Mode) Support](./native-color-scheme-support.md)

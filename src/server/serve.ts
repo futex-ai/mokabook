@@ -12,8 +12,8 @@ import {
   NodeCatalogueServerFactory,
   type CatalogueServerFactory,
 } from "./factory.js";
-import type { RunningServer } from "./http.js";
 import { configuredServedReview } from "./review_routes.js";
+import { computeChangedRoutes } from "./changed.js";
 import {
   NodeProcessSupervisorFactory,
   type ProcessSupervisor,
@@ -24,6 +24,12 @@ import {
   type ConsumerWatcher,
   type ConsumerWatcherFactory,
 } from "./watcher.js";
+import {
+  closeWatched,
+  restartWithRecovery,
+  serverLifecycle,
+  watcherReadyBeforeShutdown,
+} from "./serve_lifecycle.js";
 import {
   classifyWatchPath,
   isPackageOwnedIgnoredWatchPath,
@@ -107,10 +113,13 @@ async function serveWatched(
   let activeConfig = config;
   let watcher = createWatcher(watcherFactory, activeConfig, gate);
   let supervisor: ProcessSupervisor | undefined;
+  let manifestSignature = "";
   let port: number;
   try {
     await watcher.ready();
-    await outputStore.write(await compileCatalogue(config), config);
+    const initialCompilation = await compileCatalogue(config);
+    await outputStore.write(initialCompilation, config);
+    manifestSignature = JSON.stringify(initialCompilation.manifest);
     const binPath = fileURLToPath(new URL("../cli/bin.js", import.meta.url));
     const baseArguments = [
       "__serve-child",
@@ -163,7 +172,9 @@ async function serveWatched(
         await closeReplacement();
         return;
       }
-      await outputStore.write(await compileCatalogue(nextConfig), nextConfig);
+      const nextCompilation = await compileCatalogue(nextConfig);
+      await outputStore.write(nextCompilation, nextConfig);
+      manifestSignature = JSON.stringify(nextCompilation.manifest);
       if (closed) {
         await closeReplacement();
         return;
@@ -196,13 +207,28 @@ async function serveWatched(
       await reconfigure();
       return;
     }
-    if (action === "rebuild")
-      await outputStore.write(
-        await compileCatalogue(activeConfig),
-        activeConfig,
-      );
-    if (action === "reload") runningSupervisor.notifyUpdate();
-    else await restartWithRecovery(runningSupervisor);
+    if (action === "rebuild") {
+      const nextCompilation = await compileCatalogue(activeConfig);
+      await outputStore.write(nextCompilation, activeConfig);
+      const nextSignature = JSON.stringify(nextCompilation.manifest);
+      if (nextSignature === manifestSignature) {
+        await publishUpdate();
+      } else {
+        manifestSignature = nextSignature;
+        await restartWithRecovery(runningSupervisor);
+      }
+      return;
+    }
+    if (action === "reload") {
+      await publishUpdate();
+      return;
+    }
+    await restartWithRecovery(runningSupervisor);
+  };
+  const publishUpdate = async (): Promise<void> => {
+    const base = options.base ?? activeConfig.review.base;
+    const changedRoutes = await computeChangedRoutes(activeConfig, base);
+    if (!closed) runningSupervisor.notifyUpdate(changedRoutes);
   };
   const actionQueue = new WatchActionQueue(processAction, (error) =>
     process.stderr.write(`${errorMessage(error)}\n`),
@@ -229,17 +255,6 @@ async function serveWatched(
   };
 }
 
-/** Stop waiting for a candidate watcher as soon as watched shutdown begins. */
-async function watcherReadyBeforeShutdown(
-  watcher: ConsumerWatcher,
-  shutdownStarted: Promise<void>,
-): Promise<boolean> {
-  return Promise.race([
-    watcher.ready().then(() => true),
-    shutdownStarted.then(() => false),
-  ]);
-}
-
 function createWatcher(
   factory: ConsumerWatcherFactory,
   config: ResolvedConfig,
@@ -251,44 +266,4 @@ function createWatcher(
   watcher.onChange((candidate) => gate.notify(candidate));
   watcher.onError((error) => process.stderr.write(`${errorMessage(error)}\n`));
   return watcher;
-}
-
-async function closeWatched(
-  actionQueue: WatchActionQueue,
-  currentWatcher: () => ConsumerWatcher,
-  supervisor: ProcessSupervisor,
-): Promise<void> {
-  let firstError: unknown;
-  for (const close of [
-    () => actionQueue.close(),
-    () => currentWatcher().close(),
-    () => supervisor.close(),
-  ]) {
-    try {
-      await close();
-    } catch (error) {
-      firstError ??= error;
-    }
-  }
-  if (firstError !== undefined) throw firstError;
-}
-
-/** Restore a child after a failed restart while still reporting the failure. */
-export async function restartWithRecovery(
-  supervisor: ProcessSupervisor,
-): Promise<void> {
-  try {
-    await supervisor.restart();
-  } catch (restartError) {
-    try {
-      await supervisor.start();
-    } catch {
-      throw restartError;
-    }
-    throw restartError;
-  }
-}
-
-function serverLifecycle(server: RunningServer): RunningServe {
-  return { close: () => server.close(), port: server.port, url: server.url };
 }

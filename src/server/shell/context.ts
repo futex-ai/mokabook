@@ -10,4 +10,23 @@ export interface ShellContext {
   changedRoutes?: readonly string[];
   /** Which top-level mode the requested page belongs to. */
   mode: "browse" | "review";
+  /** Validated logical fragment applied to the routed target's frames. */
+  fragment?: string;
+  /** Update-stream version captured when this page request began. */
+  updateVersion: number;
+}
+
+/** Create one page context from the current mutable server snapshot. */
+export function shellContext(
+  base: string,
+  changedRoutes: readonly string[] | undefined,
+  mode: ShellContext["mode"],
+  updateVersion: number,
+): ShellContext {
+  return {
+    base,
+    ...(changedRoutes ? { changedRoutes } : {}),
+    mode,
+    updateVersion,
+  };
 }

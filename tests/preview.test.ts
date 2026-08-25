@@ -103,19 +103,36 @@ test("preview build refuses to replace an unowned directory", async (context) =>
 });
 
 async function assertClientGraphIsComplete(output: string): Promise<void> {
-  const clientDir = path.join(output, "__mokabook", "client");
-  const copied = (await fs.promises.readdir(clientDir)).filter((name) =>
-    name.endsWith(".js"),
-  );
+  const assetRoot = path.join(output, "__mokabook");
+  const copied = await javascriptFiles(assetRoot);
   assert.ok(copied.length > 0);
   for (const module of copied) {
-    for (const target of relativeImports(await read(clientDir, module))) {
+    const source = await fs.promises.readFile(
+      path.join(assetRoot, module),
+      "utf8",
+    );
+    for (const target of relativeImports(source)) {
+      const resolved = path.normalize(path.join(path.dirname(module), target));
       assert.ok(
-        copied.includes(target),
-        `${module} imports missing preview module ${target}`,
+        copied.includes(resolved),
+        `${module} imports missing preview module ${resolved}`,
       );
     }
   }
+}
+
+async function javascriptFiles(root: string, relative = ""): Promise<string[]> {
+  const files: string[] = [];
+  for (const entry of await fs.promises.readdir(path.join(root, relative), {
+    withFileTypes: true,
+  })) {
+    const candidate = path.join(relative, entry.name);
+    if (entry.isDirectory())
+      files.push(...(await javascriptFiles(root, candidate)));
+    else if (entry.isFile() && entry.name.endsWith(".js"))
+      files.push(candidate);
+  }
+  return files;
 }
 
 async function read(root: string, relative: string): Promise<string> {
@@ -124,7 +141,7 @@ async function read(root: string, relative: string): Promise<string> {
 
 function relativeImports(source: string): string[] {
   const targets: string[] = [];
-  const pattern = /(?:^|\s)(?:from|import)\s+"\.\/([^"]+)"/g;
+  const pattern = /(?:^|\s)(?:from|import)\s+"((?:\.\.?\/)[^"]+)"/g;
   for (const match of source.matchAll(pattern)) {
     if (match[1] !== undefined) targets.push(match[1]);
   }

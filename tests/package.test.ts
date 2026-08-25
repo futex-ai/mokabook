@@ -20,6 +20,20 @@ const execFileAsync = promisify(execFile);
 test("public helpers retain stable authoring semantics", () => {
   assert.equal(mockLink("account-home"), "mock:account-home");
   assert.equal(
+    mockLink("account-home", "billing-section"),
+    "mock:account-home#billing-section",
+  );
+  for (const invalid of [
+    "account-home#billing-section",
+    "account-home%23billing-section",
+    "mock:account-home",
+    "AccountHome",
+  ]) {
+    assert.throws(() => mockLink(invalid), /expected kebab-case/);
+  }
+  assert.throws(() => mockLink("account-home", "#billing"), /fragment/);
+  assert.throws(() => mockLink("account-home", "billing section"), /fragment/);
+  assert.equal(
     reviewMaterialKey({ beta: 2, alpha: 1 }),
     reviewMaterialKey({ alpha: 1, beta: 2 }),
   );
@@ -54,6 +68,23 @@ test("public helpers retain stable authoring semantics", () => {
     definitions[1]?.kind === "screen" ? definitions[1].route : "",
     "screens/group/screen.html",
   );
+});
+
+test("public link helpers reject non-string runtime values", () => {
+  for (const invalid of [null, true, 42, ["account-home"]]) {
+    assert.throws(
+      () => mockLink(invalid as never),
+      /expected kebab-case/,
+      String(invalid),
+    );
+  }
+  for (const invalid of [true, 42, ["billing-section"]]) {
+    assert.throws(
+      () => mockLink("account-home", invalid as never),
+      /fragment/,
+      String(invalid),
+    );
+  }
 });
 
 test("CLI defaults to watched serve and rejects misplaced options", () => {

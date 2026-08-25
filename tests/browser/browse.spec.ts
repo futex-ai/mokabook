@@ -93,7 +93,7 @@ test("durable links load complete server-rendered views", async ({ page }) => {
   await expect(page.locator("#mb-main h2")).toHaveText("Welcome");
   await expect(page.locator(".mbk-frame-mobile iframe")).toHaveAttribute(
     "sandbox",
-    "",
+    "allow-same-origin",
   );
   await expect(page.locator(welcomeRow)).toHaveAttribute(
     "aria-current",

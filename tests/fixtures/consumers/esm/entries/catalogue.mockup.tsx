@@ -30,13 +30,17 @@ export const mockups = [
         <ReviewIgnore id="fixture-navigation">
           <nav>Fixture navigation</nav>
         </ReviewIgnore>
-        <MockLink to="packed-detail">Open details</MockLink>
+        <MockLink fragment="packed-section" to="packed-detail">
+          Open details
+        </MockLink>
       </main>
     ),
     id: "packed-home",
     mobile: (
       <main data-fixture="esm-mobile">
-        <MockLink to="packed-detail">Open details</MockLink>
+        <MockLink fragment="packed-section" to="packed-detail">
+          Open details
+        </MockLink>
       </main>
     ),
     route: "screens/home.html",
@@ -46,9 +50,17 @@ export const mockups = [
   defineScreen({
     ...metadata,
     description: "The destination in the clean ESM consumer.",
-    desktop: <main data-fixture="esm-detail-desktop">Packed details</main>,
+    desktop: (
+      <main data-fixture="esm-detail-desktop" id="packed-section">
+        Packed details
+      </main>
+    ),
     id: "packed-detail",
-    mobile: <main data-fixture="esm-detail-mobile">Packed details</main>,
+    mobile: (
+      <main data-fixture="esm-detail-mobile" id="packed-section">
+        Packed details
+      </main>
+    ),
     route: "screens/detail.html",
     title: "Packed details",
     useCaseIds: ["packed-tour"],

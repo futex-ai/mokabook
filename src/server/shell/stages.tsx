@@ -23,22 +23,24 @@ interface FragmentSources {
  * the scheme attributes the Browse client assigns back into that `src` — is
  * built here so the two can never drift apart.
  */
-function fragmentSrc(route: string): string {
-  return `/static/${encodeUrlPath(route)}`;
+function fragmentSrc(route: string, fragment?: string): string {
+  const source = `/static/${encodeUrlPath(route)}`;
+  return fragment ? `${source}#${encodeURIComponent(fragment)}` : source;
 }
 
 function fragmentSources(
   screen: ManifestScreen,
   viewport: Viewport,
   hasDarkFragments: boolean,
+  fragment?: string,
 ): FragmentSources {
   if (!hasDarkFragments) {
     return { dark: undefined, light: undefined };
   }
   const dark = screen.darkFragments?.[viewport];
   return {
-    dark: dark === undefined ? undefined : fragmentSrc(dark),
-    light: fragmentSrc(screen.fragments[viewport]),
+    dark: dark === undefined ? undefined : fragmentSrc(dark, fragment),
+    light: fragmentSrc(screen.fragments[viewport], fragment),
   };
 }
 
@@ -66,7 +68,7 @@ function EmbedStage(props: { route: string; title: string }) {
     <div className="mbk-stage-embed" data-mokabook-scroll="embed">
       <iframe
         className="mbk-frag"
-        sandbox=""
+        sandbox="allow-same-origin"
         src={fragmentSrc(props.route)}
         title={props.title}
       />
@@ -75,13 +77,24 @@ function EmbedStage(props: { route: string; title: string }) {
 }
 
 function FramesStage(props: {
+  fragment?: string;
   hasDarkFragments: boolean;
   screen: ManifestScreen;
 }) {
   const screen = props.screen;
   const address = screen.address ?? screen.route;
-  const mobile = fragmentSources(screen, "mobile", props.hasDarkFragments);
-  const desktop = fragmentSources(screen, "desktop", props.hasDarkFragments);
+  const mobile = fragmentSources(
+    screen,
+    "mobile",
+    props.hasDarkFragments,
+    props.fragment,
+  );
+  const desktop = fragmentSources(
+    screen,
+    "desktop",
+    props.hasDarkFragments,
+    props.fragment,
+  );
   const fallback = isSchemeFallback(screen, props.hasDarkFragments);
   return (
     <div
@@ -98,10 +111,11 @@ function FramesStage(props: {
         <PhoneFrame>
           <iframe
             className="mbk-frag"
+            data-mokabook-fragment-frame=""
             data-fragment-dark={mobile.dark}
             data-fragment-light={mobile.light}
-            sandbox=""
-            src={fragmentSrc(screen.fragments.mobile)}
+            sandbox="allow-same-origin"
+            src={fragmentSrc(screen.fragments.mobile, props.fragment)}
             title={`${screen.title} — mobile`}
           />
         </PhoneFrame>
@@ -114,10 +128,11 @@ function FramesStage(props: {
         <BrowserFrame address={address}>
           <iframe
             className="mbk-frag"
+            data-mokabook-fragment-frame=""
             data-fragment-dark={desktop.dark}
             data-fragment-light={desktop.light}
-            sandbox=""
-            src={fragmentSrc(screen.fragments.desktop)}
+            sandbox="allow-same-origin"
+            src={fragmentSrc(screen.fragments.desktop, props.fragment)}
             title={`${screen.title} — desktop`}
           />
         </BrowserFrame>
@@ -127,11 +142,18 @@ function FramesStage(props: {
 }
 
 function FlowScreen(props: {
+  fragment?: string;
+  fragmentFrame: boolean;
   hasDarkFragments: boolean;
   screen: ManifestScreen;
 }) {
   const screen = props.screen;
-  const desktop = fragmentSources(screen, "desktop", props.hasDarkFragments);
+  const desktop = fragmentSources(
+    screen,
+    "desktop",
+    props.hasDarkFragments,
+    props.fragment,
+  );
   const fallback = isSchemeFallback(screen, props.hasDarkFragments);
   return (
     <div
@@ -141,10 +163,11 @@ function FlowScreen(props: {
       <BrowserFrame address={screen.address ?? screen.route}>
         <iframe
           className="mbk-frag"
+          data-mokabook-fragment-frame={props.fragmentFrame ? "" : undefined}
           data-fragment-dark={desktop.dark}
           data-fragment-light={desktop.light}
-          sandbox=""
-          src={fragmentSrc(screen.fragments.desktop)}
+          sandbox="allow-same-origin"
+          src={fragmentSrc(screen.fragments.desktop, props.fragment)}
           title={`${screen.title} — desktop`}
         />
       </BrowserFrame>
@@ -155,6 +178,7 @@ function FlowScreen(props: {
 function UseCaseFlowStage(props: {
   catalogue: Catalogue;
   entry: ManifestUseCase;
+  fragment?: string;
 }) {
   return (
     <div className="mbk-flow" data-mokabook-scroll="flow">
@@ -181,6 +205,10 @@ function UseCaseFlowStage(props: {
               </div>
               {screen ? (
                 <FlowScreen
+                  {...(index === 0 && props.fragment
+                    ? { fragment: props.fragment }
+                    : {})}
+                  fragmentFrame={index === 0}
                   hasDarkFragments={props.catalogue.hasDarkFragments}
                   screen={screen}
                 />
@@ -206,6 +234,7 @@ export function EmptyStage(props: { children: ReactNode; heading: string }) {
 /** Render the route-specific preview below the shell-owned heading. */
 export function TargetStage(props: {
   catalogue: Catalogue;
+  fragment?: string;
   legacyTitle: string;
   target: RouteTarget;
 }) {
@@ -217,10 +246,15 @@ export function TargetStage(props: {
   const entry = props.target.entry;
   return entry.kind === "screen" ? (
     <FramesStage
+      {...(props.fragment ? { fragment: props.fragment } : {})}
       hasDarkFragments={props.catalogue.hasDarkFragments}
       screen={entry}
     />
   ) : (
-    <UseCaseFlowStage catalogue={props.catalogue} entry={entry} />
+    <UseCaseFlowStage
+      catalogue={props.catalogue}
+      entry={entry}
+      {...(props.fragment ? { fragment: props.fragment } : {})}
+    />
   );
 }
