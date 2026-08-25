@@ -222,13 +222,13 @@ post-push diff to the required AI reviewer.
       inspect `git diff --name-status origin/main`, deletion-only changes, the
       complete diff, and generated artifacts. Do not remove or override
       mainline features.
-- [ ] Run `git add -A`; confirm every new source, test, doc, and generated file
+- [x] Run `git add -A`; confirm every new source, test, doc, and generated file
       is tracked; commit with a Conventional Commit title no longer than 50
       characters (for example, `feat: infer breadcrumbs from hierarchy`); and
       push the current branch without renaming it.
-- [ ] After the push, run `cargo xtask review` against the local diff from
+- [x] After the push, run `cargo xtask review` against the local diff from
       `origin/main`. Do not automatically fix findings.
-- [ ] Report every review finding as a numbered item with severity, relevant
+- [x] Report every review finding as a numbered item with severity, relevant
       codebase/feature context, impact of doing nothing, lettered solution
       options, and a recommended option. For each recommendation, consider
       whether a broader validation rule, test, lint, or abstraction would
