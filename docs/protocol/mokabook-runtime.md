@@ -66,7 +66,9 @@ Browse validates the manifest before binding its listening port. It exposes:
 - `/` for the catalogue home;
 - `/view/<route>` for screens, use cases, and configured legacy pages;
 - `/id/<id>` as a canonical redirect for routed registry entries;
-- `/static/<path>` for generated fragments, legacy pages, and consumer assets;
+- `/static/<path>` for generated fragments, legacy pages, and consumer assets,
+  always delivered with `Cache-Control: no-store` because watched rebuilds
+  replace bytes at stable URLs;
 - `/review` for the configured Git comparison, redirecting to the artifact
   index, with stable `/review/<path>` routes redirecting to immutable
   `/review/__generations/<version>/<path>` artifact files;

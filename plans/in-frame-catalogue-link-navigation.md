@@ -144,6 +144,19 @@ before its delivery commit:
 - full working patch and whitespace audits: inspected and clean; and
 - deletion audit against `origin/main`: no deletions.
 
+The static-cache and command-documentation follow-up audit ran on 2026-08-25
+before its delivery commit:
+
+- captured pre-integration source tip:
+  `bbc073f822f642827769fb205cfca992e0fc5fe8`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty;
+- full working patch and whitespace audits: inspected and clean; and
+- deletion audit against `origin/main`: no deletions.
+
 Milestone 1 must append a fresh dated pre-implementation audit rather than
 overwriting this evidence. Milestone 4 must append the final pre-commit audit,
 including each explicitly approved removal and its cleanup or an explicit
@@ -847,8 +860,34 @@ complete delivery and independent-review loop.
 - [ ] Mark this milestone and plan completed and return its index link to
       Completed only after the final review has no valid findings.
 
+## Milestone 10: Fresh Static Reload Delivery
+
+Summary: close review pass 9's cache-coherence and command-documentation gaps
+so reload-only watched updates cannot reuse a stale fragment at the same URL,
+then complete the final delivery and independent-review loop.
+
+- [x] Add a failure-first server regression proving successful `/static/`
+      responses are explicitly non-cacheable, including HEAD semantics.
+- [x] Send `Cache-Control: no-store` from the shared static-file response path
+      so generated HTML and its mutable local resources cannot survive a
+      watched reload in a browser or intermediary cache.
+- [x] Correct the README command table and align the runtime protocol with the
+      non-cacheable watched-static delivery contract; record review pass 9 in
+      the review ledger.
+- [x] Run focused tests and the authoritative `cargo xtask check`, continuing
+      until the complete gate passes.
+- [ ] Fetch `origin/main`, repeat the required preservation and deletion audit,
+      commit all review fixes with a Conventional Commit title of at most 50
+      characters, and push the current branch without renaming it.
+- [ ] Run the tenth and final allowed `cargo xtask review` after the push,
+      independently investigate its findings, and fix every valid finding that
+      can be completed within the review-cycle limit.
+- [ ] Mark this milestone and plan completed and return its index link to
+      Completed only after the final review has no valid findings.
+
 At completion, generated ownership proofs are valid HTML comments for every
 supported source path, all ordinary HTTP response helpers require explicit
 method semantics, every served relative path rejects decoded separators, every
 live-update client can compare its rendered page snapshot with the event-stream
-version, and the final pushed diff has no valid review findings.
+version, watched static resources cannot be reused stale, and the final pushed
+diff has no valid review findings.

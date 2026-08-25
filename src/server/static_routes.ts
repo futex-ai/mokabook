@@ -49,6 +49,7 @@ export function serveStatic(
     }
   }
   response.writeHead(200, {
+    "cache-control": "no-store",
     "content-type": type,
     "x-content-type-options": "nosniff",
   });

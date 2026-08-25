@@ -124,7 +124,7 @@ fall back to the registry. After the first release, a clean machine may use
 | Command              | Outcome                                                |
 | -------------------- | ------------------------------------------------------ |
 | `mokabook`           | Build, serve, and watch using a stable development URL |
-| `mokabook serve`     | Serve Browse; add `--no-watch` for one child process   |
+| `mokabook serve`     | Serve Browse and Review; watch by default              |
 | `mokabook build`     | Validate and transactionally write generated output    |
 | `mokabook check`     | Compare expected and committed bytes without writing   |
 | `mokabook review`    | Compare branch-point/head screens and write a Review   |
@@ -157,6 +157,8 @@ changed merely because the module's imports or composition changed.
 Lightweight watched updates recompute this route snapshot before notifying the
 browser, so the Changed rows and count match the files that triggered each
 reload without restarting the server child.
+Served `/static/` files use `Cache-Control: no-store`, so a watched reload reads
+the rebuilt fragments and resources even when their URLs remain unchanged.
 Review uses the same branch-point baseline and provides summary, side-by-side,
 overlay, and difference views as a static artifact. When screens render in both
 schemes, Review compares each viewport and scheme view and links sibling

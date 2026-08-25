@@ -25,6 +25,7 @@ test("served Browse adapts current HTML without mutating portable files", async 
   const response = await fetch(`${server.url}/static/screens/home.mobile.html`);
   const served = await response.text();
   assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store");
   assert.match(served, /data-mokabook-link="details#section"/);
   assert.match(served, /href="\.\/details\.mobile\.html#section"/);
   assert.doesNotMatch(served, /data-mokabook-target="spoof"/);
@@ -52,6 +53,7 @@ test("served Browse adapts current HTML without mutating portable files", async 
   });
   assert.equal(head.status, 200);
   assert.match(head.headers.get("content-type") ?? "", /text\/html/);
+  assert.equal(head.headers.get("cache-control"), "no-store");
   assert.equal(await head.text(), "");
 
   for (const encodedPath of [
