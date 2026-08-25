@@ -135,6 +135,45 @@ test("Review comparison panes are sandboxed without script permission", () => {
   assert.doesNotMatch(comparison ?? "", /allow-scripts/);
 });
 
+test("Review retains marker-bearing pane bytes as portable output", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const compilation = await compileCatalogue(config);
+  const baseManifest = JSON.stringify({
+    entries: [],
+    generatedBy: "mokabook",
+    legacyPages: [],
+    schemaVersion: 3,
+  });
+  const artifact = await compareReview(
+    compilation,
+    config,
+    {
+      changedPaths: async () => [],
+      fileExists: async (_commit, repoPath) =>
+        repoPath.endsWith("mokabook-manifest.json"),
+      fileKind: async (_commit, repoPath) =>
+        repoPath.endsWith("mokabook-manifest.json") ? "regular" : "missing",
+      readFile: async () => baseManifest,
+      readFileBytes: async () => Buffer.from(baseManifest),
+      mergeBase: async () => "a".repeat(40),
+    },
+    "HEAD",
+  );
+  const home = artifact.result.screens.find((screen) => screen.id === "home");
+  const afterPath = home?.views.find(
+    (view) => view.viewport === "mobile" && view.colorScheme === "light",
+  )?.afterPath;
+  assert.ok(afterPath);
+  const pane = String(artifact.files.get(afterPath));
+
+  assert.equal(pane, compilation.outputs.get("screens/home.mobile.html"));
+  assert.match(pane, /href="\.\/details\.mobile\.html"/);
+  assert.match(pane, /data-mokabook-link="details"/);
+  assert.doesNotMatch(pane, /data-mokabook-target/);
+});
+
 function collidingRouteSource(): string {
   return `import { defineScreen } from "mokabook";
 import React from "react";

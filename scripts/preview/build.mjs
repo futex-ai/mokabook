@@ -1,12 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { adaptBrowseDocument } from "../../dist/browse/document_adapter.js";
+import { toPosixPath } from "../../dist/config/paths.js";
 import { isPublicStaticFile } from "../../dist/config/public_files.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { readManifest } from "../../dist/registry/manifest.js";
+import { createCatalogue } from "../../dist/server/catalogue.js";
 import { computeChangedRoutes } from "../../dist/server/changed.js";
 import {
   loadBrowserClientModules,
+  loadBrowserNavigationModules,
   loadShellFontAssets,
 } from "../../dist/server/client_modules.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
@@ -35,6 +39,7 @@ async function buildPreview(output) {
   try {
     const config = await loadConfig(repositoryRoot, configPath);
     const manifest = readManifest(config);
+    const catalogue = createCatalogue(manifest);
     const changedRoutes = await computeChangedRoutes(config, "origin/main");
     const server = await startCatalogueServer(config, {
       base: "origin/main",
@@ -72,7 +77,7 @@ async function buildPreview(output) {
     } finally {
       await server.close();
     }
-    await copyPublicFiles(config, stage);
+    await copyPublicFiles(config, catalogue, stage);
     await writeText(stage, "_redirects", redirects(manifest.entries));
     await writeText(stage, markerName, "schemaVersion=1\n");
     await installArtifact(stage, output);
@@ -101,6 +106,9 @@ function shellAssets() {
     ...[...loadBrowserClientModules().keys()].map(
       (name) => `/__mokabook/client/${name}`,
     ),
+    ...[...loadBrowserNavigationModules().keys()].map(
+      (name) => `/__mokabook/navigation/${name}`,
+    ),
     ...[...loadShellFontAssets().keys()].map(
       (name) => `/__mokabook/fonts/${name}`,
     ),
@@ -127,13 +135,21 @@ async function capturePage(
   await writeText(stage, relativePath, staticPage(html));
 }
 
-async function copyPublicFiles(config, stage) {
+async function copyPublicFiles(config, catalogue, stage) {
   for (const candidate of await regularFiles(config.mockupsDir)) {
     if (!isPublicStaticFile(candidate, config)) continue;
-    const relative = path.relative(config.mockupsDir, candidate);
+    const relative = toPosixPath(path.relative(config.mockupsDir, candidate));
     const target = path.join(stage, "static", relative);
     await fs.promises.mkdir(path.dirname(target), { recursive: true });
-    await fs.promises.copyFile(candidate, target);
+    const content = await fs.promises.readFile(candidate);
+    const extension = path.extname(candidate).toLowerCase();
+    const adapted =
+      extension === ".html" || extension === ".htm"
+        ? Buffer.from(
+            adaptBrowseDocument(content.toString("utf8"), relative, catalogue),
+          )
+        : content;
+    await fs.promises.writeFile(target, adapted);
   }
 }
 

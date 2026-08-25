@@ -10,4 +10,6 @@ export interface ShellContext {
   changedRoutes?: readonly string[];
   /** Which top-level mode the requested page belongs to. */
   mode: "browse" | "review";
+  /** Validated logical fragment applied to the routed target's frames. */
+  fragment?: string;
 }

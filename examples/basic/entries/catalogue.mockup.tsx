@@ -45,7 +45,9 @@ function Welcome({ compact }: { compact: boolean }) {
       <Button onPress={noop} tone="primary">
         Create workspace
       </Button>
-      <MockLink to="example-details">Open the details screen</MockLink>
+      <MockLink fragment="details" to="example-details">
+        Open the details screen
+      </MockLink>
       <p>
         <MockLink to="design-browse-home">
           See the Mokabook shell design

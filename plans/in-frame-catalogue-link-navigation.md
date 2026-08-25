@@ -1,6 +1,6 @@
 # In-Frame Catalogue Link Navigation
 
-**Status:** Active; protocol complete, implementation not started.
+**Status:** Active; implementation in progress.
 
 **Goal:** Make an explicit catalogue link activated inside a Mokabook fragment
 navigate the outer Browse shell to the destination's canonical page, while
@@ -55,6 +55,29 @@ implementation:
   `9fa89d33a0453a943675348086f1d068df5154ca`;
 - `base..origin/main` additions audit: empty; and
 - deletion audit against `origin/main`: empty.
+
+The implementation-start audit ran on 2026-08-25:
+
+- unrevised source tip:
+  `27394d7c9f8a4ee6e5a1735c839ac497751c2617`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty; and
+- deletion audit against `origin/main`: empty.
+
+The final pre-commit implementation audit ran on 2026-08-25:
+
+- captured pre-integration source tip:
+  `27394d7c9f8a4ee6e5a1735c839ac497751c2617`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty;
+- full staged patch, name-status, and whitespace audits: inspected and clean; and
+- deletion audit against `origin/main`: no deletions.
 
 Milestone 1 must append a fresh dated pre-implementation audit rather than
 overwriting this evidence. Milestone 4 must append the final pre-commit audit,
@@ -310,11 +333,11 @@ cannot silently promote links inside Review panes.
 Summary: generated documents retain stable catalogue intent alongside their
 existing portable artifact links; Browse behavior is not activated yet.
 
-- [ ] Before implementation, fetch `origin/main`, capture the unrevised source
+- [x] Before implementation, fetch `origin/main`, capture the unrevised source
       tip, fetched main tip, and merge base, audit `base..origin/main`
       additions, and append the dated immutable values and result to the
       Mainline Preservation Record above.
-- [ ] Add failure-first public API cases to `tests/package.test.ts`, the
+- [x] Add failure-first public API cases to `tests/package.test.ts`, the
       NodeNext fixture, and the packed ESM smoke fixture for
       `mockLink(id, fragment?)` and `<MockLink to={id} fragment={fragment}>`.
       Prove the helpers emit `mock:<id>[#fragment]`, keep id and bare fragment
@@ -322,7 +345,7 @@ existing portable artifact links; Browse behavior is not activated yet.
       existing id-only calls. Explicitly reject non-kebab-case ids and
       overloaded inputs such as `id#fragment`, `id%23fragment`, and `mock:id`
       through both the function argument and component `to` prop.
-- [ ] Add failure-first cases to `tests/build_links.test.ts` for a reserved
+- [x] Add failure-first cases to `tests/build_links.test.ts` for a reserved
       `data-mokabook-link` marker on `MockLink` and raw `mock:` hrefs in HTML
       anchors/areas and SVG anchors; prove a `data-nav-href`-only span remains
       marker-free; reject logical `href` values on an arbitrary HTML element,
@@ -331,52 +354,52 @@ existing portable artifact links; Browse behavior is not activated yet.
       documents with an activatable logical link while allowing `<base target>`
       and metadata-only logical references; and cover both attribute orders on
       one eligible link.
-- [ ] Cover screen and use-case ids, optional target fragments, mobile and
+- [x] Cover screen and use-case ids, optional target fragments, mobile and
       desktop output, dark-to-dark resolution, dark-to-light fallback, exact
       fragment grammar, and the requirement that a target anchor exists in
       every generated destination view Browse can show.
-- [ ] Add failure-first cases for a consumer-authored reserved marker,
+- [x] Add failure-first cases for a consumer-authored reserved marker,
       different logical destinations on one element, unknown ids, collection
       ids, malformed fragments, and compatibility transformers that add/remove
       a marker, change element namespace/native-link class, or change/remove
       only its portable `href`/`data-nav-href`. Include transformers that add
       `<base href>` to an activatable document and remove the requested anchor
       only from a non-current destination view.
-- [ ] Extend `src/build/mock_links.ts` with typed logical-target parsing and
+- [x] Extend `src/build/mock_links.ts` with typed logical-target parsing and
       deterministic marker insertion for eligible HTML `a`/`area` and SVG `a`
       hrefs while preserving the byte-targeted rewrite and portable relative
       URL for every supported navigation attribute. Reject a logical `href` on
       any other element before it can be rewritten as a resource URL, and
       reject an activatable logical link in a document with `<base href>`.
-- [ ] Extract or reuse one pure catalogue-id grammar validator across the
+- [x] Extract or reuse one pure catalogue-id grammar validator across the
       authoring helpers, builder parser, registry validation, and manifest
       validation rather than duplicating the regular expression. Extend
       `src/authoring/links.tsx` with an optional bare `fragment` argument on
       `mockLink` and prop on `MockLink`; validate the id and shared logical
       fragment grammar before composing `mock:<id>#<fragment>`, and never pass
       the package-only prop through to the rendered anchor.
-- [ ] Validate one logical destination per element and reserve the marker from
+- [x] Validate one logical destination per element and reserve the marker from
       consumer output. Keep raw relative, external, asset, and same-document
       links marker-free.
-- [ ] Preserve and validate a multiset of complete logical-reference records
+- [x] Preserve and validate a multiset of complete logical-reference records
       across `transformCompatibilityDocuments`: expected marker presence and
       value, namespace/native-link class, logical attribute names, and their
       exact resolved portable values. Fail through the existing typed
       `MokabookError` contract on divergence.
-- [ ] After all compatibility transforms, index anchors from the final output
+- [x] After all compatibility transforms, index anchors from the final output
       documents and repeat cross-view anchor validation for every logical
       reference, including sibling viewports and applicable dark output.
-- [ ] Ensure HTML/resource validation ignores the inert marker as a URL while
+- [x] Ensure HTML/resource validation ignores the inert marker as a URL while
       continuing to validate the rewritten `href` and `data-nav-href`.
-- [ ] Add Review artifact and served Review regressions proving marker-bearing
+- [x] Add Review artifact and served Review regressions proving marker-bearing
       portable pane documents remain byte-unmodified, retain relative links,
       receive no Browse adaptation, and stay inside the existing strict
       sandbox.
-- [ ] Run the focused link and compatibility tests with
+- [x] Run the focused link and compatibility tests with
       `npm run build && npx tsx --test tests/build_links.test.ts tests/compatibility.test.ts`.
-- [ ] Run the focused Review regressions in `tests/review_safety.test.ts` and
+- [x] Run the focused Review regressions in `tests/review_safety.test.ts` and
       `tests/server_review.test.ts` before marking marker output complete.
-- [ ] Regenerate and check
+- [x] Regenerate and check
       `examples/basic/generated/**` with `npm run example:build` and
       `npm run example:check`.
 
@@ -390,7 +413,7 @@ Summary: served and preview copies authenticate generated link intent without
 granting consumer frames native outer-navigation capability, while served
 Browse carries logical fragments through request-visible queries.
 
-- [ ] Add failure-first adapter/server tests for preserved portable hrefs and
+- [x] Add failure-first adapter/server tests for preserved portable hrefs and
       live targets, derived explicit/inherited-base target metadata and explicit
       override precedence, download exclusion, malformed trusted markers,
       metadata-only references, manifest-owned fragments/legacy pages, and
@@ -399,54 +422,54 @@ Browse carries logical fragments through request-visible queries.
       expected portable href diverge. Also fail closed when a trusted document
       with an activatable marker contains `<base href>`, including a
       post-build-tampering fixture.
-- [ ] Add security cases for unmarked external, raw relative, same-document,
+- [x] Add security cases for unmarked external, raw relative, same-document,
       `_top`, `_parent`, HTML/SVG anchors and areas, `<base target>`, forms and
       `formtarget`, plus marked targets, mixed-case keywords, matching names,
       whitespace/control and invalid values, spoofed `data-mokabook-target`, and
       `download target="_top"`; prove adaptation preserves consumer-owned live
       attributes while the frame cannot target the shell or open a popup.
-- [ ] Add browser security regressions for `_top`/`_parent` activation from the
+- [x] Add browser security regressions for `_top`/`_parent` activation from the
       immediate document and from `srcdoc`, same-origin local, and cross-origin
       nested frames. Assert none replace the shell and no nested context gains a
       popup, script, form, download, or top-navigation capability. In `srcdoc`,
       same-origin local, generated-fragment, and cross-origin nested frames,
       activate both marked-looking and unmarked links and prove neither triggers
       parent-owned outer navigation.
-- [ ] Add table-driven unit tests for the shared typed target parser: absent,
+- [x] Add table-driven unit tests for the shared typed target parser: absent,
       empty, keyword casing, safe named grammar, case preservation, whitespace,
       controls, leading underscore, and punctuation outside the allowlist.
-- [ ] Create one typed Browse-document adapter that validates markers against
+- [x] Create one typed Browse-document adapter that validates markers against
       `Catalogue` and a manifest route-to-source map, strips reserved metadata
       from unowned HTML, verifies the matching ownership header and a trusted
       marker's exact view-relative portable href, resolves own-target precedence
       over the applicable first base target, derives trusted target metadata,
       preserves all live navigation attributes, and never mutates disk.
-- [ ] Extract `/static/` serving from the over-target `src/server/http.ts` and
+- [x] Extract `/static/` serving from the over-target `src/server/http.ts` and
       adapt every HTML response below `/static/` while preserving HEAD, content
       type, confinement, ownership, and non-HTML bytes.
-- [ ] Enable same-origin inspection on Browse frames without adding
+- [x] Enable same-origin inspection on Browse frames without adding
       `allow-top-navigation`, `allow-top-navigation-by-user-activation`, scripts,
       forms, popups, or downloads. Keep every Review permission unchanged.
-- [ ] In served Browse, carry exactly one encoded `fragment` query through
+- [x] In served Browse, carry exactly one encoded `fragment` query through
       `/id` and `/view`; decode once, validate grammar and cross-view anchors,
       return HTTP 400 on failure, and render encoded iframe hashes through
       scheme swaps or the first use-case step.
-- [ ] Reuse the adapter while building `.context/mokabook-preview`, preserving
+- [x] Reuse the adapter while building `.context/mokabook-preview`, preserving
       extensionless Cloudflare routes and queries, stripping untrusted reserved
       metadata, and failing the build for invalid trusted markers without
       claiming static request-time validation or injection.
-- [ ] Test server-rendered fragment injection with JavaScript disabled. In both
+- [x] Test server-rendered fragment injection with JavaScript disabled. In both
       served Browse and preview, prove disabled or failed enhancement keeps link
       activation inside the sandbox and cannot replace the shell or open a
       popup.
-- [ ] Add a watched-serve regression that changes only a `MockLink`
+- [x] Add a watched-serve regression that changes only a `MockLink`
       destination, waits for rebuild and reload without a child restart, and
       verifies the newly adapted HTML is served.
-- [ ] Add a separate watched-serve regression that changes a route/manifest,
+- [x] Add a separate watched-serve regression that changes a route/manifest,
       waits for the child restart on the same resolved port, verifies the
       latest manifest and adapted HTML, and proves shutdown leaves no orphan
       child.
-- [ ] Run focused server/preview tests, `npm run preview:build`, and watched and
+- [x] Run focused server/preview tests, `npm run preview:build`, and watched and
       no-watch Serve smoke tests without orphan processes.
 
 At completion, adapter trust and served fragment transport are functional,
@@ -461,24 +484,24 @@ Summary: the deployed static preview progressively applies one validated
 logical-fragment query to every applicable current and light/dark frame source,
 without adding a request handler.
 
-- [ ] Add failure-first pure client tests for absent, single, and duplicate
+- [x] Add failure-first pure client tests for absent, single, and duplicate
       `fragment` query values; decode-once and grammar validation; encoded
       current/light/dark source updates; first-use-case-step scope; and invalid
       or selector-shaped values failing closed without DOM mutation. Include a
       syntactically valid but absent anchor and prove the client still applies
       its encoded hash without querying or interpreting the fragment as a DOM
       selector.
-- [ ] Implement the static-preview query applier in a focused parent-client
+- [x] Implement the static-preview query applier in a focused parent-client
       helper/module. Update `src`, `data-fragment-light`, and
       `data-fragment-dark` wherever present, and add no backend or static
       request-time rendering path.
-- [ ] Add direct-URL Playwright coverage for a valid fragment on a screen and
+- [x] Add direct-URL Playwright coverage for a valid fragment on a screen and
       use-case preview page, light/dark toggling, every current and swap source,
       first-step-only scoping, invalid and duplicate query no-ops, and the
       JavaScript-disabled static fallback remaining at the top of the frame. A
       valid-but-absent anchor must retain its hash while the frame remains
       scrolled to the top in both light and dark sources.
-- [ ] Run the focused client/preview tests, `npm run preview:build`, and a
+- [x] Run the focused client/preview tests, `npm run preview:build`, and a
       query-preserving `wrangler pages dev` smoke test without orphan processes.
 
 At completion, direct static-preview URLs apply and retain validated logical
@@ -493,66 +516,66 @@ Summary: ordinary activation inside a fragment uses the existing progressive
 outer route transition, and every outer route change reveals its catalogue row.
 No backend response transformation is included in this milestone.
 
-- [ ] Add failure-first client tests in new focused test files for frame-link
+- [x] Add failure-first client tests in new focused test files for frame-link
       candidate classification across `MockLink`, raw HTML anchor and area,
       SVG anchor, and generated legacy output; event-source validation; primary
       and keyboard activation; Meta/Ctrl/Shift-modified click; middle-button
       `auxclick` (`button === 1`); explicit target handling; latest-wins
       delegation; inaccessible/cross-origin frame fallback; and unchanged
       unmarked, download, external, hash, and metadata-only behavior.
-- [ ] Extract navigation candidate/sequencing code from
+- [x] Extract navigation candidate/sequencing code from
       `src/client/browse.ts` into a focused module before adding frame behavior;
       keep imports and public internal test seams typed.
-- [ ] Add a frame-navigation module that attaches on initial load, scheme
+- [x] Add a frame-navigation module that attaches on initial load, scheme
       swaps, flow frames, legacy embeds, and progressively installed views. It
       must read only validated `data-mokabook-link` markers and delegate to the
       outer route navigator through `/id/<id>`. Attach only to the immediate
       document of each shell-owned frame; never traverse or bind descendant
       iframe documents.
-- [ ] For a validated modified activation or explicit non-self target, have
+- [x] For a validated modified activation or explicit non-self target, have
       package-owned parent code read only adapter-produced target metadata,
       route `_top`/`_parent` through the outer transition, and open new or named
       contexts with `noopener`; never delegate popup creation to frame content.
-- [ ] Extract catalogue-tree client state from the near-limit
+- [x] Extract catalogue-tree client state from the near-limit
       `browse_state.ts` into a focused navigation module. Replace
       `markActiveRow` with one `selectAndRevealRoute` operation used by primary
       navigation, Back, Forward, and initial enhancement.
-- [ ] Make `selectAndRevealRoute` mark exactly one row, open only its ancestor
+- [x] Make `selectAndRevealRoute` mark exactly one row, open only its ancestor
       collections, clear only a hiding query/filter, reapply visibility, and
       call `scrollIntoView({ block: "nearest" })`. Close the responsive drawer
       after selection without collapsing the destination path.
-- [ ] Preserve viewport, color scheme, details disclosure, history scroll,
+- [x] Preserve viewport, color scheme, details disclosure, history scroll,
       focus/status behavior, and frame-collapse behavior across the new route
       transition.
-- [ ] Add Playwright regressions in a new
+- [x] Add Playwright regressions in a new
       `tests/browser/browse_navigation.spec.ts` that positively activate
       `MockLink`, a raw HTML anchor, raw HTML area, SVG anchor, and generated
       legacy-page link across the mobile frame, desktop frame, and use-case
       step. Assert the outer URL, heading, breadcrumbs, active row, disclosed
       ancestors, Back/Forward, and preserved shell state.
-- [ ] In the same spec, prove modified and explicit non-self activation opens
+- [x] In the same spec, prove modified and explicit non-self activation opens
       the canonical Mokabook page through parent enhancement. Cover Meta/Ctrl/
       Shift-click, middle-button `auxclick`, `_blank`, and a named target, while
       the iframe sandbox still lacks popup, script, and top-navigation
       permissions.
-- [ ] In the same spec, activate syntactically valid marked and ordinary links
+- [x] In the same spec, activate syntactically valid marked and ordinary links
       inside `srcdoc`, same-origin local, generated-fragment, and cross-origin
       nested frames. Assert the outer URL, active row, and shell view do not
       change and no new context opens.
-- [ ] After the frame-navigation client lands, rerun
+- [x] After the frame-navigation client lands, rerun
       `tests/review_safety.test.ts` and `tests/server_review.test.ts`, then extend
       `tests/browser/review.spec.ts` with static and served Review cases that
       activate a marker-bearing portable pane link. Prove the pane retains its
       existing sandboxed behavior while the outer Review URL, mode, navigation,
       and open-context count stay unchanged and no Browse-derived target
       metadata appears.
-- [ ] Add static-preview integration coverage that follows a fragment link into
+- [x] Add static-preview integration coverage that follows a fragment link into
       the Milestone 2A query applier, toggles light and dark, and proves the
       current source and every swap source retain the encoded hash; cover
       first-step-only use-case behavior.
-- [ ] Cover an active destination initially hidden by search and Changed,
+- [x] Cover an active destination initially hidden by search and Changed,
       plus a destination already visible so unrelated user state is retained.
-- [ ] Run the focused client tests and navigation Playwright spec after
+- [x] Run the focused client tests and navigation Playwright spec after
       `npm run build`; run the existing `tests/browser/browse.spec.ts` and the
       focused cases in `tests/browser/review.spec.ts` to catch regressions in
       the persistent Browse and Review shells.
@@ -568,7 +591,7 @@ Summary: align public guidance with the shipped behavior, prove every affected
 boundary, and deliver one reviewed pushed commit without automatically changing
 post-push review findings.
 
-- [ ] Update `README.md` and `examples/basic/README.md` so `MockLink` documents
+- [x] Update `README.md` and `examples/basic/README.md` so `MockLink` documents
       its id-only and separate bare-`fragment` forms, `mockLink(id, fragment?)`,
       raw logical values for authored HTML/metadata, portable generated
       behavior, and canonical Browse navigation. Update
@@ -577,18 +600,18 @@ post-push review findings.
       during implementation; remove contradictions rather than appending
       exceptions. Mark the navigation contract implemented and remove its
       temporary delivery-status gap only after the behavior passes.
-- [ ] Review `examples/basic/notes.md` and the Design catalogue against the
+- [x] Review `examples/basic/notes.md` and the Design catalogue against the
       final implementation. If pixels changed despite the constraint above,
       stop, add a new `Tags: mockup` milestone before a new `Tags: ui`
       milestone, and complete them in that order.
-- [ ] Run `npm run format:check`, `npm run lint`, `npm run typecheck`, focused
+- [x] Run `npm run format:check`, `npm run lint`, `npm run typecheck`, focused
       tests, `npm test`, `npm run example:check`, `npm run package:check`,
       `npm run package:smoke`, `npm run test:browser`, and the relevant manual
       server/preview smoke paths.
-- [ ] Run the authoritative `cargo xtask check` and continue fixing compile,
+- [x] Run the authoritative `cargo xtask check` and continue fixing compile,
       lint, test, generated-output, packaging, or browser failures until the
       complete gate passes.
-- [ ] Fetch `origin/main` and perform the required mainline-preservation audit
+- [x] Fetch `origin/main` and perform the required mainline-preservation audit
       from the captured pre-integration source tip. Inspect
       `git diff --name-status origin/main`, the deletion-only diff, the full
       patch, and `git diff --check`; stop for approval before any unplanned

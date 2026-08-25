@@ -1,5 +1,7 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
+import { applyNavVisibility } from "./browse_navigation_state.js";
+
 /** Color scheme selection applied to fragment frames and device chrome. */
 export type BrowseColorScheme = "dark" | "light";
 
@@ -52,7 +54,7 @@ export function captureBrowseState(
 ): BrowseRecoveryState | undefined {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
   if (!shell) return undefined;
-  const viewport = selectedViewport(doc);
+  const viewport = currentViewport(doc);
   const closedCollectionIds = [
     ...doc.querySelectorAll<HTMLDetailsElement>("[data-nav-collection]"),
   ].flatMap((collection) => {
@@ -151,62 +153,6 @@ export function parseBrowseRecoveryState(
   };
 }
 
-/** Apply the current search and changed-only controls to navigation rows. */
-export function applyNavVisibility(doc: Document): void {
-  const query =
-    doc
-      .querySelector<HTMLInputElement>("[data-mokabook-search]")
-      ?.value.trim()
-      .toLowerCase() ?? "";
-  const changedOnly =
-    doc
-      .querySelector('[data-filter="changed"]')
-      ?.getAttribute("aria-pressed") === "true";
-  for (const row of doc.querySelectorAll<HTMLElement>("[data-nav-row]")) {
-    const matchesQuery =
-      query === "" ||
-      (row.textContent ?? "").toLowerCase().includes(query) ||
-      (row.getAttribute("data-route") ?? "").toLowerCase().includes(query);
-    const matchesFilter =
-      !changedOnly || row.getAttribute("data-changed") === "true";
-    row.hidden = !(matchesQuery && matchesFilter);
-  }
-  applyGroupVisibility(doc, query !== "" || changedOnly);
-}
-
-/**
- * While a search or changed filter narrows the tree, force every group open
- * (remembering its prior disclosure) and hide groups with no visible rows;
- * when the filter clears, restore the remembered disclosure.
- */
-function applyGroupVisibility(doc: Document, filtering: boolean): void {
-  const groups = [
-    ...doc.querySelectorAll<HTMLDetailsElement>("details[data-nav-collection]"),
-  ];
-  if (filtering) {
-    for (const group of groups) {
-      if (group.dataset["filterOpen"] === undefined)
-        group.dataset["filterOpen"] = group.open ? "1" : "0";
-      group.open = true;
-    }
-    for (const group of [...groups].reverse()) {
-      const visible = [
-        ...group.querySelectorAll<HTMLElement>("[data-nav-row]"),
-      ].some((row) => !row.hidden);
-      group.hidden = !visible;
-    }
-    return;
-  }
-  for (const group of groups) {
-    const saved = group.dataset["filterOpen"];
-    if (saved !== undefined) {
-      group.open = saved === "1";
-      delete group.dataset["filterOpen"];
-    }
-    group.hidden = false;
-  }
-}
-
 /** Apply the responsive navigation drawer state. */
 export function setDrawer(shell: HTMLElement, open: boolean): void {
   shell.dataset["drawer"] = open ? "open" : "closed";
@@ -223,6 +169,14 @@ export function setViewport(doc: Document, value: string): void {
       "aria-pressed",
       option.getAttribute("data-viewport-option") === value ? "true" : "false",
     );
+}
+
+/** Read the viewport selection the current stage shows. */
+export function currentViewport(doc: Document): BrowseViewport {
+  const value = doc
+    .querySelector("[data-mokabook-stage]")
+    ?.getAttribute("data-viewport");
+  return value === "desktop" || value === "mobile" ? value : "both";
 }
 
 /**
@@ -262,13 +216,6 @@ export function currentColorScheme(doc: Document): BrowseColorScheme {
   return doc.body.getAttribute("data-mokabook-color-scheme") === "dark"
     ? "dark"
     : "light";
-}
-
-function selectedViewport(doc: Document): BrowseViewport {
-  const value = doc
-    .querySelector("[data-mokabook-stage]")
-    ?.getAttribute("data-viewport");
-  return value === "desktop" || value === "mobile" ? value : "both";
 }
 
 function nonNegativeNumber(value: unknown): value is number {

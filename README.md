@@ -49,8 +49,16 @@ export const mockups = [
     description: "The account landing screen.",
     navPath: ["Account"],
     route: "account/home.html",
-    mobile: <MockLink to="account-detail">Details</MockLink>,
-    desktop: <MockLink to="account-detail">Details</MockLink>,
+    mobile: (
+      <MockLink fragment="summary" to="account-detail">
+        Details
+      </MockLink>
+    ),
+    desktop: (
+      <MockLink fragment="summary" to="account-detail">
+        Details
+      </MockLink>
+    ),
     relatedDocs: ["docs/account.md"],
     dependencies: ["src/account/home.tsx"],
     useCaseIds: [],
@@ -61,6 +69,23 @@ export const mockups = [
 `mobile` and `desktop` accept any React node; real screens usually wrap their
 content in a `<main>` landmark because each fragment is generated as its own
 standalone page.
+
+`MockLink` accepts a lowercase kebab-case entry id and an optional bare HTML id
+through its separate `fragment` prop. The equivalent string helper is
+`mockLink(id, fragment?)`; both produce `mock:<id>[#fragment]`. Raw complete
+logical values remain available for an HTML/SVG link `href`, while
+`data-nav-href="mock:<id>[#fragment]"` records metadata without inventing an
+interaction. Generated files retain portable relative links, so standalone and
+Review documents continue to work. In Browse, an eligible link opens the
+destination's canonical catalogue page, carries its fragment, and reveals the
+active item in the navigation tree.
+
+```tsx
+import { mockLink } from "mokabook";
+
+const detailsHref = mockLink("account-detail", "summary");
+// "mock:account-detail#summary"
+```
 
 Color-scheme adoption has two steps: enable `colorSchemes: ["light", "dark"]`
 in the config, then select the consumer theme from `input.colorScheme` in the
@@ -157,6 +182,10 @@ documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.
 Base resources must use portable relative URLs or explicit HTTP(S)/data URLs;
 root-absolute, protocol-relative, and unsupported-scheme URLs fail Review.
+Browse authenticates catalogue-link metadata only on current manifest-owned
+generated fragments and legacy pages. It reads only each shell-owned frame's
+immediate same-origin document, while scripts, forms, downloads, popups, and
+top navigation remain unavailable to consumer content and nested frames.
 Copied base resources must be regular Git files outside configured source roots.
 Inside a fragment, use `MockLink` for catalogue destinations; root-absolute and
 logical screen routes are not portable links in generated static files. Build
@@ -282,10 +311,13 @@ consumers, Chromium tests, and all Rust checks.
 `npm run preview:build` turns the real `examples/basic` Browse catalogue into a
 static Cloudflare Pages artifact at `.context/mokabook-preview`. It snapshots
 every catalogue route through Mokabook's HTTP server, copies the package shell
-and public example assets, preserves id redirects, and excludes the
-development-only live-reload connection. The snapshot compares the catalogue
-with `origin/main`, so Browse includes its All/Changed filter even when the
-changed count is zero. The artifact is not part of the npm package.
+and adapted public example assets, preserves id redirects, and excludes the
+development-only live-reload connection. Static routes authenticate the same
+generated link markers as served Browse, and a single validated `fragment`
+query is applied progressively to current and light/dark frame sources. The
+snapshot compares the catalogue with `origin/main`, so Browse includes its
+All/Changed filter even when the changed count is zero. The artifact is not
+part of the npm package.
 
 The Preview workflow deploys `main` to the Cloudflare Pages project `mokabook`
 at `https://mokabook.pages.dev`. Same-repository, non-release pull requests use
@@ -340,6 +372,8 @@ recorded by the
   and the watched child lifecycle.
 - [`src/client`](./src/client) — progressive Browse navigation and versioned
   live updates served to the browser.
+- [`src/navigation`](./src/navigation) and [`src/browse`](./src/browse) — shared
+  logical-target grammar and ownership-aware HTML adaptation.
 - [`src/review`](./src/review) — Git extraction, comparison, ignore normalization,
   and static artifacts.
 - [`src/legacy`](./src/legacy) — opt-in migration sources and component expansion.

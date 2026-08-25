@@ -2,11 +2,9 @@
 
 ## Delivery Status
 
-This is the approved target contract. Implementation is tracked by the active
+This contract is implemented. Its delivery and verification history is recorded
+in the completed
 [in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
-Until that plan completes, served links still navigate only their fragment
-iframe and the progressive client does not reveal a newly active row's ancestor
-collections.
 
 ## Scope
 

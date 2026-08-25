@@ -13,10 +13,8 @@ implementation and tests must preserve. Runtime behavior stays in
 
 ## Delivery Status
 
-This document describes the implemented shell design except for the explicitly
-planned active-row ancestor disclosure, conditional filter clearing, and
-nearest-row scrolling behavior below. That target is tracked by the active
-[in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
+This document describes the implemented shell design, including active-row
+ancestor disclosure, conditional filter clearing, and nearest-row scrolling.
 
 ## Design Mockups
 
@@ -111,10 +109,9 @@ scrollable region scrolls internally:
     1px vertical guide per ancestor depth. The hover/active highlight is an
     inset pill starting at the row's indent (`--mbk-indent`), so guides stay
     visible; the active row uses the accent with contrast text.
-  - Planned catalogue-link navigation opens every collection on the active
+  - Catalogue-link navigation opens every collection on the active
     row's path and scrolls that row into view. Search and Changed filtering may
-    stay selected only while the active row remains visible. The active
-    navigation plan tracks this target behavior.
+    stay selected only while the active row remains visible.
 - **Screen head** — surface band with the breadcrumb trail (11.5px, `›`
   separators; ancestor crumbs that resolve to a viewable route are links) and
   a title row: 19px heading plus a monospace ID button labelled `#<id>`. The

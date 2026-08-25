@@ -220,19 +220,47 @@ test(
     const stderr = captureOutput(child.stderr);
     const url = await outputUrl(child.stdout);
     const firstPort = new URL(url).port;
+    const events = await fetch(`${url}/__mokabook/events`);
+    const eventReader = events.body?.getReader();
+    assert.ok(eventReader);
+    assert.match(await readEvent(eventReader), /event: ready/);
     await fs.promises.writeFile(
       fixture.entryPath,
-      validEntrySource({ firstTitle: "Watched Home" }),
+      validEntrySource({ body: '<a href="mock:home">Home</a>' }),
     );
-    const generated = path.join(
-      fixture.mockupsDir,
-      "screens/home.desktop.html",
+    let generated = path.join(fixture.mockupsDir, "screens/home.desktop.html");
+    await waitFor(async () =>
+      (await fs.promises.readFile(generated, "utf8")).includes(
+        'data-mokabook-link="home"',
+      ),
     );
+    assert.match(await readEvent(eventReader), /event: update/);
+    assert.equal(new URL(url).port, firstPort);
+    await waitFor(async () =>
+      (
+        await (await fetch(`${url}/static/screens/home.desktop.html`)).text()
+      ).includes('data-mokabook-link="home"'),
+    );
+    await fs.promises.writeFile(
+      fixture.entryPath,
+      sourceWithHomeRoute("screens/start.html", "Watched Home"),
+    );
+    generated = path.join(fixture.mockupsDir, "screens/start.desktop.html");
     await waitFor(async () =>
       (await fs.promises.readFile(generated, "utf8")).includes("Watched Home"),
     );
-    assert.equal(new URL(url).port, firstPort);
-    await waitFor(async () => (await fetch(url)).status === 200);
+    assert.equal(await streamEnded(eventReader), true);
+    await waitFor(
+      async () =>
+        (await (await fetch(`${url}/view/screens/start.html`)).text()).includes(
+          "Watched Home",
+        ),
+      20_000,
+    );
+    assert.match(
+      await (await fetch(`${url}/static/screens/start.desktop.html`)).text(),
+      /data-mokabook-link="details"/,
+    );
     await fs.promises.writeFile(
       fixture.entryPath,
       validEntrySource({
@@ -247,6 +275,7 @@ test(
       fixture.entryPath,
       validEntrySource({ firstTitle: "Recovered Home" }),
     );
+    generated = path.join(fixture.mockupsDir, "screens/home.desktop.html");
     await waitFor(async () =>
       (await fs.promises.readFile(generated, "utf8")).includes(
         "Recovered Home",
@@ -331,6 +360,27 @@ async function waitFor(
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
   throw new Error("watched condition did not become true");
+}
+
+function sourceWithHomeRoute(route: string, title: string): string {
+  return validEntrySource({ firstTitle: title }).replace(
+    'route: "screens/home.html"',
+    `route: ${JSON.stringify(route)}`,
+  );
+}
+
+async function streamEnded(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+): Promise<boolean> {
+  return await Promise.race([
+    reader.read().then((result) => result.done),
+    new Promise<boolean>((_, reject) =>
+      setTimeout(
+        () => reject(new Error("watched child did not restart")),
+        12_000,
+      ),
+    ),
+  ]);
 }
 
 function nodeRequest(

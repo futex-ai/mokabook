@@ -15,10 +15,10 @@ watch, server, and Review engines, the responsive package-owned Browse shell,
 the designed Review artifact pages, packed-package consumers, CI/release
 automation, and Playwright browser coverage are implemented. The irreversible
 first publication and downstream consumer cutover remain external steps.
-Canonical outer navigation from links inside fragment frames is an approved
-runtime correction tracked by the active
-[in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md);
-the navigation protocol records its target behavior while that plan is active.
+Canonical outer navigation from links inside fragment frames, request-visible
+fragment transport, ownership-aware preview adaptation, and active-tree
+disclosure are implemented. Their delivery history is recorded in the completed
+[in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
 
 ## Build
 
@@ -117,12 +117,12 @@ crumbs stay text. The details inspector may show description, rationale,
 source and fragment paths including dark renders, the schemes a screen renders
 in, related docs, dependencies, use cases, and comparison context.
 Consumer fragments and legacy documents are sandboxed without script permission
-so they cannot alter the same-origin Browse shell. The planned navigation
-extension will permit package-owned same-origin inspection for parent-owned
-outer navigation after explicit user activation. It will not grant either
+so they cannot alter the same-origin Browse shell. Package-owned same-origin
+inspection permits parent-owned outer navigation after explicit user
+activation. Browse does not grant either
 top-navigation sandbox token, so direct and nested consumer contexts retain the
 active restriction that prevents them from replacing the shell. The
-served/preview adapter will authenticate markers only for current-manifest
+served/preview adapter authenticates markers only for current-manifest
 screen fragments and generated legacy pages whose ownership header names that
 entry's manifest `sourcePath`. Unowned HTML loses package-reserved metadata in
 the adapted copy; a trusted route with missing/mismatched ownership, invalid
@@ -152,11 +152,11 @@ Browse is server rendered first and progressively enhanced. Direct URLs,
 refresh, missing routes, and JavaScript-disabled use remain functional. For an
 eligible unmodified same-origin Browse link, the client replaces only the
 route-owned main view and updates URL, title, active row, focus, and history.
-After the active navigation plan completes, logical links activated inside a
-consumer frame will navigate that same outer route model rather than replacing
-only the iframe document. The shell will open the active row's ancestor
-collections, conditionally clear a search or Changed filter that would hide it,
-and scroll it into view. The complete target, portable-link, safe-degradation,
+Logical links activated inside a consumer frame navigate that same outer route
+model rather than replacing only the iframe document. The shell opens the active
+row's ancestor collections, conditionally clears a search or Changed filter
+that would hide it, and scrolls it into view. The complete target,
+portable-link, safe-degradation,
 sandbox, fragment, and active-tree behavior is defined by the
 [catalogue navigation contract](./mokabook-navigation.md).
 Search, disclosure, filters, and catalogue scroll remain mounted; searching
@@ -175,11 +175,11 @@ The shell scrolls inside its stage, flow, and embed regions rather than the
 document. Back and Forward restore the matching route and that history entry's
 latest per-region scroll positions. Scroll persistence is limited to one
 leading update per animation frame, and route-change focus never overrides the
-restored positions. Overlapping requests are latest-wins. Until the active
-navigation plan completes, Review, static, iframe, download, external, target,
-hash-only, and modified-click links retain native browser behavior. After the
-plan completes, trusted parent code will own primary and new-context navigation
-for a marked catalogue link inside a Browse frame when enhancement is available.
+restored positions. Overlapping requests are latest-wins. Review, download,
+external, hash-only, metadata-only, and unmarked links retain their existing
+frame-owned behavior. Trusted parent code owns primary and new-context
+navigation for a marked catalogue link inside a Browse frame when enhancement
+is available.
 There is no native outer-navigation fallback; failed or disabled enhancement
 keeps the portable link frame-owned and the sandbox prevents direct or nested
 content from replacing the shell. Served Browse applies a request-visible

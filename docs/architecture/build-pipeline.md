@@ -78,31 +78,27 @@ interface RenderInput {
 type Renderer = (input: RenderInput) => string;
 ```
 
-The returned string must be a complete HTML document. Mokabook currently
+The returned string must be a complete HTML document. Mokabook
 converts `ReviewIgnore` templates into inert comments and resolves every
 complete value of the form `mock:<id>[#fragment]` found in `href` or
 `data-nav-href` to viewport-matched fragments in the same color scheme, falling
-back to light when the destination screen has no dark view. This rewrite is
-attribute-based and does not yet distinguish the owning element. Both
+back to light when the destination screen has no dark view. Both
 attributes are resolved when they coexist, and the same pass covers legacy
 pages, which remain light-only. Text, scripts, styles, and unrelated attributes
 containing the same characters remain unchanged. A use-case link resolves
 through its first screen; collections are intentionally not linkable.
 
-The approved, not-yet-implemented
-[catalogue navigation extension](../protocol/mokabook-navigation.md) will also
-retain the stable id and optional fragment in a reserved `data-mokabook-link`
+The [catalogue navigation contract](../protocol/mokabook-navigation.md) retains
+the stable id and optional fragment in a reserved `data-mokabook-link`
 marker when an HTML `<a>`/`<area>` or SVG `<a>` has a logical `href`. A
 `data-nav-href`-only reference remains validated portable metadata and does not
-gain Browse interaction. The extension will reject logical `href` on every
-non-link or resource element and reject `<base href>` in a document containing
-an activatable logical link. It will validate matching destinations when both
-navigation attributes coexist, reject consumer-authored markers, verify
-fragment anchors across every target view, and bind expected marker presence,
+gain Browse interaction. The builder rejects logical `href` on every non-link
+or resource element and rejects `<base href>` in a document containing an
+activatable logical link. It validates matching destinations when both
+navigation attributes coexist, rejects consumer-authored markers, verifies
+fragment anchors across every target view, and binds expected marker presence,
 element namespace/native-link class, and each logical attribute to the exact
-portable value produced for that element. Until the active plan completes,
-generated documents do not contain this marker or enforce those owner and base
-URL restrictions.
+portable value produced for that element.
 
 During a staged migration only, a configured consumer transformer receives the
 complete document, current route/viewport/color scheme, repository-relative
@@ -110,15 +106,15 @@ output path, available static/output routes, and view-resolved logical routes. T
 transformed document must remain complete and then passes every normal
 Review-marker, link, resource, path, and ownership check.
 
-Once the navigation extension ships, this boundary will preserve complete
-catalogue-reference records rather than markers alone. A transformer will not
-be permitted to add, remove, or alter an expected marker, change a
+This boundary preserves complete catalogue-reference records rather than
+markers alone. A transformer cannot add, remove, or alter an expected marker,
+change a
 metadata-only reference into an activatable link, change the owning element's
 namespace or native-link class, change the set of navigation attributes that
 carried its logical destination, or alter those attributes' resolved portable
 values. Adding `<base href>` to a document that retains an activatable record
-will also fail. After transforming the complete output set, the build will
-re-index anchors from those final documents and repeat every logical fragment's
+also fails. After transforming the complete output set, the build
+re-indexes anchors from those final documents and repeats every logical fragment's
 cross-view check. This keeps Browse, standalone, and Review navigation aligned.
 
 React Native Web style collection is not a second conversion stage. If an app

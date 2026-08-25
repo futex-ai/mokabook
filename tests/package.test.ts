@@ -20,6 +20,20 @@ const execFileAsync = promisify(execFile);
 test("public helpers retain stable authoring semantics", () => {
   assert.equal(mockLink("account-home"), "mock:account-home");
   assert.equal(
+    mockLink("account-home", "billing-section"),
+    "mock:account-home#billing-section",
+  );
+  for (const invalid of [
+    "account-home#billing-section",
+    "account-home%23billing-section",
+    "mock:account-home",
+    "AccountHome",
+  ]) {
+    assert.throws(() => mockLink(invalid), /expected kebab-case/);
+  }
+  assert.throws(() => mockLink("account-home", "#billing"), /fragment/);
+  assert.throws(() => mockLink("account-home", "billing section"), /fragment/);
+  assert.equal(
     reviewMaterialKey({ beta: 2, alpha: 1 }),
     reviewMaterialKey({ alpha: 1, beta: 2 }),
   );

@@ -48,7 +48,7 @@ export function safeDecode(value: string): string {
 /** The response content type for a served artifact or static file. */
 export function contentType(candidate: string): string {
   const extension = path.extname(candidate).toLowerCase();
-  return extension === ".html"
+  return extension === ".html" || extension === ".htm"
     ? "text/html; charset=utf-8"
     : extension === ".js"
       ? "text/javascript; charset=utf-8"

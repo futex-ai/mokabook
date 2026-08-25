@@ -1,23 +1,29 @@
-import fs from "node:fs";
 import http, { type ServerResponse } from "node:http";
-import path from "node:path";
 
 import { encodeUrlPath } from "../config/paths.js";
-import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import { readManifest } from "../registry/manifest.js";
+import {
+  openEventStream,
+  serveClientModule,
+  serveFontAsset,
+  type ServedAssets,
+} from "./browser_assets.js";
 import { createCatalogue, type Catalogue } from "./catalogue.js";
 import {
   loadBrowserClientModules,
+  loadBrowserNavigationModules,
   loadShellFontAssets,
 } from "./client_modules.js";
 import { homePage, notFoundPage, reviewPage, viewPage } from "./pages.js";
+import { requestedFragment, withFragmentQuery } from "./fragments.js";
 import { listenOnAvailablePort } from "./ports.js";
-import { contentType, safeDecode, safeDecodePath, send } from "./respond.js";
+import { safeDecode, safeDecodePath, send } from "./respond.js";
 import { ReviewRoutes, type ServedReview } from "./review_routes.js";
 import type { ShellContext } from "./shell/context.js";
 import { SHELL_CSS } from "./shell/css.js";
+import { serveStatic } from "./static_routes.js";
 
 /** Options for one deterministic server child. */
 export interface ServerOptions {
@@ -45,6 +51,7 @@ export async function startCatalogueServer(
 ): Promise<RunningServer> {
   const catalogue = createCatalogue(readManifest(config));
   const clientModules = loadBrowserClientModules();
+  const navigationModules = loadBrowserNavigationModules();
   const fontAssets = loadShellFontAssets();
   const streams = new Set<ServerResponse>();
   const reviewRoutes = options.review
@@ -60,7 +67,7 @@ export async function startCatalogueServer(
       config,
       options,
       streams,
-      { clientModules, fontAssets },
+      { clientModules, fontAssets, navigationModules },
       () => updateVersion,
       reviewRoutes,
     );
@@ -102,11 +109,6 @@ export async function startCatalogueServer(
     },
     url: `http://127.0.0.1:${address.port}`,
   };
-}
-
-interface ServedAssets {
-  clientModules: ReadonlyMap<string, Buffer>;
-  fontAssets: ReadonlyMap<string, Buffer>;
 }
 
 function handleRequest(
@@ -160,6 +162,14 @@ function handleRequest(
       method,
     );
   }
+  if (url.pathname.startsWith("/__mokabook/navigation/")) {
+    return serveClientModule(
+      response,
+      url.pathname.slice("/__mokabook/navigation/".length),
+      assets.navigationModules,
+      method,
+    );
+  }
   if (url.pathname.startsWith("/__mokabook/fonts/")) {
     return serveFontAsset(
       response,
@@ -169,17 +179,32 @@ function handleRequest(
     );
   }
   if (url.pathname.startsWith("/id/"))
-    return redirectId(response, url.pathname.slice(4), catalogue, context);
+    return redirectId(
+      response,
+      url,
+      url.pathname.slice(4),
+      catalogue,
+      config,
+      context,
+    );
   if (url.pathname.startsWith("/view/"))
     return renderView(
       response,
+      url,
       url.pathname.slice(6),
       catalogue,
+      config,
       context,
       method,
     );
   if (url.pathname.startsWith("/static/"))
-    return serveStatic(response, url.pathname.slice(8), config, method);
+    return serveStatic(
+      response,
+      url.pathname.slice(8),
+      config,
+      catalogue,
+      method,
+    );
   return send(
     response,
     404,
@@ -200,44 +225,12 @@ function shellContext(
   };
 }
 
-function serveClientModule(
-  response: ServerResponse,
-  filename: string,
-  modules: ReadonlyMap<string, Buffer>,
-  method: string,
-): void {
-  const content = modules.get(filename);
-  if (!content) return send(response, 404, "text/plain", "Not found", method);
-  response.writeHead(200, {
-    "cache-control": "no-cache",
-    "content-type": "text/javascript; charset=utf-8",
-    "x-content-type-options": "nosniff",
-  });
-  response.end(method === "HEAD" ? undefined : content);
-}
-
-function serveFontAsset(
-  response: ServerResponse,
-  filename: string,
-  fonts: ReadonlyMap<string, Buffer>,
-  method: string,
-): void {
-  const content = fonts.get(filename);
-  if (!content) return send(response, 404, "text/plain", "Not found", method);
-  response.writeHead(200, {
-    "cache-control": "no-cache",
-    "content-type": filename.endsWith(".woff2")
-      ? "font/woff2"
-      : "text/plain; charset=utf-8",
-    "x-content-type-options": "nosniff",
-  });
-  response.end(method === "HEAD" ? undefined : content);
-}
-
 function redirectId(
   response: ServerResponse,
+  url: URL,
   encodedId: string,
   catalogue: Catalogue,
+  config: ResolvedConfig,
   context: ShellContext,
 ): void {
   const entry = catalogue.byId.get(safeDecode(encodedId));
@@ -248,16 +241,25 @@ function redirectId(
       "text/html",
       notFoundPage(encodedId, catalogue, context),
     );
+  const fragment = requestedFragment(url, entry, catalogue, config);
+  if (fragment === null) {
+    return send(response, 400, "text/plain", "Invalid fragment query");
+  }
   response.writeHead(302, {
-    location: `/view/${encodeUrlPath(entry.route)}`,
+    location: withFragmentQuery(
+      `/view/${encodeUrlPath(entry.route)}`,
+      fragment,
+    ),
   });
   response.end();
 }
 
 function renderView(
   response: ServerResponse,
+  url: URL,
   encodedRoute: string,
   catalogue: Catalogue,
+  config: ResolvedConfig,
   context: ShellContext,
   method: string,
 ): void {
@@ -271,7 +273,16 @@ function renderView(
       notFoundPage(encodedRoute, catalogue, context),
       method,
     );
-  const viewContext = { ...context, ...(route ? { activeRoute: route } : {}) };
+  const manifestEntry = "kind" in entry ? entry : undefined;
+  const fragment = requestedFragment(url, manifestEntry, catalogue, config);
+  if (fragment === null) {
+    return send(response, 400, "text/plain", "Invalid fragment query", method);
+  }
+  const viewContext = {
+    ...context,
+    ...(route ? { activeRoute: route } : {}),
+    ...(fragment ? { fragment } : {}),
+  };
   return send(
     response,
     200,
@@ -279,51 +290,4 @@ function renderView(
     viewPage(entry, catalogue, viewContext),
     method,
   );
-}
-
-function serveStatic(
-  response: ServerResponse,
-  encodedPath: string,
-  config: ResolvedConfig,
-  method: string,
-): void {
-  const relative = safeDecodePath(encodedPath);
-  if (!relative)
-    return send(response, 400, "text/plain", "Invalid static path", method);
-  const candidate = path.resolve(config.mockupsDir, relative);
-  if (!isPublicStaticFile(candidate, config)) {
-    return send(response, 404, "text/plain", "Not found", method);
-  }
-  let content: Buffer;
-  try {
-    content = fs.readFileSync(candidate);
-  } catch {
-    return send(response, 404, "text/plain", "Not found", method);
-  }
-  response.writeHead(200, {
-    "content-type": contentType(candidate),
-    "x-content-type-options": "nosniff",
-  });
-  if (method !== "HEAD") response.end(content);
-  else response.end();
-}
-
-function openEventStream(
-  response: ServerResponse,
-  streams: Set<ServerResponse>,
-  version: number,
-  method: string,
-): void {
-  response.writeHead(200, {
-    "cache-control": "no-cache",
-    connection: "keep-alive",
-    "content-type": "text/event-stream",
-  });
-  if (method === "HEAD") {
-    response.end();
-    return;
-  }
-  response.write(`event: ready\ndata: ${version}\n\n`);
-  streams.add(response);
-  response.on("close", () => streams.delete(response));
 }

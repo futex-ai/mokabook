@@ -1,0 +1,177 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import test from "node:test";
+
+import { adaptBrowseDocument } from "../dist/browse/document_adapter.js";
+import { compileCatalogue } from "../dist/build/compile.js";
+import { loadConfig } from "../dist/config/load.js";
+import { createCatalogue } from "../dist/server/catalogue.js";
+import {
+  createFixture,
+  removeFixture,
+  validEntrySource,
+} from "./helpers/fixture.js";
+
+test("Browse authenticates markers while preserving live navigation attributes", async (context) => {
+  const fixture = await createFixture(
+    validEntrySource({
+      body: `<>
+        <base target="InheritedFrame" />
+        <a href="mock:details">Inherited</a>
+        <a href="mock:details" target="">Own self</a>
+        <a data-mokabook-target="spoof" href="mock:details" target="_TOP">Top</a>
+        <a href="mock:details" target="_blank">Blank</a>
+        <a href="mock:details" target="Named.Frame:2">Named</a>
+        <a href="mock:details" target=" invalid">Invalid</a>
+        <a download href="mock:details" target="_top">Download</a>
+        <a href="https://example.test/" target="_top">External</a>
+        <a href="./details.mobile.html" target="_parent">Relative</a>
+        <span id="local-target" />
+        <a href="#local-target" target="NamedFrame">Hash</a>
+        <map name="targets"><area href="mock:details" target="_parent" /></map>
+        <svg><a href="mock:details" target="_blank"><text>SVG</text></a></svg>
+        <span data-mokabook-target="spoof" data-nav-href="mock:details">Metadata</span>
+        <form target="_top"><button formTarget="_parent">Submit</button></form>
+      </>`,
+    }),
+  );
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const compilation = await compileCatalogue(config);
+  const route = "screens/home.mobile.html";
+  const original = compilation.outputs.get(route) ?? "";
+  const adapted = adaptBrowseDocument(
+    original,
+    route,
+    createCatalogue(compilation.manifest),
+  );
+
+  assert.match(
+    adapted,
+    /href="\.\/details\.mobile\.html" data-mokabook-link="details" data-mokabook-target="InheritedFrame">Inherited/,
+  );
+  assert.match(
+    adapted,
+    /href="\.\/details\.mobile\.html" target="" data-mokabook-link="details">Own self/,
+  );
+  assert.match(adapted, /target="_TOP"[^>]+data-mokabook-target="_top">Top/);
+  assert.match(
+    adapted,
+    /target="_blank"[^>]+data-mokabook-target="_blank">Blank/,
+  );
+  assert.match(
+    adapted,
+    /target="Named\.Frame:2"[^>]+data-mokabook-target="Named\.Frame:2">Named/,
+  );
+  assert.match(adapted, /target=" invalid">Invalid/);
+  assert.doesNotMatch(adapted, /target=" invalid"[^>]+data-mokabook-link/);
+  assert.match(
+    adapted,
+    /download="" href="\.\/details\.mobile\.html" target="_top">Download/,
+  );
+  assert.doesNotMatch(
+    adapted,
+    /target="_top"[^>]+data-mokabook-link[^>]*>Download/,
+  );
+  assert.match(adapted, /data-nav-href="\.\/details\.mobile\.html">Metadata/);
+  assert.doesNotMatch(adapted, /data-mokabook-target="spoof"/);
+  assert.match(
+    adapted,
+    /href="https:\/\/example\.test\/" target="_top">External/,
+  );
+  assert.match(
+    adapted,
+    /href="\.\/details\.mobile\.html" target="_parent">Relative/,
+  );
+  assert.match(adapted, /href="#local-target" target="NamedFrame">Hash/);
+  assert.match(
+    adapted,
+    /<area href="\.\/details\.mobile\.html" target="_parent"[^>]+data-mokabook-target="_parent"/,
+  );
+  assert.match(
+    adapted,
+    /<a href="\.\/details\.mobile\.html" target="_blank"[^>]+data-mokabook-target="_blank"><text>SVG/,
+  );
+  assert.match(adapted, /<base target="InheritedFrame"/);
+  assert.match(adapted, /<form target="_top"><button formTarget="_parent"/);
+  assert.equal(original.includes("data-mokabook-target"), true);
+});
+
+test("Browse strips reserved metadata from unowned HTML", () => {
+  const catalogue = createCatalogue({
+    entries: [],
+    generatedBy: "mokabook",
+    legacyPages: [],
+    schemaVersion: 3,
+  });
+  const original = `<!doctype html><html><body><a data-mokabook-link="home" data-mokabook-target="_top" href="./home.html">Home</a></body></html>`;
+  const adapted = adaptBrowseDocument(original, "unowned.html", catalogue);
+
+  assert.match(adapted, /href="\.\/home\.html"/);
+  assert.doesNotMatch(adapted, /data-mokabook-(?:link|target)/);
+});
+
+test("Browse fails closed when trusted ownership or marker bytes diverge", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const compilation = await compileCatalogue(await loadConfig(fixture.root));
+  const catalogue = createCatalogue(compilation.manifest);
+  const route = "screens/home.mobile.html";
+  const original = compilation.outputs.get(route) ?? "";
+  const mutations = [
+    original.replace("Generated by mokabook", "Generated elsewhere"),
+    original.replace("entries/fixture.mockup.tsx", "entries/other.mockup.tsx"),
+    original.replace(
+      'data-mokabook-link="details"',
+      'data-mokabook-link="missing"',
+    ),
+    original.replace("./details.mobile.html", "./home.mobile.html"),
+    original.replace("<head>", '<head><base href="https://example.test/">'),
+  ];
+
+  for (const content of mutations) {
+    assert.throws(
+      () => adaptBrowseDocument(content, route, catalogue),
+      /trusted Browse document|marker|portable href|base href/,
+    );
+  }
+});
+
+test("Browse authenticates generated legacy links from their manifest owner", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const legacyDir = path.join(fixture.root, "legacy");
+  await fs.promises.mkdir(legacyDir);
+  await fs.promises.writeFile(
+    path.join(legacyDir, "notice.source.ts"),
+    'export const source = () => "<!doctype html><html><body><a href=\\"mock:details\\">Details</a></body></html>";\n',
+  );
+  await fs.promises.writeFile(
+    path.join(legacyDir, "compact.mobile.source.ts"),
+    'export const source = () => "<!doctype html><html><body><a href=\\"mock:details\\">Details</a></body></html>";\n',
+  );
+  await fs.promises.writeFile(
+    fixture.configPath,
+    'export default { entriesDir: "entries", legacy: { pagesDir: "legacy" }, mockupsDir: "mockups", repoRoot: "." };\n',
+  );
+  const compilation = await compileCatalogue(await loadConfig(fixture.root));
+  const original = compilation.outputs.get("notice.html") ?? "";
+  const adapted = adaptBrowseDocument(
+    original,
+    "notice.html",
+    createCatalogue(compilation.manifest),
+  );
+
+  assert.match(adapted, /href="\.\/screens\/details\.desktop\.html"/);
+  assert.match(adapted, /data-mokabook-link="details"/);
+
+  const mobileRoute = "compact.mobile.html";
+  const mobile = adaptBrowseDocument(
+    compilation.outputs.get(mobileRoute) ?? "",
+    mobileRoute,
+    createCatalogue(compilation.manifest),
+  );
+  assert.match(mobile, /href="\.\/screens\/details\.mobile\.html"/);
+  assert.match(mobile, /data-mokabook-link="details"/);
+});

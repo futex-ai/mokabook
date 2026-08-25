@@ -9,8 +9,18 @@ import type {
 } from "../authoring/types.js";
 import { encodeUrlPath } from "../config/paths.js";
 import { MokabookError } from "../errors.js";
-import { fragmentRoute } from "../registry/manifest.js";
-import { effectiveColorSchemes } from "../registry/views.js";
+import {
+  logicalMarker,
+  parseLogicalTarget,
+  type LogicalTarget,
+} from "../navigation/logical.js";
+import {
+  logicalNamespace,
+  nativeLinkClass,
+  type LogicalAttributeRecord,
+  type LogicalReferenceRecord,
+} from "./logical_record_types.js";
+import { artifactRouteForEntry } from "./logical_routes.js";
 
 interface HtmlAttribute {
   name: string;
@@ -26,16 +36,23 @@ interface HtmlNode {
   attrs?: HtmlAttribute[];
   childNodes?: HtmlNode[];
   content?: HtmlNode;
+  namespaceURI?: string;
   sourceCodeLocation?: {
     attrs?: Readonly<Record<string, HtmlLocation>>;
+    startTag?: HtmlLocation;
   } | null;
+  tagName?: string;
 }
 
 interface Replacement extends HtmlLocation {
   value: string;
 }
 
-const MOCK_HREF = /^mock:([a-z0-9]+(?:-[a-z0-9]+)*)(#[A-Za-z][\w:.-]*)?$/;
+/** One rewritten document plus its compatibility invariant records. */
+export interface RewrittenLogicalLinks {
+  content: string;
+  records: readonly LogicalReferenceRecord[];
+}
 
 /** Rewrite complete logical href values while preserving all other HTML bytes. */
 export function rewriteMockLinks(
@@ -45,79 +62,182 @@ export function rewriteMockLinks(
   colorScheme: ColorScheme,
   byId: ReadonlyMap<string, ResolvedRegistryEntry>,
   catalogueSchemes: readonly ColorScheme[],
-): string {
+): RewrittenLogicalLinks {
   const replacements: Replacement[] = [];
+  const records: LogicalReferenceRecord[] = [];
+  let hasBaseHref = false;
   const document = parse(html, {
     sourceCodeLocationInfo: true,
   }) as unknown as HtmlNode;
   visit(document, (node) => {
-    const links = (node.attrs ?? []).filter(
-      (attribute) =>
-        attribute.name === "href" || attribute.name === "data-nav-href",
-    );
-    for (const link of links) {
-      const match = MOCK_HREF.exec(link.value);
-      if (!match) continue;
-      const id = match[1] ?? "";
-      const hash = match[2] ?? "";
-      const target = byId.get(id);
-      if (!target) {
-        throw new MokabookError(
-          "build-invalid",
-          `${sourceRoute} links to unknown id: ${id}`,
-        );
-      }
-      const targetRoute = artifactRouteForEntry(
-        target,
-        viewport,
-        colorScheme,
-        byId,
-        catalogueSchemes,
+    const attributes = node.attrs ?? [];
+    if (
+      attributes.some((attribute) => attribute.name === "data-mokabook-link")
+    ) {
+      throw invalid(
+        sourceRoute,
+        "contains reserved data-mokabook-link metadata",
       );
-      if (!targetRoute) {
-        throw new MokabookError(
-          "build-invalid",
-          `${sourceRoute} links to collection id: ${id}`,
-        );
-      }
-      const location = node.sourceCodeLocation?.attrs?.[link.name];
-      if (!location) {
-        throw new MokabookError(
-          "build-invalid",
-          `${sourceRoute} has an id link without source location`,
-        );
-      }
-      const attributeSource = html.slice(
-        location.startOffset,
-        location.endOffset,
-      );
-      const valueRange = attributeValueRange(attributeSource);
-      if (!valueRange) {
-        throw new MokabookError(
-          "build-invalid",
-          `${sourceRoute} has an id link that cannot be rewritten`,
-        );
-      }
-      const relative = path.posix.relative(
-        path.posix.dirname(sourceRoute),
-        targetRoute,
-      );
-      const encoded = encodeUrlPath(relative);
-      const linked = `${encoded.startsWith(".") ? encoded : `./${encoded}`}${hash}`;
-      replacements.push({
-        endOffset: location.startOffset + valueRange.endOffset,
-        startOffset: location.startOffset + valueRange.startOffset,
-        value: linked,
-      });
     }
-  });
-  return replacements
-    .sort((left, right) => right.startOffset - left.startOffset)
-    .reduce(
-      (content, replacement) =>
-        `${content.slice(0, replacement.startOffset)}${replacement.value}${content.slice(replacement.endOffset)}`,
-      html,
+    if (
+      node.tagName === "base" &&
+      attributes.some((attribute) => attribute.name === "href")
+    ) {
+      hasBaseHref = true;
+    }
+    const logicalAttributes = attributes.flatMap((attribute) => {
+      if (attribute.name !== "href" && attribute.name !== "data-nav-href") {
+        return [];
+      }
+      if (!attribute.value.startsWith("mock:")) return [];
+      const destination = parseLogicalTarget(attribute.value);
+      if (!destination) {
+        throw invalid(
+          sourceRoute,
+          `has malformed logical link: ${attribute.value}`,
+        );
+      }
+      return [{ attribute, destination }];
+    });
+    if (logicalAttributes.length === 0) return;
+    const destination = oneDestination(sourceRoute, logicalAttributes);
+    const namespace = logicalNamespace(node.namespaceURI);
+    const nativeClass = nativeLinkClass(node.tagName, namespace);
+    const logicalHref = logicalAttributes.some(
+      ({ attribute }) => attribute.name === "href",
     );
+    if (logicalHref && !nativeClass) {
+      throw invalid(
+        sourceRoute,
+        "has a logical href outside a native HTML or SVG link",
+      );
+    }
+    const target = byId.get(destination.id);
+    if (!target) {
+      throw invalid(sourceRoute, `links to unknown id: ${destination.id}`);
+    }
+    const targetRoute = artifactRouteForEntry(
+      target,
+      viewport,
+      colorScheme,
+      byId,
+      catalogueSchemes,
+    );
+    if (!targetRoute) {
+      throw invalid(sourceRoute, `links to collection id: ${destination.id}`);
+    }
+    const linked = portableTarget(sourceRoute, targetRoute, destination);
+    const rewrittenAttributes = logicalAttributes.map(({ attribute }) => {
+      replacements.push(
+        attributeReplacement(html, sourceRoute, node, attribute.name, linked),
+      );
+      return { name: attribute.name, value: linked } as LogicalAttributeRecord;
+    });
+    const marker = logicalHref ? logicalMarker(destination) : undefined;
+    if (marker)
+      replacements.push(markerInsertion(html, sourceRoute, node, marker));
+    records.push({
+      attributes: rewrittenAttributes.sort((left, right) =>
+        left.name.localeCompare(right.name),
+      ),
+      destination,
+      ...(marker ? { marker } : {}),
+      namespace,
+      ownerClass: nativeClass ?? "metadata-only",
+      sourceRoute,
+    });
+  });
+  if (hasBaseHref && records.some((record) => record.marker)) {
+    throw invalid(
+      sourceRoute,
+      "contains base href with an activatable logical link",
+    );
+  }
+  return {
+    content: applyReplacements(html, replacements),
+    records,
+  };
+}
+
+function oneDestination(
+  sourceRoute: string,
+  logicalAttributes: readonly {
+    attribute: HtmlAttribute;
+    destination: LogicalTarget;
+  }[],
+): LogicalTarget {
+  const first = logicalAttributes[0]?.destination;
+  if (!first) throw invalid(sourceRoute, "has an empty logical reference");
+  const marker = logicalMarker(first);
+  if (
+    logicalAttributes.some(
+      ({ destination }) => logicalMarker(destination) !== marker,
+    )
+  ) {
+    throw invalid(
+      sourceRoute,
+      "has conflicting logical destinations on one element",
+    );
+  }
+  return first;
+}
+
+function portableTarget(
+  sourceRoute: string,
+  targetRoute: string,
+  target: LogicalTarget,
+): string {
+  const relative = path.posix.relative(
+    path.posix.dirname(sourceRoute),
+    targetRoute,
+  );
+  const encoded = encodeUrlPath(relative);
+  const route = encoded.startsWith(".") ? encoded : `./${encoded}`;
+  return `${route}${target.fragment ? `#${target.fragment}` : ""}`;
+}
+
+function attributeReplacement(
+  html: string,
+  sourceRoute: string,
+  node: HtmlNode,
+  name: string,
+  value: string,
+): Replacement {
+  const location = node.sourceCodeLocation?.attrs?.[name];
+  if (!location)
+    throw invalid(sourceRoute, "has an id link without source location");
+  const range = attributeValueRange(
+    html.slice(location.startOffset, location.endOffset),
+  );
+  if (!range)
+    throw invalid(sourceRoute, "has an id link that cannot be rewritten");
+  return {
+    endOffset: location.startOffset + range.endOffset,
+    startOffset: location.startOffset + range.startOffset,
+    value,
+  };
+}
+
+function markerInsertion(
+  html: string,
+  sourceRoute: string,
+  node: HtmlNode,
+  marker: string,
+): Replacement {
+  const startTag = node.sourceCodeLocation?.startTag;
+  if (!startTag)
+    throw invalid(sourceRoute, "has a logical link without a start tag");
+  const source = html.slice(startTag.startOffset, startTag.endOffset);
+  const closing = source.lastIndexOf(">");
+  if (closing < 0)
+    throw invalid(sourceRoute, "has a logical link that cannot be marked");
+  const slash = source.slice(0, closing).match(/\/\s*$/)?.index;
+  const offset = startTag.startOffset + (slash ?? closing);
+  return {
+    endOffset: offset,
+    startOffset: offset,
+    value: ` data-mokabook-link="${marker}"`,
+  };
 }
 
 function attributeValueRange(source: string): HtmlLocation | undefined {
@@ -138,50 +258,18 @@ function attributeValueRange(source: string): HtmlLocation | undefined {
   return endOffset === startOffset ? undefined : { endOffset, startOffset };
 }
 
-/** Resolve a registry entry to the static artifact appropriate for a view. */
-export function artifactRouteForEntry(
-  entry: ResolvedRegistryEntry,
-  viewport: Viewport,
-  colorScheme: ColorScheme,
-  byId: ReadonlyMap<string, ResolvedRegistryEntry>,
-  catalogueSchemes: readonly ColorScheme[],
-): string | undefined {
-  const screen =
-    entry.kind === "screen"
-      ? entry
-      : entry.kind === "use-case" && entry.steps[0]
-        ? byId.get(entry.steps[0].screenId)
-        : undefined;
-  if (screen?.kind !== "screen") return undefined;
-  const targetScheme = effectiveColorSchemes(screen, catalogueSchemes).includes(
-    colorScheme,
-  )
-    ? colorScheme
-    : "light";
-  return fragmentRoute(screen.route, viewport, targetScheme);
+function applyReplacements(html: string, replacements: Replacement[]): string {
+  return replacements
+    .sort((left, right) => right.startOffset - left.startOffset)
+    .reduce(
+      (content, replacement) =>
+        `${content.slice(0, replacement.startOffset)}${replacement.value}${content.slice(replacement.endOffset)}`,
+      html,
+    );
 }
 
-/** Map logical catalogue routes to concrete view artifacts. */
-export function logicalArtifactRoutes(
-  entries: readonly ResolvedRegistryEntry[],
-  viewport: Viewport,
-  colorScheme: ColorScheme,
-  catalogueSchemes: readonly ColorScheme[],
-): Readonly<Record<string, string>> {
-  const byId = new Map(entries.map((entry) => [entry.id, entry]));
-  return Object.fromEntries(
-    entries.flatMap((entry) => {
-      if (entry.kind === "collection") return [];
-      const artifact = artifactRouteForEntry(
-        entry,
-        viewport,
-        colorScheme,
-        byId,
-        catalogueSchemes,
-      );
-      return artifact ? [[entry.route, artifact] as const] : [];
-    }),
-  );
+function invalid(route: string, message: string): MokabookError {
+  return new MokabookError("build-invalid", `${route} ${message}`);
 }
 
 function visit(node: HtmlNode, callback: (node: HtmlNode) => void): void {

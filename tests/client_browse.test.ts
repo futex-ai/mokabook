@@ -4,7 +4,7 @@ import test from "node:test";
 import {
   isEligibleBrowseLink,
   NavigationSequencer,
-} from "../dist/client/browse.js";
+} from "../dist/client/navigation.js";
 import {
   captureBrowseState,
   currentColorScheme,

@@ -1,9 +1,8 @@
 import { MokabookError } from "../errors.js";
 import { isSafeCatalogueRoute, isSafeRepositoryPath } from "../config/paths.js";
+import { isCatalogueId } from "../navigation/logical.js";
 import { validateManifestRelationships } from "./manifest_relationships.js";
 import type { ManifestV3 } from "./types.js";
-
-const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /** Validate unknown manifest JSON and normalize temporary schema version 2. */
 export function validateManifest(value: unknown, allowV2: boolean): ManifestV3 {
@@ -43,7 +42,7 @@ export function validateManifest(value: unknown, allowV2: boolean): ManifestV3 {
     }
     const entry = rawEntry;
     const id = rawEntry.id;
-    if (!ID_PATTERN.test(id)) {
+    if (!isCatalogueId(id)) {
       throw new MokabookError("manifest-invalid", `invalid manifest id: ${id}`);
     }
     validateEntry(entry);

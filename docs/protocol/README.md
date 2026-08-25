@@ -10,6 +10,6 @@ delivery steps.
 
 - [Package and authoring contract](./mokabook-package.md)
 - [Build, Browse, and Review runtime](./mokabook-runtime.md)
-- [Catalogue navigation target contract](./mokabook-navigation.md)
+- [Catalogue navigation contract](./mokabook-navigation.md)
 - [Shell design contract](./mokabook-shell-design.md)
 - [CI and npm release contract](./npm-release.md)

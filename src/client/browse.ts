@@ -8,53 +8,21 @@ import {
   handleFrameClick,
 } from "./browse_frames.js";
 import {
-  applyNavVisibility,
   captureRegionScrolls,
   currentColorScheme,
+  currentViewport,
   restoreRegionScrolls,
   setColorScheme,
   setDrawer,
   setViewport,
 } from "./browse_state.js";
-
-/** Anchor facts used to decide whether Browse may intercept a click. */
-export interface BrowseLinkCandidate {
-  download: boolean;
-  modified: boolean;
-  pathname: string;
-  sameOrigin: boolean;
-  samePageHash: boolean;
-  target: string;
-}
-
-/** Decide whether one clicked link is an eligible in-shell navigation. */
-export function isEligibleBrowseLink(candidate: BrowseLinkCandidate): boolean {
-  if (!candidate.sameOrigin) return false;
-  if (candidate.download || candidate.modified || candidate.samePageHash)
-    return false;
-  if (candidate.target !== "" && candidate.target !== "_self") return false;
-  return (
-    candidate.pathname === "/" ||
-    candidate.pathname.startsWith("/view/") ||
-    candidate.pathname.startsWith("/id/")
-  );
-}
-
-/** Latest-wins request sequencing for overlapping navigations. */
-export class NavigationSequencer {
-  #current: AbortController | undefined;
-
-  /** Abort the previous request and open a new latest-wins slot. */
-  begin(): { isCurrent(): boolean; signal: AbortSignal } {
-    this.#current?.abort();
-    const controller = new AbortController();
-    this.#current = controller;
-    return {
-      isCurrent: () => this.#current === controller,
-      signal: controller.signal,
-    };
-  }
-}
+import {
+  applyNavVisibility,
+  selectAndRevealRoute,
+} from "./browse_navigation_state.js";
+import { applyPreviewFragmentQuery } from "./preview_fragment.js";
+import { isEligibleBrowseLink, NavigationSequencer } from "./navigation.js";
+import { attachFrameNavigation } from "./frame_navigation.js";
 
 interface ScrollState {
   scrolls?: Record<string, number>;
@@ -80,6 +48,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
   const main = doc.querySelector<HTMLElement>("[data-mokabook-view]");
   if (!shell || !main) return;
+  applyPreviewFragmentQuery(doc, win.location.search);
   const detailsPreference = createBrowserDetailsPreference(win);
   detailsPreference.apply(doc);
   if (win.history.scrollRestoration) win.history.scrollRestoration = "manual";
@@ -111,16 +80,6 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     if (status) status.textContent = message;
   };
 
-  const markActiveRow = (pathname: string): void => {
-    for (const row of doc.querySelectorAll<HTMLAnchorElement>(
-      "a[data-nav-row]",
-    )) {
-      if (new URL(row.href, win.location.href).pathname === pathname)
-        row.setAttribute("aria-current", "page");
-      else row.removeAttribute("aria-current");
-    }
-  };
-
   const navigate = async (
     url: string,
     push: boolean,
@@ -149,21 +108,29 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
       win.location.assign(url);
       return;
     }
+    const viewport = currentViewport(doc);
     for (const frame of main.querySelectorAll("iframe")) frame.remove();
     collapseFrame(doc, expandedFrame(doc));
     if (push) persistScroll();
     main.innerHTML = nextMain.innerHTML;
+    const finalUrl = response.url || url;
+    attachFrameNavigation(doc, frameActions);
+    applyPreviewFragmentQuery(doc, new URL(finalUrl, win.location.href).search);
     detailsPreference.apply(doc);
+    setViewport(doc, viewport);
     setColorScheme(doc, currentColorScheme(doc));
     doc.title = parsed.title || doc.title;
-    const finalUrl = response.url || url;
     if (push)
       win.history.pushState(
         { scrolls: {} } satisfies ScrollState,
         "",
         finalUrl,
       );
-    markActiveRow(new URL(finalUrl, win.location.href).pathname);
+    selectAndRevealRoute(
+      doc,
+      new URL(finalUrl, win.location.href).pathname,
+      win.location.href,
+    );
     setDrawer(shell, false);
     restoreRegionScrolls(doc, restoreScrolls ?? {});
     if (!push) {
@@ -176,6 +143,14 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     }
     main.focus({ preventScroll: true });
     announce(`Loaded ${doc.title}`);
+  };
+  const frameActions = {
+    navigate: (href: string): void => {
+      void navigate(href, true);
+    },
+    open: (href: string, target: string): void => {
+      win.open(href, target, "noopener");
+    },
   };
 
   doc.addEventListener("click", (event) => {
@@ -286,6 +261,8 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     restoringHistory = true;
     void navigate(win.location.href, false, scrolls);
   });
+  attachFrameNavigation(doc, frameActions);
+  selectAndRevealRoute(doc, win.location.pathname, win.location.href);
 }
 
 if (typeof document !== "undefined" && typeof window !== "undefined") {

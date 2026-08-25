@@ -1,11 +1,10 @@
 import path from "node:path";
 
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
-import {
-  rewriteMockLinks,
-  logicalArtifactRoutes,
-} from "../build/mock_links.js";
 import { walkFiles } from "../build/discovery.js";
+import type { LogicalReferenceRecord } from "../build/logical_record_types.js";
+import { validateCompatibilityRecords } from "../build/logical_records.js";
+import { logicalArtifactRoutes } from "../build/logical_routes.js";
 import { isPublicStaticFile } from "../config/public_files.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
@@ -14,6 +13,7 @@ import { MANIFEST_NAME } from "../registry/manifest.js";
 import type { LoadedGraph } from "../build/load_graph.js";
 import { pendingGeneratedOrphanRoutes } from "../build/ownership.js";
 import type { ArtifactView } from "../registry/views.js";
+import { rewriteMockLinks } from "../build/mock_links.js";
 
 /** Resolve legacy id links and apply an explicitly configured migration bridge. */
 export function transformCompatibilityDocuments(
@@ -22,8 +22,9 @@ export function transformCompatibilityDocuments(
   config: ResolvedConfig,
   graph: LoadedGraph,
   fragmentViews: ReadonlyMap<string, ArtifactView>,
-): void {
+): readonly LogicalReferenceRecord[] {
   const byId = new Map(entries.map((entry) => [entry.id, entry]));
+  const records: LogicalReferenceRecord[] = [];
   const outputRoutes = [...outputs.keys()];
   const availableRoutes = availablePublicRoutes(outputRoutes, config);
   for (const [route, original] of outputs) {
@@ -37,9 +38,10 @@ export function transformCompatibilityDocuments(
       byId,
       config.colorSchemes,
     );
+    records.push(...linked.records);
     const transformer = graph.compatibilityTransformer;
     if (!transformer) {
-      outputs.set(route, linked);
+      outputs.set(route, linked.content);
       continue;
     }
     let transformed: string;
@@ -47,7 +49,7 @@ export function transformCompatibilityDocuments(
       transformed = transformer({
         availableRoutes,
         colorScheme,
-        content: linked,
+        content: linked.content,
         logicalRoutes: logicalArtifactRoutes(
           entries,
           viewport,
@@ -73,11 +75,13 @@ export function transformCompatibilityDocuments(
         `compatibility transformer must return a complete HTML document for ${route}`,
       );
     }
-    outputs.set(
-      route,
-      transformed.endsWith("\n") ? transformed : `${transformed}\n`,
-    );
+    const normalized = transformed.endsWith("\n")
+      ? transformed
+      : `${transformed}\n`;
+    validateCompatibilityRecords(route, normalized, linked.records);
+    outputs.set(route, normalized);
   }
+  return records;
 }
 
 function availablePublicRoutes(

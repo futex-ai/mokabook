@@ -14,10 +14,9 @@ may exist only under examples and test fixtures.
 
 ## Delivery Status
 
-This document describes implemented pre-release package and authoring behavior
-except for the optional fragment helper API, element-aware logical-link rules,
-the portable `<base href>` restriction, and Browse marker behavior explicitly
-identified below as target behavior. Those additions are tracked by the active
+This document describes implemented pre-release package and authoring behavior.
+The catalogue-link implementation and its verification history are recorded in
+the completed
 [in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
 
 ## Package Identity
@@ -255,25 +254,22 @@ paths whose filenames contain other characters.
 Logical screen and use-case routes are catalogue identifiers, not generated
 documents. Fragment links must target a generated fragment or public static
 asset with a relative URL; root-absolute links are rejected as non-portable.
-Authors currently use `mockLink(id)` or `<MockLink to={id}>` for id-addressed
-catalogue navigation. Complete raw `mock:<id>[#fragment]` values may also appear
-in `href` or `data-nav-href`. Generated documents currently retain only the
-portable relative target. The approved
-[catalogue navigation contract](./mokabook-navigation.md) will add
-`mockLink(id, fragment?)` and a separate `fragment` prop to `MockLink`, then
-retain stable logical-destination metadata so Browse can open the canonical
-catalogue page without changing standalone fragment behavior. The fragment is
-a bare HTML id without `#` or percent-encoding. That API, marker, and the rule
-reserving logical `href` for native HTML/SVG links are target behavior and are
-not enforced until the active implementation plan completes. Under the target
-contract, both helpers immediately apply the registry's lowercase kebab-case id
-grammar and reject fragment, percent-encoded, or `mock:` syntax in the id/`to`
-value; only the separate fragment input or complete raw logical attribute form
-may carry a fragment. Metadata-only references use `data-nav-href`, and resource
-elements must keep real resource URLs. A document with an activatable logical
-`href` must not contain `<base href>`; the target builder rejects that
-combination before and after compatibility transformation while continuing to
-support `<base target>`.
+Authors use `mockLink(id, fragment?)` or
+`<MockLink to={id} fragment={fragment}>` for id-addressed catalogue navigation.
+Complete raw `mock:<id>[#fragment]` values may also appear in `href` or
+`data-nav-href`. The fragment is a bare HTML id without `#` or percent-encoding.
+Both helpers immediately apply the registry's lowercase kebab-case id grammar
+and reject fragment, percent-encoded, or `mock:` syntax in the id/`to` value;
+only the separate fragment input or complete raw logical attribute form may
+carry a fragment. Generated documents retain a portable relative target plus
+stable marker metadata on native HTML/SVG links so Browse can open the
+canonical catalogue page without changing standalone or Review behavior.
+Metadata-only references use `data-nav-href`, and resource elements must keep
+real resource URLs. A document with an activatable logical `href` must not
+contain `<base href>`; the builder rejects that combination before and after
+compatibility transformation while continuing to support `<base target>`. The
+complete behavior is defined by the
+[catalogue navigation contract](./mokabook-navigation.md).
 Local resource URLs in HTML source attributes, `srcset`, inline/style-block
 CSS, and transitively referenced HTML/CSS must likewise resolve to public
 static files beneath `mockupsDir` that remain after the pending build. An owned
@@ -313,15 +309,14 @@ interface RenderInput {
 export default function render(input: RenderInput): string;
 ```
 
-The string must contain a complete `<html>` document. Mokabook currently
+The string must contain a complete `<html>` document. Mokabook
 serializes Review-ignore markers and rewrites every complete
 `mock:<id>[#fragment]` value found in `href` or `data-nav-href` after this
-function returns, including when one element has both attributes. The current
-rewrite is attribute-based and applies to legacy output. The approved
-navigation extension will make the rewrite element-aware: logical `href` will
-be valid only on native HTML/SVG links, every other owner will fail the build,
-documents with an activatable logical link will reject `<base href>`, and final
-compatibility output will be checked through that fail-closed contract. The
+function returns, including when one element has both attributes. The rewrite
+is element-aware and applies to legacy output: logical `href` is valid only on
+native HTML/SVG links, every other owner fails the build, documents with an
+activatable logical link reject `<base href>`, and final compatibility output
+is checked through that fail-closed contract. The
 package declares `react` and `react-dom` `>=19.0.0` as peers and does not ship a
 private runtime. The builder resolves both peers and their subpaths from
 consumer config, then bundles every React-bearing input in one internal graph.

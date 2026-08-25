@@ -15,6 +15,7 @@ import type { ArtifactView } from "../registry/views.js";
 import { effectiveColorSchemes, VIEWPORTS } from "../registry/views.js";
 import { normalizeSingleDocument } from "../review/ignore.js";
 import { validateHtmlLinks } from "./html_links.js";
+import { validateLogicalFragments } from "./logical_records.js";
 import { loadConsumerGraph } from "./load_graph.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";
 import { addOutput, generatedHeader, renderFragments } from "./render.js";
@@ -77,13 +78,14 @@ export async function compileCatalogue(
       );
     }
   }
-  transformCompatibilityDocuments(
+  const logicalRecords = transformCompatibilityDocuments(
     outputs,
     registry.entries,
     config,
     graph,
     fragmentViews,
   );
+  validateLogicalFragments(outputs, logicalRecords, registry.entries, config);
   for (const [route, content] of outputs) {
     normalizeSingleDocument(content, route);
   }

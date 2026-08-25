@@ -13,7 +13,7 @@ paths, and synthetic tests.
 | esbuild discovery and one-graph loading | Product component library        | Renderer/module resolution |
 | Static fragments and manifest schema    | Theme/tokens/providers           | Stylesheet rules           |
 | Generated-file ownership and check      | Product CSS/fonts/images         | Legacy policy/bridge       |
-| Safe routes; planned link navigation    | Product route semantics          | Additional watch inputs    |
+| Safe routes and catalogue navigation    | Product route semantics          | Additional watch inputs    |
 | Git comparison and Review-ignore rules  | Product Review policy            | Base, output, impact globs |
 
 ## Dependency Direction
@@ -69,17 +69,16 @@ the server's temporary archive lifecycle. Archive roots are explicit
 changed-path exclusions rather than consumer-owned ignore policy, and shutdown
 drains generation work before removing them.
 
-The approved navigation extension will promote only explicit id-addressed
+Browse promotes only explicit id-addressed
 catalogue links from manifest-owned generated fragments and legacy documents
 whose ownership header matches the entry's manifest `sourcePath` into outer
 Browse routes. Adapted public unowned HTML loses reserved-looking metadata and
-is never trusted. A generated document with an activatable catalogue link will
-reject `<base href>` so its relative fallback cannot resolve differently from
-the portable bytes Browse authenticates. Browse will add same-origin inspection
+is never trusted. A generated document with an activatable catalogue link
+rejects `<base href>` so its relative fallback cannot resolve differently from
+the portable bytes Browse authenticates. Browse uses same-origin inspection
 for parent enhancement but no top-navigation capability, so direct and nested
-consumer contexts remain unable to replace the shell. It is target behavior
-tracked by the active plan, not current package behavior. Portable generated
-files will keep relative artifact fallbacks, while ordinary product, asset, and
+consumer contexts remain unable to replace the shell. Portable generated files
+keep relative artifact fallbacks, while ordinary product, asset, and
 external links remain consumer-owned. The
 [catalogue navigation protocol](../protocol/mokabook-navigation.md) defines the
 link marker, sandbox boundary, and active-tree invariant.
