@@ -1,6 +1,6 @@
 # In-Frame Catalogue Link Navigation
 
-**Status:** Active; implementation in progress.
+**Status:** Completed.
 
 **Goal:** Make an explicit catalogue link activated inside a Mokabook fragment
 navigate the outer Browse shell to the destination's canonical page, while
@@ -619,14 +619,14 @@ post-push review findings.
       `base..origin/main` additions result, and either `no deletions` or every
       explicitly user-approved removal plus its cleanup to the Mainline
       Preservation Record above.
-- [ ] Update this plan's TODOs and move its link from Active to Completed in
+- [x] Update this plan's TODOs and move its link from Active to Completed in
       `plans/README.md` only after every implementation and verification item
       is complete.
-- [ ] Run `git add -A`, verify every new file is tracked, commit the complete
+- [x] Run `git add -A`, verify every new file is tracked, commit the complete
       work with a Conventional Commit title of at most 50 characters, inspect
       `git diff --name-status origin/main..HEAD` and the deletion-only diff,
       then push the current branch without renaming it.
-- [ ] Only after the push, run `cargo xtask review`. Do not automatically fix
+- [x] Only after the push, run `cargo xtask review`. Do not automatically fix
       findings. Report every finding as a numbered item with severity,
       codebase/feature context, impact of doing nothing, lettered solution
       options, and a recommended option that considers whether a broader test,
