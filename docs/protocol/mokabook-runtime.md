@@ -120,14 +120,20 @@ Consumer fragments and legacy documents are sandboxed without script permission
 so they cannot alter the same-origin Browse shell. The planned navigation
 extension will permit package-owned same-origin inspection and outer navigation
 after explicit user activation. Before enabling that iframe-wide sandbox token,
-the served/preview adapter will neutralize every consumer-authored non-self and
-`<base target>` route, including targets on marked and download links, so a
-named target cannot select the outer context either. It will retain an eligible
-marked link's explicit target only as trusted inert metadata for parent
-enhancement; only a validated default/`_self` link can receive the
-package-owned live `_top` target. Consumer scripts, forms, popups, and automatic
-top navigation remain forbidden. Review panes retain their stricter sandbox and
-byte-unmodified documents.
+the served/preview adapter will sanitize every public static HTML copy but
+promote markers only for current-manifest screen fragments and generated legacy
+pages whose ownership header names that entry's manifest `sourcePath`. Unowned
+HTML loses package-reserved metadata in the adapted copy; a trusted route with
+missing/mismatched ownership, invalid markers, or a marker/portable-href
+mismatch fails closed. One
+strict typed parser shared with the parent client neutralizes every
+consumer-authored non-self `<base target>`, `target`, and `formtarget`, including
+HTML/SVG, marked, and download cases, so a named target cannot select the outer
+context. It retains an eligible trusted link's explicit target only as inert
+metadata for parent enhancement; only a validated default/`_self` link can
+receive the package-owned live `_top` target. Consumer scripts, forms, popups,
+and automatic top navigation remain forbidden. Review panes retain their
+stricter sandbox and byte-unmodified documents.
 
 A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
 light-only catalogue offers none. One switch renders in the top bar and one in
@@ -176,7 +182,8 @@ exception is a marked catalogue link inside a Browse frame: trusted parent code
 will own primary and new-context navigation, while only default/`_self`
 activation has native outer-navigation fallback. Served Browse applies a
 request-visible logical fragment during server rendering. The static deployed
-preview applies it progressively; with JavaScript disabled, that preview still
+preview applies it progressively to each current and light/dark swap source so
+scheme changes retain the anchor; with JavaScript disabled, that preview still
 opens the canonical page but does not promise anchor scrolling.
 
 The shell meets keyboard, focus, reduced-motion, contrast, semantics, and status

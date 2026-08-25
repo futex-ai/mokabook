@@ -70,10 +70,14 @@ changed-path exclusions rather than consumer-owned ignore policy, and shutdown
 drains generation work before removing them.
 
 The approved navigation extension will promote only explicit id-addressed
-catalogue links from a consumer fragment into outer Browse routes. It is target
-behavior tracked by the active plan, not current package behavior. Portable
-generated files will keep relative artifact fallbacks, while ordinary product,
-asset, and external links remain consumer-owned. The
+catalogue links from manifest-owned generated fragments and legacy documents
+whose ownership header matches the entry's manifest `sourcePath` into outer
+Browse routes. Public unowned HTML is still sanitized before it can run under
+the relaxed Browse-frame sandbox, but its reserved-looking metadata is removed
+and never trusted. It is target behavior tracked by the active plan, not
+current package behavior. Portable generated files will keep relative artifact
+fallbacks, while ordinary product, asset, and external links remain
+consumer-owned. The
 [catalogue navigation protocol](../protocol/mokabook-navigation.md) defines the
 link marker, sandbox boundary, and active-tree invariant.
 

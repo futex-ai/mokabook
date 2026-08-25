@@ -92,14 +92,14 @@ through its first screen; collections are intentionally not linkable.
 The approved, not-yet-implemented
 [catalogue navigation extension](../protocol/mokabook-navigation.md) will also
 retain the stable id and optional fragment in a reserved `data-mokabook-link`
-marker when a native `<a>` or `<area>` has a logical `href`. A
+marker when an HTML `<a>`/`<area>` or SVG `<a>` has a logical `href`. A
 `data-nav-href`-only reference remains validated portable metadata and does not
 gain Browse interaction. The extension will validate matching destinations
 when both navigation attributes coexist, reject consumer-authored markers,
 verify fragment anchors across every target view, and bind expected marker
-presence, native-link class, and each logical attribute to the exact portable
-value produced for that element. Until the active plan completes, generated
-documents do not contain this marker.
+presence, element namespace/native-link class, and each logical attribute to
+the exact portable value produced for that element. Until the active plan
+completes, generated documents do not contain this marker.
 
 During a staged migration only, a configured consumer transformer receives the
 complete document, current route/viewport/color scheme, repository-relative
@@ -111,9 +111,9 @@ Once the navigation extension ships, this boundary will preserve complete
 catalogue-reference records rather than markers alone. A transformer will not
 be permitted to add, remove, or alter an expected marker, change a
 metadata-only reference into an activatable link, change the owning element's
-native-link class, change the set of navigation attributes that carried its
-logical destination, or alter those attributes' resolved portable values. This
-keeps Browse, standalone, and Review navigation aligned.
+namespace or native-link class, change the set of navigation attributes that
+carried its logical destination, or alter those attributes' resolved portable
+values. This keeps Browse, standalone, and Review navigation aligned.
 
 React Native Web style collection is not a second conversion stage. If an app
 uses it, its renderer wraps the node in the app provider, registers or renders
