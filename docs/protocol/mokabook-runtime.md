@@ -253,6 +253,15 @@ is strictly parsed, applies only when its durable URL exactly matches the
 reloaded page, and is removed before application; a later manual refresh cannot
 resurrect stale state.
 
+When a successful rebuild leaves the manifest structure unchanged, or an
+explicit watch rule requests a reload, the parent keeps the ready child and
+recomputes the complete optional changed-route snapshot. One typed update
+message replaces the child's shell snapshot before the event-stream version is
+published. An available empty list keeps the filter visible at zero; an
+unavailable comparison removes it. The following browser reload therefore
+observes Changed rows and counts from the same successful watch action without
+requiring a child restart.
+
 Watch actions execute serially. Changes received during an active action are
 coalesced by impact before the next action starts, so two rebuilds cannot race
 to replace generated output or restart the same child. The parent assigns a

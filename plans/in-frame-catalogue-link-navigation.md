@@ -1,6 +1,6 @@
 # In-Frame Catalogue Link Navigation
 
-**Status:** Completed.
+**Status:** Active; review follow-up in progress.
 
 **Goal:** Make an explicit catalogue link activated inside a Mokabook fragment
 navigate the outer Browse shell to the destination's canonical page, while
@@ -77,6 +77,18 @@ The final pre-commit implementation audit ran on 2026-08-25:
   `9fa89d33a0453a943675348086f1d068df5154ca`;
 - `base..origin/main` additions audit: empty;
 - full staged patch, name-status, and whitespace audits: inspected and clean; and
+- deletion audit against `origin/main`: no deletions.
+
+The review-follow-up audit ran on 2026-08-25 before its delivery commit:
+
+- captured pre-integration source tip:
+  `844e371b04d6fe97c717547c7d203f5b44de6f92`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty;
+- full working patch and whitespace audits: inspected and clean; and
 - deletion audit against `origin/main`: no deletions.
 
 Milestone 1 must append a fresh dated pre-implementation audit rather than
@@ -636,3 +648,31 @@ post-push review findings.
 At completion, all tests and `cargo xtask check` pass, the branch is committed
 and pushed, the post-push review has inspected the complete diff against
 `origin/main`, and the user has the findings needed to choose any follow-up.
+
+## Milestone 5: Review Follow-Up Correctness
+
+Summary: close the accepted post-push findings at shared validation and watched
+runtime boundaries, then repeat the complete delivery and independent-review
+loop.
+
+- [x] Add failure-first regressions proving public link helpers reject
+      non-string JavaScript values and lightweight watched updates refresh the
+      Browse Changed filter without restarting the child.
+- [x] Make the shared catalogue-id and fragment predicates safe for unknown
+      runtime values so every current and future caller fails closed.
+- [x] Carry freshly computed changed-route state through a typed parent/child
+      update message and update the running server's shell context before
+      publishing the reload event. Cover both available route lists and the
+      unavailable state.
+- [x] Update nearby runtime documentation for the refreshed Changed-filter
+      lifecycle and record the review decisions in the review ledger.
+- [x] Run focused tests and the authoritative `cargo xtask check`, continuing
+      until the complete gate passes.
+- [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
+      commit all review fixes with a Conventional Commit title of at most 50
+      characters, and push the current branch without renaming it.
+- [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
+      check, commit, push, and review loop for every valid finding, stopping
+      after at most ten total review cycles.
+- [ ] Mark this milestone and plan completed and return its index link to
+      Completed only after the final review has no valid findings.

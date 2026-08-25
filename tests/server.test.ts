@@ -59,7 +59,7 @@ test("server validates before bind and supports safe no-watch routes on port zer
   const eventReader = events.body?.getReader();
   assert.ok(eventReader);
   assert.match(await readEvent(eventReader), /event: ready\ndata: 1/);
-  server.publishUpdate(2);
+  server.publishUpdate({ version: 2 });
   assert.match(await readEvent(eventReader), /event: update\ndata: 2/);
   await eventReader.cancel();
   assert.equal(

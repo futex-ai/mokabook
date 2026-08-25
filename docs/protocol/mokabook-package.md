@@ -261,9 +261,12 @@ Complete raw `mock:<id>[#fragment]` values may also appear in `href` or
 Both helpers immediately apply the registry's lowercase kebab-case id grammar
 and reject fragment, percent-encoded, or `mock:` syntax in the id/`to` value;
 only the separate fragment input or complete raw logical attribute form may
-carry a fragment. Generated documents retain a portable relative target plus
-stable marker metadata on native HTML/SVG links so Browse can open the
-canonical catalogue page without changing standalone or Review behavior.
+carry a fragment. The shared runtime predicates reject non-string values before
+regular-expression evaluation, so untyped JavaScript callers cannot rely on
+implicit coercion for either field. Generated documents retain a portable
+relative target plus stable marker metadata on native HTML/SVG links so Browse
+can open the canonical catalogue page without changing standalone or Review
+behavior.
 Metadata-only references use `data-nav-href`, and resource elements must keep
 real resource URLs. A document with an activatable logical `href` must not
 contain `<base href>`; the builder rejects that combination before and after

@@ -11,18 +11,18 @@ export interface LogicalTarget {
 }
 
 /** Check one value against the stable catalogue-id grammar. */
-export function isCatalogueId(value: string): boolean {
-  return CATALOGUE_ID_PATTERN.test(value);
+export function isCatalogueId(value: unknown): value is string {
+  return typeof value === "string" && CATALOGUE_ID_PATTERN.test(value);
 }
 
 /** Check one value against the bare logical-fragment grammar. */
-export function isLogicalFragment(value: string): boolean {
-  return LOGICAL_FRAGMENT_PATTERN.test(value);
+export function isLogicalFragment(value: unknown): value is string {
+  return typeof value === "string" && LOGICAL_FRAGMENT_PATTERN.test(value);
 }
 
 /** Parse a complete `mock:<id>[#fragment]` value. */
-export function parseLogicalTarget(value: string): LogicalTarget | undefined {
-  if (!value.startsWith("mock:")) return undefined;
+export function parseLogicalTarget(value: unknown): LogicalTarget | undefined {
+  if (typeof value !== "string" || !value.startsWith("mock:")) return undefined;
   const separator = value.indexOf("#", 5);
   const id = separator < 0 ? value.slice(5) : value.slice(5, separator);
   const fragment = separator < 0 ? undefined : value.slice(separator + 1);
@@ -36,7 +36,8 @@ export function parseLogicalTarget(value: string): LogicalTarget | undefined {
 }
 
 /** Parse the marker form `<id>[#fragment]`. */
-export function parseLogicalMarker(value: string): LogicalTarget | undefined {
+export function parseLogicalMarker(value: unknown): LogicalTarget | undefined {
+  if (typeof value !== "string") return undefined;
   return parseLogicalTarget(`mock:${value}`);
 }
 

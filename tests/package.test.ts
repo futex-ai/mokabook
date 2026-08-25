@@ -70,6 +70,23 @@ test("public helpers retain stable authoring semantics", () => {
   );
 });
 
+test("public link helpers reject non-string runtime values", () => {
+  for (const invalid of [null, true, 42, ["account-home"]]) {
+    assert.throws(
+      () => mockLink(invalid as never),
+      /expected kebab-case/,
+      String(invalid),
+    );
+  }
+  for (const invalid of [true, 42, ["billing-section"]]) {
+    assert.throws(
+      () => mockLink("account-home", invalid as never),
+      /fragment/,
+      String(invalid),
+    );
+  }
+});
+
 test("CLI defaults to watched serve and rejects misplaced options", () => {
   assert.deepEqual(parseArguments([]), {
     command: "serve",

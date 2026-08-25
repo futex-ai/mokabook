@@ -13,6 +13,7 @@ import {
   type CatalogueServerFactory,
 } from "./factory.js";
 import { configuredServedReview } from "./review_routes.js";
+import { computeChangedRoutes } from "./changed.js";
 import {
   NodeProcessSupervisorFactory,
   type ProcessSupervisor,
@@ -211,7 +212,7 @@ async function serveWatched(
       await outputStore.write(nextCompilation, activeConfig);
       const nextSignature = JSON.stringify(nextCompilation.manifest);
       if (nextSignature === manifestSignature) {
-        runningSupervisor.notifyUpdate();
+        await publishUpdate();
       } else {
         manifestSignature = nextSignature;
         await restartWithRecovery(runningSupervisor);
@@ -219,10 +220,15 @@ async function serveWatched(
       return;
     }
     if (action === "reload") {
-      runningSupervisor.notifyUpdate();
+      await publishUpdate();
       return;
     }
     await restartWithRecovery(runningSupervisor);
+  };
+  const publishUpdate = async (): Promise<void> => {
+    const base = options.base ?? activeConfig.review.base;
+    const changedRoutes = await computeChangedRoutes(activeConfig, base);
+    if (!closed) runningSupervisor.notifyUpdate(changedRoutes);
   };
   const actionQueue = new WatchActionQueue(processAction, (error) =>
     process.stderr.write(`${errorMessage(error)}\n`),

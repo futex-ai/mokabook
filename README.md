@@ -78,7 +78,9 @@ logical values remain available for an HTML/SVG link `href`, while
 interaction. Generated files retain portable relative links, so standalone and
 Review documents continue to work. In Browse, an eligible link opens the
 destination's canonical catalogue page, carries its fragment, and reveals the
-active item in the navigation tree.
+active item in the navigation tree. Untyped JavaScript calls are validated at
+runtime as well: ids and fragments must be strings before their respective
+grammars are applied.
 
 ```tsx
 import { mockLink } from "mokabook";
@@ -152,6 +154,9 @@ base. Commits added only to the base branch after divergence do not appear as
 branch changes; staged, unstaged, and untracked workspace edits still do. A
 registry module that defines many routes does not make every route appear
 changed merely because the module's imports or composition changed.
+Lightweight watched updates recompute this route snapshot before notifying the
+browser, so the Changed rows and count match the files that triggered each
+reload without restarting the server child.
 Review uses the same branch-point baseline and provides summary, side-by-side,
 overlay, and difference views as a static artifact. When screens render in both
 schemes, Review compares each viewport and scheme view and links sibling

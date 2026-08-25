@@ -21,9 +21,10 @@ import { requestedFragment, withFragmentQuery } from "./fragments.js";
 import { listenOnAvailablePort } from "./ports.js";
 import { safeDecode, safeDecodePath, send } from "./respond.js";
 import { ReviewRoutes, type ServedReview } from "./review_routes.js";
-import type { ShellContext } from "./shell/context.js";
+import { shellContext, type ShellContext } from "./shell/context.js";
 import { SHELL_CSS } from "./shell/css.js";
 import { serveStatic } from "./static_routes.js";
+import type { CatalogueUpdate } from "./update_messages.js";
 
 /** Options for one deterministic server child. */
 export interface ServerOptions {
@@ -39,7 +40,7 @@ export interface ServerOptions {
 /** Running server lifecycle and update-stream boundary. */
 export interface RunningServer {
   close(): Promise<void>;
-  publishUpdate(version?: number): void;
+  publishUpdate(update?: CatalogueUpdate): void;
   port: number;
   url: string;
 }
@@ -57,6 +58,7 @@ export async function startCatalogueServer(
   const reviewRoutes = options.review
     ? new ReviewRoutes(options.review)
     : undefined;
+  let changedRoutes = options.changedRoutes;
   let updateVersion = options.updateVersion ?? 1;
   const server = http.createServer((request, response) => {
     handleRequest(
@@ -65,7 +67,8 @@ export async function startCatalogueServer(
       response,
       catalogue,
       config,
-      options,
+      options.base,
+      () => changedRoutes,
       streams,
       { clientModules, fontAssets, navigationModules },
       () => updateVersion,
@@ -98,10 +101,13 @@ export async function startCatalogueServer(
       }
     },
     port: address.port,
-    publishUpdate(version?: number): void {
-      const nextVersion = version ?? updateVersion + 1;
+    publishUpdate(update = {}): void {
+      const nextVersion = update.version ?? updateVersion + 1;
       if (!Number.isSafeInteger(nextVersion) || nextVersion <= updateVersion)
         return;
+      if (Object.hasOwn(update, "changedRoutes")) {
+        changedRoutes = update.changedRoutes ?? undefined;
+      }
       updateVersion = nextVersion;
       reviewRoutes?.invalidate();
       const payload = `event: update\ndata: ${updateVersion}\n\n`;
@@ -117,7 +123,8 @@ function handleRequest(
   response: ServerResponse,
   catalogue: Catalogue,
   config: ResolvedConfig,
-  options: ServerOptions,
+  base: string,
+  currentChangedRoutes: () => readonly string[] | undefined,
   streams: Set<ServerResponse>,
   assets: ServedAssets,
   currentVersion: () => number,
@@ -126,7 +133,7 @@ function handleRequest(
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed");
   const url = new URL(rawUrl, "http://mokabook.invalid");
-  const context = shellContext(options, "browse");
+  const context = shellContext(base, currentChangedRoutes(), "browse");
   if (url.pathname === "/")
     return send(
       response,
@@ -147,7 +154,11 @@ function handleRequest(
       response,
       200,
       "text/html",
-      reviewPage(options.base, catalogue, shellContext(options, "review")),
+      reviewPage(
+        base,
+        catalogue,
+        shellContext(base, currentChangedRoutes(), "review"),
+      ),
       method,
     );
   if (url.pathname === "/__mokabook/shell.css")
@@ -212,17 +223,6 @@ function handleRequest(
     notFoundPage(url.pathname, catalogue, context),
     method,
   );
-}
-
-function shellContext(
-  options: ServerOptions,
-  mode: ShellContext["mode"],
-): ShellContext {
-  return {
-    base: options.base,
-    ...(options.changedRoutes ? { changedRoutes: options.changedRoutes } : {}),
-    mode,
-  };
 }
 
 function redirectId(

@@ -13,3 +13,16 @@ export interface ShellContext {
   /** Validated logical fragment applied to the routed target's frames. */
   fragment?: string;
 }
+
+/** Create one page context from the current mutable server snapshot. */
+export function shellContext(
+  base: string,
+  changedRoutes: readonly string[] | undefined,
+  mode: ShellContext["mode"],
+): ShellContext {
+  return {
+    base,
+    ...(changedRoutes ? { changedRoutes } : {}),
+    mode,
+  };
+}
