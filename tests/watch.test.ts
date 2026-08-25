@@ -8,7 +8,8 @@ import { FileSystemConfigLoader, loadConfig } from "../dist/config/load.js";
 import type { ResolvedConfig } from "../dist/config/types.js";
 import type { CatalogueServerFactory } from "../dist/server/factory.js";
 import type { RunningServer, ServerOptions } from "../dist/server/http.js";
-import { restartWithRecovery, serve } from "../dist/server/serve.js";
+import { serve } from "../dist/server/serve.js";
+import { restartWithRecovery } from "../dist/server/serve_lifecycle.js";
 import {
   NotificationGate,
   WatchActionQueue,

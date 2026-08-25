@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import {
   defineRoot,
+  MockLink,
   ReviewIgnore,
   ReviewIgnoreScope,
   reviewMaterialKey,
@@ -25,6 +26,24 @@ test("ReviewIgnore serializes to inert paired comments", () => {
   assert.match(html, /<!--mokabook-review-ignore:start:shared-nav-->/);
   assert.match(html, /<!--mokabook-review-ignore:end:shared-nav-->/);
   assert.match(html, /<!--mokabook-review-material:shared-nav:[a-f0-9]{64}-->/);
+});
+
+test("MockLink keeps fragment identity out of rendered package props", () => {
+  const html = renderToStaticMarkup(
+    <MockLink className="details-link" fragment="billing-section" to="details">
+      Details
+    </MockLink>,
+  );
+
+  assert.equal(
+    html,
+    '<a class="details-link" href="mock:details#billing-section">Details</a>',
+  );
+  assert.doesNotMatch(html, /fragment=/);
+  assert.throws(
+    () => renderToStaticMarkup(<MockLink to="details#billing">Bad</MockLink>),
+    /expected kebab-case/,
+  );
 });
 
 test("ReviewIgnoreScope can render children with no marker contract", () => {

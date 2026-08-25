@@ -1,6 +1,7 @@
 import { fork, type ChildProcess } from "node:child_process";
 
 import { MokabookError, errorMessage } from "../errors.js";
+import { childUpdateMessage, type ChildCommand } from "./update_messages.js";
 
 interface ReadyMessage {
   port: number;
@@ -13,7 +14,7 @@ export interface ChildHandle {
   onError(callback: (error: Error) => void): void;
   onExit(callback: (code: number | null) => void): void;
   onMessage(callback: (message: unknown) => void): void;
-  send(message: Record<string, string | number>): void;
+  send(message: ChildCommand): void;
   terminate(): void;
 }
 
@@ -51,7 +52,7 @@ export class NodeChildFactory implements ChildFactory {
 /** Restartable child interface used by watched Serve. */
 export interface ProcessSupervisor {
   close(): Promise<void>;
-  notifyUpdate(): void;
+  notifyUpdate(changedRoutes: readonly string[] | undefined): void;
   /** Register the watched-runtime handler for a post-readiness child failure. */
   onUnexpectedExit(callback: (error: Error) => void): void;
   restart(): Promise<number>;
@@ -135,10 +136,10 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
     return this.start();
   }
 
-  notifyUpdate(): void {
+  notifyUpdate(changedRoutes: readonly string[] | undefined): void {
     if (!this.#child) return;
     this.#updateVersion += 1;
-    this.#child.send({ type: "update", version: this.#updateVersion });
+    this.#child.send(childUpdateMessage(this.#updateVersion, changedRoutes));
   }
 
   onUnexpectedExit(callback: (error: Error) => void): void {
@@ -258,7 +259,7 @@ class NodeChildHandle implements ChildHandle {
     this.child.on("message", callback);
   }
 
-  send(message: Record<string, string | number>): void {
+  send(message: ChildCommand): void {
     if (this.child.connected) this.child.send(message);
   }
 

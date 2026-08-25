@@ -14,9 +14,13 @@ export function loadBrowserClientModules(): ReadonlyMap<string, Buffer> {
     "browse_details.js",
     "browse_frames.js",
     "browse_navigation.js",
+    "browse_navigation_state.js",
+    "frame_navigation.js",
     "browse_state.js",
     "browser.js",
     "live_updates.js",
+    "navigation.js",
+    "preview_fragment.js",
   ]) {
     const candidate = fileURLToPath(
       new URL(`../client/${filename}`, import.meta.url),
@@ -32,6 +36,11 @@ export function loadBrowserClientModules(): ReadonlyMap<string, Buffer> {
     }
   }
   return modules;
+}
+
+/** Load shared pure navigation modules imported by the browser client. */
+export function loadBrowserNavigationModules(): ReadonlyMap<string, Buffer> {
+  return loadModules("../navigation", ["logical.js", "target.js"]);
 }
 
 /** Load the packaged shell fonts before the HTTP server binds. */
@@ -52,4 +61,26 @@ export function loadShellFontAssets(): ReadonlyMap<string, Buffer> {
     }
   }
   return fonts;
+}
+
+function loadModules(
+  relativeDirectory: string,
+  filenames: readonly string[],
+): ReadonlyMap<string, Buffer> {
+  const modules = new Map<string, Buffer>();
+  for (const filename of filenames) {
+    const candidate = fileURLToPath(
+      new URL(`${relativeDirectory}/${filename}`, import.meta.url),
+    );
+    try {
+      modules.set(filename, fs.readFileSync(candidate));
+    } catch (error) {
+      throw new MokabookError(
+        "server-failed",
+        `could not load browser module ${filename}: ${errorMessage(error)}`,
+        { cause: error },
+      );
+    }
+  }
+  return modules;
 }

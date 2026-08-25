@@ -19,6 +19,7 @@ import {
   type ProcessSupervisor,
   type ProcessSupervisorFactory,
 } from "../dist/server/supervisor.js";
+import type { ChildCommand } from "../dist/server/update_messages.js";
 import type {
   ConsumerWatcher,
   ConsumerWatcherFactory,
@@ -137,7 +138,7 @@ class FakeChild implements ChildHandle {
     this.messageCallbacks.push(callback);
   }
 
-  send(message: Record<string, string | number>): void {
+  send(message: ChildCommand): void {
     if (message.type === "shutdown") queueMicrotask(() => this.exit(0));
   }
 

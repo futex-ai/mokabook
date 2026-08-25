@@ -38,7 +38,10 @@ export async function smokeEsmConsumer(context) {
     "utf8",
   );
   assert.match(fragment, /data-fixture="esm-desktop"/);
-  assert.match(fragment, /href="\.\/detail\.desktop\.html"/);
+  assert.match(
+    fragment,
+    /href="\.\/detail\.desktop\.html#packed-section"[^>]+data-mokabook-link="packed-detail#packed-section"/,
+  );
   await smokeServer(root);
   await runCommand("npx", ["--no-install", "mokabook", "--help"], {
     cwd: root,

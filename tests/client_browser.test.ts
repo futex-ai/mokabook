@@ -25,6 +25,7 @@ test("browser adapter connects updates to reload and shutdown", () => {
     onPageHide(callback) {
       pageHide = callback;
     },
+    pageVersion: 1,
     restoreBrowseState(state) {
       restored = state;
     },
@@ -60,6 +61,7 @@ test("browser adapter consumes stale-URL recovery without applying it", () => {
     createEventSource: () => new FakeEventSource(),
     location: new FakeLocation(),
     onPageHide: () => undefined,
+    pageVersion: 1,
     restoreBrowseState: () => {
       restored = true;
     },

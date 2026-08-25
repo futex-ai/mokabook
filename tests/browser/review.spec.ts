@@ -16,6 +16,8 @@ import {
 
 const run = promisify(execFile);
 const cli = path.join(repositoryRoot, "dist/cli/bin.js");
+const reviewLink =
+  '<a href="mock:details" id="review-link" target="_top">Details</a>';
 
 let fixture: TestFixture;
 let outDir: string;
@@ -38,7 +40,7 @@ import React from "react";
 const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"] };
 export const mockups = [
   defineCollection({ ...metadata, childIds: ["home", "details", "tour"], description: "Fixture collection", id: "fixture", title: "Fixture" }),
-  defineScreen({ ...metadata, description: "Home screen", desktop: <main id="home">Home</main>, id: "home", mobile: <main id="home-mobile">Home</main>, route: "screens/home.html", title: ${firstTitle}, useCaseIds: ["tour"] }),
+  defineScreen({ ...metadata, description: "Home screen", desktop: <main id="home">Home<a href="mock:details" id="review-link" target="_top">Details</a></main>, id: "home", mobile: <main id="home-mobile">Home<a href="mock:details" id="review-link" target="_top">Details</a></main>, route: "screens/home.html", title: ${firstTitle}, useCaseIds: ["tour"] }),
   defineScreen({ ...metadata, colorSchemes: ["light"], description: "Detail screen", desktop: <main id="details">Detail</main>, id: "details", mobile: <main id="details-mobile">Detail</main>, route: "screens/details.html", title: ${secondTitle}, useCaseIds: ["tour"] }),
   defineUseCase({ ...metadata, description: "Fixture journey", id: "tour", route: "user-flows/tour.html", steps: [{ screenId: "home" }, { screenId: "details" }], title: "Tour" })
 ];
@@ -110,7 +112,7 @@ async function stopServe(child: ChildProcess): Promise<void> {
 }
 
 test.beforeAll(async () => {
-  fixture = await createFixture();
+  fixture = await createFixture(validEntrySource({ body: reviewLink }));
   await run("node", [cli, "build", "--config", fixture.configPath]);
   await git(fixture.root, "init", "--initial-branch=main");
   await git(fixture.root, "config", "user.email", "fixture@example.test");
@@ -119,7 +121,7 @@ test.beforeAll(async () => {
   await git(fixture.root, "commit", "-m", "base");
   await fs.promises.writeFile(
     fixture.entryPath,
-    validEntrySource({ firstTitle: "Home Revised" }),
+    validEntrySource({ body: reviewLink, firstTitle: "Home Revised" }),
   );
   await run("node", [cli, "build", "--config", fixture.configPath]);
   await run("node", [
@@ -240,6 +242,28 @@ test("compare pages switch modes and viewports", async ({ page }) => {
   );
 });
 
+test("static Review panes keep marked links frame-owned", async ({ page }) => {
+  await page.goto(pathToFileURL(path.join(outDir, "index.html")).href);
+  await page.locator(".mbk-chg-row").first().click();
+  const outerUrl = page.url();
+  const pageCount = page.context().pages().length;
+  const pane = page.frameLocator(".mb-pane--after iframe");
+  const link = pane.locator("#review-link");
+  await expect(link).toHaveAttribute("data-mokabook-link", "details");
+  await expect(link).not.toHaveAttribute("data-mokabook-target", /.+/);
+  await link.click();
+  await page.waitForTimeout(100);
+  expect(page.url()).toBe(outerUrl);
+  expect(page.context().pages()).toHaveLength(pageCount);
+  await expect(page.locator(".mb-panes")).toHaveAttribute(
+    "data-compare-mode",
+    "side",
+  );
+  await expect(page.locator('.mbk-chg-row[aria-current="page"]')).toHaveCount(
+    1,
+  );
+});
+
 test("narrow static review pages expose navigation and the index", async ({
   page,
 }) => {
@@ -347,6 +371,28 @@ test.describe("served review of a dark-capable catalogue", () => {
       "src",
       /home\.mobile\.dark\.html$/,
     );
+  });
+
+  test("served Review panes keep marked links frame-owned", async ({
+    page,
+  }) => {
+    await page.goto(`${url}/review`);
+    await page.click(homeRow);
+    const outerUrl = page.url();
+    const pageCount = page.context().pages().length;
+    const pane = page.frameLocator(".mb-pane--after iframe");
+    const link = pane.locator("#review-link");
+    await expect(link).toHaveAttribute("data-mokabook-link", "details");
+    await expect(link).not.toHaveAttribute("data-mokabook-target", /.+/);
+    await link.click();
+    await page.waitForTimeout(100);
+    expect(page.url()).toBe(outerUrl);
+    expect(page.context().pages()).toHaveLength(pageCount);
+    await expect(page.locator(".mb-panes")).toHaveAttribute(
+      "data-compare-mode",
+      "side",
+    );
+    await expect(page.locator(homeRow)).toHaveAttribute("aria-current", "page");
   });
 
   test("a light-only screen compares without a scheme choice", async ({

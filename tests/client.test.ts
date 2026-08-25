@@ -39,6 +39,28 @@ test("live updates are latest-wins and recovery is consumed once", () => {
   assert.equal(stream.closed, true);
 });
 
+test("a ready version newer than the served page reloads immediately", () => {
+  const stream = new FakeStream();
+  const storage = new FakeStorage();
+  const location = new FakeLocation();
+  const controller = new LiveUpdateController(
+    stream,
+    storage,
+    location,
+    () => undefined,
+    4,
+  );
+  controller.start();
+
+  stream.ready(5);
+
+  assert.equal(location.reloads, 1);
+  assert.deepEqual(controller.consumeRecovery(), {
+    url: location.href,
+    version: 5,
+  });
+});
+
 test("Browse recovery parsing rejects malformed session state", () => {
   assert.deepEqual(parseBrowseRecoveryState(browseState()), browseState());
   assert.equal(

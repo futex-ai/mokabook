@@ -57,6 +57,18 @@ test.afterAll(async () => {
 test("watched serve rebuilds and reloads after an authored change", async ({
   page,
 }) => {
+  let releaseFirstEventRequest = (): void => undefined;
+  const firstEventRequestBlocked = new Promise<void>((resolve) => {
+    releaseFirstEventRequest = resolve;
+  });
+  let blockFirstEventRequest = true;
+  await page.route(`${url}/__mokabook/events`, async (route) => {
+    if (blockFirstEventRequest) {
+      blockFirstEventRequest = false;
+      await firstEventRequestBlocked;
+    }
+    await route.continue();
+  });
   await page.goto(`${url}/view/screens/home.html`);
   await expect(page.locator("#mb-main h2")).toHaveText("Home");
   await page.fill("[data-mokabook-search]", "home");
@@ -77,11 +89,28 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   await page.click("[data-mokabook-menu]");
   await fs.promises.writeFile(
     fixture.entryPath,
-    reparentedEntrySource("screens", { firstTitle: "Home Reloaded" }),
+    reparentedEntrySource("screens", {
+      body: '<a href="mock:details">Details</a><p data-watch-version="2">Reloaded</p>',
+    }),
   );
-  await expect(page.locator("#mb-main h2")).toHaveText("Home Reloaded", {
-    timeout: 45_000,
-  });
+  await expect
+    .poll(async () => {
+      try {
+        return (
+          await (await fetch(`${url}/static/screens/home.mobile.html`)).text()
+        ).includes('data-watch-version="2"');
+      } catch {
+        return false;
+      }
+    })
+    .toBe(true);
+  releaseFirstEventRequest();
+  await expect(
+    page
+      .frameLocator(".mbk-frame-mobile iframe")
+      .locator('[data-watch-version="2"]'),
+  ).toHaveText("Reloaded", { timeout: 45_000 });
+  await expect(page.locator("#mb-main h2")).toHaveText("Home");
   await expect(page.locator("[data-mokabook-search]")).toHaveValue("home");
   await expect(page.locator(".mbk-frame-mobile")).toBeVisible();
   await expect(page.locator(".mbk-frame-desktop")).toBeHidden();

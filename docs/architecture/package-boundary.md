@@ -13,7 +13,7 @@ paths, and synthetic tests.
 | esbuild discovery and one-graph loading | Product component library        | Renderer/module resolution |
 | Static fragments and manifest schema    | Theme/tokens/providers           | Stylesheet rules           |
 | Generated-file ownership and check      | Product CSS/fonts/images         | Legacy policy/bridge       |
-| Safe Browse routes and watch lifecycle  | Application navigation semantics | Additional watch inputs    |
+| Safe routes and catalogue navigation    | Product route semantics          | Additional watch inputs    |
 | Git comparison and Review-ignore rules  | Product Review policy            | Base, output, impact globs |
 
 ## Dependency Direction
@@ -52,10 +52,11 @@ legacy source trees, traversal, and symlink escapes. Watch targets come only
 from resolved config; package-owned dependency/build/test/output trees are
 pruned before broad consumer rules, while explicit source modules and
 stylesheets retain their required action. Output HTML is pruned only when its
-generated header proves package ownership; consumer-authored public HTML may
-use explicit watch rules. A child closes on either an orderly message/signal or
-loss of its parent IPC channel, and supervisor shutdown waits for confirmed
-exit while escalating from IPC to SIGTERM and SIGKILL. Review reads the base
+versioned, comment-safe generated header decodes to a source beneath an authored
+root; consumer-authored public HTML may use explicit watch rules. A child closes
+on either an orderly message/signal or loss of its parent IPC channel, and
+supervisor shutdown waits for confirmed exit while escalating from IPC to
+SIGTERM and SIGKILL. Review reads the base
 tree through bounded Git object batches, matches directory dependencies
 recursively, rejects non-portable base resource URLs, and never checks the base
 out over the worktree. Comparison pages share one artifact-owned navigation
@@ -68,6 +69,20 @@ behind the active generation, and only a marker-owned current output may enter
 the server's temporary archive lifecycle. Archive roots are explicit
 changed-path exclusions rather than consumer-owned ignore policy, and shutdown
 drains generation work before removing them.
+
+Browse promotes only explicit id-addressed
+catalogue links from manifest-owned generated fragments and legacy documents
+whose ownership header matches the entry's manifest `sourcePath` into outer
+Browse routes. Adapted public unowned HTML loses reserved-looking metadata and
+is never trusted. A generated document with an activatable catalogue link
+rejects `<base href>` so its relative fallback cannot resolve differently from
+the portable bytes Browse authenticates. Browse uses same-origin inspection
+for parent enhancement but no top-navigation capability, so direct and nested
+consumer contexts remain unable to replace the shell. Portable generated files
+keep relative artifact fallbacks, while ordinary product, asset, and
+external links remain consumer-owned. The
+[catalogue navigation protocol](../protocol/mokabook-navigation.md) defines the
+link marker, sandbox boundary, and active-tree invariant.
 
 ## Related Docs
 

@@ -6,6 +6,7 @@ import {
   type ChildFactory,
   type ChildHandle,
 } from "../dist/server/supervisor.js";
+import type { ChildCommand } from "../dist/server/update_messages.js";
 
 test("supervisor waits for readiness and shuts down before restart", async () => {
   const factory = new ResponsiveChildFactory();
@@ -13,15 +14,30 @@ test("supervisor waits for readiness and shuts down before restart", async () =>
   const starting = supervisor.start();
   factory.children[0]?.ready(48123);
   assert.equal(await starting, 48123);
-  supervisor.notifyUpdate();
+  supervisor.notifyUpdate(["screens/home.html"]);
   assert.deepEqual(factory.children[0]?.messages, [
-    { type: "update", version: 2 },
+    {
+      changedRoutes: ["screens/home.html"],
+      type: "update",
+      version: 2,
+    },
   ]);
+  supervisor.notifyUpdate(undefined);
+  assert.deepEqual(factory.children[0]?.messages[1], {
+    changedRoutes: null,
+    type: "update",
+    version: 3,
+  });
 
   const restarting = supervisor.restart();
   await new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual(factory.children[0]?.messages, [
-    { type: "update", version: 2 },
+    {
+      changedRoutes: ["screens/home.html"],
+      type: "update",
+      version: 2,
+    },
+    { changedRoutes: null, type: "update", version: 3 },
     { type: "shutdown" },
   ]);
   assert.deepEqual(factory.arguments_[1], [
@@ -30,7 +46,7 @@ test("supervisor waits for readiness and shuts down before restart", async () =>
     "48123",
     "--strict-port",
     "--update-version",
-    "3",
+    "4",
   ]);
   factory.children[1]?.ready(48123);
   assert.equal(await restarting, 48123);
@@ -89,7 +105,7 @@ class ResponsiveChildFactory implements ChildFactory {
 }
 
 class ResponsiveChild implements ChildHandle {
-  readonly messages: Array<Record<string, string | number>> = [];
+  readonly messages: ChildCommand[] = [];
   private exitCallback: ((code: number | null) => void) | undefined;
   private messageCallback: ((message: unknown) => void) | undefined;
 
@@ -107,7 +123,7 @@ class ResponsiveChild implements ChildHandle {
     this.messageCallback = callback;
   }
 
-  send(message: Record<string, string | number>): void {
+  send(message: ChildCommand): void {
     this.messages.push(message);
     if (message.type === "shutdown")
       queueMicrotask(() => this.exitCallback?.(0));
@@ -142,7 +158,7 @@ class UnresponsiveChild implements ChildHandle {
     this.messageCallbacks.push(callback);
   }
 
-  send(_message: Record<string, string | number>): void {}
+  send(_message: ChildCommand): void {}
 
   terminate(): void {
     this.terminations += 1;

@@ -19,3 +19,8 @@ const expected = [
 
 assert.deepEqual(Object.keys(api).sort(), expected);
 assert.equal(api.mockLink("packed-home"), "mock:packed-home");
+assert.equal(
+  api.mockLink("packed-home", "packed-section"),
+  "mock:packed-home#packed-section",
+);
+assert.throws(() => api.mockLink("packed-home#packed-section"), /kebab-case/);

@@ -8,9 +8,8 @@ import {
   isSafeRepositoryPath,
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { isCatalogueId } from "../navigation/logical.js";
 import type { RegistryViolation } from "./types.js";
-
-const ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /** Validate metadata, routes, source attribution, and declared paths. */
 export function validateEntry(
@@ -25,7 +24,7 @@ export function validateEntry(
       );
     }
   }
-  if (!ID_PATTERN.test(entry.id)) {
+  if (!isCatalogueId(entry.id)) {
     violations.push(
       problem(entry, "invalid-id", "id must be globally unique kebab-case"),
     );

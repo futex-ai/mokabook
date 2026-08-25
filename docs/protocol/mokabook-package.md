@@ -12,6 +12,13 @@ The package must be usable by Accounting and Juno without importing either
 application or recognizing application-specific route names. Synthetic screens
 may exist only under examples and test fixtures.
 
+## Delivery Status
+
+This document describes implemented pre-release package and authoring behavior.
+The catalogue-link implementation and its verification history are recorded in
+the completed
+[in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
+
 ## Package Identity
 
 - The public package name is `mokabook`.
@@ -294,7 +301,25 @@ paths whose filenames contain other characters.
 Logical screen and use-case routes are catalogue identifiers, not generated
 documents. Fragment links must target a generated fragment or public static
 asset with a relative URL; root-absolute links are rejected as non-portable.
-Authors use `MockLink` for id-addressed catalogue navigation.
+Authors use `mockLink(id, fragment?)` or
+`<MockLink to={id} fragment={fragment}>` for id-addressed catalogue navigation.
+Complete raw `mock:<id>[#fragment]` values may also appear in `href` or
+`data-nav-href`. The fragment is a bare HTML id without `#` or percent-encoding.
+Both helpers immediately apply the registry's lowercase kebab-case id grammar
+and reject fragment, percent-encoded, or `mock:` syntax in the id/`to` value;
+only the separate fragment input or complete raw logical attribute form may
+carry a fragment. The shared runtime predicates reject non-string values before
+regular-expression evaluation, so untyped JavaScript callers cannot rely on
+implicit coercion for either field. Generated documents retain a portable
+relative target plus stable marker metadata on native HTML/SVG links so Browse
+can open the canonical catalogue page without changing standalone or Review
+behavior.
+Metadata-only references use `data-nav-href`, and resource elements must keep
+real resource URLs. A document with an activatable logical `href` must not
+contain `<base href>`; the builder rejects that combination before and after
+compatibility transformation while continuing to support `<base target>`. The
+complete behavior is defined by the
+[catalogue navigation contract](./mokabook-navigation.md).
 Local resource URLs in HTML source attributes, `srcset`, inline/style-block
 CSS, and transitively referenced HTML/CSS must likewise resolve to public
 static files beneath `mockupsDir` that remain after the pending build. An owned
@@ -334,15 +359,17 @@ interface RenderInput {
 export default function render(input: RenderInput): string;
 ```
 
-The string must contain a complete `<html>` document. Mokabook serializes
-Review-ignore markers and rewrites every complete `mock:<id>` `href` and
-`data-nav-href` value after this function returns, including when one element
-has both attributes. Final values from compatibility transforms are validated
-through the same fail-closed link contract. The same rewrite applies to legacy
-output. The package declares `react` and `react-dom`
-`>=19.0.0` as peers and does not ship a private runtime. The builder resolves
-both peers and their subpaths from consumer config, then bundles every
-React-bearing input in one internal graph.
+The string must contain a complete `<html>` document. Mokabook
+serializes Review-ignore markers and rewrites every complete
+`mock:<id>[#fragment]` value found in `href` or `data-nav-href` after this
+function returns, including when one element has both attributes. The rewrite
+is element-aware and applies to legacy output: logical `href` is valid only on
+native HTML/SVG links, every other owner fails the build, documents with an
+activatable logical link reject `<base href>`, and final compatibility output
+is checked through that fail-closed contract. The
+package declares `react` and `react-dom` `>=19.0.0` as peers and does not ship a
+private runtime. The builder resolves both peers and their subpaths from
+consumer config, then bundles every React-bearing input in one internal graph.
 
 The builder invokes the renderer once for every effective viewport and color
 scheme. Light stays the default and canonical render. The consumer renderer
@@ -386,9 +413,15 @@ when the destination supports them and otherwise falls back to the light
 fragment. `outputPath` is repository-relative; no absolute checkout path is
 exposed. Mokabook applies the transformer after id links resolve and before
 Review-marker, link, resource, and ownership validation. It must return a
-complete document, remain deterministic, and stay consumer-owned. It cannot
-weaken final validation. New catalogues should author portable links directly
-and leave this option unset.
+complete document, retain the exact generated source owner, remain
+deterministic, and stay consumer-owned. The shared ownership parser accepts LF
+or CRLF after the header and strictly decodes its versioned canonical-base64
+source field, but a missing or changed source identity fails before write. This
+keeps source filenames out of HTML comment syntax; former raw-path headers are
+accepted only when their source is comment-safe so existing files can be
+recognized for migration. A transformer must retain the current encoded form
+and cannot weaken final validation. New catalogues should author portable links
+directly and leave this option unset.
 
 Stylesheet rules are ordered, declarative consumer configuration. Their globs
 match the catalogue route before viewport fragments are derived, so one exact
@@ -423,11 +456,13 @@ stable across operating systems and independent of absolute checkout paths.
 Repository paths are canonical POSIX paths with no empty, dot, parent, drive,
 or backslash segments; generated manifests are self-validated before writing.
 
-Generated documents carry a generic generated-file header. Build removes only
-files that it can prove were previously generated by the same configured
-catalogue: an HTML header's source must belong to the current entries or legacy
-root even when that source was just deleted. It never deletes an unknown or
-foreign-catalogue file.
+Generated documents carry a generic generated-file header. After compatibility
+transformation, every pending document must retain the expected source path in
+that header. The same parser accepts LF and CRLF and lets Build remove only
+files proven to have been generated by the configured catalogue: an HTML
+header's source must belong to the current entries or legacy root even when
+that source was just deleted. It never deletes an unknown or foreign-catalogue
+file.
 
 The normative version 3 manifest shape is:
 

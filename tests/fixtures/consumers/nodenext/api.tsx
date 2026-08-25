@@ -46,7 +46,12 @@ const config: MokabookConfig = defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
 });
-const node: ReactNode = <MockLink to="typed-screen">Typed link</MockLink>;
+const node: ReactNode = (
+  <MockLink fragment="typed-section" to="typed-screen">
+    Typed link
+  </MockLink>
+);
+const typedLink: string = mockLink("typed-screen", "typed-section");
 const definitions: RegistryDefinition[] = [
   defineScreen({
     dependencies: [],
@@ -70,6 +75,7 @@ void [
   ReviewIgnoreScope,
   reviewMaterialKey,
   screen,
+  typedLink,
   config,
   definitions,
 ];

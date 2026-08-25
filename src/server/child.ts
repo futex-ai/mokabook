@@ -2,6 +2,7 @@ import type { ResolvedConfig } from "../config/types.js";
 import { computeChangedRoutes } from "./changed.js";
 import { startCatalogueServer } from "./http.js";
 import { configuredServedReview } from "./review_routes.js";
+import { parseChildUpdateMessage } from "./update_messages.js";
 
 /** Run the hidden deterministic server child until its parent shuts it down. */
 export async function runServerChild(
@@ -54,7 +55,8 @@ function waitForChildShutdown(
       }
     };
     const onMessage = (message: unknown): void => {
-      if (isUpdateMessage(message)) server.publishUpdate(message.version);
+      const update = parseChildUpdateMessage(message);
+      if (update) server.publishUpdate(update);
       if (isMessage(message, "shutdown")) void close();
     };
     const onDisconnect = (): void => void close();
@@ -64,15 +66,6 @@ function waitForChildShutdown(
     process.once("SIGINT", onSignal);
     process.once("SIGTERM", onSignal);
   });
-}
-
-function isUpdateMessage(
-  value: unknown,
-): value is { type: "update"; version: number } {
-  return (
-    isMessage(value, "update") &&
-    Number.isSafeInteger((value as { version?: unknown }).version)
-  );
 }
 
 function isMessage(value: unknown, type: string): boolean {

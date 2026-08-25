@@ -73,11 +73,17 @@ receive Cloudflare credentials or write-capable execution.
 `npm run preview:build` first rebuilds Mokabook and its committed basic
 consumer. The repository-only preview builder starts the real Browse server on
 an ephemeral loopback port and snapshots the home, review launcher, not-found,
-and every manifest-backed route. It copies the shell stylesheet, browser
-navigation modules, fonts, id redirects, and every validated public consumer
-asset into `.context/mokabook-preview`. Preview shell links use Cloudflare
+and every manifest-backed route. It copies the shell stylesheet, browser and
+shared navigation modules, fonts, id redirects, and every validated public
+consumer asset into `.context/mokabook-preview`. HTML copies pass through the
+same manifest/header-aware logical-link adapter as served Browse; unowned
+reserved metadata is removed and invalid trusted output fails the build.
+Preview shell links use Cloudflare
 Pages' canonical extensionless HTML routes, and static deployments omit the
-watched server's live-update module. The builder computes route changes from the
+watched server's live-update module. The parent client validates one optional
+`fragment` query and applies its encoded hash to every applicable current and
+light/dark frame source, with first-step-only use-case scope. The builder
+computes route changes from the
 branch point shared with `origin/main`, and both deployment jobs fetch complete
 Git history so that common ancestor can be resolved and the static Browse shell
 always includes the All/Changed filter, including a zero count. Artifact

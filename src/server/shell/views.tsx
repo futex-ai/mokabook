@@ -38,7 +38,11 @@ function HeadActions(props: { catalogue: Catalogue; target: RouteTarget }) {
   );
 }
 
-function TargetView(props: { catalogue: Catalogue; target: RouteTarget }) {
+function TargetView(props: {
+  catalogue: Catalogue;
+  fragment?: string;
+  target: RouteTarget;
+}) {
   const head = targetHead(props.catalogue, props.target);
   return (
     <>
@@ -52,6 +56,7 @@ function TargetView(props: { catalogue: Catalogue; target: RouteTarget }) {
       />
       <TargetStage
         catalogue={props.catalogue}
+        {...(props.fragment ? { fragment: props.fragment } : {})}
         legacyTitle={head.title}
         target={props.target}
       />
@@ -163,7 +168,13 @@ export function ShellMain(props: {
         <ReviewLauncherView base={props.context.base} />
       ) : null}
       {props.view.kind === "target" ? (
-        <TargetView catalogue={props.catalogue} target={props.view.target} />
+        <TargetView
+          catalogue={props.catalogue}
+          {...(props.context.fragment
+            ? { fragment: props.context.fragment }
+            : {})}
+          target={props.view.target}
+        />
       ) : null}
     </main>
   );

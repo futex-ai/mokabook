@@ -14,6 +14,13 @@ the same breadcrumb ancestry. Consumer code does not provide `navPath`; when
 migrating an older catalogue, keep a former synthetic group only by adding an
 equivalent parent collection.
 
+The Welcome screen uses
+`<MockLink to="example-details" fragment="details">` to prove that generated
+HTML keeps a portable relative artifact link while served and deployed Browse
+navigate to the canonical Details page, retain its anchor through Light/Dark
+swaps, and select the Details row in the catalogue tree. The reciprocal Details
+link exercises the id-only form.
+
 ## Firna renderer adapter
 
 `renderer.tsx` is the reference consumer adapter for react-native-web
@@ -62,4 +69,6 @@ server into `.context/mokabook-preview` for Cloudflare Pages; it is the same
 artifact used by the main and pull-request preview workflow. The snapshot
 compares the catalogue with its branch point on `origin/main` and preserves
 Browse's All/Changed filter, Light/Dark switch, client assets, and light/dark
-fragment files, including when no routes changed.
+fragment files, including when no routes changed. Public HTML copies pass
+through the same ownership-aware link adapter as served Browse; direct preview
+URLs apply one validated `fragment` query progressively in the parent shell.

@@ -24,8 +24,17 @@ test("Browse frames sandbox generated scripts away from the shell", async (conte
     await fetch(`${server.url}/view/screens/home.html`)
   ).text();
 
-  assert.match(html, /<iframe[^>]+sandbox=""/);
-  assert.doesNotMatch(html, /allow-scripts/);
+  assert.match(html, /<iframe[^>]+sandbox="allow-same-origin"/);
+  for (const capability of [
+    "allow-downloads",
+    "allow-forms",
+    "allow-popups",
+    "allow-scripts",
+    "allow-top-navigation",
+    "allow-top-navigation-by-user-activation",
+  ]) {
+    assert.doesNotMatch(html, new RegExp(capability));
+  }
 });
 
 test("static serving rejects symlinks into nested authored source roots", async (context) => {

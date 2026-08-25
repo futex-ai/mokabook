@@ -25,6 +25,7 @@ export interface BrowserLiveUpdateEnvironment {
   captureBrowseState(): BrowseRecoveryState | undefined;
   location: ReloadLocation;
   onPageHide(callback: () => void): void;
+  pageVersion?: number;
   restoreBrowseState(state: BrowseRecoveryState): void;
   storage: RecoveryStorage;
 }
@@ -38,6 +39,7 @@ export function startBrowserLiveUpdates(
     environment.storage,
     environment.location,
     environment.captureBrowseState,
+    environment.pageVersion,
   );
   const recovery = controller.consumeRecovery();
   if (recovery?.browse && recovery.url === environment.location.href)
@@ -45,6 +47,16 @@ export function startBrowserLiveUpdates(
   controller.start();
   environment.onPageHide(() => controller.close());
   return controller;
+}
+
+/** Read a valid request-snapshot update version from a served document. */
+export function pageUpdateVersion(document: Document): number | undefined {
+  const encoded = document.documentElement.getAttribute(
+    "data-mokabook-update-version",
+  );
+  if (!encoded || !/^[1-9]\d*$/.test(encoded)) return undefined;
+  const version = Number(encoded);
+  return Number.isSafeInteger(version) ? version : undefined;
 }
 
 class EventSourceStream implements UpdateEventStream {
@@ -68,12 +80,14 @@ class EventSourceStream implements UpdateEventStream {
 }
 
 if (typeof window !== "undefined" && typeof EventSource !== "undefined") {
+  const updateVersion = pageUpdateVersion(document);
   startBrowserLiveUpdates({
     captureBrowseState: () => captureBrowseState(document, window),
     createEventSource: (url) => new EventSource(url),
     location: window.location,
     onPageHide: (callback) =>
       window.addEventListener("pagehide", callback, { once: true }),
+    ...(updateVersion ? { pageVersion: updateVersion } : {}),
     restoreBrowseState: (state) => restoreBrowseState(document, window, state),
     storage: window.sessionStorage,
   });
