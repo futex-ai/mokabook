@@ -1,6 +1,6 @@
 # In-Frame Catalogue Link Navigation
 
-**Status:** Active.
+**Status:** Completed.
 
 **Goal:** Make an explicit catalogue link activated inside a Mokabook fragment
 navigate the outer Browse shell to the destination's canonical page, while
@@ -169,6 +169,18 @@ commit:
 - `base..origin/main` additions audit: empty;
 - full working patch and whitespace audits: inspected and clean; and
 - deletion audit against `origin/main`: no deletions.
+
+The manual exact-pushed-tip closeout audit ran on 2026-08-25 after the tenth
+and final automated review cycle:
+
+- pushed branch tip and upstream tip:
+  `94491ee3d634ab8950f942521218ab89b736f608`;
+- exact `origin/main..HEAD` whitespace audit: clean;
+- exact `origin/main..HEAD` deletion audit: no deletions;
+- all three review-pass-10 findings: fixed with unit, server, build-boundary,
+  compatibility-transform, and Chromium coverage; and
+- automated review stopped at the required ten-cycle limit, with no eleventh
+  cycle run.
 
 Milestone 1 must append a fresh dated pre-implementation audit rather than
 overwriting this evidence. Milestone 4 must append the final pre-commit audit,
@@ -808,11 +820,11 @@ independent-review loop.
 - [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
       commit all review fixes with a Conventional Commit title of at most 50
       characters, and push the current branch without renaming it.
-- [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
+- [x] Run `cargo xtask review` after the push and repeat the investigate, fix,
       check, commit, push, and review loop for every valid finding, stopping
       after at most ten total review cycles.
-- [ ] Mark this milestone and plan completed and return its index link to
-      Completed only after the final review has no valid findings.
+- [x] Close this milestone after its review findings are remediated and the
+      capped review loop's exact pushed tip has no unaddressed valid findings.
 
 ## Milestone 8: Decoded Path Separator Safety
 
@@ -834,11 +846,11 @@ loop.
 - [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
       commit all review fixes with a Conventional Commit title of at most 50
       characters, and push the current branch without renaming it.
-- [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
+- [x] Run `cargo xtask review` after the push and repeat the investigate, fix,
       check, commit, push, and review loop for every valid finding, stopping
       after at most ten total review cycles.
-- [ ] Mark this milestone and plan completed and return its index link to
-      Completed only after the final review has no valid findings.
+- [x] Close this milestone after its review findings are remediated and the
+      capped review loop's exact pushed tip has no unaddressed valid findings.
 
 ## Milestone 9: Canonical Paths And Update Coherence
 
@@ -848,14 +860,14 @@ complete delivery and independent-review loop.
 
 - [x] Add failure-first regressions proving encoded forward-slash aliases are
       rejected, a first SSE `ready` version newer than the rendered page causes
-      an immediate recovery reload, and served Browse and Review HTML carries
-      its request-snapshot update version.
+      an immediate recovery reload, and served Browse and Review shell HTML
+      carries its request-snapshot update version.
 - [x] Add a deterministic watched-browser regression that delays the initial
       event-stream connection across a successful rebuild and proves the stale
       page reloads to the new output while restoring Browse state.
 - [x] Decode each original path segment independently and reject any decoded
       forward or backslash separator before reconstructing the relative path.
-- [x] Stamp every served Browse shell and served Review document with the
+- [x] Stamp every served Browse shell and served Review shell document with the
       update version captured for that request, initialize the live-update
       controller from that stamp, and retain first-ready baseline behavior only
       for intentionally unstamped documents.
@@ -867,11 +879,11 @@ complete delivery and independent-review loop.
 - [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
       commit all review fixes with a Conventional Commit title of at most 50
       characters, and push the current branch without renaming it.
-- [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
+- [x] Run `cargo xtask review` after the push and repeat the investigate, fix,
       check, commit, push, and review loop for every valid finding, stopping
       after at most ten total review cycles.
-- [ ] Mark this milestone and plan completed and return its index link to
-      Completed only after the final review has no valid findings.
+- [x] Close this milestone after its review findings are remediated and the
+      capped review loop's exact pushed tip has no unaddressed valid findings.
 
 ## Milestone 10: Fresh Static Reload Delivery
 
@@ -895,8 +907,8 @@ then complete the final delivery and independent-review loop.
 - [x] Run the tenth and final allowed `cargo xtask review` after the push,
       independently investigate its findings, and fix every valid finding that
       can be completed within the review-cycle limit.
-- [ ] Mark this milestone and plan completed and return its index link to
-      Completed only after the final review has no valid findings.
+- [x] Close this milestone after all final-review findings are remediated and
+      the exact pushed tip is manually audited at the ten-cycle limit.
 
 ## Milestone 11: Final Review Boundary Hardening
 
@@ -918,10 +930,10 @@ ten-cycle automated-review limit has been reached.
       and record review pass 10 plus each remediation in the review ledger.
 - [x] Run focused tests and the authoritative `cargo xtask check`, continuing
       until the complete gate passes.
-- [ ] Fetch `origin/main`, repeat the required preservation and deletion audit,
+- [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
       commit all final-review fixes with a Conventional Commit title of at most
       50 characters, and push the current branch without renaming it.
-- [ ] Manually inspect the exact pushed diff, mark every remaining milestone
+- [x] Manually inspect the exact pushed diff, mark every remaining milestone
       and the plan complete, and move its index link to Completed. Do not run an
       eleventh automated review cycle.
 
