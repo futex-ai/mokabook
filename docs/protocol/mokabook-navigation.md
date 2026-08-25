@@ -86,6 +86,10 @@ cross-view fragment validation for every retained logical-reference record. A
 transformer that removes or renames an anchor in any destination viewport or
 scheme therefore fails the build even when the source link record itself is
 unchanged.
+The builder also requires every transformed screen fragment and legacy document
+to retain a generated ownership header naming its expected source path. Header
+parsing accepts LF and CRLF line endings; a missing or changed source identity
+fails before any output is written.
 
 The marker is inert metadata, not a second resource URL. HTML escaping must be
 deterministic, and link/resource validation continues to inspect the portable
@@ -254,8 +258,9 @@ Coverage must prove:
   after compatibility transformation, dual navigation attributes, hashes,
   use-case ids, dark-to-light fallback, conflicts, and reserved-marker errors;
 - served and preview adaptation without mutating committed fragments, including
-  ownership-gated promotion, unowned reserved-metadata removal, secure target
-  parsing, portable live attributes, and request-visible fragment transport;
+  LF/CRLF ownership-gated promotion, unowned reserved-metadata removal, secure
+  target parsing, portable live attributes, and request-visible fragment
+  transport;
 - served cross-view fragment validation and JavaScript-disabled anchor
   injection, plus enhanced static-preview current/swap-source injection,
   scheme-toggle retention, and first-step use-case scoping;

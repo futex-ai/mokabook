@@ -239,8 +239,8 @@ file and confined to `repoRoot`.
   artifact directory, and shared-impact globs.
 - `compatibility.readManifestV2` reads Accounting's old manifest only when v3
   is absent. A temporary `compatibility.transformer` may deterministically
-  repair already-authored documents during a consumer cutover; final links and
-  resources are still validated.
+  repair already-authored documents during a consumer cutover; final links,
+  resources, and generated source ownership are still validated.
 
 Use `MockLink` for catalogue destinations. Raw relative links remain suitable
 for real static assets and legacy documents, but logical screen/use-case routes

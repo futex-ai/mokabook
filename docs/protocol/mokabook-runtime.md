@@ -124,9 +124,11 @@ top-navigation sandbox token, so direct and nested consumer contexts retain the
 active restriction that prevents them from replacing the shell. The
 served/preview adapter authenticates markers only for current-manifest
 screen fragments and generated legacy pages whose ownership header names that
-entry's manifest `sourcePath`. Unowned HTML loses package-reserved metadata in
-the adapted copy; a trusted route with missing/mismatched ownership, invalid
-markers, or a marker/portable-href mismatch fails closed. One strict typed
+entry's manifest `sourcePath`. The adapter shares the build/cleanup parser and
+accepts either LF or CRLF after that exact header. Unowned HTML loses
+package-reserved metadata in the adapted copy; a trusted route with
+missing/mismatched ownership, invalid markers, or a marker/portable-href
+mismatch fails closed. One strict typed
 target parser supplies inert metadata only to trusted parent enhancement. A
 trusted document that carries an activatable marker and `<base href>` also
 fails closed, including if post-build tampering introduced the base URL;

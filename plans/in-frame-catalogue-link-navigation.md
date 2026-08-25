@@ -1,6 +1,6 @@
 # In-Frame Catalogue Link Navigation
 
-**Status:** Completed.
+**Status:** Active.
 
 **Goal:** Make an explicit catalogue link activated inside a Mokabook fragment
 navigate the outer Browse shell to the destination's canonical page, while
@@ -83,6 +83,19 @@ The review-follow-up audit ran on 2026-08-25 before its delivery commit:
 
 - captured pre-integration source tip:
   `844e371b04d6fe97c717547c7d203f5b44de6f92`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty;
+- full working patch and whitespace audits: inspected and clean; and
+- deletion audit against `origin/main`: no deletions.
+
+The generated-ownership follow-up audit ran on 2026-08-25 before its delivery
+commit:
+
+- captured pre-integration source tip:
+  `3ebc88ba6953ec574f66f651feaff75e2683a9f2`;
 - fetched `origin/main` tip:
   `9fa89d33a0453a943675348086f1d068df5154ca`;
 - merge base:
@@ -675,4 +688,31 @@ loop.
       check, commit, push, and review loop for every valid finding, stopping
       after at most ten total review cycles.
 - [x] Mark this milestone and plan completed and return its index link to
+      Completed only after the final review has no valid findings.
+
+## Milestone 6: Generated Ownership Integrity
+
+Summary: close the final review's build-versus-serve ownership mismatch with
+one shared header contract, then repeat the complete delivery and independent
+review loop.
+
+- [x] Add failure-first regressions proving compatibility transforms cannot
+      remove or change screen-fragment or legacy ownership headers, while
+      trusted Browse documents remain valid when their generated header uses
+      CRLF.
+- [x] Centralize generated-header creation and parsing, validate every final
+      transformed HTML output against its expected source owner before write,
+      and reuse that parser in build cleanup and Browse authentication.
+- [x] Align the navigation, runtime, package, and build-pipeline documentation
+      with post-transform ownership enforcement and newline-portable parsing.
+- [x] Record the review findings and decisions in the review ledger, run
+      focused tests, and run the authoritative `cargo xtask check`, continuing
+      until the complete gate passes.
+- [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
+      commit all review fixes with a Conventional Commit title of at most 50
+      characters, and push the current branch without renaming it.
+- [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
+      check, commit, push, and review loop for every valid finding, stopping
+      after at most ten total review cycles.
+- [ ] Mark this milestone and plan completed and return its index link to
       Completed only after the final review has no valid findings.

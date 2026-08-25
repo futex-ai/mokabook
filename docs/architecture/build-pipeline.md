@@ -105,6 +105,8 @@ complete document, current route/viewport/color scheme, repository-relative
 output path, available static/output routes, and view-resolved logical routes. The
 transformed document must remain complete and then passes every normal
 Review-marker, link, resource, path, and ownership check.
+The final ownership header must still name the route's expected source; the
+shared parser accepts either an LF or CRLF line ending after that header.
 
 This boundary preserves complete catalogue-reference records rather than
 markers alone. A transformer cannot add, remove, or alter an expected marker,
@@ -144,9 +146,10 @@ compatibility route inventory exclude those routes before any write begins, so
 a document cannot validate against a file that the successful transaction will
 remove.
 
-Watched Serve reuses that header-based ownership proof when pruning generated
-HTML. Public HTML without the header remains a consumer-owned static input and
-may be classified by an explicit watch rule.
+Watched Serve and Browse authentication reuse that same newline-portable,
+source-matching ownership proof when pruning or presenting generated HTML.
+Public HTML without the header remains a consumer-owned static input and may be
+classified by an explicit watch rule.
 
 Catalogue routes use portable URL-unreserved segments, reject Windows device
 filename stems, and end in `.html`. Framework-generated links and redirects

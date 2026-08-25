@@ -138,6 +138,23 @@ test("Browse fails closed when trusted ownership or marker bytes diverge", async
   }
 });
 
+test("Browse accepts CRLF generated ownership headers", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const compilation = await compileCatalogue(await loadConfig(fixture.root));
+  const route = "screens/home.mobile.html";
+  const original = compilation.outputs.get(route) ?? "";
+  const crlfHeader = original.replace("\n", "\r\n");
+
+  const adapted = adaptBrowseDocument(
+    crlfHeader,
+    route,
+    createCatalogue(compilation.manifest),
+  );
+
+  assert.match(adapted, /data-mokabook-link="details"/);
+});
+
 test("Browse authenticates generated legacy links from their manifest owner", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
