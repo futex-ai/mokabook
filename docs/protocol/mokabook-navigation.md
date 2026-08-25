@@ -87,9 +87,13 @@ transformer that removes or renames an anchor in any destination viewport or
 scheme therefore fails the build even when the source link record itself is
 unchanged.
 The builder also requires every transformed screen fragment and legacy document
-to retain a generated ownership header naming its expected source path. Header
-parsing accepts LF and CRLF line endings; a missing or changed source identity
-fails before any output is written.
+to retain a generated ownership header that decodes to its expected source
+path. The versioned header encodes that identity with canonical base64 so no
+source filename can alter HTML comment parsing. Header parsing accepts LF and
+CRLF line endings. Final transformed output must retain the current encoded
+form; safe legacy raw-path headers remain recognizable only for migration,
+while a missing, malformed, downgraded, or changed source identity fails before
+any output is written.
 
 The marker is inert metadata, not a second resource URL. HTML escaping must be
 deterministic, and link/resource validation continues to inspect the portable

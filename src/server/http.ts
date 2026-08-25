@@ -131,7 +131,7 @@ function handleRequest(
   reviewRoutes?: ReviewRoutes,
 ): void {
   if (method !== "GET" && method !== "HEAD")
-    return send(response, 405, "text/plain", "Method not allowed");
+    return send(response, 405, "text/plain", "Method not allowed", method);
   const url = new URL(rawUrl, "http://mokabook.invalid");
   const context = shellContext(base, currentChangedRoutes(), "browse");
   if (url.pathname === "/")
@@ -197,6 +197,7 @@ function handleRequest(
       catalogue,
       config,
       context,
+      method,
     );
   if (url.pathname.startsWith("/view/"))
     return renderView(
@@ -232,6 +233,7 @@ function redirectId(
   catalogue: Catalogue,
   config: ResolvedConfig,
   context: ShellContext,
+  method: string,
 ): void {
   const entry = catalogue.byId.get(safeDecode(encodedId));
   if (!entry || entry.kind === "collection")
@@ -240,10 +242,11 @@ function redirectId(
       404,
       "text/html",
       notFoundPage(encodedId, catalogue, context),
+      method,
     );
   const fragment = requestedFragment(url, entry, catalogue, config);
   if (fragment === null) {
-    return send(response, 400, "text/plain", "Invalid fragment query");
+    return send(response, 400, "text/plain", "Invalid fragment query", method);
   }
   response.writeHead(302, {
     location: withFragmentQuery(

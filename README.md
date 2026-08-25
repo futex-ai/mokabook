@@ -240,7 +240,7 @@ file and confined to `repoRoot`.
 - `compatibility.readManifestV2` reads Accounting's old manifest only when v3
   is absent. A temporary `compatibility.transformer` may deterministically
   repair already-authored documents during a consumer cutover; final links,
-  resources, and generated source ownership are still validated.
+  resources, and the comment-safe generated source proof are still validated.
 
 Use `MockLink` for catalogue destinations. Raw relative links remain suitable
 for real static assets and legacy documents, but logical screen/use-case routes
@@ -275,8 +275,9 @@ forcing React peers to the consumer's one runtime.
 - **A generated file is stale:** run `mokabook build`, inspect the diff, then
   rerun `mokabook check`.
 - **Mokabook refuses an overwrite:** the existing HTML lacks a valid Mokabook
-  ownership header. Move it or choose a non-colliding route; the tool will not
-  delete an authored file.
+  ownership header. Current headers encode their source identity so every valid
+  repository filename remains safe inside an HTML comment. Move an unowned file
+  or choose a non-colliding route; the tool will not delete authored output.
 - **A package or React peer cannot resolve:** install React/React DOM in the
   consumer and configure the correct `moduleResolution.packageRoots` for a
   nested npm workspace.

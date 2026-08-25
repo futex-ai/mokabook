@@ -9,7 +9,7 @@ export function send(
   status: number,
   type: string,
   body: string,
-  method = "GET",
+  method: string,
 ): void {
   response.writeHead(status, {
     "content-type": `${type}; charset=utf-8`,

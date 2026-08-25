@@ -1,6 +1,6 @@
 # In-Frame Catalogue Link Navigation
 
-**Status:** Completed.
+**Status:** Active.
 
 **Goal:** Make an explicit catalogue link activated inside a Mokabook fragment
 navigate the outer Browse shell to the destination's canonical page, while
@@ -102,6 +102,20 @@ commit:
   `9fa89d33a0453a943675348086f1d068df5154ca`;
 - `base..origin/main` additions audit: empty;
 - full working patch and whitespace audits: inspected and clean; and
+- deletion audit against `origin/main`: no deletions.
+
+The ownership-encoding and HTTP follow-up audit ran on 2026-08-25 before its
+delivery commit:
+
+- captured pre-integration source tip:
+  `61bc09c3687e880878734191b6885c0b9fe7b41c`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty;
+- full working patch, regenerated-header-only output diff, and whitespace
+  audits: inspected and clean; and
 - deletion audit against `origin/main`: no deletions.
 
 Milestone 1 must append a fresh dated pre-implementation audit rather than
@@ -716,3 +730,38 @@ review loop.
       after at most ten total review cycles.
 - [x] Mark this milestone and plan completed and return its index link to
       Completed only after the final review has no valid findings.
+
+## Milestone 7: Ownership Encoding And HEAD Safety
+
+Summary: close the exact-tip review's generated-comment and HTTP method gaps
+with shared preventive boundaries, then repeat the complete delivery and
+independent-review loop.
+
+- [x] Add failure-first regressions proving generated ownership round-trips
+      source paths containing `-->`, `--`, `<`, and `>` without producing
+      comment-unsafe bytes, while retaining LF/CRLF parsing and safe legacy
+      migration support.
+- [x] Replace raw source interpolation with a versioned, comment-safe ownership
+      encoding and strictly decode it through the shared parser used by build,
+      cleanup, Browse, and preview.
+- [x] Add raw HTTP regressions proving `HEAD /id/missing` and invalid-fragment
+      errors return 404/400 respectively with empty bodies on a reused
+      keep-alive connection.
+- [x] Make the request method mandatory at the shared text-response boundary
+      and update every call site so future response branches cannot silently
+      fall back to GET semantics.
+- [x] Align nearby ownership and HTTP documentation, record review pass 6 in
+      the review ledger, run focused tests, and run the authoritative
+      `cargo xtask check`, continuing until the complete gate passes.
+- [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
+      commit all review fixes with a Conventional Commit title of at most 50
+      characters, and push the current branch without renaming it.
+- [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
+      check, commit, push, and review loop for every valid finding, stopping
+      after at most ten total review cycles.
+- [ ] Mark this milestone and plan completed and return its index link to
+      Completed only after the final review has no valid findings.
+
+At completion, generated ownership proofs are valid HTML comments for every
+supported source path, all ordinary HTTP response helpers require explicit
+method semantics, and the final pushed diff has no valid review findings.

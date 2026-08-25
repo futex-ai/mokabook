@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { Agent, request } from "node:http";
 import path from "node:path";
 import test from "node:test";
 
@@ -109,6 +110,27 @@ test("served fragment queries validate once and reach every applicable frame", a
   }
 });
 
+test("HEAD id errors omit bodies on a reused connection", async (context) => {
+  const fixture = await navigationFixture(context);
+  const server = await startFixtureServer(fixture);
+  context.after(() => server.close());
+  const agent = new Agent({ keepAlive: true, maxSockets: 1 });
+  context.after(() => agent.destroy());
+
+  for (const [route, status] of [
+    ["/id/missing", 404],
+    ["/id/details?fragment=bad", 400],
+  ] as const) {
+    const head = await nodeRequest(`${server.url}${route}`, "HEAD", agent);
+    assert.equal(head.status, status);
+    assert.equal(head.body, "");
+  }
+
+  const home = await nodeRequest(`${server.url}/`, "GET", agent);
+  assert.equal(home.status, 200);
+  assert.match(home.body, /data-mokabook-shell/);
+});
+
 test("served Browse fails closed on post-build trusted tampering", async (context) => {
   const fixture = await navigationFixture(context);
   const server = await startFixtureServer(fixture);
@@ -142,6 +164,30 @@ async function startFixtureServer(fixture: TestFixture) {
   return startCatalogueServer(await loadConfig(fixture.root), {
     base: "origin/main",
     port: 0,
+  });
+}
+
+function nodeRequest(
+  url: string,
+  method: "GET" | "HEAD",
+  agent: Agent,
+): Promise<{ body: string; status: number | undefined }> {
+  return new Promise((resolve, reject) => {
+    const request_ = request(url, { agent, method }, (response) => {
+      let body = "";
+      response.setEncoding("utf8");
+      response.on("data", (chunk: string) => {
+        body += chunk;
+      });
+      response.once("end", () =>
+        resolve({ body, status: response.statusCode }),
+      );
+    });
+    request_.setTimeout(2_000, () =>
+      request_.destroy(new Error(`${method} ${url} timed out`)),
+    );
+    request_.once("error", reject);
+    request_.end();
   });
 }
 

@@ -72,9 +72,10 @@ Browse validates the manifest before binding its listening port. It exposes:
   `/review/__generations/<version>/<path>` artifact files;
 - package-owned client and update endpoints under `/__mokabook/`.
 
-All ordinary routes support GET and HEAD. A HEAD request to the update endpoint
-returns its response headers and completes without opening or registering an
-event stream.
+All ordinary routes support GET and HEAD. HEAD returns the same status and
+headers without a body, including `/id` not-found and fragment-validation
+errors. A HEAD request to the update endpoint completes without opening or
+registering an event stream.
 
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
@@ -124,8 +125,12 @@ top-navigation sandbox token, so direct and nested consumer contexts retain the
 active restriction that prevents them from replacing the shell. The
 served/preview adapter authenticates markers only for current-manifest
 screen fragments and generated legacy pages whose ownership header names that
-entry's manifest `sourcePath`. The adapter shares the build/cleanup parser and
-accepts either LF or CRLF after that exact header. Unowned HTML loses
+entry's manifest `sourcePath`. The versioned header stores that identity as
+canonical base64, keeping arbitrary repository filename bytes out of the HTML
+comment grammar. The adapter shares the strict build/cleanup decoder and
+accepts either LF or CRLF after that exact header. During migration it also
+recognizes the former raw-path header only when its source is valid comment
+content. Unowned HTML loses
 package-reserved metadata in the adapted copy; a trusted route with
 missing/mismatched ownership, invalid markers, or a marker/portable-href
 mismatch fails closed. One strict typed

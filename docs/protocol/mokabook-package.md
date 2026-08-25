@@ -368,9 +368,13 @@ exposed. Mokabook applies the transformer after id links resolve and before
 Review-marker, link, resource, and ownership validation. It must return a
 complete document, retain the exact generated source owner, remain
 deterministic, and stay consumer-owned. The shared ownership parser accepts LF
-or CRLF after the header, but a missing or changed source identity fails before
-write. A transformer cannot weaken final validation. New catalogues should
-author portable links directly and leave this option unset.
+or CRLF after the header and strictly decodes its versioned canonical-base64
+source field, but a missing or changed source identity fails before write. This
+keeps source filenames out of HTML comment syntax; former raw-path headers are
+accepted only when their source is comment-safe so existing files can be
+recognized for migration. A transformer must retain the current encoded form
+and cannot weaken final validation. New catalogues should author portable links
+directly and leave this option unset.
 
 Stylesheet rules are ordered, declarative consumer configuration. Their globs
 match the catalogue route before viewport fragments are derived, so one exact
