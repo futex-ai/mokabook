@@ -13,7 +13,7 @@ paths, and synthetic tests.
 | esbuild discovery and one-graph loading | Product component library        | Renderer/module resolution |
 | Static fragments and manifest schema    | Theme/tokens/providers           | Stylesheet rules           |
 | Generated-file ownership and check      | Product CSS/fonts/images         | Legacy policy/bridge       |
-| Safe Browse routes and watch lifecycle  | Application navigation semantics | Additional watch inputs    |
+| Catalogue routes and link navigation    | Product route semantics          | Additional watch inputs    |
 | Git comparison and Review-ignore rules  | Product Review policy            | Base, output, impact globs |
 
 ## Dependency Direction
@@ -68,6 +68,13 @@ behind the active generation, and only a marker-owned current output may enter
 the server's temporary archive lifecycle. Archive roots are explicit
 changed-path exclusions rather than consumer-owned ignore policy, and shutdown
 drains generation work before removing them.
+
+Mokabook promotes only explicit id-addressed catalogue links from a consumer
+fragment into outer Browse routes. Portable generated files keep relative
+artifact fallbacks, while ordinary product, asset, and external links remain
+consumer-owned. The
+[catalogue navigation protocol](../protocol/mokabook-navigation.md) defines the
+link marker, sandbox boundary, and active-tree invariant.
 
 ## Related Docs
 

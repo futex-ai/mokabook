@@ -18,7 +18,7 @@ validate definitions and cross-references in memory
 renderer({ node, entry, viewport, colorScheme, stylesheets })
         |
         v
-resolve mock:id links -> compatibility bridge -> validate markers/links/resources
+resolve mock:id links + retain ids -> compatibility bridge -> validate markers/links/resources
         |
         v
 mobile/desktop light and optional dark HTML + schema-v3 manifest in memory
@@ -82,18 +82,24 @@ The returned string must be a complete HTML document. Mokabook then converts
 `ReviewIgnore` templates into inert comments and resolves every complete value
 of the form `mock:<id>` in `href` and `data-nav-href` to viewport-matched
 fragments in the same color scheme, falling back to light when the destination
-screen has no dark view. Both attributes are resolved when they coexist on one
-element, and the validator independently rejects any logical navigation value
-left by a compatibility transform. The same pass covers legacy pages, which
-remain light-only. Text, scripts, styles, and unrelated attributes containing
-the same characters remain unchanged. A use-case link resolves through its
-first screen; collections are intentionally not linkable.
+screen has no dark view. The element also retains its stable id and optional
+fragment in the reserved `data-mokabook-link` marker so Browse can distinguish
+catalogue intent from an ordinary relative link. Both navigation attributes
+are resolved when they coexist with the same destination on one element;
+conflicting destinations and consumer-authored reserved markers fail. The
+validator independently rejects any logical navigation value left by a
+compatibility transform. The same pass covers legacy pages, which remain
+light-only. Text, scripts, styles, and unrelated attributes containing the
+same characters remain unchanged. A use-case link resolves through its first
+screen; collections are intentionally not linkable.
 
 During a staged migration only, a configured consumer transformer receives the
 complete document, current route/viewport/color scheme, repository-relative
 output path, available static/output routes, and view-resolved logical routes. The
 transformed document must remain complete and then passes every normal
-Review-marker, link, resource, path, and ownership check.
+Review-marker, catalogue-link-marker, link, resource, path, and ownership
+check. A transformer cannot remove or alter the reserved identity of a logical
+link it receives.
 
 React Native Web style collection is not a second conversion stage. If an app
 uses it, its renderer wraps the node in the app provider, registers or renders
