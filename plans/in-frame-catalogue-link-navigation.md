@@ -838,7 +838,7 @@ complete delivery and independent-review loop.
       the review ledger.
 - [x] Run focused tests and the authoritative `cargo xtask check`, continuing
       until the complete gate passes.
-- [ ] Fetch `origin/main`, repeat the required preservation and deletion audit,
+- [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
       commit all review fixes with a Conventional Commit title of at most 50
       characters, and push the current branch without renaming it.
 - [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
