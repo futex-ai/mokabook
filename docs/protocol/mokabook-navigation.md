@@ -21,19 +21,24 @@ asset, external, download, and same-document links.
 
 ## Logical Catalogue Links
 
-`MockLink`, `mockLink`, and complete `mock:<id>[#fragment]` values in supported
-navigation attributes express catalogue references. A logical `href` is valid
-only on an HTML `<a>`/`<area>` or SVG `<a>` and makes that native link eligible
-for Browse activation. A logical `href` on every other element, including HTML
-resource elements and SVG `use`/`image`, fails the build instead of becoming an
-accidental resource request. Authors use `data-nav-href` for metadata-only
-references; it is valid on any element but does not invent click or keyboard
-semantics. A logical `data-nav-href` may coexist with an eligible logical
-`href`, in which case both must name the same destination. The id is stable
-authoring identity; the entry's `route` is its current Browse location. A
-collection remains an invalid destination. A use-case destination opens the
-use-case page, even though its portable fragment fallback resolves through the
-first screen in that use case.
+The target helper API is `mockLink(id, fragment?)` and
+`<MockLink to={id} fragment={fragment}>`. The id and optional fragment remain
+separate authoring concepts: `to` and the first function argument contain only
+the stable entry id, while `fragment` is a bare HTML id without `#` or
+percent-encoding. The helpers emit a complete `mock:<id>[#fragment]` value, and
+authors may still use that raw form in supported navigation attributes.
+
+A logical `href` is valid only on an HTML `<a>`/`<area>` or SVG `<a>` and makes
+that native link eligible for Browse activation. A logical `href` on every
+other element, including HTML resource elements and SVG `use`/`image`, fails the
+build instead of becoming an accidental resource request. Authors use
+`data-nav-href` for metadata-only references; it is valid on any element but
+does not invent click or keyboard semantics. A logical `data-nav-href` may
+coexist with an eligible logical `href`, in which case both must name the same
+destination. The entry's `route` is its current Browse location. A collection
+remains an invalid destination. A use-case destination opens the use-case page,
+even though its portable fragment fallback resolves through the first screen in
+that use case.
 
 A logical fragment begins with an ASCII letter and then contains only ASCII
 letters, digits, `_`, `:`, `.`, or `-`. It names an HTML `id`, not a CSS
@@ -178,14 +183,16 @@ details inspector, frames, focus, and status announcement all describe the
 destination. Back and Forward return through those outer route entries and
 restore their route-owned scroll.
 
-The same trusted parent enhancement exclusively handles modified activation
-and explicit non-self targets after validating the marker and canonical
-destination. A requested `_top` or `_parent` uses the normal outer route
-transition. When a new or named browsing context is requested, package-owned
-parent code opens the canonical Mokabook URL with `noopener`; it never delegates
-popup creation to the consumer frame. If enhancement is absent or fails, the
-portable live link remains frame-owned and subject to the sandbox; Mokabook does
-not grant native outer-navigation fallback.
+The same trusted parent enhancement exclusively handles modified pointer
+activation and explicit non-self targets after validating the marker and
+canonical destination. Modified activation includes Meta-, Ctrl-, or
+Shift-modified click and middle-button `auxclick` (`button === 1`). A requested
+`_top` or `_parent` uses the normal outer route transition. When a new or named
+browsing context is requested, package-owned parent code opens the canonical
+Mokabook URL with `noopener`; it never delegates popup creation to the consumer
+frame. If enhancement is absent or fails, the portable live link remains
+frame-owned and subject to the sandbox; Mokabook does not grant native
+outer-navigation fallback.
 
 Consumer scripts remain disabled. Browse permits same-origin inspection but
 does not grant script, form, popup, download, or either top-navigation

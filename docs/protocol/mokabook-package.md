@@ -247,15 +247,19 @@ paths whose filenames contain other characters.
 Logical screen and use-case routes are catalogue identifiers, not generated
 documents. Fragment links must target a generated fragment or public static
 asset with a relative URL; root-absolute links are rejected as non-portable.
-Authors use `MockLink` for id-addressed catalogue navigation. Generated
-documents currently retain only its portable relative target. The approved
-[catalogue navigation contract](./mokabook-navigation.md) will additionally
+Authors currently use `mockLink(id)` or `<MockLink to={id}>` for id-addressed
+catalogue navigation. Complete raw `mock:<id>[#fragment]` values may also appear
+in `href` or `data-nav-href`. Generated documents currently retain only the
+portable relative target. The approved
+[catalogue navigation contract](./mokabook-navigation.md) will add
+`mockLink(id, fragment?)` and a separate `fragment` prop to `MockLink`, then
 retain stable logical-destination metadata so Browse can open the canonical
-catalogue page without changing standalone fragment behavior. That marker is
-target behavior and is not emitted until the active implementation plan
-completes. Logical `href` values are reserved for native HTML/SVG links;
-metadata-only references use `data-nav-href`, and resource elements must keep
-real resource URLs.
+catalogue page without changing standalone fragment behavior. The fragment is
+a bare HTML id without `#` or percent-encoding. That API, marker, and the rule
+reserving logical `href` for native HTML/SVG links are target behavior and are
+not enforced until the active implementation plan completes. Under the target
+contract, metadata-only references use `data-nav-href`, and resource elements
+must keep real resource URLs.
 Local resource URLs in HTML source attributes, `srcset`, inline/style-block
 CSS, and transitively referenced HTML/CSS must likewise resolve to public
 static files beneath `mockupsDir` that remain after the pending build. An owned
@@ -295,16 +299,18 @@ interface RenderInput {
 export default function render(input: RenderInput): string;
 ```
 
-The string must contain a complete `<html>` document. Mokabook serializes
-Review-ignore markers and rewrites every complete `mock:<id>[#fragment]`
-native-link `href` and every `data-nav-href` value after this function returns,
-including when one native link has both attributes. A logical `href` on any
-other element fails the build. Final values from compatibility transforms are
-validated through the same fail-closed link contract. The same rewrite applies
-to legacy output. The package declares `react` and `react-dom`
-`>=19.0.0` as peers and does not ship a private runtime. The builder resolves
-both peers and their subpaths from consumer config, then bundles every
-React-bearing input in one internal graph.
+The string must contain a complete `<html>` document. Mokabook currently
+serializes Review-ignore markers and rewrites every complete
+`mock:<id>[#fragment]` value found in `href` or `data-nav-href` after this
+function returns, including when one element has both attributes. The current
+rewrite is attribute-based and applies to legacy output. The approved
+navigation extension will make the rewrite element-aware: logical `href` will
+be valid only on native HTML/SVG links, every other owner will fail the build,
+and final compatibility output will be checked through that fail-closed
+contract. The package declares `react` and `react-dom` `>=19.0.0` as peers and
+does not ship a private runtime. The builder resolves both peers and their
+subpaths from consumer config, then bundles every React-bearing input in one
+internal graph.
 
 The builder invokes the renderer once for every effective viewport and color
 scheme. Light stays the default and canonical render. The consumer renderer

@@ -200,6 +200,24 @@ Milestone 0E; those completed checklists remain as the review history.
 At completion, the security boundary depends on a denied browser capability,
 not complete recursive sanitization of consumer-controlled browsing contexts.
 
+## Milestone 0G: API, Status, And Activation Corrections
+
+Summary: close the current-behavior status, public fragment API, and
+middle-click coverage gaps found by the seventh review pass.
+
+- [x] Keep owner-based logical-`href` rejection explicitly planned in the
+      package and build-pipeline docs while documenting today's attribute-based
+      rewrite.
+- [x] Define fragments as a separate optional `mockLink` argument and
+      `MockLink` prop, with raw complete logical values retained for authored
+      HTML and compatibility metadata.
+- [x] Require both modifier-key click and middle-button `auxclick` coverage for
+      trusted new-context activation.
+
+At completion, current and target behavior are distinct, the public helper API
+does not overload entry ids with fragment syntax, and every common browser
+new-context gesture is named by the implementation plan.
+
 ## Milestone 1: Portable Logical-Link Identity
 
 Summary: generated documents retain stable catalogue intent alongside their
@@ -208,6 +226,12 @@ existing portable artifact links; Browse behavior is not activated yet.
 - [ ] Before implementation, fetch `origin/main`, capture the unrevised source
       tip and its merge base, audit `base..origin/main` additions, and record
       the immutable values under `.context/` for the final preservation audit.
+- [ ] Add failure-first public API cases to `tests/package.test.ts`, the
+      NodeNext fixture, and the packed ESM smoke fixture for
+      `mockLink(id, fragment?)` and `<MockLink to={id} fragment={fragment}>`.
+      Prove the helpers emit `mock:<id>[#fragment]`, keep id and bare fragment
+      separate, do not percent-encode or accept a leading `#`, and preserve the
+      existing id-only calls.
 - [ ] Add failure-first cases to `tests/build_links.test.ts` for a reserved
       `data-mokabook-link` marker on `MockLink` and raw `mock:` hrefs in HTML
       anchors/areas and SVG anchors; prove a `data-nav-href`-only span remains
@@ -229,6 +253,10 @@ existing portable artifact links; Browse behavior is not activated yet.
       hrefs while preserving the byte-targeted rewrite and portable relative
       URL for every supported navigation attribute. Reject a logical `href` on
       any other element before it can be rewritten as a resource URL.
+- [ ] Extend `src/authoring/links.tsx` with an optional bare `fragment` argument
+      on `mockLink` and prop on `MockLink`; validate it with the shared logical
+      fragment grammar before composing `mock:<id>#<fragment>`, and never pass
+      the package-only prop through to the rendered anchor.
 - [ ] Validate one logical destination per element and reserve the marker from
       consumer output. Keep raw relative, external, asset, and same-document
       links marker-free.
@@ -331,9 +359,10 @@ No backend response transformation is included in this milestone.
 
 - [ ] Add failure-first client tests in new focused test files for frame-link
       candidate classification, event-source validation, primary and keyboard
-      activation, modified activation, explicit target handling, latest-wins
-      delegation, inaccessible/cross-origin frame fallback, and unchanged
-      unmarked/download/external/hash/metadata-only behavior.
+      activation, Meta/Ctrl/Shift-modified click, middle-button `auxclick`
+      (`button === 1`), explicit target handling, latest-wins delegation,
+      inaccessible/cross-origin frame fallback, and unchanged unmarked,
+      download, external, hash, and metadata-only behavior.
 - [ ] Extract navigation candidate/sequencing code from
       `src/client/browse.ts` into a focused module before adding frame behavior;
       keep imports and public internal test seams typed.
@@ -366,8 +395,10 @@ No backend response transformation is included in this milestone.
       heading, breadcrumbs, active row, disclosed ancestors, Back/Forward, and
       preserved shell state.
 - [ ] In the same spec, prove modified and explicit non-self activation opens
-      the canonical Mokabook page through parent enhancement, while the iframe
-      sandbox still lacks popup, script, and top-navigation permissions.
+      the canonical Mokabook page through parent enhancement. Cover Meta/Ctrl/
+      Shift-click, middle-button `auxclick`, `_blank`, and a named target, while
+      the iframe sandbox still lacks popup, script, and top-navigation
+      permissions.
 - [ ] Add static-preview coverage that follows a fragment link, toggles light
       and dark, and proves the current source and every swap source retain the
       encoded hash; cover first-step-only use-case behavior.
@@ -389,7 +420,9 @@ boundary, and deliver one reviewed pushed commit without automatically changing
 post-push review findings.
 
 - [ ] Update `README.md` and `examples/basic/README.md` so `MockLink` documents
-      both portable generated behavior and canonical Browse navigation. Update
+      its id-only and separate bare-`fragment` forms, `mockLink(id, fragment?)`,
+      raw logical values for authored HTML/metadata, portable generated
+      behavior, and canonical Browse navigation. Update
       `docs/protocol/npm-release.md`, the navigation protocol, and nearby
       architecture docs for the final preview adapter and any behavior clarified
       during implementation; remove contradictions rather than appending

@@ -78,16 +78,14 @@ interface RenderInput {
 type Renderer = (input: RenderInput) => string;
 ```
 
-The returned string must be a complete HTML document. Mokabook then converts
-`ReviewIgnore` templates into inert comments and resolves every complete value
-of the form `mock:<id>[#fragment]` in native HTML/SVG link `href` attributes and
-in `data-nav-href` to viewport-matched fragments in the same color scheme,
-falling back to light when the destination screen has no dark view. A logical
-`href` on a non-link or resource element is rejected; metadata-only references
-use `data-nav-href`. Both supported attributes are resolved when they coexist on
-one native link, and the validator independently rejects any logical navigation
-value left by a compatibility transform. The same pass covers legacy pages,
-which remain light-only. Text, scripts, styles, and unrelated attributes
+The returned string must be a complete HTML document. Mokabook currently
+converts `ReviewIgnore` templates into inert comments and resolves every
+complete value of the form `mock:<id>[#fragment]` found in `href` or
+`data-nav-href` to viewport-matched fragments in the same color scheme, falling
+back to light when the destination screen has no dark view. This rewrite is
+attribute-based and does not yet distinguish the owning element. Both
+attributes are resolved when they coexist, and the same pass covers legacy
+pages, which remain light-only. Text, scripts, styles, and unrelated attributes
 containing the same characters remain unchanged. A use-case link resolves
 through its first screen; collections are intentionally not linkable.
 
@@ -96,12 +94,14 @@ The approved, not-yet-implemented
 retain the stable id and optional fragment in a reserved `data-mokabook-link`
 marker when an HTML `<a>`/`<area>` or SVG `<a>` has a logical `href`. A
 `data-nav-href`-only reference remains validated portable metadata and does not
-gain Browse interaction. The extension will validate matching destinations
-when both navigation attributes coexist, reject consumer-authored markers,
-verify fragment anchors across every target view, and bind expected marker
-presence, element namespace/native-link class, and each logical attribute to
-the exact portable value produced for that element. Until the active plan
-completes, generated documents do not contain this marker.
+gain Browse interaction. The extension will reject logical `href` on every
+non-link or resource element, validate matching destinations when both
+navigation attributes coexist, reject consumer-authored markers, verify
+fragment anchors across every target view, and bind expected marker presence,
+element namespace/native-link class, and each logical attribute to the exact
+portable value produced for that element. Until the active plan completes,
+generated documents do not contain this marker or enforce that owner-based
+`href` restriction.
 
 During a staged migration only, a configured consumer transformer receives the
 complete document, current route/viewport/color scheme, repository-relative
