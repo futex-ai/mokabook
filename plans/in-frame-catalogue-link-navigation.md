@@ -1,6 +1,6 @@
 # In-Frame Catalogue Link Navigation
 
-**Status:** Active.
+**Status:** Completed.
 
 **Goal:** Make an explicit catalogue link activated inside a Mokabook fragment
 navigate the outer Browse shell to the destination's canonical page, while
@@ -711,8 +711,8 @@ review loop.
 - [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
       commit all review fixes with a Conventional Commit title of at most 50
       characters, and push the current branch without renaming it.
-- [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
+- [x] Run `cargo xtask review` after the push and repeat the investigate, fix,
       check, commit, push, and review loop for every valid finding, stopping
       after at most ten total review cycles.
-- [ ] Mark this milestone and plan completed and return its index link to
+- [x] Mark this milestone and plan completed and return its index link to
       Completed only after the final review has no valid findings.
