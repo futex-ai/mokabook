@@ -8,6 +8,7 @@ import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { startCatalogueServer } from "../dist/server/http.js";
+import { safeDecodePath } from "../dist/server/respond.js";
 import {
   createFixture,
   removeFixture,
@@ -129,6 +130,20 @@ test("HEAD id errors omit bodies on a reused connection", async (context) => {
   const home = await nodeRequest(`${server.url}/`, "GET", agent);
   assert.equal(home.status, 200);
   assert.match(home.body, /data-mokabook-shell/);
+});
+
+test("safe URL paths reject decoded backslash separators", () => {
+  for (const candidate of [
+    "screens%5Chome.mobile.html",
+    "screens/%5c..%5c/package.json",
+    "%5C%5Cserver%5Cshare",
+  ]) {
+    assert.equal(safeDecodePath(candidate), undefined, candidate);
+  }
+  assert.equal(
+    safeDecodePath("screens/home%20screen.mobile.html"),
+    "screens/home screen.mobile.html",
+  );
 });
 
 test("served Browse fails closed on post-build trusted tampering", async (context) => {

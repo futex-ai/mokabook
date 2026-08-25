@@ -18,13 +18,14 @@ export function send(
   response.end(method === "HEAD" ? undefined : body);
 }
 
-/** Decode an encoded relative URL path, rejecting traversal and absolutes. */
+/** Decode an encoded relative URL path, rejecting traversal and separators. */
 export function safeDecodePath(value: string): string | undefined {
   try {
     const decoded = value.split("/").map(decodeURIComponent).join("/");
     if (
       decoded === "" ||
       decoded.startsWith("/") ||
+      decoded.includes("\\") ||
       decoded
         .split("/")
         .some((part) => part === ".." || part === "." || part === "")

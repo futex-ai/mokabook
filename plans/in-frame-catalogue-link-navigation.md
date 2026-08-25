@@ -118,6 +118,19 @@ delivery commit:
   audits: inspected and clean; and
 - deletion audit against `origin/main`: no deletions.
 
+The decoded-path separator follow-up audit ran on 2026-08-25 before its
+delivery commit:
+
+- captured pre-integration source tip:
+  `fddfc092df81e02efc71a229d2a2230e739de618`;
+- fetched `origin/main` tip:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- merge base:
+  `9fa89d33a0453a943675348086f1d068df5154ca`;
+- `base..origin/main` additions audit: empty;
+- full working patch and whitespace audits: inspected and clean; and
+- deletion audit against `origin/main`: no deletions.
+
 Milestone 1 must append a fresh dated pre-implementation audit rather than
 overwriting this evidence. Milestone 4 must append the final pre-commit audit,
 including each explicitly approved removal and its cleanup or an explicit
@@ -762,6 +775,33 @@ independent-review loop.
 - [ ] Mark this milestone and plan completed and return its index link to
       Completed only after the final review has no valid findings.
 
+## Milestone 8: Decoded Path Separator Safety
+
+Summary: close the shared served-path parsing gap from review pass 7 so every
+current and future filesystem-backed route rejects Windows-style separators at
+the common boundary, then repeat the complete delivery and independent-review
+loop.
+
+- [x] Add a failure-first shared-boundary regression proving percent-decoded
+      backslashes, including traversal-shaped and UNC-shaped inputs, are
+      rejected while valid percent-decoded filename bytes remain accepted.
+- [x] Reject every decoded backslash in the shared relative URL-path parser so
+      static, Review, and view callers cannot depend on downstream filesystem
+      containment for platform-specific separator safety.
+- [x] Align the README and runtime protocol with the strengthened served-path
+      contract and record review pass 7 in the review ledger.
+- [x] Run focused tests and the authoritative `cargo xtask check`, continuing
+      until the complete gate passes.
+- [x] Fetch `origin/main`, repeat the required preservation and deletion audit,
+      commit all review fixes with a Conventional Commit title of at most 50
+      characters, and push the current branch without renaming it.
+- [ ] Run `cargo xtask review` after the push and repeat the investigate, fix,
+      check, commit, push, and review loop for every valid finding, stopping
+      after at most ten total review cycles.
+- [ ] Mark this milestone and plan completed and return its index link to
+      Completed only after the final review has no valid findings.
+
 At completion, generated ownership proofs are valid HTML comments for every
 supported source path, all ordinary HTTP response helpers require explicit
-method semantics, and the final pushed diff has no valid review findings.
+method semantics, every served relative path rejects decoded backslash
+separators, and the final pushed diff has no valid review findings.

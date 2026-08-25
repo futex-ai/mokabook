@@ -185,6 +185,9 @@ from starting, drains active work, and then cleans retained directories.
 Consumer documents run in sandboxed frames. Review keeps unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
 fonts, and images so comparison artifacts do not depend on the live workspace.
+Filesystem-backed Browse and Review routes reject malformed encoding,
+traversal segments, absolute paths, and percent-decoded backslashes before
+resolving a consumer file.
 Base resources must use portable relative URLs or explicit HTTP(S)/data URLs;
 root-absolute, protocol-relative, and unsupported-scheme URLs fail Review.
 Browse authenticates catalogue-link metadata only on current manifest-owned

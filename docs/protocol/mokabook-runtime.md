@@ -80,7 +80,10 @@ registering an event stream.
 Collections are navigation folders, not destinations. Unknown ids and routes
 return a not-found main view while keeping catalogue navigation available.
 Static path handling rejects traversal and does not expose repository files
-outside configured public roots.
+outside configured public roots. The shared relative-path decoder rejects
+malformed encoding, absolute and empty paths, dot segments, and every decoded
+backslash before any filesystem resolution, including on platforms where a
+backslash is a path separator.
 
 ## Browse Shell
 
