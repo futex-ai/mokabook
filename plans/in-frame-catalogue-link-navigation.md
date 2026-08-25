@@ -17,14 +17,15 @@ HTML keeps its viewport- and color-scheme-compatible relative artifact `href`
 for standalone and Review portability. Eligible native hyperlinks also carry a
 reserved marker containing the stable entry id and optional fragment; a
 `data-nav-href`-only reference stays inert metadata. Browse adapts only the
-served/preview representation to `/id/<id>`, using a reserved `fragment` query
-when an anchor must survive a server request. The parent client recognizes
-marked links in same-origin, script-disabled frames, invokes the existing
-latest-wins route transition for current-context navigation, and exclusively
-handles validated new-context requests. Native user-activated top navigation
-remains the no-JavaScript and failed-enhancement fallback only for default and
-`_self` links. One client helper owns the invariant that the active navigation
-row is selected, disclosed, filter-visible, and scrolled into view.
+served/preview copy to authenticate markers and derive inert target metadata;
+the portable live `href` and target remain unchanged. The parent client
+recognizes marked links in same-origin, script-disabled frames, derives their
+stable `/id/<id>` destination, invokes the existing latest-wins route transition
+for current-context navigation, and exclusively handles validated new-context
+requests. The iframe never receives top-navigation permission, so failed or
+disabled enhancement stays frame-owned and cannot replace the shell. One client
+helper owns the invariant that the active navigation row is selected, disclosed,
+filter-visible, and scrolled into view.
 
 **Tech stack:** TypeScript ESM, React 19 static rendering, parse5, Node 22 test
 runner through `tsx`, Playwright Chromium, the synthetic basic consumer, and
@@ -39,28 +40,25 @@ Rust `xtask` repository gates.
 - Carry a logical anchor through `/id` and `/view` as one percent-encoded
   `fragment` query value, then render it as an encoded hash on each target
   iframe source. Served Browse injects it server-side; static preview injects it
-  progressively into current and light/dark swap sources and promises only
-  page-level navigation without JavaScript.
+  progressively into current and light/dark swap sources. Link activation needs
+  parent enhancement; no-JavaScript links keep portable in-frame behavior.
 - Keep the committed fragment bytes portable and adapt responses/copies
   without mutating their files on disk.
-- Sanitize every served/preview public HTML copy, but trust and promote markers
-  only on current-manifest screen fragments and generated legacy documents with
-  package ownership headers matching their manifest `sourcePath`. Strip
-  reserved-looking metadata from unowned HTML copies.
-- Consumer scripts remain disabled. Browse may add only the sandbox abilities
-  needed for trusted parent inspection and explicit user-activated top
-  navigation, after its adapted HTML neutralizes every consumer-authored
-  non-self/base target, including marked and download links. Review panes remain
+- Authenticate markers only on current-manifest screen fragments and generated
+  legacy documents with ownership headers matching their manifest `sourcePath`.
+  Strip reserved-looking metadata from unowned served/preview HTML copies.
+- Consumer scripts remain disabled. Browse adds same-origin inspection only;
+  top navigation, scripts, forms, popups, and downloads stay forbidden for the
+  generated frame and every nested browsing context. Review panes remain
   unchanged.
 - Promote only an HTML `<a>`/`<area>` or SVG `<a>` whose `href` carried the
-  logical destination. Continue rewriting and validating `data-nav-href`, but
-  do not infer interaction semantics from that metadata alone.
+  logical destination. Reject logical `href` on every other element and require
+  `data-nav-href` for metadata-only intent.
 - Default and `_self` catalogue links navigate the outer shell. Downloads stay
   portable/native; the adapter retains explicit non-self requests only in
-  trusted inert metadata and gives them a popup-denied live target. Parent code
-  handles those requests and modified activation against the canonical
-  destination with `noopener` where a new context is opened. No-JavaScript
-  new-context activation is intentionally unsupported.
+  trusted inert metadata without changing live targets. Parent code handles
+  those requests and modified activation against the canonical destination with
+  `noopener` where a new context is opened.
 - If search or Changed filtering hides the new active row, clear only the
   hiding constraint. Preserve those controls when the row is already visible.
 - The selected-screen, active-navigation, and narrow-drawer visuals already
@@ -75,7 +73,7 @@ Rust `xtask` repository gates.
   failure: marker expectation, element namespace/native-link class, logical
   attribute names, and portable values remain one invariant.
 - Use one exact pure target parser in server adaptation and parent enhancement;
-  sanitize every `target` and `formtarget`, not a tag-name allowlist.
+  do not broaden iframe capabilities or rewrite consumer-owned live targets.
 - Do not change Review-pane link behavior or enable consumer application
   scripts as part of this work.
 
@@ -85,7 +83,7 @@ Summary: establish a complete behavioral contract and an indexed implementation
 plan before changing generated output or runtime behavior.
 
 - [x] Add `docs/protocol/mokabook-navigation.md` covering logical-link
-      classification, portable output, Browse adaptation, native fallback,
+      classification, portable output, Browse adaptation, safe degradation,
       sandbox limits, fragments, active-tree visibility, and verification.
 - [x] Align the package, runtime, shell-design, build-pipeline, and package
       boundary docs with the new navigation ownership.
@@ -183,6 +181,25 @@ documentation gaps found by the fifth review pass.
 At completion, later milestones must prove every final transformed anchor,
 metadata-only owner, watch lifecycle, and preview documentation boundary.
 
+## Milestone 0F: Capability And Resource-Href Corrections
+
+Summary: close the nested-context escape and live-resource ambiguity found by
+the sixth review pass. These decisions supersede the native top-navigation and
+target-sanitizer outcomes in Milestones 0B–0D and the resource-`href` outcome in
+Milestone 0E; those completed checklists remain as the review history.
+
+- [x] Remove native outer-navigation fallback and keep both top-navigation
+      sandbox restrictions active for direct and nested frame content.
+- [x] Preserve live `href`, `target`, `formtarget`, and base targets in adapted
+      copies; make trusted parent enhancement the only outer-navigation owner.
+- [x] Reject logical `href` on every non-native-link owner and reserve
+      `data-nav-href` for metadata-only references.
+- [x] Add direct, `srcdoc`, local, and cross-origin nested escape cases plus
+      resource-owner rejection to the implementation coverage.
+
+At completion, the security boundary depends on a denied browser capability,
+not complete recursive sanitization of consumer-controlled browsing contexts.
+
 ## Milestone 1: Portable Logical-Link Identity
 
 Summary: generated documents retain stable catalogue intent alongside their
@@ -194,9 +211,9 @@ existing portable artifact links; Browse behavior is not activated yet.
 - [ ] Add failure-first cases to `tests/build_links.test.ts` for a reserved
       `data-mokabook-link` marker on `MockLink` and raw `mock:` hrefs in HTML
       anchors/areas and SVG anchors; prove a `data-nav-href`-only span remains
-      marker-free; prove logical `href` values on an HTML `link` and SVG
-      `use`/`image` remain metadata-only and marker-free; and cover both
-      attribute orders on one eligible link.
+      marker-free; reject logical `href` values on an arbitrary HTML element,
+      HTML `link`, and SVG `use`/`image`; prove `data-nav-href` on those owners
+      remains marker-free; and cover both attribute orders on one eligible link.
 - [ ] Cover screen and use-case ids, optional target fragments, mobile and
       desktop output, dark-to-dark resolution, dark-to-light fallback, exact
       fragment grammar, and the requirement that a target anchor exists in
@@ -210,7 +227,8 @@ existing portable artifact links; Browse behavior is not activated yet.
 - [ ] Extend `src/build/mock_links.ts` with typed logical-target parsing and
       deterministic marker insertion for eligible HTML `a`/`area` and SVG `a`
       hrefs while preserving the byte-targeted rewrite and portable relative
-      URL for every supported navigation attribute.
+      URL for every supported navigation attribute. Reject a logical `href` on
+      any other element before it can be rewritten as a resource URL.
 - [ ] Validate one logical destination per element and reserve the marker from
       consumer output. Keep raw relative, external, asset, and same-document
       links marker-free.
@@ -240,50 +258,55 @@ At completion, every explicit catalogue link has portable fallback bytes and
 stable, validated identity, while all existing Browse and Review pages remain
 functional.
 
-## Milestone 2: Safe Browse Adaptation And Native Fallback
+## Milestone 2: Safe Browse Authentication And Query Transport
 
-Summary: served and preview copies gain canonical marked links while the same
-adapter closes every consumer-authored route to iframe-wide top navigation.
+Summary: served and preview copies authenticate generated link intent without
+granting consumer frames native outer-navigation capability.
 
-- [ ] Add failure-first adapter/server tests for canonical id destinations,
-      default/empty/`_self` outer targeting, explicit target metadata and safe
-      live targets, download exclusion, malformed trusted markers, metadata-only
-      references, manifest-owned fragments/legacy pages, and unowned HTML with
-      reserved-looking metadata plus `_top`; fail closed when a trusted route
-      loses or swaps its generated source header, or its marker and expected
-      portable href diverge.
+- [ ] Add failure-first adapter/server tests for preserved portable hrefs and
+      live targets, derived explicit/inherited-base target metadata and explicit
+      override precedence, download exclusion, malformed trusted markers,
+      metadata-only references, manifest-owned fragments/legacy pages, and
+      unowned HTML with reserved-looking metadata; fail closed when a trusted
+      route loses or swaps its generated source header, or its marker and
+      expected portable href diverge.
 - [ ] Add security cases for unmarked external, raw relative, same-document,
       `_top`, `_parent`, HTML/SVG anchors and areas, `<base target>`, forms and
       `formtarget`, plus marked targets, mixed-case keywords, matching names,
       whitespace/control and invalid values, spoofed `data-mokabook-target`, and
-      `download target="_top"`; retain `<base href>` and prove only a validated
-      default/`_self` link can target the shell.
+      `download target="_top"`; prove adaptation preserves consumer-owned live
+      attributes while the frame cannot target the shell or open a popup.
+- [ ] Add browser security regressions for `_top`/`_parent` activation from the
+      immediate document and from `srcdoc`, same-origin local, and cross-origin
+      nested frames. Assert none replace the shell and no nested context gains a
+      popup, script, form, download, or top-navigation capability.
 - [ ] Add table-driven unit tests for the shared typed target parser: absent,
       empty, keyword casing, safe named grammar, case preservation, whitespace,
       controls, leading underscore, and punctuation outside the allowlist.
 - [ ] Create one typed Browse-document adapter that validates markers against
       `Catalogue` and a manifest route-to-source map, strips reserved metadata
       from unowned HTML, verifies the matching ownership header and a trusted
-      marker's exact view-relative portable href before rewriting it, removes
-      base targets, sanitizes all target/formtarget attributes with the shared
-      parser, derives trusted target metadata, and never mutates disk.
+      marker's exact view-relative portable href, resolves own-target precedence
+      over the applicable first base target, derives trusted target metadata,
+      preserves all live navigation attributes, and never mutates disk.
 - [ ] Extract `/static/` serving from the over-target `src/server/http.ts` and
       adapt every HTML response below `/static/` while preserving HEAD, content
       type, confinement, ownership, and non-HTML bytes.
-- [ ] Enable same-origin inspection and user-activated top navigation on Browse
-      frames only after the sanitizer is installed. Keep script, form, popup,
-      download, automatic-top-navigation, and every Review permission unchanged.
+- [ ] Enable same-origin inspection on Browse frames without adding
+      `allow-top-navigation`, `allow-top-navigation-by-user-activation`, scripts,
+      forms, popups, or downloads. Keep every Review permission unchanged.
 - [ ] In served Browse, carry exactly one encoded `fragment` query through
       `/id` and `/view`; decode once, validate grammar and cross-view anchors,
       return HTTP 400 on failure, and render encoded iframe hashes through
       scheme swaps or the first use-case step.
 - [ ] Reuse the adapter while building `.context/mokabook-preview`, preserving
-      extensionless Cloudflare routes and queries, sanitizing unowned HTML
-      copies, and failing the build for invalid trusted markers without claiming
-      static request-time validation or injection.
-- [ ] Test served JavaScript-disabled default/`_self` navigation and anchors.
-      Test that JavaScript-disabled preview reaches the canonical page without
-      promising anchor scroll, and that neither environment grants popups.
+      extensionless Cloudflare routes and queries, stripping untrusted reserved
+      metadata, and failing the build for invalid trusted markers without
+      claiming static request-time validation or injection.
+- [ ] Test server-rendered fragment injection with JavaScript disabled. In both
+      served Browse and preview, prove disabled or failed enhancement keeps link
+      activation inside the sandbox and cannot replace the shell or open a
+      popup.
 - [ ] Add a watched-serve regression that changes only a `MockLink`
       destination, waits for rebuild and reload without a child restart, and
       verifies the newly adapted HTML is served.
@@ -295,8 +318,8 @@ adapter closes every consumer-authored route to iframe-wide top navigation.
       no-watch Serve smoke tests, and a query-preserving
       `wrangler pages dev` preview smoke test without orphan processes.
 
-At completion, native served fallback is functional and secure, static preview
-degradation is explicit, and the UI milestone can inspect sanitized frames.
+At completion, adapter trust and fragment transport are functional, degraded
+links remain safely frame-owned, and the UI milestone can inspect trusted frames.
 
 ## Milestone 3: Outer Navigation And Active-Tree UI
 
@@ -344,7 +367,7 @@ No backend response transformation is included in this milestone.
       preserved shell state.
 - [ ] In the same spec, prove modified and explicit non-self activation opens
       the canonical Mokabook page through parent enhancement, while the iframe
-      sandbox still lacks popup and script permissions.
+      sandbox still lacks popup, script, and top-navigation permissions.
 - [ ] Add static-preview coverage that follows a fragment link, toggles light
       and dark, and proves the current source and every swap source retain the
       encoded hash; cover first-step-only use-case behavior.
@@ -356,8 +379,8 @@ No backend response transformation is included in this milestone.
 
 At completion, JavaScript-enabled Browse navigation, including trusted
 new-context activation, is coherent and the active catalogue entry is always
-visible. Served native fallback and static-preview degradation remain as
-established by Milestone 2.
+visible. Safe failed/disabled-enhancement degradation remains as established by
+Milestone 2.
 
 ## Milestone 4: Documentation, Verification, And Handoff
 

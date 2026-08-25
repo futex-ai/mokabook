@@ -253,7 +253,9 @@ documents currently retain only its portable relative target. The approved
 retain stable logical-destination metadata so Browse can open the canonical
 catalogue page without changing standalone fragment behavior. That marker is
 target behavior and is not emitted until the active implementation plan
-completes.
+completes. Logical `href` values are reserved for native HTML/SVG links;
+metadata-only references use `data-nav-href`, and resource elements must keep
+real resource URLs.
 Local resource URLs in HTML source attributes, `srcset`, inline/style-block
 CSS, and transitively referenced HTML/CSS must likewise resolve to public
 static files beneath `mockupsDir` that remain after the pending build. An owned
@@ -295,8 +297,9 @@ export default function render(input: RenderInput): string;
 
 The string must contain a complete `<html>` document. Mokabook serializes
 Review-ignore markers and rewrites every complete `mock:<id>[#fragment]`
-`href` and `data-nav-href` value after this function returns, including when
-one element has both attributes. Final values from compatibility transforms are
+native-link `href` and every `data-nav-href` value after this function returns,
+including when one native link has both attributes. A logical `href` on any
+other element fails the build. Final values from compatibility transforms are
 validated through the same fail-closed link contract. The same rewrite applies
 to legacy output. The package declares `react` and `react-dom`
 `>=19.0.0` as peers and does not ship a private runtime. The builder resolves

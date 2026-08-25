@@ -22,16 +22,18 @@ asset, external, download, and same-document links.
 ## Logical Catalogue Links
 
 `MockLink`, `mockLink`, and complete `mock:<id>[#fragment]` values in supported
-`href` or `data-nav-href` attributes express catalogue references. Only an HTML
-`<a>` or `<area>`, or an SVG `<a>`, whose own `href` carried the logical value
-is an activatable catalogue link in Browse. `data-nav-href` on any element, and
-`href` on any other element, remains validated portable metadata; Mokabook does
-not invent click or keyboard semantics for it. A logical `data-nav-href` may
-coexist with an activatable logical `href`, in which case both must name the
-same destination. The id is stable authoring identity; the entry's `route` is
-its current Browse location. A collection remains an invalid destination. A
-use-case destination opens the use-case page, even though its portable fragment
-fallback resolves through the first screen in that use case.
+navigation attributes express catalogue references. A logical `href` is valid
+only on an HTML `<a>`/`<area>` or SVG `<a>` and makes that native link eligible
+for Browse activation. A logical `href` on every other element, including HTML
+resource elements and SVG `use`/`image`, fails the build instead of becoming an
+accidental resource request. Authors use `data-nav-href` for metadata-only
+references; it is valid on any element but does not invent click or keyboard
+semantics. A logical `data-nav-href` may coexist with an eligible logical
+`href`, in which case both must name the same destination. The id is stable
+authoring identity; the entry's `route` is its current Browse location. A
+collection remains an invalid destination. A use-case destination opens the
+use-case page, even though its portable fragment fallback resolves through the
+first screen in that use case.
 
 A logical fragment begins with an ASCII letter and then contains only ASCII
 letters, digits, `_`, `:`, `.`, or `-`. It names an HTML `id`, not a CSS
@@ -48,8 +50,9 @@ The builder must:
   artifact for the source viewport and color scheme, retaining light fallback;
 - add one package-owned `data-mokabook-link` marker containing the original
   `<id>[#fragment]` destination only to an activatable native link; and
-- reject a reserved marker supplied by consumer output or conflicting logical
-  destinations carried by two navigation attributes on one element.
+- reject a logical `href` on any other element, a reserved marker supplied by
+  consumer output, or conflicting logical destinations carried by two
+  navigation attributes on one element.
 
 Before invoking a compatibility transformer, the builder records a multiset of
 complete logical-reference records: expected marker presence and value, the
@@ -86,37 +89,36 @@ pane retains the existing sandbox behavior.
 
 When an eligible marked native link from a manifest-owned generated document is
 presented beneath `/static/` in served Browse or in the deployed Browse preview,
-Mokabook adapts its `href` to the stable `/id/<id>` route. The trusted-document
-set is exactly every current manifest screen fragment, including dark
-fragments, plus every generated legacy page in that manifest. Its generated
-header must name the same `sourcePath` as that manifest entry. Without a
-fragment, the link's complete destination is the stable `/id/<id>` route. With
-a fragment, the destination is
-`/id/<encoded-id>?fragment=<encoded-fragment>`. An absent, empty, or `_self`
-target receives the package-owned `_top` target for native fallback. Any other
-valid requested target is copied into adapter-produced inert
-`data-mokabook-target` metadata while its live target becomes `_blank`; the
-popup-denying sandbox means only trusted parent enhancement can honor that
-request. Target classification follows the exact parser below. An invalid
-target also receives the inert live `_blank` value but no trusted metadata, so
-parent enhancement declines it. The adapter removes any consumer-authored copy
-of its target metadata before deriving this value. A `download` link is not
-promoted, and `data-nav-href` without an eligible logical `href` stays portable
-metadata rather than becoming a Browse interaction.
+Mokabook authenticates its marker for trusted parent enhancement while retaining
+the portable `href` and live `target`. The trusted-document set is exactly every
+current manifest screen fragment, including dark fragments, plus every
+generated legacy page in that manifest. Its generated header must name the same
+`sourcePath` as that manifest entry. The parent derives the canonical
+`/id/<encoded-id>` or
+`/id/<encoded-id>?fragment=<encoded-fragment>` destination from the marker; it
+never trusts the portable URL as route identity. The adapter removes any
+consumer-authored `data-mokabook-target`, resolves the eligible link's effective
+request from its own `target` or the document's applicable first `<base target>`,
+parses it, and retains a valid non-self request only in newly derived inert
+metadata. An invalid target receives no trusted metadata, so parent enhancement
+declines it. A `download` link is not promoted, and `data-nav-href` without an
+eligible logical `href` stays portable metadata rather than becoming a Browse
+interaction.
 
 The portable file on disk must not be mutated. The development server and
-preview builder share one deterministic Browse-document adapter for canonical
-link rewriting and target sanitization. Every HTML response or preview copy
-beneath `/static/` passes through its sanitizer. Only a route in the trusted set
-above whose bytes retain that matching ownership header may promote a marker.
-The adapter also recomputes the source view's expected portable `href` and
-requires the marked link to match it exactly before promotion. On any other HTML
-route, including consumer-authored unowned files, the adapter removes
-`data-mokabook-link` and `data-mokabook-target` from the adapted copy and never
-promotes them. A missing or mismatched ownership header, malformed or
-manifest-invalid marker, or mismatched portable `href` on a trusted route yields
-HTTP 500 without serving that document and fails the preview build. Neither
-environment promotes an unmarked relative link.
+preview builder share one deterministic Browse-document adapter for marker
+authentication and derived target metadata. Every HTML response or preview
+copy beneath `/static/` passes through it. Only a route in the trusted set above
+whose bytes retain that matching ownership header may promote a marker. The
+adapter recomputes the source view's expected portable `href` and requires the
+marked link to match it exactly. On any other HTML route, including
+consumer-authored unowned files, it removes `data-mokabook-link` and
+`data-mokabook-target` from the adapted copy and never promotes them. A missing
+or mismatched ownership header, malformed or manifest-invalid marker, or
+mismatched portable `href` on a trusted route yields HTTP 500 without serving
+that document and fails the preview build. Neither environment promotes an
+unmarked relative link or rewrites a live `href`, `target`, `formtarget`, or
+`base` target.
 
 One pure target parser is shared by the adapter and parent client. It does not
 trim its input and returns exactly one typed state:
@@ -130,20 +132,17 @@ trim its input and returns exactly one typed state:
 The parent reparses adapter-produced target metadata with this same contract
 and declines an invalid or context-inappropriate state.
 
-Before Browse frames receive user-activated top-navigation permission, that
-adapter removes `target` from every HTML `<base>` and sanitizes every remaining
-`target` and `formtarget` attribute regardless of element or namespace. On
-unmarked, metadata-only, and download elements it maps `_top`/`_parent` to
-`_self` and every other non-self value to `_blank`, which the popup-denying
-sandbox makes inert. This prevents a named target from selecting an existing
-outer browsing context. On an eligible marked link it retains a valid request
-only in the trusted metadata above and uses the same popup-denied live target.
-It preserves a `<base href>` and ordinary unmarked self navigation. Only a
-validated, non-download marked default/`_self` link may receive the
-package-owned `_top` target. Forms remain sandbox-disabled; sanitizing
-`formtarget` prevents a later permission change from reopening this class of
-escape. The portable and Review documents retain their original bytes and
-stricter sandbox.
+Browse grants a fragment frame same-origin access only so trusted parent code
+can inspect its immediate document. It never grants `allow-top-navigation`,
+`allow-top-navigation-by-user-activation`, `allow-popups`, `allow-forms`,
+`allow-scripts`, or `allow-downloads`. The top-navigation restriction remains
+active for the generated document and is inherited by every descendant
+browsing context it creates, including `srcdoc`, local, and cross-origin child
+frames. Consumer-authored `_top`, `_parent`, named, `<base target>`, and
+`formtarget` values therefore cannot replace the shell even when they live in
+nested content the adapter cannot inspect. Trusted parent code is the only
+outer-navigation authority. Portable and Review documents retain their original
+bytes and Review keeps its stricter sandbox.
 
 In served Browse, the `/id/<id>` redirect preserves the optional
 request-visible `fragment` query on
@@ -163,12 +162,13 @@ on every current screen frame. On a use-case page it updates only the first
 step. Authored links already carry the builder's cross-view anchor proof, and
 updating every swap source preserves the anchor through light/dark changes. A
 direct preview URL whose syntactically valid fragment names no anchor simply
-remains at the top of that frame. Without JavaScript, preview links still reach
-the correct canonical Mokabook page but do not promise anchor scrolling. A
-top-level `#fragment` is never logical-fragment transport because URL hashes are
-not sent in an HTTP request.
+remains at the top of that frame. Without parent enhancement, served and preview
+links keep their portable in-frame behavior; neither environment promises outer
+page navigation or logical-fragment transport from a click. A top-level
+`#fragment` is never logical-fragment transport because URL hashes are not sent
+in an HTTP request.
 
-## Enhanced And Native Navigation
+## Enhanced Navigation And Safe Degradation
 
 With Browse enhancement available, an unmodified primary or keyboard activation
 of a default/`_self` marked link asks the outer shell to navigate through its
@@ -183,30 +183,26 @@ and explicit non-self targets after validating the marker and canonical
 destination. A requested `_top` or `_parent` uses the normal outer route
 transition. When a new or named browsing context is requested, package-owned
 parent code opens the canonical Mokabook URL with `noopener`; it never delegates
-popup creation to the consumer frame. If enhancement is absent or fails, an
-unmodified user activation of a default or `_self` marked link may navigate the
-outer browsing context natively. Modified and non-self activation is
-intentionally declined by the popup-denying fallback.
+popup creation to the consumer frame. If enhancement is absent or fails, the
+portable live link remains frame-owned and subject to the sandbox; Mokabook does
+not grant native outer-navigation fallback.
 
-Consumer scripts remain disabled: Browse may permit same-origin inspection and
-top navigation by explicit user activation, but must not grant script, form,
-popup, or automatic top-navigation capabilities to consumer documents. Review
-panes retain their stricter existing sandbox.
+Consumer scripts remain disabled. Browse permits same-origin inspection but
+does not grant script, form, popup, download, or either top-navigation
+capability to consumer documents. Review panes retain their stricter existing
+sandbox.
 
 External, raw relative, download, same-document hash, metadata-only, and
 unmarked links retain their existing frame-owned behavior subject to the
-sandbox. Consumer-authored non-self and `<base target>` values are the security
-exception: the adapted Browse copy neutralizes them on marked, unmarked, and
-download elements so a reserved keyword or matching named context cannot
-replace the shell. Mokabook must not infer product navigation from URLs,
-`data-nav-href`, or visible labels.
+sandbox. Consumer-authored targets remain byte-preserved, but the sandbox denies
+their access to the outer shell and to popups. Mokabook must not infer product
+navigation from URLs, `data-nav-href`, or visible labels.
 
 ## Active Catalogue Visibility
 
-Every successful outer route change, including progressive navigation, native
-navigation, Back, and Forward, establishes one navigation invariant: when the
-route has a catalogue row, that row is visible and marked
-`aria-current="page"`.
+Every successful outer route change, including progressive navigation, Back,
+and Forward, establishes one navigation invariant: when the route has a
+catalogue row, that row is visible and marked `aria-current="page"`.
 
 To establish the invariant, Browse must:
 
@@ -232,24 +228,24 @@ Filters and search remain unchanged when the destination is already visible.
 Coverage must prove:
 
 - portable output, eligible native-link markers, metadata-only
-  `data-nav-href`, dual navigation attributes, hashes, use-case ids,
-  dark-to-light fallback, conflicts, and reserved-marker errors;
+  `data-nav-href`, rejection of logical `href` on resource/non-link elements,
+  dual navigation attributes, hashes, use-case ids, dark-to-light fallback,
+  conflicts, and reserved-marker errors;
 - served and preview adaptation without mutating committed fragments, including
-  ownership-gated promotion, unowned-HTML sanitization, secure target parsing,
-  and request-visible fragment transport;
+  ownership-gated promotion, unowned reserved-metadata removal, secure target
+  parsing, portable live attributes, and request-visible fragment transport;
 - served cross-view fragment validation and JavaScript-disabled anchor
   injection, plus enhanced static-preview current/swap-source injection,
-  scheme-toggle retention, first-step use-case scoping, and its documented
-  page-level no-JavaScript fallback;
+  scheme-toggle retention, and first-step use-case scoping;
 - enhanced primary, keyboard, modified, non-self, Back, and Forward navigation
   from mobile, desktop, flow, and legacy frames where supported;
-- JavaScript-disabled served default/`_self` outer navigation without popup
-  capability;
+- safe failed/disabled-enhancement degradation without outer navigation;
 - active-row selection, ancestor disclosure, conditional filter/search reset,
   nearest scrolling, responsive drawer closure, and preserved shell state; and
-- continued script denial; ancestor/named-context denial across HTML and SVG
-  links, forms, marked, unmarked, download, and base targets; frame-owned
-  external/download/hash behavior; and unchanged Review-pane links.
+- continued script denial and top-navigation denial across direct, `srcdoc`,
+  local, and cross-origin nested contexts; ancestor/named-context denial across
+  HTML and SVG links, forms, marked, unmarked, download, and base targets;
+  frame-owned external/download/hash behavior; and unchanged Review-pane links.
 
 ## Related Docs
 

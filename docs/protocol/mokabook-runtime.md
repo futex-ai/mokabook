@@ -118,21 +118,19 @@ source and fragment paths including dark renders, the schemes a screen renders
 in, related docs, dependencies, use cases, and comparison context.
 Consumer fragments and legacy documents are sandboxed without script permission
 so they cannot alter the same-origin Browse shell. The planned navigation
-extension will permit package-owned same-origin inspection and outer navigation
-after explicit user activation. Before enabling that iframe-wide sandbox token,
-the served/preview adapter will sanitize every public static HTML copy but
-promote markers only for current-manifest screen fragments and generated legacy
-pages whose ownership header names that entry's manifest `sourcePath`. Unowned
-HTML loses package-reserved metadata in the adapted copy; a trusted route with
-missing/mismatched ownership, invalid markers, or a marker/portable-href
-mismatch fails closed. One
-strict typed parser shared with the parent client neutralizes every
-consumer-authored non-self `<base target>`, `target`, and `formtarget`, including
-HTML/SVG, marked, and download cases, so a named target cannot select the outer
-context. It retains an eligible trusted link's explicit target only as inert
-metadata for parent enhancement; only a validated default/`_self` link can
-receive the package-owned live `_top` target. Consumer scripts, forms, popups,
-and automatic top navigation remain forbidden. Review panes retain their
+extension will permit package-owned same-origin inspection for parent-owned
+outer navigation after explicit user activation. It will not grant either
+top-navigation sandbox token, so direct and nested consumer contexts retain the
+active restriction that prevents them from replacing the shell. The
+served/preview adapter will authenticate markers only for current-manifest
+screen fragments and generated legacy pages whose ownership header names that
+entry's manifest `sourcePath`. Unowned HTML loses package-reserved metadata in
+the adapted copy; a trusted route with missing/mismatched ownership, invalid
+markers, or a marker/portable-href mismatch fails closed. One strict typed
+target parser supplies inert metadata only to trusted parent enhancement;
+consumer-authored `href`, `<base target>`, `target`, and `formtarget` values
+remain portable and sandbox-confined. Consumer scripts, forms, popups,
+downloads, and top navigation remain forbidden. Review panes retain their
 stricter sandbox and byte-unmodified documents.
 
 A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
@@ -156,7 +154,7 @@ After the active navigation plan completes, logical links activated inside a
 consumer frame will navigate that same outer route model rather than replacing
 only the iframe document. The shell will open the active row's ancestor
 collections, conditionally clear a search or Changed filter that would hide it,
-and scroll it into view. The complete target portable-link, native-fallback,
+and scroll it into view. The complete target, portable-link, safe-degradation,
 sandbox, fragment, and active-tree behavior is defined by the
 [catalogue navigation contract](./mokabook-navigation.md).
 Search, disclosure, filters, and catalogue scroll remain mounted; searching
@@ -177,14 +175,15 @@ latest per-region scroll positions. Scroll persistence is limited to one
 leading update per animation frame, and route-change focus never overrides the
 restored positions. Overlapping requests are latest-wins. Until the active
 navigation plan completes, Review, static, iframe, download, external, target,
-hash-only, and modified-click links retain native browser behavior. The target
-exception is a marked catalogue link inside a Browse frame: trusted parent code
-will own primary and new-context navigation, while only default/`_self`
-activation has native outer-navigation fallback. Served Browse applies a
-request-visible logical fragment during server rendering. The static deployed
-preview applies it progressively to each current and light/dark swap source so
-scheme changes retain the anchor; with JavaScript disabled, that preview still
-opens the canonical page but does not promise anchor scrolling.
+hash-only, and modified-click links retain native browser behavior. After the
+plan completes, trusted parent code will own primary and new-context navigation
+for a marked catalogue link inside a Browse frame when enhancement is available.
+There is no native outer-navigation fallback; failed or disabled enhancement
+keeps the portable link frame-owned and the sandbox prevents direct or nested
+content from replacing the shell. Served Browse applies a request-visible
+logical fragment during server rendering. The static deployed preview applies
+it progressively to each current and light/dark swap source so scheme changes
+retain the anchor.
 
 The shell meets keyboard, focus, reduced-motion, contrast, semantics, and status
 announcement requirements. Mobile and desktop shell variants are specified by

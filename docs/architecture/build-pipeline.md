@@ -80,12 +80,14 @@ type Renderer = (input: RenderInput) => string;
 
 The returned string must be a complete HTML document. Mokabook then converts
 `ReviewIgnore` templates into inert comments and resolves every complete value
-of the form `mock:<id>[#fragment]` in `href` and `data-nav-href` to
-viewport-matched fragments in the same color scheme, falling back to light when
-the destination screen has no dark view. Both attributes are resolved when they
-coexist on one element, and the validator independently rejects any logical
-navigation value left by a compatibility transform. The same pass covers legacy
-pages, which remain light-only. Text, scripts, styles, and unrelated attributes
+of the form `mock:<id>[#fragment]` in native HTML/SVG link `href` attributes and
+in `data-nav-href` to viewport-matched fragments in the same color scheme,
+falling back to light when the destination screen has no dark view. A logical
+`href` on a non-link or resource element is rejected; metadata-only references
+use `data-nav-href`. Both supported attributes are resolved when they coexist on
+one native link, and the validator independently rejects any logical navigation
+value left by a compatibility transform. The same pass covers legacy pages,
+which remain light-only. Text, scripts, styles, and unrelated attributes
 containing the same characters remain unchanged. A use-case link resolves
 through its first screen; collections are intentionally not linkable.
 
