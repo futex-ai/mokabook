@@ -222,6 +222,7 @@ test("details disclosure is remembered across routes and reloads", async ({
       ?.click();
     window.location.assign("/view/screens/welcome.html");
   });
+  await page.waitForURL(/\/view\/screens\/welcome\.html$/);
   await expect(details).toHaveAttribute("open", "");
 });
 
