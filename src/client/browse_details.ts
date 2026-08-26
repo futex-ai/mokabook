@@ -36,6 +36,14 @@ export class DetailsDisclosurePreference {
     }
   }
 
+  /** Record the state produced by a summary activation before a later task. */
+  rememberActivation(details: HTMLDetailsElement): void {
+    const openBeforeActivation = details.open;
+    queueMicrotask(() => {
+      if (details.open !== openBeforeActivation) this.remember(details.open);
+    });
+  }
+
   private read(): boolean | undefined {
     try {
       const value = this.#storage?.getItem(DETAILS_DISCLOSURE_KEY);

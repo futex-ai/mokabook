@@ -32,6 +32,18 @@ test("details preference keeps its in-memory state without storage", () => {
   assert.equal(replacement.open, false);
 });
 
+test("details preference records a completed activation before later tasks", async () => {
+  const storage = new FakeStorage("closed");
+  const preference = new DetailsDisclosurePreference(storage);
+  const details = { open: false } as HTMLDetailsElement;
+
+  preference.rememberActivation(details);
+  details.open = true;
+  await Promise.resolve();
+
+  assert.equal(storage.value, "open");
+});
+
 function fakeDocument(details: HTMLDetailsElement): Document {
   return {
     querySelector(selector: string) {
