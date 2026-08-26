@@ -6,6 +6,10 @@ import { isDeepStrictEqual } from "node:util";
 import { projectRealPath, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
+import {
+  analyzeHierarchy,
+  type CatalogueHierarchy,
+} from "../registry/hierarchy.js";
 import { readManifest } from "../registry/manifest.js";
 import type { ManifestEntry, ManifestV3 } from "../registry/types.js";
 import { readBaseManifest } from "../review/base_manifest.js";
@@ -60,14 +64,16 @@ export function changedManifestRoutes(
   const baseEntries = new Map(
     baseManifest.entries.map((entry) => [entry.id, entry]),
   );
+  const hierarchy = analyzeHierarchy(manifest.entries).hierarchy;
+  const baseHierarchy = analyzeHierarchy(baseManifest.entries).hierarchy;
   for (const entry of manifest.entries) {
     if (entry.kind === "collection") continue;
     const baseEntry = baseEntries.get(entry.id);
     const candidates = changedPathCandidates(entry, baseEntry, mockupsPrefix);
     if (
       isDeepStrictEqual(
-        routeChangeProjection(entry),
-        routeChangeProjection(baseEntry),
+        routeChangeProjection(entry, hierarchy),
+        routeChangeProjection(baseEntry, baseHierarchy),
       ) &&
       !candidates.some((candidate) =>
         changedPaths.some((changedPath) =>
@@ -92,9 +98,15 @@ export function changedManifestRoutes(
 }
 
 /** Select manifest metadata whose changes can affect a routed Browse entry. */
-function routeChangeProjection(entry: ManifestEntry | undefined): unknown {
+function routeChangeProjection(
+  entry: ManifestEntry | undefined,
+  hierarchy: CatalogueHierarchy<ManifestEntry>,
+): unknown {
   if (!entry) return undefined;
   const common = {
+    ancestorCollections: (hierarchy.ancestorsById.get(entry.id) ?? []).map(
+      ({ id, title }) => ({ id, title }),
+    ),
     dependencies: entry.dependencies,
     description: entry.description,
     id: entry.id,

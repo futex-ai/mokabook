@@ -121,9 +121,11 @@ matches changed generated fragments plus explicitly declared dependencies. The
 automatically recorded registry source module is attribution metadata, not a
 route dependency: changing a shared registry module alone must not mark its
 unchanged sibling routes.
-Entry comparison uses an explicit projection of route-affecting fields.
+Entry comparison uses an explicit projection of route-affecting fields plus
+the ordered ancestor collection ids and titles derived from `childIds`.
 Serialized `navPath` labels are compatibility output and cannot independently
-mark a screen or use case as changed.
+mark a screen or use case as changed. Reparenting an entry or renaming one of
+its ancestor collections marks the routed entry as changed.
 When a screen is directly affected, every use case that embeds that screen's
 fragments is affected too and remains visible in the changed-only filter.
 
