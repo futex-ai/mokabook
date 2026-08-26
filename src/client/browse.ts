@@ -170,6 +170,14 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
   doc.addEventListener("click", (event) => {
     const target = event.target instanceof Element ? event.target : undefined;
     if (!target) return;
+    const summary = target.closest("summary");
+    const details = summary?.parentElement;
+    if (
+      details instanceof HTMLDetailsElement &&
+      details.matches("[data-mokabook-details]")
+    ) {
+      detailsPreference.rememberActivation(details);
+    }
     const idChip = target.closest<HTMLElement>("button[data-copy-id]");
     if (idChip) {
       const id = idChip.dataset["copyId"] ?? "";

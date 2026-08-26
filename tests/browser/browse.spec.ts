@@ -216,10 +216,12 @@ test("details disclosure is remembered across routes and reloads", async ({
 
   await page.reload();
   await expect(details).not.toHaveAttribute("open", "");
-  await details.locator("summary").click();
-  await expect(details).toHaveAttribute("open", "");
-
-  await page.goto("/view/screens/welcome.html");
+  await page.evaluate(() => {
+    document
+      .querySelector<HTMLElement>("[data-mokabook-details] summary")
+      ?.click();
+    window.location.assign("/view/screens/welcome.html");
+  });
   await expect(details).toHaveAttribute("open", "");
 });
 
