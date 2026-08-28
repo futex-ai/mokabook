@@ -39,7 +39,12 @@ function HomeMobile() {
   );
 }
 
-function WelcomeHead({ active }: { active: "both" | "desktop" | "mobile" }) {
+/** The head band of the example Welcome screen with its viewport control. */
+export function WelcomeHead({
+  active,
+}: {
+  active: "both" | "desktop" | "mobile";
+}) {
   return (
     <ScreenHead
       action={<ViewSwitch active={active} />}

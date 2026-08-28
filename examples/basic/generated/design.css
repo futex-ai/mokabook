@@ -128,6 +128,16 @@ body {
   padding: 0 12px;
 }
 
+/* An entered query reads in the ink color; only the empty-field placeholder
+   copy keeps the muted tone of the field itself. */
+.mbk-search-value {
+  color: var(--chrome-ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* The color-scheme switch sits right of the search field. It never
    compresses, and its tighter pad matches the mode switch height. */
 .mbk-topbar > .mbk-seg {
@@ -331,7 +341,8 @@ body {
   color: rgba(255, 255, 255, 0.75);
 }
 
-/* Narrow-shell navigation drawer, shown open over a dimmed shell. */
+/* Narrow-shell navigation drawer, shown open under the top bar it is opened
+   from, over a dimmed shell. */
 .mbk-drawer {
   border-right: 1px solid var(--chrome-border);
   bottom: 0;
@@ -340,7 +351,7 @@ body {
   left: 0;
   max-width: 280px;
   position: absolute;
-  top: 0;
+  top: 48px;
   width: 82%;
   z-index: 5;
 }

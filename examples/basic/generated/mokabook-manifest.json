@@ -54,7 +54,7 @@
         "examples/basic/generated/design-stage.css",
         "examples/basic/generated/design.css"
       ],
-      "description": "Browse states for details, missing routes, narrow layouts, and color schemes.",
+      "description": "Browse states for details, missing routes, narrow layouts, tag filtering, and color schemes.",
       "id": "design-browse-states",
       "kind": "collection",
       "navPath": [
@@ -72,6 +72,7 @@
         "design-browse-details",
         "design-browse-missing-route",
         "design-browse-navigation",
+        "design-browse-tag-filter",
         "design-browse-dark-scheme",
         "design-browse-light-only"
       ]
@@ -398,6 +399,39 @@
         "mobile": "design/browse/states/navigation.mobile.html"
       },
       "route": "design/browse/states/navigation.html",
+      "useCaseIds": [],
+      "viewports": [
+        "mobile",
+        "desktop"
+      ]
+    },
+    {
+      "dependencies": [
+        "examples/basic/entries/design/browse_tag_screens.tsx",
+        "examples/basic/generated/design-stage.css",
+        "examples/basic/generated/design.css"
+      ],
+      "description": "A selected tag chip filtering the catalogue tree through the search field.",
+      "id": "design-browse-tag-filter",
+      "kind": "screen",
+      "navPath": [
+        "Design",
+        "Mokabook design",
+        "Browse shell",
+        "Shell states"
+      ],
+      "rationale": "Tag filtering reuses the search field rather than adding a second top-level control: selecting a tag chip in the details inspector enters that tag as a search term, so the active filter stays visible and clearable where a reader already looks for one, and it still composes with the All/Changed filter. Rows without the tag and the groups they leave empty drop out of the tree, and the chip for the entered term reads in the accent, so the chip, the query, and the filtered tree describe a single state.",
+      "relatedDocs": [
+        "docs/protocol/mokabook-shell-design.md",
+        "examples/basic/notes.md"
+      ],
+      "sourcePath": "examples/basic/entries/design/browse_tag_screens.tsx",
+      "title": "Tag filter",
+      "fragments": {
+        "desktop": "design/browse/states/tag-filter.desktop.html",
+        "mobile": "design/browse/states/tag-filter.mobile.html"
+      },
+      "route": "design/browse/states/tag-filter.html",
       "useCaseIds": [],
       "viewports": [
         "mobile",

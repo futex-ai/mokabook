@@ -494,6 +494,23 @@
   flex-shrink: 0;
 }
 
+.mbk-chip.tag svg {
+  color: var(--chrome-muted);
+  flex-shrink: 0;
+}
+
+/* The chip whose tag is the entered search term carries the same accent fill
+   as the selected navigation row, so both read as one selection. */
+.mbk-chip.tag.active {
+  background: var(--mbk-sage);
+  border-color: var(--mbk-sage);
+  color: #fff;
+}
+
+.mbk-chip.tag.active svg {
+  color: rgba(255, 255, 255, 0.9);
+}
+
 /* ---- Use-case flow track ---------------------------------------------- */
 
 .mbk-flow {

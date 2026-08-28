@@ -27,6 +27,21 @@ in each entry's description and rationale, never inside the rendered screens:
 - The dark view compare screen shows the same `Welcome` comparison as the
   changed screen, in its dark view. Review compares one view at a time, so the
   two are separate pages reached from the comparison band's scheme segment.
+- The `forms` and `onboarding` tags drawn on the Welcome entry are synthetic
+  fixture labels chosen to show a tagged entry; they carry no product meaning
+  and no example entry declares tags in its authored metadata yet.
+- Tag chips are drawn as styled text like every other link inside a design
+  screen. The chip in the accent state depicts the tag named by the search
+  query; selecting a chip to enter that query is runtime behavior.
+- The tag-filter artboards draw the top-bar search field because the entered
+  query is the depicted state. The narrow one draws it too: the shell keeps the
+  search field in the top bar below the breakpoint, where the brand keeps its
+  mark without the product name so the field has room. The other narrow
+  artboards omit the field, and so keep the product name, because their
+  depicted state has no query.
+- The narrow navigation drawer opens under the top bar over a dimmed shell, so
+  the menu button that opened it and the query beside it stay visible, matching
+  the served shell.
 - The `Light | Dark` control sits in the top bar on the wide artboards and in
   the screen head band, under the viewport control, on the narrow ones: a 390px
   top bar has no room for a third control.

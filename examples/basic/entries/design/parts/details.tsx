@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 
-import { ChevronIcon, FlowIcon } from "./icons.js";
+import { ChevronIcon, FlowIcon, TagIcon } from "./icons.js";
+
+/** Tags declared by the fixture screen the inspector describes. */
+const SCREEN_TAGS = ["forms", "onboarding"];
 
 function MetaRow({ children, label }: { children: ReactNode; label: string }) {
   return (
@@ -11,7 +14,23 @@ function MetaRow({ children, label }: { children: ReactNode; label: string }) {
   );
 }
 
-function DetailsBody() {
+function TagChips({ activeTag }: { activeTag?: string | undefined }) {
+  return (
+    <span className="mbk-chips">
+      {SCREEN_TAGS.map((tag) => (
+        <span
+          key={tag}
+          className={tag === activeTag ? "mbk-chip tag active" : "mbk-chip tag"}
+        >
+          <TagIcon size={11} />
+          {tag}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function DetailsBody({ activeTag }: { activeTag?: string | undefined }) {
   return (
     <div className="mbk-details-body">
       <div>
@@ -32,6 +51,9 @@ function DetailsBody() {
           <code className="mbk-code">screens/welcome.html</code>
         </MetaRow>
         <MetaRow label="Schemes">light, dark</MetaRow>
+        <MetaRow label="Tags">
+          <TagChips activeTag={activeTag} />
+        </MetaRow>
         <MetaRow label="Related docs">
           <span className="mbk-meta-link">Example notes</span>
         </MetaRow>
@@ -49,11 +71,13 @@ function DetailsBody() {
 }
 
 interface DetailsPanelProps {
+  /** Tag drawn as the selected chip because it is the current search term. */
+  activeTag?: string | undefined;
   open?: boolean;
 }
 
 /** The collapsible details inspector at the foot of the stage. */
-export function DetailsPanel({ open }: DetailsPanelProps) {
+export function DetailsPanel({ activeTag, open }: DetailsPanelProps) {
   return (
     <section className="mbk-details">
       <div className="mbk-details-bar">
@@ -67,7 +91,7 @@ export function DetailsPanel({ open }: DetailsPanelProps) {
             : "Show context for this screen"}
         </span>
       </div>
-      {open ? <DetailsBody /> : null}
+      {open ? <DetailsBody activeTag={activeTag} /> : null}
     </section>
   );
 }

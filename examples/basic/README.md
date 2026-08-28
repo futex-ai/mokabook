@@ -39,15 +39,15 @@ render plain React DOM need none of this and can keep a plain
 `renderToStaticMarkup` adapter.
 
 The `Design` navigation group is the approved design catalogue for Mokabook's
-own Browse and Review shell: sixteen screens covering the Browse home,
+own Browse and Review shell: seventeen screens covering the Browse home,
 selected screen and use case, details panel, missing route, narrow navigation,
-the dark-scheme and light-only stage states, and the changed, added, removed,
-difference, dark-view, shared-impact, ignored-only, and empty Review states,
-each with distinct mobile and desktop variants. The sixteen design screens
-explicitly opt out with `colorSchemes: ["light"]` because they are light
-documents that draw the Mokabook shell, including the three that depict the
-shell with dark selected; the two product screens inherit the catalogue default
-and prove dark generation. The recorded
+tag filtering, the dark-scheme and light-only stage states, and the changed,
+added, removed, difference, dark-view, shared-impact, ignored-only, and empty
+Review states, each with distinct mobile and desktop variants. The seventeen
+design screens explicitly opt out with `colorSchemes: ["light"]` because they
+are light documents that draw the Mokabook shell, including the three that
+depict the shell with dark selected; the two product screens inherit the
+catalogue default and prove dark generation. The recorded
 tokens and responsive rules live in
 [`docs/protocol/mokabook-shell-design.md`](../../docs/protocol/mokabook-shell-design.md).
 

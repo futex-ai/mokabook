@@ -16,6 +16,11 @@ interface TopBarProps {
    */
   colorScheme?: ShellColorScheme | undefined;
   mode: ShellMode;
+  /**
+   * Text entered in the search field. Narrow artboards draw the field only
+   * when a query is part of the depicted state; otherwise they keep the room.
+   */
+  searchValue?: string | undefined;
   viewport: ArtboardViewport;
 }
 
@@ -24,6 +29,30 @@ function BaseWatch() {
     <span className="mbk-basewatch">
       <span className="mbk-basewatch-dot" aria-hidden="true" />
       Comparing this branch with <strong>origin/main</strong>
+    </span>
+  );
+}
+
+function Brand({ markOnly }: { markOnly: boolean }) {
+  return (
+    <span className="mbk-brand">
+      <span className="mbk-mark" aria-hidden="true">
+        ◫
+      </span>
+      {markOnly ? null : "Mokabook"}
+    </span>
+  );
+}
+
+function SearchField({ value }: { value?: string | undefined }) {
+  return (
+    <span className="mbk-search">
+      <span aria-hidden="true">⌕</span>
+      {value === undefined ? (
+        "Search screens…"
+      ) : (
+        <span className="mbk-search-value">{value}</span>
+      )}
     </span>
   );
 }
@@ -49,7 +78,12 @@ export function SchemeSwitch({ active }: { active: ShellColorScheme }) {
 }
 
 /** The 48px shell header: brand mark, search or base ref, mode switch. */
-export function TopBar({ colorScheme, mode, viewport }: TopBarProps) {
+export function TopBar({
+  colorScheme,
+  mode,
+  searchValue,
+  viewport,
+}: TopBarProps) {
   return (
     <header className="mbk-topbar">
       {viewport === "mobile" ? (
@@ -65,20 +99,15 @@ export function TopBar({ colorScheme, mode, viewport }: TopBarProps) {
           ☰
         </button>
       ) : null}
-      <span className="mbk-brand">
-        <span className="mbk-mark" aria-hidden="true">
-          ◫
-        </span>
-        Mokabook
-      </span>
+      <Brand markOnly={viewport === "mobile" && searchValue !== undefined} />
       {viewport === "desktop" ? (
         mode === "review" ? (
           <BaseWatch />
         ) : (
-          <span className="mbk-search">
-            <span aria-hidden="true">⌕</span>Search screens…
-          </span>
+          <SearchField value={searchValue} />
         )
+      ) : searchValue !== undefined ? (
+        <SearchField value={searchValue} />
       ) : null}
       {colorScheme !== undefined && viewport === "desktop" ? (
         <SchemeSwitch active={colorScheme} />
@@ -101,6 +130,7 @@ interface ShellProps {
   colorScheme?: ShellColorScheme | undefined;
   mode: ShellMode;
   nav: ReactNode;
+  searchValue?: string | undefined;
   viewport: ArtboardViewport;
 }
 
@@ -111,12 +141,18 @@ export function Shell({
   colorScheme,
   mode,
   nav,
+  searchValue,
   viewport,
 }: ShellProps) {
   if (viewport === "desktop") {
     return (
       <div className="mbk-shell mbk-shell--desktop">
-        <TopBar colorScheme={colorScheme} mode={mode} viewport={viewport} />
+        <TopBar
+          colorScheme={colorScheme}
+          mode={mode}
+          searchValue={searchValue}
+          viewport={viewport}
+        />
         <div className="mbk-body">
           {nav}
           <main className="mbk-main">{children}</main>
@@ -126,7 +162,12 @@ export function Shell({
   }
   return (
     <div className="mbk-shell mbk-shell--mobile">
-      <TopBar colorScheme={colorScheme} mode={mode} viewport={viewport} />
+      <TopBar
+        colorScheme={colorScheme}
+        mode={mode}
+        searchValue={searchValue}
+        viewport={viewport}
+      />
       <main className="mbk-main">{children}</main>
       {aside}
     </div>

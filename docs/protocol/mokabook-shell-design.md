@@ -15,6 +15,8 @@ implementation and tests must preserve. Runtime behavior stays in
 
 This document describes the implemented shell design, including active-row
 ancestor disclosure, conditional filter clearing, and nearest-row scrolling.
+The details inspector's tag chips and the `tag:` search term are recorded
+design pending implementation; every other state here is implemented.
 
 ## Design Mockups
 
@@ -29,6 +31,7 @@ generated under `examples/basic/generated/design/`:
 | `design/browse/states/details.html`       | Expanded details inspector            |
 | `design/browse/states/missing-route.html` | Not-found view with navigation        |
 | `design/browse/states/navigation.html`    | Collapsed navigation drawer           |
+| `design/browse/states/tag-filter.html`    | Tag search filtering the tree         |
 | `design/browse/states/dark-scheme.html`   | Dark selected, dark device screens    |
 | `design/browse/states/light-only.html`    | Light-only screen under dark          |
 | `design/review/outcomes/changed.html`     | Changed screen, side-by-side compare  |
@@ -96,7 +99,12 @@ scrollable region scrolls internally:
   a centred search field (max-width 440px, `⌕` glyph), the color-scheme
   control when the catalogue has one, and a right-aligned Browse/Review
   segmented mode switch. Below the breakpoint a menu button precedes the brand
-  and opens the navigation drawer.
+  and opens the navigation drawer, and the brand keeps its mark without the
+  product name so the search field keeps its room. A query splits into terms:
+  a `tag:<tag>` term matches only rows whose entry declares that tag, and the
+  remaining free text matches row titles and routes as before. Every term must
+  match for a row to stay visible, tag terms hide the groups they empty and
+  open the groups they keep, and they compose with the All/Changed filter.
 - **Navigation** — 248px column, `#fbfbfa` background, hairline right border.
   Head row `CATALOGUE` (uppercase, 11px) with a `Collapse all` text button;
   an All/Changed segmented filter (with a monospace changed count) when Git
@@ -127,10 +135,14 @@ scrollable region scrolls internally:
   routes and reloads: a bar with a rotating chevron, `Details`, and a muted
   hint; a two-column body (`1.35fr / 1fr`) with description and
   `Why this screen —` rationale on the left and uppercase-labelled metadata
-  rows (Source, Generated, Schemes, Related docs, Dependencies, Used by) on the
-  right. Paths render as monospace chips; use cases render as pill chips with
-  the flow icon; the Schemes row is plain text naming the schemes the screen
-  renders in (`light, dark`).
+  rows (Source, Generated, Schemes, Tags, Related docs, Dependencies, Used by)
+  on the right. Paths render as monospace chips; use cases render as pill chips
+  with the flow icon; the Schemes row is plain text naming the schemes the
+  screen renders in (`light, dark`). The Tags row lists the tags the entry
+  declares as pill chips with the tag icon: selecting one enters `tag:<tag>` in
+  the search field, so the filter stays visible and clearable there, and the
+  chip whose tag is in the entered query carries the accent active state with
+  contrast text and glyph. An entry that declares no tags omits the row.
 
 ## Device Chrome
 
