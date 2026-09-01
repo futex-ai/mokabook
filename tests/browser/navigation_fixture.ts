@@ -42,7 +42,11 @@ export async function startNavigationFixture(): Promise<NavigationFixture> {
   await writeCompilation(await compileCatalogue(config), config);
   const server = await startCatalogueServer(config, {
     base: "origin/main",
-    changedRoutes: ["screens/home.html"],
+    changedRoutes: [
+      "screens/extra.html",
+      "screens/home.html",
+      "user-flows/tour.html",
+    ],
     port: 0,
   });
   return {

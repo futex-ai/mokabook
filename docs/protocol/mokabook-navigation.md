@@ -253,6 +253,12 @@ screen. Its tree retains the opened destination path for the next time it is
 opened. A user may collapse the active path afterward; the next route change
 re-establishes the invariant.
 
+Entering a non-empty search or Changed filter may initially open groups to
+reveal matching rows. Reapplying that same active filtering state during a
+route change must preserve groups the user subsequently collapsed; only the
+destination row's ancestor path may be reopened. Clearing every filtering
+constraint restores the disclosure state captured before filtering began.
+
 Enhanced navigation preserves the selected viewport, color scheme, and details
 disclosure. It collapses an expanded frame before installing the destination.
 Filters and search remain unchanged when the destination is already visible.

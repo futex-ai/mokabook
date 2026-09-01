@@ -193,17 +193,19 @@ that would hide it, and scrolls it into view. The complete target,
 portable-link, safe-degradation,
 sandbox, fragment, and active-tree behavior is defined by the
 [catalogue navigation contract](./mokabook-navigation.md).
-Search, disclosure, filters, and catalogue scroll remain mounted; searching
-temporarily force-opens navigation groups and restores their prior disclosure
-when cleared. Navigation groups and the details inspector retain explicit
-disclosure choices across in-shell navigation, durable navigation, and browser
-reloads for that origin. Unavailable or malformed browser storage leaves the
-server-rendered default intact; the latest choice still survives in-shell
-navigation when writes fail. The browser-frame expand toggle overlays one
-frame at a time and collapses on Escape, on an outside click, and on route
-navigation. Clicking a screen or use-case ID chip labelled `#<id>` copies the
-unprefixed ID without navigating. Clicking a frame address copies it to the
-clipboard.
+Search, disclosure, filters, and catalogue scroll remain mounted. Entering
+search or Changed filtering force-opens navigation groups once and restores
+their prior disclosure when all filtering clears. Route changes during that
+active filtering state preserve groups the user subsequently collapsed, except
+for the destination's ancestor path. Navigation groups and the details
+inspector retain explicit disclosure choices across in-shell navigation,
+durable navigation, and browser reloads for that origin. Unavailable or
+malformed browser storage leaves the server-rendered default intact; the latest
+choice still survives in-shell navigation when writes fail. The browser-frame
+expand toggle overlays one frame at a time and collapses on Escape, on an
+outside click, and on route navigation. Clicking a screen or use-case ID chip
+labelled `#<id>` copies the unprefixed ID without navigating. Clicking a frame
+address copies it to the clipboard.
 
 The shell scrolls inside its stage, flow, and embed regions rather than the
 document. Back and Forward restore the matching route and that history entry's

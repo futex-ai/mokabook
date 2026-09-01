@@ -15,12 +15,32 @@ test.afterAll(async () => {
   await navigation.close();
 });
 
+async function waitForCurrentFrameLoad(
+  page: Page,
+  selector: string,
+): Promise<void> {
+  await expect
+    .poll(() =>
+      page.locator(selector).evaluate((element: HTMLIFrameElement) => {
+        const source = element.getAttribute("src");
+        if (!source) return false;
+        const expected = new URL(source, element.ownerDocument.baseURI).href;
+        return (
+          element.contentDocument?.readyState === "complete" &&
+          element.contentWindow?.location.href === expected
+        );
+      }),
+    )
+    .toBe(true);
+}
+
 test("MockLink navigation reveals the destination and preserves shell state", async ({
   page,
 }) => {
   await page.goto(`${navigation.url}/view/screens/home.html`);
   await page.click('[data-viewport-option="mobile"]');
   await page.click('.mbk-topbar [data-color-scheme-option="dark"]');
+  await waitForCurrentFrameLoad(page, ".mbk-frame-mobile iframe");
   const detailsPanel = page.locator("details[data-mokabook-details]");
   if ((await detailsPanel.getAttribute("open")) !== null) {
     await detailsPanel.locator("summary").click();
@@ -98,6 +118,26 @@ test("keyboard navigation retains constraints that already show the destination"
   await expect(
     page.locator('a[data-nav-row][data-route="screens/details.html"]'),
   ).toHaveAttribute("aria-current", "page");
+});
+
+test("Changed navigation preserves collapsed unrelated groups", async ({
+  page,
+}) => {
+  await page.goto(`${navigation.url}/view/screens/home.html`);
+  await page.click('[data-filter="changed"]');
+  const other = page.locator('details[data-nav-collection="collection:other"]');
+  await expect(other).toHaveAttribute("open", "");
+  await other.locator("summary").click();
+  await expect(other).not.toHaveAttribute("open", "");
+
+  await page.click('a[data-nav-row][data-route="user-flows/tour.html"]');
+
+  await expect(page.locator("#mb-main h2")).toHaveText("Tour");
+  await expect(page.locator('[data-filter="changed"]')).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(other).not.toHaveAttribute("open", "");
 });
 
 test("raw native links navigate from desktop, area, SVG, flow, and legacy frames", async ({

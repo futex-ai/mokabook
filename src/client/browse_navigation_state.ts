@@ -118,9 +118,8 @@ function applyGroupVisibility(doc: Document, filtering: boolean): void {
   ];
   if (filtering) {
     for (const group of groups) {
-      if (group.dataset["filterOpen"] === undefined) {
-        group.dataset["filterOpen"] = group.open ? "1" : "0";
-      }
+      if (group.dataset["filterOpen"] !== undefined) continue;
+      group.dataset["filterOpen"] = group.open ? "1" : "0";
       group.open = true;
     }
     for (const group of [...groups].reverse()) {

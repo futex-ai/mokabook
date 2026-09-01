@@ -238,7 +238,8 @@ watched reload restores the current Browse
 search, filter, disclosures,
 viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and
-Forward.
+Forward. While Changed filtering is active, route changes preserve collections
+the user collapsed and open only the destination's ancestor path.
 A rejected config or failed candidate build leaves the last-good watcher,
 output, and child active.
 
