@@ -87,6 +87,7 @@ function browseState(): BrowseRecoveryState {
     colorScheme: "dark",
     detailsOpen: true,
     drawerOpen: true,
+    filterBaselineClosedCollectionIds: ["collection:fixture"],
     navScroll: 18,
     query: "home",
     regionScrolls: { flow: 8, stage: 42 },

@@ -133,6 +133,13 @@ test("recovery state restores color scheme strictly", () => {
     parseBrowseRecoveryState({ ...snapshot(), colorScheme: "sepia" }),
     undefined,
   );
+  assert.equal(
+    parseBrowseRecoveryState({
+      ...snapshot(),
+      filterBaselineClosedCollectionIds: [4],
+    }),
+    undefined,
+  );
   const withoutScheme: Record<string, unknown> = { ...snapshot() };
   delete withoutScheme["colorScheme"];
   assert.equal(parseBrowseRecoveryState(withoutScheme), undefined);
@@ -169,6 +176,7 @@ test("recovery matches stable keys and ignores old label paths", () => {
   restoreBrowseState(doc, fakeWindow(), {
     ...snapshot(),
     closedCollectionIds: ["/Same title", "collection:alpha"],
+    filterBaselineClosedCollectionIds: ["/Same title", "collection:alpha"],
   });
 
   assert.equal(alpha.open, false);
@@ -243,6 +251,7 @@ function snapshot(): BrowseRecoveryState {
     colorScheme: "dark",
     detailsOpen: true,
     drawerOpen: false,
+    filterBaselineClosedCollectionIds: ["collection:fixture"],
     navScroll: 12,
     query: "welcome",
     regionScrolls: { stage: 42 },

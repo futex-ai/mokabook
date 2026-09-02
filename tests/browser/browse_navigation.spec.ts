@@ -15,23 +15,27 @@ test.afterAll(async () => {
   await navigation.close();
 });
 
-async function waitForCurrentFrameLoad(
+async function clickAndWaitForFrameLoad(
   page: Page,
-  selector: string,
+  frameSelector: string,
+  triggerSelector: string,
 ): Promise<void> {
-  await expect
-    .poll(() =>
-      page.locator(selector).evaluate((element: HTMLIFrameElement) => {
-        const source = element.getAttribute("src");
-        if (!source) return false;
-        const expected = new URL(source, element.ownerDocument.baseURI).href;
-        return (
-          element.contentDocument?.readyState === "complete" &&
-          element.contentWindow?.location.href === expected
-        );
-      }),
-    )
-    .toBe(true);
+  const frame = page.locator(frameSelector);
+  await frame.evaluate((element) => {
+    element.setAttribute("data-test-load-state", "pending");
+    element.addEventListener(
+      "load",
+      () => element.setAttribute("data-test-load-state", "complete"),
+      { once: true },
+    );
+  });
+  await page.click(triggerSelector);
+  await expect(frame).toHaveAttribute("data-test-load-state", "complete", {
+    timeout: 15_000,
+  });
+  await frame.evaluate((element) =>
+    element.removeAttribute("data-test-load-state"),
+  );
 }
 
 test("MockLink navigation reveals the destination and preserves shell state", async ({
@@ -39,8 +43,11 @@ test("MockLink navigation reveals the destination and preserves shell state", as
 }) => {
   await page.goto(`${navigation.url}/view/screens/home.html`);
   await page.click('[data-viewport-option="mobile"]');
-  await page.click('.mbk-topbar [data-color-scheme-option="dark"]');
-  await waitForCurrentFrameLoad(page, ".mbk-frame-mobile iframe");
+  await clickAndWaitForFrameLoad(
+    page,
+    ".mbk-frame-mobile iframe",
+    '.mbk-topbar [data-color-scheme-option="dark"]',
+  );
   const detailsPanel = page.locator("details[data-mokabook-details]");
   if ((await detailsPanel.getAttribute("open")) !== null) {
     await detailsPanel.locator("summary").click();

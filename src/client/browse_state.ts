@@ -16,6 +16,8 @@ export interface BrowseRecoveryState {
   colorScheme: BrowseColorScheme;
   detailsOpen: boolean;
   drawerOpen: boolean;
+  /** Closed collection ids from before filtering, or null without a filter. */
+  filterBaselineClosedCollectionIds: readonly string[] | null;
   navScroll: number;
   query: string;
   regionScrolls: Readonly<Record<string, number>>;
@@ -55,13 +57,21 @@ export function captureBrowseState(
 ): BrowseRecoveryState | undefined {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
   if (!shell) return undefined;
-  const viewport = currentViewport(doc);
-  const closedCollectionIds = [
+  const collections = [
     ...doc.querySelectorAll<HTMLDetailsElement>("[data-nav-collection]"),
-  ].flatMap((collection) => {
+  ];
+  const closedCollectionIds = collections.flatMap((collection) => {
     const id = collection.getAttribute("data-nav-collection");
     return !collection.open && id ? [id] : [];
   });
+  const filterBaselineClosedCollectionIds = collections.some(
+    (collection) => collection.dataset["filterOpen"] !== undefined,
+  )
+    ? collections.flatMap((collection) => {
+        const id = collection.getAttribute("data-nav-collection");
+        return collection.dataset["filterOpen"] === "0" && id ? [id] : [];
+      })
+    : null;
   return {
     changedOnly:
       doc
@@ -73,6 +83,7 @@ export function captureBrowseState(
       doc.querySelector<HTMLDetailsElement>("[data-mokabook-details]")?.open ??
       false,
     drawerOpen: shell.dataset["drawer"] === "open",
+    filterBaselineClosedCollectionIds,
     navScroll:
       doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]")?.scrollTop ??
       0,
@@ -80,7 +91,7 @@ export function captureBrowseState(
       doc.querySelector<HTMLInputElement>("[data-mokabook-search]")?.value ??
       "",
     regionScrolls: captureRegionScrolls(doc),
-    viewport,
+    viewport: currentViewport(doc),
   };
 }
 
@@ -102,11 +113,23 @@ export function restoreBrowseState(
     );
   }
   const closed = new Set(state.closedCollectionIds.filter(isNavDisclosureKey));
+  const filterBaselineClosed =
+    state.filterBaselineClosedCollectionIds === null
+      ? undefined
+      : new Set(
+          state.filterBaselineClosedCollectionIds.filter(isNavDisclosureKey),
+        );
   for (const collection of doc.querySelectorAll<HTMLDetailsElement>(
     "[data-nav-collection]",
   )) {
     const id = collection.getAttribute("data-nav-collection");
     collection.open = !id || !closed.has(id);
+    if (filterBaselineClosed) {
+      collection.dataset["filterOpen"] =
+        id && filterBaselineClosed.has(id) ? "0" : "1";
+    } else {
+      delete collection.dataset["filterOpen"];
+    }
   }
   const details = doc.querySelector<HTMLDetailsElement>(
     "[data-mokabook-details]",
@@ -127,6 +150,8 @@ export function parseBrowseRecoveryState(
 ): BrowseRecoveryState | undefined {
   if (!record(value)) return undefined;
   const colorScheme = value["colorScheme"];
+  const filterBaselineClosedCollectionIds =
+    value["filterBaselineClosedCollectionIds"];
   const viewport = value["viewport"];
   if (
     typeof value["changedOnly"] !== "boolean" ||
@@ -134,6 +159,8 @@ export function parseBrowseRecoveryState(
     (colorScheme !== "dark" && colorScheme !== "light") ||
     typeof value["detailsOpen"] !== "boolean" ||
     typeof value["drawerOpen"] !== "boolean" ||
+    (filterBaselineClosedCollectionIds !== null &&
+      !stringArray(filterBaselineClosedCollectionIds)) ||
     !nonNegativeNumber(value["navScroll"]) ||
     typeof value["query"] !== "string" ||
     !scrollRecord(value["regionScrolls"]) ||
@@ -147,6 +174,10 @@ export function parseBrowseRecoveryState(
     colorScheme,
     detailsOpen: value["detailsOpen"],
     drawerOpen: value["drawerOpen"],
+    filterBaselineClosedCollectionIds:
+      filterBaselineClosedCollectionIds === null
+        ? null
+        : [...new Set(filterBaselineClosedCollectionIds)],
     navScroll: value["navScroll"],
     query: value["query"],
     regionScrolls: { ...value["regionScrolls"] },
