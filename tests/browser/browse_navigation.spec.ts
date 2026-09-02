@@ -15,12 +15,39 @@ test.afterAll(async () => {
   await navigation.close();
 });
 
+async function clickAndWaitForFrameLoad(
+  page: Page,
+  frameSelector: string,
+  triggerSelector: string,
+): Promise<void> {
+  const frame = page.locator(frameSelector);
+  await frame.evaluate((element) => {
+    element.setAttribute("data-test-load-state", "pending");
+    element.addEventListener(
+      "load",
+      () => element.setAttribute("data-test-load-state", "complete"),
+      { once: true },
+    );
+  });
+  await page.click(triggerSelector);
+  await expect(frame).toHaveAttribute("data-test-load-state", "complete", {
+    timeout: 15_000,
+  });
+  await frame.evaluate((element) =>
+    element.removeAttribute("data-test-load-state"),
+  );
+}
+
 test("MockLink navigation reveals the destination and preserves shell state", async ({
   page,
 }) => {
   await page.goto(`${navigation.url}/view/screens/home.html`);
   await page.click('[data-viewport-option="mobile"]');
-  await page.click('.mbk-topbar [data-color-scheme-option="dark"]');
+  await clickAndWaitForFrameLoad(
+    page,
+    ".mbk-frame-mobile iframe",
+    '.mbk-topbar [data-color-scheme-option="dark"]',
+  );
   const detailsPanel = page.locator("details[data-mokabook-details]");
   if ((await detailsPanel.getAttribute("open")) !== null) {
     await detailsPanel.locator("summary").click();
@@ -97,6 +124,62 @@ test("keyboard navigation retains constraints that already show the destination"
   );
   await expect(
     page.locator('a[data-nav-row][data-route="screens/details.html"]'),
+  ).toHaveAttribute("aria-current", "page");
+});
+
+test("Changed navigation preserves collapsed unrelated groups", async ({
+  page,
+}) => {
+  await page.goto(`${navigation.url}/view/screens/home.html`);
+  await page.click('[data-filter="changed"]');
+  const other = page.locator('details[data-nav-collection="collection:other"]');
+  await expect(other).toHaveAttribute("open", "");
+  await other.locator("summary").click();
+  await expect(other).not.toHaveAttribute("open", "");
+
+  await page.click('a[data-nav-row][data-route="user-flows/tour.html"]');
+
+  await expect(page.locator("#mb-main h2")).toHaveText("Tour");
+  await expect(page.locator('[data-filter="changed"]')).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(other).not.toHaveAttribute("open", "");
+});
+
+test("editing an active filter reveals newly matching groups", async ({
+  page,
+}) => {
+  await page.goto(`${navigation.url}/view/screens/home.html`);
+  await page.click('[data-filter="changed"]');
+  const other = page.locator('details[data-nav-collection="collection:other"]');
+  await other.locator("summary").click();
+  await expect(other).not.toHaveAttribute("open", "");
+
+  await page.fill("[data-mokabook-search]", "extra");
+
+  await expect(other).toHaveAttribute("open", "");
+  await expect(
+    page.locator('a[data-nav-row][data-route="screens/extra.html"]'),
+  ).toBeVisible();
+});
+
+test("clearing filtering keeps the destination collection open", async ({
+  page,
+}) => {
+  await page.goto(`${navigation.url}/view/screens/home.html`);
+  const other = page.locator('details[data-nav-collection="collection:other"]');
+  await other.locator("summary").click();
+  await expect(other).not.toHaveAttribute("open", "");
+  await page.click('[data-filter="changed"]');
+
+  await page.click('a[data-nav-row][data-route="screens/extra.html"]');
+  await expect(page.locator("#mb-main h2")).toHaveText("Extra");
+  await page.click('[data-filter="all"]');
+
+  await expect(other).toHaveAttribute("open", "");
+  await expect(
+    page.locator('a[data-nav-row][data-route="screens/extra.html"]'),
   ).toHaveAttribute("aria-current", "page");
 });
 

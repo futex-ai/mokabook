@@ -198,7 +198,8 @@ class UnusedServerFactory implements CatalogueServerFactory {
 }
 
 async function waitFor(condition: () => boolean): Promise<void> {
-  for (let attempt = 0; attempt < 100; attempt += 1) {
+  const deadline = Date.now() + 5_000;
+  while (Date.now() < deadline) {
     if (condition()) return;
     await new Promise((resolve) => setTimeout(resolve, 10));
   }

@@ -234,11 +234,13 @@ snapshot with the versioned event stream and reload after a newer build or
 asset version arrives, including when the build completes before the initial
 stream connection. Publishing a reload-only watch update invalidates the served
 Review cache, so the reloaded Review URL regenerates before it is served. A
-watched reload restores the current Browse
-search, filter, disclosures,
-viewport, drawer, and scroll state once on the same durable URL.
+watched reload restores Browse search, filter, current and pre-filter collection
+disclosures, viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and
-Forward.
+Forward. While Changed filtering is active, route changes preserve collections
+the user collapsed and open only the destination's ancestor path. Editing the
+search or filter reveals its current matches. Clearing all filtering restores
+the earlier disclosures, except that a navigated destination's path stays open.
 A rejected config or failed candidate build leaves the last-good watcher,
 output, and child active.
 

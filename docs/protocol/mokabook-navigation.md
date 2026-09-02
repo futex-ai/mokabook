@@ -253,6 +253,15 @@ screen. Its tree retains the opened destination path for the next time it is
 opened. A user may collapse the active path afterward; the next route change
 re-establishes the invariant.
 
+Each user edit to search or the All/Changed filter opens groups to reveal the
+rows matching the updated constraints. Reapplying the same active constraints
+during a route change or watched-reload restoration must instead preserve
+groups the user subsequently collapsed; only the destination row's ancestor
+path may be reopened. Clearing every filtering constraint restores the
+disclosure state captured before filtering began, except that an ancestor
+opened for the navigated destination remains open so the active row stays
+visible.
+
 Enhanced navigation preserves the selected viewport, color scheme, and details
 disclosure. It collapses an expanded frame before installing the destination.
 Filters and search remain unchanged when the destination is already visible.

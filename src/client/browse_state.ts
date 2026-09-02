@@ -1,7 +1,10 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
 import { isNavDisclosureKey } from "./browse_navigation.js";
-import { applyNavVisibility } from "./browse_navigation_state.js";
+import {
+  applyNavVisibility,
+  selectAndRevealRoute,
+} from "./browse_navigation_state.js";
 
 /** Color scheme selection applied to fragment frames and device chrome. */
 export type BrowseColorScheme = "dark" | "light";
@@ -16,6 +19,8 @@ export interface BrowseRecoveryState {
   colorScheme: BrowseColorScheme;
   detailsOpen: boolean;
   drawerOpen: boolean;
+  /** Closed collection ids from before filtering, or null without a filter. */
+  filterBaselineClosedCollectionIds: readonly string[] | null;
   navScroll: number;
   query: string;
   regionScrolls: Readonly<Record<string, number>>;
@@ -55,13 +60,21 @@ export function captureBrowseState(
 ): BrowseRecoveryState | undefined {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
   if (!shell) return undefined;
-  const viewport = currentViewport(doc);
-  const closedCollectionIds = [
+  const collections = [
     ...doc.querySelectorAll<HTMLDetailsElement>("[data-nav-collection]"),
-  ].flatMap((collection) => {
+  ];
+  const closedCollectionIds = collections.flatMap((collection) => {
     const id = collection.getAttribute("data-nav-collection");
     return !collection.open && id ? [id] : [];
   });
+  const filterBaselineClosedCollectionIds = collections.some(
+    (collection) => collection.dataset["filterOpen"] !== undefined,
+  )
+    ? collections.flatMap((collection) => {
+        const id = collection.getAttribute("data-nav-collection");
+        return collection.dataset["filterOpen"] === "0" && id ? [id] : [];
+      })
+    : null;
   return {
     changedOnly:
       doc
@@ -73,6 +86,7 @@ export function captureBrowseState(
       doc.querySelector<HTMLDetailsElement>("[data-mokabook-details]")?.open ??
       false,
     drawerOpen: shell.dataset["drawer"] === "open",
+    filterBaselineClosedCollectionIds,
     navScroll:
       doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]")?.scrollTop ??
       0,
@@ -80,14 +94,14 @@ export function captureBrowseState(
       doc.querySelector<HTMLInputElement>("[data-mokabook-search]")?.value ??
       "",
     regionScrolls: captureRegionScrolls(doc),
-    viewport,
+    viewport: currentViewport(doc),
   };
 }
 
 /** Restore a validated Browse snapshot into server-rendered shell markup. */
 export function restoreBrowseState(
   doc: Document,
-  _win: Window & typeof globalThis,
+  win: Window & typeof globalThis,
   state: BrowseRecoveryState,
 ): void {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
@@ -102,11 +116,23 @@ export function restoreBrowseState(
     );
   }
   const closed = new Set(state.closedCollectionIds.filter(isNavDisclosureKey));
+  const filterBaselineClosed =
+    state.filterBaselineClosedCollectionIds === null
+      ? undefined
+      : new Set(
+          state.filterBaselineClosedCollectionIds.filter(isNavDisclosureKey),
+        );
   for (const collection of doc.querySelectorAll<HTMLDetailsElement>(
     "[data-nav-collection]",
   )) {
     const id = collection.getAttribute("data-nav-collection");
     collection.open = !id || !closed.has(id);
+    if (filterBaselineClosed) {
+      collection.dataset["filterOpen"] =
+        id && filterBaselineClosed.has(id) ? "0" : "1";
+    } else {
+      delete collection.dataset["filterOpen"];
+    }
   }
   const details = doc.querySelector<HTMLDetailsElement>(
     "[data-mokabook-details]",
@@ -115,7 +141,13 @@ export function restoreBrowseState(
   setDrawer(shell, state.drawerOpen);
   setViewport(doc, state.viewport);
   setColorScheme(doc, state.colorScheme);
-  applyNavVisibility(doc);
+  applyNavVisibility(doc, "preserve");
+  selectAndRevealRoute(
+    doc,
+    win.location.pathname,
+    win.location.href,
+    "recovery",
+  );
   const nav = doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]");
   if (nav) nav.scrollTop = state.navScroll;
   restoreRegionScrolls(doc, state.regionScrolls);
@@ -126,29 +158,48 @@ export function parseBrowseRecoveryState(
   value: unknown,
 ): BrowseRecoveryState | undefined {
   if (!record(value)) return undefined;
+  const changedOnly = value["changedOnly"];
   const colorScheme = value["colorScheme"];
+  const storedFilterBaselineClosedCollectionIds =
+    value["filterBaselineClosedCollectionIds"];
+  const filterBaselineClosedCollectionIds =
+    storedFilterBaselineClosedCollectionIds === undefined
+      ? null
+      : storedFilterBaselineClosedCollectionIds;
+  const query = value["query"];
   const viewport = value["viewport"];
   if (
-    typeof value["changedOnly"] !== "boolean" ||
+    typeof changedOnly !== "boolean" ||
     !stringArray(value["closedCollectionIds"]) ||
     (colorScheme !== "dark" && colorScheme !== "light") ||
     typeof value["detailsOpen"] !== "boolean" ||
     typeof value["drawerOpen"] !== "boolean" ||
     !nonNegativeNumber(value["navScroll"]) ||
-    typeof value["query"] !== "string" ||
+    typeof query !== "string" ||
     !scrollRecord(value["regionScrolls"]) ||
     (viewport !== "both" && viewport !== "desktop" && viewport !== "mobile")
   ) {
     return undefined;
   }
+  if (
+    filterBaselineClosedCollectionIds !== null &&
+    (!stringArray(filterBaselineClosedCollectionIds) ||
+      (!changedOnly && query.trim() === ""))
+  ) {
+    return undefined;
+  }
   return {
-    changedOnly: value["changedOnly"],
+    changedOnly,
     closedCollectionIds: [...new Set(value["closedCollectionIds"])],
     colorScheme,
     detailsOpen: value["detailsOpen"],
     drawerOpen: value["drawerOpen"],
+    filterBaselineClosedCollectionIds:
+      filterBaselineClosedCollectionIds === null
+        ? null
+        : [...new Set(filterBaselineClosedCollectionIds)],
     navScroll: value["navScroll"],
-    query: value["query"],
+    query,
     regionScrolls: { ...value["regionScrolls"] },
     viewport,
   };

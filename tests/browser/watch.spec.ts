@@ -71,7 +71,19 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   });
   await page.goto(`${url}/view/screens/home.html`);
   await expect(page.locator("#mb-main h2")).toHaveText("Home");
-  await page.fill("[data-mokabook-search]", "home");
+  const screens = page.locator(
+    'details[data-nav-collection="collection:screens"]',
+  );
+  const archive = page.locator(
+    'details[data-nav-collection="collection:archive"]',
+  );
+  await expect(screens).toHaveAttribute("open", "");
+  await screens.locator("summary").click();
+  await expect(screens).not.toHaveAttribute("open", "");
+  await expect(archive).not.toHaveAttribute("open", "");
+  await page.fill("[data-mokabook-search]", "html");
+  await expect(screens).toHaveAttribute("open", "");
+  await expect(archive).toHaveAttribute("open", "");
   await page.click('[data-viewport-option="mobile"]');
   await page.click(
     '.mbk-topbar [data-mokabook-schemeswitch] [data-color-scheme-option="dark"]',
@@ -111,7 +123,9 @@ test("watched serve rebuilds and reloads after an authored change", async ({
       .locator('[data-watch-version="2"]'),
   ).toHaveText("Reloaded", { timeout: 45_000 });
   await expect(page.locator("#mb-main h2")).toHaveText("Home");
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("home");
+  await expect(page.locator("[data-mokabook-search]")).toHaveValue("html");
+  await expect(screens).toHaveAttribute("open", "");
+  await expect(archive).toHaveAttribute("open", "");
   await expect(page.locator(".mbk-frame-mobile")).toBeVisible();
   await expect(page.locator(".mbk-frame-desktop")).toBeHidden();
   await expect(page.locator("body")).toHaveAttribute(
@@ -135,6 +149,42 @@ test("watched serve rebuilds and reloads after an authored change", async ({
     "data-drawer",
     "open",
   );
+  await page.fill("[data-mokabook-search]", "");
+  await expect(screens).not.toHaveAttribute("open", "");
+  await expect(archive).not.toHaveAttribute("open", "");
+});
+
+test("watched reload reopens collapsed active route ancestry", async ({
+  page,
+}) => {
+  await page.goto(`${url}/view/screens/home.html`);
+  const screens = page.locator(
+    'details[data-nav-collection="collection:screens"]',
+  );
+  await expect(screens).toHaveAttribute("open", "");
+  await screens.locator("summary").click();
+  await expect(screens).not.toHaveAttribute("open", "");
+  await page.fill("[data-mokabook-search]", "html");
+  await expect(screens).toHaveAttribute("open", "");
+  await screens.locator("summary").click();
+  await expect(screens).not.toHaveAttribute("open", "");
+
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    reparentedEntrySource("screens", {
+      body: '<a href="mock:details">Details</a><p data-watch-version="3">Active route</p>',
+    }),
+  );
+
+  await expect(
+    page
+      .frameLocator(".mbk-frame-mobile iframe")
+      .locator('[data-watch-version="3"]'),
+  ).toHaveText("Active route", { timeout: 45_000 });
+  await expect(page.locator("[data-mokabook-search]")).toHaveValue("html");
+  await expect(screens).toHaveAttribute("open", "");
+  await page.fill("[data-mokabook-search]", "");
+  await expect(screens).toHaveAttribute("open", "");
 });
 
 test("watched reparenting moves navigation and crumbs together", async ({
@@ -162,6 +212,7 @@ test("watched reparenting moves navigation and crumbs together", async ({
   await expect(
     archive.locator('a[data-route="screens/home.html"]'),
   ).toHaveAttribute("aria-current", "page");
+  await expect(archive).toHaveAttribute("open", "");
   await expect(
     screens.locator('a[data-route="screens/home.html"]'),
   ).toHaveCount(0);

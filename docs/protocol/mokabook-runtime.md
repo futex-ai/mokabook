@@ -193,17 +193,20 @@ that would hide it, and scrolls it into view. The complete target,
 portable-link, safe-degradation,
 sandbox, fragment, and active-tree behavior is defined by the
 [catalogue navigation contract](./mokabook-navigation.md).
-Search, disclosure, filters, and catalogue scroll remain mounted; searching
-temporarily force-opens navigation groups and restores their prior disclosure
-when cleared. Navigation groups and the details inspector retain explicit
-disclosure choices across in-shell navigation, durable navigation, and browser
-reloads for that origin. Unavailable or malformed browser storage leaves the
-server-rendered default intact; the latest choice still survives in-shell
-navigation when writes fail. The browser-frame expand toggle overlays one
-frame at a time and collapses on Escape, on an outside click, and on route
-navigation. Clicking a screen or use-case ID chip labelled `#<id>` copies the
-unprefixed ID without navigating. Clicking a frame address copies it to the
-clipboard.
+Search, disclosure, filters, and catalogue scroll remain mounted. Each user
+edit to search or the All/Changed filter opens groups to reveal its current
+matches. Route changes and watched-reload restoration during active filtering
+preserve groups the user subsequently collapsed, except for the destination's
+ancestor path. Clearing all filtering restores the earlier disclosure state,
+but a destination path opened by navigation stays open. Navigation groups and
+the details inspector retain explicit disclosure choices across in-shell navigation,
+durable navigation, and browser reloads for that origin. Unavailable or
+malformed browser storage leaves the server-rendered default intact; the latest
+choice still survives in-shell navigation when writes fail. The browser-frame
+expand toggle overlays one frame at a time and collapses on Escape, on an
+outside click, and on route navigation. Clicking a screen or use-case ID chip
+labelled `#<id>` copies the unprefixed ID without navigating. Clicking a frame
+address copies it to the clipboard.
 
 The shell scrolls inside its stage, flow, and embed regions rather than the
 document. Back and Forward restore the matching route and that history entry's
@@ -282,11 +285,18 @@ Rebuilds are debounced and transactional. A failed rebuild keeps the last-good
 server and output, reports the error, and waits for another authored change. A
 successful rebuild or healthy restart publishes a new update version. Browsers
 reload their current durable URL and restore search, changed-only selection,
-collection and details disclosure, viewport and color-scheme selection,
-responsive drawer, catalogue scroll, and per-region stage scroll once. Recovery
-is strictly parsed, applies only when its durable URL exactly matches the
-reloaded page, and is removed before application; a later manual refresh cannot
-resurrect stale state.
+current collection disclosure, the disclosure baseline captured before active
+filtering, details disclosure, viewport and color-scheme selection, responsive
+drawer, catalogue scroll, and per-region stage scroll once. Recovery is strictly
+parsed with one compatibility rule: a payload from before filter-baseline
+capture treats that missing baseline as unavailable while restoring its other
+valid state. Browse applies durable preferences and initial active-route
+selection before one-shot recovery. It then re-establishes active-route
+visibility, promoting a recovered pre-filter baseline only when a closed
+ancestor must be opened. A non-null baseline without active search or Changed
+filtering is invalid. Recovery applies only when its durable URL exactly matches
+the reloaded page and is removed before application; a later manual refresh
+cannot resurrect stale state.
 
 When an authored rebuild reparents an entry, the new manifest relationships
 move its navigation row and ancestor crumbs in the same reload. Disclosure

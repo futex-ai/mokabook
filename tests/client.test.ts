@@ -63,6 +63,12 @@ test("a ready version newer than the served page reloads immediately", () => {
 
 test("Browse recovery parsing rejects malformed session state", () => {
   assert.deepEqual(parseBrowseRecoveryState(browseState()), browseState());
+  const legacyState: Record<string, unknown> = { ...browseState() };
+  delete legacyState["filterBaselineClosedCollectionIds"];
+  assert.deepEqual(parseBrowseRecoveryState(legacyState), {
+    ...browseState(),
+    filterBaselineClosedCollectionIds: null,
+  });
   assert.equal(
     parseBrowseRecoveryState({ ...browseState(), viewport: "tablet" }),
     undefined,
@@ -78,6 +84,15 @@ test("Browse recovery parsing rejects malformed session state", () => {
     parseBrowseRecoveryState({ ...browseState(), regionScrolls: [4] }),
     undefined,
   );
+  assert.equal(
+    parseBrowseRecoveryState({
+      ...browseState(),
+      changedOnly: false,
+      filterBaselineClosedCollectionIds: [],
+      query: "",
+    }),
+    undefined,
+  );
 });
 
 function browseState(): BrowseRecoveryState {
@@ -87,6 +102,7 @@ function browseState(): BrowseRecoveryState {
     colorScheme: "dark",
     detailsOpen: true,
     drawerOpen: true,
+    filterBaselineClosedCollectionIds: ["collection:fixture"],
     navScroll: 18,
     query: "home",
     regionScrolls: { flow: 8, stage: 42 },

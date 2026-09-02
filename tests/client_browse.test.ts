@@ -133,6 +133,13 @@ test("recovery state restores color scheme strictly", () => {
     parseBrowseRecoveryState({ ...snapshot(), colorScheme: "sepia" }),
     undefined,
   );
+  assert.equal(
+    parseBrowseRecoveryState({
+      ...snapshot(),
+      filterBaselineClosedCollectionIds: [4],
+    }),
+    undefined,
+  );
   const withoutScheme: Record<string, unknown> = { ...snapshot() };
   delete withoutScheme["colorScheme"];
   assert.equal(parseBrowseRecoveryState(withoutScheme), undefined);
@@ -169,6 +176,7 @@ test("recovery matches stable keys and ignores old label paths", () => {
   restoreBrowseState(doc, fakeWindow(), {
     ...snapshot(),
     closedCollectionIds: ["/Same title", "collection:alpha"],
+    filterBaselineClosedCollectionIds: ["/Same title", "collection:alpha"],
   });
 
   assert.equal(alpha.open, false);
@@ -243,6 +251,7 @@ function snapshot(): BrowseRecoveryState {
     colorScheme: "dark",
     detailsOpen: true,
     drawerOpen: false,
+    filterBaselineClosedCollectionIds: ["collection:fixture"],
     navScroll: 12,
     query: "welcome",
     regionScrolls: { stage: 42 },
@@ -255,7 +264,12 @@ function asDocument(doc: FakeDocument): Document {
 }
 
 function fakeWindow(): Window & typeof globalThis {
-  return {} as unknown as Window & typeof globalThis;
+  return {
+    location: {
+      href: "http://127.0.0.1:4173/view/screens/welcome.html",
+      pathname: "/view/screens/welcome.html",
+    },
+  } as unknown as Window & typeof globalThis;
 }
 
 const SELECTOR = /^(?<tag>[a-z]*)\[(?<name>[a-z-]+)(?:="(?<value>[^"]*)")?\]$/;
