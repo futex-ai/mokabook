@@ -26,6 +26,16 @@ test("every served document loads the browser update client", async (context) =>
       route,
     );
   }
+  const browseDocument = await (
+    await fetch(`${server.url}/view/screens/home.html`)
+  ).text();
+  const browseClient = browseDocument.indexOf(
+    '<script src="/__mokabook/client/browse.js" type="module"></script>',
+  );
+  const updateClient = browseDocument.indexOf(
+    '<script src="/__mokabook/client/browser.js" type="module"></script>',
+  );
+  assert.ok(browseClient >= 0 && browseClient < updateClient);
   const browser = await fetch(`${server.url}/__mokabook/client/browser.js`);
   assert.equal(browser.status, 200);
   assert.match(browser.headers.get("content-type") ?? "", /javascript/);

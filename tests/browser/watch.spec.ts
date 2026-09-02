@@ -71,11 +71,18 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   });
   await page.goto(`${url}/view/screens/home.html`);
   await expect(page.locator("#mb-main h2")).toHaveText("Home");
+  const screens = page.locator(
+    'details[data-nav-collection="collection:screens"]',
+  );
   const archive = page.locator(
     'details[data-nav-collection="collection:archive"]',
   );
+  await expect(screens).toHaveAttribute("open", "");
+  await screens.locator("summary").click();
+  await expect(screens).not.toHaveAttribute("open", "");
   await expect(archive).not.toHaveAttribute("open", "");
   await page.fill("[data-mokabook-search]", "html");
+  await expect(screens).toHaveAttribute("open", "");
   await expect(archive).toHaveAttribute("open", "");
   await page.click('[data-viewport-option="mobile"]');
   await page.click(
@@ -117,6 +124,8 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   ).toHaveText("Reloaded", { timeout: 45_000 });
   await expect(page.locator("#mb-main h2")).toHaveText("Home");
   await expect(page.locator("[data-mokabook-search]")).toHaveValue("html");
+  await expect(screens).toHaveAttribute("open", "");
+  await expect(archive).toHaveAttribute("open", "");
   await expect(page.locator(".mbk-frame-mobile")).toBeVisible();
   await expect(page.locator(".mbk-frame-desktop")).toBeHidden();
   await expect(page.locator("body")).toHaveAttribute(
@@ -141,6 +150,7 @@ test("watched serve rebuilds and reloads after an authored change", async ({
     "open",
   );
   await page.fill("[data-mokabook-search]", "");
+  await expect(screens).not.toHaveAttribute("open", "");
   await expect(archive).not.toHaveAttribute("open", "");
 });
 
