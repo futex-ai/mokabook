@@ -264,7 +264,12 @@ function asDocument(doc: FakeDocument): Document {
 }
 
 function fakeWindow(): Window & typeof globalThis {
-  return {} as unknown as Window & typeof globalThis;
+  return {
+    location: {
+      href: "http://127.0.0.1:4173/view/screens/welcome.html",
+      pathname: "/view/screens/welcome.html",
+    },
+  } as unknown as Window & typeof globalThis;
 }
 
 const SELECTOR = /^(?<tag>[a-z]*)\[(?<name>[a-z-]+)(?:="(?<value>[^"]*)")?\]$/;

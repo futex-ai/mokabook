@@ -154,6 +154,39 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   await expect(archive).not.toHaveAttribute("open", "");
 });
 
+test("watched reload reopens collapsed active route ancestry", async ({
+  page,
+}) => {
+  await page.goto(`${url}/view/screens/home.html`);
+  const screens = page.locator(
+    'details[data-nav-collection="collection:screens"]',
+  );
+  await expect(screens).toHaveAttribute("open", "");
+  await screens.locator("summary").click();
+  await expect(screens).not.toHaveAttribute("open", "");
+  await page.fill("[data-mokabook-search]", "html");
+  await expect(screens).toHaveAttribute("open", "");
+  await screens.locator("summary").click();
+  await expect(screens).not.toHaveAttribute("open", "");
+
+  await fs.promises.writeFile(
+    fixture.entryPath,
+    reparentedEntrySource("screens", {
+      body: '<a href="mock:details">Details</a><p data-watch-version="3">Active route</p>',
+    }),
+  );
+
+  await expect(
+    page
+      .frameLocator(".mbk-frame-mobile iframe")
+      .locator('[data-watch-version="3"]'),
+  ).toHaveText("Active route", { timeout: 45_000 });
+  await expect(page.locator("[data-mokabook-search]")).toHaveValue("html");
+  await expect(screens).toHaveAttribute("open", "");
+  await page.fill("[data-mokabook-search]", "");
+  await expect(screens).toHaveAttribute("open", "");
+});
+
 test("watched reparenting moves navigation and crumbs together", async ({
   page,
 }) => {
@@ -179,6 +212,7 @@ test("watched reparenting moves navigation and crumbs together", async ({
   await expect(
     archive.locator('a[data-route="screens/home.html"]'),
   ).toHaveAttribute("aria-current", "page");
+  await expect(archive).toHaveAttribute("open", "");
   await expect(
     screens.locator('a[data-route="screens/home.html"]'),
   ).toHaveCount(0);

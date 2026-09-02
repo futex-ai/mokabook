@@ -84,6 +84,15 @@ test("Browse recovery parsing rejects malformed session state", () => {
     parseBrowseRecoveryState({ ...browseState(), regionScrolls: [4] }),
     undefined,
   );
+  assert.equal(
+    parseBrowseRecoveryState({
+      ...browseState(),
+      changedOnly: false,
+      filterBaselineClosedCollectionIds: [],
+      query: "",
+    }),
+    undefined,
+  );
 });
 
 function browseState(): BrowseRecoveryState {

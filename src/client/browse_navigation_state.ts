@@ -18,6 +18,9 @@ export interface NavigationConstraintChanges {
 /** How a visibility update should affect navigation-group disclosure. */
 export type NavigationDisclosurePolicy = "preserve" | "reveal-matches";
 
+/** Why the active route's navigation path is being revealed. */
+export type NavigationRevealCause = "navigation" | "recovery";
+
 /** Determine which user constraints actually hide a destination. */
 export function navigationConstraintChanges(
   facts: NavigationConstraintFacts,
@@ -64,6 +67,7 @@ export function selectAndRevealRoute(
   doc: Document,
   pathname: string,
   baseHref: string,
+  cause: NavigationRevealCause,
 ): HTMLAnchorElement | undefined {
   const rows = [...doc.querySelectorAll<HTMLAnchorElement>("a[data-nav-row]")];
   let active: HTMLAnchorElement | undefined;
@@ -105,8 +109,12 @@ export function selectAndRevealRoute(
     "details[data-nav-collection]",
   );
   while (ancestor) {
+    const wasOpen = ancestor.open;
     ancestor.open = true;
-    if (ancestor.dataset["filterOpen"] !== undefined) {
+    if (
+      ancestor.dataset["filterOpen"] !== undefined &&
+      (cause === "navigation" || !wasOpen)
+    ) {
       ancestor.dataset["filterOpen"] = "1";
     }
     ancestor =

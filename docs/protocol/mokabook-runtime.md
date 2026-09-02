@@ -291,10 +291,12 @@ drawer, catalogue scroll, and per-region stage scroll once. Recovery is strictly
 parsed with one compatibility rule: a payload from before filter-baseline
 capture treats that missing baseline as unavailable while restoring its other
 valid state. Browse applies durable preferences and initial active-route
-selection before one-shot recovery, making both recovered current disclosure
-and its pre-filter baseline authoritative. Recovery applies only when its
-durable URL exactly matches the reloaded page and is removed before application;
-a later manual refresh cannot resurrect stale state.
+selection before one-shot recovery. It then re-establishes active-route
+visibility, promoting a recovered pre-filter baseline only when a closed
+ancestor must be opened. A non-null baseline without active search or Changed
+filtering is invalid. Recovery applies only when its durable URL exactly matches
+the reloaded page and is removed before application; a later manual refresh
+cannot resurrect stale state.
 
 When an authored rebuild reparents an entry, the new manifest relationships
 move its navigation row and ancestor crumbs in the same reload. Disclosure

@@ -1,7 +1,10 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
 import { isNavDisclosureKey } from "./browse_navigation.js";
-import { applyNavVisibility } from "./browse_navigation_state.js";
+import {
+  applyNavVisibility,
+  selectAndRevealRoute,
+} from "./browse_navigation_state.js";
 
 /** Color scheme selection applied to fragment frames and device chrome. */
 export type BrowseColorScheme = "dark" | "light";
@@ -98,7 +101,7 @@ export function captureBrowseState(
 /** Restore a validated Browse snapshot into server-rendered shell markup. */
 export function restoreBrowseState(
   doc: Document,
-  _win: Window & typeof globalThis,
+  win: Window & typeof globalThis,
   state: BrowseRecoveryState,
 ): void {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
@@ -139,6 +142,12 @@ export function restoreBrowseState(
   setViewport(doc, state.viewport);
   setColorScheme(doc, state.colorScheme);
   applyNavVisibility(doc, "preserve");
+  selectAndRevealRoute(
+    doc,
+    win.location.pathname,
+    win.location.href,
+    "recovery",
+  );
   const nav = doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]");
   if (nav) nav.scrollTop = state.navScroll;
   restoreRegionScrolls(doc, state.regionScrolls);
@@ -149,6 +158,7 @@ export function parseBrowseRecoveryState(
   value: unknown,
 ): BrowseRecoveryState | undefined {
   if (!record(value)) return undefined;
+  const changedOnly = value["changedOnly"];
   const colorScheme = value["colorScheme"];
   const storedFilterBaselineClosedCollectionIds =
     value["filterBaselineClosedCollectionIds"];
@@ -156,24 +166,30 @@ export function parseBrowseRecoveryState(
     storedFilterBaselineClosedCollectionIds === undefined
       ? null
       : storedFilterBaselineClosedCollectionIds;
+  const query = value["query"];
   const viewport = value["viewport"];
   if (
-    typeof value["changedOnly"] !== "boolean" ||
+    typeof changedOnly !== "boolean" ||
     !stringArray(value["closedCollectionIds"]) ||
     (colorScheme !== "dark" && colorScheme !== "light") ||
     typeof value["detailsOpen"] !== "boolean" ||
     typeof value["drawerOpen"] !== "boolean" ||
-    (filterBaselineClosedCollectionIds !== null &&
-      !stringArray(filterBaselineClosedCollectionIds)) ||
     !nonNegativeNumber(value["navScroll"]) ||
-    typeof value["query"] !== "string" ||
+    typeof query !== "string" ||
     !scrollRecord(value["regionScrolls"]) ||
     (viewport !== "both" && viewport !== "desktop" && viewport !== "mobile")
   ) {
     return undefined;
   }
+  if (
+    filterBaselineClosedCollectionIds !== null &&
+    (!stringArray(filterBaselineClosedCollectionIds) ||
+      (!changedOnly && query.trim() === ""))
+  ) {
+    return undefined;
+  }
   return {
-    changedOnly: value["changedOnly"],
+    changedOnly,
     closedCollectionIds: [...new Set(value["closedCollectionIds"])],
     colorScheme,
     detailsOpen: value["detailsOpen"],
@@ -183,7 +199,7 @@ export function parseBrowseRecoveryState(
         ? null
         : [...new Set(filterBaselineClosedCollectionIds)],
     navScroll: value["navScroll"],
-    query: value["query"],
+    query,
     regionScrolls: { ...value["regionScrolls"] },
     viewport,
   };
