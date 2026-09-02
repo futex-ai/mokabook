@@ -239,7 +239,9 @@ search, filter, disclosures,
 viewport, drawer, and scroll state once on the same durable URL.
 Browse also retains each history entry's latest document position for Back and
 Forward. While Changed filtering is active, route changes preserve collections
-the user collapsed and open only the destination's ancestor path.
+the user collapsed and open only the destination's ancestor path. Editing the
+search or filter reveals its current matches. Clearing all filtering restores
+the earlier disclosures, except that a navigated destination's path stays open.
 A rejected config or failed candidate build leaves the last-good watcher,
 output, and child active.
 

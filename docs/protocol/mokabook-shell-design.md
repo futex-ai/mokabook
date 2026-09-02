@@ -113,7 +113,9 @@ scrollable region scrolls internally:
     row's path and scrolls that row into view. Search and Changed filtering may
     stay selected only while the active row remains visible. Reapplying an
     active filter during navigation preserves collapsed groups outside the
-    destination path.
+    destination path, while editing the search or filter opens groups to reveal
+    current matches. Clearing filtering restores earlier disclosures except
+    for a destination path opened by navigation.
 - **Screen head** — surface band with the breadcrumb trail (11.5px, `›`
   separators; ancestor crumbs that resolve to a viewable route are links) and
   a title row: 19px heading plus a monospace ID button labelled `#<id>`. The

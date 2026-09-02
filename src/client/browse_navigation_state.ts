@@ -15,6 +15,9 @@ export interface NavigationConstraintChanges {
   showAll: boolean;
 }
 
+/** How a visibility update should affect navigation-group disclosure. */
+export type NavigationDisclosurePolicy = "preserve" | "reveal-matches";
+
 /** Determine which user constraints actually hide a destination. */
 export function navigationConstraintChanges(
   facts: NavigationConstraintFacts,
@@ -30,8 +33,11 @@ export function navigationConstraintChanges(
   };
 }
 
-/** Apply the current search and changed-only controls to navigation rows. */
-export function applyNavVisibility(doc: Document): void {
+/** Apply the current navigation controls with an explicit disclosure policy. */
+export function applyNavVisibility(
+  doc: Document,
+  disclosure: NavigationDisclosurePolicy,
+): void {
   const query =
     doc
       .querySelector<HTMLInputElement>("[data-mokabook-search]")
@@ -50,7 +56,7 @@ export function applyNavVisibility(doc: Document): void {
       !changedOnly || row.getAttribute("data-changed") === "true";
     row.hidden = !(matchesQuery && matchesFilter);
   }
-  applyGroupVisibility(doc, query !== "" || changedOnly);
+  applyGroupVisibility(doc, query !== "" || changedOnly, disclosure);
 }
 
 /** Select one route and disclose, reveal, and scroll its catalogue row. */
@@ -94,7 +100,7 @@ export function selectAndRevealRoute(
       );
     }
   }
-  applyNavVisibility(doc);
+  applyNavVisibility(doc, "preserve");
   let ancestor = active.closest<HTMLDetailsElement>(
     "details[data-nav-collection]",
   );
@@ -112,15 +118,20 @@ export function selectAndRevealRoute(
   return active;
 }
 
-function applyGroupVisibility(doc: Document, filtering: boolean): void {
+function applyGroupVisibility(
+  doc: Document,
+  filtering: boolean,
+  disclosure: NavigationDisclosurePolicy,
+): void {
   const groups = [
     ...doc.querySelectorAll<HTMLDetailsElement>("details[data-nav-collection]"),
   ];
   if (filtering) {
     for (const group of groups) {
-      if (group.dataset["filterOpen"] !== undefined) continue;
-      group.dataset["filterOpen"] = group.open ? "1" : "0";
-      group.open = true;
+      if (group.dataset["filterOpen"] === undefined) {
+        group.dataset["filterOpen"] = group.open ? "1" : "0";
+      }
+      if (disclosure === "reveal-matches") group.open = true;
     }
     for (const group of [...groups].reverse()) {
       const visible = [

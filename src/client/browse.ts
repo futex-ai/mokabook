@@ -219,7 +219,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
           "aria-pressed",
           option === filterButton ? "true" : "false",
         );
-      applyNavVisibility(doc);
+      applyNavVisibility(doc, "reveal-matches");
       return;
     }
     if (handleFrameClick(doc, target)) {
@@ -257,7 +257,8 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
 
   doc.addEventListener("input", (event) => {
     const target = event.target instanceof Element ? event.target : undefined;
-    if (target?.matches("[data-mokabook-search]")) applyNavVisibility(doc);
+    if (target?.matches("[data-mokabook-search]"))
+      applyNavVisibility(doc, "reveal-matches");
   });
 
   doc.addEventListener(

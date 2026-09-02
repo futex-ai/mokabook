@@ -115,7 +115,7 @@ export function restoreBrowseState(
   setDrawer(shell, state.drawerOpen);
   setViewport(doc, state.viewport);
   setColorScheme(doc, state.colorScheme);
-  applyNavVisibility(doc);
+  applyNavVisibility(doc, "preserve");
   const nav = doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]");
   if (nav) nav.scrollTop = state.navScroll;
   restoreRegionScrolls(doc, state.regionScrolls);

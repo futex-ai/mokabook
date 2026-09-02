@@ -140,6 +140,42 @@ test("Changed navigation preserves collapsed unrelated groups", async ({
   await expect(other).not.toHaveAttribute("open", "");
 });
 
+test("editing an active filter reveals newly matching groups", async ({
+  page,
+}) => {
+  await page.goto(`${navigation.url}/view/screens/home.html`);
+  await page.click('[data-filter="changed"]');
+  const other = page.locator('details[data-nav-collection="collection:other"]');
+  await other.locator("summary").click();
+  await expect(other).not.toHaveAttribute("open", "");
+
+  await page.fill("[data-mokabook-search]", "extra");
+
+  await expect(other).toHaveAttribute("open", "");
+  await expect(
+    page.locator('a[data-nav-row][data-route="screens/extra.html"]'),
+  ).toBeVisible();
+});
+
+test("clearing filtering keeps the destination collection open", async ({
+  page,
+}) => {
+  await page.goto(`${navigation.url}/view/screens/home.html`);
+  const other = page.locator('details[data-nav-collection="collection:other"]');
+  await other.locator("summary").click();
+  await expect(other).not.toHaveAttribute("open", "");
+  await page.click('[data-filter="changed"]');
+
+  await page.click('a[data-nav-row][data-route="screens/extra.html"]');
+  await expect(page.locator("#mb-main h2")).toHaveText("Extra");
+  await page.click('[data-filter="all"]');
+
+  await expect(other).toHaveAttribute("open", "");
+  await expect(
+    page.locator('a[data-nav-row][data-route="screens/extra.html"]'),
+  ).toHaveAttribute("aria-current", "page");
+});
+
 test("raw native links navigate from desktop, area, SVG, flow, and legacy frames", async ({
   page,
 }) => {

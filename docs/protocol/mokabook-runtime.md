@@ -193,12 +193,13 @@ that would hide it, and scrolls it into view. The complete target,
 portable-link, safe-degradation,
 sandbox, fragment, and active-tree behavior is defined by the
 [catalogue navigation contract](./mokabook-navigation.md).
-Search, disclosure, filters, and catalogue scroll remain mounted. Entering
-search or Changed filtering force-opens navigation groups once and restores
-their prior disclosure when all filtering clears. Route changes during that
-active filtering state preserve groups the user subsequently collapsed, except
-for the destination's ancestor path. Navigation groups and the details
-inspector retain explicit disclosure choices across in-shell navigation,
+Search, disclosure, filters, and catalogue scroll remain mounted. Each user
+edit to search or the All/Changed filter opens groups to reveal its current
+matches. Route changes and watched-reload restoration during active filtering
+preserve groups the user subsequently collapsed, except for the destination's
+ancestor path. Clearing all filtering restores the earlier disclosure state,
+but a destination path opened by navigation stays open. Navigation groups and
+the details inspector retain explicit disclosure choices across in-shell navigation,
 durable navigation, and browser reloads for that origin. Unavailable or
 malformed browser storage leaves the server-rendered default intact; the latest
 choice still survives in-shell navigation when writes fail. The browser-frame
