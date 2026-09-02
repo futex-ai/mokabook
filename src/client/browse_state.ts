@@ -150,8 +150,12 @@ export function parseBrowseRecoveryState(
 ): BrowseRecoveryState | undefined {
   if (!record(value)) return undefined;
   const colorScheme = value["colorScheme"];
-  const filterBaselineClosedCollectionIds =
+  const storedFilterBaselineClosedCollectionIds =
     value["filterBaselineClosedCollectionIds"];
+  const filterBaselineClosedCollectionIds =
+    storedFilterBaselineClosedCollectionIds === undefined
+      ? null
+      : storedFilterBaselineClosedCollectionIds;
   const viewport = value["viewport"];
   if (
     typeof value["changedOnly"] !== "boolean" ||

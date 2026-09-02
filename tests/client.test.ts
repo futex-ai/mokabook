@@ -63,6 +63,12 @@ test("a ready version newer than the served page reloads immediately", () => {
 
 test("Browse recovery parsing rejects malformed session state", () => {
   assert.deepEqual(parseBrowseRecoveryState(browseState()), browseState());
+  const legacyState: Record<string, unknown> = { ...browseState() };
+  delete legacyState["filterBaselineClosedCollectionIds"];
+  assert.deepEqual(parseBrowseRecoveryState(legacyState), {
+    ...browseState(),
+    filterBaselineClosedCollectionIds: null,
+  });
   assert.equal(
     parseBrowseRecoveryState({ ...browseState(), viewport: "tablet" }),
     undefined,

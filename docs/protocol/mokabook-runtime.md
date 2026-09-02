@@ -288,9 +288,11 @@ reload their current durable URL and restore search, changed-only selection,
 current collection disclosure, the disclosure baseline captured before active
 filtering, details disclosure, viewport and color-scheme selection, responsive
 drawer, catalogue scroll, and per-region stage scroll once. Recovery is strictly
-parsed, applies only when its durable URL exactly matches the reloaded page, and
-is removed before application; a later manual refresh cannot resurrect stale
-state.
+parsed with one compatibility rule: a payload from before filter-baseline
+capture treats that missing baseline as unavailable while restoring its other
+valid state. Recovery applies only when its durable URL exactly matches the
+reloaded page and is removed before application; a later manual refresh cannot
+resurrect stale state.
 
 When an authored rebuild reparents an entry, the new manifest relationships
 move its navigation row and ancestor crumbs in the same reload. Disclosure
