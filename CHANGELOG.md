@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/futex-ai/mokabook/compare/v0.6.0...v0.6.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **browse:** preserve collapsed groups across navigation ([#35](https://github.com/futex-ai/mokabook/issues/35)) ([ef66bf2](https://github.com/futex-ai/mokabook/commit/ef66bf219e7a846f5660f55ef6359ae0d07d5823))
+
 ## [0.6.0](https://github.com/futex-ai/mokabook/compare/v0.5.1...v0.6.0) (2026-08-26)
 
 
