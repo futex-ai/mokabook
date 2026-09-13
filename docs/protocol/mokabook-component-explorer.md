@@ -10,11 +10,13 @@ and [component design catalogue](./mokabook-component-design.md).
 
 ## Catalogue And Component Pages
 
-Components are a distinct entry kind in the existing navigation tree, with a
-component icon and the same All/Changes filter, count, search, tags, breadcrumbs,
-id chip, and responsive navigation. Collection membership remains the hierarchy;
-a separate explorer application or automatically invented Components folder is
-not required. The example catalogue should provide an authored Components group.
+Components are a distinct entry kind in a dedicated collapsible Components
+section, with a component icon and the same All/Changes filter, count, search,
+tags, breadcrumbs, id chip, and responsive navigation. Screens, whole-document
+pages, and use cases stay in the sibling Pages section. Collection membership
+remains the hierarchy within both projections; a separate explorer application
+or automatically invented Components folder is not required. The example
+catalogue still provides its authored Components group.
 
 A component page contains its title, description, selected saved variant,
 preview canvas, grouped view controls, eligible comparison controls, and an icon inspector.

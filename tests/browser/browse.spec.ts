@@ -103,6 +103,34 @@ test("durable links load complete server-rendered views", async ({ page }) => {
   );
 });
 
+test("catalogue separates pages and components into collapsible sections", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const pages = page.locator('[data-nav-section="pages"]');
+  const components = page.locator('[data-nav-section="components"]');
+  await expect(pages.locator(":scope > summary")).toHaveText("Pages");
+  await expect(components.locator(":scope > summary")).toHaveText("Components");
+  await expect(pages).toHaveAttribute("open", "");
+  await expect(components).toHaveAttribute("open", "");
+  await expect(pages.locator('[data-entry-kind="component"]')).toHaveCount(0);
+  await expect(
+    components.locator(':not([data-entry-kind="component"])[data-nav-row]'),
+  ).toHaveCount(0);
+  expect(await pages.locator("[data-nav-row]").count()).toBeGreaterThan(0);
+  expect(await components.locator("[data-nav-row]").count()).toBeGreaterThan(0);
+
+  await components.locator(":scope > summary").click();
+  await expect(components).not.toHaveAttribute("open", "");
+  await page.reload();
+  await expect(pages).toHaveAttribute("open", "");
+  await expect(components).not.toHaveAttribute("open", "");
+
+  await page.getByRole("button", { name: "Collapse all" }).click();
+  await expect(pages).not.toHaveAttribute("open", "");
+  await expect(components).not.toHaveAttribute("open", "");
+});
+
 test("progressive navigation swaps the main view without reloads", async ({
   page,
 }) => {

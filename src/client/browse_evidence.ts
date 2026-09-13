@@ -38,7 +38,12 @@ export function applyNavigationEvidence(doc: Document, next: Document): void {
     if (row.hasAttribute("data-nav-removed")) {
       removed.set(row.getAttribute("href"), row);
       copyChildren(row, replacement);
-      for (const name of ["data-tags", "data-entry-id", "data-removed-page"]) {
+      for (const name of [
+        "data-tags",
+        "data-entry-id",
+        "data-entry-kind",
+        "data-removed-page",
+      ]) {
         const value = replacement.getAttribute(name);
         if (value === null) row.removeAttribute(name);
         else row.setAttribute(name, value);
@@ -46,18 +51,73 @@ export function applyNavigationEvidence(doc: Document, next: Document): void {
     }
     nextRows.delete(row.getAttribute("href"));
   }
-  let following: ChildNode | null = null;
-  for (const row of [
-    ...next.querySelectorAll<HTMLAnchorElement>("a[data-nav-removed]"),
-  ].reverse()) {
-    const retained =
-      removed.get(row.getAttribute("href")) ?? doc.importNode(row, true);
-    if (retained.parentElement !== tree || retained.nextSibling !== following)
-      tree?.insertBefore(retained, following);
-    following = retained;
-  }
+  reconcileRemovedRows(doc, next, tree, removed);
   applyNavVisibility(doc, "preserve");
   if (tree) tree.scrollTop = scroll;
+}
+
+function reconcileRemovedRows(
+  doc: Document,
+  next: Document,
+  tree: HTMLElement | null,
+  removed: ReadonlyMap<string | null, HTMLAnchorElement>,
+): void {
+  if (!tree) return;
+  const currentSections = new Map(
+    [
+      ...tree.querySelectorAll<HTMLDetailsElement>(
+        ":scope > [data-nav-section]",
+      ),
+    ]
+      .map((section) => [section.dataset["navSection"], section] as const)
+      .filter(
+        (entry): entry is readonly [string, HTMLDetailsElement] =>
+          entry[0] !== undefined,
+      ),
+  );
+  const nextSections = [
+    ...next.querySelectorAll<HTMLDetailsElement>(
+      "[data-mokabook-nav-scroll] > [data-nav-section]",
+    ),
+  ];
+  const nextIds = new Set(
+    nextSections.flatMap((section) =>
+      section.dataset["navSection"] ? [section.dataset["navSection"]] : [],
+    ),
+  );
+  let following: ChildNode | null = null;
+  for (const nextSection of [...nextSections].reverse()) {
+    const id = nextSection.dataset["navSection"];
+    if (!id) continue;
+    let current = currentSections.get(id);
+    if (!current) {
+      current = doc.importNode(nextSection, true);
+    } else {
+      let rowFollowing: ChildNode | null = null;
+      const nextRemoved = [
+        ...nextSection.querySelectorAll<HTMLAnchorElement>(
+          ":scope > a[data-nav-removed]",
+        ),
+      ];
+      for (const row of nextRemoved.reverse()) {
+        const retained =
+          removed.get(row.getAttribute("href")) ?? doc.importNode(row, true);
+        if (
+          retained.parentElement !== current ||
+          retained.nextSibling !== rowFollowing
+        )
+          current.insertBefore(retained, rowFollowing);
+        rowFollowing = retained;
+      }
+    }
+    if (current.parentElement !== tree || current.nextSibling !== following)
+      tree.insertBefore(current, following);
+    following = current;
+  }
+  for (const [id, section] of currentSections) {
+    if (!nextIds.has(id) && !section.querySelector("[data-nav-row]"))
+      section.remove();
+  }
 }
 
 /** Unchanged evidence does not replace descendants or disturb their focus. */

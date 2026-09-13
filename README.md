@@ -227,7 +227,8 @@ manifest stays internal: its source inventory is unavailable through HTTP,
 published assets, and comparison resources. Ordinary public JSON remains
 supported. Browse
 serves the package-owned Mokabook shell — resizable desktop catalogue
-navigation with folder/screen/flow icons and an All/Changes filter, search that
+navigation with separate collapsible Pages and Components sections, folder and
+entry-kind icons, and an All/Changes filter, search that
 narrows the tree by page ID, title, route, and `tag:` terms that the field's tag
 picker and the details inspector's chips enter for you, hierarchy-derived
 breadcrumbs with hash-prefixed copyable ID chips, realistic browser chrome with
@@ -748,7 +749,7 @@ eligible comparisons retain an opaque toolbar. The desktop grip sits on its
 divider line.
 
 All 56 design screens reuse the 15 registered components in
-**Design → Shared components**, including the footer tabs panel. The library
+**Components → Design → Shared components**, including the footer tabs panel. The library
 provides 56 saved variants, local prop controls, real usage and component-owned
 change attribution. See the [shared design library guide](./examples/basic/entries/design/library/README.md).
 

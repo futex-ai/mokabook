@@ -52,6 +52,7 @@ for (const mobile of [false, true]) {
       await page
         .locator('[data-nav-collection="collection:screens"] > summary')
         .click();
+      await page.locator('[data-nav-section="pages"] > summary').click();
       await page.locator("[data-mokabook-nav-scroll]").evaluate((tree) => {
         tree.scrollTop = 120;
       });
@@ -125,8 +126,8 @@ async function navigationState(page: Page) {
       ?.dataset["drawer"],
     scroll: document.querySelector("[data-mokabook-nav-scroll]")?.scrollTop,
     groups: [
-      ...document.querySelectorAll<HTMLDetailsElement>("[data-nav-collection]"),
-    ].map((node) => [node.dataset["navCollection"], node.open, node.hidden]),
+      ...document.querySelectorAll<HTMLDetailsElement>("[data-nav-disclosure]"),
+    ].map((node) => [node.dataset["navDisclosure"], node.open, node.hidden]),
     rows: [...document.querySelectorAll<HTMLElement>(".mbk-nav-row")].map(
       (node) => ({
         text: node.textContent,

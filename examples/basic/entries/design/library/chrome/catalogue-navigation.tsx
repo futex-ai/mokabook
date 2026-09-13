@@ -1,6 +1,7 @@
 import { defineComponent, type ComponentProps } from "mokabook";
 import { libraryMetadata } from "../metadata.js";
 import { destination, flag, optionalText, text } from "../schemas.js";
+import { NAV_TREE } from "../../parts/nav_data.js";
 import { CatalogueNavigationView } from "./catalogue-navigation.view.js";
 
 const propSchema = {
@@ -48,32 +49,8 @@ const propSchema = {
   },
 } as const;
 export type CatalogueNavigationProps = ComponentProps<typeof propSchema, []>;
-const rows = [
-  {
-    key: "screens",
-    kind: "collection",
-    depth: 0,
-    label: "Screens",
-    count: 2,
-    open: true,
-  },
-  {
-    key: "welcome",
-    kind: "screen",
-    depth: 1,
-    label: "Welcome",
-    to: "design-browse-screen",
-  },
-  {
-    key: "details",
-    kind: "screen",
-    depth: 1,
-    label: "Details",
-    to: "design-browse-details-screen",
-  },
-] as const;
 const sample = {
-  rows,
+  rows: NAV_TREE,
   activeDestination: "design-browse-screen",
   changedCount: 1,
   changedOnly: false,
@@ -117,7 +94,7 @@ export const catalogueNavigation = defineComponent({
     {
       id: "changes",
       title: "Changes",
-      props: { ...sample, changedOnly: true, rows: rows.slice(0, 2) },
+      props: { ...sample, changedOnly: true, rows: NAV_TREE.slice(0, 3) },
     },
     {
       id: "empty",

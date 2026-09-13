@@ -28,6 +28,14 @@ export interface NavGroupNode {
 /** One rendered navigation node. */
 export type NavNode = NavGroupNode | NavLeafNode;
 
+/** One top-level catalogue section separating component entries from pages. */
+export interface NavSectionNode {
+  children: NavNode[];
+  id: "components" | "pages";
+  key: "section:components" | "section:pages";
+  label: "Components" | "Pages";
+}
+
 /** One breadcrumb segment, representing an authored collection ancestor. */
 export interface CatalogueCrumb {
   label: string;
@@ -41,6 +49,34 @@ export function buildNavTree(
     structuredNode(entry, hierarchy, new Set()),
   );
   return sortNodes(structured);
+}
+
+/** Project the authored hierarchy into separate page and component sections. */
+export function buildNavSections(
+  hierarchy: CatalogueHierarchy<ManifestEntry>,
+  additionalLeaves: readonly NavLeafNode[] = [],
+): NavSectionNode[] {
+  const tree = buildNavTree(hierarchy);
+  return (["pages", "components"] as const).flatMap((id) => {
+    const current = projectNodes(tree, id);
+    const additional = additionalLeaves.filter((leaf) =>
+      id === "components"
+        ? leaf.entryKind === "component"
+        : leaf.entryKind !== "component",
+    );
+    const children = [...current, ...additional];
+    if (children.length === 0) return [];
+    return [
+      id === "pages"
+        ? { children, id, key: "section:pages", label: "Pages" }
+        : {
+            children,
+            id,
+            key: "section:components",
+            label: "Components",
+          },
+    ];
+  });
 }
 
 /** Derive text-only crumbs for a structured entry from its real ancestors. */
@@ -80,6 +116,23 @@ function structuredNode(
     kind: "group",
     label: entry.title,
   };
+}
+
+function projectNodes(
+  nodes: readonly NavNode[],
+  section: NavSectionNode["id"],
+): NavNode[] {
+  return nodes.flatMap((node): NavNode[] => {
+    if (node.kind === "leaf") {
+      const component = node.entryKind === "component";
+      return component === (section === "components") ? [node] : [];
+    }
+    const children = projectNodes(node.children, section);
+    const emptyPageFolder = section === "pages" && node.children.length === 0;
+    return children.length > 0 || emptyPageFolder
+      ? [{ ...node, children }]
+      : [];
+  });
 }
 
 function sortNodes(nodes: readonly NavNode[]): NavNode[] {

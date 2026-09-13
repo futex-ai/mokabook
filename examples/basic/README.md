@@ -4,7 +4,7 @@ This is a synthetic external-consumer fixture. It contains two distinct mobile
 and desktop product-style screens built with `@firna/ui` controls, nested
 collections, one use case, id-addressed links, a Firna renderer adapter, local
 stylesheets, light and dark product fragments, and a safe Review-ignore region.
-The Example → Components collection contains real registered Action and Toolbar
+The Components → Example → Components collection contains real registered Action and Toolbar
 components. Both product screens use Action repeatedly, directly and inside the
 Toolbar, with caller-owned slots. Action has Default, Disabled and Secondary
 variants plus text, boolean, number, optional hint and emphasis controls; Toolbar
@@ -22,7 +22,7 @@ uses the same Firna/React Native Web rendering stack with configurable volume,
 without expanding this committed example or slowing ordinary development startup.
 
 Mokabook's 56 design screens now use 15 registered shared components, including
-the footer tabs panel. Open **Design → Shared components** for Chrome, Controls,
+the footer tabs panel. Open **Components → Design → Shared components** for Chrome, Controls,
 Inspector and Preview galleries with 56 saved variants, real mobile/desktop
 previews and editable local props. The outer Components and Usage tabs show actual
 recorded relationships; pictured example data inside an artboard stays separate.

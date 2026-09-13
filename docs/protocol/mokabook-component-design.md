@@ -16,7 +16,8 @@ extend the [shell design](./mokabook-shell-design.md) and depict the
 
 Source lives under `examples/basic/entries/design/components/`; generated
 artboards live under `examples/basic/generated/design/components/`. The existing
-Design → Mokabook design → Component explorer collection reaches every screen.
+Pages → Design → Mokabook design → Component explorer collection reaches every
+screen.
 The canonical `overview` screen shows a component page, followed by links to the
 owning child pages outside the artboard. The original Pages, Inspection, and States child collections are gallery
 indexes, each with at most five direct owning screens; inspection also links a nested
@@ -65,9 +66,9 @@ spans for unsupported controls.
 
 ## Component Pages
 
-Reuse the existing top bar, navigation tree, screen heading, comparison band,
+Reuse the existing top bar, split navigation tree, screen heading, comparison band,
 stage, and comparison controls, adding the shared icon inspector and compact view toolbar. Components use a small cube
-icon in an authored Components collection. Desktop keeps the resizable navigation;
+icon in the Components section and its authored Components collection. Desktop keeps the resizable navigation;
 mobile keeps the compact header and adds short Screen/Components/Changes links
 above the heading so the relevant destinations and change count remain visible.
 

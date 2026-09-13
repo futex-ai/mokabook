@@ -1,9 +1,11 @@
 import { useDesignStyle } from "../style_context.js";
 import type { CSSProperties } from "react";
 import type { Viewport } from "mokabook";
+import { MockLink } from "mokabook";
 import { DesignLink } from "../../parts/design_navigation.js";
 import type { DesignDestination } from "../../parts/destinations.js";
 import {
+  ChevronIcon,
   FlowIcon,
   FolderIcon,
   FolderOpenIcon,
@@ -12,6 +14,10 @@ import {
 } from "../../parts/icons.js";
 import { NavResizeHandle } from "../../parts/nav_resize.js";
 import type { CatalogueNavigationProps } from "./catalogue-navigation.js";
+import {
+  navigationSections,
+  type NavigationRow,
+} from "./catalogue-navigation-sections.js";
 
 /** Left padding applied to a top-level (depth 0) row, in pixels. */
 const ROOT_INSET = 8;
@@ -51,7 +57,7 @@ function NavRow({
 }: {
   activeDestination?: DesignDestination | undefined;
   activeLabel?: string | undefined;
-  node: CatalogueNavigationProps["rows"][number];
+  node: NavigationRow;
 }) {
   const isActive =
     node.kind !== "collection" &&
@@ -72,38 +78,44 @@ function NavRow({
       </span>
     );
   }
-  return (
-    <DesignLink to={node.to}>
+  const content = (
+    <>
       <span
-        className={className}
-        style={navRowStyle(node.depth)}
-        aria-current={isActive ? "page" : undefined}
+        className={node.kind === "flow" ? "mbk-nav-ico flow" : "mbk-nav-ico"}
+        aria-hidden="true"
       >
-        <span
-          className={node.kind === "flow" ? "mbk-nav-ico flow" : "mbk-nav-ico"}
-          aria-hidden="true"
-        >
-          {node.kind === "component" ? (
-            <svg
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 16 16"
-              width="15"
-              height="15"
-            >
-              <path d="m8 1 6 3.5v7L8 15l-6-3.5v-7L8 1Zm0 7 6-3.5M8 8v7M8 8 2 4.5" />
-            </svg>
-          ) : node.kind === "page" ? (
-            <PageIcon />
-          ) : node.kind === "flow" ? (
-            <FlowIcon />
-          ) : (
-            <ScreenIcon />
-          )}
-        </span>
-        {node.label}
+        {node.kind === "component" ? (
+          <svg
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 16 16"
+            width="15"
+            height="15"
+          >
+            <path d="m8 1 6 3.5v7L8 15l-6-3.5v-7L8 1Zm0 7 6-3.5M8 8v7M8 8 2 4.5" />
+          </svg>
+        ) : node.kind === "page" ? (
+          <PageIcon />
+        ) : node.kind === "flow" ? (
+          <FlowIcon />
+        ) : (
+          <ScreenIcon />
+        )}
       </span>
-    </DesignLink>
+      {node.label}
+    </>
+  );
+  const rowProps = {
+    className,
+    style: navRowStyle(node.depth),
+    "aria-current": isActive ? ("page" as const) : undefined,
+  };
+  return node.to === undefined ? (
+    <span {...rowProps}>{content}</span>
+  ) : (
+    <MockLink {...rowProps} to={node.to}>
+      {content}
+    </MockLink>
   );
 }
 
@@ -121,6 +133,7 @@ export function CatalogueNavigationView({
   viewport,
 }: CatalogueNavigationProps & { viewport: Viewport }) {
   useDesignStyle("catalogue-navigation");
+  const sections = navigationSections(rows);
   const body = (
     <>
       <div className="mbk-nav-head">
@@ -176,13 +189,28 @@ export function CatalogueNavigationView({
               : "Changes are unavailable. You can still browse All."}
           </div>
         ) : (
-          rows.map((node) => (
-            <NavRow
-              key={node.key}
-              activeDestination={activeDestination}
-              activeLabel={activeLabel}
-              node={node}
-            />
+          sections.map((section) => (
+            <details
+              className="mbk-nav-section"
+              data-nav-section={section.id}
+              key={section.id}
+              open
+            >
+              <summary className="mbk-nav-section-head">
+                <span className="mbk-nav-section-chevron" aria-hidden="true">
+                  <ChevronIcon />
+                </span>
+                {section.label}
+              </summary>
+              {section.rows.map((node) => (
+                <NavRow
+                  key={node.key}
+                  activeDestination={activeDestination}
+                  activeLabel={activeLabel}
+                  node={node}
+                />
+              ))}
+            </details>
           ))
         )}
       </div>

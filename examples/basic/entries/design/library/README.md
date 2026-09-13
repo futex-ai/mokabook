@@ -1,9 +1,9 @@
 # Shared Design Components
 
 These fifteen registered components render both Mokabook's design artboards and
-the independent pages under **Design → Shared components**. The footer tabs
-panel is `inspector/inspector`. This is the consumer's mockup library; the actual
-Mokabook browser shell remains in the package source.
+the independent pages under **Components → Design → Shared components**. The
+footer tabs panel is `inspector/inspector`. This is the consumer's mockup
+library; the actual Mokabook browser shell remains in the package source.
 
 Catalogue navigation has a fifth saved example, **Checking for changes**, in both
 viewports. All and Changes retain their positions while the count shows a spinner;
@@ -27,6 +27,8 @@ bodies and native inputs. Resolve scenario navigation in an adapter before
 calling a component; missing destinations stay non-links. Theme links belong in
 the header view controls. Use ordinary `MockLink` anchors for inspector-body
 links and tag chips so they can live inside native `details` panels.
+`parts/nav_data.ts` is the canonical catalogue-navigation fixture for both the
+saved All example and in-screen artboards, so those two views stay aligned.
 
 Use explicit semantic `mokabookInstance` names for repeated siblings. The
 `DesignInstances` context supplies a stable prefix for simultaneous viewport
@@ -61,6 +63,8 @@ not link chip CSS merely because another variant uses chips.
 
 Only exclusive selectors belong in an owned stylesheet. Tokens, resets, mixed
 selectors and cross-component layout/state rules stay in the shared design CSS.
+Keep shared host resets at zero specificity so owned component styles render
+identically in standalone samples and in-screen compositions.
 Keep configured watch paths in sync when introducing an owned sheet.
 
 `host.tsx` supplies standalone layout and semantic parents without fixture data.

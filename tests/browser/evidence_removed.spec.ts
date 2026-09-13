@@ -63,11 +63,33 @@ test("background baselines reconcile removed rows and invalidate changed histori
     const retained = await screen.elementHandle();
     publish();
     await expect(removed).toHaveCount(3);
+    await expect(
+      page.locator(
+        '[data-nav-section="pages"] a[data-route="removed/z-screen.html"]',
+      ),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(
+        '[data-nav-section="pages"] a[data-route="removed/m-page.html"]',
+      ),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(
+        '[data-nav-section="components"] a[data-route="removed/a-component.html"]',
+      ),
+    ).toHaveCount(1);
+    await expect(
+      page.locator("[data-mokabook-nav-scroll] > a[data-nav-removed]"),
+    ).toHaveCount(0);
     expect(
       await removed.evaluateAll((rows) =>
         rows.map((row) => row.getAttribute("data-route")),
       ),
-    ).toEqual(routes);
+    ).toEqual([
+      "removed/m-page.html",
+      "removed/z-screen.html",
+      "removed/a-component.html",
+    ]);
     expect(await retained!.evaluate((row) => row.isConnected)).toBe(true);
     await expect(component).toBeVisible();
     await expect(document).toBeHidden();
@@ -121,6 +143,9 @@ test("background baselines reconcile removed rows and invalidate changed histori
       changesStatus: "pending",
     });
     await expect(removed).toHaveCount(0);
+    await expect(page.locator('[data-nav-section="components"]')).toHaveCount(
+      0,
+    );
     expect(fixture.comparisonRequests).toBe(0);
   } finally {
     await fixture.close();

@@ -36,7 +36,8 @@ event. Superseded requests are aborted and cannot apply data or cause a reload.
 Page shutdown cancels pending fetches and navigation waits.
 
 The browser retains the navigation tree, All/Changes buttons, current preview
-frames, user filter, search, folder disclosure, focus, drawer and scroll state.
+frames, user filter, search, section and folder disclosure, focus, drawer and
+scroll state.
 Update the count/status, changed-route attributes and baseline-only rows from
 the same snapshot. Retained removed rows keep their identity; additions/removals
 follow the canonical server order after the current tree. Existing rules for
@@ -44,10 +45,10 @@ removed screens/components in All and removed pages only in Changes still apply.
 Changes loading and empty/unavailable states use the existing sidebar design.
 
 Background adoption never runs destination-reveal recovery. A search may
-intentionally hide the currently displayed page, and its parent folder may be
-intentionally collapsed. Evidence completion cannot clear that search, open the
-folder or scroll the current route into view. Explicit navigation still reveals
-its destination using the normal constraint rules.
+intentionally hide the currently displayed page, and its parent section or
+folder may be intentionally collapsed. Evidence completion cannot clear that
+search, open the disclosure or scroll the current route into view. Explicit
+navigation still reveals its destination using the normal constraint rules.
 
 If the response changes content version, lacks a valid live stamp, cannot be
 read, or no longer describes the same workspace, use the existing durable
