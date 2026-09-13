@@ -196,7 +196,7 @@ export function FieldnotesScreen() {
               <em>with your work.</em>
             </h2>
             <p>
-              Mokabook is open source. Render your screens locally, commit them
+              Mokly is open source. Render your screens locally, commit them
               with your code, and share a catalogue on your own terms.
             </p>
             <ArrowLink href={docsUrl}>Make your first catalogue</ArrowLink>

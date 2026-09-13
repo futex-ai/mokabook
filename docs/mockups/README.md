@@ -1,4 +1,4 @@
-# Website directions
+# Mokly website directions
 
 Open [the HTML comparison gallery](./index.html) directly from disk. Choose a
 direction, switch between desktop and mobile, or open/save a full website. The
@@ -21,6 +21,12 @@ evidence, agent context, and a future cloud review layer. Fieldnotes is closest
 to the current open-source capability. Signal's chat and Common Ground's shared
 workspace, comments, and approval depict proposed capabilities. No agent, MCP,
 hosting, accounts, billing, or review service is implemented by these designs.
+
+The website copy uses the product name Mokly and links to
+[`mokly-ai/mokly`](https://github.com/mokly-ai/mokly). The install snippet still
+uses the published `mokabook` npm package, and the documentation link uses the
+existing `#use-mokabook` heading. Update these when the package and its
+documentation are renamed.
 
 All depicted product content uses illustrative fixtures under `docs/mockups`.
 There are no customer endorsements, usage claims, pricing, or live signup forms.

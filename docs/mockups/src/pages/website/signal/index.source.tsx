@@ -11,7 +11,7 @@ import { Icon } from "../../../components/icons.js";
 export function SignalScreen() {
   return (
     <div className="website signal" id="top">
-      <Navigation action="Start with Mokabook" />
+      <Navigation action="Start with Mokly" />
       <main>
         <section className="signal-hero wrap">
           <div className="signal-overline">

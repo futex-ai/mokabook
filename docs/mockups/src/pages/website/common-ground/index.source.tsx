@@ -10,7 +10,7 @@ import { Icon } from "../../../components/icons.js";
 export function CommonGroundScreen() {
   return (
     <div className="website common-ground" id="top">
-      <Navigation section="How it comes together" action="Explore Mokabook" />
+      <Navigation section="How it comes together" action="Explore Mokly" />
       <main>
         <section className="common-hero wrap">
           <span className="common-eyebrow">
@@ -166,7 +166,7 @@ export function CommonGroundScreen() {
               At home with your code.
             </h2>
             <p>
-              Keep Storybook for your component library. Use Mokabook to bring
+              Keep Storybook for your component library. Use Mokly to bring
               those components together into a picture of the whole product.
             </p>
           </div>

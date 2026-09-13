@@ -5,7 +5,7 @@ export function CatalogueDemo() {
   return (
     <div
       className="catalogue-illustration"
-      aria-label="Illustration of desktop and mobile designs in a Mokabook catalogue"
+      aria-label="Illustration of desktop and mobile designs in a Mokly catalogue"
     >
       <div className="catalogue-window">
         <div className="window-top">

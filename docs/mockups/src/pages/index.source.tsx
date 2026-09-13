@@ -9,7 +9,7 @@ export function ReviewGallery() {
         <a className="brand" href="#top">
           <BrandMark />
           <span>
-            mokabook<span className="brand-period">.</span>
+            mokly<span className="brand-period">.</span>
           </span>
         </a>
         <span>
@@ -28,7 +28,7 @@ export function ReviewGallery() {
           </div>
           <div>
             <p>
-              Mokabook turns design intent into a shared picture of the product.
+              Mokly turns design intent into a shared picture of the product.
               These three website concepts explore who we speak to—and how it
               should feel.
             </p>
@@ -187,7 +187,7 @@ export function ReviewGallery() {
         </aside>
       </main>
       <footer className="gallery-footer">
-        <span>Mokabook / Website directions</span>
+        <span>Mokly / Website directions</span>
         <span>Made to compare, discuss, and take forward.</span>
       </footer>
     </div>

@@ -29,15 +29,15 @@ interface Page {
 const pages: Page[] = [
   {
     path: "index.html",
-    title: "Mokabook — website directions",
+    title: "Mokly — website directions",
     description:
-      "Compare three Mokabook website directions on desktop and mobile.",
+      "Compare three Mokly website directions on desktop and mobile.",
     styles: ["gallery"],
     content: <ReviewGallery />,
   },
   {
     path: concepts[0].path,
-    title: "Mokabook — get on the same page",
+    title: "Mokly — get on the same page",
     description:
       "Give your next product idea a place to take shape, with real screens and your own components.",
     styles: ["product", "fieldnotes"],
@@ -45,14 +45,14 @@ const pages: Page[] = [
   },
   {
     path: concepts[1].path,
-    title: "Mokabook — less guesswork, more good product",
+    title: "Mokly — less guesswork, more good product",
     description: "Give the next change a clearer picture of what to build.",
     styles: ["product", "signal"],
     content: <SignalScreen />,
   },
   {
     path: concepts[2].path,
-    title: "Mokabook — great products start on common ground",
+    title: "Mokly — great products start on common ground",
     description: "Bring the idea, the details, and the conversation together.",
     styles: ["product", "common-ground"],
     content: <CommonGroundScreen />,

@@ -1,14 +1,14 @@
 import { BrandMark, Icon } from "./icons.js";
 
-export const repositoryUrl = "https://github.com/futex-ai/mokabook";
+export const repositoryUrl = "https://github.com/mokly-ai/mokly";
 export const docsUrl = `${repositoryUrl}#use-mokabook`;
 
 export function Brand() {
   return (
-    <a className="brand" href="#top" aria-label="Mokabook home">
+    <a className="brand" href="#top" aria-label="Mokly home">
       <BrandMark />
       <span>
-        mokabook<span className="brand-period">.</span>
+        mokly<span className="brand-period">.</span>
       </span>
     </a>
   );

@@ -784,7 +784,7 @@ in the [plans index](./plans/README.md).
 - [Styled control migration guide](./docs/migration/accounting-link-controls.md)
 - [Implementation review prompt](./docs/implementation-review-prompt.md)
 - [Implementation plans](./plans/README.md)
-- [Website design directions and HTML review gallery](./docs/mockups/README.md)
+- [Mokly website design directions and HTML review gallery](./docs/mockups/README.md)
 - [Unified catalogue pages](./docs/protocol/mokabook-pages.md) and
   [required breaking upgrade](./docs/protocol/mokabook-page-migration.md)
 - [Authoring source protection](./docs/protocol/mokabook-source-protection.md) and
