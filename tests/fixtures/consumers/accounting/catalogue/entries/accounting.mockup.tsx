@@ -8,7 +8,7 @@ import {
   defineUseCase,
   MockLink,
   ReviewIgnore,
-} from "mokabook";
+} from "mokly";
 
 import { renderToStaticMarkup } from "react-dom/server";
 import { renderComponent } from "../legacy/components.js";

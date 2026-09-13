@@ -94,7 +94,7 @@ export function Inspector({
       <div
         className="mbk-inspector-content"
         id="mb-inspector-content"
-        data-mokabook-scroll="inspector"
+        data-mokly-scroll="inspector"
         hidden
       >
         {tabs.map((tab) => (

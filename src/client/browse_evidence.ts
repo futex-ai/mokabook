@@ -2,7 +2,7 @@
 import { applyNavVisibility } from "./browse_navigation_state.js";
 
 export function applyNavigationEvidence(doc: Document, next: Document): void {
-  const tree = doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]");
+  const tree = doc.querySelector<HTMLElement>("[data-mokly-nav-scroll]");
   const scroll = tree?.scrollTop ?? 0;
   const filter = doc.querySelector<HTMLElement>("[data-changes-status]");
   const nextFilter = next.querySelector<HTMLElement>("[data-changes-status]");

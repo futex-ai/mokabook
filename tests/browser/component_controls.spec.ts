@@ -106,7 +106,9 @@ for (const viewport of ["desktop", "mobile"] as const) {
     await expect(page).toHaveURL(
       componentDesignUrl("controls/states/pending", viewport),
     );
-    await expect(page.getByRole("status")).toContainText("Updating preview");
+    await expect(
+      page.locator(`[data-preview-viewport="${viewport}"]`).getByRole("status"),
+    ).toContainText("Updating preview");
   });
 
   test(`${viewport}: unset, comparison, and published views preserve control boundaries`, async ({

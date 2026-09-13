@@ -7,7 +7,11 @@ import {
 } from "../components/comparison_projection.js";
 import type { EntryChangeReason } from "./component_types.js";
 import type { ViewReview } from "./types.js";
-import { normalizeReviewPair, normalizeSingleDocument } from "./ignore.js";
+import {
+  normalizeHistoricalDocument,
+  normalizeReviewPair,
+  normalizeSingleDocument,
+} from "./ignore.js";
 import { snapshotPath } from "./paths.js";
 import type { ComponentDependencyPolicy } from "./component_metadata.js";
 import type { ComponentMaterialReader } from "./component_resources.js";
@@ -34,7 +38,7 @@ export async function compareComponentView(
   const selected = after ?? before;
   if (!selected) throw new Error("Comparison view requires at least one side");
   const base = before
-    ? await context.beforeReader.text(before.path)
+    ? normalizeHistoricalDocument(await context.beforeReader.text(before.path))
     : undefined;
   const head = after ? await context.afterReader.text(after.path) : undefined;
   const baseRanges =

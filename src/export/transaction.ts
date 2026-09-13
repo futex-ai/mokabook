@@ -19,7 +19,7 @@ import {
 import { prepareReservation, reservationPath } from "./reservation.js";
 
 /** Marker proving ownership of an active export reservation. */
-export const TRANSACTION_MARKER = ".mokabook-export-transaction";
+export const TRANSACTION_MARKER = ".mokly-export-transaction";
 
 /** Deterministic reservation shared by aliases of the same output. */
 export function exportReservation(output: string): string {

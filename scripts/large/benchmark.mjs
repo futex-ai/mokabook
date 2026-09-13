@@ -35,7 +35,7 @@ export async function benchmark(repository, fixture) {
       try {
         const match = await waitFor(
           running,
-          /Mokabook listening at (http:\/\/127\.0\.0\.1:\d+)/,
+          /Mokly listening at (http:\/\/127\.0\.0\.1:\d+)/,
         );
         const url = match[1];
         const readinessMs = Math.round(performance.now() - beginning);

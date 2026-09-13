@@ -39,10 +39,10 @@ no automatic review fixes were applied.
    additional transient UI state without resolving the mixed-generation model.
 
 2. **Low — delivered contracts retain stale implementation-status wording.**
-   [The component authoring contract](../protocol/mokabook-components.md) says
+   [The component authoring contract](../protocol/mokly-components.md) says
    its API is unavailable beneath a delivered-status introduction;
-   [Changes](../protocol/mokabook-changes.md) still calls component attribution
-   planned; [prop validation](../protocol/mokabook-component-props.md) describes
+   [Changes](../protocol/mokly-changes.md) still calls component attribution
+   planned; [prop validation](../protocol/mokly-component-props.md) describes
    the implemented validator/tests as TODOs. The root [README](../../README.md)
    also describes the legacy fallback as v3-only, although component manifests
    use v4. The public API, validator, attribution engine, and v4 reader are

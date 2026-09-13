@@ -1,4 +1,4 @@
-/** Progressive Browse shell enhancement served at /__mokabook/client/browse.js. */
+/** Progressive Browse shell enhancement served at /__mokly/client/browse.js. */
 
 import { installDiffs } from "./diffs.js";
 import { installWorkspace } from "./workspace.js";
@@ -48,8 +48,8 @@ interface ScrollState {
 }
 
 function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
-  const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
-  const main = doc.querySelector<HTMLElement>("[data-mokabook-view]");
+  const shell = doc.querySelector<HTMLElement>("[data-mokly-shell]");
+  const main = doc.querySelector<HTMLElement>("[data-mokly-view]");
   if (!shell || !main) return;
   normalizeStaticAlias(doc, win);
   applyPreviewFragmentQuery(doc, win.location.search);
@@ -130,13 +130,13 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     if (push) persistScroll();
     diffs.reset();
     main.innerHTML = nextMain.innerHTML;
-    const baseline = nextMain.getAttribute("data-mokabook-baseline");
-    if (baseline) main.setAttribute("data-mokabook-baseline", baseline);
-    else main.removeAttribute("data-mokabook-baseline");
+    const baseline = nextMain.getAttribute("data-mokly-baseline");
+    if (baseline) main.setAttribute("data-mokly-baseline", baseline);
+    else main.removeAttribute("data-mokly-baseline");
     if (nextStamp) {
       applyNavigationEvidence(doc, parsed);
       doc.documentElement.setAttribute(
-        "data-mokabook-update-version",
+        "data-mokly-update-version",
         String(nextStamp.version),
       );
     }
@@ -199,7 +199,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
     const details = summary?.parentElement;
     if (
       details instanceof HTMLDetailsElement &&
-      details.matches("[data-mokabook-details]")
+      details.matches("[data-mokly-details]")
     ) {
       detailsPreference.rememberActivation(details);
     }
@@ -238,7 +238,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
 
   doc.addEventListener("input", (event) => {
     const target = event.target instanceof Element ? event.target : undefined;
-    if (!target?.matches("[data-mokabook-search]")) return;
+    if (!target?.matches("[data-mokly-search]")) return;
     applyNavVisibility(doc, "reveal-matches");
     syncTagChips(doc);
   });
@@ -249,7 +249,7 @@ function initBrowseShell(doc: Document, win: Window & typeof globalThis): void {
       const target = event.target;
       if (
         target instanceof HTMLDetailsElement &&
-        target.matches("[data-mokabook-details]")
+        target.matches("[data-mokly-details]")
       ) {
         detailsPreference.remember(target.open);
       }

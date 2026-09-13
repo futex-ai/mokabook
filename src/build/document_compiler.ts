@@ -10,7 +10,7 @@ import { rebaseStyleOwnership } from "../components/style_ownership.js";
 import { validateComponentViewRecord } from "../components/view_validation.js";
 import type { ComponentViewRecord } from "../components/manifest_types.js";
 import { generatedViews } from "../components/views.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { extractHtmlReferences } from "../html_references.js";
 import { prepareRegistry } from "../registry/prepare.js";
 import type { ArtifactView } from "../registry/views.js";
@@ -137,7 +137,7 @@ export class DocumentCompiler {
     if (cached) return cached;
     const target = this.routes.get(route);
     if (!target)
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `unknown generated document: ${route}`,
       );

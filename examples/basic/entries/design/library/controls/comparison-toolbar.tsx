@@ -1,4 +1,4 @@
-import { defineComponent, type ComponentProps } from "mokabook";
+import { defineComponent, type ComponentProps } from "mokly";
 import { libraryMetadata } from "../metadata.js";
 import { comparisonDestinations, comparisonMode, flag } from "../schemas.js";
 import { ComparisonToolbarView } from "./comparison-toolbar.view.js";

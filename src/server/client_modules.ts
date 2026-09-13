@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 
 /** Load the allowlisted browser modules before the HTTP server binds. */
 export function loadBrowserClientModules(): ReadonlyMap<string, Buffer> {
@@ -62,7 +62,7 @@ export function loadBrowserClientModules(): ReadonlyMap<string, Buffer> {
     try {
       modules.set(filename, fs.readFileSync(candidate));
     } catch (error) {
-      throw new MokabookError(
+      throw new MoklyError(
         "server-failed",
         `could not load browser client ${filename}: ${errorMessage(error)}`,
         { cause: error },
@@ -91,7 +91,7 @@ export function loadShellFontAssets(): ReadonlyMap<string, Buffer> {
     try {
       fonts.set(filename, fs.readFileSync(candidate));
     } catch (error) {
-      throw new MokabookError(
+      throw new MoklyError(
         "server-failed",
         `could not load shell font ${filename}: ${errorMessage(error)}`,
         { cause: error },
@@ -113,7 +113,7 @@ function loadModules(
     try {
       modules.set(filename, fs.readFileSync(candidate));
     } catch (error) {
-      throw new MokabookError(
+      throw new MoklyError(
         "server-failed",
         `could not load browser module ${filename}: ${errorMessage(error)}`,
         { cause: error },

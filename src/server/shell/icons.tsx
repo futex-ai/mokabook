@@ -1,4 +1,4 @@
-// Shared Mokabook shell glyphs: the disclosure chevron, the closed / open
+// Shared Mokly shell glyphs: the disclosure chevron, the closed / open
 // folder icons for collapsible collections, the screen / page / use-case leaf
 // icons, the top bar's brand, search and tag controls, and the device chrome's
 // copy and expand / collapse controls. All icons are stroke-based on a 24-unit
@@ -27,7 +27,7 @@ export function IconSvg(props: { children: ReactNode; size: number }) {
   );
 }
 
-/** Overlapping mobile and desktop screens in Mokabook's brand mark. */
+/** Overlapping mobile and desktop screens in Mokly's brand mark. */
 export function BrandIcon(props: { size?: number }) {
   return (
     <IconSvg size={props.size ?? 17}>

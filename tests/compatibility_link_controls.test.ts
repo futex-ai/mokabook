@@ -15,7 +15,7 @@ const source = validEntrySource({
   body: '<MockLink asChild to="details"><button id="continue">Continue</button></MockLink><MockLink to="details" id="ordinary">Plain</MockLink>',
 }).replace(
   'import React from "react";',
-  'import React from "react"; import { MockLink } from "mokabook";',
+  'import React from "react"; import { MockLink } from "mokly";',
 );
 
 test("custom renderer casing cannot bypass child adaptation", async (context) => {
@@ -26,13 +26,13 @@ test("custom renderer casing cannot bypass child adaptation", async (context) =>
   await fs.writeFile(
     path.join(fixture.root, "renderer.tsx"),
     `import { renderToStaticMarkup } from "react-dom/server";
-export default input => '<html><body>' + renderToStaticMarkup(input.node).replaceAll('data-mokabook-link-child-', 'DATA-MOKABOOK-LINK-CHILD-') + '</body></html>';`,
+export default input => '<html><body>' + renderToStaticMarkup(input.node).replaceAll('data-mokly-link-child-', 'DATA-MOKLY-LINK-CHILD-') + '</body></html>';`,
   );
   const compilation = await compileCatalogue(await loadConfig(fixture.root));
   const html = compilation.outputs.get("screens/home.mobile.html") ?? "";
   assert.match(html, /<a id="continue"/);
-  assert.match(html, /data-mokabook-link-control="button"/);
-  assert.doesNotMatch(html, /data-mokabook-link-child-/i);
+  assert.match(html, /data-mokly-link-control="button"/);
+  assert.doesNotMatch(html, /data-mokly-link-child-/i);
 });
 
 test("compatibility transforms cannot introduce or alter owned control metadata", async (context) => {
@@ -42,18 +42,18 @@ test("compatibility transforms cannot introduce or alter owned control metadata"
   context.after(() => removeFixture(fixture));
   const transformer = path.join(fixture.root, "transform.ts");
   const mutations = [
-    `input.content.replace('</body>', '<template DATA-MOKABOOK-LINK-CHILD-END=""></template></body>')`,
-    `input.content.replace('</body>', '<a DATA-MOKABOOK-LINK-CONTROL="button">Unrelated</a></body>')`,
-    `input.content.replace('</body>', '<template><a data-mokabook-link-control="span">Inert</a></template></body>')`,
-    `input.content.replace('</head>', '<style DATA-MOKABOOK-LINK-CONTROL-STYLES=""></style></head>')`,
-    `input.content.replace('data-mokabook-link-control="button"', 'data-mokabook-link-control="div"')`,
-    `input.content.replace(' data-mokabook-link-control="button"', '')`,
-    `input.content.replace(' data-mokabook-link-control="button"', '').replace('id="ordinary"', 'id="ordinary" data-mokabook-link-control="button"')`,
-    `input.content.replace('data-mokabook-link-control="button"', 'data-mokabook-link-control="button" DATA-MOKABOOK-LINK-CONTROL="div"')`,
+    `input.content.replace('</body>', '<template DATA-MOKLY-LINK-CHILD-END=""></template></body>')`,
+    `input.content.replace('</body>', '<a DATA-MOKLY-LINK-CONTROL="button">Unrelated</a></body>')`,
+    `input.content.replace('</body>', '<template><a data-mokly-link-control="span">Inert</a></template></body>')`,
+    `input.content.replace('</head>', '<style DATA-MOKLY-LINK-CONTROL-STYLES=""></style></head>')`,
+    `input.content.replace('data-mokly-link-control="button"', 'data-mokly-link-control="div"')`,
+    `input.content.replace(' data-mokly-link-control="button"', '')`,
+    `input.content.replace(' data-mokly-link-control="button"', '').replace('id="ordinary"', 'id="ordinary" data-mokly-link-control="button"')`,
+    `input.content.replace('data-mokly-link-control="button"', 'data-mokly-link-control="button" DATA-MOKLY-LINK-CONTROL="div"')`,
     `input.content.replace('width:fit-content', 'width:100%')`,
-    `input.content.replace('data-mokabook-link-control-styles=""', 'data-mokabook-link-control-styles="changed"')`,
-    String.raw`input.content.replace(/<style data-mokabook-link-control-styles="">[^]*?<\/style>/, '')`,
-    `input.content.replace('id="ordinary"', 'id="ordinary" data-mokabook-link-control-future=""')`,
+    `input.content.replace('data-mokly-link-control-styles=""', 'data-mokly-link-control-styles="changed"')`,
+    String.raw`input.content.replace(/<style data-mokly-link-control-styles="">[^]*?<\/style>/, '')`,
+    `input.content.replace('id="ordinary"', 'id="ordinary" data-mokly-link-control-future=""')`,
   ];
   for (const expression of mutations) {
     await context.test(expression, async () => {
@@ -73,7 +73,7 @@ test("compatibility cannot add control metadata to a document without child link
   context.after(() => removeFixture(fixture));
   await fs.writeFile(
     path.join(fixture.root, "transform.ts"),
-    `export default input => input.content.replace('</body>', '<a DATA-MOKABOOK-LINK-CONTROL="a">Unrelated</a></body>');`,
+    `export default input => input.content.replace('</body>', '<a DATA-MOKLY-LINK-CONTROL="a">Unrelated</a></body>');`,
   );
   await assert.rejects(
     async () => compileCatalogue(await loadConfig(fixture.root)),
@@ -89,13 +89,13 @@ test("compatibility preserves generated metadata while allowing harmless edits a
   await fs.writeFile(
     path.join(fixture.root, "transform.ts"),
     `export default input => input.content
-      .replaceAll(' data-mokabook-link-control', ' DATA-MOKABOOK-LINK-CONTROL')
+      .replaceAll(' data-mokly-link-control', ' DATA-MOKLY-LINK-CONTROL')
       .replaceAll('Continue', 'Next')
-      .replace('</body>', '<p data-note="data-mokabook-link-child-end">Literal metadata</p></body>');`,
+      .replace('</body>', '<p data-note="data-mokly-link-child-end">Literal metadata</p></body>');`,
   );
   const compilation = await compileCatalogue(await loadConfig(fixture.root));
   const html = compilation.outputs.get("screens/home.mobile.html") ?? "";
-  assert.match(html, /DATA-MOKABOOK-LINK-CONTROL="button"/);
+  assert.match(html, /DATA-MOKLY-LINK-CONTROL="button"/);
   assert.match(html, />Next<\/a>/);
-  assert.match(html, /data-note="data-mokabook-link-child-end"/);
+  assert.match(html, /data-note="data-mokly-link-child-end"/);
 });

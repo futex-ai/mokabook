@@ -66,7 +66,7 @@ test("Review copies local stylesheet dependencies for both snapshots", async (co
   await fs.promises.writeFile(image, Uint8Array.from([0, 1, 2, 255]));
   await fs.promises.writeFile(
     fixture.configPath,
-    `import { defineConfig } from "mokabook";
+    `import { defineConfig } from "mokly";
 export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
@@ -79,8 +79,8 @@ export default defineConfig({
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
   await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["config", "user.name", "Mokly Test"]);
+  await git(fixture.root, ["config", "user.email", "mokly@example.invalid"]);
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: base"]);
   await fs.promises.writeFile(
@@ -122,7 +122,7 @@ test("Review rejects base dependencies beneath authored source roots", async (co
   await fs.promises.rename(fixture.entryPath, nestedEntry);
   await fs.promises.writeFile(
     fixture.configPath,
-    `import { defineConfig } from "mokabook";
+    `import { defineConfig } from "mokly";
 export default defineConfig({
   entriesDir: "mockups/src/entries",
   mockupsDir: "mockups",
@@ -145,8 +145,8 @@ export default defineConfig({
     ),
   );
   await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["config", "user.name", "Mokly Test"]);
+  await git(fixture.root, ["config", "user.email", "mokly@example.invalid"]);
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: base source reference"]);
   await fs.promises.writeFile(
@@ -188,8 +188,8 @@ test("Review rejects non-regular base dependency blobs", async (context) => {
     ),
   );
   await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["config", "user.name", "Mokly Test"]);
+  await git(fixture.root, ["config", "user.email", "mokly@example.invalid"]);
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: base symlink reference"]);
   await fs.promises.writeFile(
@@ -219,8 +219,8 @@ test("Review rejects a base pane stored as a Git symlink", async (context) => {
   await fs.promises.rm(fragment);
   await fs.promises.symlink("../../notes.md", fragment);
   await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["config", "user.name", "Mokly Test"]);
+  await git(fixture.root, ["config", "user.email", "mokly@example.invalid"]);
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: symlink pane"]);
   await fs.promises.rm(fragment);

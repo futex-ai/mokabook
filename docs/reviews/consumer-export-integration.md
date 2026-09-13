@@ -29,7 +29,7 @@ added paths: material-output Changes filtering, resource validation/watching,
 comparison diagnostics, protocols, design examples, and tests.
 
 Two conflicts were resolved path-by-path in `src/server/watch_events.ts` and
-`docs/protocol/mokabook-watch.md`. Both retain main's referenced-resource reloads
+`docs/protocol/mokly-watch.md`. Both retain main's referenced-resource reloads
 and readiness lifecycle alongside inventory-aware export ignores. No mainline
 files were deleted. Main's design sources/generated files, comparison changes,
 resource watchers, and existing test changes are retained.

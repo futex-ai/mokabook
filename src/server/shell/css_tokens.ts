@@ -7,7 +7,7 @@ export const SHELL_TOKENS_CSS = `
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url("/__mokabook/fonts/InterVariable.woff2") format("woff2");
+  src: url("/__mokly/fonts/InterVariable.woff2") format("woff2");
 }
 
 :root {
@@ -24,9 +24,9 @@ export const SHELL_TOKENS_CSS = `
   --sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  --mokabook-accent: #4f7864;
-  --mokabook-accent-contrast: #ffffff;
-  --mokabook-accent-soft: rgba(79, 120, 100, 0.1);
+  --mokly-accent: #4f7864;
+  --mokly-accent-contrast: #ffffff;
+  --mokly-accent-soft: rgba(79, 120, 100, 0.1);
   --mbk-accent-deep: #2f5945;
   --mbk-dark-screen-bg: #121514;
   --mbk-dark-screen-ink: #eef1ef;

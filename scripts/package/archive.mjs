@@ -41,7 +41,7 @@ export async function inspectDryRun(repositoryRoot) {
 }
 
 export function validatePackageReport(report) {
-  assert.equal(report.name, "mokabook");
+  assert.equal(report.name, "mokly");
   assert.match(report.version, /^\d+\.\d+\.\d+$/);
   assert.match(report.integrity, /^sha512-/);
   assert.match(report.shasum, /^[a-f0-9]{40}$/);

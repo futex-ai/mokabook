@@ -25,10 +25,7 @@ export async function smokeRegisteredComponents(
   await runBin(root, ["build"]);
   await runBin(root, ["check"]);
   const manifest = JSON.parse(
-    await fs.readFile(
-      path.join(root, output, "mokabook-manifest.json"),
-      "utf8",
-    ),
+    await fs.readFile(path.join(root, output, "mokly-manifest.json"), "utf8"),
   );
   assert.equal(manifest.schemaVersion, 5);
   assert.equal(
@@ -36,7 +33,7 @@ export async function smokeRegisteredComponents(
     2,
   );
   const before = await fs.readFile(
-    path.join(root, output, "mokabook-manifest.json"),
+    path.join(root, output, "mokly-manifest.json"),
     "utf8",
   );
   await smokeServer(root, ["--base", "HEAD"], async (url) => {
@@ -47,12 +44,12 @@ export async function smokeRegisteredComponents(
       page.match(/data-workspace-data="">(.*?)<\/script>/s)[1],
     );
     const capability = data.renderCapability;
-    const response = await fetch(`${url}/__mokabook/components/render`, {
+    const response = await fetch(`${url}/__mokly/components/render`, {
       method: "POST",
       headers: {
         origin: url,
         "content-type": "application/json",
-        "x-mokabook-render-token": capability.token,
+        "x-mokly-render-token": capability.token,
       },
       body: JSON.stringify({
         componentId: "packed-action",
@@ -71,10 +68,7 @@ export async function smokeRegisteredComponents(
     if (crossPlatform) assert.match(html, /data-theme="fixture-theme"/);
   });
   assert.equal(
-    await fs.readFile(
-      path.join(root, output, "mokabook-manifest.json"),
-      "utf8",
-    ),
+    await fs.readFile(path.join(root, output, "mokly-manifest.json"), "utf8"),
     before,
   );
   await runBin(root, ["export", "--out", "published", "--base", "HEAD"]);

@@ -89,7 +89,7 @@ test("an older evidence response cannot overwrite the latest result", async ({
       changesStatus: "ready",
     });
     await expect(page.locator("html")).toHaveAttribute(
-      "data-mokabook-update-version",
+      "data-mokly-update-version",
       "3",
     );
     await expect(page.locator(".mbk-nav-filter-count")).toHaveText("0");
@@ -169,7 +169,7 @@ test("reconnecting to newer evidence keeps the page, while missed content change
     const ready = new Promise<void>((resolve) => {
       captured = resolve;
     });
-    await page.route("**/__mokabook/events", async (route) => {
+    await page.route("**/__mokly/events", async (route) => {
       captured();
       await held;
       await route.continue();
@@ -179,7 +179,7 @@ test("reconnecting to newer evidence keeps the page, while missed content change
     await page
       .locator("html")
       .evaluate((root) => root.setAttribute("data-test-retained", "true"));
-    await page.locator("[data-mokabook-search]").fill("tour");
+    await page.locator("[data-mokly-search]").fill("tour");
     server.publishUpdate({
       kind: "evidence",
       changedRoutes: [],
@@ -191,7 +191,7 @@ test("reconnecting to newer evidence keeps the page, while missed content change
       "data-test-retained",
       "true",
     );
-    await expect(page.locator("[data-mokabook-search]")).toHaveValue("tour");
+    await expect(page.locator("[data-mokly-search]")).toHaveValue("tour");
     server.publishUpdate();
     server.publishUpdate({
       kind: "evidence",
@@ -199,7 +199,7 @@ test("reconnecting to newer evidence keeps the page, while missed content change
       changesStatus: "ready",
     });
     await expect(page.locator("html")).toHaveAttribute(
-      "data-mokabook-update-version",
+      "data-mokly-update-version",
       "4",
     );
     await expect(page.locator("html")).not.toHaveAttribute(

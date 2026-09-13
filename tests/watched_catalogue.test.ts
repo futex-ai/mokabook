@@ -17,7 +17,7 @@ function shell(published: number, count?: number): string {
       ? '<span class="mbk-nav-filter-count">—</span>'
       : `<span class="mbk-nav-filter-count">${count}</span>`;
   const status = count === undefined ? "unavailable" : "ready";
-  return `<html><body data-mokabook-update-version="${published}" data-changes-status="${status}">${filter}</body></html>`;
+  return `<html><body data-mokly-update-version="${published}" data-changes-status="${status}">${filter}</body></html>`;
 }
 
 /** Serve each queued shell response once, repeating the last one after. */

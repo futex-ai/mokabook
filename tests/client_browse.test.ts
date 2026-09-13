@@ -67,10 +67,7 @@ test("setColorScheme replaces frame history and marks the body", () => {
   const doc = asDocument(view.doc);
 
   setColorScheme(doc, "dark");
-  assert.equal(
-    view.doc.body.getAttribute("data-mokabook-color-scheme"),
-    "dark",
-  );
+  assert.equal(view.doc.body.getAttribute("data-mokly-color-scheme"), "dark");
   assert.equal(currentColorScheme(doc), "dark");
   assert.equal(view.mobileFrame.contentWindow.location.pathname, MOBILE_DARK);
   assert.equal(view.desktopFrame.contentWindow.location.pathname, DESKTOP_DARK);
@@ -102,12 +99,12 @@ test("setColorScheme clamps a light-only catalogue to light", () => {
 
   assert.equal(currentColorScheme(doc), "light");
   setColorScheme(doc, "dark");
-  assert.equal(fake.body.getAttribute("data-mokabook-color-scheme"), "light");
+  assert.equal(fake.body.getAttribute("data-mokly-color-scheme"), "light");
   assert.equal(currentColorScheme(doc), "light");
   assert.equal(embed.getAttribute("src"), "/static/pages/notes.html");
   assert.equal(embed.srcWrites, 0);
 
-  fake.body.setAttribute("data-mokabook-color-scheme", "sepia");
+  fake.body.setAttribute("data-mokly-color-scheme", "sepia");
   assert.equal(currentColorScheme(doc), "light");
 });
 
@@ -121,7 +118,7 @@ test("recovery state restores color scheme strictly", () => {
   const reloaded = schemeView();
   restoreBrowseState(asDocument(reloaded.doc), fakeWindow(), state);
   assert.equal(
-    reloaded.doc.body.getAttribute("data-mokabook-color-scheme"),
+    reloaded.doc.body.getAttribute("data-mokly-color-scheme"),
     "dark",
   );
   assert.equal(
@@ -156,7 +153,7 @@ test("recovery state restores color scheme strictly", () => {
 test("restored dark stays light when a rebuild drops dark fragments", () => {
   const embed = new FakeElement("iframe", { src: "/static/pages/notes.html" });
   const fake = new FakeDocument([
-    new FakeElement("div", { "data-mokabook-shell": "" }),
+    new FakeElement("div", { "data-mokly-shell": "" }),
     embed,
   ]);
   const doc = asDocument(fake);
@@ -164,20 +161,20 @@ test("restored dark stays light when a rebuild drops dark fragments", () => {
   restoreBrowseState(doc, fakeWindow(), snapshot());
 
   assert.equal(snapshot().colorScheme, "dark");
-  assert.equal(fake.body.getAttribute("data-mokabook-color-scheme"), "light");
+  assert.equal(fake.body.getAttribute("data-mokly-color-scheme"), "light");
   assert.equal(currentColorScheme(doc), "light");
   assert.equal(embed.getAttribute("src"), "/static/pages/notes.html");
   assert.equal(embed.srcWrites, 0);
 });
 
 test("recovery selects the tag chip the restored query names", () => {
-  const search = new FakeElement("input", { "data-mokabook-search": "" });
-  const forms = new FakeElement("button", { "data-mokabook-tag": "forms" });
+  const search = new FakeElement("input", { "data-mokly-search": "" });
+  const forms = new FakeElement("button", { "data-mokly-tag": "forms" });
   const onboarding = new FakeElement("button", {
-    "data-mokabook-tag": "onboarding",
+    "data-mokly-tag": "onboarding",
   });
   const fake = new FakeDocument([
-    new FakeElement("div", { "data-mokabook-shell": "" }),
+    new FakeElement("div", { "data-mokly-shell": "" }),
     search,
     forms,
     onboarding,
@@ -194,7 +191,7 @@ test("recovery selects the tag chip the restored query names", () => {
 });
 
 test("recovery matches stable keys and ignores old label paths", () => {
-  const shell = new FakeElement("div", { "data-mokabook-shell": "" });
+  const shell = new FakeElement("div", { "data-mokly-shell": "" });
   const alpha = new FakeElement("details", {
     "data-nav-collection": "collection:alpha",
   });
@@ -242,7 +239,7 @@ function schemeView(): SchemeView {
   return {
     ...view,
     doc: new FakeDocument([
-      new FakeElement("div", { "data-mokabook-shell": "" }),
+      new FakeElement("div", { "data-mokly-shell": "" }),
       view.topLight,
       view.topDark,
       view.headLight,

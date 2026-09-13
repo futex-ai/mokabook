@@ -3,7 +3,7 @@ import {
   definePage,
   defineScreen,
   defineUseCase,
-} from "mokabook";
+} from "mokly";
 import { createComponents } from "./components.js";
 import { DesktopScreen, MobileScreen } from "./screens.js";
 

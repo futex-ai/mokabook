@@ -1,4 +1,4 @@
-# Basic Mokabook Consumer
+# Basic Mokly Consumer
 
 This is a synthetic external-consumer fixture. It contains two distinct mobile
 and desktop product-style screens built with `@firna/ui` controls, nested
@@ -21,19 +21,19 @@ The [large fixture](../../tests/fixtures/large/README.md)
 uses the same Firna/React Native Web rendering stack with configurable volume,
 without expanding this committed example or slowing ordinary development startup.
 
-Mokabook's 56 design screens now use 15 registered shared components, including
+Mokly's 56 design screens now use 15 registered shared components, including
 the footer tabs panel. Open **Design → Shared components** for Chrome, Controls,
 Inspector and Preview galleries with 56 saved variants, real mobile/desktop
 previews and editable local props. The outer Components and Usage tabs show actual
 recorded relationships; pictured example data inside an artboard stays separate.
 See the [library authoring guide](./entries/design/library/README.md),
-[adoption contract](../../docs/protocol/mokabook-design-components.md),
-[library inventory](../../docs/protocol/mokabook-design-component-library.md)
+[adoption contract](../../docs/protocol/mokly-design-components.md),
+[library inventory](../../docs/protocol/mokly-design-component-library.md)
 and [plans index](../../plans/README.md).
 
 The entry definitions use collection membership as their only navigation
 hierarchy. The real `Example` collection owns `Screens`, the example tour, and
-Getting started; the real `Design` collection owns the `Mokabook design` tree. Those parent
+Getting started; the real `Design` collection owns the `Mokly design` tree. Those parent
 collections preserve the intended visible groups and automatically produce
 the same breadcrumb ancestry. Consumer code does not provide `navPath`; when
 migrating an older catalogue, keep a former synthetic group only by adding an
@@ -60,8 +60,8 @@ Theme pairs use the icon in the same header group; component designs also
 support native local theme/highlight toggles. Copy, refresh, collapse-all and
 unsupported combinations remain visual depictions.
 The actual outer shell provides its normal runtime controls. See the
-[design mockup links contract](../../docs/protocol/mokabook-design-links.md)
-and the [complete design inventory](../../docs/protocol/mokabook-shell-design.md#design-mockups).
+[design mockup links contract](../../docs/protocol/mokly-design-links.md)
+and the [complete design inventory](../../docs/protocol/mokly-shell-design.md#design-mockups).
 Shared destinations live in [destinations.ts](./entries/design/parts/destinations.ts);
 [navigation_states.ts](./entries/design/parts/navigation_states.ts) explicitly
 selects which transitions each artboard supports. Add an owning screen and its
@@ -77,14 +77,14 @@ atomic styles through `AppRegistry`, and injects them into the document head.
 The adapter also stamps the document's `data-color-scheme`/`color-scheme`
 hooks and, for dark fragments, emits dark-safe body text and link colors for
 plain HTML outside Firna components.
-`mokabook.config.ts` enables both schemes and pairs the renderer with the
+`mokly.config.ts` enables both schemes and pairs the renderer with the
 `moduleResolution` settings such a stack needs — the `react-native` →
 `react-native-web` alias, `react-native`-first conditions and main fields,
 `.web.*`-first resolve extensions, and the `.js` → `jsx` loader. Consumers that
 render plain React DOM need none of this and can keep a plain
 `renderToStaticMarkup` adapter.
 
-The `Design` navigation group is the owning design catalogue for Mokabook's
+The `Design` navigation group is the owning design catalogue for Mokly's
 Browse and Changes views. Its thirty Browse, page, publication and Changes screens cover navigation,
 Details, tags, color schemes, and comparison outcomes. Thirty-two component
 explorer screens add component pages, saved variants, affected screens,
@@ -97,7 +97,7 @@ fields can be edited, and authored state links show the designed outcomes.
 Desktop variants depict the
 shared resize grip on the catalogue navigation in Current and comparison views; narrow variants
 keep the drawer fixed. The recorded tokens and responsive rules live in
-[`docs/protocol/mokabook-shell-design.md`](../../docs/protocol/mokabook-shell-design.md).
+[`docs/protocol/mokly-shell-design.md`](../../docs/protocol/mokly-shell-design.md).
 
 A grouped icon toolbar switches Mobile/Desktop/Both previews, light/dark, and
 screen highlighting. The original Browse/Changes theme pairs retain their
@@ -130,7 +130,7 @@ Each child gallery lists at most five owning screens; inspection also links
 two selected-instance screens in a nested gallery.
 
 All fifty-six design screens use `colorSchemes: ["light"]`: they draw the
-Mokabook shell, including the existing dark-selection examples. The two product
+Mokly shell, including the existing dark-selection examples. The two product
 screens inherit the catalogue's light/dark settings and prove dark generation.
 Design headers retain the approved screen-stack logo: 17px overlapping mobile
 and desktop outlines in a 24px sage square. Desktop keeps the navigation resize
@@ -154,12 +154,12 @@ unchanged. Actual rendered resource references and generated usage determine the
 scope; regression tests cover each exclusive sheet and the mixed/global sheets.
 
 The recorded tokens and responsive rules live in the
-[shell design contract](../../docs/protocol/mokabook-shell-design.md); component
+[shell design contract](../../docs/protocol/mokly-shell-design.md); component
 routes, fixture relationships, mask geometry, and delivery status live in the
-[component design contract](../../docs/protocol/mokabook-component-design.md),
-[inspector design](../../docs/protocol/mokabook-component-inspector-design.md),
-[controls design](../../docs/protocol/mokabook-component-controls-design.md), and
-[workspace design](../../docs/protocol/mokabook-component-workspace-design.md).
+[component design contract](../../docs/protocol/mokly-component-design.md),
+[inspector design](../../docs/protocol/mokly-component-inspector-design.md),
+[controls design](../../docs/protocol/mokly-component-controls-design.md), and
+[workspace design](../../docs/protocol/mokly-component-workspace-design.md).
 
 All unchanged Browse designs, including the tag picker, omit comparison controls.
 Changed screens and changed or removed component variants retain an opaque
@@ -183,7 +183,7 @@ renderer, and configured stylesheets. Open the printed URL; the browser reloads
 after watched edits. Forward Serve options with `npm run dev -- --port 0`.
 Imported consumer helpers, including this example's `theme.ts`, are tracked
 and trigger rebuilds automatically. Restart the command after changing
-Mokabook's own `src/` files.
+Mokly's own `src/` files.
 
 For one-off generation, verification, or publishing an artifact:
 
@@ -198,7 +198,7 @@ the fixture also exercises stale and deterministic-output checks. The
 hand-authored stylesheets (`styles.css`, `design.css`, `design-stage.css`,
 `design-review.css`, and the component design stylesheets) also live under `generated/` because it doubles as the
 public static root. `preview:build` exports this catalogue through the shared
-package engine into `.context/mokabook-preview` for Cloudflare Pages; it is the same
+package engine into `.context/mokly-preview` for Cloudflare Pages; it is the same
 current catalogue used by the main preview workflow. It preserves search, tags,
 navigation, Light/Dark choices, client assets, and light/dark fragment files.
 Public HTML copies pass through the same ownership-aware link adapter as served
@@ -234,7 +234,7 @@ screen comparisons. Both options omit development update connections.
 For an ordinary static host, use the consumer command instead of the Pages adapter:
 
 ```bash
-node dist/cli/bin.js export --config examples/basic/mokabook.config.ts --out ../../.context/mokabook-site
+node dist/cli/bin.js export --config examples/basic/mokly.config.ts --out ../../.context/mokly-site
 ```
 
 Output is config-relative. This command builds the example itself, retains exact

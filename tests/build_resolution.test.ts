@@ -9,7 +9,7 @@ import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("consumer module resolution supports package roots, aliases, and web conditions", async (context) => {
   const fixture = await createFixture(`
-import { defineScreen } from "mokabook";
+import { defineScreen } from "mokly";
 import React from "react";
 import { FixturePanel } from "fixture-ui";
 const metadata = { dependencies: [], relatedDocs: [], useCaseIds: [] };

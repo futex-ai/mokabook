@@ -61,6 +61,33 @@ interface RegistryContractModule {
   }): boolean;
 }
 
+test("package identity belongs to Mokly", async () => {
+  const packageJson = JSON.parse(
+    await fs.promises.readFile(
+      path.join(repositoryRoot, "package.json"),
+      "utf8",
+    ),
+  );
+  assert.equal(packageJson.name, "mokly");
+  assert.equal(packageJson.author, "Mokly");
+  assert.deepEqual(packageJson.bin, { mokly: "./dist/cli/bin.js" });
+  assert.equal(
+    packageJson.homepage,
+    "https://github.com/mokly-ai/mokly#readme",
+  );
+  assert.deepEqual(packageJson.repository, {
+    type: "git",
+    url: "git+https://github.com/mokly-ai/mokly.git",
+  });
+  assert.deepEqual(packageJson.bugs, {
+    url: "https://github.com/mokly-ai/mokly/issues",
+  });
+  assert.deepEqual(packageJson.publishConfig, {
+    access: "public",
+    registry: "https://registry.npmjs.org/",
+  });
+});
+
 test("CI pins actions and gates both supported Node runtimes", async () => {
   const source = await workflowSource("ci.yml");
   const workflow = parse(source) as Workflow;

@@ -9,9 +9,9 @@
 
 import { clearTagTerm, parseSearchQuery, setTagTerm } from "./search_query.js";
 
-const CHIP = "[data-mokabook-tag]";
-const SEARCH = "[data-mokabook-search]";
-const TOGGLE = "[data-mokabook-tag-toggle]";
+const CHIP = "[data-mokly-tag]";
+const SEARCH = "[data-mokly-search]";
+const TOGGLE = "[data-mokly-tag-toggle]";
 
 /** The search field's tag button with the panel of chips it controls. */
 interface TagPicker {
@@ -162,7 +162,7 @@ function selectChipTag(doc: Document, chip: HTMLElement): void {
 }
 
 function chipTag(chip: Element): string {
-  return (chip.getAttribute("data-mokabook-tag") ?? "").toLowerCase();
+  return (chip.getAttribute("data-mokly-tag") ?? "").toLowerCase();
 }
 
 function searchField(doc: Document): HTMLInputElement | null {

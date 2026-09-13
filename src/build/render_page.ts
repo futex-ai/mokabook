@@ -1,5 +1,5 @@
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import { serializeReviewSentinels } from "../renderer/sentinels.js";
 import { generatedHeader } from "./ownership.js";
 
@@ -11,7 +11,7 @@ export function renderPage(
   try {
     rendered = entry.render();
   } catch (error) {
-    throw new MokabookError(
+    throw new MoklyError(
       "build-invalid",
       `page render failed for ${entry.id} (${entry.sourceRelativePath}): ${errorMessage(error)}`,
       { cause: error },
@@ -23,7 +23,7 @@ export function renderPage(
     !/<\/html\s*>/i.test(rendered)
   ) {
     if (rendered instanceof Promise) void rendered.catch(() => undefined);
-    throw new MokabookError(
+    throw new MoklyError(
       "build-invalid",
       `page render must return a complete HTML document synchronously for ${entry.id} (${entry.sourceRelativePath})`,
     );

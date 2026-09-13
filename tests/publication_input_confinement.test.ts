@@ -72,7 +72,7 @@ test("publication rejects an escaping manifest before reading its bytes", async 
   context.after(() => removeFixture(outside));
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
-  const manifest = path.join(fixture.mockupsDir, "mokabook-manifest.json");
+  const manifest = path.join(fixture.mockupsDir, "mokly-manifest.json");
   const target = path.join(outside.root, "metadata.json");
   await fs.promises.copyFile(manifest, target);
   await fs.promises.unlink(manifest);

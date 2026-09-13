@@ -14,7 +14,7 @@ export default function render(input: RenderInput): string {
     `<html lang="en"><head><meta charset="utf-8">`,
     `<meta name="viewport" content="width=device-width, initial-scale=1">`,
     `<title>${escapeText(input.entry.title)}</title>${links}</head>`,
-    `<body data-mokabook-viewport="${input.viewport}">${body}</body></html>\n`,
+    `<body data-mokly-viewport="${input.viewport}">${body}</body></html>\n`,
   ].join("");
 }
 

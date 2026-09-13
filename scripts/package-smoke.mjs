@@ -53,7 +53,7 @@ try {
   await smokeCleanCacheExecution(context);
   await smokeAccountingFixture(context);
   await smokeJunoFixture(context);
-  process.stdout.write("Packed Mokabook consumers passed.\n");
+  process.stdout.write("Packed Mokly consumers passed.\n");
 } finally {
   await fs.promises.rm(workingRoot, { force: true, recursive: true });
 }

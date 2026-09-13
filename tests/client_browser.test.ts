@@ -10,7 +10,7 @@ test("browser adapter connects updates to reload and shutdown", () => {
   const location = new FakeLocation();
   const browse = browseState();
   storage.setItem(
-    "mokabook:live-update-recovery",
+    "mokly:live-update-recovery",
     JSON.stringify({ browse, url: location.href, version: 1 }),
   );
   let pageHide: (() => void) | undefined;
@@ -18,7 +18,7 @@ test("browser adapter connects updates to reload and shutdown", () => {
   const controller = startBrowserLiveUpdates({
     captureBrowseState: () => browse,
     createEventSource(url) {
-      assert.equal(url, "/__mokabook/events");
+      assert.equal(url, "/__mokly/events");
       return source;
     },
     location,
@@ -48,7 +48,7 @@ test("browser adapter connects updates to reload and shutdown", () => {
 test("browser adapter consumes stale-URL recovery without applying it", () => {
   const storage = new FakeStorage();
   storage.setItem(
-    "mokabook:live-update-recovery",
+    "mokly:live-update-recovery",
     JSON.stringify({
       browse: browseState(),
       url: "http://127.0.0.1:4173/view/screens/other.html",
@@ -69,7 +69,7 @@ test("browser adapter consumes stale-URL recovery without applying it", () => {
   });
 
   assert.equal(restored, false);
-  assert.equal(storage.getItem("mokabook:live-update-recovery"), null);
+  assert.equal(storage.getItem("mokly:live-update-recovery"), null);
 });
 
 function browseState(): BrowseRecoveryState {

@@ -21,7 +21,7 @@ export function FlowStep({
 }) {
   return (
     <flowStep.Component
-      mokabookInstance={useDesignInstance(name)}
+      moklyInstance={useDesignInstance(name)}
       number={number}
       title={title}
       description={description}
@@ -47,7 +47,7 @@ export function EmptyState({
 }) {
   return (
     <emptyState.Component
-      mokabookInstance={useDesignInstance("empty")}
+      moklyInstance={useDesignInstance("empty")}
       body={body}
       title={title}
       destination={to}

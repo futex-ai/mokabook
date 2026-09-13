@@ -30,7 +30,7 @@ for (const includeChanges of [false, true]) {
       ["images", "assets"],
       ["cycle", "."],
       ["dangling.svg", "missing.svg"],
-      ["metadata.json", "mokabook-manifest.json"],
+      ["metadata.json", "mokly-manifest.json"],
       ["source.txt", fixture.entryPath],
     ] as const)
       await fs.promises.symlink(target, path.join(fixture.mockupsDir, name));

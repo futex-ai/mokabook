@@ -6,7 +6,7 @@ export interface NavPreferenceStorage {
   setItem(key: string, value: string): void;
 }
 
-const NAV_DISCLOSURE_KEY = "mokabook:nav-disclosure:v2";
+const NAV_DISCLOSURE_KEY = "mokly:nav-disclosure:v2";
 
 /** Whether a value identifies a current collection nav group. */
 export function isNavDisclosureKey(value: string): boolean {

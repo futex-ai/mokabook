@@ -23,7 +23,7 @@ finding remains invalid; its compiled reproduction needs no production change.
    This is broader than calling the old shutdown helper from additional catches:
    that helper could miss a prior exit and let competing callers return early.
 
-The [watch contract](../protocol/mokabook-watch.md) and README document the shared
+The [watch contract](../protocol/mokly-watch.md) and README document the shared
 cleanup rules. The changes preserve the 15-second readiness timeout and existing
 graceful/SIGTERM/SIGKILL intervals; they add no consumer configuration.
 
@@ -141,7 +141,7 @@ after review, following the user's instruction to report new findings first.
    manually edited generated body, while `checkCompilation` rejected both.
    However, the supported `npm run preview:build` command explicitly rebuilds
    before capture. The
-   [source-protection contract](../protocol/mokabook-source-protection.md#freshness-and-lifecycle)
+   [source-protection contract](../protocol/mokly-source-protection.md#freshness-and-lifecycle)
    defines inventory freshness as path membership, with content edits applied
    by build/watch, and the publication contract snapshots existing generated
    files. The finding therefore does not establish a broken supported command

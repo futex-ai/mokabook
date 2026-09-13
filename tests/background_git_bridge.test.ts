@@ -39,7 +39,7 @@ test("the Git bridge preserves concurrent text, binary input and command errors"
     input,
   );
   await assert.rejects(
-    runner.run(["mokabook-invalid-command"]),
+    runner.run(["mokly-invalid-command"]),
     /not a git command/,
   );
   await host.close();

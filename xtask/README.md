@@ -1,6 +1,6 @@
-# Mokabook xtask
+# Mokly xtask
 
-`xtask` owns repository-local verification for the Mokabook workspace. It is an
+`xtask` owns repository-local verification for the Mokly workspace. It is an
 internal binary and is not published to npm or crates.io.
 
 ## Responsibilities

@@ -19,7 +19,7 @@ export async function createExampleBaseline(root: string) {
     {
       recursive: true,
       filter: (source) =>
-        ![".context", ".mokabook-cache", "node_modules", ".git"].includes(
+        ![".context", ".mokly-cache", "node_modules", ".git"].includes(
           path.basename(source),
         ),
     },
@@ -29,12 +29,12 @@ export async function createExampleBaseline(root: string) {
     path.join(root, "docs/protocol"),
     { recursive: true },
   );
-  const config = await loadConfig(root, "examples/basic/mokabook.config.ts");
+  const config = await loadConfig(root, "examples/basic/mokly.config.ts");
   await writeCompilation(await compileCatalogue(config), config);
   const git = (...args: string[]) => execute("git", args, { cwd: root });
   await git("init", "-q", "-b", "main");
-  await git("config", "user.name", "Mokabook Test");
-  await git("config", "user.email", "mokabook@example.invalid");
+  await git("config", "user.name", "Mokly Test");
+  await git("config", "user.email", "mokly@example.invalid");
   await git("add", "examples", "docs");
   await git(
     "-c",

@@ -14,7 +14,7 @@ export interface RenderedRange {
   contentEnd: number;
   end: number;
 }
-const prefix = "mokabook-component:";
+const prefix = "mokly-component:";
 
 /** Turn authenticated inert React sentinels into layout-neutral comment pairs. */
 export function serializeComponentSentinels(
@@ -34,15 +34,15 @@ export function serializeComponentSentinels(
       invalidData("$render", "reserved component comment");
     if (!("attrs" in node)) return;
     const attributes = node.attrs.filter((attribute) =>
-      attribute.name.startsWith("data-mokabook-component-"),
+      attribute.name.startsWith("data-mokly-component-"),
     );
     if (!attributes.length) return;
     const attribute = attributes[0]!;
     const location = node.sourceCodeLocation;
     const boundary =
-      attribute.name === "data-mokabook-component-start"
+      attribute.name === "data-mokly-component-start"
         ? "start"
-        : attribute.name === "data-mokabook-component-end"
+        : attribute.name === "data-mokly-component-end"
           ? "end"
           : undefined;
     if (
@@ -52,7 +52,7 @@ export function serializeComponentSentinels(
       !boundary ||
       !location ||
       !new RegExp(
-        `^<template data-mokabook-component-${boundary}="b-[0-9]+"></template>$`,
+        `^<template data-mokly-component-${boundary}="b-[0-9]+"></template>$`,
       ).test(html.slice(location.startOffset, location.endOffset))
     )
       invalidData("$render", "forged or malformed component sentinel");
@@ -108,20 +108,20 @@ export function validateComponentRanges(
     if (
       "attrs" in node &&
       node.attrs.some((attribute) =>
-        attribute.name.startsWith("data-mokabook-component-"),
+        attribute.name.startsWith("data-mokly-component-"),
       )
     )
       invalidData("$document", "reserved component attributes remain");
     if (node.nodeName !== "#comment" || !("data" in node)) return;
-    if (node.data.startsWith("mokabook-review-ignore:start:")) ignored = true;
-    if (node.data.startsWith("mokabook-review-ignore:end:")) ignored = false;
+    if (node.data.startsWith("mokly-review-ignore:start:")) ignored = true;
+    if (node.data.startsWith("mokly-review-ignore:end:")) ignored = false;
     if (!node.data.startsWith(prefix)) return;
     if (ignored)
       invalidData(
         "$document",
         "ReviewIgnore cannot enclose component or caller-slot boundaries",
       );
-    const match = /^mokabook-component:(start|end):(r-[0-9]+)$/.exec(node.data);
+    const match = /^mokly-component:(start|end):(r-[0-9]+)$/.exec(node.data);
     const location = node.sourceCodeLocation;
     const record = expected.get(match?.[2] ?? "");
     if (!match || !record || !location)

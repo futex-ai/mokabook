@@ -1,4 +1,4 @@
-import { defineComponent, type ComponentProps } from "mokabook";
+import { defineComponent, type ComponentProps } from "mokly";
 import { libraryMetadata } from "../metadata.js";
 import { destination, flag, optionalText, text } from "../schemas.js";
 import { CatalogueNavigationView } from "./catalogue-navigation.view.js";

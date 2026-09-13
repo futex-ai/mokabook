@@ -5,8 +5,8 @@ import {
   type StaticDelivery,
 } from "../navigation/delivery.js";
 
-const STATIC_ATTRIBUTE = "data-mokabook-static";
-const DELIVERY_ATTRIBUTE = "data-mokabook-delivery";
+const STATIC_ATTRIBUTE = "data-mokly-static";
+const DELIVERY_ATTRIBUTE = "data-mokly-delivery";
 
 /** Read only shell-root metadata; missing static metadata fails closed. */
 export function readStaticDelivery(doc: Document): StaticDelivery | undefined {

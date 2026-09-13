@@ -10,7 +10,7 @@ export function NavigationResizeHandle() {
       aria-valuemin={192}
       aria-valuenow={248}
       className="mbk-nav-resize"
-      data-mokabook-nav-resize=""
+      data-mokly-nav-resize=""
       role="separator"
       tabIndex={0}
       title="Drag to resize. Use arrow keys for precise control."

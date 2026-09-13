@@ -15,7 +15,7 @@ export function TagChip(props: { tag: string }) {
     <button
       aria-pressed="false"
       className="mbk-chip tag"
-      data-mokabook-tag={props.tag}
+      data-mokly-tag={props.tag}
       type="button"
     >
       <TagIcon size={11} />
@@ -42,7 +42,7 @@ export function SearchTagPicker(props: { tags: readonly string[] }) {
         aria-expanded="false"
         aria-label="Filter by tag"
         className="mbk-search-tag"
-        data-mokabook-tag-toggle=""
+        data-mokly-tag-toggle=""
         type="button"
       >
         <TagIcon />

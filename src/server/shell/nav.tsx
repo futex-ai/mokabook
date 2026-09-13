@@ -1,4 +1,4 @@
-// Renders the served Mokabook left navigation as native disclosure elements:
+// Renders the served Mokly left navigation as native disclosure elements:
 // groups are <details> whose summary row carries the folder icon (no chevron),
 // so collapsing works without any client script and the shell stylesheet swaps
 // the closed folder for the open one while the <details> is open. Leaves are
@@ -170,21 +170,21 @@ export function CatalogueNav(props: {
     <nav
       aria-label="Catalogue"
       className="mbk-nav"
-      data-mokabook-nav=""
+      data-mokly-nav=""
       id="mb-nav"
     >
       <div className="mbk-nav-head">
         Catalogue
         <button
           className="mbk-nav-collapse"
-          data-mokabook-collapse=""
+          data-mokly-collapse=""
           type="button"
         >
           Collapse all
         </button>
       </div>
       <NavFilter context={props.context} />
-      <div className="mbk-nav-scroll" data-mokabook-nav-scroll="">
+      <div className="mbk-nav-scroll" data-mokly-nav-scroll="">
         <NavStatus context={props.context} />
         <NavRows context={props.context} depth={0} nodes={nodes} />
       </div>

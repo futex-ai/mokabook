@@ -19,7 +19,7 @@ export function Inspector({
 }) {
   return (
     <inspector.Component
-      mokabookInstance={useDesignInstance("inspector")}
+      moklyInstance={useDesignInstance("inspector")}
       tabs={panels.map(({ id, label }) => ({ id, label }))}
       initial={initial}
       sheetSize="compact"

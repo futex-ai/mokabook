@@ -122,8 +122,8 @@ for (const [name, options, error] of [
   ["missing data", { body: "<action.Component />" }, /required prop/],
   [
     "null instance identity",
-    { body: '<action.Component label="One" mokabookInstance={null} />' },
-    /mokabookInstance must/,
+    { body: '<action.Component label="One" moklyInstance={null} />' },
+    /moklyInstance must/,
   ],
   [
     "unregistered wrapper",
@@ -132,7 +132,7 @@ for (const [name, options, error] of [
   ],
   [
     "forged sentinel",
-    { body: '<template data-mokabook-component-start="b-999" />' },
+    { body: '<template data-mokly-component-start="b-999" />' },
     /unknown component sentinel/,
   ],
   [

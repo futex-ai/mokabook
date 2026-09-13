@@ -1,4 +1,4 @@
-import { mockLink } from "mokabook";
+import { mockLink } from "mokly";
 import { renderToStaticMarkup } from "react-dom/server";
 
 /** Complete example document shared by the page and its shell designs. */

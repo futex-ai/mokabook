@@ -88,7 +88,7 @@ test("scaled consumer exercises the same render, hierarchy, resource and compone
   );
   const html = compilation.outputs.get(screen.fragments.desktop)!;
   assert.match(html, /react-native-stylesheet/);
-  assert.match(html, /data-mokabook-link/);
+  assert.match(html, /data-mokly-link/);
   assert.match(html, /assets\/mark.svg/);
   assert.ok(
     compilation.manifest.sourceFiles.some((file) =>

@@ -269,7 +269,7 @@ rendering, and lints are untouched.
 
 Per repository rules, mockups land before UI implementation:
 
-- `docs/protocol/mokabook-shell-design.md` gains the color-scheme control,
+- `docs/protocol/mokly-shell-design.md` gains the color-scheme control,
   the dark device-chrome tokens (phone screen surface, status-band ink,
   browser viewport surface), and the `LIGHT ONLY` frame-label state. The
   shell tokens themselves stay light-only.
@@ -292,8 +292,8 @@ Per repository rules, mockups land before UI implementation:
 - Browser (Playwright): toggle swaps frames and flow steps, persistence
   across watched reload, light-only fallback label, compare-page scheme
   control, no-JavaScript light default.
-- Docs: README, `mokabook-package.md`, `mokabook-runtime.md`,
-  `mokabook-shell-design.md`, and the example README/notes updated with the
+- Docs: README, `mokly-package.md`, `mokly-runtime.md`,
+  `mokly-shell-design.md`, and the example README/notes updated with the
   new contract.
 
 ## Non-Goals

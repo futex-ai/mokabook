@@ -13,13 +13,13 @@ import { SelectedReviewRoutes } from "../dist/server/selected_review_routes.js";
 const source: SelectedReviewSource = {
   before: {
     entries: [],
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     schemaVersion: 5,
     sourceFiles: [],
   },
   after: {
     entries: [],
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     schemaVersion: 5,
     sourceFiles: [],
   },
@@ -78,7 +78,7 @@ async function start(
     routes,
     request: (route: string, refresh = false) =>
       fetch(
-        `http://127.0.0.1:${address.port}/__mokabook/diffs/review.json?route=${encodeURIComponent(route)}${refresh ? "&refresh=1" : ""}`,
+        `http://127.0.0.1:${address.port}/__mokly/diffs/review.json?route=${encodeURIComponent(route)}${refresh ? "&refresh=1" : ""}`,
       ),
   };
 }

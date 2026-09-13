@@ -42,10 +42,10 @@ test("documented catalogue formats match compilation and both comparison sides",
 
 test("delivered component contracts do not retain superseded status or version instructions", async () => {
   for (const file of [
-    "mokabook-components.md",
-    "mokabook-changes.md",
-    "mokabook-component-props.md",
-    "mokabook-component-changes.md",
+    "mokly-components.md",
+    "mokly-changes.md",
+    "mokly-component-props.md",
+    "mokly-component-changes.md",
   ]) {
     const text = await read(`docs/protocol/${file}`);
     assert.doesNotMatch(
@@ -55,7 +55,7 @@ test("delivered component contracts do not retain superseded status or version i
     );
   }
   assert.doesNotMatch(
-    await read("docs/protocol/mokabook-export.md"),
+    await read("docs/protocol/mokly-export.md"),
     /Keep `ReviewResult\.schemaVersion` at 2/,
   );
   assert.match(await read("README.md"), /current output requires manifest v5/);

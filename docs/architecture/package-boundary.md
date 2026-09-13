@@ -2,12 +2,12 @@
 
 ## Rule
 
-Mokabook owns the mechanics shared by any React mockup catalogue. A consumer
+Mokly owns the mechanics shared by any React mockup catalogue. A consumer
 owns everything that gives a screen application meaning or appearance. The
 boundary is enforced through peer dependencies, a renderer hook, declarative
 paths, and synthetic tests.
 
-| Mokabook owns                           | Consumer owns                    | Configured at the boundary |
+| Mokly owns                              | Consumer owns                    | Configured at the boundary |
 | --------------------------------------- | -------------------------------- | -------------------------- |
 | Registry definitions and validation     | Product screens and fixture data | Source and output roots    |
 | esbuild discovery and one-graph loading | Product component library        | Renderer/module resolution |
@@ -19,7 +19,7 @@ paths, and synthetic tests.
 
 ## Dependency Direction
 
-`mokabook` has React and React DOM peer dependencies. It does not depend on
+`mokly` has React and React DOM peer dependencies. It does not depend on
 React Native, React Native Web, `@firna/ui`, Accounting, Juno, or a consumer's
 workspace layout. At build time, React imports are resolved from the consumer's
 config file and every React-bearing source is bundled in one graph.
@@ -29,24 +29,24 @@ string or as `RenderResult` with optional validated style/resource ownership. Th
 only place an app should install theme providers, collect React Native Web's
 `AppRegistry` styles, inject product fonts, or establish other render context.
 Those actions depend on app-owned packages and policy, so moving them into the
-library would make Mokabook app-specific and risk two React runtimes.
+library would make Mokly app-specific and risk two React runtimes.
 
 Module-resolution configuration is likewise consumer-owned: aliases,
 conditions, package fields, extensions, loaders, and package roots describe the
-consumer component tree. Mokabook validates and applies them without supplying
+consumer component tree. Mokly validates and applies them without supplying
 React Native Web, Accounting, or Juno defaults.
 
 ## Registered Components
 
 Consumers declare component props, saved variants, slots, controls and owned
-resources through the public registration API. Mokabook records actual render
+resources through the public registration API. Mokly records actual render
 invocations in the same React graph; import lists do not imply usage. The package
 owns validation, attribution, variant pages and inspection. During local Serve,
 a bounded worker reevaluates the retained successful consumer bundle and renders
 controlled edits through its renderer. Preview documents/resources stay immutable
 and in memory; controls do not change source, committed fragments or Changes.
 Static export carries saved variants and inspection without the local capability.
-See the [component contract](../protocol/mokabook-components.md).
+See the [component contract](../protocol/mokly-components.md).
 
 ## Complete-Document Boundary
 
@@ -90,7 +90,7 @@ for parent enhancement but no top-navigation capability, so direct and nested
 consumer contexts remain unable to replace the shell. Portable generated files
 keep relative artifact fallbacks, while ordinary product, asset, and
 external links remain consumer-owned. The
-[catalogue navigation protocol](../protocol/mokabook-navigation.md) defines the
+[catalogue navigation protocol](../protocol/mokly-navigation.md) defines the
 link marker, sandbox boundary, and active-tree invariant.
 
 ## Export Boundary
@@ -109,7 +109,7 @@ export files while traversing output directories for new authored files.
 ## Related Docs
 
 - [Build pipeline](./build-pipeline.md)
-- [Package and authoring protocol](../protocol/mokabook-package.md)
-- [Runtime protocol](../protocol/mokabook-runtime.md)
-- [Static export contract](../protocol/mokabook-export.md)
-- [Static delivery contract](../protocol/mokabook-export-delivery.md)
+- [Package and authoring protocol](../protocol/mokly-package.md)
+- [Runtime protocol](../protocol/mokly-runtime.md)
+- [Static export contract](../protocol/mokly-export.md)
+- [Static delivery contract](../protocol/mokly-export-delivery.md)

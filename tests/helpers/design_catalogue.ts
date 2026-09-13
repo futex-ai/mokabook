@@ -13,7 +13,7 @@ export type Element = DefaultTreeAdapterMap["element"];
 /** Compile the real consumer once per test process without writing output. */
 export const designCatalogue = loadConfig(
   repositoryRoot,
-  "examples/basic/mokabook.config.ts",
+  "examples/basic/mokly.config.ts",
 ).then(compileCatalogue);
 
 export function elements(

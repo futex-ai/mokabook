@@ -66,7 +66,7 @@ for (const viewport of ["desktop", "mobile"] as const) {
       await expect(evidence.getByRole("table")).toContainText("Get started");
       await expect(
         evidence.getByRole("link", { name: "Action" }),
-      ).toHaveAttribute("data-mokabook-link", "design-component-affected");
+      ).toHaveAttribute("data-mokly-link", "design-component-affected");
       await page.getByRole("button", { name: "Props", exact: true }).click();
       await expect(page.getByLabel("Supplied props")).toContainText(
         "Get started",

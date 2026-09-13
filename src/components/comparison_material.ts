@@ -12,7 +12,7 @@ export function stripMarkers(
   validatedRanges?: readonly RenderedRange[],
 ): string {
   if (usage && !validatedRanges) validateComponentRanges(html, usage.ranges);
-  return html.replace(/<!--mokabook-component:(?:start|end):r-[0-9]+-->/g, "");
+  return html.replace(/<!--mokly-component:(?:start|end):r-[0-9]+-->/g, "");
 }
 
 export function structureSignals(
@@ -55,7 +55,7 @@ export function projectOwnedMaterial(
         replacements.push({
           start: range.start,
           end: range.end,
-          text: `<!--mokabook-owned:${componentId}:${key}-->`,
+          text: `<!--mokly-owned:${componentId}:${key}-->`,
         });
     }
     if (clip)
@@ -75,7 +75,7 @@ export function projectOwnedMaterial(
           replacements.push({
             start: range.start,
             end: range.end,
-            text: `<!--mokabook-external-slot:${slot.sourceSlotKey ?? slot.key}-->`,
+            text: `<!--mokly-external-slot:${slot.sourceSlotKey ?? slot.key}-->`,
           });
       }
     for (const style of usage.styles)
@@ -115,7 +115,7 @@ export function projectOwnedMaterial(
         range.record.target.kind === "slot" &&
         keys.has(range.record.target.slotKey),
     );
-    return `<mokabook-caller-slot data-key="${slot.key}" data-rendered="${Boolean(range)}">${range ? render(range.contentStart, range.contentEnd) : ""}</mokabook-caller-slot>`;
+    return `<mokly-caller-slot data-key="${slot.key}" data-rendered="${Boolean(range)}">${range ? render(range.contentStart, range.contentEnd) : ""}</mokly-caller-slot>`;
   });
   return render(clip?.start ?? 0, clip?.end ?? html.length) + material.join("");
 }

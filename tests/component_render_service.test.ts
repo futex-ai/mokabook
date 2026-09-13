@@ -85,12 +85,12 @@ test("render HTTP validates authority, body limits and methods; memory documents
   const headers = {
     origin: server.url,
     "content-type": "application/json",
-    "x-mokabook-render-token": capability.token,
+    "x-mokly-render-token": capability.token,
   };
-  const endpoint = `${server.url}/__mokabook/components/render`;
+  const endpoint = `${server.url}/__mokly/components/render`;
   for (const [altered, status] of [
     [{ ...headers, origin: "https://foreign.example" }, 403],
-    [{ ...headers, "x-mokabook-render-token": "bad" }, 403],
+    [{ ...headers, "x-mokly-render-token": "bad" }, 403],
     [{ ...headers, "content-type": "text/plain" }, 400],
   ] as const)
     assert.equal(

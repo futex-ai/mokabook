@@ -1,6 +1,6 @@
 /** One child owns readiness, terminal observation and an idempotent cleanup operation. */
 
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import type { ChildHandle } from "./child_process.js";
 import type { ChildCommand } from "./update_messages.js";
 
@@ -24,7 +24,7 @@ export class ManagedChild {
   #rejectReady: (error: Error) => void = () => undefined;
   #resolveExit: () => void = () => undefined;
   #state: "waiting" | "ready" | "stopping" | "exited" = "waiting";
-  #failure: MokabookError | undefined;
+  #failure: MoklyError | undefined;
   readonly #messages: Array<(message: unknown) => void> = [];
   #cleanup: Promise<void> | undefined;
   #readinessTimer: ReturnType<typeof setTimeout> | undefined;
@@ -70,7 +70,7 @@ export class ManagedChild {
     return this.#cleanup !== undefined;
   }
   /** First failure, retained through subsequent shutdown errors. */
-  get failure(): MokabookError | undefined {
+  get failure(): MoklyError | undefined {
     return this.#failure;
   }
 
@@ -167,8 +167,8 @@ export class ManagedChild {
   }
 }
 
-function serverFailure(error: unknown): MokabookError {
-  return new MokabookError("server-failed", errorMessage(error), {
+function serverFailure(error: unknown): MoklyError {
+  return new MoklyError("server-failed", errorMessage(error), {
     cause: error,
   });
 }

@@ -61,7 +61,7 @@ export const valid = (
     label="Confirm"
     intent="quiet"
     nested={{ enabled: false }}
-    mokabookInstance="footer"
+    moklyInstance="footer"
   >
     <strong>Slot</strong>
   </definition.Component>

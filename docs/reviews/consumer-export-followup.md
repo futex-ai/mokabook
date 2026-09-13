@@ -75,7 +75,7 @@ replacement guarantee. Recommended: A, before merging. Cover initial absence,
 late empty/marker-owned outputs, existing-output identity changes, and the
 check-to-rename interval with deterministic regressions on supported platforms.
 This is broader than B, but a check alone still races with replacing rename.
-Keep the [recovery contract](../protocol/mokabook-export-recovery.md) explicit
+Keep the [recovery contract](../protocol/mokly-export-recovery.md) explicit
 about both installation and restoration, rather than adding another isolated
 preflight check.
 

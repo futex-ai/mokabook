@@ -32,13 +32,13 @@ Target design (from Accounting, treated as the source of truth):
 Rewrite the shell design contract to specify the Accounting-parity design and
 align the runtime contract's Browse Shell section with it.
 
-- [x] Rewrite `docs/protocol/mokabook-shell-design.md`: tokens (`--chrome-*`
+- [x] Rewrite `docs/protocol/mokly-shell-design.md`: tokens (`--chrome-*`
       family, Inter/mono stacks), consumer-tunable accent trio defaults, layout
       (100vh shell, 48px top bar, 248px nav, internal scroll regions), device
       chrome dimensions, expand-overlay behavior, nav iconography and guides,
       breadcrumb linking, details inspector, and the review-artifact legacy
       class subset that must stay styled.
-- [x] Update `docs/protocol/mokabook-runtime.md` Browse Shell section: nav
+- [x] Update `docs/protocol/mokly-runtime.md` Browse Shell section: nav
       filter placement, linked breadcrumbs, frame expansion, region-scoped
       scroll restoration, font asset route, and client module list.
 - [x] Validate Markdown and internal links.

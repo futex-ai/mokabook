@@ -1,6 +1,6 @@
 import React from "react";
 
-import { defineCollection, defineScreen } from "mokabook";
+import { defineCollection, defineScreen } from "mokly";
 
 import { WorkspacePanel } from "../ui/workspace-panel.tsx";
 

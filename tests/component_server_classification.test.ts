@@ -29,7 +29,7 @@ test("Browse responds before separately computed component evidence arrives", as
   });
   t.after(() => server.close());
   const initial = await (await fetch(server.url)).text();
-  assert.match(initial, /data-mokabook-filter/);
+  assert.match(initial, /data-mokly-filter/);
   assert.match(initial, /data-changes-status="pending"/);
 
   server.publishUpdate({
@@ -40,8 +40,8 @@ test("Browse responds before separately computed component evidence arrives", as
     version: 2,
   });
   const classified = await waitForClassifiedShell(server.url);
-  assert.match(classified, /data-mokabook-update-version="2"/);
-  assert.match(classified, /data-mokabook-filter/);
+  assert.match(classified, /data-mokly-update-version="2"/);
+  assert.match(classified, /data-mokly-filter/);
 });
 
 test("ordinary Browse serves cached component evidence without generating or writing comparisons", async (t) => {
@@ -105,7 +105,7 @@ test("ordinary Browse serves cached component evidence without generating or wri
 async function waitForClassifiedShell(url: string): Promise<string> {
   for (let attempt = 0; attempt < 100; attempt += 1) {
     const html = await (await fetch(url)).text();
-    if (html.includes('data-mokabook-update-version="2"')) return html;
+    if (html.includes('data-mokly-update-version="2"')) return html;
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
   throw new Error("component classification did not publish");

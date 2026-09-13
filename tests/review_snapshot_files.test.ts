@@ -8,7 +8,7 @@ import test from "node:test";
 import { serveReviewArtifactFile } from "../dist/server/review_responses.js";
 
 test("snapshot serving permits regular files and rejects linked leaves and ancestors", async (t) => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "mokabook-snapshots-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "mokly-snapshots-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   const artifact = path.join(root, "artifact");
   await fs.mkdir(path.join(artifact, "snapshots"), { recursive: true });

@@ -8,9 +8,9 @@ The basic example's prominent buttons also demonstrate `MockLink asChild`.
 
 Status: complete. All milestones are delivered; implementation `9fbbc17` is
 pushed and reviewed against integrated main `e47524b`. The complete contract is
-[Design mockup links](../docs/protocol/mokabook-design-links.md), which builds
-on the implemented [navigation](../docs/protocol/mokabook-navigation.md) and
-[child controls](../docs/protocol/mokabook-link-controls.md) contracts.
+[Design mockup links](../docs/protocol/mokly-design-links.md), which builds
+on the implemented [navigation](../docs/protocol/mokly-navigation.md) and
+[child controls](../docs/protocol/mokly-link-controls.md) contracts.
 
 ## Baseline And Boundaries
 

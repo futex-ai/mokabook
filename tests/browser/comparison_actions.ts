@@ -17,7 +17,7 @@ export async function loadComparison(
         candidate.method() === "GET" &&
         candidate.resourceType() === "fetch" &&
         url.origin === origin &&
-        url.pathname === "/__mokabook/diffs/review.json" &&
+        url.pathname === "/__mokly/diffs/review.json" &&
         (url.searchParams.get("refresh") === "1") === refresh;
       if (matches) initiatingRequest = candidate;
       return matches;

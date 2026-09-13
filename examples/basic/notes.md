@@ -1,16 +1,16 @@
 # Basic Example Notes
 
-These screens are synthetic fixtures for exercising Mokabook. They are not
+These screens are synthetic fixtures for exercising Mokly. They are not
 application product designs.
 
 ## Design Catalogue Notes
 
 Navigation follows the
-[design mockup links contract](../../docs/protocol/mokabook-design-links.md).
+[design mockup links contract](../../docs/protocol/mokly-design-links.md).
 The 24 artboards remain static documents, with native links between their
 canonical states in both viewport variants.
 
-The `Design` navigation group holds the approved mockups for Mokabook's own
+The `Design` navigation group holds the approved mockups for Mokly's own
 catalogue shell and Changes controls. Implementation notes for those mockups live here and
 in each entry's description and rationale, never inside the rendered screens:
 
@@ -34,7 +34,7 @@ in each entry's description and rationale, never inside the rendered screens:
 - The completed [in-frame catalogue navigation work](../../plans/in-frame-catalogue-link-navigation.md)
   reused the approved active-row, disclosure, and frame visuals, adding runtime
   behavior and inert generated metadata without new design screens. The
-  [design mockup adoption](../../docs/protocol/mokabook-design-links.md#canonical-destination-inventory)
+  [design mockup adoption](../../docs/protocol/mokly-design-links.md#canonical-destination-inventory)
   adds normal light Details and four tag states; that contract owns their
   destinations. The original inspector and forms-open routes stay available.
 - The dark-scheme, light-only, and dark view compare screens are light
@@ -81,7 +81,7 @@ in each entry's description and rationale, never inside the rendered screens:
   The same band belongs to the actual shell in both development and published
   catalogues; it is independent of the design pictures rendered inside frames.
 - The approved tokens, consumer-tunable accent properties, and responsive
-  breakpoints are recorded in `docs/protocol/mokabook-shell-design.md`.
+  breakpoints are recorded in `docs/protocol/mokly-shell-design.md`.
 
 ## Intentional Implementation Differences
 

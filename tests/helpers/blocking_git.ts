@@ -31,7 +31,7 @@ export async function blockingGit(
 if [ "$1" = "rev-parse" ] && [ "$2" = "--show-toplevel" ]; then
   ${ignoreTermination ? "trap '' TERM" : ":"}
   printf '%s\\n' "$$" >> ${quote(marker)}
-  ${withHelper ? `exec ${quote(executable)} -c ${quote(`alias.mokabook-block=${helper}`)} mokabook-block` : hash}
+  ${withHelper ? `exec ${quote(executable)} -c ${quote(`alias.mokly-block=${helper}`)} mokly-block` : hash}
 fi
 exec ${quote(executable)} "$@"
 `,

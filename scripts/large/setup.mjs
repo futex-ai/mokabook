@@ -20,7 +20,7 @@ export async function prepareFixture(repository, size, debug) {
   const beginning = performance.now();
   const context = path.join(repository, ".context");
   await fs.mkdir(context, { recursive: true });
-  const root = await fs.mkdtemp(path.join(context, "mokabook-large-"));
+  const root = await fs.mkdtemp(path.join(context, "mokly-large-"));
   const fixture = await generateLargeFixture(root, size);
   process.stdout.write(
     `Preparing ${fixture.routes} routes and ${fixture.documents} documents in ${root}\n`,
@@ -48,7 +48,7 @@ export async function prepareFixture(repository, size, debug) {
     throw new Error("Fixture setup was interrupted");
   const git = (...args) => run("git", args, { cwd: root });
   await git("init", "-q", "-b", "main");
-  await git("config", "user.name", "Mokabook Fixture");
+  await git("config", "user.name", "Mokly Fixture");
   await git("config", "user.email", "fixture@example.invalid");
   await git("add", ".");
   await git(

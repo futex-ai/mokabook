@@ -1,4 +1,4 @@
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { analyzeHierarchy, type HierarchyEntry } from "./hierarchy.js";
 
 type ValidatedManifestEntry = Record<string, unknown> & HierarchyEntry;
@@ -64,7 +64,7 @@ function relationshipError(
   entry: Record<string, unknown>,
   detail: string,
 ): never {
-  throw new MokabookError(
+  throw new MoklyError(
     "manifest-invalid",
     `${String(entry.id)} has an invalid relationship: ${detail}`,
   );

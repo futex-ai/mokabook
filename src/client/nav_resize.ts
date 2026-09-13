@@ -6,7 +6,7 @@ export function initializeNavigationResize(
   win: Window & typeof globalThis,
 ): void {
   const nav = doc.querySelector<HTMLElement>(".mbk-nav");
-  const handle = nav?.querySelector<HTMLElement>("[data-mokabook-nav-resize]");
+  const handle = nav?.querySelector<HTMLElement>("[data-mokly-nav-resize]");
   if (!nav || !handle || handle.dataset["resizeInitialized"] === "true") {
     return;
   }
@@ -30,7 +30,7 @@ export function initializeNavigationResize(
     return;
   }
 
-  const storageKey = "mokabook:navigation-width:v1";
+  const storageKey = "mokly:navigation-width:v1";
   let storage: Storage | undefined;
   try {
     storage = win.localStorage;

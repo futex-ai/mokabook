@@ -53,7 +53,7 @@ user authorized all four fixes. Earlier findings and verification remain in
    also exists on the audited main revision.
 
 4. **Low — CLI and nested-entry documentation remains contradictory. Resolved.**
-   The [package contract](../protocol/mokabook-package.md) rejected `review` and
+   The [package contract](../protocol/mokly-package.md) rejected `review` and
    `--out` but still described a Review CLI output override. Parser probes reject
    both `review` and `serve --out`, as the existing CLI tests require. The
    [NestedChild comment](../../src/authoring/types.ts) also named only screens and
@@ -158,7 +158,7 @@ selection under the repository's review rule.
    that would require an explicit provider decision beyond this demonstrated bug.
 
 3. **Medium — preserved legacy-page comparison is promised but absent. Fixed in the follow-up below.**
-   [The migration contract](../protocol/mokabook-page-migration.md) requires an
+   [The migration contract](../protocol/mokly-page-migration.md) requires an
    exact-route historical adapter using the current page's ID and the legacy
    document/source. [Document pairing](../../src/server/changed_content.ts)
    looks only at historical entries by ID. A validated v3 fixture with a matching
@@ -167,7 +167,7 @@ selection under the repository's review rule.
    explicitly permits adoption to remain changed, so this finding does not promise
    zero Changes after migration. Its missing behavior is historical document,
    paired-ignore, and resource comparison. Separately, the
-   [runtime contract](../protocol/mokabook-runtime.md) still describes a live legacy
+   [runtime contract](../protocol/mokly-runtime.md) still describes a live legacy
    route-directory tree that the implemented catalogue no longer has.
    Options: **A.** Add a typed route-based historical-page adapter under the
    existing validated baseline boundary, test identical/ignored/material/resource

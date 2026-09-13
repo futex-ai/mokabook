@@ -1,7 +1,7 @@
 import { parse } from "parse5";
 
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { extractHtmlReferences } from "../html_references.js";
 import {
   duplicateReservedAttributeName,
@@ -59,7 +59,7 @@ export function validateCompatibilityRecords(
       node.sourceCodeLocation?.startTag,
     );
     if (duplicate) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `${route} contains duplicate reserved ${duplicate} metadata after compatibility transform`,
       );
@@ -69,7 +69,7 @@ export function validateCompatibilityRecords(
     );
     if (node.tagName === "base" && attributes.has("href")) hasBaseHref = true;
     const namespace = logicalNamespace(node.namespaceURI);
-    const marker = attributes.get("data-mokabook-link");
+    const marker = attributes.get("data-mokly-link");
     nodes.push({
       attributes,
       ...(marker === undefined ? {} : { marker }),
@@ -78,7 +78,7 @@ export function validateCompatibilityRecords(
     });
   });
   if (hasBaseHref && expected.some((record) => record.marker)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "build-invalid",
       `${route} contains base href with an activatable logical link after compatibility transform`,
     );
@@ -134,7 +134,7 @@ export function validateLogicalFragments(
     const entry = byId.get(record.destination.id);
     if (entry?.kind === "page") {
       if (!anchors(entry.route)?.has(fragment))
-        throw new MokabookError(
+        throw new MoklyError(
           "build-invalid",
           `${record.sourceRoute} logical fragment ${fragment} for ${entry.id} is missing from page ${entry.route}`,
         );
@@ -159,7 +159,7 @@ export function validateLogicalFragments(
               )
             : fragmentRoute(screen.route, viewport, scheme);
         if (!anchors(route)?.has(fragment)) {
-          throw new MokabookError(
+          throw new MoklyError(
             "build-invalid",
             `${record.sourceRoute} logical fragment ${fragment} for ${record.destination.id} is missing from ${viewport} ${scheme} view ${route}`,
           );
@@ -200,8 +200,8 @@ function groupMetadataRecords(
   return groups;
 }
 
-function divergence(route: string): MokabookError {
-  return new MokabookError(
+function divergence(route: string): MoklyError {
+  return new MoklyError(
     "build-invalid",
     `compatibility transform changed a logical-reference record in ${route}`,
   );

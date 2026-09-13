@@ -66,7 +66,7 @@ for (const includeChanges of [false, true]) {
     );
     assert.deepEqual(await fs.promises.readdir(output), ["keep.txt"]);
     assert.equal(
-      fs.existsSync(path.join(preserved, ".mokabook-preview-artifact")),
+      fs.existsSync(path.join(preserved, ".mokly-preview-artifact")),
       true,
     );
   });
