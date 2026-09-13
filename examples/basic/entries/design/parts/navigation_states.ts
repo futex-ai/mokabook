@@ -114,6 +114,8 @@ export const NAVIGATION_STATES: Record<DesignDestination, NavigationState> = {
   [D.shared]: { ...welcomeFilters },
   [D.ignored]: { ...welcomeFilters },
   [D.empty]: { all: D.welcome },
+  [D.preparing]: { all: D.welcome },
+  [D.unavailable]: { all: D.welcome },
 };
 
 /** Open/close preserves the depicted query; a selection closes the picker. */

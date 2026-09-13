@@ -21,9 +21,9 @@ The [large fixture](../../tests/fixtures/large/README.md)
 uses the same Firna/React Native Web rendering stack with configurable volume,
 without expanding this committed example or slowing ordinary development startup.
 
-Mokabook's 56 design screens now use 15 registered shared components, including
+Mokabook's 64 design screens now use 15 registered shared components, including
 the footer tabs panel. Open **Design → Shared components** for Chrome, Controls,
-Inspector and Preview galleries with 56 saved variants, real mobile/desktop
+Inspector and Preview galleries with 58 saved variants, real mobile/desktop
 previews and editable local props. The outer Components and Usage tabs show actual
 recorded relationships; pictured example data inside an artboard stays separate.
 See the [library authoring guide](./entries/design/library/README.md),
@@ -85,8 +85,9 @@ render plain React DOM need none of this and can keep a plain
 `renderToStaticMarkup` adapter.
 
 The `Design` navigation group is the owning design catalogue for Mokabook's
-Browse and Changes views. Its thirty Browse, page, publication and Changes screens cover navigation,
-Details, tags, color schemes, and comparison outcomes. Thirty-two component
+Browse and Changes views. Its thirty-two Browse, page, publication and Changes screens cover navigation,
+Details, tags, color schemes, comparison outcomes, and the preparing and
+unavailable comparison states. Thirty-two component
 explorer screens add component pages, saved variants, affected screens,
 repeated/nested inspection, highlighting, and empty or removed states. The shared icon inspector and complete controls
 mockups include edited/reset, optional, loading, validation, retry, comparison,
@@ -146,7 +147,7 @@ A shared implementation edit appears on its component page and lists consuming
 screens as affected; independent screen inputs, slots or instance changes still
 appear in Changes. This is tested against fully registered baseline snapshots.
 
-The shared inspector/workspace sheets cover all 56 design screens and standalone
+The shared inspector/workspace sheets cover all 64 design screens and standalone
 library hosts. Other mixed component-design sheets remain scoped to the 32
 component-design routes and hosts; the controls sheet additionally remains
 scoped to its eleven owning screen routes. Global `review.sharedImpact` policy is

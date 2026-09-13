@@ -134,21 +134,24 @@ a tiny consumer catalogue.
 - [ ] Update `README.md` and the package protocol CLI table.
 - [ ] Run tests, typecheck, lint, `cargo xtask check`, commit, and push.
 
-## Milestone 5: Design the preparing and failed baseline states
+## Milestone 5: Design the preparing and failed baseline states — completed
 
 Tags: mockup
 
-- [ ] Add a `preparing` Changes state to the shell design entries under
+- [x] Add a `preparing` Changes state to the shell design entries under
       `examples/basic/entries/design/` for mobile and desktop: tabs stay,
       Changes shows a spinner with product copy such as "Preparing comparison",
       and All stays usable.
-- [ ] Add a failed-rebuild state reusing the existing unavailable presentation
+- [x] Add a failed-rebuild state reusing the existing unavailable presentation
       with copy that names the outcome, not the command or cache path.
-- [ ] Keep owning pages within the five-screen limit; reuse screens in the
+- [x] Keep owning pages within the five-screen limit; reuse screens in the
       relevant flow with links back.
-- [ ] Update the shell design protocol, build and check the example, run
+- [x] Update the shell design protocol, build and check the example, run
       relevant tests, and visually inspect changed artifacts from disk.
-- [ ] Commit and push.
+- [x] Update the design-library inventory doc, the library authoring guide, and
+      the example README so the catalogue-navigation variant list, the
+      availability enum, and the screen and variant counts stay accurate.
+- [x] Commit and push.
 
 ## Milestone 6: Serve, watch, and export integration
 

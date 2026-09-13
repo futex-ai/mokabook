@@ -5,11 +5,14 @@ the independent pages under **Design → Shared components**. The footer tabs
 panel is `inspector/inspector`. This is the consumer's mockup library; the actual
 Mokabook browser shell remains in the package source.
 
-Catalogue navigation has a fifth saved example, **Checking for changes**, in both
-viewports. All and Changes retain their positions while the count shows a spinner;
-the selected Changes sidebar shows the same loading state. Toggle **Changes only**
-to inspect All during calculation, or select **Unavailable** in Props to inspect a
-failed check. The counter reserves its width in every state.
+Catalogue navigation saves each Changes availability state: **Checking for
+changes**, **Preparing comparison** and **Changes unavailable**, in both
+viewports. All and Changes retain their positions while the count shows a spinner
+or a dash; the selected Changes sidebar shows the matching message. Preparing is
+the only message with a secondary line, because it is the only state that asks
+the reader to wait. Toggle **Changes only** to inspect All in any state, or use
+the **Changes availability** control in Props to move between them. The counter
+reserves its width in every state.
 
 ## Authoring
 

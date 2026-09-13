@@ -44,6 +44,40 @@ function navRowStyle(depth: number): CSSProperties {
   return style as CSSProperties;
 }
 
+/**
+ * Availability wording shown in place of the Changes rows. A `spinner` entry
+ * names the work still running; a `detail` entry adds the secondary line.
+ */
+const CHANGES_MESSAGES = {
+  pending: { title: "Checking for changes…", spinner: "Checking for changes" },
+  preparing: {
+    title: "Preparing comparison",
+    spinner: "Preparing comparison",
+    detail: "This takes a moment. You can keep browsing All while it finishes.",
+  },
+  unavailable: { title: "Changes are unavailable. You can still browse All." },
+} as const;
+
+type ChangesMessage = (typeof CHANGES_MESSAGES)[keyof typeof CHANGES_MESSAGES];
+
+function ChangesStatusBody({ message }: { message: ChangesMessage }) {
+  return (
+    <div className="mbk-nav-status" role="status">
+      {"spinner" in message ? (
+        <span className="mbk-nav-spinner" aria-hidden="true" />
+      ) : null}
+      {"detail" in message ? (
+        <span className="mbk-nav-status-text">
+          <span className="mbk-nav-status-title">{message.title}</span>
+          <span className="mbk-nav-status-detail">{message.detail}</span>
+        </span>
+      ) : (
+        message.title
+      )}
+    </div>
+  );
+}
+
 function NavRow({
   activeDestination,
   activeLabel,
@@ -121,6 +155,8 @@ export function CatalogueNavigationView({
   viewport,
 }: CatalogueNavigationProps & { viewport: Viewport }) {
   useDesignStyle("catalogue-navigation");
+  const status =
+    changesStatus === "ready" ? undefined : CHANGES_MESSAGES[changesStatus];
   const body = (
     <>
       <div className="mbk-nav-head">
@@ -149,16 +185,16 @@ export function CatalogueNavigationView({
             >
               Changes
               <span className="mbk-nav-filter-count">
-                {changesStatus === "pending" ? (
+                {status && "spinner" in status ? (
                   <span
                     className="mbk-nav-spinner"
-                    aria-label="Checking for changes"
+                    aria-label={status.spinner}
                     role="status"
                   />
-                ) : changesStatus === "ready" ? (
-                  changedCount
-                ) : (
+                ) : status ? (
                   "—"
+                ) : (
+                  changedCount
                 )}
               </span>
             </span>
@@ -166,15 +202,8 @@ export function CatalogueNavigationView({
         </div>
       ) : null}
       <div className="mbk-nav-scroll">
-        {changedOnly && changesStatus !== "ready" ? (
-          <div className="mbk-nav-status" role="status">
-            {changesStatus === "pending" ? (
-              <span className="mbk-nav-spinner" aria-hidden="true" />
-            ) : null}
-            {changesStatus === "pending"
-              ? "Checking for changes…"
-              : "Changes are unavailable. You can still browse All."}
-          </div>
+        {changedOnly && status ? (
+          <ChangesStatusBody message={status} />
         ) : (
           rows.map((node) => (
             <NavRow

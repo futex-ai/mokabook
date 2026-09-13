@@ -11,6 +11,7 @@ import { browseSchemeScreens } from "./browse_scheme_screens.js";
 import { browseStateScreens, browseViewScreens } from "./browse_screens.js";
 import { browseTagScreens } from "./browse_tag_screens.js";
 import { changesScreens } from "./changes_screens.js";
+import { reviewAvailabilityScreens } from "./review_availability_screens.js";
 import { reviewImpactScreens } from "./review_impact_screens.js";
 import { componentDesign } from "./components/index.js";
 
@@ -105,6 +106,14 @@ const designMockups = defineRoot({
           id: "design-review-impact",
           segment: "impact",
           title: "Impact states",
+        }),
+        collection({
+          children: reviewAvailabilityScreens,
+          description:
+            "Changes while the comparison is being prepared and after preparing it fails.",
+          id: "design-review-availability",
+          segment: "availability",
+          title: "Comparison availability",
         }),
       ],
       dependencies: [

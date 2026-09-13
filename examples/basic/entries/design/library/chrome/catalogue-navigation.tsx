@@ -36,7 +36,10 @@ const propSchema = {
     changedCount: { schema: { kind: "number", minimum: 0, integer: true } },
     changedOnly: flag,
     changesStatus: {
-      schema: { kind: "enum", values: ["ready", "pending", "unavailable"] },
+      schema: {
+        kind: "enum",
+        values: ["ready", "pending", "preparing", "unavailable"],
+      },
       optional: true,
     },
     showChanges: { ...flag, optional: true },
@@ -97,6 +100,7 @@ export const catalogueNavigation = defineComponent({
       options: [
         { label: "Ready", value: "ready" },
         { label: "Checking", value: "pending" },
+        { label: "Preparing", value: "preparing" },
         { label: "Unavailable", value: "unavailable" },
       ],
     },
@@ -133,6 +137,16 @@ export const catalogueNavigation = defineComponent({
       id: "loading",
       title: "Checking for changes",
       props: { ...sample, changedOnly: true, changesStatus: "pending" },
+    },
+    {
+      id: "preparing",
+      title: "Preparing comparison",
+      props: { ...sample, changedOnly: true, changesStatus: "preparing" },
+    },
+    {
+      id: "unavailable",
+      title: "Changes unavailable",
+      props: { ...sample, changedOnly: true, changesStatus: "unavailable" },
     },
   ],
 });
