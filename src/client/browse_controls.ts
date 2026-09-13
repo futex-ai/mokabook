@@ -14,7 +14,7 @@ export function handleBrowseControl(
   }
   if (target.closest("[data-mokly-collapse]")) {
     for (const group of doc.querySelectorAll<HTMLDetailsElement>(
-      "details[data-nav-collection]",
+      "details[data-nav-disclosure]",
     ))
       group.open = false;
     return true;

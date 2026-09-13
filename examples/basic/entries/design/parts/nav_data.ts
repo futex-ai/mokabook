@@ -1,10 +1,11 @@
 import { DESTINATIONS } from "./destinations.js";
-import type { NavNode } from "./nav.js";
+import { COMPONENT_PAGES } from "../components/parts/destinations.js";
+import type { CatalogueNavigationProps } from "../library/chrome/catalogue-navigation.js";
 
-export const NAV_TREE: readonly NavNode[] = [
+export const NAV_TREE = [
   {
     key: "example",
-    count: 3,
+    count: 4,
     depth: 0,
     kind: "collection",
     label: "Example",
@@ -40,6 +41,28 @@ export const NAV_TREE: readonly NavNode[] = [
     to: DESTINATIONS.tour,
   },
   {
+    key: "example-components",
+    count: 2,
+    depth: 1,
+    kind: "collection",
+    label: "Components",
+    open: true,
+  },
+  {
+    key: "action",
+    depth: 2,
+    kind: "component",
+    label: "Action",
+    to: COMPONENT_PAGES.default,
+  },
+  {
+    key: "toolbar",
+    depth: 2,
+    kind: "component",
+    label: "Toolbar",
+    to: COMPONENT_PAGES.toolbar,
+  },
+  {
     key: "design",
     count: 2,
     depth: 0,
@@ -49,4 +72,4 @@ export const NAV_TREE: readonly NavNode[] = [
   },
   { key: "browse-shell", depth: 1, kind: "collection", label: "Browse shell" },
   { key: "changes", depth: 1, kind: "collection", label: "Changes" },
-];
+] as const satisfies CatalogueNavigationProps["rows"];

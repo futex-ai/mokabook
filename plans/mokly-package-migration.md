@@ -10,7 +10,7 @@ deprecated only after `mokly` has been published and verified. Historical Git
 tags, changelog entries, and review evidence remain history; current repository
 metadata and release provenance move to `mokly-ai/mokly`.
 
-## Milestone 1: Distribution And Protocol Contract
+## Milestone 1: Distribution And Protocol Contract (Completed)
 
 Summary: define the exact public rename and the one-time npm bootstrap sequence
 before changing implementation behavior.
@@ -25,7 +25,7 @@ before changing implementation behavior.
       verification.
 - [x] Update current README and protocol links for the new product identity.
 
-## Milestone 2: Canonical Design Rebrand
+## Milestone 2: Canonical Design Rebrand (Completed)
 
 Tags: mockup
 
@@ -38,7 +38,7 @@ shell that implements it.
 - [x] Run design, generated-output, type, and browser smoke checks for every
       changed canonical page.
 
-## Milestone 3: Package, CLI, And Runtime Cutover
+## Milestone 3: Package, CLI, And Runtime Cutover (Completed)
 
 Summary: make installed consumers use only the new package, executable, config,
 and generated-output contract.
@@ -55,7 +55,7 @@ and generated-output contract.
 - [x] Keep implementation files within repository size limits and update nearby
       README guidance.
 
-## Milestone 4: Served Product Rebrand
+## Milestone 4: Served Product Rebrand (Completed)
 
 Tags: ui
 
@@ -68,7 +68,7 @@ Mokly design while leaving feature behavior unchanged.
 - [x] Smoke Browse, Review, watch, build, check, and export through the `mokly`
       executable.
 
-## Milestone 5: Release Automation And Complete Verification
+## Milestone 5: Release Automation And Complete Verification (Completed)
 
 Summary: prepare the repository side of the first unscoped `mokly` publication
 and prove the complete product remains releasable.
@@ -82,18 +82,116 @@ and prove the complete product remains releasable.
 - [x] Record the remaining authenticated npm/GitHub/Cloudflare maintainer steps
       that cannot be completed from the workspace without credentials.
 
-## Milestone 6: Commit And Push
+## Milestone 6: Commit And Push (Completed)
 
 Summary: publish the complete reviewed workspace change to the current branch.
 
 - [x] Inspect the complete diff against `origin/main` and ensure every generated
       and newly created file is tracked.
-- [ ] Run `git add -A`, commit with a Conventional Commit, and push the current
+- [x] Run `git add -A`, commit with a Conventional Commit, and push the current
       branch without renaming it.
 
-## Milestone 7: Post-Push Implementation Review
+Delivered in `96a7ca6` (`feat!: rename package to Mokly`), pushed to
+`calummoore/minnetonka-v4`.
+
+## Milestone 7: Post-Push Implementation Review (Completed)
 
 Summary: review the exact pushed result without changing implementation.
+
+- [x] After the push, use
+      [`docs/implementation-review-prompt.md`](../docs/implementation-review-prompt.md)
+      to review the complete local diff against `origin/main`; report every
+      finding and recommendation without applying fixes.
+
+The review identified historical style-offset corruption, missing bootstrap
+commit evidence, unconfigured GitHub publishing protections, and stale delivery
+checkboxes. The user authorized these follow-up fixes separately.
+
+## Milestone 8: Review Follow-Up Corrections (Completed)
+
+Summary: preserve historical comparison coordinates, tie the bootstrap archive
+to its reviewed source, and make publishing protection requirements actionable.
+
+- [x] Add failure-first historical marker/style tests for Review and Changes;
+      parse old boundaries without rewriting coordinate-bearing HTML and retain
+      original snapshot bytes. Update the component comparison contract.
+- [x] Add failure-first bootstrap tests for dirty and wrong source commits,
+      isolated clean builds, and commit/integrity evidence. Provide a dedicated
+      archive command and update the bootstrap contract and README.
+  - [x] Cover symlinked temporary roots (including the macOS path-alias case)
+        without losing source-root validation or temporary-build cleanup.
+- [x] Configure and read back the GitHub `npm` environment and immutable `v*`
+      tag protections, or record an authenticated API blocker with exact
+      maintainer setup and verification commands. Allow workflow ref `main`,
+      not the tag checked out inside the publish job.
+- [x] Correct the original delivery and review records without reopening
+      completed milestones.
+
+GitHub setup is externally blocked: two attempts each to update environment
+`npm` and create the immutable-tag ruleset returned HTTP 403 `Resource not
+accessible by integration`. Read-back confirms the environment still has no
+protection rules and administrator bypass enabled, the ruleset list is empty,
+and `main` is protected. An authorized maintainer must complete and verify
+[`npm-github-protections.md`](../docs/protocol/npm-github-protections.md) before
+publishing. No npm publication or protection change occurred in this workspace.
+
+## Milestone 9: Mainline Design Preservation (Completed)
+
+Tags: mockup
+
+Summary: preserve the catalogue-navigation design merged to `main` in `83b377a`
+after this branch's original `96a7ca6` delivery. The captured pre-merge source
+tip is `96a7ca66ba89e24017152368e2154e75230e9f9a`; its merge base with the new
+main is `e0dc6d10163e79e0b991d1cd25b53778810dffe7`.
+
+- [x] Audit the upstream additions, keep the separate Pages/Components design
+      and its tests/docs, and resolve branded imports/copy path by path.
+- [x] Regenerate conflicted artboards from the integrated source; retain the
+      new section helper and all existing source and generated routes.
+- [x] Verify design examples and smoke the generated mobile/desktop navigation.
+
+All 69 regenerated pages opened directly from disk with no page errors; their
+desktop/mobile captures were visually inspected. A normalized comparison of all
+41 upstream source/test/style/doc files confirms every mainline change is
+preserved; only the authorized rename/formatting and README release guidance
+differ. No mainline feature or test is removed.
+
+## Milestone 10: Mainline Product Preservation (Completed)
+
+Tags: ui
+
+Summary: preserve the already-approved navigation feature in the served shell.
+
+- [x] Keep section projections, disclosure state and live-update behavior from
+      `main`; carry the Mokly rename into its newly added selectors and fixtures.
+- [x] Run the navigation and browser regression tests, including the upstream
+      section tests and Changes continuity tests.
+
+## Milestone 11: Combined Verification
+
+Summary: verify the fixes together with current main before delivery.
+
+- [x] Run focused regressions, packaging smoke checks, and `cargo xtask check`
+      with every check passing.
+- [ ] Smoke the dedicated bootstrap CLI against the clean committed result
+      before pushing; never publish the smoke artifact.
+
+The complete gate passed on Node 24.21.0: 1,037 unit/integration tests, 245
+Chromium browser tests, packed consumers, generated output, dependency audit,
+formatting/lint/typechecking, and Rust formatting/Clippy/tests/file-length lint.
+
+## Milestone 12: Follow-Up Commit And Push
+
+Summary: publish the checked follow-up on the existing branch.
+
+- [ ] Inspect the complete diff and newly created files, run `git add -A`,
+      commit with a Conventional Commit, and push the current branch.
+
+## Milestone 13: Follow-Up Post-Push Review
+
+Summary: review the complete delivered migration and follow-up without applying
+new findings. Record the outcome and move this plan to the completed index in a
+documentation-only closeout commit, then push and review that final diff too.
 
 - [ ] After the push, use
       [`docs/implementation-review-prompt.md`](../docs/implementation-review-prompt.md)

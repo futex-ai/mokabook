@@ -38,7 +38,7 @@ export interface NormalizedReviewPair {
   ignoredIds: readonly string[];
 }
 
-/** Normalize retired internal comments only when reading historical output. */
+/** Normalize historical comparison material, never HTML with unconsumed offsets. */
 export function normalizeHistoricalDocument(content: string): string {
   for (const [former, current] of FORMER_MARKERS)
     content = content.replaceAll(former, current);

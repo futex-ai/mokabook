@@ -2,10 +2,9 @@
 // folder icons for collapsible collections, the screen / page / use-case leaf
 // icons, the top bar's brand, search and tag controls, and the device chrome's
 // copy and expand / collapse controls. All icons are stroke-based on a 24-unit
-// viewBox and inherit `currentColor`. The navigation tree drops the chevron in
-// favour of the folder icon, swapping the closed folder for the open one while
-// a group is expanded (see `.mbk-nav-ico.folder` in the shell stylesheet); the
-// chevron is used by the details inspector bar.
+// viewBox and inherit `currentColor`. Authored collection groups swap closed
+// and open folder icons; top-level catalogue sections and the details inspector
+// use the chevron.
 
 import type { ReactNode } from "react";
 

@@ -1,6 +1,7 @@
 import {
   projectOwnedMaterial,
   sameOwner,
+  stripHistoricalMarkers,
   stripMarkers,
   structureSignals,
 } from "./comparison_material.js";
@@ -37,13 +38,14 @@ export function projectComponentPair(
   afterRanges?: readonly RenderedRange[],
 ): ComponentProjection {
   const validatedBefore = beforeView
-    ? (beforeRanges ?? validateComponentRanges(before, beforeView.ranges))
+    ? (beforeRanges ??
+      validateComponentRanges(before, beforeView.ranges, "historical"))
     : undefined;
   const validatedAfter = afterView
     ? (afterRanges ?? validateComponentRanges(after, afterView.ranges))
     : undefined;
   const rawBefore = normalizeSingleDocument(
-    stripMarkers(before, beforeView, validatedBefore),
+    stripHistoricalMarkers(before),
     context,
   );
   const rawAfter = normalizeSingleDocument(
@@ -93,7 +95,11 @@ export function projectComponentPair(
           validatedAfter,
         )
       : stripMarkers(after, afterView, validatedAfter);
-  const normalized = normalizeReviewPair(left, right, context);
+  const normalized = normalizeReviewPair(
+    stripHistoricalMarkers(left),
+    right,
+    context,
+  );
   const currentInputs = new Map(
     afterView?.instances
       .filter((item) => item.owner.kind === "entry")
@@ -161,7 +167,7 @@ export function changedComponentImplementations(
       .map((instance) => [instance.key, instance.componentId]),
   );
   const validatedBase =
-    baseRanges ?? validateComponentRanges(before, base.ranges);
+    baseRanges ?? validateComponentRanges(before, base.ranges, "historical");
   const validatedHead =
     headRanges ?? validateComponentRanges(after, head.ranges);
   for (const instance of base.instances) {
@@ -180,6 +186,7 @@ export function changedComponentImplementations(
       html: string,
       view: ComponentViewRecord,
       ranges: readonly RenderedRange[],
+      historical = false,
     ): string[] => [
       ...new Set(
         ranges
@@ -201,8 +208,11 @@ export function changedComponentImplementations(
                 end: range.contentEnd,
               },
             );
-            normalizeSingleDocument(projected, instance.componentId);
-            return projected;
+            const material = historical
+              ? stripHistoricalMarkers(projected)
+              : projected;
+            normalizeSingleDocument(material, instance.componentId);
+            return material;
           }),
       ),
     ];
@@ -210,7 +220,7 @@ export function changedComponentImplementations(
       view.instances
         .filter((child) => sameOwner(child.owner, owner))
         .map((child) => ({ key: child.key, propsKey: child.propsKey }));
-    const left = contents(before, base, validatedBase);
+    const left = contents(before, base, validatedBase, true);
     const right = contents(after, head, validatedHead);
     const match = (a: string, b: string) => {
       const pair = normalizeReviewPair(a, b, instance.componentId);

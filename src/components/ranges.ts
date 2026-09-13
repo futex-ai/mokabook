@@ -90,10 +90,11 @@ export function serializeComponentSentinels(
   return { html, ranges };
 }
 
-/** Validate parsed DOM boundaries, including manual-ignore composition. */
+/** Validate DOM boundaries in the original document's UTF-16 coordinate space. */
 export function validateComponentRanges(
   html: string,
   records: readonly ComponentRangeRecord[],
+  dialect: "current" | "historical" = "current",
 ): RenderedRange[] {
   const expected = new Map(records.map((record) => [record.id, record]));
   const result: RenderedRange[] = [];
@@ -113,15 +114,19 @@ export function validateComponentRanges(
     )
       invalidData("$document", "reserved component attributes remain");
     if (node.nodeName !== "#comment" || !("data" in node)) return;
-    if (node.data.startsWith("mokly-review-ignore:start:")) ignored = true;
-    if (node.data.startsWith("mokly-review-ignore:end:")) ignored = false;
-    if (!node.data.startsWith(prefix)) return;
+    const data =
+      dialect === "historical"
+        ? node.data.replace(/^mokabook-(component|review-ignore):/, "mokly-$1:")
+        : node.data;
+    if (data.startsWith("mokly-review-ignore:start:")) ignored = true;
+    if (data.startsWith("mokly-review-ignore:end:")) ignored = false;
+    if (!data.startsWith(prefix)) return;
     if (ignored)
       invalidData(
         "$document",
         "ReviewIgnore cannot enclose component or caller-slot boundaries",
       );
-    const match = /^mokly-component:(start|end):(r-[0-9]+)$/.exec(node.data);
+    const match = /^mokly-component:(start|end):(r-[0-9]+)$/.exec(data);
     const location = node.sourceCodeLocation;
     const record = expected.get(match?.[2] ?? "");
     if (!match || !record || !location)

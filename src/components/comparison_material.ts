@@ -4,6 +4,12 @@ import type {
   ComponentViewRecord,
 } from "./manifest_types.js";
 import { validateComponentRanges, type RenderedRange } from "./ranges.js";
+import { normalizeHistoricalDocument } from "../review/ignore.js";
+
+/** Canonicalize historical material only after its original coordinates are consumed. */
+export function stripHistoricalMarkers(html: string): string {
+  return stripMarkers(normalizeHistoricalDocument(html));
+}
 
 /** Validate ownership before stripping layout-neutral markers for conservative migration. */
 export function stripMarkers(

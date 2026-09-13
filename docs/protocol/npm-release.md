@@ -25,8 +25,8 @@ one `mokly` bin, explicit exports/types, and a restrictive `files` allowlist.
 
 Read the checkout's version from `package.json`; `.release-please-manifest.json`
 tracks release-please's version state, and `package-lock.json` mirrors package
-metadata. Release PRs update these together. The one-time registry bootstrap
-below registers the new package without changing those release-managed files;
+metadata. Release PRs update these together. The one-time
+[registry bootstrap](./npm-bootstrap.md) registers the new package without changing those release-managed files;
 after it succeeds, neither this document nor consumer export instructions
 require another bootstrap publish.
 
@@ -197,7 +197,7 @@ The release workflow then:
    provenance, and unexpected transport failures remain fail-closed.
 
 Publishing occurs in the same workflow invocation that creates the GitHub
-release. A manual `publish_ref` dispatch may retry an existing `vX.Y.Z` tag and
+release. A manual `publish_ref` dispatch from workflow ref `main` may retry an existing `vX.Y.Z` tag and
 runs the identical verification path. Concurrency never cancels an in-progress
 publish.
 
@@ -219,31 +219,12 @@ runtime alias or a second publication target. Because npm trusted publishing can
 only be configured after a package exists, the unscoped `mokly` package needs
 one reviewed bootstrap publication before normal releases can use OIDC.
 
-After this migration is merged to `main`, but before merging its Release Please
-release PR:
-
-1. Confirm `npm view mokly` still returns a recognized missing-package response.
-2. Run `cargo xtask check`, create the exact package archive with
-   `node scripts/release/pack.mjs .context/release-artifact`, and inspect its
-   report. The archive must identify `mokly@0.8.0` and the reviewed migration
-   commit.
-3. From an approved maintainer account with 2FA, publish that exact archive as
-   public with the non-consumer `bootstrap` dist-tag. Do not assign `latest`.
-4. Configure npm trusted publishing for GitHub organization `mokly-ai`,
-   repository `mokly`, workflow `release.yml`, environment `npm`, and explicitly
-   allow the workflow's direct `npm publish` action.
-5. Give the intended `mokly` npm organization team read/write access to the
-   unscoped package, then require 2FA and disallow token publishing. Store no npm
-   write token in GitHub.
-6. Merge the breaking Release Please PR. Its new `v0.9.0` tag is the first
-   supported `mokly` release and the first version assigned to `latest`.
-7. Verify package contents, owner/team access, metadata, provenance, dist-tags,
-   `npx mokly --version`, and a minimal clean build/serve fixture. Only then
-   deprecate every version of `mokabook` with a move notice; do not unpublish it.
-
-The bootstrap archive is package-registration evidence, not a supported
-consumer release. Never move an existing Git tag or reset the release-please
-manifest to recreate an old version.
+Follow the [bootstrap procedure](./npm-bootstrap.md) after the migration and its
+review fixes reach `main`, before merging the Release Please PR. The dedicated
+`scripts/release/bootstrap.mjs` command requires the reviewed full commit SHA,
+builds from a fresh isolated checkout, and records source identity beside the
+archive integrity and inventory. The ordinary `pack.mjs` command does not supply
+this bootstrap source proof.
 
 ## Maintainer Setup
 
@@ -256,17 +237,21 @@ Before enabling publish, maintainers must configure and verify:
   branch `main`, repository variable `CLOUDFLARE_ACCOUNT_ID` is set, and
   repository secret `CLOUDFLARE_PAGES_API_TOKEN` or `CLOUDFLARE_API_TOKEN`
   holds a least-privilege token with Pages write access;
-- the protected `npm` environment has the approved deployment branches/tags and
-  reviewers, without storing an npm token;
+- the protected `npm` environment allows only the workflow's `main` branch,
+  requires an approved reviewer, and disables administrator bypass, without
+  storing an npm token. Checking out a release tag does not change the workflow
+  deployment ref; manual retries must also dispatch from `main`;
 - the `RELEASE_PLEASE_TOKEN` credential owner, least-privilege repository
   access, expiry/rotation, and fallback behavior;
 - approved Mokly npm maintainer accounts and teams, enforced 2FA, public
   unscoped-package access, and the intended initial owner list;
 - the trusted-publisher repository, workflow filename, environment, and publish
   action exactly match the values above; and
-- immutable tag/GitHub release protection and who may invoke the manual retry.
+- immutable `v*` tag update/deletion protection and who may invoke the manual retry.
 
 No long-lived npm write token is stored in GitHub Actions.
+See [GitHub publishing protections](./npm-github-protections.md) for exact setup,
+read-back verification, sole-maintainer approval policy, and credential blockers.
 
 ## Release Evidence
 

@@ -227,7 +227,8 @@ manifest stays internal: its source inventory is unavailable through HTTP,
 published assets, and comparison resources. Ordinary public JSON remains
 supported. Browse
 serves the package-owned Mokly shell — resizable desktop catalogue
-navigation with folder/screen/flow icons and an All/Changes filter, search that
+navigation with separate collapsible Pages and Components sections, folder and
+entry-kind icons, and an All/Changes filter, search that
 narrows the tree by page ID, title, route, and `tag:` terms that the field's tag
 picker and the details inspector's chips enter for you, hierarchy-derived
 breadcrumbs with hash-prefixed copyable ID chips, realistic browser chrome with
@@ -729,8 +730,12 @@ signature propagation before proving the registry artifact. A manual
 `publish_ref` retries only an existing tag. See the
 [release protocol](./docs/protocol/npm-release.md) for the current release/retry
 procedure and maintainer settings. Package versions are release-managed;
-complete the one-time `mokly` registry bootstrap in that protocol before the
-first release, then do not repeat it. Do not add an npm write token to GitHub.
+complete the one-time [Mokly registry bootstrap](./docs/protocol/npm-bootstrap.md)
+before the first release, then do not repeat it. Its dedicated
+`node scripts/release/bootstrap.mjs <reviewed-full-commit-sha> <new-output-dir>`
+command builds an isolated checkout and records the source SHA alongside the
+tarball hashes. Verify the [GitHub publishing protections](./docs/protocol/npm-github-protections.md)
+with an authorized maintainer account. Do not add an npm write token to GitHub.
 
 The synthetic fixture at [`examples/basic`](./examples/basic/README.md) proves
 custom rendering, stylesheets, id links, collections, use cases, and
@@ -750,7 +755,7 @@ eligible comparisons retain an opaque toolbar. The desktop grip sits on its
 divider line.
 
 All 56 design screens reuse the 15 registered components in
-**Design → Shared components**, including the footer tabs panel. The library
+**Components → Design → Shared components**, including the footer tabs panel. The library
 provides 56 saved variants, local prop controls, real usage and component-owned
 change attribution. See the [shared design library guide](./examples/basic/entries/design/library/README.md).
 

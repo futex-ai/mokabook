@@ -215,10 +215,13 @@ otherwise remain portable and sandbox-confined. Consumer scripts, forms,
 popups, downloads, and top navigation remain forbidden. Review panes retain
 their stricter sandbox and byte-unmodified documents.
 
-Every disclosure group uses `collection:<id>` as its rendered and persisted
-identity. Labels remain presentation only, so equally titled collections retain
-independent state. Obsolete `legacy:` and label-path keys are ignored while
-valid collection keys remain effective.
+The top-level disclosures use `section:pages` and `section:components` as their
+rendered and persisted identities. A collection projected into a section uses
+`collection:<section>:<id>`, so the two appearances of a mixed collection retain
+independent state. Labels remain presentation only. Stored pre-section
+`collection:<id>` keys apply to either projection during migration; obsolete
+`legacy:` and label-path keys are ignored while valid disclosure keys remain
+effective.
 
 A catalogue with dark fragments offers a `Light | Dark` scheme switch; a
 light-only catalogue offers none. One switch renders in the top bar and one in

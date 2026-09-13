@@ -325,7 +325,14 @@ test("catalogue nav marks active, changed, and iconed rows", () => {
     /data-route="user-flows\/tour\.html"[^>]*data-tags/.test(html),
     false,
   );
+  assert.match(
+    html,
+    /data-nav-disclosure="section:pages" data-nav-section="pages"/,
+  );
+  assert.doesNotMatch(html, /data-nav-section="components"/);
   assert.match(html, /data-nav-collection="collection:screens"/);
+  assert.match(html, /data-nav-disclosure="collection:pages:screens"/);
+  assert.match(html, /data-entry-kind="screen"/);
   assert.match(html, /class="mbk-nav-ico folder"><svg/);
   assert.match(html, /class="mbk-nav-count">2</);
   assert.match(html, /Collapse all/);
@@ -735,6 +742,14 @@ test("shell stylesheet stays aligned with the design contract", () => {
   assert.match(SHELL_CSS, /max-width: 1180px/);
   assert.match(SHELL_CSS, /max-width: 56\.25rem/);
   assert.match(SHELL_CSS, /width: var\(--mbk-nav-width, 248px\)/);
+  assert.match(
+    SHELL_CSS,
+    /\.mbk-nav-section-head \{[^}]*text-transform: uppercase;[^}]*cursor: pointer;/,
+  );
+  assert.match(
+    SHELL_CSS,
+    /\.mbk-nav-section\[open\][^{]*\.mbk-nav-section-chevron \{[^}]*transform: rotate\(90deg\);/,
+  );
   assert.match(
     SHELL_CSS,
     /\.mbk-nav\[data-resize-ready\] \.mbk-nav-resize \{[\s\S]*display: block;/,

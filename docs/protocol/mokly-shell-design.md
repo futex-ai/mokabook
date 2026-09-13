@@ -202,15 +202,24 @@ scrollable region scrolls internally:
   The drawer below the breakpoint shows the same body. Static exports without
   Changes retain their filter-free layout. The catalogue-navigation component's
   `loading` variant is the mobile/desktop owning mockup.
-  - Groups are native `<details>` whose summary row shows a closed/open folder
-    SVG pair (swapped via the `[open]` state), a bold label, and a monospace
-    child count. Leaves show a screen, page, or flow SVG; flow icons read in
-    the accent.
+  - The tree begins with separate `Pages` and `Components` native disclosures,
+    both open by default and both closed by `Collapse all`. Pages contains
+    screens, whole-document pages, and use cases; Components contains component
+    entries. A section is omitted when it has no matching current or retained
+    removed entries. Search and Changes hide a section when they hide every row
+    in it.
+  - Each section projects the authored collection hierarchy rather than
+    inventing route folders. A mixed collection appears in both projections
+    with only its matching descendants and a projected child count. Empty
+    authored collections remain in Pages. Collection groups are native
+    `<details>` whose summary row shows a closed/open folder SVG pair (swapped
+    via the `[open]` state), a bold label, and a monospace child count. Leaves
+    show a screen, page, flow, or component SVG; flow icons read in the accent.
   - Rows indent 16px per depth from an 8px root inset and paint one faint
     1px vertical guide per ancestor depth. The hover/active highlight is an
     inset pill starting at the row's indent (`--mbk-indent`), so guides stay
     visible; the active row uses the accent with contrast text.
-  - Catalogue-link navigation opens every collection on the active
+  - Catalogue-link navigation opens the active section and every collection on the active
     row's path and scrolls that row into view. Search and Changes filtering may
     stay selected only while the active row remains visible. Reapplying an
     active filter during navigation preserves collapsed groups outside the

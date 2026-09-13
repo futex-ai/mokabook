@@ -223,9 +223,10 @@ deleted; no historical collection tree is synthesized.
 
 Watch rebuilds imported sources, recomputes page impact before notification,
 and restores disclosures by entry/collection identity. Parent changes update
-both navigation and breadcrumbs after reload. Existing saved `collection:`
-keys survive; old `legacy:` keys are ignored, never applied to a collection
-with the same title. Active ancestors open through the existing reveal logic.
+both navigation and breadcrumbs after reload. Existing unsectioned saved
+`collection:` keys migrate to the matching Pages or Components projection; old
+`legacy:` keys are ignored, never applied to a collection with the same title.
+Active sections and ancestors open through the existing reveal logic.
 
 Static publishing includes each page route, generated document and resources,
 ID redirect, validated anchor navigation, metadata, search/filter behavior,

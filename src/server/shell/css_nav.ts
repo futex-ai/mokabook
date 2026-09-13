@@ -275,6 +275,41 @@ export const SHELL_NAV_CSS = `
   padding: 4px 8px 12px;
 }
 
+.mbk-nav-section + .mbk-nav-section {
+  margin-top: 10px;
+}
+
+.mbk-nav-section > summary {
+  list-style: none;
+}
+
+.mbk-nav-section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mbk-nav-section-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px 4px;
+  color: var(--chrome-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.mbk-nav-section-chevron {
+  display: inline-grid;
+  place-items: center;
+  transition: transform 120ms ease;
+}
+
+.mbk-nav-section[open] > .mbk-nav-section-head .mbk-nav-section-chevron {
+  transform: rotate(90deg);
+}
+
 .mbk-nav-row {
   position: relative;
   z-index: 0;
@@ -381,12 +416,22 @@ details.mbk-nav-group[hidden] {
   display: none;
 }
 
+details.mbk-nav-section[hidden] {
+  display: none;
+}
+
 details.mbk-nav-group > summary {
   list-style: none;
 }
 
 details.mbk-nav-group > summary::-webkit-details-marker {
   display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mbk-nav-section-chevron {
+    transition: none;
+  }
 }
 
 .mbk-basewatch {

@@ -152,6 +152,8 @@ test("free text filters structured rows by their page id", () => {
 
 test("navigation clears only a query that hides its destination", () => {
   const nav = navFixture();
+  nav.pages.open = false;
+  nav.screens.open = false;
   nav.search.value = "tag:onboarding";
 
   const welcome = selectAndRevealRoute(
@@ -167,6 +169,8 @@ test("navigation clears only a query that hides its destination", () => {
   assert.equal(nav.welcome.scrolled, true);
   assert.equal(nav.welcome.hidden, false);
   assert.equal(nav.details.hidden, true);
+  assert.equal(nav.pages.open, true);
+  assert.equal(nav.screens.open, true);
 
   const details = selectAndRevealRoute(
     asDocument(nav.root),
@@ -188,6 +192,7 @@ interface NavFixture {
   details: FakeNode;
   docs: FakeNode;
   glossary: FakeNode;
+  pages: FakeNode;
   root: FakeNode;
   screens: FakeNode;
   search: FakeNode;
@@ -212,14 +217,24 @@ function navFixture(): NavFixture {
   const screens = navGroup("collection:screens", welcome, details);
   const docs = navGroup("collection:docs", glossary);
   const changed = filterOption("changed", "false");
+  const pages = navGroup("section:pages", screens, docs);
   const root = new FakeNode("div").append(
     search,
     filterOption("all", "true"),
     changed,
-    screens,
-    docs,
+    pages,
   );
-  return { changed, details, docs, glossary, root, screens, search, welcome };
+  return {
+    changed,
+    details,
+    docs,
+    glossary,
+    pages,
+    root,
+    screens,
+    search,
+    welcome,
+  };
 }
 
 function navRow(
@@ -242,9 +257,10 @@ function navRow(
 }
 
 function navGroup(key: string, ...rows: readonly FakeNode[]): FakeNode {
-  return new FakeNode("details", { "data-nav-collection": key }).append(
-    ...rows,
-  );
+  return new FakeNode("details", {
+    "data-nav-disclosure": key,
+    ...(key.startsWith("collection:") ? { "data-nav-collection": key } : {}),
+  }).append(...rows);
 }
 
 function filterOption(name: string, pressed: string): FakeNode {
@@ -257,7 +273,7 @@ function filterOption(name: string, pressed: string): FakeNode {
 function group(key: string, open: boolean): HTMLDetailsElement {
   return {
     getAttribute(name: string) {
-      return name === "data-nav-collection" ? key : null;
+      return name === "data-nav-disclosure" ? key : null;
     },
     open,
   } as HTMLDetailsElement;
@@ -266,7 +282,7 @@ function group(key: string, open: boolean): HTMLDetailsElement {
 function fakeDocument(...groups: HTMLDetailsElement[]): Document {
   return {
     querySelectorAll(selector: string) {
-      assert.equal(selector, "details[data-nav-collection]");
+      assert.equal(selector, "details[data-nav-disclosure]");
       return groups;
     },
   } as unknown as Document;

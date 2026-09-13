@@ -7569,7 +7569,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -7790,6 +7790,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -7896,7 +8023,7 @@
                   false
                 ]
               },
-              "propsKey": "bf125001950e7d30d90a5f3ded93f3c00d0df4cac212e8ca7e00a25937ed1dd2"
+              "propsKey": "645bae19a3e2016ce015cf250949a63a63494b0be9f7ddf368ecb76886c78657"
             },
             {
               "componentId": "design-ui-metadata-row",
@@ -9547,7 +9674,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -9768,6 +9895,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -9874,7 +10128,7 @@
                   true
                 ]
               },
-              "propsKey": "c6ff24dbb2a6ab1d5352ac0951746180c80200dc3a62c43ae69f5e766ee3a48b"
+              "propsKey": "9de83d04388c7b9cb4099e93958b6037342bcad8c1a4580091ff1ca3223f5a02"
             },
             {
               "componentId": "design-ui-metadata-row",
@@ -11604,7 +11858,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -11825,6 +12079,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -11931,7 +12312,7 @@
                   true
                 ]
               },
-              "propsKey": "d7e00775d52432d296027ddb579bd8d51c087186104940a6a73dcd36060ac347"
+              "propsKey": "41d0d69471ad3734540434b29ed7c53c03281858d07ea08c08197890d0ca9c05"
             },
             {
               "componentId": "design-ui-device-frame",
@@ -13644,7 +14025,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -13865,6 +14246,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -13971,7 +14479,7 @@
                   true
                 ]
               },
-              "propsKey": "d7e00775d52432d296027ddb579bd8d51c087186104940a6a73dcd36060ac347"
+              "propsKey": "41d0d69471ad3734540434b29ed7c53c03281858d07ea08c08197890d0ca9c05"
             },
             {
               "componentId": "design-ui-device-frame",
@@ -15658,7 +16166,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -15879,6 +16387,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -15985,7 +16620,7 @@
                   true
                 ]
               },
-              "propsKey": "57446839750b6878e3616f6d975c0c53e5900e5dcd7d8165ca4e0df4bf6b352c"
+              "propsKey": "59df61eb1c90d5cd7aa7baa653e86a3ef3e63f4533cb808b9b7affd032d9a998"
             },
             {
               "componentId": "design-ui-device-frame",
@@ -16819,7 +17454,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -17040,6 +17675,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -17146,7 +17908,7 @@
                   true
                 ]
               },
-              "propsKey": "b164519ca3012af6c5ab5235617a96600688a12b4f43d4c33e4262657ff1bcd3"
+              "propsKey": "bce3ce131919c08dec0a933564071e2bd31001ae49b08d51f20d77a6080e051b"
             },
             {
               "componentId": "design-ui-top-bar",
@@ -17364,7 +18126,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -17585,6 +18347,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -17691,7 +18580,7 @@
                   true
                 ]
               },
-              "propsKey": "7009240d7689c398211a87c41d924f55594fa9a943f91a0b67f1c87153ad0bdb"
+              "propsKey": "51e4c2a04d0d7ed58b99f0169f6c946f1ae6cc635c510e8df2039a8b55ff6282"
             },
             {
               "componentId": "design-ui-top-bar",
@@ -17871,7 +18760,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -18092,6 +18981,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -18198,7 +19214,7 @@
                   true
                 ]
               },
-              "propsKey": "7009240d7689c398211a87c41d924f55594fa9a943f91a0b67f1c87153ad0bdb"
+              "propsKey": "51e4c2a04d0d7ed58b99f0169f6c946f1ae6cc635c510e8df2039a8b55ff6282"
             },
             {
               "componentId": "design-ui-top-bar",
@@ -27897,7 +28913,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -28118,6 +29134,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -28224,7 +29367,7 @@
                   true
                 ]
               },
-              "propsKey": "d7e00775d52432d296027ddb579bd8d51c087186104940a6a73dcd36060ac347"
+              "propsKey": "41d0d69471ad3734540434b29ed7c53c03281858d07ea08c08197890d0ca9c05"
             },
             {
               "componentId": "design-ui-device-frame",
@@ -29965,7 +31108,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -30186,6 +31329,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -30292,7 +31562,7 @@
                   true
                 ]
               },
-              "propsKey": "57446839750b6878e3616f6d975c0c53e5900e5dcd7d8165ca4e0df4bf6b352c"
+              "propsKey": "59df61eb1c90d5cd7aa7baa653e86a3ef3e63f4533cb808b9b7affd032d9a998"
             },
             {
               "componentId": "design-ui-device-frame",
@@ -31117,7 +32387,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -31338,6 +32608,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -31444,7 +32841,7 @@
                   true
                 ]
               },
-              "propsKey": "b164519ca3012af6c5ab5235617a96600688a12b4f43d4c33e4262657ff1bcd3"
+              "propsKey": "bce3ce131919c08dec0a933564071e2bd31001ae49b08d51f20d77a6080e051b"
             },
             {
               "componentId": "design-ui-top-bar",
@@ -32664,7 +34061,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -32885,6 +34282,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -32991,7 +34515,7 @@
                   true
                 ]
               },
-              "propsKey": "d7e00775d52432d296027ddb579bd8d51c087186104940a6a73dcd36060ac347"
+              "propsKey": "41d0d69471ad3734540434b29ed7c53c03281858d07ea08c08197890d0ca9c05"
             },
             {
               "componentId": "design-ui-device-frame",
@@ -34167,7 +35691,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -34388,6 +35912,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -34494,7 +36145,7 @@
                   true
                 ]
               },
-              "propsKey": "9064803d87f519f24f357b4c671f4733d4b53b0a0a6331e41e6c7a866bf3ad8c"
+              "propsKey": "d39dc0c642034e919f196010b414ed796edc2c50cae3ef6b2746e60f75a02437"
             },
             {
               "componentId": "design-ui-flow-step",
@@ -98930,7 +100581,7 @@
                       "count",
                       [
                         "number",
-                        "2"
+                        "4"
                       ]
                     ],
                     [
@@ -98938,6 +100589,53 @@
                       [
                         "number",
                         "0"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Example"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
                       ]
                     ],
                     [
@@ -98977,7 +100675,7 @@
                       "depth",
                       [
                         "number",
-                        "1"
+                        "2"
                       ]
                     ],
                     [
@@ -99017,7 +100715,7 @@
                       "depth",
                       [
                         "number",
-                        "1"
+                        "2"
                       ]
                     ],
                     [
@@ -99046,6 +100744,286 @@
                       [
                         "string",
                         "design-browse-details-screen"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example-tour"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "flow"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Example tour"
+                      ]
+                    ],
+                    [
+                      "to",
+                      [
+                        "string",
+                        "design-browse-use-case"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example-components"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Components"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "action"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "component"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Action"
+                      ]
+                    ],
+                    [
+                      "to",
+                      [
+                        "string",
+                        "design-component-overview"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "toolbar"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "component"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Toolbar"
+                      ]
+                    ],
+                    [
+                      "to",
+                      [
+                        "string",
+                        "design-component-toolbar"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "0"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "design"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Design"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "browse-shell"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Browse shell"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "changes"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Changes"
                       ]
                     ]
                   ]
@@ -99117,7 +101095,7 @@
                       "count",
                       [
                         "number",
-                        "2"
+                        "4"
                       ]
                     ],
                     [
@@ -99125,6 +101103,53 @@
                       [
                         "number",
                         "0"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Example"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
                       ]
                     ],
                     [
@@ -99164,7 +101189,7 @@
                       "depth",
                       [
                         "number",
-                        "1"
+                        "2"
                       ]
                     ],
                     [
@@ -99323,7 +101348,7 @@
                       "count",
                       [
                         "number",
-                        "2"
+                        "4"
                       ]
                     ],
                     [
@@ -99331,6 +101356,53 @@
                       [
                         "number",
                         "0"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Example"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
                       ]
                     ],
                     [
@@ -99370,7 +101442,7 @@
                       "depth",
                       [
                         "number",
-                        "1"
+                        "2"
                       ]
                     ],
                     [
@@ -99410,7 +101482,7 @@
                       "depth",
                       [
                         "number",
-                        "1"
+                        "2"
                       ]
                     ],
                     [
@@ -99439,6 +101511,286 @@
                       [
                         "string",
                         "design-browse-details-screen"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example-tour"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "flow"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Example tour"
+                      ]
+                    ],
+                    [
+                      "to",
+                      [
+                        "string",
+                        "design-browse-use-case"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example-components"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Components"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "action"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "component"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Action"
+                      ]
+                    ],
+                    [
+                      "to",
+                      [
+                        "string",
+                        "design-component-overview"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "toolbar"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "component"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Toolbar"
+                      ]
+                    ],
+                    [
+                      "to",
+                      [
+                        "string",
+                        "design-component-toolbar"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "0"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "design"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Design"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "browse-shell"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Browse shell"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "changes"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Changes"
                       ]
                     ]
                   ]
@@ -99514,7 +101866,7 @@
                       "count",
                       [
                         "number",
-                        "2"
+                        "4"
                       ]
                     ],
                     [
@@ -99522,6 +101874,53 @@
                       [
                         "number",
                         "0"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Example"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
                       ]
                     ],
                     [
@@ -99561,7 +101960,7 @@
                       "depth",
                       [
                         "number",
-                        "1"
+                        "2"
                       ]
                     ],
                     [
@@ -99601,7 +102000,7 @@
                       "depth",
                       [
                         "number",
-                        "1"
+                        "2"
                       ]
                     ],
                     [
@@ -99630,6 +102029,286 @@
                       [
                         "string",
                         "design-browse-details-screen"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example-tour"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "flow"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Example tour"
+                      ]
+                    ],
+                    [
+                      "to",
+                      [
+                        "string",
+                        "design-browse-use-case"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "example-components"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Components"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "action"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "component"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Action"
+                      ]
+                    ],
+                    [
+                      "to",
+                      [
+                        "string",
+                        "design-component-overview"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "toolbar"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "component"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Toolbar"
+                      ]
+                    ],
+                    [
+                      "to",
+                      [
+                        "string",
+                        "design-component-toolbar"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "count",
+                      [
+                        "number",
+                        "2"
+                      ]
+                    ],
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "0"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "design"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Design"
+                      ]
+                    ],
+                    [
+                      "open",
+                      [
+                        "boolean",
+                        true
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "browse-shell"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Browse shell"
+                      ]
+                    ]
+                  ]
+                ],
+                [
+                  "object",
+                  [
+                    [
+                      "depth",
+                      [
+                        "number",
+                        "1"
+                      ]
+                    ],
+                    [
+                      "key",
+                      [
+                        "string",
+                        "changes"
+                      ]
+                    ],
+                    [
+                      "kind",
+                      [
+                        "string",
+                        "collection"
+                      ]
+                    ],
+                    [
+                      "label",
+                      [
+                        "string",
+                        "Changes"
                       ]
                     ]
                   ]
@@ -113952,7 +116631,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -114173,6 +116852,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -114279,7 +117085,7 @@
                   true
                 ]
               },
-              "propsKey": "4e5b829b46519c5d86a521f7e525a5ec8a4b37f6fc376c968f9cd6520d313d3b"
+              "propsKey": "7d2f95bbfb21b4005d3f01db545455bae905120ce61d0166fa7bc267ec067a5a"
             },
             {
               "componentId": "design-ui-device-frame",
@@ -115947,7 +118753,7 @@
                           "count",
                           [
                             "number",
-                            "3"
+                            "4"
                           ]
                         ],
                         [
@@ -116168,6 +118974,133 @@
                           "depth",
                           [
                             "number",
+                            "1"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "example-components"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "collection"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Components"
+                          ]
+                        ],
+                        [
+                          "open",
+                          [
+                            "boolean",
+                            true
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "action"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Action"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-overview"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "depth",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "key",
+                          [
+                            "string",
+                            "toolbar"
+                          ]
+                        ],
+                        [
+                          "kind",
+                          [
+                            "string",
+                            "component"
+                          ]
+                        ],
+                        [
+                          "label",
+                          [
+                            "string",
+                            "Toolbar"
+                          ]
+                        ],
+                        [
+                          "to",
+                          [
+                            "string",
+                            "design-component-toolbar"
+                          ]
+                        ]
+                      ]
+                    ],
+                    [
+                      "object",
+                      [
+                        [
+                          "count",
+                          [
+                            "number",
+                            "2"
+                          ]
+                        ],
+                        [
+                          "depth",
+                          [
+                            "number",
                             "0"
                           ]
                         ],
@@ -116274,7 +119207,7 @@
                   true
                 ]
               },
-              "propsKey": "4e5b829b46519c5d86a521f7e525a5ec8a4b37f6fc376c968f9cd6520d313d3b"
+              "propsKey": "7d2f95bbfb21b4005d3f01db545455bae905120ce61d0166fa7bc267ec067a5a"
             },
             {
               "componentId": "design-ui-device-frame",
@@ -129664,6 +132597,7 @@
     "examples/basic/entries/design/components/states/additions/screens.tsx",
     "examples/basic/entries/design/components/states/screens.tsx",
     "examples/basic/entries/design/design.mockup.tsx",
+    "examples/basic/entries/design/library/chrome/catalogue-navigation-sections.ts",
     "examples/basic/entries/design/library/chrome/catalogue-navigation.tsx",
     "examples/basic/entries/design/library/chrome/catalogue-navigation.view.tsx",
     "examples/basic/entries/design/library/chrome/screen-header.tsx",

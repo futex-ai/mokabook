@@ -1,4 +1,7 @@
-import { stripMarkers } from "../components/comparison_material.js";
+import {
+  stripHistoricalMarkers,
+  stripMarkers,
+} from "../components/comparison_material.js";
 import type { GeneratedComponentView } from "../components/views.js";
 import { validateComponentRanges } from "../components/ranges.js";
 import {
@@ -7,11 +10,7 @@ import {
 } from "../components/comparison_projection.js";
 import type { EntryChangeReason } from "./component_types.js";
 import type { ViewReview } from "./types.js";
-import {
-  normalizeHistoricalDocument,
-  normalizeReviewPair,
-  normalizeSingleDocument,
-} from "./ignore.js";
+import { normalizeReviewPair, normalizeSingleDocument } from "./ignore.js";
 import { snapshotPath } from "./paths.js";
 import type { ComponentDependencyPolicy } from "./component_metadata.js";
 import type { ComponentMaterialReader } from "./component_resources.js";
@@ -38,12 +37,12 @@ export async function compareComponentView(
   const selected = after ?? before;
   if (!selected) throw new Error("Comparison view requires at least one side");
   const base = before
-    ? normalizeHistoricalDocument(await context.beforeReader.text(before.path))
+    ? await context.beforeReader.text(before.path)
     : undefined;
   const head = after ? await context.afterReader.text(after.path) : undefined;
   const baseRanges =
     base !== undefined && before?.usage
-      ? validateComponentRanges(base, before.usage.ranges)
+      ? validateComponentRanges(base, before.usage.ranges, "historical")
       : undefined;
   const headRanges =
     head !== undefined && after?.usage
@@ -59,11 +58,9 @@ export async function compareComponentView(
   };
   if (base === undefined || head === undefined) {
     normalizeSingleDocument(
-      stripMarkers(
-        (base ?? head)!,
-        (before ?? after)!.usage,
-        baseRanges ?? headRanges,
-      ),
+      base !== undefined
+        ? stripHistoricalMarkers(base)
+        : stripMarkers(head!, after!.usage, headRanges),
       selected.path,
     );
     return {
@@ -113,7 +110,7 @@ export async function compareComponentView(
       reasons.push({ kind: "dependency", path });
   }
   const actual = normalizeReviewPair(
-    stripMarkers(base, before?.usage, baseRanges),
+    stripHistoricalMarkers(base),
     stripMarkers(head, after?.usage, headRanges),
     selected.path,
   );
