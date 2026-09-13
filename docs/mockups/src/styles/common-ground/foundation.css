@@ -1,0 +1,67 @@
+.common-foundation {
+  border-block: 1px solid #e5e1eb;
+  padding-block: 42px;
+  display: flex;
+  align-items: center;
+  gap: 33px;
+}
+.foundation-symbol {
+  width: 65px;
+  height: 65px;
+  display: grid;
+  place-items: center;
+  background: #f3eff9;
+  border: 1px solid #e7def2;
+  border-radius: 14px;
+  color: #baa8ce;
+  flex-shrink: 0;
+}
+.foundation-symbol .icon {
+  width: 28px;
+  height: 28px;
+}
+.common-foundation > div:nth-child(2) {
+  flex: 1;
+}
+.common-foundation h2 {
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.7px;
+  margin-block: 15px 12px;
+}
+.common-foundation p {
+  max-width: 480px;
+  font-size: 12px;
+  color: #68676f;
+  margin-bottom: 0;
+}
+.common-foundation .eyebrow {
+  font-size: 8px;
+  color: #6e6579;
+}
+.common-foundation .text-link {
+  color: #736187;
+  font-size: 11px;
+}
+.common-closing {
+  text-align: center;
+}
+.common-closing .eyebrow {
+  color: #6e6478;
+}
+.common-closing h2 {
+  font-size: 65px;
+  font-weight: 450;
+  letter-spacing: -3px;
+  margin-block: 26px;
+}
+.common-closing h2 em {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  color: #9681b8;
+}
+.common-closing p {
+  font-size: 9px;
+  color: #6d6674;
+  margin-top: 19px;
+}

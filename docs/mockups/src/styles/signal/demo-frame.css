@@ -1,0 +1,146 @@
+.agent-demo {
+  border: 1px solid #414a35;
+  border-radius: 9px;
+  overflow: hidden;
+  background: #1a1e17;
+  box-shadow: 0 25px 80px #0002;
+}
+.agent-demo-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #343d2b;
+  font-size: 10px;
+}
+.agent-demo-top > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.agent-demo-top .brand-mark {
+  width: 20px;
+  height: 20px;
+}
+.agent-demo-top strong {
+  font-weight: 500;
+}
+.agent-demo-top .demo-divider {
+  padding: 0;
+  color: #5f6b52;
+}
+.agent-demo-top > div > span:last-child {
+  color: #7d886e;
+}
+.branch-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #909e7e;
+  font-size: 8px;
+}
+.branch-label .icon {
+  width: 12px;
+  height: 12px;
+}
+.agent-demo-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr 275px;
+}
+.agent-outline {
+  padding: 25px 18px 18px;
+  position: relative;
+  font-size: 9px;
+  color: #94a080;
+}
+.agent-outline .eyebrow {
+  font-size: 7px;
+  color: #687457;
+  letter-spacing: 1px;
+  margin-bottom: 17px;
+}
+.agent-outline > div:not(.outline-footer) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  margin-inline: -5px;
+}
+.agent-outline .icon {
+  width: 13px;
+  height: 13px;
+}
+.outline-selected {
+  background: #2d3822;
+  border: 1px solid #3d4a30;
+  border-radius: 4px;
+  color: #c2df9c;
+}
+.agent-outline .outline-heading {
+  display: block;
+  margin-top: 31px;
+  margin-bottom: 13px;
+}
+.component-tag {
+  display: block;
+  width: fit-content;
+  border: 1px solid #323d28;
+  border-radius: 3px;
+  padding: 5px 8px;
+  margin-bottom: 9px;
+  font-size: 8px;
+  color: #889874;
+}
+.outline-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: absolute;
+  bottom: 20px;
+  font-size: 7px;
+}
+.outline-footer .status-dot {
+  width: 4px;
+  height: 4px;
+}
+.agent-stage {
+  padding: 20px 30px;
+  background-color: #23291e;
+  background-image: radial-gradient(#65774840 0.6px, transparent 0.6px);
+  background-size: 12px 12px;
+  border-inline: 1px solid #37432b;
+}
+.agent-stage-label {
+  display: flex;
+  justify-content: space-between;
+  color: #93a27f;
+  font-size: 7px;
+  margin-bottom: 14px;
+}
+.agent-stage-label > span:last-child {
+  color: #afc394;
+}
+.agent-stage .project-screen {
+  box-shadow: 0 5px 15px #0002;
+  min-height: 448px;
+}
+.agent-stage .project-body {
+  padding: 23px 24px;
+}
+.agent-stage .project-title h3 {
+  font-size: 24px;
+}
+.stage-footnote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 7px;
+  color: #809269;
+  margin-top: 17px;
+}
+.stage-footnote .icon {
+  width: 11px;
+  height: 11px;
+}

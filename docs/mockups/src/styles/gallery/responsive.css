@@ -1,0 +1,118 @@
+@media (max-width: 1100px) {
+  .gallery {
+    padding-inline: 32px;
+  }
+  .gallery-intro h1 {
+    font-size: 58px;
+  }
+  .concept-card-body {
+    padding: 20px;
+  }
+  .concept-thumbnail {
+    height: 170px;
+  }
+  .concept-detail {
+    gap: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .gallery {
+    padding-inline: 20px;
+  }
+  .gallery-header {
+    height: 82px;
+  }
+  .gallery-header > span {
+    font-size: 7px;
+    gap: 8px;
+  }
+  .gallery-header-rule {
+    width: 10px;
+  }
+  .gallery-intro {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-block: 40px 32px;
+    gap: 25px;
+  }
+  .gallery-intro h1 {
+    font-size: 51px;
+    letter-spacing: -2.5px;
+    margin-top: 18px;
+  }
+  .gallery-intro p {
+    font-size: 12px;
+  }
+  .concept-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .concept-thumbnail {
+    height: 240px;
+  }
+  .concept-card-body {
+    padding: 23px;
+  }
+  .concept-card p {
+    min-height: 0;
+  }
+  .compare-section {
+    padding-top: 50px;
+  }
+  .compare-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  .compare-heading h2 {
+    font-size: 26px;
+  }
+  .compare-heading p {
+    font-size: 10px;
+  }
+  .review-toolbar {
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 16px 12px;
+  }
+  .selected-concept {
+    font-size: 10px;
+  }
+  .selected-concept > span:last-child {
+    display: none;
+  }
+  .viewport-controls button {
+    padding: 6px;
+    font-size: 8px;
+  }
+  .review-toolbar > a {
+    width: 100%;
+    font-size: 9px;
+  }
+  .preview-stage {
+    padding: 23px 14px;
+    min-height: 180px;
+  }
+  .concept-detail {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    gap: 20px;
+  }
+  .review-guidance {
+    grid-template-columns: 1fr;
+    gap: 23px;
+    padding-block: 40px 30px;
+  }
+  .review-guidance p {
+    font-size: 10px;
+  }
+  .gallery-notes {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding-bottom: 25px;
+  }
+  .gallery-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

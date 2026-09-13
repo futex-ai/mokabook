@@ -1,0 +1,161 @@
+@media (max-width: 1100px) {
+  .signal h1 {
+    font-size: 83px;
+    letter-spacing: -5px;
+  }
+  .signal-hero-bottom {
+    gap: 24px;
+  }
+  .signal-hero-bottom > p {
+    max-width: 440px;
+  }
+  .signal-hero .hero-actions {
+    gap: 18px;
+  }
+  .agent-demo-grid {
+    grid-template-columns: 125px 1fr 240px;
+  }
+  .agent-outline {
+    padding-inline: 13px;
+  }
+  .agent-stage {
+    padding-inline: 18px;
+  }
+  .agent-stage .project-title h3 {
+    font-size: 21px;
+  }
+  .agent-stage .project-body {
+    padding-inline: 15px;
+  }
+  .agent-chat {
+    padding-inline: 16px;
+  }
+  .signal-foundation {
+    gap: 35px;
+  }
+}
+@media (max-width: 760px) {
+  .signal-hero {
+    padding-block: 36px 32px;
+  }
+  .signal-coordinate {
+    display: none;
+  }
+  .signal h1 {
+    font-size: clamp(42px, 10.2vw, 71px);
+    line-height: 1.1;
+    letter-spacing: -2.8px;
+    margin-block: 27px 24px;
+  }
+  .signal-hero-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .signal-hero-bottom > p {
+    font-size: 12px;
+    max-width: 430px;
+  }
+  .signal-workspace {
+    padding-top: 15px;
+  }
+  .signal-workspace-caption > span:last-child {
+    display: none;
+  }
+  .agent-demo-top {
+    padding: 14px 12px;
+    gap: 0;
+  }
+  .agent-demo-top > div {
+    font-size: 8px;
+    gap: 6px;
+  }
+  .agent-demo-top .branch-label {
+    display: none;
+  }
+  .agent-demo-grid {
+    grid-template-columns: 1fr;
+  }
+  .agent-outline {
+    display: none;
+  }
+  .agent-stage {
+    padding: 18px 14px;
+    border-inline: 0;
+    border-bottom: 1px solid #37432b;
+  }
+  .agent-stage .project-body {
+    padding: 20px 17px;
+  }
+  .agent-stage .project-screen {
+    min-height: 440px;
+  }
+  .agent-chat {
+    padding: 22px 21px;
+  }
+  .chat-heading {
+    font-size: 12px;
+    padding-bottom: 17px;
+  }
+  .chat-user,
+  .chat-reply p {
+    font-size: 11px;
+  }
+  .agent-checklist > span {
+    font-size: 9px;
+  }
+  .agent-apply {
+    padding: 13px;
+    font-size: 11px;
+  }
+  .chat-footnote {
+    font-size: 9px;
+  }
+  .signal-caption {
+    justify-content: space-between;
+    gap: 9px;
+    font-size: 7px;
+    line-height: 1.8;
+  }
+  .signal h2 {
+    font-size: 35px;
+    letter-spacing: -1.3px;
+  }
+  .signal-workflow {
+    padding-top: 78px;
+  }
+  .signal-feature-grid {
+    grid-template-columns: 1fr;
+    margin-top: 35px;
+  }
+  .signal-feature-grid article {
+    padding: 30px 0;
+    border-right: none;
+    border-bottom: 1px solid #343d2c;
+  }
+  .signal-feature-grid article:last-child {
+    padding-bottom: 0;
+  }
+  .signal-feature-icon {
+    float: right;
+    margin: 0;
+  }
+  .signal-feature-grid p {
+    max-width: 100%;
+  }
+  .signal-feature-grid h3 {
+    font-size: 25px;
+  }
+  .handoff-sequence {
+    flex-direction: column;
+    gap: 18px;
+    font-size: 24px;
+  }
+  .handoff-sequence .icon {
+    transform: rotate(90deg);
+  }
+  .signal-foundation {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}

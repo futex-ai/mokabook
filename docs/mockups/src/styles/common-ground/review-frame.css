@@ -1,0 +1,180 @@
+.review-demo {
+  border: 1px solid #d9d4e5;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 8px 18px #5e4d7d08;
+}
+.review-demo-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 18px;
+  border-bottom: 1px solid #e9e6ee;
+}
+.review-workspace {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9px;
+  color: #8f899b;
+}
+.review-workspace .brand-mark {
+  width: 19px;
+  height: 19px;
+  color: #a495bf;
+  margin-right: 4px;
+}
+.review-workspace strong {
+  color: #655a77;
+  font-weight: 550;
+}
+.review-team {
+  display: flex;
+  padding-left: 6px;
+}
+.review-team .tiny-avatar {
+  margin-left: -6px;
+  width: 23px;
+  height: 23px;
+  font-size: 6px;
+}
+.review-demo-body {
+  display: grid;
+  grid-template-columns: 170px 1fr 242px;
+}
+.review-sidebar {
+  border-right: 1px solid #e9e6ee;
+  padding: 25px 18px;
+  color: #9c95a7;
+  position: relative;
+}
+.review-sidebar > .eyebrow {
+  font-size: 7px;
+  letter-spacing: 0.7px;
+  color: #b2aabf;
+  margin-bottom: 19px;
+}
+.review-sidebar > span:not(.eyebrow) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  margin-inline: -6px;
+  font-size: 9px;
+}
+.review-sidebar .icon {
+  width: 13px;
+  height: 13px;
+}
+.sidebar-selected {
+  background: #f0ecf8;
+  color: #8c73b6;
+  border-radius: 4px;
+}
+.sidebar-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  font-size: 8px;
+  margin-top: 28px;
+  padding-left: 4px;
+}
+.sidebar-tree strong {
+  font-weight: 550;
+  color: #92819f;
+}
+.sidebar-tree > span {
+  padding-left: 10px;
+}
+.tree-active {
+  color: #8b71b6;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.tree-active i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #bea4dc;
+}
+.sidebar-bottom {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 6px;
+  color: #a79eb4;
+}
+.sidebar-bottom .status-dot {
+  width: 4px;
+  height: 4px;
+  background: #b8aac8;
+}
+.review-stage {
+  padding: 18px 25px;
+  background: #f8f7fa;
+}
+.review-stage-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 18px;
+}
+.review-stage-top > strong {
+  font-size: 11px;
+  color: #70647f;
+  font-weight: 550;
+}
+.segmented {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #eeebf3;
+  padding: 3px;
+  border-radius: 5px;
+}
+.segmented button {
+  font-size: 8px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #a59aaf;
+}
+.segmented button[aria-pressed="true"] {
+  background: #fff;
+  border-color: #e5dfea;
+  color: #8b6db0;
+  box-shadow: 0 1px 3px #695d8110;
+}
+.review-stage .project-screen {
+  min-height: 435px;
+}
+.review-stage .project-body {
+  padding: 20px 25px;
+}
+.review-stage-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 7px;
+  color: #a99eb7;
+  padding-top: 16px;
+}
+.review-stage-bottom .icon {
+  width: 11px;
+  height: 11px;
+}
+.review-ready {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 6px;
+  color: #a098b1;
+}

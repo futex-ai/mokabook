@@ -1,0 +1,115 @@
+.review-comments {
+  border-left: 1px solid #e9e6ee;
+  padding: 22px 19px;
+}
+.comment-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #7e6e91;
+  font-size: 9px;
+  margin-bottom: 28px;
+}
+.comment-heading strong {
+  font-weight: 550;
+}
+.comment-heading .icon {
+  width: 13px;
+  height: 13px;
+  color: #ae9fbe;
+}
+.review-comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.review-comment .tiny-avatar {
+  width: 25px;
+  height: 25px;
+  font-size: 7px;
+}
+.review-comment > div > strong {
+  display: block;
+  font-size: 8px;
+  color: #81708f;
+  font-weight: 550;
+}
+.review-comment small {
+  display: block;
+  color: #b0a4bb;
+  font-size: 6px;
+  margin-top: 5px;
+}
+.review-comment p {
+  font-size: 9px;
+  color: #9a8ca8;
+  line-height: 1.9;
+  margin-block: 12px 0;
+}
+.comment-line {
+  height: 23px;
+  border-left: 1px dashed #e0d8e8;
+  margin: 9px 0 9px 12px;
+}
+.comment-resolved {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #8c9b73;
+  background: #f0f4e9;
+  font-size: 6px;
+  padding: 5px 7px;
+  border-radius: 3px;
+  margin-top: 12px;
+}
+.comment-resolved .icon {
+  width: 9px;
+  height: 9px;
+}
+.comment-note {
+  background: #faf5dd;
+  padding: 19px 13px 15px;
+  margin: 39px 4px 0;
+  border: 1px solid #ece3bd;
+  box-shadow: 2px 3px 0 #dacfa512;
+  transform: rotate(4deg);
+  position: relative;
+  text-align: center;
+}
+.comment-note p {
+  font:
+    italic 15px/1.6 Georgia,
+    serif;
+  color: #a99a65;
+  margin: 0;
+}
+.note-pin {
+  position: absolute;
+  top: -10px;
+  left: calc(50% - 8px);
+  color: #b5a172;
+  font-size: 21px;
+}
+.common-product-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding-block: 21px;
+  color: #6e6579;
+  font-size: 8px;
+}
+.common-product-caption > span:not(.caption-line) {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.common-product-caption .icon {
+  width: 12px;
+  height: 12px;
+}
+.caption-line {
+  width: 50px;
+  height: 1px;
+  background: #dbd1e8;
+}

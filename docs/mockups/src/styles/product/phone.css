@@ -1,0 +1,122 @@
+.phone-frame {
+  width: 185px;
+  border: 5px solid #353830;
+  border-radius: 29px;
+  overflow: hidden;
+  background: #fff;
+  padding: 0 3px;
+  box-shadow: 8px 15px 32px #28302026;
+}
+.phone-status {
+  height: 29px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 9px;
+  position: relative;
+  font-size: 7px;
+  color: #353830;
+}
+.phone-notch {
+  width: 54px;
+  height: 14px;
+  border-radius: 12px;
+  background: #353830;
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  transform: translateX(-50%);
+}
+.phone-home {
+  width: 62px;
+  height: 3px;
+  border-radius: 3px;
+  background: #353830;
+  margin: 9px auto 6px;
+}
+.project-compact {
+  border: 0;
+  border-radius: 0;
+}
+.project-compact .project-top {
+  padding-inline: 10px;
+  height: 32px;
+}
+.project-compact .project-body {
+  padding: 18px 11px 6px;
+}
+.project-compact .project-breadcrumb {
+  font-size: 5px;
+  margin-bottom: 15px;
+}
+.project-compact .project-title {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.project-compact .project-title h3 {
+  font-size: 19px;
+  letter-spacing: -0.8px;
+}
+.project-compact .project-description {
+  font-size: 6px;
+  margin-block: 8px 15px;
+}
+.project-compact .project-label {
+  font-size: 5px;
+  letter-spacing: 0.6px;
+}
+.project-compact .project-action {
+  font-size: 6px;
+  padding: 7px 9px;
+}
+.project-compact .project-tabs {
+  font-size: 6px;
+  gap: 21px;
+}
+.project-compact .project-progress {
+  margin-block: 14px;
+  padding: 12px 10px;
+}
+.project-compact .project-progress > span:first-child {
+  font-size: 9px;
+}
+.project-compact .project-progress-note {
+  font-size: 6px;
+}
+.project-compact .project-people small {
+  font-size: 5px;
+}
+.project-compact .project-task {
+  font-size: 6px;
+  gap: 5px;
+  padding-block: 10px;
+}
+.project-compact .task-chip {
+  font-size: 4px;
+  padding: 3px;
+}
+.project-compact .project-task-heading {
+  margin-top: 17px;
+}
+.project-compact .project-task-heading,
+.project-compact .project-task-heading > span {
+  font-size: 6px;
+}
+.project-compact .project-brand {
+  font-size: 12px;
+}
+@media (max-width: 760px) {
+  .project-body {
+    padding: 22px 18px;
+  }
+  .project-title h3 {
+    font-size: 23px;
+  }
+  .project-action {
+    padding: 8px;
+    font-size: 7px;
+  }
+  .project-top {
+    padding-inline: 18px;
+  }
+}

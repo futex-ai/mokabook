@@ -1,0 +1,188 @@
+.gallery {
+  --accent: #647c4c;
+  --line: #dcded5;
+  --paper: #f5f6f1;
+  --ink: #30362b;
+  color: var(--ink);
+  background: var(--paper);
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 0 56px;
+}
+.gallery-header {
+  height: 102px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+.gallery-header > span {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font:
+    9px ui-monospace,
+    monospace;
+  letter-spacing: 1px;
+  color: #686f61;
+}
+.gallery-header-rule {
+  width: 28px;
+  height: 1px;
+  background: #adb5a2;
+}
+.gallery-intro {
+  display: flex;
+  justify-content: space-between;
+  gap: 60px;
+  padding-block: 63px 49px;
+  align-items: flex-end;
+}
+.gallery-intro .eyebrow {
+  color: #667059;
+  font-size: 9px;
+}
+.gallery-intro h1 {
+  font-size: 66px;
+  font-weight: 470;
+  letter-spacing: -3.5px;
+  line-height: 1.06;
+  margin: 22px 0 0;
+}
+.gallery-intro h1 > span {
+  color: #7d8f64;
+}
+.gallery-intro > div:last-child {
+  max-width: 370px;
+  padding-bottom: 5px;
+}
+.gallery-intro p {
+  font-size: 13px;
+  color: #67705d;
+  margin-bottom: 15px;
+}
+.gallery-scope {
+  font-size: 10px;
+  line-height: 1.7;
+  color: #67705d;
+  display: block;
+}
+.concept-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.concept-card {
+  border: 1px solid #dcded4;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fdfdf9;
+}
+.concept-thumbnail {
+  display: block;
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+  background: #e9e9df;
+  border-bottom: 1px solid var(--line);
+}
+.concept-thumbnail iframe {
+  display: block;
+  width: 1280px;
+  height: 920px;
+  transform: scale(var(--thumbnail-scale, 0.28));
+  transform-origin: top left;
+  border: 0;
+  pointer-events: none;
+}
+.thumbnail-open {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #bec8b3;
+  background: #f9fbf3ed;
+  color: #657655;
+  border-radius: 50%;
+  transition: transform 150ms ease;
+}
+.thumbnail-open .icon {
+  width: 15px;
+  height: 15px;
+  transform: rotate(-45deg);
+}
+.concept-thumbnail:hover .thumbnail-open {
+  transform: translate(2px, -2px);
+}
+.concept-card-body {
+  padding: 24px;
+}
+.concept-number {
+  font:
+    8px ui-monospace,
+    monospace;
+  letter-spacing: 1px;
+  color: #82684e;
+}
+.concept-signal .concept-number {
+  color: #587540;
+}
+.concept-common-ground .concept-number {
+  color: #7b6391;
+}
+.concept-card h2 {
+  font-size: 27px;
+  letter-spacing: -1px;
+  margin-block: 11px 10px;
+  font-weight: 500;
+}
+.concept-tone {
+  display: block;
+  font-size: 9px;
+  color: #696f61;
+}
+.concept-card p {
+  font-size: 11px;
+  line-height: 1.85;
+  color: #696f61;
+  margin-block: 22px 23px;
+  min-height: 81px;
+}
+.concept-card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e8df;
+}
+.concept-card-actions button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  background: transparent;
+  font-size: 10px;
+  padding: 8px 0;
+  color: #66705a;
+}
+.concept-card-actions button[aria-pressed="true"] {
+  color: #354829;
+  font-weight: 650;
+}
+.concept-card-actions button .icon {
+  width: 14px;
+  height: 14px;
+}
+.concept-card-actions a {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e0e6d7;
+  border-radius: 4px;
+  color: #657158;
+}

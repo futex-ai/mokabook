@@ -1,0 +1,46 @@
+.review-guidance {
+  display: grid;
+  grid-template-columns: 0.8fr 1fr 1fr 1fr;
+  gap: 35px;
+  padding-block: 60px 38px;
+}
+.review-guidance > .eyebrow {
+  align-items: flex-start;
+  padding-top: 3px;
+  font-size: 8px;
+  color: #67705a;
+}
+.review-guidance h3 {
+  font-size: 14px;
+  letter-spacing: -0.2px;
+  margin-bottom: 10px;
+}
+.review-guidance p {
+  font-size: 11px;
+  color: #67705e;
+  margin: 0;
+}
+.gallery-notes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  border-top: 1px solid #e0e5d8;
+  padding-block: 23px 38px;
+}
+.gallery-notes p {
+  font-size: 10px;
+  color: #686f5f;
+  line-height: 1.9;
+  margin: 0;
+}
+.gallery-footer {
+  padding-block: 25px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font:
+    8px ui-monospace,
+    monospace;
+  color: #686f5f;
+}

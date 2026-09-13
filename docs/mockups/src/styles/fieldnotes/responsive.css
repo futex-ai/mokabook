@@ -1,0 +1,155 @@
+@media (max-width: 1100px) {
+  .field-hero {
+    gap: 15px;
+    min-height: 660px;
+  }
+  .field-hero h1 {
+    font-size: 64px;
+    letter-spacing: -3px;
+  }
+  .catalogue-illustration {
+    margin-right: 0;
+  }
+  .catalogue-canvas {
+    padding: 20px 17px 30px;
+  }
+  .catalogue-canvas .project-title h3 {
+    font-size: 21px;
+  }
+  .floating-phone {
+    transform: rotate(7deg) scale(0.87);
+    transform-origin: bottom right;
+    right: -10px;
+  }
+  .handwritten {
+    left: 20px;
+  }
+  .field-catalogue .section-heading > p {
+    max-width: 300px;
+  }
+}
+@media (max-width: 760px) {
+  .field-hero {
+    grid-template-columns: 1fr;
+    gap: 64px;
+    padding-top: 36px;
+    padding-bottom: 85px;
+  }
+  .field-hero h1 {
+    font-size: clamp(49px, 10.6vw, 74px);
+    line-height: 1.08;
+    letter-spacing: -2.5px;
+    margin-top: 24px;
+  }
+  .field-hero-copy > p {
+    max-width: 420px;
+    font-size: 13px;
+  }
+  .field-hero .hero-actions {
+    gap: 19px;
+  }
+  .field-hero .button {
+    font-size: 11px;
+    gap: 12px;
+  }
+  .field-hero .text-link {
+    font-size: 11px;
+  }
+  .catalogue-illustration {
+    width: calc(100% - 15px);
+    max-width: 530px;
+    margin-inline: auto;
+    padding-bottom: 26px;
+  }
+  .catalogue-canvas {
+    padding: 16px 12px 27px;
+  }
+  .catalogue-canvas .project-body {
+    padding: 20px 15px 24px;
+  }
+  .catalogue-canvas .project-title h3 {
+    font-size: 21px;
+  }
+  .catalogue-canvas .project-action {
+    font-size: 6px;
+    padding: 7px;
+  }
+  .floating-phone {
+    transform: rotate(7deg) scale(0.72);
+    right: -8px;
+    bottom: -31px;
+  }
+  .floating-note {
+    right: 4px;
+    top: -26px;
+    font-size: 8px;
+    padding: 10px;
+  }
+  .floating-note small {
+    font-size: 7px;
+  }
+  .handwritten {
+    font-size: 14px;
+    left: 6px;
+    bottom: -6px;
+  }
+  .window-top {
+    padding-inline: 9px;
+    gap: 8px;
+  }
+  .window-top > span:nth-child(2) {
+    font-size: 6px;
+  }
+  .field-principles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px 12px;
+    padding-block: 25px;
+  }
+  .field-principles strong {
+    font-size: 11px;
+    gap: 8px;
+  }
+  .field-principles > span {
+    font-size: 10px;
+  }
+  .field-catalogue .section-heading > p {
+    position: static;
+    max-width: 360px;
+  }
+  .field-features {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    margin-top: 32px;
+  }
+  .feature-art {
+    height: 190px;
+  }
+  .field-features p {
+    max-width: 100%;
+  }
+  .field-workflow > .wrap {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+  .field-workflow h2 {
+    font-size: 35px;
+  }
+  .field-foundation {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .foundation-stamp {
+    width: 100px;
+    height: 100px;
+    margin: 10px 10px 15px;
+    gap: 5px;
+  }
+  .foundation-stamp .icon {
+    width: 28px;
+    height: 28px;
+  }
+  .foundation-stamp span {
+    font-size: 8px;
+  }
+}

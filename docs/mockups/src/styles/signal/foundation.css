@@ -1,0 +1,72 @@
+.signal-foundation {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 75px;
+}
+.signal-foundation h2 {
+  margin-top: 22px;
+}
+.signal-foundation h2 > span {
+  color: #c2f17a;
+}
+.signal-foundation p {
+  max-width: 410px;
+  font-size: 12px;
+  color: #909d80;
+  margin-bottom: 25px;
+}
+.signal-install-card {
+  border: 1px solid #3c4930;
+  border-radius: 7px;
+  background: #1b2116;
+  box-shadow: 10px 10px 0 #ffffff03;
+}
+.terminal-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #333f29;
+  padding: 16px;
+  font-size: 8px;
+  color: #7a8d64;
+}
+.signal .install {
+  border: 0;
+  border-radius: 0;
+  padding: 28px 22px;
+  align-items: flex-start;
+}
+.signal .install .eyebrow {
+  color: #7f9269;
+}
+.signal .install code {
+  color: #c5deaa;
+  line-height: 2.2;
+  margin-top: 16px;
+  font-size: 11px;
+}
+.signal .install button {
+  color: #91a87b;
+}
+.signal .install button span {
+  display: none;
+}
+.terminal-detail {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #333f29;
+  gap: 6px;
+  padding: 15px 22px;
+}
+.terminal-detail > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 8px;
+  color: #7c9267;
+}
+.terminal-detail .icon {
+  width: 10px;
+  height: 10px;
+}
