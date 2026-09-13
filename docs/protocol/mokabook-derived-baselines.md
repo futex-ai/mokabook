@@ -1,0 +1,218 @@
+# Derived Baselines
+
+## Delivery Status
+
+Approved target tracked by the [derived baselines plan](../../plans/derived-baselines.md).
+Until that plan completes, every catalogue behaves as `generatedOutput: "committed"`,
+which is the implemented behavior described by the other protocol documents.
+
+## Purpose
+
+Committed generated output gives Changes, comparisons, and export a baseline
+that is read from Git without executing anything. Its cost is that every
+source edit also changes generated files, which conflict on merge even though
+the only correct resolution is regeneration. Derived mode removes generated
+routes and the manifest from Git and instead reproduces the baseline from the
+merge-base commit itself, with that commit's own dependencies and Mokabook
+version, cached per commit. Source stays the only authored artifact.
+
+Derived mode changes where baseline bytes come from. It never renders a
+historical commit with the current tree's config, entries, renderer, or
+Mokabook package, and it never rebuilds the baseline on an HTTP request path.
+
+## Configuration
+
+```ts
+interface MokabookConfig {
+  generatedOutput?: "committed" | "derived"; // "committed"
+  review?: {
+    baselineBuild?: readonly (readonly string[])[];
+  };
+}
+```
+
+`generatedOutput` selects the mode for every command. `committed` is the
+default and keeps today's contract unchanged. `derived` is a typed value;
+unknown strings are config errors.
+
+`review.baselineBuild` is an ordered list of argv arrays executed in the
+extracted base commit's root, in order, without a shell. Each array is
+non-empty; the first element is the executable. It is valid only in derived
+mode; setting it in committed mode is a config error. The default is an npm
+clean install followed by the Mokabook build for the same repository-relative
+config path as the current run. Consumers whose base commit must first compile
+their own tooling, such as this repository's example, list those commands
+explicitly. Mokabook never appends implicit commands after an explicit list.
+
+## Trust Statement
+
+Rebuilding executes code from the merge-base commit: its lockfile, package
+scripts, config module, entries, and renderer. Derived mode is appropriate
+only when the configured base ref is a trusted mainline the consumer already
+runs in CI. A consumer that compares against untrusted branches must stay in
+committed mode. The documentation for the option states this plainly.
+
+## Command Behavior By Mode
+
+| Command     | Committed                            | Derived                                                  |
+| ----------- | ------------------------------------ | -------------------------------------------------------- |
+| `build`     | Transactional write to `mockupsDir`  | Same; output is a local artifact, not a commit candidate |
+| `check`     | Expected bytes equal committed bytes | Validate compilation; fail if output is Git-tracked      |
+| `serve`     | Baseline read from Git blobs         | Baseline from the cache, `preparing` until complete      |
+| `export`    | Baseline read from Git blobs         | Rebuild synchronously before capture, then export        |
+| Publication | As export                            | As export                                                |
+
+Build validation, ownership headers, manifest schema, source protection, and
+route collision rules are identical in both modes. Derived mode does not weaken
+any validation; it only changes the baseline source and the `check` comparison.
+
+### Derived check
+
+`check` compiles and validates exactly as in committed mode, then lists the
+files Git tracks under `mockupsDir`, intersects them with the compiled routes
+plus the manifest, and fails with a typed `build-invalid` error naming each
+tracked path when the intersection is non-empty. The message suggests ignore
+rules for the listed paths. Consumer-authored public files below `mockupsDir`,
+including hand-written HTML without an ownership header, stay tracked and are
+never reported. Derived `check` does not require the on-disk generated files to
+exist or to match; the working tree copy is a local artifact.
+
+### Head side
+
+In both modes the head side of a comparison is the current compilation's
+validated output. Committed mode additionally requires that output to equal
+the working tree, as today. Derived mode never reads head bytes from the
+working tree.
+
+## Rebuild Procedure
+
+The builder runs the following steps for one merge-base commit.
+
+1. Resolve the merge base of `HEAD` and the configured base ref with Git. A
+   missing ref, shallow history, or unrelated histories fail as
+   `baseline-history-unavailable`.
+2. Reuse the cache entry when its completion marker is valid for that commit.
+   No command runs in that case.
+3. Acquire the entry lock. Extract the commit with Git's archive format into
+   the entry's `source` directory. Entries that escape the directory, symlinks
+   that resolve outside it, and non-regular files other than directories fail
+   as `baseline-extraction-failed`.
+4. Run each `baselineBuild` command in the `source` directory with a bounded
+   environment: `PATH`, `HOME`, locale and temp variables, `CI=1`, and
+   `MOKABOOK_BASELINE_COMMIT=<commit>`. Standard output and error are captured
+   and bounded. A non-zero exit fails as `baseline-command-failed` with the
+   command index, argv, exit code or signal, and the last lines of output.
+5. Locate `<source>/<mockupsDir>` using the current config's repository-relative
+   `mockupsDir`. Parse its manifest with the historical-manifest reader; the
+   same version rules apply as for committed baselines. A missing directory,
+   missing manifest, or invalid manifest fails as
+   `baseline-output-invalid`. Moving `mockupsDir` between the base and head
+   commits is therefore unsupported in derived mode until the move is merged.
+6. Move `<source>/<mockupsDir>` to the entry's `output` directory, delete the
+   remaining `source` extraction including installed dependencies, write the
+   completion marker, then release the lock.
+
+Every step is cancellable. Cancellation terminates the running command's
+process group, waits for exit, removes the partial entry, and reports
+`baseline-interrupted`. Serve's shutdown drain includes rebuild processes
+using the same rules as its Git processes.
+
+## Cache Layout
+
+The cache lives at `<repoRoot>/.mokabook-cache/baselines/`. It is package
+owned: never served, never watched, never a comparison resource, excluded from
+changed-path evidence and shared-impact globs before those globs are evaluated,
+and never a valid `mockupsDir`, `entriesDir`, `review.outDir`, or export
+destination. Consumers add `.mokabook-cache/` to their ignore file; derived
+`check` also fails when Git tracks anything under it.
+
+```text
+.mokabook-cache/baselines/<commit>/
+  lock            # holder pid and start time, created exclusively
+  source/         # extraction, removed after adoption
+  output/         # the rebuilt mockupsDir tree
+  complete.json   # completion marker
+```
+
+`complete.json` is `{ schemaVersion: 1, commit, finishedAt, commands,
+manifestVersion }`. An entry is complete only when the marker parses, its
+`commit` matches the directory name, and `output/<manifest>` exists. Anything
+else is a partial entry and is removed before the next attempt.
+
+Lock holders whose process no longer exists are reclaimed. Other waiters poll
+until the holder finishes, then reuse the completed entry. Waiting longer than
+the bounded lock timeout fails as `baseline-lock-timeout`.
+
+After a successful rebuild the builder removes complete entries beyond the
+retained count, newest markers first, defaulting to three. It never removes the
+entry it just built, an entry another process holds locked, or partial entries
+belonging to a live lock holder.
+
+## Baseline Reads
+
+`RebuiltBaselineReader` implements the same reader interface as the Git blob
+reader over `output/`. Paths are `mockupsDir`-relative, confined to `output/`,
+and must resolve to regular files; symlinks, directories, and escapes are
+rejected exactly as symlink and non-regular Git blobs are. Bulk reads batch
+filesystem access and are subject to the same object-count and byte budgets.
+Source protection applies the baseline's own manifest inventory, entry source
+paths, and reserved basenames, as for any historical manifest.
+
+## Serve And Watch
+
+Serve in derived mode starts HTTP and adopts complete generated output exactly
+as in committed mode. The background worker then asks the builder for the
+baseline. While the rebuild runs, the evidence state is `preparing`: the count
+slot shows the spinner and selecting Changes shows the preparing sidebar with
+product copy, distinct from the `pending` classification state that follows.
+All remains available. A cache hit skips `preparing` and enters `pending`
+directly. A rebuild failure publishes `unavailable` with the existing sidebar
+presentation; the typed error reason is logged, not shown in the sidebar.
+
+Watched Serve observes ref changes as today. When the merge base moves, the
+supervisor cancels a running rebuild, publishes `preparing` for the new commit,
+and starts a new rebuild. Ref changes that leave the merge base unchanged do
+not rebuild; they reclassify as today. `--no-watch` resolves the baseline once.
+Content updates during `preparing` keep the state; the rebuild is independent
+of the current generation. Late results for a superseded commit are ignored.
+
+The evidence state machine is `preparing → pending → ready | unavailable`, with
+`preparing` omitted on a cache hit or in committed mode. Live evidence updates,
+retained navigation state, and reconnect rules apply to `preparing` exactly as
+they apply to `pending`. The owning mockups are recorded in the
+[shell design](./mokabook-shell-design.md).
+
+## Export And Publication
+
+Export resolves and pins the merge base, then runs the rebuild to completion
+before capturing head input. A rebuild failure fails the export with the typed
+reason; export never emits a zero Changes count or disables controls because
+the baseline could not be prepared. Its input recheck verifies the completion
+marker still names the pinned commit. Publication with Changes follows the same
+rules; default publication without Changes needs no baseline in either mode.
+
+## Diagnostics
+
+`--debug-timings` adds `baseline.resolve`, `baseline.extract`,
+`baseline.command[<index>]`, and `baseline.adopt` phases, with a `cacheHit`
+flag on the parent baseline phase. The large fixture gains a derived variant
+whose setup records both a cold-cache and a warm-cache Serve start; the
+benchmark asserts the existing five-second navigation target for both and
+records the separate time to a complete `preparing → pending` transition.
+
+## Acceptance
+
+- Config parsing rejects unknown `generatedOutput` values and `baselineBuild`
+  in committed mode.
+- Derived `check` fails on tracked generated routes, the manifest, and cache
+  contents, listing exact paths, and passes for tracked authored public files.
+- Cache hit runs no command; concurrent builders of one commit share a lock;
+  a dead lock holder is reclaimed; interrupted entries leave no marker.
+- Command failure reports index, argv, exit status, and bounded output.
+- Extraction rejects escaping paths and outward symlinks.
+- Reader rejects symlinks and escapes identically to the Git reader.
+- Serve publishes `preparing`, then `pending`, then a terminal state; a merge
+  base move cancels and restarts; a failure is `unavailable` with no leak of
+  command or path detail into the sidebar.
+- Export fails explicitly on rebuild failure and pins one commit throughout.
+- Committed mode behavior is byte-identical to before this contract.

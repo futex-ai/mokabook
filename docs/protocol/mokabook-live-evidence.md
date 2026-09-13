@@ -41,7 +41,9 @@ Update the count/status, changed-route attributes and baseline-only rows from
 the same snapshot. Retained removed rows keep their identity; additions/removals
 follow the canonical server order after the current tree. Existing rules for
 removed screens/components in All and removed pages only in Changes still apply.
-Changes loading and empty/unavailable states use the existing sidebar design.
+Changes preparing, loading and empty/unavailable states use the existing
+sidebar design; `preparing` precedes loading only in
+[derived mode](./mokabook-derived-baselines.md).
 
 Background adoption never runs destination-reveal recovery. A search may
 intentionally hide the currently displayed page, and its parent folder may be
@@ -93,7 +95,8 @@ supply the complete Used by list.
 
 Desktop/mobile browser regressions assert retained document, navigation-row and
 iframe identity, row positions, scroll, focused search/control fields and folder
-choices through pending, ready-zero, ready-nonzero and unavailable evidence.
+choices through preparing, pending, ready-zero, ready-nonzero and unavailable
+evidence.
 Cover Changed selection while its current preview is unchanged, actual Usage
 completion during a temporary prop edit, later variant/scheme switches, removed
 row membership/order, superseded responses, navigation races, reconnect catch-up

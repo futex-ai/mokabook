@@ -31,11 +31,11 @@ Milestone 1). Related contracts: [Changes](../docs/protocol/mokabook-changes.md)
 [timings](../docs/protocol/mokabook-timings.md),
 [package](../docs/protocol/mokabook-package.md).
 
-## Milestone 1: Define the derived-baseline contract
+## Milestone 1: Define the derived-baseline contract — completed
 
 Documentation only. Every later milestone implements this contract.
 
-- [ ] Create `docs/protocol/mokabook-derived-baselines.md` (about 250 lines)
+- [x] Create `docs/protocol/mokabook-derived-baselines.md` (about 250 lines)
       covering: the `generatedOutput` option and its default; what `build`,
       `check`, Serve, export, and publication do in each mode; the rebuild
       procedure (resolve merge base, extract the commit with `git archive` into
@@ -46,27 +46,27 @@ Documentation only. Every later milestone implements this contract.
       cleanup of old commits; explicit failure states (missing history, failed
       install or build, interrupted rebuild, invalid rebuilt manifest); and the
       trust statement that rebuilding executes base-commit code.
-- [ ] Define the typed rebuild command config: `review.baselineBuild` as an
+- [x] Define the typed rebuild command config: `review.baselineBuild` as an
       ordered list of argv arrays run in the extraction root. The defaults are
       an npm clean install followed by the Mokabook build command for the
       configured config path, both invoked without a shell. Document that this
       repository's example must also build the package itself at the base
       commit.
-- [ ] Define the derived-mode `check` contract: compile and validate as today,
+- [x] Define the derived-mode `check` contract: compile and validate as today,
       require that no generated route or the manifest is tracked by Git, and
       report tracked paths as a typed failure with the ignore rule to add.
-- [ ] Define the derived-mode Git ignore requirement for `mockupsDir`: HTML
+- [x] Define the derived-mode Git ignore requirement for `mockupsDir`: HTML
       routes and the manifest ignored, authored public files still tracked.
-- [ ] Update `mokabook-changes.md`, `mokabook-export.md`,
+- [x] Update `mokabook-changes.md`, `mokabook-export.md`,
       `mokabook-source-protection.md`, `mokabook-timings.md`,
       `mokabook-on-demand.md`, `mokabook-live-evidence.md`, and
       `mokabook-package.md` so "the baseline is read, never rebuilt" becomes
       "the baseline is committed bytes or a cached rebuild; it is never rendered
       with the current tree's code". Add a `preparing` evidence state alongside
       the existing loading, unavailable, and complete states.
-- [ ] Add the new doc to `docs/protocol/README.md`; link this plan from
+- [x] Add the new doc to `docs/protocol/README.md`; link this plan from
       `plans/README.md` under Active.
-- [ ] Validate Markdown with `npm run format:check`, check local link targets,
+- [x] Validate Markdown with `npm run format:check`, check local link targets,
       review the diff, commit, and push.
 
 ## Milestone 2: Separate baseline reads from repository evidence

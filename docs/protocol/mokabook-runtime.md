@@ -7,10 +7,12 @@ defines the required consumer upgrade.
 ## Source Of Truth
 
 Consumer-authored registry modules and imported render helpers are the source of
-truth. Generated fragments, page HTML, and the manifest remain committed in
-consumer repositories so they can be reviewed without a server. Browsing and
-comparisons consume those same artifacts and definitions; neither may introduce a
-second screen renderer or catalogue.
+truth. In the default committed mode, generated fragments, page HTML, and the
+manifest remain committed in consumer repositories so they can be reviewed
+without a server. In [derived mode](./mokabook-derived-baselines.md) they are
+local artifacts and the baseline is rebuilt from the merge-base commit. Browsing
+and comparisons consume those same artifacts and definitions; neither may
+introduce a second screen renderer or catalogue.
 
 ## Delivery Status
 
@@ -57,7 +59,8 @@ diagnostics use repo-relative paths and deterministic ordering.
 
 ## Check
 
-`mokabook check` computes expected output without mutating committed files. It
+`mokabook check` computes expected output without mutating committed files. In
+derived mode it also fails when Git tracks generated routes or the manifest. It
 fails for:
 
 - invalid config or registry metadata;

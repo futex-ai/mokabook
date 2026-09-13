@@ -111,7 +111,9 @@ cannot bypass the generation's protected paths.
 
 For v5 or historical page-v4 Review resources, use that baseline's structurally validated
 inventory, entry source paths, and reserved-name rules. Never execute historical
-config or rebuild a Git baseline to refresh its inventory. Historical v2/v3 and component-v4
+config with the current package or rebuild a Git baseline to refresh its
+inventory; a [derived baseline](./mokabook-derived-baselines.md) is built once
+by its own commit's tooling and then read like any historical baseline. Historical v2/v3 and component-v4
 readers retain their version-specific source/root safeguards and also deny
 reserved source basenames; they are the only readers allowed to lack v5's
 inventory. Internal manifest paths stay private for every historical schema.

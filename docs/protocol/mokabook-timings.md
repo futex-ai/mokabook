@@ -61,6 +61,9 @@ or timings. It must provide a Git baseline so Changes performs real comparison.
 `.context`; setup time includes exhaustive Build and Git and is reported separately.
 `dev:large` and `benchmark:large` reuse that fixture without compiling the package
 or rebuilding a baseline. Rebuild Mokabook explicitly after package-source edits.
+The derived-mode fixture variant additionally records cold-cache and warm-cache
+starts and the `baseline.*` phases defined in the
+[derived baselines contract](./mokabook-derived-baselines.md).
 The benchmark launches Chrome before timing a fresh Serve subprocess and measures
 searchable navigation with real preview content, then repeats in a fresh server
 and browser context for an OS-warm restart. “Cold” means application-cold, not a

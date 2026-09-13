@@ -49,7 +49,7 @@ The public commands are:
 mokabook                 Alias for `mokabook serve`
 mokabook serve           Serve the catalogue and diffs; watch by default
 mokabook build           Generate static artifacts and the manifest
-mokabook check           Validate source and committed generated output
+mokabook check           Validate source and generated output for the configured mode
 mokabook export --out <path>  Build a complete static catalogue for hosting
 mokabook --help          Show commands, options, and config discovery
 mokabook --version       Show the installed package version
@@ -134,6 +134,7 @@ type ModuleLoader =
 interface MokabookConfig {
   colorSchemes?: readonly ColorScheme[]; // ["light"]
   entriesDir: string;
+  generatedOutput?: "committed" | "derived"; // "committed"
   mockupsDir: string;
   repoRoot?: string; // config directory
   renderer?: string;
@@ -153,6 +154,7 @@ interface MokabookConfig {
   }[];
   review?: {
     base?: string; // origin/main; merge base with HEAD
+    baselineBuild?: readonly (readonly string[])[]; // derived mode only
     outDir?: string; // .context/mokabook-review
     sharedImpact?: readonly string[];
   };
@@ -179,6 +181,9 @@ that must include `"light"`; it defaults to `["light"]` and normalizes to
 light-first order. Shared `stylesheets` apply to every generated view, with a
 matching `lightStylesheets` or `darkStylesheets` list appended in declaration
 order.
+`generatedOutput` defaults to `"committed"`; `"derived"` and the derived-only
+`review.baselineBuild` argv list follow the
+[derived baselines contract](./mokabook-derived-baselines.md).
 `watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
 globs, while stylesheet `match` matches catalogue routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
 matches and watch paths are invalid. Additional watch rules cannot override

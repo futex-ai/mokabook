@@ -55,9 +55,12 @@ their existing execution boundary; export adds no hosting network calls.
 ## Baseline And Comparisons
 
 The consumer command always includes comparisons. The separate repository
-preview keeps its optional Changes contract. A Git checkout with `HEAD`, the selected base, their merge base, and
-the required committed baseline artifacts is necessary at export time. CI must
-fetch sufficient history before invoking the command; export never fetches it.
+preview keeps its optional Changes contract. A Git checkout with `HEAD`, the
+selected base, and their merge base is necessary at export time. Committed mode
+also needs the committed baseline artifacts at that commit; derived mode
+instead rebuilds the commit before capture under the
+[derived baselines contract](./mokabook-derived-baselines.md). CI must fetch
+sufficient history before invoking the command; export never fetches it.
 Unavailable or invalid baselines fail explicitly, including shallow-history
 failures. It does not silently export a zero Changes count or disable controls.
 
@@ -93,7 +96,8 @@ broad rules, without ignoring unrelated authored files with similar names.
 
 1. Parse options, load config, validate output boundaries and ownership, and
    reserve the resolved output against concurrent export writers.
-2. Resolve the comparison baseline without changing the checkout. Compile,
+2. Resolve the comparison baseline without changing the checkout; in derived
+   mode, complete the cached rebuild of the pinned commit first. Compile,
    validate, and transactionally write the existing generated build outputs.
 3. Capture the current manifest, documents, required assets, and changed-path
    evidence into one export input snapshot. Build the comparison against the

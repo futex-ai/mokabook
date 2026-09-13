@@ -41,6 +41,8 @@ when the historical primary file is absent, never when it is invalid.
 - [Breaking page migration](./mokabook-page-migration.md)
 - [Optional changes in publication](./mokabook-publication.md)
 - [Changes and screen comparisons](./mokabook-changes.md)
+- [Derived baselines](./mokabook-derived-baselines.md) — approved target:
+  uncommitted generated output with per-commit rebuilt baselines.
 - [Registered components](./mokabook-components.md)
 - [Component runtime prop schema](./mokabook-component-props.md)
 - [Current manifest v5 schema](./mokabook-component-manifest.md)
