@@ -31,14 +31,20 @@ export async function createBootstrapArchive({
   );
   try {
     const checkout = path.join(temporaryRoot, "checkout");
-    await runCommand("git", [
-      "clone",
-      "--no-local",
-      "--no-checkout",
-      "--",
-      repositoryRoot,
-      checkout,
-    ]);
+    await runCommand("git", ["init", "--initial-branch=bootstrap", checkout]);
+    await runCommand(
+      "git",
+      [
+        "fetch",
+        "--depth=1",
+        "--no-tags",
+        "--no-recurse-submodules",
+        "--",
+        repositoryRoot,
+        expectedCommit,
+      ],
+      { cwd: checkout },
+    );
     await runCommand("git", ["checkout", "--detach", expectedCommit], {
       cwd: checkout,
     });

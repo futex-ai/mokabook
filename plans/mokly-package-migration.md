@@ -175,10 +175,20 @@ Summary: verify the fixes together with current main before delivery.
       with every check passing.
 - [ ] Smoke the dedicated bootstrap CLI against the clean committed result
       before pushing; never publish the smoke artifact.
+- [x] Capture and fix partial-clone packing: a full clone attempts to transfer
+      unavailable historical blobs even when the reviewed tree is complete.
+      Fetch only the explicit reviewed commit into the isolated checkout, prove
+      this with a real filtered-clone fixture, and rerun `cargo xtask check`.
 
-The complete gate passed on Node 24.21.0: 1,037 unit/integration tests, 245
+The first complete gate passed on Node 24.21.0: 1,037 unit/integration tests, 245
 Chromium browser tests, packed consumers, generated output, dependency audit,
 formatting/lint/typechecking, and Rust formatting/Clippy/tests/file-length lint.
+
+After the partial-clone correction, the complete gate passed again with 1,038
+unit/integration tests and 245 browser tests; every other gate passed too. The
+revised packer also built the real 1,312-file package from an isolated source
+checkout before this final gate, recording its exact source commit/tree and
+verified archive hashes.
 
 ## Milestone 12: Follow-Up Commit And Push
 

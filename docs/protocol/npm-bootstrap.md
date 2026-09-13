@@ -26,10 +26,12 @@ the Release Please PR:
    ```
 
 The command requires `HEAD` to equal the supplied SHA, a clean source tree, and
-`mokly@0.8.0`. It clones the committed source into a fresh temporary checkout,
+`mokly@0.8.0`. It fetches that exact commit into a fresh temporary checkout,
 installs the lockfile with `npm ci`, and runs the package's `prepack` build via
 `npm pack`. Ignored local `dist`, dependencies, and caches cannot leak into that
-checkout. It checks the runtime license closure and package allowlist, verifies
+checkout. The isolated fetch is depth-one: partially fetched workspaces do not
+need unrelated historical blobs, and build scripts must not require Git history
+before the reviewed commit. It checks the runtime license closure and package allowlist, verifies
 the source is still clean and pinned after lifecycle scripts finish, and
 recomputes the archive hashes before exposing the result.
 
@@ -77,6 +79,6 @@ Compare the registry hashes to the retained report. `bootstrap` must identify
 
 `tests/release_bootstrap.test.ts` uses real isolated Git/npm fixtures to prove
 dirty/ref/version rejection, exclusion of stale ignored output, source/hash
-evidence, destination preservation, symlinked temporary roots, and rejection of
-lifecycle input mutations.
+evidence, destination preservation, symlinked temporary roots, partial source
+clones with missing historical blobs, and rejection of lifecycle input mutations.
 Run it with `node --import tsx --test tests/release_bootstrap.test.ts`.

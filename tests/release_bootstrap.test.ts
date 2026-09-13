@@ -134,6 +134,65 @@ test("bootstrap refuses release-managed versions after registration", async (t) 
   await assert.rejects(fs.stat(fixture.destination), { code: "ENOENT" });
 });
 
+test("bootstrap needs only the reviewed tree from a partial source clone", async (t) => {
+  const fixture = await bootstrapFixture(t);
+  await fs.writeFile(
+    path.join(fixture.root, "retired.txt"),
+    "historical content not needed by this release",
+  );
+  await fixture.git("add", "-A");
+  await fixture.git(
+    "-c",
+    "core.hooksPath=/dev/null",
+    "commit",
+    "-m",
+    "test: old source",
+  );
+  const retiredBlob = await fixture.git("rev-parse", "HEAD:retired.txt");
+  await fixture.git("rm", "retired.txt");
+  await fixture.git(
+    "-c",
+    "core.hooksPath=/dev/null",
+    "commit",
+    "-m",
+    "test: remove old source",
+  );
+  const expectedCommit = await fixture.git("rev-parse", "HEAD");
+  await fixture.git("config", "uploadpack.allowFilter", "true");
+  const partial = path.join(path.dirname(fixture.root), "partial");
+  await execute("git", [
+    "clone",
+    "--no-local",
+    "--no-checkout",
+    "--filter=blob:none",
+    fixture.root,
+    partial,
+  ]);
+  await execute("git", ["checkout", "--detach", expectedCommit], {
+    cwd: partial,
+  });
+  const objects = await execute(
+    "git",
+    ["rev-list", "--objects", "--all", "--missing=print"],
+    { cwd: partial },
+  );
+  assert.ok(
+    objects.stdout.includes(`?${retiredBlob}`),
+    "the fixture must lack an unrelated historical blob",
+  );
+  const { createBootstrapArchive } = await bootstrapModule();
+  const { report } = await createBootstrapArchive({
+    repositoryRoot: partial,
+    destination: fixture.destination,
+    expectedCommit,
+  });
+  assert.equal(report.sourceCommit, expectedCommit);
+  assert.equal(
+    report.files.some((file) => file.path === "retired.txt"),
+    false,
+  );
+});
+
 test("bootstrap supports symlinked temporary roots used on macOS", async (t) => {
   const fixture = await bootstrapFixture(t);
   const alias = path.join(path.dirname(fixture.root), "temporary-alias");
