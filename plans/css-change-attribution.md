@@ -289,19 +289,24 @@ cross-platform parse check.
 
 Add the document matching layer, still without changing classification.
 
-- [ ] Add `css-select` with `npm install`. It operates on the parse5 tree via
+Completed. The matcher, parse5 document adapter, nesting resolver, pseudo
+handling, and `analyzeStylesheetChange` entry point were delivered by a Codex
+session and verified by the coordinator. `css-what` was added alongside
+`css-select` for typed selector rewrites.
+
+- [x] Add `css-select` with `npm install`. It operates on the parse5 tree via
       `domhandler` adapters; confirm the adapter works with the tree shape
       produced by the existing `parse5` usage in `src/html_references.ts`, or
       add a thin adapter in `src/review/css/document.ts`.
-- [ ] Create `src/review/css/match.ts`: given changed rules and a document,
+- [x] Create `src/review/css/match.ts`: given changed rules and a document,
       return the kept rules with the reason (`matched` or `unresolved`).
       Implement the keep-list from Milestone 1 exactly.
-- [ ] Tests under `tests/review_css_match.test.ts`: unused class selector
+- [x] Tests under `tests/review_css_match.test.ts`: unused class selector
       excluded; matching class kept; matching only in the after document kept;
       universal selector kept; `:root` kept; custom property change kept;
       `@font-face` kept; unparseable selector kept; shadow-scoped selector
       kept; rule inside `@media` treated identically to one outside.
-- [ ] Run tests, typecheck, lint, format check.
+- [x] Run tests, typecheck, lint, format check.
 
 ## Milestone 6: Integrate with classification
 
@@ -337,6 +342,11 @@ Wire the analysis into both classification paths so Changes membership uses it.
 - [ ] Run the existing review, component, publication, and export test suites
       and the browser suite; both viewports and colour schemes must produce
       the same exclusions.
+- [ ] Fix the declaration serializer so a comment between a function name
+      and its opening parenthesis (for example `url/**/("a.svg")`) is not
+      normalized to the valid form; add parser and diff regressions for
+      identifier and function boundary cases. Discovered during Milestone 5
+      review.
 - [ ] Run tests, typecheck, lint, format check, and `cargo xtask check`.
 
 ## Milestone 7: Implement the shell evidence

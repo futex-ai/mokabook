@@ -2,8 +2,8 @@
 
 ## Delivery Status
 
-The standalone rule parser and diff layer are implemented; matching and
-classification remain approved targets tracked by
+The standalone rule parser, diff, and document matcher are implemented;
+classification remains an approved target tracked by
 [CSS Change Attribution](../../plans/css-change-attribution.md). Until that
 plan's classification milestone lands, a changed linked stylesheet remains
 file-level dependency evidence as described in
@@ -52,10 +52,25 @@ documents, keep their existing file-level attribution unchanged.
    `@media` or `@container` is tested exactly like a rule outside it.
    Evaluating conditions needs a viewport and element sizes, which belongs to
    browser refinement.
+   Resolve nesting parents outermost first, substituting `&` with `:is()` of
+   the complete parent selector list, or applying an implicit descendant when
+   needed. Unresolvable combinations stay unresolved. Match using the default
+   parse5 document tree, respecting document quirks, inert template boundaries,
+   and HTML versus SVG/MathML name case; absent view sides contribute no tree.
+   Interactive/browser-state pseudo-classes (`:hover`, `:focus`, `:visited`,
+   etc.) and non-shadow pseudo-elements (`::before`, etc.) are not evaluated.
+   Test their base compound instead; a potential base match is `matched`.
+   Broaden through functional selectors without making negation restrictive:
+   `.button:not(:hover)` can match `.button`. State-dependent `:nth-child(... of
+...)` counts are likewise unevaluated. Static structural predicates remain
+   in force. Unsupported selectors and matcher compilation failures remain
+   unresolved; stripping state never strips shadow/global keep constructs.
 3. **Reduce.** If at least one rule is kept, the resource remains a dependency
    reason for that view and the reason records the kept selectors. If no rule
    is kept, the resource is recorded on the view as examined and excluded, and
    it does not contribute to Changes membership for that view.
+   Any unresolved rule makes the reduced status `unresolved`, even if another
+   rule matched. A failed stylesheet parse yields no partial selector evidence.
 
 ## Rule Diff Representation
 
@@ -117,6 +132,31 @@ exclusions beyond it.
   attributes the referenced file; the analysis must not weaken that path.
 - A parse failure on either side of the stylesheet.
 
+Apply these checks in the order above before ordinary matching. Global and
+shadow detection includes nested selector arguments and nesting parents, not
+literal attribute values or synthetic universals introduced by state stripping.
+For a declaration edit, compare the custom declarations and URL references on
+both sides: an unchanged custom property or URL does not trigger its keep rule.
+Changed URLs in unevaluated condition preludes also count as changed references.
+
+## Document Matching Interface
+
+`matchCssRules(diff: CssRuleDiffResult, documents: CssDocumentPair):
+CssRuleMatchResult` returns `status: "resolved"` with one `{ change, outcome }`
+per diffed rule, in added, removed, then changed list order. It preserves each
+list's ordinal ordering and original rule records. An unresolved diff passes
+through with its side-tagged parse failures. `CssDocumentPair.before` and
+`.after` are optional default-adapter parse5 documents supplied after paired
+normalization; the matcher performs no file reads or classification writes.
+
+`analyzeStylesheetChange(before: string, after: string, documents:
+CssDocumentPair, parser?: CssRuleParser): CssAnalysisOutcome` composes all three
+stages for one resource on one view. The default parser is
+`LightningCssRuleParser`; missing stylesheet sides use an empty string.
+The outcome is `{ kind: "kept", status: "matched" | "unresolved", selectors }`
+or `{ kind: "excluded" }`. No match means excluded, including a resolved empty
+diff. Callers remain responsible for reachability and `changedPaths` eligibility.
+
 ## Membership Rule
 
 A CSS dependency reason keeps a view in Changes only when its analysis status
@@ -151,7 +191,8 @@ type DependencyReason = {
 };
 ```
 
-`selectors` lists the kept rule selectors in their serialized form, sorted
+`selectors` lists every selector of each kept rule in its original serialized
+form (including `&` for nested rules, before query-only substitution), sorted
 lexically by UTF-16 code units and duplicate-free. For `unresolved` reasons it
 lists the selectors that could be serialized and may be empty when the kept
 construct has no selector.
