@@ -11,7 +11,8 @@ import {
 import type { ReviewEvidence } from "../review/selection_types.js";
 import path from "node:path";
 
-import { projectRealPath, toPosixPath } from "../config/paths.js";
+import { toPosixPath } from "../config/paths.js";
+import { ConfiguredGitCommandRunner } from "../config/git.js";
 import type { ResolvedConfig } from "../config/types.js";
 import type { Manifest } from "../registry/types.js";
 import { GitReviewAssetReader } from "../review/assets.js";
@@ -22,11 +23,7 @@ import {
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { classifyComponents } from "../review/component_classification.js";
 import type { ReviewResultV3 } from "../review/component_types.js";
-import {
-  NodeGitCommandRunner,
-  CommittedRepository,
-  type GitCommandRunner,
-} from "../review/git.js";
+import { CommittedRepository, type GitCommandRunner } from "../review/git.js";
 import type { ReadOnlyReviewRepository } from "../review/repository.js";
 
 export interface ComponentChangeSnapshot {
@@ -122,7 +119,7 @@ export class ComponentChangeCache {
 
 /** Production read boundary for a last-good catalogue and its current Git branch point. */
 export class RepositoryComponentChanges implements ComponentChangeSource {
-  private readonly runner: GitCommandRunner;
+  private readonly runner: ConfiguredGitCommandRunner;
   private git: ReadOnlyReviewRepository;
   constructor(
     private readonly config: ResolvedConfig,
@@ -132,10 +129,11 @@ export class RepositoryComponentChanges implements ComponentChangeSource {
     commands?: GitCommandRunner,
     private readonly accepted?: CatalogueClassificationInputs,
   ) {
-    this.runner = commands ?? new NodeGitCommandRunner(config.repoRoot, signal);
+    this.runner = new ConfiguredGitCommandRunner(config, signal, commands);
     this.git = new CommittedRepository(this.runner);
   }
   async baseline(): Promise<string> {
+    await this.runner.requireTopLevel();
     if (this.accepted?.commit) {
       this.git = {
         ...this.git,
@@ -150,12 +148,6 @@ export class RepositoryComponentChanges implements ComponentChangeSource {
     }
     if (this.config.generatedOutput === "derived")
       throw comparisonNotPrepared();
-    if (
-      projectRealPath(
-        (await this.runner.run(["rev-parse", "--show-toplevel"])).trim(),
-      ) !== projectRealPath(this.config.repoRoot)
-    )
-      throw new Error("Comparison requires the configured repository root");
     return this.git.evidence.mergeBase(this.base, "HEAD");
   }
   async read(commit: string): Promise<ComponentChangeSnapshot | undefined> {

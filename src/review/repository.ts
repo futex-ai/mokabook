@@ -5,11 +5,11 @@ import { NodeBaselineFileSystem } from "../baseline/filesystem.js";
 import { RebuiltBaselineReader } from "../baseline/reader.js";
 import type { BaselineFileSystem } from "../baseline/types.js";
 import { toPosixPath } from "../config/paths.js";
+import { ConfiguredGitCommandRunner } from "../config/git.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import { CommittedBaselineReader } from "./committed.js";
 import {
-  NodeGitCommandRunner,
   CommittedRepository,
   type RepositoryEvidence,
   type BaselineReader,
@@ -26,7 +26,7 @@ export interface ReadOnlyReviewRepository {
 /** Committed mode needs no preparation; derived mode must receive a pinned commit. */
 export function committedReviewRepository(
   config: ResolvedConfig,
-  runner: GitCommandRunner = new NodeGitCommandRunner(config.repoRoot),
+  runner: GitCommandRunner = new ConfiguredGitCommandRunner(config),
 ): ReadOnlyReviewRepository {
   if (config.generatedOutput === "derived") throw comparisonNotPrepared();
   return new CommittedRepository(runner);
@@ -40,7 +40,7 @@ export function comparisonNotPrepared(): MokabookError {
 export function readOnlyRepositoryForCommit(
   config: ResolvedConfig,
   commit: string,
-  runner: GitCommandRunner = new NodeGitCommandRunner(config.repoRoot),
+  runner: GitCommandRunner = new ConfiguredGitCommandRunner(config),
   signal?: AbortSignal,
   filesystem: BaselineFileSystem = new NodeBaselineFileSystem(),
 ): ReadOnlyReviewRepository {
@@ -59,7 +59,7 @@ export function readOnlyRepositoryForCommit(
 export function baselineReaderForCommit(
   config: ResolvedConfig,
   commit: string,
-  runner: GitCommandRunner = new NodeGitCommandRunner(config.repoRoot),
+  runner: GitCommandRunner = new ConfiguredGitCommandRunner(config),
   signal?: AbortSignal,
   filesystem: BaselineFileSystem = new NodeBaselineFileSystem(),
 ): BaselineReader {

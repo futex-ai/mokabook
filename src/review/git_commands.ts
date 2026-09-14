@@ -11,6 +11,8 @@ export class GitCommands {
     try {
       return await this.runner.run(arguments_);
     } catch (error) {
+      if (error instanceof MokabookError && error.code === "config-invalid")
+        throw error;
       throw new MokabookError(
         "git-failed",
         `${context}: ${errorMessage(error)}`,
@@ -27,6 +29,8 @@ export class GitCommands {
       if (this.runner.runBytes) return await this.runner.runBytes(arguments_);
       return Buffer.from(await this.runner.run(arguments_), "utf8");
     } catch (error) {
+      if (error instanceof MokabookError && error.code === "config-invalid")
+        throw error;
       throw new MokabookError(
         "git-failed",
         `${context}: ${errorMessage(error)}`,

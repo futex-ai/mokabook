@@ -91,6 +91,7 @@ the following contract:
 
 - `mockupsDir`: output/catalogue root, such as `docs/mockups`;
 - `entriesDir`: structured `*.mockup.ts` and `*.mockup.tsx` source directory;
+- `repoRoot`: repository root, defaulting to the config file's directory;
 - a light-only or light-and-dark catalogue rendering set;
 - optional renderer-module path and declarative route-to-stylesheet rules;
 - optional consumer package roots, aliases, conditions, fields, extensions, and
@@ -106,6 +107,17 @@ repo-relative POSIX paths. Config validation rejects path traversal, output
 outside the repository (including through symlinks), overlapping
 authored/generated roots, duplicate rules, and a watch path that cannot be
 classified safely.
+
+Before reading Git, `repoRoot` must resolve through symlinks to the same path
+as `git rev-parse --show-toplevel` run from that directory. A nested root fails
+with `config-invalid`, naming both paths. This validation belongs to config's
+Git boundary, not unconditional config loading: build in either output mode,
+committed Check and publication without comparisons need no Git repository.
+Derived Check requires Git to inspect tracking. Serve's parent, classifier and
+HTTP child, comparison export and preview all validate before their first Git
+read. All remains usable when history is unavailable; an explicit comparison
+request retains the typed configuration error. Missing refs or history keep
+their existing command-specific errors.
 
 No default may encode `docs/mockups` as a mandatory location, Accounting route
 families, Bookfolio/Firna product tokens, email-template paths, or a TypeScript

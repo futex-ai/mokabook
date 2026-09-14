@@ -1,6 +1,7 @@
 import path from "node:path";
 
 import { MOKABOOK_CACHE } from "../config/cache_paths.js";
+import { requireGitTopLevel } from "../config/git.js";
 import { projectRealPath, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
@@ -17,13 +18,7 @@ export class GitTrackedGeneratedOutput implements TrackedGeneratedOutput {
 
   async check(compilation: Compilation, config: ResolvedConfig): Promise<void> {
     try {
-      const root = (
-        await this.runner.run(["rev-parse", "--show-toplevel"])
-      ).trim();
-      if (projectRealPath(root) !== projectRealPath(config.repoRoot))
-        throw new Error(
-          "derived check requires repoRoot to be the Git repository root",
-        );
+      await requireGitTopLevel(config, this.runner);
       const prefixes = [
         ...new Set([
           toPosixPath(path.relative(config.repoRoot, config.mockupsDir)),
@@ -70,7 +65,10 @@ export class GitTrackedGeneratedOutput implements TrackedGeneratedOutput {
         `derived output must not be tracked by Git:\n${invalid.map((name) => `  - ${name}`).join("\n")}\nRemove these paths from the index with git rm --cached and add these rules to .gitignore:\n${invalid.map((name) => `/${name}`).join("\n")}\n/${MOKABOOK_CACHE}/`,
       );
     } catch (error) {
-      if (error instanceof MokabookError && error.code === "build-invalid")
+      if (
+        error instanceof MokabookError &&
+        (error.code === "build-invalid" || error.code === "config-invalid")
+      )
         throw error;
       throw new MokabookError(
         "build-invalid",

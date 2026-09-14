@@ -4,6 +4,7 @@ import path from "node:path";
 import { minimatch } from "minimatch";
 
 import { toPosixPath } from "../config/paths.js";
+import { ConfiguredGitCommandRunner } from "../config/git.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import type { ManifestScreen } from "../registry/types.js";
@@ -12,7 +13,7 @@ import { baselineResourceConfig } from "./base_manifest.js";
 import { SelectedAssetReader } from "./evidence_assets.js";
 import { CompiledReviewAssetReader } from "./head_assets.js";
 import { baselineReaderForCommit } from "./repository.js";
-import { NodeGitCommandRunner, type BaselineReader } from "./git.js";
+import type { BaselineReader } from "./git.js";
 import { parseReviewResult } from "./result_validation.js";
 import { compareScreen } from "./screen_compare.js";
 import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
@@ -53,7 +54,7 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
       baselineReaderForCommit(
         this.config,
         source.baseCommit,
-        new NodeGitCommandRunner(this.config.repoRoot, signal),
+        new ConfiguredGitCommandRunner(this.config, signal),
         signal,
       );
     const before = new SelectedAssetReader(

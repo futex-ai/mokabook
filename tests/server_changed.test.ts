@@ -16,6 +16,7 @@ import {
 import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import { changedManifestRoutes } from "../dist/registry/changed_routes.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
+import { nestedRepository } from "./helpers/nested_repository.js";
 import {
   createFixture,
   removeFixture,
@@ -231,16 +232,11 @@ test("directory dependency edits alone leave unchanged routes out of Changes", a
 });
 
 test("changed routes require the config repo root to be the Git top level", async (context) => {
-  const fixture = await createFixture();
-  context.after(() => removeFixture(fixture));
-  const config = await loadConfig(fixture.root);
-  assert.equal(
-    await computeChangedRoutes(
-      config,
-      "HEAD",
-      committedReviewRepository(config),
-    ),
-    undefined,
+  const { config } = await nestedRepository(context);
+  await assert.rejects(
+    () =>
+      computeChangedRoutes(config, "HEAD", committedReviewRepository(config)),
+    { code: "config-invalid" },
   );
 });
 

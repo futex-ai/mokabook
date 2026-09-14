@@ -11,6 +11,15 @@ groups those independent dependencies for comparison orchestration.
 `CommittedRepository` composes `GitRepositoryEvidence` with
 `CommittedBaselineReader` using an injected `GitCommandRunner`.
 
+Production composition uses `ConfiguredGitCommandRunner` from `config/git.ts`.
+Its first read calls `requireGitTopLevel`, sharing validation across concurrent
+reads and retaining `config-invalid` for a nested `repoRoot`. Preparation also
+validates when handed an already resolved commit. Build and committed Check
+never construct this boundary; Serve can keep All available while an explicit
+comparison reports the configuration error. The worker's Git host is only a
+transport: the classification worker validates its configured runner before
+requesting repository evidence.
+
 `git_batch.ts` bounds literal tree queries and blob reads by pathspec bytes,
 object count and output bytes. `assets.ts` applies the baseline manifest's
 source policy and rejects non-regular files before using historical resources.

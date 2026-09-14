@@ -17,6 +17,10 @@ uses `ServedReviewRepository` in `review_repository.ts` to open a confined cache
 reader through `readOnlyRepositoryForCommit` / `baselineReaderForCommit` and
 ignore stale versions. The single-process host uses the same holder directly.
 Committed mode can open a Git-blob reader locally, without preparation.
+That reader validates the configured Git top level on its first read, so the
+unselected route reports `config-invalid` for a nested `repoRoot` while All
+remains available. Parent preparation, classification and selected readers use
+the same config-owned validation.
 
 `configuredServedReview` requires an injected `ReadOnlyReviewRepository` or a
 `ReviewRepositorySource` that supplies the current reader. The full comparison

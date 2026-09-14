@@ -110,6 +110,10 @@ reason; `changedPaths` and `dependency` reasons retain actual Git evidence.
 
 The builder runs the following steps for one merge-base commit.
 
+The [package `repoRoot` rule](./mokabook-package.md#configuration-discovery) applies at
+every Git boundary in both output modes. A root mismatch remains `config-invalid`
+and is not converted to a baseline history error.
+
 1. Resolve the merge base of `HEAD` and the configured base ref with Git. A
    missing ref, shallow history, or unrelated histories fail as
    `baseline-history-unavailable`.

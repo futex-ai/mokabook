@@ -13,11 +13,12 @@ import type {
   BaselineFileSystem,
   BaselineProgress,
 } from "../baseline/types.js";
-import { projectRealPath, toPosixPath } from "../config/paths.js";
+import { toPosixPath } from "../config/paths.js";
+import { ConfiguredGitCommandRunner } from "../config/git.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import { timeAsync } from "../diagnostics/timings.js";
-import { NodeGitCommandRunner, type GitCommandRunner } from "./git.js";
+import type { GitCommandRunner } from "./git.js";
 import { GitRepositoryEvidence } from "./git_evidence.js";
 import type { CompletionMarker } from "../baseline/cache_layout.js";
 import {
@@ -51,23 +52,25 @@ export async function prepareReviewRepository(
   base: string,
   options: BaselinePreparationOptions = {},
 ): Promise<PreparedReviewRepository> {
-  const runner =
-    options.runner ?? new NodeGitCommandRunner(config.repoRoot, options.signal);
+  const runner = new ConfiguredGitCommandRunner(
+    config,
+    options.signal,
+    options.runner,
+  );
   const evidence = new GitRepositoryEvidence(runner);
   let commit: string;
   try {
     commit = await timeAsync("baseline.resolve", async () => {
       options.signal?.throwIfAborted();
-      const root = (await runner.run(["rev-parse", "--show-toplevel"])).trim();
-      if (projectRealPath(root) !== projectRealPath(config.repoRoot))
-        throw new MokabookError(
-          "git-failed",
-          "Comparison requires the configured Git repository root",
-        );
+      await runner.requireTopLevel();
       return options.commit ?? (await evidence.mergeBase(base, "HEAD"));
     });
   } catch (error) {
-    if (config.generatedOutput !== "derived") throw error;
+    if (
+      config.generatedOutput !== "derived" ||
+      (error instanceof MokabookError && error.code === "config-invalid")
+    )
+      throw error;
     assertBaselineActive(options.signal);
     throw new BaselineError(
       "baseline-history-unavailable",

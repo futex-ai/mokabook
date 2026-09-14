@@ -6,7 +6,7 @@ import { ensureBaselineDirectory } from "../../dist/baseline/confinement.js";
 import { NodeBaselineFileSystem } from "../../dist/baseline/filesystem.js";
 import { tryBaselineLock } from "../../dist/baseline/lock.js";
 import { NodeBaselineProcessRunner } from "../../dist/baseline/process.js";
-import { NodeGitCommandRunner } from "../../dist/review/git.js";
+import { ConfiguredGitCommandRunner } from "../../dist/config/git.js";
 import { GitRepositoryEvidence } from "../../dist/review/git_evidence.js";
 
 export async function resetFixtureBaseline(config, dependencies = {}) {
@@ -15,7 +15,7 @@ export async function resetFixtureBaseline(config, dependencies = {}) {
   const clock = dependencies.clock ?? new SystemBaselineClock();
   const evidence =
     dependencies.evidence ??
-    new GitRepositoryEvidence(new NodeGitCommandRunner(config.repoRoot));
+    new GitRepositoryEvidence(new ConfiguredGitCommandRunner(config));
   const commit = await evidence.mergeBase(config.review.base, "HEAD");
   const layout = cacheLayout(config.repoRoot, commit);
   await ensureBaselineDirectory(fs, config.repoRoot, layout.entry);

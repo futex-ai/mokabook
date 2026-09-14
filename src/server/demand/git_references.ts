@@ -1,5 +1,5 @@
 /** Poll resolved commits off HTTP; Git handles worktrees, packed refs and symbolic HEAD. */
-import { NodeGitCommandRunner } from "../../review/git.js";
+import { ConfiguredGitCommandRunner } from "../../config/git.js";
 
 export interface GitReferenceSource {
   read(
@@ -11,7 +11,7 @@ export interface GitReferenceSource {
 
 export class RepositoryGitReferences implements GitReferenceSource {
   async read(root: string, base: string, signal: AbortSignal): Promise<string> {
-    const git = new NodeGitCommandRunner(root, signal);
+    const git = new ConfiguredGitCommandRunner({ repoRoot: root }, signal);
     const refs = await Promise.all(
       ["HEAD", base].map(async (ref) => {
         try {

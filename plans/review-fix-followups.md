@@ -11,21 +11,24 @@ Protocol owner: [package and authoring contract](../docs/protocol/mokabook-packa
 for the `repoRoot` rule; [derived baselines](../docs/protocol/mokabook-derived-baselines.md)
 for the rebuild post-steps.
 
-## Milestone 1: Validate the Git top level at config resolution
+## Milestone 1: Validate the Git top level at config resolution — completed
 
-- [ ] In config resolution, run `git rev-parse --show-toplevel` from
+- [x] In config resolution, run `git rev-parse --show-toplevel` from
       `repoRoot` and fail with a typed config error when its projected real
       path differs from `repoRoot`. Apply to every command that reads Git;
       `build` and `check` without comparisons must keep working outside a Git
       repository, so the check runs where a repository is first required, not
       at `defineConfig` load for those commands. Remove the duplicate check
       from `prepareReviewRepository`.
-- [ ] Rewrite the test named "changed routes require the config repo root to
+- [x] Rewrite the test named "changed routes require the config repo root to
       be the Git top level" so its fixture has a manifest and it asserts the
       typed error code from a nested `repoRoot`; add the same assertion for
       the unselected comparison route in a committed-mode child.
-- [ ] Document the rule in `mokabook-package.md` under `repoRoot` and remove
+- [x] Document the rule in `mokabook-package.md` under `repoRoot` and remove
       the comparison-specific wording from the derived baselines doc.
+- [x] Apply the same config-owned guard to derived tracking checks, pinned and
+      selected readers, classification and reference polling; retain All when
+      optional history is unavailable and test standalone build/check without Git.
 
 ## Milestone 2: Preserve the original error in every rebuild post-step
 

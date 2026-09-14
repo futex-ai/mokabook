@@ -266,6 +266,8 @@ function invalidBatchOutput(): MokabookError {
 }
 
 function gitBatchError(context: string, error: unknown): MokabookError {
+  if (error instanceof MokabookError && error.code === "config-invalid")
+    return error;
   return new MokabookError("git-failed", `${context}: ${errorMessage(error)}`, {
     cause: error,
   });

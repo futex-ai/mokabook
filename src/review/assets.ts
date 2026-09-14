@@ -137,7 +137,10 @@ export class GitReviewAssetReader implements ReviewAssetReader {
       }
       return files;
     } catch (error) {
-      if (error instanceof MokabookError && error.code === "review-invalid") {
+      if (
+        error instanceof MokabookError &&
+        (error.code === "review-invalid" || error.code === "config-invalid")
+      ) {
         throw error;
       }
       throw assetError(
