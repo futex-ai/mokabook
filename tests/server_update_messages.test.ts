@@ -107,3 +107,34 @@ test("watch updates distinguish evidence from content without guessing from Chan
     }
   }
 });
+
+test("baseline handoffs preserve pinned commits and explicit revocation", () => {
+  for (const commit of ["a".repeat(40), "b".repeat(64), null]) {
+    const message = childUpdateMessage(
+      2,
+      undefined,
+      undefined,
+      "pending",
+      "evidence",
+      commit,
+    );
+    assert.equal(message.baselineCommit, commit);
+    assert.deepEqual(parseChildUpdateMessage(message), message);
+  }
+  for (const baselineCommit of [
+    "HEAD",
+    "../escape",
+    "a".repeat(41),
+    "",
+    12,
+    {},
+  ]) {
+    assert.equal(
+      parseChildUpdateMessage({
+        ...childUpdateMessage(2, undefined),
+        baselineCommit,
+      }),
+      undefined,
+    );
+  }
+});

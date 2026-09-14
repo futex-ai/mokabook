@@ -33,6 +33,8 @@ export interface CatalogueUpdate {
 
 /** Parent-to-child update command with an explicit changed-route snapshot. */
 export interface ChildUpdateMessage {
+  /** Omit to retain the reader; null revokes it while the parent prepares. */
+  baselineCommit?: string | null;
   kind?: CatalogueUpdateKind;
   changesStatus?: ChangesStatus;
   changedRoutes: readonly string[] | null;
@@ -88,8 +90,10 @@ export function childUpdateMessage(
   componentChanges?: ComponentChangeSnapshot,
   changesStatus?: ChangesStatus,
   kind?: CatalogueUpdateKind,
+  baselineCommit?: string | null,
 ): ChildUpdateMessage {
   return {
+    ...(baselineCommit !== undefined ? { baselineCommit } : {}),
     ...(kind ? { kind } : {}),
     ...(changesStatus ? { changesStatus } : {}),
     changedRoutes: changedRoutes ? [...changedRoutes] : null,
@@ -111,6 +115,7 @@ export function parseChildUpdateMessage(
     return undefined;
   }
   const candidate = value as {
+    baselineCommit?: unknown;
     kind?: unknown;
     changesStatus?: unknown;
     changedRoutes?: unknown;
@@ -118,6 +123,10 @@ export function parseChildUpdateMessage(
     version?: unknown;
   };
   if (
+    (candidate.baselineCommit !== undefined &&
+      candidate.baselineCommit !== null &&
+      (typeof candidate.baselineCommit !== "string" ||
+        !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(candidate.baselineCommit))) ||
     !Number.isSafeInteger(candidate.version) ||
     (candidate.version as number) <= 0 ||
     !isChangedRoutes(candidate.changedRoutes) ||
@@ -131,6 +140,9 @@ export function parseChildUpdateMessage(
     return undefined;
   }
   return {
+    ...(candidate.baselineCommit !== undefined
+      ? { baselineCommit: candidate.baselineCommit }
+      : {}),
     ...(candidate.kind ? { kind: candidate.kind } : {}),
     ...(candidate.changesStatus
       ? { changesStatus: candidate.changesStatus }

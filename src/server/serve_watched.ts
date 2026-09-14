@@ -112,6 +112,14 @@ export async function serveWatched(
         "evidence",
       ),
     {
+      baselinePrepared: (commit) =>
+        running.notifyUpdate(
+          undefined,
+          undefined,
+          "pending",
+          "evidence",
+          commit,
+        ),
       baselineStatus: (changesStatus) =>
         running.notifyUpdate(undefined, undefined, changesStatus, "evidence"),
       resources,

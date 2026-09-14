@@ -1,3 +1,4 @@
+import { committedReviewRepository } from "../dist/review/repository.js";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
@@ -11,8 +12,8 @@ import { compareReview } from "../dist/review/compare.js";
 import {
   NodeGitCommandRunner,
   CommittedRepository,
-  type ReviewRepository,
 } from "../dist/review/git.js";
+import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import { changedManifestRoutes } from "../dist/registry/changed_routes.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
 import {
@@ -233,7 +234,14 @@ test("changed routes require the config repo root to be the Git top level", asyn
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
   const config = await loadConfig(fixture.root);
-  assert.equal(await computeChangedRoutes(config, "HEAD"), undefined);
+  assert.equal(
+    await computeChangedRoutes(
+      config,
+      "HEAD",
+      committedReviewRepository(config),
+    ),
+    undefined,
+  );
 });
 
 test("changed-route detection degrades to undefined when Git fails", async (context) => {
@@ -242,7 +250,7 @@ test("changed-route detection degrades to undefined when Git fails", async (cont
   const config = await loadConfig(fixture.root);
   const compilation = await compileCatalogue(config);
   await writeCompilation(compilation, config);
-  const failing: ReviewRepository = {
+  const failing: ReadOnlyReviewRepository = {
     evidence: {
       changedPaths: () => Promise.reject(new Error("no repository")),
       mergeBase: () => Promise.reject(new Error("no repository")),
@@ -258,7 +266,7 @@ test("changed-route detection degrades to undefined when Git fails", async (cont
     await computeChangedRoutes(config, "origin/main", failing),
     undefined,
   );
-  const succeeding: ReviewRepository = {
+  const succeeding: ReadOnlyReviewRepository = {
     ...failing,
     evidence: {
       ...failing.evidence,

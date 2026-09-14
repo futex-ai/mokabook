@@ -7,7 +7,7 @@ import { resolveExportOutput } from "../../dist/export/paths.js";
 import { ExportTransaction } from "../../dist/export/transaction.js";
 import { errorMessage } from "../../dist/errors.js";
 import { publicationOptions } from "../../dist/publication/options.js";
-import { prepareReviewRepository } from "../../dist/review/repository.js";
+import { prepareReviewRepository } from "../../dist/review/prepare.js";
 import { capturePublicationInputs } from "./inputs.mjs";
 import { previewOwnership, stagePreviewArtifact } from "./artifact.mjs";
 import { copyPublicFiles } from "../../dist/publication/resources.js";
@@ -58,7 +58,7 @@ export async function buildPreview(config, output, options = {}) {
         const prepared = capability.includeChanges
           ? await prepareReviewRepository(config, base)
           : undefined;
-        const git = prepared?.repository;
+        const git = prepared;
         const inputs = await capturePublicationInputs(config, excludedRoots);
         const snapshot = await loadCatalogueSnapshot(
           config,

@@ -7,7 +7,7 @@ import { promisify } from "node:util";
 
 import { RebuiltBaselineReader } from "../dist/baseline/reader.js";
 import { parseHistoricalManifest } from "../dist/registry/manifest.js";
-import { prepareReviewRepository } from "../dist/review/repository.js";
+import { prepareReviewRepository } from "../dist/review/prepare.js";
 import { createExampleBaseline } from "./helpers/example_baseline.js";
 import { repositoryRoot } from "./helpers/fixture.js";
 
@@ -33,10 +33,10 @@ test("the example fixture rebuilds an untracked baseline from its own source and
   const manifestPath = path.join(config.mockupsDir, "mokabook-manifest.json");
   await assert.rejects(fs.access(manifestPath), { code: "ENOENT" });
   const prepared = await prepareReviewRepository(config, "HEAD");
-  assert.ok(prepared.repository.reader instanceof RebuiltBaselineReader);
+  assert.ok(prepared.reader instanceof RebuiltBaselineReader);
   const manifest = parseHistoricalManifest(
     JSON.parse(
-      await prepared.repository.reader.readFile(
+      await prepared.reader.readFile(
         prepared.commit,
         "examples/basic/generated/mokabook-manifest.json",
       ),

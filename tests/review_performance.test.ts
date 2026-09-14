@@ -8,10 +8,8 @@ import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { renderReviewArtifact } from "../dist/review/artifact.js";
 import { compareReview } from "../dist/review/compare.js";
-import {
-  CommittedRepository,
-  type ReviewRepository,
-} from "../dist/review/git.js";
+import { CommittedRepository } from "../dist/review/git.js";
+import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import type { ReviewResult } from "../dist/review/types.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
@@ -36,7 +34,7 @@ test("Review batches base viewport reads", async (context) => {
   let batchReads = 0;
   let individualReads = 0;
   let batchedPathCount = 0;
-  const git: ReviewRepository = {
+  const git: ReadOnlyReviewRepository = {
     evidence: {
       changedPaths: async () => [],
       mergeBase: async () => "a".repeat(40),

@@ -1,3 +1,4 @@
+import type { ReadOnlyReviewRepository } from "../review/repository.js";
 import { timeAsync, timeSync } from "../diagnostics/timings.js";
 import type { ComponentChangeSnapshot } from "./component_changes.js";
 import { assertFreshSourceInventory } from "../build/source_freshness.js";
@@ -68,17 +69,18 @@ export function loadServedCatalogueSnapshot(
   config: ResolvedConfig,
   base?: string,
   manifest?: ManifestV5,
+  repository?: () => ReadOnlyReviewRepository,
 ): Promise<CatalogueSnapshot> {
   return loadCatalogueSnapshot(
     config,
-    base === undefined
+    base === undefined || !repository
       ? undefined
       : async (current) => {
           try {
             return await computeCatalogueChanges(
               config,
               base,
-              undefined,
+              repository(),
               current,
             );
           } catch (error) {

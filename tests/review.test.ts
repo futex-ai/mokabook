@@ -13,8 +13,8 @@ import { renderReviewArtifact } from "../dist/review/artifact.js";
 import {
   NodeGitCommandRunner,
   CommittedRepository,
-  type ReviewRepository,
 } from "../dist/review/git.js";
+import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import {
   normalizeReviewPair,
   normalizeSingleDocument,
@@ -447,7 +447,7 @@ async function git(cwd: string, arguments_: readonly string[]): Promise<void> {
   await execFileAsync("git", [...arguments_], { cwd });
 }
 
-function fakeGit(files: ReadonlyMap<string, string>): ReviewRepository {
+function fakeGit(files: ReadonlyMap<string, string>): ReadOnlyReviewRepository {
   return {
     evidence: {
       changedPaths: async () => [],

@@ -44,7 +44,8 @@ on a miss. Its successful end includes a boolean `cacheHit`; it settles only
 after cleanup and lock release. Command argv and diagnostics never enter timing
 records. See the [timing contract](../../docs/protocol/mokabook-timings.md).
 
-Mode selection now lives in `review/repository.ts`:
+Preparation lives in `review/prepare.ts`; read-only factories live separately
+in `review/repository.ts`:
 `prepareReviewRepository(config, base, { signal, onProgress })` creates the Node
 builder or committed reader and returns a pinned repository. Serve's
 `BackgroundGeneration` calls it in the parent after output adoption and before

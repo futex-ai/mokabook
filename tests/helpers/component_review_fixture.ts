@@ -6,7 +6,7 @@ import {
 } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
-import type { ReviewRepository } from "../../dist/review/git.js";
+import type { ReadOnlyReviewRepository } from "../../dist/review/repository.js";
 import { createFixture, removeFixture } from "./fixture.js";
 import { componentEntrySource } from "./component_fixture.js";
 
@@ -42,7 +42,7 @@ export async function componentReviewFixture(
 export function componentGit(
   compilation: Compilation,
   changedPaths: readonly string[] = [],
-): ReviewRepository {
+): ReadOnlyReviewRepository {
   const files = new Map(
     [...compilation.outputs].map(([route, html]) => [`mockups/${route}`, html]),
   );

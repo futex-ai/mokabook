@@ -7,8 +7,7 @@ import {
 } from "../registry/changes.js";
 import { readManifest } from "../registry/manifest.js";
 import type { ManifestV5 } from "../registry/types.js";
-import type { ReviewRepository } from "../review/git.js";
-import { prepareReviewRepository } from "../review/repository.js";
+import type { ReadOnlyReviewRepository } from "../review/repository.js";
 import {
   readCatalogueChanges,
   type ComponentChangeSnapshot,
@@ -23,7 +22,7 @@ export interface ResolvedCatalogueChanges extends CatalogueChangeSnapshot {
 export async function computeChangedRoutes(
   config: ResolvedConfig,
   base: string,
-  git?: ReviewRepository,
+  git: ReadOnlyReviewRepository,
 ): Promise<readonly string[] | undefined> {
   try {
     return (await computeCatalogueChanges(config, base, git)).changedRoutes;
@@ -36,11 +35,10 @@ export async function computeChangedRoutes(
 export async function computeCatalogueChanges(
   config: ResolvedConfig,
   base: string,
-  git?: ReviewRepository,
+  git: ReadOnlyReviewRepository,
   manifest?: ManifestV5,
 ): Promise<ResolvedCatalogueChanges> {
-  const client =
-    git ?? (await prepareReviewRepository(config, base)).repository;
+  const client = git;
   const compilation =
     config.generatedOutput === "derived" && !manifest
       ? await compileCatalogue(config)

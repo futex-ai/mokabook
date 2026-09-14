@@ -19,39 +19,39 @@ UI work is involved.
 
 Protocol owner: [derived baselines](../docs/protocol/mokabook-derived-baselines.md).
 
-## Milestone 1: Build capability as a type
+## Milestone 1: Build capability as a type — completed
 
 Make "may rebuild a baseline" a capability that HTTP-side code cannot obtain,
 and restore the unselected comparison route in derived watched Serve by
 handing the child a read-only repository from the parent.
 
-- [ ] Split the repository type in `src/review/repository.ts`:
+- [x] Split the repository type in `src/review/repository.ts`:
       `PreparedReviewRepository` carries the pinned commit, evidence, reader
       and completion marker and is constructible only by the CLI composition
       root and the Serve parent; `ReadOnlyReviewRepository` carries evidence
       and a reader only. Every function reachable from the HTTP child accepts
       the read-only type.
-- [ ] Delete the `??= prepareReviewRepository(...)` fallbacks in
+- [x] Delete the `??= prepareReviewRepository(...)` fallbacks in
       `src/review/run.ts`, `src/server/changed.ts` and
       `src/server/component_changes.ts`; callers inject a repository. Keep
       committed-mode construction of a Git-blob reader available to the child
       through a read-only factory.
-- [ ] Parent-to-child handoff: after a rebuild completes and on every merge
+- [x] Parent-to-child handoff: after a rebuild completes and on every merge
       base move, the parent sends the pinned commit to the child over the
       existing generation message. The child builds a read-only repository
       over the cache through `baselineReaderForCommit` and passes it to
       `configuredServedReview`. Before the first completion the child has none
       and the unselected route returns a typed `review-invalid` error whose
       message says the comparison is not prepared; no command is spawned.
-- [ ] Tests: the child serves `/__mokabook/diffs/review.json` without `route`
+- [x] Tests: the child serves `/__mokabook/diffs/review.json` without `route`
       in derived mode with `CachedBaselineBuilder.prototype.build` mocked to
       throw; the child swaps readers when the merge base moves; the child
       factory module has no import path to the builder; committed-mode
       behavior is byte-identical.
-- [ ] Update `docs/protocol/mokabook-derived-baselines.md` (Serve And Watch)
+- [x] Update `docs/protocol/mokabook-derived-baselines.md` (Serve And Watch)
       and `src/review/README.md` / `src/server/README.md` to describe the
       typed capability and the IPC handoff.
-- [ ] Run format, lint, typecheck, `npm test`, `npm run example:check`,
+- [x] Run format, lint, typecheck, `npm test`, `npm run example:check`,
       browser tests, `cargo xtask check`; commit and push.
 
 ## Milestone 2: Publish before cleanup

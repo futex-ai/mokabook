@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadConfig } from "../dist/config/load.js";
-import { prepareReviewRepository } from "../dist/review/repository.js";
+import { prepareReviewRepository } from "../dist/review/prepare.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 import {

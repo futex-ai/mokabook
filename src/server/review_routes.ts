@@ -1,11 +1,12 @@
 /** Lazy comparison snapshots used by the catalogue diff controls. */
+import type { ReviewRepositorySource } from "./review_repository.js";
 
 import type { ServerResponse } from "node:http";
 
 import { encodeUrlPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
-import type { ReviewRepository } from "../review/git.js";
+import type { ReadOnlyReviewRepository } from "../review/repository.js";
 import { runReview } from "../review/run.js";
 import { RepositorySelectedReview } from "../review/selected.js";
 import type {
@@ -33,23 +34,29 @@ export interface ServedReview extends ReviewArtifactProvider {
   /** Comparison base ref, shown when the comparison cannot be generated. */
   base: string;
   selected?: SelectedReviewProvider;
+  repository?(): ReadOnlyReviewRepository;
 }
 
 /** Serve the configured Git comparison from the consumer's Review engine. */
 export function configuredServedReview(
   config: ResolvedConfig,
   base: string,
-  git?: ReviewRepository,
+  git: ReadOnlyReviewRepository | ReviewRepositorySource,
 ): ServedReview {
+  const repository = () => ("current" in git ? git.current() : git);
   return {
     base,
-    selected: new RepositorySelectedReview(config, git?.reader),
+    repository,
+    selected: new RepositorySelectedReview(
+      config,
+      "current" in git ? undefined : git.reader,
+    ),
     async generate(options): Promise<void> {
       await runReview(
         config,
         base,
         config.review.outDir,
-        git,
+        repository(),
         undefined,
         options.changedPathExclusions,
       );

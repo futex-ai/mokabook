@@ -9,10 +9,8 @@ import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { compareReview } from "../dist/review/compare.js";
-import {
-  CommittedRepository,
-  type ReviewRepository,
-} from "../dist/review/git.js";
+import { CommittedRepository } from "../dist/review/git.js";
+import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import { runReview } from "../dist/review/run.js";
 import type { ManifestScreen, ManifestV3 } from "../dist/registry/types.js";
 import {
@@ -245,7 +243,7 @@ test("Review uses v2 compatibility only when v3 is absent", async (context) => {
   );
 });
 
-function fakeGit(files: ReadonlyMap<string, string>): ReviewRepository {
+function fakeGit(files: ReadonlyMap<string, string>): ReadOnlyReviewRepository {
   return {
     evidence: {
       changedPaths: async () => [],

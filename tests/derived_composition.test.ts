@@ -5,7 +5,7 @@ import test from "node:test";
 import { CommittedBaselineReader } from "../dist/review/committed.js";
 import { RebuiltBaselineReader } from "../dist/baseline/reader.js";
 import type { BaselineBuildRequest } from "../dist/baseline/types.js";
-import { prepareReviewRepository } from "../dist/review/repository.js";
+import { prepareReviewRepository } from "../dist/review/prepare.js";
 import { loadConfig } from "../dist/config/load.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 import { MemoryBaselineFileSystem } from "./helpers/baseline_memory.js";
@@ -30,16 +30,15 @@ test("composition selects committed reads without building and pins repository e
       },
     },
   });
-  assert.ok(prepared.repository.reader instanceof CommittedBaselineReader);
+  assert.ok(prepared.reader instanceof CommittedBaselineReader);
   assert.equal(
-    await prepared.repository.evidence.mergeBase("other", "HEAD"),
+    await prepared.evidence.mergeBase("other", "HEAD"),
     "a".repeat(40),
   );
   assert.equal(calls.filter((name) => name === "merge-base").length, 1);
-  assert.deepEqual(
-    await prepared.repository.evidence.changedPaths(prepared.commit),
-    ["notes.md"],
-  );
+  assert.deepEqual(await prepared.evidence.changedPaths(prepared.commit), [
+    "notes.md",
+  ]);
   await prepared.assertUnchanged();
 });
 
@@ -90,7 +89,7 @@ test("derived composition forwards cancellation and progress to the injected bui
       },
     },
   });
-  assert.ok(prepared.repository.reader instanceof RebuiltBaselineReader);
+  assert.ok(prepared.reader instanceof RebuiltBaselineReader);
   assert.deepEqual(progress, ["start", "complete"]);
   assert.equal(requests.length, 1);
   assert.equal(requests[0]!.signal, signal);

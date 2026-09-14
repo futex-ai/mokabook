@@ -1,3 +1,4 @@
+import { committedReviewRepository } from "../dist/review/repository.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -24,7 +25,14 @@ test("Changes excludes ignored-only edits while comparisons retain their evidenc
     ignoredSource.replaceAll("Old navigation", "New navigation"),
   );
   await fixture.build();
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), []);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    [],
+  );
   const running = await serve(fixture.config, {
     base: "HEAD",
     port: 0,
@@ -53,16 +61,27 @@ test("Changes keeps real content edits alongside ignored-region edits", async (t
       .replaceAll("Screen content", "Changed content"),
   );
   await fixture.build();
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
-    "screens/home.html",
-    "user-flows/tour.html",
-  ]);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    ["screens/home.html", "user-flows/tour.html"],
+  );
 });
 
 test("dependency-only edits retain evidence without generating a review list", async (t) => {
   const fixture = await changedFixture(t);
   await fs.writeFile(path.join(fixture.root, "notes.md"), "# Edited notes\n");
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), []);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    [],
+  );
   const running = await serve(fixture.config, {
     base: "HEAD",
     port: 0,
@@ -85,10 +104,14 @@ test("Changes includes a dark-only material edit", async (t) => {
   const file = path.join(fixture.mockupsDir, "screens/home.mobile.dark.html");
   const document = await fs.readFile(file, "utf8");
   await fs.writeFile(file, document.replaceAll(">Details<", ">Dark details<"));
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
-    "screens/home.html",
-    "user-flows/tour.html",
-  ]);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    ["screens/home.html", "user-flows/tour.html"],
+  );
 });
 
 test("Changes keeps material keys inside otherwise ignored shared chrome", async (t) => {
@@ -102,10 +125,14 @@ test("Changes keeps material keys inside otherwise ignored shared chrome", async
     source.replace('"a".repeat(64)', '"b".repeat(64)'),
   );
   await fixture.build();
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
-    "screens/home.html",
-    "user-flows/tour.html",
-  ]);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    ["screens/home.html", "user-flows/tour.html"],
+  );
 });
 
 test("moving a source module preserves an unchanged review list", async (t) => {
@@ -115,7 +142,14 @@ test("moving a source module preserves an unchanged review list", async (t) => {
     path.join(fixture.entriesDir, "moved.mockup.tsx"),
   );
   await fixture.build();
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), []);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    [],
+  );
   const running = await serve(fixture.config, {
     base: "HEAD",
     port: 0,
@@ -139,7 +173,14 @@ test("invalid baseline ignore markers leave the filter unavailable", async (t) =
   fixture.git("add", ".");
   fixture.git("commit", "-qm", "test: invalid baseline");
   await fixture.build();
-  assert.equal(await computeChangedRoutes(fixture.config, "HEAD"), undefined);
+  assert.equal(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    undefined,
+  );
 });
 
 test("embedding an ignored-only screen does not reintroduce it through resource impact", async (t) => {
@@ -153,5 +194,12 @@ test("embedding an ignored-only screen does not reintroduce it through resource 
     source.replaceAll("Old navigation", "New navigation"),
   );
   await fixture.build();
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), []);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    [],
+  );
 });

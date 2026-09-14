@@ -1,3 +1,4 @@
+import { prepareReviewRepository } from "../dist/review/prepare.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -15,7 +16,11 @@ test("derived Changes and selected comparisons use compiled source when generate
     validEntrySource({ body: "Source-only change" }),
   );
   await fs.rm(fixture.mockupsDir, { recursive: true });
-  const changes = await computeCatalogueChanges(fixture.config, "HEAD");
+  const changes = await computeCatalogueChanges(
+    fixture.config,
+    "HEAD",
+    await prepareReviewRepository(fixture.config, "HEAD"),
+  );
   assert.deepEqual(changes.changedRoutes, [
     "screens/home.html",
     "user-flows/tour.html",

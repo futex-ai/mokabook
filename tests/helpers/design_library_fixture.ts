@@ -9,7 +9,7 @@ import {
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { classifyComponents } from "../../dist/review/component_classification.js";
-import type { ReviewRepository } from "../../dist/review/git.js";
+import type { ReadOnlyReviewRepository } from "../../dist/review/repository.js";
 import { copyExampleSources } from "./example_sources.js";
 import { repositoryRoot } from "./fixture.js";
 
@@ -71,7 +71,7 @@ export async function designLibraryFixture(
     });
   }
   const batches: string[][] = [];
-  function git(changedPaths: readonly string[]): ReviewRepository {
+  function git(changedPaths: readonly string[]): ReadOnlyReviewRepository {
     const files = new Map(
       [...resources, ...before.outputs].map(([file, contents]) => [
         `examples/basic/generated/${file}`,

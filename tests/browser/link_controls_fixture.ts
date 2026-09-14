@@ -1,3 +1,4 @@
+import { committedReviewRepository } from "../../dist/review/repository.js";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -41,7 +42,12 @@ moduleResolution: { aliases: { "react-native": "react-native-web" }, conditions:
       controlSource("Updated Home"),
     );
     await writeCompilation(await compileCatalogue(config), config);
-    await runReview(config, "HEAD", config.review.outDir);
+    await runReview(
+      config,
+      "HEAD",
+      config.review.outDir,
+      committedReviewRepository(config),
+    );
     const server = await startCatalogueServer(config, {
       base: "HEAD",
       port: 0,

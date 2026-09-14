@@ -6,7 +6,7 @@ import { EvidenceAssetReader } from "../review/evidence_assets.js";
 import { derivedHeadOutputs } from "../review/head_assets.js";
 import {
   baselineReaderForCommit,
-  prepareReviewRepository,
+  comparisonNotPrepared,
 } from "../review/repository.js";
 import type { ReviewEvidence } from "../review/selection_types.js";
 import path from "node:path";
@@ -25,9 +25,9 @@ import type { ReviewResultV3 } from "../review/component_types.js";
 import {
   NodeGitCommandRunner,
   CommittedRepository,
-  type ReviewRepository,
   type GitCommandRunner,
 } from "../review/git.js";
+import type { ReadOnlyReviewRepository } from "../review/repository.js";
 
 export interface ComponentChangeSnapshot {
   baseline: Manifest;
@@ -123,7 +123,7 @@ export class ComponentChangeCache {
 /** Production read boundary for a last-good catalogue and its current Git branch point. */
 export class RepositoryComponentChanges implements ComponentChangeSource {
   private readonly runner: GitCommandRunner;
-  private git: ReviewRepository;
+  private git: ReadOnlyReviewRepository;
   constructor(
     private readonly config: ResolvedConfig,
     private readonly manifest: Manifest,
@@ -148,14 +148,8 @@ export class RepositoryComponentChanges implements ComponentChangeSource {
       };
       return this.accepted.commit;
     }
-    if (this.config.generatedOutput === "derived") {
-      const prepared = await prepareReviewRepository(this.config, this.base, {
-        runner: this.runner,
-        ...(this.signal ? { signal: this.signal } : {}),
-      });
-      this.git = prepared.repository;
-      return prepared.commit;
-    }
+    if (this.config.generatedOutput === "derived")
+      throw comparisonNotPrepared();
     if (
       projectRealPath(
         (await this.runner.run(["rev-parse", "--show-toplevel"])).trim(),
@@ -181,7 +175,7 @@ export async function readCatalogueChanges(
   config: ResolvedConfig,
   manifest: Manifest,
   base: string,
-  git: ReviewRepository,
+  git: ReadOnlyReviewRepository,
   commit: string,
   outputs?: ReadonlyMap<string, string>,
 ): Promise<ComponentChangeSnapshot> {

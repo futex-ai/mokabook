@@ -1,3 +1,4 @@
+import { committedReviewRepository } from "../dist/review/repository.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -75,7 +76,11 @@ for (const version of [2, 3] as const) {
 
   test(`v${version} page migration attributes Changes to current metadata without historical rows`, async (context) => {
     const fixture = await historicalPageFixture(context, version);
-    const changes = await computeCatalogueChanges(fixture.config, "HEAD");
+    const changes = await computeCatalogueChanges(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    );
     assert.deepEqual(changes.changedRoutes, ["handbook.html"]);
     assert.deepEqual(changes.removedEntries, []);
     const catalogue = createCatalogue(fixture.manifest, changes.removedEntries);
@@ -121,7 +126,11 @@ test("a renamed legacy route is an added page without pairing or synthetic remov
     route: "old-handbook.html",
     document: pageDocument.replace("end:nav", "end:other"),
   });
-  const changes = await computeCatalogueChanges(fixture.config, "HEAD");
+  const changes = await computeCatalogueChanges(
+    fixture.config,
+    "HEAD",
+    committedReviewRepository(fixture.config),
+  );
   assert.deepEqual(changes.changedRoutes, ["handbook.html"]);
   assert.deepEqual(changes.removedEntries, []);
 });

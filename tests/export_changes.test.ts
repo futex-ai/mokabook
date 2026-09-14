@@ -1,3 +1,4 @@
+import { committedReviewRepository } from "../dist/review/repository.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -41,10 +42,14 @@ for (const resource of ["nested.css", "image.svg"]) {
       },
     );
     await fs.appendFile(path.join(fixture.mockupsDir, resource), "\n");
-    assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
-      "screens/home.html",
-      "user-flows/tour.html",
-    ]);
+    assert.deepEqual(
+      await computeChangedRoutes(
+        fixture.config,
+        "HEAD",
+        committedReviewRepository(fixture.config),
+      ),
+      ["screens/home.html", "user-flows/tour.html"],
+    );
     const result = await exportCatalogue(fixture.config, {
       outDir: "site",
       base: "HEAD",

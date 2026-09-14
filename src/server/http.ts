@@ -87,6 +87,7 @@ export async function startCatalogueServer(
               ? options.base
               : undefined,
           options.manifest,
+          options.review?.repository,
         ));
   const validated = catalogueSnapshotForConfig(snapshot, config);
   const changes = validated.changes;

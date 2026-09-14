@@ -6,7 +6,7 @@ import { MokabookError, errorMessage } from "../errors.js";
 import { readBaseManifest } from "../review/base_manifest.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { compareReview } from "../review/compare.js";
-import { prepareReviewRepository } from "../review/repository.js";
+import { prepareReviewRepository } from "../review/prepare.js";
 import { changedContentPaths } from "../server/changed_content.js";
 import { withExportCleanup } from "./cleanup.js";
 import { assertExportActive, exportError } from "./error.js";
@@ -54,7 +54,8 @@ async function generateExport(
       base,
       options.signal ? { signal: options.signal } : {},
     );
-    const { repository: git, commit } = prepared;
+    const { commit } = prepared;
+    const git = prepared;
     const baseline = await readBaseManifest(git.reader, commit, config);
     const compilation = await compileCatalogue(config);
     config = { ...config, sourceFiles: compilation.manifest.sourceFiles };

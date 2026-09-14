@@ -35,6 +35,14 @@ for (const watch of [false, true]) {
         t.mock.method(CachedBaselineBuilder.prototype, "build", async () => {
           throw new Error("HTTP must never rebuild a baseline");
         });
+        const unselected = await fetch(
+          `${running.url}/__mokabook/diffs/review.json`,
+        );
+        assert.equal(unselected.status, 200, await unselected.clone().text());
+        assert.equal(
+          parseReviewResult(await unselected.json()).baseCommit,
+          fixture.commit,
+        );
         await fs.writeFile(
           path.join(fixture.mockupsDir, "screens/home.mobile.html"),
           "wrong local bytes",

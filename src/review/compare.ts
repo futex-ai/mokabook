@@ -17,7 +17,7 @@ import {
 import { baselineResourceConfig, readBaseManifest } from "./base_manifest.js";
 import { compareComponentCatalogue } from "./component_compare.js";
 import { reviewChangedPaths } from "./changed_paths.js";
-import type { ReviewRepository } from "./git.js";
+import type { ReadOnlyReviewRepository } from "./repository.js";
 import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
 import type {
   ReviewArtifact,
@@ -30,7 +30,7 @@ import type {
 export async function compareReview(
   compilation: Compilation,
   config: ResolvedConfig,
-  git: ReviewRepository,
+  git: ReadOnlyReviewRepository,
   baseRef: string,
   outDir = config.review.outDir,
   assetReader: ReviewAssetReader = new FileSystemReviewAssetReader(config),

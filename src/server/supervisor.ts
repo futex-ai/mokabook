@@ -37,6 +37,7 @@ export interface ProcessSupervisor {
     componentChanges?: ComponentChangeSnapshot,
     changesStatus?: ChangesStatus,
     kind?: CatalogueUpdateKind,
+    baselineCommit?: string | null,
   ): void;
   /** Register the watched-runtime handler for a post-readiness child failure. */
   onUnexpectedExit(callback: (error: Error) => void): void;
@@ -203,6 +204,7 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
     componentChanges?: ComponentChangeSnapshot,
     changesStatus?: ChangesStatus,
     kind?: CatalogueUpdateKind,
+    baselineCommit?: string | null,
   ): void {
     const child = this.#child;
     if (!child || child.stopping || child.exited) return;
@@ -214,6 +216,7 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
         componentChanges,
         changesStatus,
         kind,
+        baselineCommit,
       ),
     );
   }

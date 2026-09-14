@@ -12,7 +12,7 @@ import {
 } from "../dist/review/component_metadata.js";
 import { ComponentMaterialReader } from "../dist/review/component_resources.js";
 import { compareComponentView } from "../dist/review/component_view.js";
-import type { ReviewRepository } from "../dist/review/git.js";
+import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
@@ -133,7 +133,7 @@ for (const baseline of ["screens", "components"] as const)
       baseline === "screens" ? validEntrySource() : source,
     );
     const batches: string[][] = [];
-    const git: ReviewRepository = {
+    const git: ReadOnlyReviewRepository = {
       ...fixture.git,
       reader: {
         ...fixture.git.reader,

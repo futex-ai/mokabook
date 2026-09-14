@@ -14,7 +14,7 @@ import type {
   ResourceWatcher,
 } from "../resource_watcher.js";
 import { BackgroundCompilation } from "./background.js";
-import { prepareReviewRepository } from "../../review/repository.js";
+import { prepareReviewRepository } from "../../review/prepare.js";
 import type {
   BaselineBuilder,
   BaselineProgress,
@@ -25,6 +25,8 @@ export interface BackgroundGenerationOptions {
   readonly resources?: ResourceWatcher;
   /** Resolves when the host shuts down; preparation stays independently cancellable. */
   readonly shutdown?: Promise<void>;
+  /** The parent publishes or revokes the read capability for this generation. */
+  readonly baselinePrepared?: (commit: string | null) => void;
   /**
    * Publish `preparing` while a derived baseline is genuinely rebuilt and
    * `pending` once it settles. Committed mode and a cache hit never call this.
@@ -40,6 +42,7 @@ export class BackgroundGeneration {
   private sequence = 0;
   private closed = false;
   private busy = false;
+  private derived = false;
   private controller: AbortController | undefined;
   private readonly shutdown: Promise<void>;
   constructor(
@@ -59,6 +62,7 @@ export class BackgroundGeneration {
 
   start(runtime: ComponentRuntime, base: string, existing?: Compilation): void {
     if (this.closed) return;
+    this.derived = runtime.config.generatedOutput === "derived";
     const sequence = ++this.sequence;
     const controller = (this.controller = new AbortController());
     const worker = (this.worker = new BackgroundCompilation(runtime, existing));
@@ -92,6 +96,7 @@ export class BackgroundGeneration {
               })
             : undefined;
         if (!current()) return;
+        if (baseline) this.options.baselinePrepared?.(baseline.commit);
         const snapshot = await timeAsync("changes.classify", () =>
           this.classifier instanceof RepositoryCatalogueChangeClassifier
             ? worker.classify(base, baseline?.commit)
@@ -155,6 +160,7 @@ export class BackgroundGeneration {
   }
   async invalidate(): Promise<void> {
     this.sequence++;
+    if (this.derived) this.options.baselinePrepared?.(null);
     this.controller?.abort();
     this.controller = undefined;
     const worker = this.worker;

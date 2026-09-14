@@ -1,3 +1,4 @@
+import { committedReviewRepository } from "../dist/review/repository.js";
 import assert from "node:assert/strict";
 import test from "node:test";
 
@@ -20,7 +21,13 @@ test("Comparison snapshot output cannot overlap generated or authored roots", as
 
   for (const out of ["mockups/review", "entries/review"]) {
     await assert.rejects(
-      () => runReview(config, "HEAD", path.join(fixture.root, out)),
+      () =>
+        runReview(
+          config,
+          "HEAD",
+          path.join(fixture.root, out),
+          committedReviewRepository(config),
+        ),
       /must not overlap/,
     );
   }

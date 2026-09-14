@@ -1,3 +1,4 @@
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
@@ -101,7 +102,11 @@ test("server startup rejects invalid current metadata before querying history", 
     startCatalogueServer(fixture.config, {
       base: "main",
       port: 0,
-      review: configuredServedReview(fixture.config, "main"),
+      review: configuredServedReview(
+        fixture.config,
+        "main",
+        committedReviewRepository(fixture.config),
+      ),
     }),
     { code: "manifest-invalid" },
   );

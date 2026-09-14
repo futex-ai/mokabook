@@ -1,3 +1,4 @@
+import { ServedReviewRepository } from "./review_repository.js";
 import {
   parseRuntimeMessage,
   requestComponentRuntime,
@@ -28,6 +29,7 @@ export async function runServerChild(
       ? await receiveRequestedRuntime()
       : undefined;
   if (initial?.version) updateVersion = initial.version;
+  const repository = new ServedReviewRepository(config, updateVersion);
   const server = await startCatalogueServer(config, {
     base,
     changesStatus: "pending",
@@ -39,11 +41,11 @@ export async function runServerChild(
       ? { componentRuntime: { ...initial.runtime, config, manifest } }
       : {}),
     port,
-    review: configuredServedReview(config, base),
+    review: configuredServedReview(config, base, repository),
     strictPort,
     updateVersion,
   });
-  const shutdown = waitForChildShutdown(server, config, manifest);
+  const shutdown = waitForChildShutdown(server, config, repository, manifest);
   process.send?.({ port: server.port, type: "ready", version: updateVersion });
   if (!process.send)
     process.stdout.write(`Mokabook listening at ${server.url}\n`);
@@ -58,6 +60,7 @@ export async function runServerChild(
 function waitForChildShutdown(
   server: Awaited<ReturnType<typeof startCatalogueServer>>,
   config: ResolvedConfig,
+  repository: ServedReviewRepository,
   manifest?: ComponentRuntime["manifest"],
 ): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -86,6 +89,7 @@ function waitForChildShutdown(
         complete &&
         server.completeCatalogue?.(complete.manifest, complete.generation)
       ) {
+        repository.accept(undefined, complete.version);
         server.publishUpdate({ kind: "evidence", version: complete.version });
       }
       const runtime = parseRuntimeMessage(message);
@@ -97,11 +101,14 @@ function waitForChildShutdown(
             manifest,
           }),
         );
-        if (runtime.version !== undefined)
+        if (runtime.version !== undefined) {
+          repository.accept(undefined, runtime.version);
           server.publishUpdate({ version: runtime.version });
+        }
       }
       const update = parseChildUpdateMessage(message);
-      if (update)
+      if (update) {
+        repository.accept(update.baselineCommit, update.version);
         server.publishUpdate({
           ...(update.kind ? { kind: update.kind } : {}),
           changesStatus:
@@ -111,6 +118,7 @@ function waitForChildShutdown(
           componentChanges: update.componentChanges,
           version: update.version,
         });
+      }
       if (isMessage(message, "shutdown")) void close();
     };
     const onDisconnect = (): void => void close();

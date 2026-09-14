@@ -1,3 +1,4 @@
+import { ServedReviewRepository } from "./review_repository.js";
 import type { BaselineBuilder } from "../baseline/types.js";
 import { prepareLiveRuntime } from "../build/live_runtime.js";
 import {
@@ -72,6 +73,7 @@ export async function serve(
     const runtime = await prepareLiveRuntime(config);
     config = runtime.config;
     const base = options.base ?? config.review.base;
+    const repository = new ServedReviewRepository(config);
     const background = new BackgroundGeneration(
       dependencies.outputStore,
       dependencies.changeClassifier ?? DEFAULT_CHANGE_CLASSIFIER,
@@ -87,6 +89,13 @@ export async function serve(
           changesStatus: snapshot ? "ready" : "unavailable",
         }),
       {
+        baselinePrepared: (commit) => {
+          repository.accept(commit);
+          server.publishUpdate({
+            kind: "evidence",
+            ...(commit === null ? { changesStatus: "pending" } : {}),
+          });
+        },
         baselineStatus: (changesStatus) =>
           server.publishUpdate({ kind: "evidence", changesStatus }),
         ...(dependencies.baselineBuilder
@@ -101,7 +110,7 @@ export async function serve(
       manifest: runtime.manifest,
       componentRuntime: runtime,
       port: options.port,
-      review: configuredServedReview(config, base),
+      review: configuredServedReview(config, base, repository),
     });
     background.start(runtime, base);
     return {

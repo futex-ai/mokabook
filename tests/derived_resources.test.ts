@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
-import { prepareReviewRepository } from "../dist/review/repository.js";
+import { prepareReviewRepository } from "../dist/review/prepare.js";
 import { readCatalogueChanges } from "../dist/server/component_changes.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
 import { derivedFixture } from "./helpers/derived_fixture.js";
@@ -35,9 +35,9 @@ for (const components of [false, true]) {
         '<svg xmlns="http://www.w3.org/2000/svg"><title>Changed</title></svg>',
       );
     const repository = {
-      ...prepared.repository,
+      ...prepared,
       evidence: {
-        ...prepared.repository.evidence,
+        ...prepared.evidence,
         changedPaths: async () => [],
       },
     };
@@ -78,6 +78,10 @@ mockups.push(definePage({ id: "guide", title: "Guide", description: "Guide", rou
     fixture.entryPath,
     source.replace("Original guide", "Updated guide"),
   );
-  const changes = await computeCatalogueChanges(fixture.config, "HEAD");
+  const changes = await computeCatalogueChanges(
+    fixture.config,
+    "HEAD",
+    await prepareReviewRepository(fixture.config, "HEAD"),
+  );
   assert.deepEqual(changes.changedRoutes, ["guide.html"]);
 });

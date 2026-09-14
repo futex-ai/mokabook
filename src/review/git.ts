@@ -1,3 +1,4 @@
+import type { ReadOnlyReviewRepository } from "./repository.js";
 import { CommittedBaselineReader } from "./committed.js";
 import { GitRepositoryEvidence } from "./git_evidence.js";
 import { executeGit } from "./git_process.js";
@@ -31,14 +32,8 @@ export interface BaselineReader {
   ): Promise<ReadonlyMap<string, GitFile>>;
 }
 
-/** Independently replaceable evidence and baseline dependencies. */
-export interface ReviewRepository {
-  readonly evidence: RepositoryEvidence;
-  readonly reader: BaselineReader;
-}
-
 /** Composition for catalogues that retain generated output in Git. */
-export class CommittedRepository implements ReviewRepository {
+export class CommittedRepository implements ReadOnlyReviewRepository {
   readonly evidence: GitRepositoryEvidence;
   readonly reader: CommittedBaselineReader;
   constructor(runner: GitCommandRunner) {

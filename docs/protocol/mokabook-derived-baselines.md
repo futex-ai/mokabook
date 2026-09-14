@@ -200,8 +200,23 @@ paths, and reserved basenames, as for any historical manifest.
 Serve in derived mode starts HTTP and adopts complete generated output exactly
 as in committed mode. The parent owns preparation and its abort controller;
 the disposable classification worker receives the prepared commit and compiled
-head output. The builder never runs inside a worker that can be terminated
-without draining its processes. The evidence state while a rebuild actually
+head output. `PreparedReviewRepository` is constructed only at the CLI,
+export/publication and Serve-parent composition boundary; it carries the pinned
+commit, evidence, reader and completion marker. HTTP-reachable comparisons and
+classification accept `ReadOnlyReviewRepository` (evidence and reader only),
+with no implicit preparation fallback or import path to the builder.
+
+After preparation, the parent sends `baselineCommit` in the existing versioned
+`update` IPC message, before classification. The child opens the cached reader
+through `baselineReaderForCommit` and injects it into its unselected comparison
+provider. Omission retains the reader; `null` revokes it while a replacement is
+prepared. Ref moves revoke and replace the reader; stale update versions cannot
+restore an old commit. Before the first handoff and while revoked, unselected
+`/__mokabook/diffs/review.json` fails with `review-invalid` and the message
+"The comparison is not prepared", without starting commands. Committed mode
+may construct its read-only Git reader locally. Single-process `--no-watch`
+Serve uses the same reader handoff without IPC. The builder never runs inside
+a worker that can be terminated without draining its processes. The evidence state while a rebuild actually
 runs is `preparing`: the count slot shows the spinner and selecting Changes
 shows the preparing sidebar with product copy, distinct from the `pending`
 classification state that follows. All remains available. Serve opens in
