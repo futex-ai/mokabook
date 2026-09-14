@@ -83,9 +83,9 @@ export async function changedContentPaths(
   );
   const result = new Set<string>();
   const normalizedDocuments = new Map<string, string>();
+  const normalizedBases = new Map<string, string>();
   const changedPairs = pairs.filter(
-    (pair): pair is DocumentPair & { base: string } =>
-      pair.changed && pair.base !== undefined,
+    (pair): pair is DocumentPair & { base: string } => pair.base !== undefined,
   );
   await timeAsync("review.compare-screens", async () => {
     for (let offset = 0; offset < changedPairs.length; offset += 32) {
@@ -109,6 +109,7 @@ export async function changedContentPaths(
         );
         const normalized = normalizeReviewPair(before, after, pair.context);
         normalizedDocuments.set(pair.head, normalized.head);
+        normalizedBases.set(pair.head, normalized.base);
         if (normalized.base !== normalized.head) {
           result.add(repoPath(pair.head));
         } else if (pair.base === pair.head) {
@@ -135,7 +136,16 @@ export async function changedContentPaths(
           ? normalizeReviewPair(after, after, pair.context).head
           : normalizeSingleDocument(after, pair.context);
       }
-      if (await resources.affects(pair.head, document))
+      const before = normalizedBases.get(pair.head);
+      if (
+        await resources.affects(
+          pair.head,
+          document,
+          pair.base && before !== undefined
+            ? { path: pair.base, html: before }
+            : undefined,
+        )
+      )
         result.add(repoPath(pair.head));
     }
   });

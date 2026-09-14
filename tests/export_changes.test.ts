@@ -40,7 +40,10 @@ for (const resource of ["nested.css", "image.svg"]) {
         );
       },
     );
-    await fs.appendFile(path.join(fixture.mockupsDir, resource), "\n");
+    await fs.appendFile(
+      path.join(fixture.mockupsDir, resource),
+      resource.endsWith(".css") ? "\nmain { color: red; }" : "\n",
+    );
     assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
       "screens/home.html",
       "user-flows/tour.html",

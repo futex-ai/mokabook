@@ -20,6 +20,9 @@ import { compareComponentCatalogue } from "./component_compare.js";
 import { reviewChangedPaths } from "./changed_paths.js";
 import type { GitClient } from "./git.js";
 import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
+import { ComponentMaterialReader } from "./component_resources.js";
+import { ResourceComparison } from "./resource_comparison.js";
+import { CompilationAssetReader } from "./compilation_assets.js";
 import type {
   ReviewArtifact,
   ReviewArtifactContent,
@@ -88,6 +91,14 @@ export async function compareReview(
     ),
   );
   const screens: ScreenReview[] = [];
+  const resources = new ResourceComparison(
+    new ComponentMaterialReader(baseAssetReader),
+    new ComponentMaterialReader(
+      new CompilationAssetReader(compilation.outputs, assetReader),
+    ),
+    new Set(changedPaths),
+    mockupsPrefix,
+  );
   await timeAsync("review.compare-screens", async () => {
     for (const route of routes) {
       const base = baseByRoute.get(route);
@@ -103,6 +114,7 @@ export async function compareReview(
           files,
           baseSeeds,
           headSeeds,
+          resources,
         ),
       );
     }

@@ -68,12 +68,16 @@ generation still requires current references to resolve, including resources
 whose verified deletion made their consumers eligible for Changes.
 
 Linked stylesheet edits are narrowed by
-[CSS change attribution](./mokly-css-attribution.md) once that approved
-target lands: a changed stylesheet keeps a view in Changes only when a changed
+[CSS change attribution](./mokly-css-attribution.md): a changed stylesheet
+keeps a view in Changes only when a changed
 rule could match that view's document or the analysis cannot resolve the rule.
 Stylesheets whose changed rules match nothing on a view are recorded as examined
 and excluded rather than as dependency evidence. Fonts, images, and embedded
 documents keep file-level attribution.
+This same analysis runs in live classification, watched updates, complete and
+selected comparisons, and publication. A newline-only edit has no changed rules
+and leaves consumers out of Changes; every viewport and scheme retains its own
+kept or excluded resource evidence.
 
 This detection reads files without rebuilding the baseline, writing snapshots,
 or generating a comparison. Baseline reads are batched; shared resource edges
@@ -237,13 +241,14 @@ Complete comparison output contains `review.json`, `summary.md`, an ownership ma
 and the isolated snapshots. No HTML report or navigation payload is written.
 The summary's `output changes` count includes only screens classified as added,
 removed, or changed, counting each screen once across all viewports and color
-schemes. Ignored-only screens remain a separate diagnostic count.
+schemes. Changed views include retained rendering-resource evidence as well as
+material document changes. Ignored-only screens remain a separate diagnostic count.
 `impact evidence` independently counts screens with shared-impact or dependency
 evidence, including screens with output changes; `impact-only` is the subset
 without output changes and can overlap ignored-only. Neither evidence nor
 ignored-only edits inflate output changes. These counts aggregate fragment
-comparisons per screen; the catalogue Changes total also considers rendered
-resources, reviewable metadata, and flows. Complete JSON retains every screen and its
+comparisons per screen; the catalogue Changes total also considers reviewable
+metadata and flows. Complete JSON retains every screen and its
 evidence. Selected live responses contain only the requested screen or saved variant
 and retain its snapshots in memory.
 
@@ -287,6 +292,14 @@ interface ReviewResult {
       beforePath?: string;
       afterPath?: string;
       ignoredIds: readonly string[];
+      reasons?: readonly {
+        kind: "dependency";
+        path: string;
+        analysis?: {
+          status: "matched" | "unresolved";
+          selectors: readonly string[];
+        };
+      }[];
       excludedResources?: readonly {
         path: string;
         reason: "no-matching-rule";
@@ -296,9 +309,11 @@ interface ReviewResult {
 }
 ```
 
-`excludedResources` is the approved
-[CSS change attribution](./mokly-css-attribution.md) extension; it is
-omitted until that analysis runs.
+Optional view `reasons` and `excludedResources` implement
+[CSS change attribution](./mokly-css-attribution.md). Empty optional lists are
+omitted; historical results without them remain valid. Retained resource reasons
+make paired views changed. Entry `sharedImpact` includes a stylesheet only if
+some view kept it, and summary counts follow these states.
 
 Routes sort in deterministic catalogue order; views sort by viewport
 (`mobile`, then `desktop`) and then color scheme (`light`, then `dark`).

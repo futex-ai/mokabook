@@ -155,6 +155,17 @@ only affected component evidence cannot produce a use-case screen reason.
 An affected-only consumer has no ChangedEntry unless it has another direct
 reason. Its full comparison remains available through the other result arrays.
 
+Views carry optional dependency-only `reasons` alongside optional
+`excludedResources` in both schemas. Omit either list when empty and sort it
+uniquely by path. `matched` analysis requires selectors; `unresolved` permits an
+empty selector list. Entry reasons merge retained view evidence by path with a
+sorted selector union and unresolved precedence. Entry ownership can suppress
+a view resource reason from direct membership; one view excluding a path does
+not conflict with another keeping it. A component's reasons also aggregate owned
+CSS retained at actual invocations, even if its saved variants all exclude that
+path. Their unchanged view states remain accurate. Public stylesheet globs alone
+add no reason, and an exact screen declaration cannot override rule exclusion.
+
 Each affected record groups one changed component and one canonical consumer.
 Its component id must appear in `changes` with kind component, and evidence
 must be nonempty.

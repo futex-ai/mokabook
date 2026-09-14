@@ -18,10 +18,15 @@ import type { ReviewArtifactContent } from "./types.js";
 /** Filesystem boundary for current-worktree Review assets. */
 export interface ReviewAssetReader {
   read(route: string): Promise<Uint8Array>;
+  readIfExists?(route: string): Promise<Uint8Array | undefined>;
   /** Optional bounded bulk read; every requested route must be present or reject. */
   readMany?(
     routes: readonly string[],
   ): Promise<ReadonlyMap<string, Uint8Array>>;
+  /** Missing files are explicit; unsafe or non-regular files still reject. */
+  readManyIfExists?(
+    routes: readonly string[],
+  ): Promise<ReadonlyMap<string, Uint8Array | undefined>>;
 }
 
 /** A worktree reader that distinguishes absent files from invalid resources. */
@@ -101,6 +106,20 @@ export class GitReviewAssetReader implements ReviewAssetReader {
   async readMany(
     routes: readonly string[],
   ): Promise<ReadonlyMap<string, Uint8Array>> {
+    const loaded = await this.readManyIfExists(routes);
+    const files = new Map<string, Uint8Array>();
+    for (const route of routes) {
+      const content = loaded.get(route);
+      if (content === undefined)
+        throw assetError(route, "not a regular Git file (missing)");
+      files.set(route, content);
+    }
+    return files;
+  }
+
+  async readManyIfExists(
+    routes: readonly string[],
+  ): Promise<ReadonlyMap<string, Uint8Array | undefined>> {
     const requested = [...new Set(routes)].sort().map((route) => {
       assertPublicStaticRoute(route, this.config);
       return {
@@ -114,16 +133,16 @@ export class GitReviewAssetReader implements ReviewAssetReader {
       const gitFiles = this.git.readFiles
         ? await this.git.readFiles(this.commit, repoPaths)
         : await readGitFilesIndividually(this.git, this.commit, repoPaths);
-      const files = new Map<string, Uint8Array>();
+      const files = new Map<string, Uint8Array | undefined>();
       for (const { repoPath, route } of requested) {
         const file = gitFiles.get(repoPath);
-        if (!file || file.kind !== "regular") {
+        if (!file || (file.kind !== "regular" && file.kind !== "missing")) {
           throw assetError(
             route,
             `not a regular Git file (${file?.kind ?? "missing"})`,
           );
         }
-        files.set(route, file.bytes);
+        files.set(route, file.kind === "regular" ? file.bytes : undefined);
       }
       return files;
     } catch (error) {

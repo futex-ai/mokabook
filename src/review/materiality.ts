@@ -7,7 +7,7 @@ export function isImpactOnly(screen: ScreenReview): boolean {
   return !hasOutputChange(screen) && screen.sharedImpact.length > 0;
 }
 
-/** Added, removed, or changed fragments are output changes; ignored-only is not. */
+/** Changed views include retained resource impact; ignored-only views do not. */
 export function hasOutputChange(screen: ScreenReview): boolean {
   return ["added", "removed", "changed"].includes(screen.state);
 }

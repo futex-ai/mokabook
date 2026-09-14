@@ -148,5 +148,8 @@ test("summary counts a screen once when several viewport and scheme views change
     })),
   });
   assert.match(summary, /Screens: 1; output changes: 1;/);
-  assert.match(summary, /Output changes count screens with output changes/);
+  assert.match(
+    summary,
+    /Output changes count screens with changed documents or retained resource evidence/,
+  );
 });

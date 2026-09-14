@@ -118,20 +118,19 @@ test(
       }
     }
     const snapshot = await computeCatalogueChanges(config, "main");
-    assert.deepEqual(snapshot.changedRoutes, [
-      "area-1/screens/activity-1.html",
-      "area-1/screens/activity-2.html",
-      "user-flows/area-1/journey-1.html",
-    ]);
+    assert.deepEqual(snapshot.changedRoutes, []);
     const result = snapshot.componentChanges?.result;
     assert.ok(result);
     assert.deepEqual(result.changedPaths, [changedPath]);
-    for (const change of result.changes.filter(
-      (entry) => entry.kind === "screen",
-    ))
-      assert.deepEqual(change.reasons, [
-        { kind: "dependency", path: changedPath },
-      ]);
+    assert.deepEqual(result.changes, []);
+    for (const screen of result.screens)
+      for (const view of screen.views)
+        assert.deepEqual(
+          view.excludedResources,
+          screen.id === "area-1-screen-3"
+            ? undefined
+            : [{ path: changedPath, reason: "no-matching-rule" }],
+        );
   },
 );
 

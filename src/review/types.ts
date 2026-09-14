@@ -8,12 +8,33 @@ export type ReviewArtifactContent = string | Uint8Array;
 export type ReviewState =
   "added" | "changed" | "ignored-only" | "removed" | "unchanged";
 
+/** Potential impact from the changed rules of one reachable stylesheet. */
+export interface DependencyAnalysis {
+  status: "matched" | "unresolved";
+  selectors: readonly string[];
+}
+
+/** A changed resource retained as dependency evidence. */
+export interface DependencyReason {
+  kind: "dependency";
+  path: string;
+  analysis?: DependencyAnalysis;
+}
+
+/** A reachable changed stylesheet whose changed rules cannot match this view. */
+export interface ExcludedResource {
+  path: string;
+  reason: "no-matching-rule";
+}
+
 /** One view comparison and its retained artifact paths. */
 export interface ViewReview {
   afterPath?: string;
   beforePath?: string;
   colorScheme: ColorScheme;
   ignoredIds: readonly string[];
+  reasons?: readonly DependencyReason[];
+  excludedResources?: readonly ExcludedResource[];
   state: ReviewState;
   viewport: Viewport;
 }

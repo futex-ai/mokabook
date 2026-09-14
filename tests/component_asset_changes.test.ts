@@ -60,12 +60,17 @@ for (const exact of [false, true])
 
 for (const ownership of ["dependency", "renderer", "unowned"] as const)
   test(`external styles retain real snapshots with ${ownership} attribution`, async (t) => {
-    const source = componentEntrySource().replace(
-      'id: "action",',
-      ownership === "dependency"
-        ? 'id: "action", ownedDependencies: ["mockups/action.css"], dependencies: ["mockups/action.css"],'
-        : 'id: "action",',
-    );
+    const source = componentEntrySource()
+      .replace(
+        "<button data-viewport=",
+        '<button className="action" data-viewport=',
+      )
+      .replace(
+        'id: "action",',
+        ownership === "dependency"
+          ? 'id: "action", ownedDependencies: ["mockups/action.css"], dependencies: ["mockups/action.css"],'
+          : 'id: "action",',
+      );
     const fixture = await createFixture(source, {
       extraConfig:
         ownership === "renderer"

@@ -256,8 +256,10 @@ metadata remain unchanged. Source locations and dependency declarations are
 evidence, so reorganizing them alone does not fill Changes. Generated fragments
 use the comparison engine's paired ignore rules: excluded chrome-only edits
 stay out, while material keys and changes to screen content remain reviewable.
-Linked CSS, fonts, images, and transitive local resources still mark the screens
-that reference them; unrelated shared files do not mark the whole catalogue.
+Linked stylesheet edits mark a view only when a changed rule could apply or
+cannot be resolved. Formatting-only or unrelated rules are recorded as examined
+and excluded. Fonts, images, and other transitive resources retain file-level
+impact; unrelated public files do not mark the whole catalogue.
 For public file and directory aliases, edits to the target also mark consuming
 screens and pages, even when the alias itself is unchanged.
 The filter validates referenced public files, including changed stylesheets and
@@ -784,7 +786,7 @@ canonical destinations and the controls that remain visual depictions.
 - [`src/navigation`](./src/navigation) and [`src/browse`](./src/browse) — shared
   logical-target grammar and ownership-aware HTML adaptation.
 - [`src/review`](./src/review/README.md) — Git extraction, comparison, ignore
-  normalization, isolated snapshots, and standalone CSS rule attribution.
+  normalization, isolated snapshots, and CSS rule attribution shared by Changes.
 - [`src/build/source_inventory.ts`](./src/build/source_inventory.ts) — resolved
   authoring inputs; [`src/config/public_files.ts`](./src/config/public_files.ts)
   applies the shared source and internal-metadata policy to public resources.

@@ -31,13 +31,35 @@ for (const resource of ["home.css", "nested.css", "image.svg"]) {
         );
       },
     );
-    await fs.appendFile(path.join(fixture.mockupsDir, resource), "\n");
+    await fs.appendFile(
+      path.join(fixture.mockupsDir, resource),
+      resource.endsWith(".css") ? "\nmain { color: red; }" : "\n",
+    );
     assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
       "screens/home.html",
       "user-flows/tour.html",
     ]);
   });
 }
+
+test("a newline-only stylesheet edit leaves every consumer out of Changes", async (t) => {
+  const fixture = await changedFixture(
+    t,
+    validEntrySource(),
+    {
+      extraConfig:
+        'stylesheets: [{ match: "**/*.html", stylesheets: ["home.css"] }],',
+    },
+    async ({ mockupsDir }) => {
+      await fs.writeFile(
+        path.join(mockupsDir, "home.css"),
+        "main { color: red; }",
+      );
+    },
+  );
+  await fs.appendFile(path.join(fixture.mockupsDir, "home.css"), "\n");
+  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), []);
+});
 
 test("unused public files and broad shared-impact globs do not fill Changes", async (t) => {
   const fixture = await changedFixture(t);

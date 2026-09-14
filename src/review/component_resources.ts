@@ -3,47 +3,155 @@ import { timeAsync } from "../diagnostics/timings.js";
 import { referencedRoutes } from "./asset_references.js";
 import type { ReviewAssetReader } from "./assets.js";
 import { ResourceGraph } from "./resource_graph.js";
+import { normalizeResourceDocuments } from "./resource_documents.js";
 
 /** One immutable read cache per source side; it never copies or writes snapshots. */
 export class ComponentMaterialReader {
   private readonly files = new Map<string, Promise<Uint8Array>>();
+  private readonly optional = new Map<
+    string,
+    Promise<Uint8Array | undefined>
+  >();
   private readonly graph: ResourceGraph;
+  private counterpart?: ComponentMaterialReader;
+  private side: "before" | "after" = "after";
+  private readonly normalized = new Map<string, Promise<string>>();
   constructor(private readonly reader: ReviewAssetReader) {
     this.graph = new ResourceGraph({
+      prefetch: (routes) => this.prefetch(routes),
       readReferences: async (route) =>
-        referencedRoutes(route, await this.read(route), {
+        referencedRoutes(route, await this.resourceText(route), {
           resourceHints: false,
         }),
     });
   }
+  /** Bind immutable source sides before traversing embedded-document resources. */
+  pairWith(
+    counterpart: ComponentMaterialReader,
+    side: "before" | "after",
+  ): void {
+    this.counterpart = counterpart;
+    this.side = side;
+  }
+
+  /** Embedded documents use the same paired ignore policy for edges and selectors. */
+  resourceText(route: string): Promise<string> {
+    if (!/\.(css|html?)$/i.test(route)) return this.text(route);
+    let normalized = this.normalized.get(route);
+    if (!normalized) {
+      normalized = this.normalizeResource(route);
+      this.normalized.set(route, normalized);
+    }
+    return normalized;
+  }
+
+  private async normalizeResource(route: string): Promise<string> {
+    const text = await this.text(route);
+    if (!/\.html?$/i.test(route)) return text;
+    const other = (await this.counterpart?.optionalTexts([route]))?.get(route);
+    const pair = normalizeResourceDocuments(
+      this.side === "before" ? text : other,
+      this.side === "after" ? text : other,
+      route,
+    );
+    return pair[this.side] ?? "";
+  }
   /** Load known view documents together without changing lazy resource discovery. */
   async prefetch(routes: readonly string[]): Promise<void> {
     if (!this.reader.readMany) return;
+    for (const route of routes) {
+      const optional = this.optional.get(route);
+      if (optional && !this.files.has(route))
+        this.files.set(
+          route,
+          optional.then((content) => {
+            if (content === undefined)
+              throw new MoklyError(
+                "review-invalid",
+                `referenced resource is missing: ${route}`,
+              );
+            return content;
+          }),
+        );
+    }
     const missing = [...new Set(routes)].filter(
       (route) => !this.files.has(route),
     );
-    if (missing.length === 0) return;
-    const loaded = await this.reader.readMany(missing);
-    for (const route of missing) {
-      const content = loaded.get(route);
-      if (content === undefined)
-        throw new MoklyError(
-          "review-invalid",
-          `could not retain Review asset ${route}: batch reader omitted the file`,
-        );
-      this.files.set(route, Promise.resolve(content));
+    if (missing.length === 0) {
+      await Promise.all(routes.map((route) => this.files.get(route)));
+      return;
     }
+    const loaded = this.reader.readMany(missing);
+    for (const route of missing) {
+      this.files.set(
+        route,
+        loaded.then((files) => {
+          const content = files.get(route);
+          if (content === undefined)
+            throw new MoklyError(
+              "review-invalid",
+              `could not retain Review asset ${route}: batch reader omitted the file`,
+            );
+          return content;
+        }),
+      );
+    }
+    await Promise.all(missing.map((route) => this.files.get(route)));
   }
   read(route: string): Promise<Uint8Array> {
     let result = this.files.get(route);
     if (!result) {
-      result = this.reader.read(route);
+      const optional = this.optional.get(route);
+      result = optional
+        ? optional.then((content) => {
+            if (content === undefined)
+              throw new MoklyError(
+                "review-invalid",
+                `referenced resource is missing: ${route}`,
+              );
+            return content;
+          })
+        : this.reader.read(route);
       this.files.set(route, result);
     }
     return result;
   }
   async text(route: string): Promise<string> {
     return Buffer.from(await this.read(route)).toString("utf8");
+  }
+  /** Read eligible CSS or embedded-document counterparts, allowing additions/removals. */
+  async optionalTexts(
+    routes: readonly string[],
+  ): Promise<ReadonlyMap<string, string | undefined>> {
+    const missing = [...new Set(routes)].filter(
+      (route) => !this.files.has(route) && !this.optional.has(route),
+    );
+    const loaded = missing.length
+      ? this.reader.readManyIfExists?.(missing)
+      : undefined;
+    for (const route of missing)
+      this.optional.set(
+        route,
+        loaded
+          ? loaded.then((files) => {
+              if (!files.has(route))
+                throw new MoklyError(
+                  "review-invalid",
+                  `batch reader omitted the file: ${route}`,
+                );
+              return files.get(route);
+            })
+          : (this.reader.readIfExists?.(route) ?? Promise.resolve(undefined)),
+      );
+    const texts = new Map<string, string | undefined>();
+    for (const route of routes) {
+      const bytes = await (this.files.get(route) ?? this.optional.get(route));
+      texts.set(
+        route,
+        bytes === undefined ? undefined : Buffer.from(bytes).toString("utf8"),
+      );
+    }
+    return texts;
   }
   async resources(
     route: string,

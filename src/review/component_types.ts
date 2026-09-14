@@ -1,6 +1,7 @@
 import type { ColorScheme, Viewport } from "../authoring/types.js";
 import type { ManifestComponentVariant } from "../components/manifest_types.js";
 import type {
+  DependencyReason,
   ReviewResultV2,
   ReviewState,
   ScreenReview,
@@ -38,7 +39,7 @@ export type EntryChangeReason =
       kind:
         "added" | "removed" | "metadata" | "material" | "inputs" | "structure";
     }
-  | { kind: "dependency"; path: string }
+  | DependencyReason
   | { kind: "screen"; route: string };
 export interface ChangedEntry extends ReviewEntrySides {
   kind: "screen" | "component" | "use-case";

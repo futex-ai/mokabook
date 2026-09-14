@@ -167,6 +167,7 @@ function compact(
 
 function joinsTokens(before: CssSourceToken, after: CssSourceToken): boolean {
   return (
+    (before.word && after.value === "(") ||
     ((before.value === "#" || before.value === "@") && after.word) ||
     ((before.value === "." || before.value === "+") &&
       /^\d/.test(after.value)) ||

@@ -312,42 +312,48 @@ session and verified by the coordinator. `css-what` was added alongside
 
 Wire the analysis into both classification paths so Changes membership uses it.
 
-- [ ] In `src/review/component_view.ts`, before pushing a dependency reason
+Completed. Delivered by a Codex session and verified by the coordinator:
+both result versions, live Serve, watched updates, and publication run the
+same cached analysis; `reasons` and `excludedResources` are recorded per view;
+the newline-only test now asserts exclusion; the serializer boundary fix landed
+with regressions.
+
+- [x] In `src/review/component_view.ts`, before pushing a dependency reason
       for a CSS resource, run the analysis against the view's before and after
       documents and either attach `analysis` or record the resource under
       `excludedResources`. Non-CSS resources are unchanged.
-- [ ] Apply the same rule in the v2 path in `src/review/screen_compare.ts` so
+- [x] Apply the same rule in the v2 path in `src/review/screen_compare.ts` so
       catalogues without registered components get identical behaviour.
-- [ ] Apply the same rule in the live Serve membership calculation in
+- [x] Apply the same rule in the live Serve membership calculation in
       `src/server/changed.ts` so the Changes count, background classification,
       and complete comparison agree.
-- [ ] Ensure the analysis reads base CSS through the existing batched Git
+- [x] Ensure the analysis reads base CSS through the existing batched Git
       reader and never falls back to individual reads for the CSS pass.
-- [ ] Update `src/review/result_records.ts` and `result_validation.ts` for
+- [x] Update `src/review/result_records.ts` and `result_validation.ts` for
       the new fields; reject unsorted or duplicate selectors and excluded
       paths absent from `changedPaths`.
-- [ ] Re-examine `tests/server_changed_assets.test.ts`. The case that appends
+- [x] Re-examine `tests/server_changed_assets.test.ts`. The case that appends
       a newline to a CSS file currently asserts the consumers are in Changes.
       Under this plan a newline-only edit yields no changed rules and the
       consumers are excluded. Rewrite that case to append a rule whose
       selector matches, and add a sibling case for a newline-only edit that
       asserts exclusion.
-- [ ] Add end-to-end tests under `tests/changes_css_attribution.test.ts` using
+- [x] Add end-to-end tests under `tests/changes_css_attribution.test.ts` using
       an isolated Git fixture: a guide-only rule added to a shared stylesheet
       leaves an unrelated auth screen out of Changes and in
       `excludedResources`; a rule matching the auth screen keeps it in; a
       custom property edit keeps every consumer in with `unresolved`; a font
       or image edit still keeps consumers through the existing resource path;
       a broad `sharedImpact` glob continues to add nothing on its own.
-- [ ] Run the existing review, component, publication, and export test suites
+- [x] Run the existing review, component, publication, and export test suites
       and the browser suite; both viewports and colour schemes must produce
       the same exclusions.
-- [ ] Fix the declaration serializer so a comment between a function name
+- [x] Fix the declaration serializer so a comment between a function name
       and its opening parenthesis (for example `url/**/("a.svg")`) is not
       normalized to the valid form; add parser and diff regressions for
       identifier and function boundary cases. Discovered during Milestone 5
       review.
-- [ ] Run tests, typecheck, lint, format check, and `cargo xtask check`.
+- [x] Run tests, typecheck, lint, format check, and `cargo xtask check`.
 
 ## Milestone 7: Implement the shell evidence
 

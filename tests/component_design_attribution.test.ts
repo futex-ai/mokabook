@@ -21,7 +21,7 @@ test("mixed component design styles retain their actual rendered resource scope"
       await fixture.reset();
       await fixture.edit(
         `examples/basic/generated/${stylesheet}`,
-        (source) => source + "\n.layout-regression { gap: 17px; }\n",
+        (source) => source + "\nbody { gap: 17px; }\n",
       );
       const expected = fixture.before.manifest.entries.filter((entry) =>
         generatedViews(entry).some((view) =>
@@ -38,14 +38,6 @@ test("mixed component design styles retain their actual rendered resource scope"
       );
       const result = await fixture.compare();
       const ids = expected.map((entry) => entry.id);
-      if (stylesheet === "design.css")
-        ids.push(
-          "example-action",
-          "example-details",
-          "example-toolbar",
-          "example-tour",
-          "example-welcome",
-        );
       assert.deepEqual(
         result.changes
           .map((change) => (change.after ?? change.before)!.id)
@@ -62,7 +54,7 @@ test("mixed component design styles retain their actual rendered resource scope"
       else
         assert.ok(
           result.sharedImpact.includes("examples/basic/generated/design.css"),
-          "the pre-existing global dependency policy stays conservative",
+          "the glob remains diagnostic evidence without adding unrelated entries",
         );
     });
 });

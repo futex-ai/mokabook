@@ -25,7 +25,7 @@ export class EvidenceAssetReader extends FileSystemReviewAssetReader {
 
 /** Bounded capture shared by all reads on a snapshot side, including transitive assets. */
 export class SelectedAssetReader implements ReviewAssetReader {
-  private readonly files = new Map<string, Uint8Array>();
+  private readonly files = new Map<string, Uint8Array | undefined>();
   private bytes = 0;
   constructor(
     private readonly reader: ReviewAssetReader,
@@ -40,31 +40,57 @@ export class SelectedAssetReader implements ReviewAssetReader {
   async readMany(
     routes: readonly string[],
   ): Promise<ReadonlyMap<string, Uint8Array>> {
-    this.signal.throwIfAborted();
-    const missing = [...new Set(routes)].filter(
-      (route) => !this.files.has(route),
-    );
-    const loaded =
-      this.reader.readMany && missing.length
-        ? await this.reader.readMany(missing)
-        : undefined;
-    for (const route of missing) {
-      this.signal.throwIfAborted();
-      const content = loaded
-        ? loaded.get(route)
-        : await this.reader.read(route);
+    const loaded = await this.readManyIfExists(routes);
+    const files = new Map<string, Uint8Array>();
+    for (const route of routes) {
+      const content = loaded.get(route);
       if (content === undefined)
         throw new MoklyError(
           "review-invalid",
           `Snapshot file is missing: ${route}`,
         );
+      files.set(route, content);
+    }
+    return files;
+  }
+
+  /** Capture optional CSS counterparts with the same confinement, digests, and byte budget. */
+  async readManyIfExists(
+    routes: readonly string[],
+  ): Promise<ReadonlyMap<string, Uint8Array | undefined>> {
+    this.signal.throwIfAborted();
+    const missing = [...new Set(routes)].filter(
+      (route) => !this.files.has(route),
+    );
+    const loaded = missing.length
+      ? this.reader.readManyIfExists
+        ? await this.reader.readManyIfExists(missing)
+        : this.reader.readMany
+          ? await this.reader.readMany(missing)
+          : undefined
+      : undefined;
+    for (const route of missing) {
+      this.signal.throwIfAborted();
+      const content = loaded
+        ? loaded.get(route)
+        : this.reader.readIfExists
+          ? await this.reader.readIfExists(route)
+          : await this.reader.read(route);
+      if (loaded && !loaded.has(route))
+        throw new MoklyError(
+          "review-invalid",
+          `Snapshot batch omitted the file: ${route}`,
+        );
       const expected =
         this.digests && Object.hasOwn(this.digests, route)
           ? this.digests[route]
           : undefined;
-      if (expected && assetDigest(content) !== expected)
+      if (
+        expected &&
+        (content === undefined || assetDigest(content) !== expected)
+      )
         throw changedAsset(route);
-      this.bytes += content.byteLength;
+      this.bytes += content?.byteLength ?? 0;
       if (this.bytes > 64 * 1024 * 1024)
         throw new MoklyError(
           "review-invalid",

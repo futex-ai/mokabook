@@ -4,7 +4,8 @@ import { minimatch } from "minimatch";
 
 import { canonicalJson } from "../components/data.js";
 import { generatedViews } from "../components/views.js";
-import { toPosixPath } from "../config/paths.js";
+import { isInside, toPosixPath } from "../config/paths.js";
+import { isPrivateStaticPath } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
 import { analyzeHierarchy } from "../registry/hierarchy.js";
@@ -38,6 +39,16 @@ import {
   type ComponentViewContext,
 } from "./component_view.js";
 import { aggregateIgnored, aggregateState } from "./screen_views.js";
+import { ResourceComparison } from "./resource_comparison.js";
+import { CssResourceAnalysis } from "./css/resource_analysis.js";
+import { isStylesheetPath } from "./css/paths.js";
+import type { CssRuleParser } from "./css/types.js";
+import {
+  exactScreenCssReasons,
+  propagateOwnedCss,
+  resourceImpact,
+  type OwnedCssReason,
+} from "./component_resource_attribution.js";
 
 export interface ComponentClassificationInput {
   before: Manifest;
@@ -48,6 +59,7 @@ export interface ComponentClassificationInput {
   changedPaths: readonly string[];
   baseCommit: string;
   baseRef: string;
+  cssParser?: CssRuleParser;
 }
 
 /** The sole component-aware membership policy, shared by Browse, Review, and publishing. */
@@ -60,12 +72,23 @@ export async function classifyComponents(
     after,
     config.review.sharedImpact,
   );
+  const beforeReader = new ComponentMaterialReader(input.beforeReader);
+  const afterReader = new ComponentMaterialReader(input.afterReader);
+  const changed = new Set(changedPaths);
+  const prefix = toPosixPath(path.relative(config.repoRoot, config.mockupsDir));
   const context: ComponentViewContext = {
-    beforeReader: new ComponentMaterialReader(input.beforeReader),
-    afterReader: new ComponentMaterialReader(input.afterReader),
+    beforeReader,
+    afterReader,
     dependencies,
-    changed: new Set(changedPaths),
-    prefix: toPosixPath(path.relative(config.repoRoot, config.mockupsDir)),
+    changed,
+    prefix,
+    resources: new ResourceComparison(
+      beforeReader,
+      afterReader,
+      changed,
+      prefix,
+      new CssResourceAnalysis(input.cssParser),
+    ),
   };
   const prefetchBefore = () =>
     context.beforeReader.prefetch(
@@ -93,6 +116,7 @@ export async function classifyComponents(
   const changes: ChangedEntry[] = [];
   const impacting = new Set<string>();
   const actualImplementations = new Set<string>();
+  const ownedResources: OwnedCssReason[] = [];
   const pairs = entryPairs(before, after);
   const beforeHierarchy = analyzeHierarchy<ManifestEntry>(
     before.entries as readonly ManifestEntry[],
@@ -118,7 +142,17 @@ export async function classifyComponents(
       )
         reasons.push({ kind: "metadata" });
       reasons.push(
-        ...dependencies.reasons(pair.before, pair.after, changedPaths),
+        ...dependencies
+          .reasons(pair.before, pair.after, changedPaths)
+          .filter((reason) => {
+            if (reason.kind !== "dependency" || !isStylesheetPath(reason.path))
+              return true;
+            const candidate = path.resolve(config.repoRoot, reason.path);
+            return (
+              !isInside(config.mockupsDir, candidate) ||
+              isPrivateStaticPath(candidate, config)
+            );
+          }),
       );
       const common = {
         ...address(entry),
@@ -129,14 +163,7 @@ export async function classifyComponents(
             ...(pair.after?.dependencies ?? []),
           ]),
         ].sort(),
-        sharedImpact: [
-          ...new Set([
-            ...sharedImpact,
-            ...reasons.flatMap((reason) =>
-              reason.kind === "dependency" ? [reason.path] : [],
-            ),
-          ]),
-        ].sort(),
+        sharedImpact: [] as string[],
       };
       const baseViews = pair.before ? generatedViews(pair.before) : [];
       const headViews = pair.after ? generatedViews(pair.after) : [];
@@ -152,6 +179,17 @@ export async function classifyComponents(
         ),
       );
       reasons.push(...compared.flatMap((result) => result.reasons));
+      reasons.push(
+        ...exactScreenCssReasons(
+          pair.before,
+          pair.after,
+          compared.map((result) => result.view),
+        ),
+      );
+      common.sharedImpact = resourceImpact(sharedImpact, reasons);
+      ownedResources.push(
+        ...compared.flatMap((result) => result.ownedResources),
+      );
       for (const comparison of compared)
         for (const id of comparison.changedImplementations)
           actualImplementations.add(id);
@@ -224,6 +262,7 @@ export async function classifyComponents(
         });
     }
   });
+  propagateOwnedCss(ownedResources, impacting, components, changes);
   propagateImplementations(
     actualImplementations,
     impacting,

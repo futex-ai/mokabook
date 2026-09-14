@@ -14,6 +14,8 @@ import {
 } from "./assets.js";
 import { baselineResourceConfig } from "./base_manifest.js";
 import { SelectedAssetReader } from "./evidence_assets.js";
+import { ComponentMaterialReader } from "./component_resources.js";
+import { ResourceComparison } from "./resource_comparison.js";
 import {
   NodeGitCommandRunner,
   RepositoryGitClient,
@@ -146,6 +148,14 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
       new Map(),
       new Set(),
       new Set(),
+      new ResourceComparison(
+        new ComponentMaterialReader(beforeReader),
+        new ComponentMaterialReader(afterReader),
+        new Set(source.changedPaths),
+        toPosixPath(
+          path.relative(this.config.repoRoot, this.config.mockupsDir),
+        ),
+      ),
     );
     return {
       baseCommit: source.baseCommit,

@@ -1,6 +1,7 @@
 /** Retain comparison JSON, snapshots, and a diagnostic summary. */
 
 import { parseReviewResult } from "./result_validation.js";
+import { validateArtifactResources } from "./artifact_resources.js";
 import { canonicalJson } from "../components/data.js";
 import { markdownCode, markdownText } from "./markdown.js";
 
@@ -16,12 +17,19 @@ import { addArtifactFile } from "./paths.js";
 export function renderReviewArtifact(
   artifact: ReviewArtifact,
 ): ReadonlyMap<string, ReviewArtifactContent> {
-  if (artifact.result.schemaVersion === 3) parseReviewResult(artifact.result);
+  if (
+    artifact.result.schemaVersion === 3 ||
+    artifact.result.screens.some((screen) =>
+      screen.views.some((view) => view.reasons || view.excludedResources),
+    )
+  )
+    parseReviewResult(artifact.result);
+  validateArtifactResources(artifact);
   const files = new Map(artifact.files);
   addArtifactFile(
     files,
     "review.json",
-    `${artifact.result.schemaVersion === 3 ? canonicalJson(artifact.result, 2) : JSON.stringify(artifact.result, null, 2)}\n`,
+    `${canonicalJson(artifact.result, 2)}\n`,
   );
   addArtifactFile(files, "summary.md", summaryMarkdown(artifact.result));
   addArtifactFile(
@@ -58,7 +66,7 @@ ${result.changes.map((change) => `- ${change.kind}: ${markdownText((change.after
     "",
     `Screens: ${result.screens.length}; output changes: ${outputChanges}; changed: ${counts.get("changed") ?? 0}; added: ${counts.get("added") ?? 0}; removed: ${counts.get("removed") ?? 0}; ignored-only: ${counts.get("ignored-only") ?? 0}; impact evidence: ${impactEvidence}; impact-only: ${impactOnly}.`,
     "",
-    "Output changes count screens with output changes, once per screen across all viewports and color schemes; catalogue Changes also considers rendered resources, metadata, and flows. Impact evidence is counted independently; impact-only screens have no output change and can also be ignored-only.",
+    "Output changes count screens with changed documents or retained resource evidence, once per screen across all viewports and color schemes; catalogue Changes also considers metadata and flows. Impact evidence is counted independently; impact-only screens have no output change and can also be ignored-only.",
   ];
   if (result.sharedImpact.length > 0) {
     lines.push(

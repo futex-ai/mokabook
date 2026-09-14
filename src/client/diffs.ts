@@ -119,8 +119,9 @@ export function installDiffs(
               : "Comparison unavailable",
           );
         }
+        const payload: unknown = await response.json();
         comparison = {
-          result: parseReviewResult(await response.json()),
+          result: parseReviewResult(payload),
           url: response.url,
         };
       }

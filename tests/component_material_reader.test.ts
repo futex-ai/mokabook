@@ -7,7 +7,14 @@ test("prefetch retains empty files and discovers resources only when requested",
   const reads: string[] = [];
   const reader = new ComponentMaterialReader({
     readMany: async (routes) =>
-      new Map(routes.map((route) => [route, Buffer.alloc(0)])),
+      new Map(
+        routes.map((route) => {
+          if (route === "view.html") return [route, Buffer.alloc(0)];
+          reads.push(route);
+          assert.equal(route, "used.css");
+          return [route, Buffer.from('@import "./used.css";')];
+        }),
+      ),
     read: async (route) => {
       reads.push(route);
       assert.equal(route, "used.css");

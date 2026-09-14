@@ -130,6 +130,20 @@ excluded. Ownership and rule analysis compose; neither widens the other. Ownersh
 of a component marker somewhere in the document. Screen/component-owned
 dependency overlap must be validated and explained rather than silently dropped.
 
+The rule analysis is implemented in Browse/watch classification, complete and
+selected comparison evidence, and publication. Actual normalized view documents
+supply matching trees; ownership projections supply eligible resources. A public
+stylesheet glob or dependency declaration cannot restore an excluded stylesheet.
+Entry reasons combine retained view selectors by path, with unresolved evidence
+taking precedence, while excluded resources stay on their own views. Formatting
+alone therefore leaves every consumer out of Changes for that stylesheet.
+Retained CSS evidence at an actual invocation also keeps its explicit or
+renderer-proven component owner in Changes when saved variants do not match.
+Their own view exclusions stay intact; affected-consumer links retain the actual
+invocation context. An exact screen dependency can independently retain the same
+stylesheet only when its actual view analysis keeps it. Non-CSS dependencies
+retain the existing file-level policy.
+
 Component-generated style material can live in the document head rather than
 inside a component boundary. Extend the renderer result with optional typed
 style/resource ownership records while continuing to accept a plain HTML string.

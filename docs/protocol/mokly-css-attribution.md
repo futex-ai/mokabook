@@ -2,12 +2,10 @@
 
 ## Delivery Status
 
-The standalone rule parser, diff, and document matcher are implemented;
-classification remains an approved target tracked by
-[CSS Change Attribution](../../plans/css-change-attribution.md). Until that
-plan's classification milestone lands, a changed linked stylesheet remains
-file-level dependency evidence as described in
-[Changes and screen comparisons](./mokly-changes.md).
+Rule parsing, diffing, document matching, and classification are implemented in
+both result versions, live Serve, watched updates, and publication. The inspector
+presentation below remains the approved target of the next milestone in
+[CSS Change Attribution](../../plans/css-change-attribution.md).
 
 ## Purpose
 
@@ -88,6 +86,8 @@ inside nested conditions are separate `&` rules under the enclosing context.
 Declaration serialization removes comments and insignificant whitespace, retaining
 token separation, string and URL contents, duplicates, shorthand/longhand distinctions,
 and source order, including interleaved `!important` declarations. It does not
+join tokens separated by comments: `url/**/("a.svg")` remains distinct from
+`url("a.svg")`, as do separated identifiers. It does not
 use optimized stylesheet output as diff material. Native serialization normalizes
 selectors and known condition preludes. Selector-less at-rules have `selectors: []`,
 an explicit `atRule` name without `@`, a serialized `prelude`, and their complete
@@ -207,6 +207,7 @@ interface ExcludedResource {
 
 interface ViewReview {
   // existing fields unchanged
+  reasons?: readonly DependencyReason[];
   excludedResources?: readonly ExcludedResource[];
 }
 ```
@@ -215,13 +216,49 @@ Both the schema-v2 `ReviewResult` and the schema-v3 `ReviewResultV3` carry
 these fields. Schema versions do not change. Results without them remain valid
 and mean the analysis did not run.
 
+`reasons` holds the view's retained resource evidence in both versions; it is
+omitted when empty. This supplies the dependency-analysis location that v2 did
+not previously have. View evidence describes the complete retained render;
+v3 entry reasons still apply component ownership separately. Match selectors
+against the actual paired-ignore-normalized documents, including component
+markup; ownership projections determine resource eligibility, not selector
+matchability. Embedded documents contribute their own normalized trees; pair
+their original bytes once before both reference discovery and matching. Never
+feed normalized ignore tokens back into the marker parser.
+
+Entry dependency reasons merge by path across views, unioning selectors and
+giving `unresolved` precedence. Keep a stylesheet in entry `sharedImpact`
+only when some eligible view retains it. Explicit or renderer-proven ownership
+also attributes retained actual-invocation CSS evidence to its component owner,
+even when every saved variant excludes the stylesheet. Saved view states and
+exclusions remain unchanged; no synthetic variant is created. An exact screen
+dependency remains independent when its actual view keeps the stylesheet.
+A broad public stylesheet glob or declaration cannot bypass rule exclusion.
+Non-CSS and non-public implementation dependencies retain their existing
+ownership policy. Resource evidence makes a paired view
+`changed`; exclusions alone do not. Diagnostic summary counts use those states
+and, for v3, the resulting `changes` membership.
+
+Baseline CSS uses the bounded Git batch reader, including optional counterpart
+reads for added/removed files. The head uses compilation outputs or the confined
+public reader. Resource bytes are cached per side/path within a classification;
+the injected parser cache additionally shares identical source text across
+paths and sides. Parsing a shared stylesheet therefore does not repeat per view.
+
 ## Validation
 
 - An `excludedResources` path must be in `changedPaths` and must be a
   stylesheet reachable from that view's document on at least one side.
+  Producers validate resource confinement during discovery; artifact rendering
+  additionally checks retained/excluded evidence against the snapshot closure.
+  The browser decoder validates the structural contract without fetching panes.
 - A path may not appear both as a dependency reason and as an excluded
   resource on the same view.
 - `analysis.selectors` must be sorted and duplicate-free.
+- A `matched` analysis has at least one selector; `unresolved` may have none.
+- View reasons and exclusions sort uniquely by path. Entry analysis is the
+  union of its eligible saved-view and actual-invocation analyses; a view's
+  exclusion does not conflict with another view retaining the same path.
 - `analysis` may appear only on stylesheet paths.
 - Optional fields are omitted when empty, matching the existing canonical
   output rules.

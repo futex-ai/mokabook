@@ -15,6 +15,10 @@ import {
   reviewString,
   reviewStrings,
 } from "./result_helpers.js";
+import {
+  validateDependencyReason,
+  validateResourceEvidence,
+} from "./result_resources.js";
 
 const screenKeys = [
   "dependencies",
@@ -28,6 +32,7 @@ export function validateReviewScreen(
   value: unknown,
   version: 2 | 3,
   component = false,
+  changedPaths: readonly string[] = [],
 ): Record<string, unknown> {
   const record = reviewObject(
     value,
@@ -49,7 +54,11 @@ export function validateReviewScreen(
     });
   }
   if (!component)
-    validateReviewViews(record.views, version === 3 ? record : undefined);
+    validateReviewViews(
+      record.views,
+      version === 3 ? record : undefined,
+      changedPaths,
+    );
   else {
     const variants = reviewArray(record.variants);
     if (!variants.length) reviewInvalid("component variants are missing");
@@ -87,7 +96,7 @@ export function validateReviewScreen(
         ["description"],
       );
       requireEqual(preferred.title, variant.title);
-      validateReviewViews(variant.views, variant);
+      validateReviewViews(variant.views, variant, changedPaths);
     }
   }
   return record;
@@ -95,6 +104,7 @@ export function validateReviewScreen(
 export function validateReviewViews(
   value: unknown,
   sides?: Record<string, unknown>,
+  changedPaths: readonly string[] = [],
 ): void {
   const views = reviewArray(value);
   if (!views.length) reviewInvalid("view evidence is missing");
@@ -103,8 +113,9 @@ export function validateReviewViews(
     const view = reviewObject(
       item,
       ["viewport", "colorScheme", "ignoredIds", "state"],
-      ["beforePath", "afterPath"],
+      ["beforePath", "afterPath", "reasons", "excludedResources"],
     );
+    validateResourceEvidence(view, changedPaths);
     if (
       !["mobile", "desktop"].includes(String(view.viewport)) ||
       !["light", "dark"].includes(String(view.colorScheme))
@@ -159,6 +170,7 @@ export function validateChangedEntry(
         : raw.kind === "screen"
           ? ["kind", "route"]
           : ["kind"],
+      raw.kind === "dependency" ? ["analysis"] : [],
     );
     if (
       ![
@@ -178,11 +190,8 @@ export function validateChangedEntry(
       (reason.kind === "removed" && record.after)
     )
       reviewInvalid("reason conflicts with available sides");
-    if (
-      reason.kind === "dependency" &&
-      !changedPaths.includes(reviewPath(reason.path))
-    )
-      reviewInvalid("dependency did not change");
+    if (reason.kind === "dependency")
+      validateDependencyReason(reason, changedPaths);
     if (
       reason.kind === "screen" &&
       (record.kind !== "use-case" || !reviewRoute(reason.route))
