@@ -1,5 +1,5 @@
 import { useDesignStyle } from "../style_context.js";
-import { MockLink } from "mokly";
+import { MockLink } from "@mokly/mokly";
 import { TagIcon } from "../../parts/icons.js";
 import type { TagChipProps } from "./tag-chip.js";
 

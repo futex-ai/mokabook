@@ -18,7 +18,7 @@ as breaking; version numbers and `CHANGELOG.md` remain release-PR owned.
 
 ## Package Metadata
 
-`package.json` describes the published, unscoped public ESM package `mokly`,
+`package.json` describes the published, scoped public ESM package `@mokly/mokly`,
 with a release-managed version, MIT licensing, Mokly authorship, exact
 repository/bugs/homepage metadata for `mokly-ai/mokly`, a Node engine floor,
 one `mokly` bin, explicit exports/types, and a restrictive `files` allowlist.
@@ -216,8 +216,11 @@ The repository and release history moved from `futex-ai/mokabook` to
 `mokly-ai/mokly`, but npm package names do not move with GitHub repositories.
 The former unscoped `mokabook` package remains reserved at `0.8.0`; it is not a
 runtime alias or a second publication target. Because npm trusted publishing can
-only be configured after a package exists, the unscoped `mokly` package needs
+only be configured after a package exists, the scoped `@mokly/mokly` package needs
 one reviewed bootstrap publication before normal releases can use OIDC.
+The attempted unscoped `mokly` registration was rejected by npm's name-similarity
+policy; it was never published. The scope change does not reset release history
+or rename the `mokly` executable.
 
 Follow the [bootstrap procedure](./npm-bootstrap.md) after the migration and its
 review fixes reach `main`, before merging the Release Please PR. The dedicated
@@ -244,7 +247,7 @@ Before enabling publish, maintainers must configure and verify:
 - the `RELEASE_PLEASE_TOKEN` credential owner, least-privilege repository
   access, expiry/rotation, and fallback behavior;
 - approved Mokly npm maintainer accounts and teams, enforced 2FA, public
-  unscoped-package access, and the intended initial owner list;
+  scoped-package access, and the intended initial owner list;
 - the trusted-publisher repository, workflow filename, environment, and publish
   action exactly match the values above; and
 - immutable `v*` tag update/deletion protection and who may invoke the manual retry.
@@ -267,7 +270,7 @@ Implementation must re-check these primary references because release tooling
 changes over time:
 
 - [npm trusted publishers](https://docs.npmjs.com/trusted-publishers/)
-- [npm unscoped public packages](https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages/)
+- [npm scoped public packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/)
 - [npm package executables](https://docs.npmjs.com/cli/npm-exec/)
 - [npm package metadata](https://docs.npmjs.com/files/package.json/)
 - [release-please action](https://github.com/googleapis/release-please-action)

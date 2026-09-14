@@ -1,4 +1,4 @@
-import { MockLink } from "mokly";
+import { MockLink } from "@mokly/mokly";
 
 import { ActionPropValues, actionVariants } from "../../parts/action_props.js";
 import { ControlFields } from "./fields.js";

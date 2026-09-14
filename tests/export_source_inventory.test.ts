@@ -26,7 +26,7 @@ test("consumer export omits unused reserved templates without treating them as p
 
 test("consumer export keeps imported document templates private while publishing their registered page", async (context) => {
   const source = `${validEntrySource()}
-import { definePage } from "mokly";
+import { definePage } from "@mokly/mokly";
 import template from "../mockups/private-template.html";
 mockups.push(definePage({ id: "handbook", title: "Handbook", description: "Guidance", dependencies: [], relatedDocs: [], route: "handbook.html", render: () => template }));`;
   const fixture = await changedFixture(

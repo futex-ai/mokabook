@@ -42,7 +42,7 @@ export function packageApiPlugin(config: ResolvedConfig): Plugin {
   return {
     name: "mokly-package-api",
     setup(pluginBuild: PluginBuild): void {
-      pluginBuild.onResolve({ filter: /^mokly$/ }, (args) => {
+      pluginBuild.onResolve({ filter: /^@mokly\/mokly$/ }, (args) => {
         if (!args.importer) return { path: indexPath };
         let realImporter: string;
         try {

@@ -66,7 +66,7 @@ test("Review copies local stylesheet dependencies for both snapshots", async (co
   await fs.promises.writeFile(image, Uint8Array.from([0, 1, 2, 255]));
   await fs.promises.writeFile(
     fixture.configPath,
-    `import { defineConfig } from "mokly";
+    `import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
@@ -122,7 +122,7 @@ test("Review rejects base dependencies beneath authored source roots", async (co
   await fs.promises.rename(fixture.entryPath, nestedEntry);
   await fs.promises.writeFile(
     fixture.configPath,
-    `import { defineConfig } from "mokly";
+    `import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   entriesDir: "mockups/src/entries",
   mockupsDir: "mockups",

@@ -64,7 +64,7 @@ export async function generateLargeFixture(
   );
   await fs.writeFile(
     path.join(root, "mokly.config.ts"),
-    `import { defineConfig } from "mokly";
+    `import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   repoRoot: ".", entriesDir: "entries", mockupsDir: "mockups", renderer: "renderer.tsx",
   colorSchemes: ["light", "dark"],
@@ -75,7 +75,7 @@ export default defineConfig({
   );
   await fs.writeFile(
     path.join(entries, "catalogue.mockup.tsx"),
-    `import { defineCollection } from "mokly";
+    `import { defineCollection } from "@mokly/mokly";
 export const mockups = [defineCollection({ id: "large", title: "Large catalogue", description: "Synthetic product areas", dependencies: [], relatedDocs: ["notes.md"], childIds: ${JSON.stringify(areas)} })];\n`,
   );
   for (const id of areas) {

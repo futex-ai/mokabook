@@ -1,4 +1,4 @@
-import { defineCollection } from "mokly";
+import { defineCollection } from "@mokly/mokly";
 import { topBar } from "./chrome/top-bar.js";
 import { catalogueNavigation } from "./chrome/catalogue-navigation.js";
 import { screenHeader } from "./chrome/screen-header.js";

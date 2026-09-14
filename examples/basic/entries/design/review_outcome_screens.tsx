@@ -1,4 +1,4 @@
-import { screen } from "mokly";
+import { screen } from "@mokly/mokly";
 
 import { CompareGrid, Pane } from "./parts/compare.js";
 import { PreviewWorkspace } from "./components/parts/workspace.js";

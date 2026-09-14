@@ -24,7 +24,7 @@ export async function historicalPageFixture(
     symlink?: boolean;
   } = {},
 ) {
-  const source = `import { defineCollection, definePage } from "mokly";
+  const source = `import { defineCollection, definePage } from "@mokly/mokly";
 const meta = { description: "Document", dependencies: [], relatedDocs: [] };
 export const mockups = [
   defineCollection({ ...meta, id: "documents", title: "Documents", childIds: ["handbook"] }),

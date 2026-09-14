@@ -46,7 +46,7 @@ module attribution as other definitions. Common metadata (`id`, `title`,
 use the existing optional, unique kebab-case tag contract.
 
 ```tsx
-import { defineCollection, definePage } from "mokly";
+import { defineCollection, definePage } from "@mokly/mokly";
 import { source } from "../documents/statement.source.js";
 
 export const mockups = [

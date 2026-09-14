@@ -15,7 +15,7 @@ import {
 function source(body: string): string {
   return validEntrySource({ body }).replace(
     'import React from "react";',
-    'import React from "react"; import { MockLink } from "mokly";',
+    'import React from "react"; import { MockLink } from "@mokly/mokly";',
   );
 }
 
@@ -186,7 +186,7 @@ export default input => '<!doctype html><html><body data-custom="yes">'+renderTo
   await fs.promises.mkdir(path.join(fixture.root, "legacy"));
   await fs.promises.writeFile(
     path.join(fixture.root, "legacy/old.source.tsx"),
-    `import { renderToStaticMarkup } from "react-dom/server"; import { MockLink } from "mokly";
+    `import { renderToStaticMarkup } from "react-dom/server"; import { MockLink } from "@mokly/mokly";
 export const source = () => '<html><body>'+renderToStaticMarkup(<MockLink asChild to="details"><button>Legacy</button></MockLink>)+'</body></html>';`,
   );
   const transformer = path.join(fixture.root, "transform.ts");

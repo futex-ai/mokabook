@@ -1,4 +1,4 @@
-import { collection, defineCollection, defineRoot } from "mokly";
+import { collection, defineCollection, defineRoot } from "@mokly/mokly";
 
 import { pageScreens } from "./page_screens.js";
 import { publicationScreens } from "./publication_screens.js";

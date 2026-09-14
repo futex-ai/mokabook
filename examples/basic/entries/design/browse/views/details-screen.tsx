@@ -1,4 +1,4 @@
-import { screen } from "mokly";
+import { screen } from "@mokly/mokly";
 
 import { DESTINATIONS } from "../../parts/destinations.js";
 import { ExampleWorkspace } from "../../parts/example_workspace.js";

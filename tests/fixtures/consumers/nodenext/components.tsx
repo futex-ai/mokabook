@@ -4,7 +4,7 @@ import {
   type ComponentProps,
   type DataPropSchema,
   type RenderResult,
-} from "mokly";
+} from "@mokly/mokly";
 
 const schema = {
   kind: "object",

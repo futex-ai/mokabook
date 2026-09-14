@@ -172,7 +172,7 @@ test("Review retains marker-bearing pane bytes as portable output", async (conte
 });
 
 function collidingRouteSource(): string {
-  return `import { defineScreen } from "mokly";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"], useCaseIds: [] };
 export const mockups = [

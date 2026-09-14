@@ -212,7 +212,7 @@ function nodeRequest(
 }
 
 function navigationSource(): string {
-  return `import { defineScreen, defineUseCase } from "mokly";
+  return `import { defineScreen, defineUseCase } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], navPath: ["Fixture"], relatedDocs: [] };
 export const mockups = [

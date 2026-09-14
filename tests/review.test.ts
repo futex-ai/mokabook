@@ -259,7 +259,7 @@ test("removing dark classifies dark views removed", async (context) => {
   const darkCompilation = await compileCatalogue(darkConfig);
   await fs.promises.writeFile(
     fixture.configPath,
-    `import { defineConfig } from "mokly";
+    `import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { MockLink } from "mokly";
+import { MockLink } from "@mokly/mokly";
 import { inspector } from "../library/inspector/inspector.js";
 import { useDesignInstance } from "../library/composition.js";
 import { MetaRow } from "./metadata_row.js";

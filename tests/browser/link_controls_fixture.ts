@@ -65,7 +65,7 @@ function controlSource(firstTitle = "Home"): string {
   return validEntrySource({ firstTitle, body: `<Controls />` }).replace(
     'import React from "react";',
     `import React from "react";
-import { MockLink } from "mokly";
+import { MockLink } from "@mokly/mokly";
 import { Button } from "@firna/ui/button";
 const noop = () => {};
 function Controls() { return <>

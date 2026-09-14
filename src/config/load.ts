@@ -118,9 +118,9 @@ function configApiPlugin(): Plugin {
   return {
     name: "mokly-config-api",
     setup(pluginBuild: PluginBuild): void {
-      pluginBuild.onResolve({ filter: /^mokly$/ }, () => ({
+      pluginBuild.onResolve({ filter: /^@mokly\/mokly$/ }, () => ({
         namespace: "mokly-config-api",
-        path: "mokly",
+        path: "@mokly/mokly",
       }));
       pluginBuild.onLoad(
         { filter: /.*/, namespace: "mokly-config-api" },

@@ -15,6 +15,9 @@ styles and the design mockups. Registration and source ownership live in
 `entries/components/action.tsx` and `toolbar.tsx`.
 It contains no Accounting or Juno product screen.
 
+Authoring imports use the public package `@mokly/mokly`. The local executable
+and configuration filename remain `mokly` and `mokly.config.ts`.
+
 For a much larger synthetic catalogue, first prepare it with `npm run fixture:large`,
 then use `npm run dev:large -- --debug-timings` or `npm run benchmark:large`.
 The [large fixture](../../tests/fixtures/large/README.md)

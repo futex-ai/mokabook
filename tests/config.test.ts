@@ -30,6 +30,23 @@ test("route-like config values normalize to platform-independent POSIX paths", (
   );
 });
 
+test("config resolves the scoped API without changing its filename", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const source = `import { defineConfig } from "@mokly/mokly";
+export default defineConfig({ repoRoot: ".", entriesDir: "entries", mockupsDir: "mockups" });
+`;
+  await fs.promises.writeFile(fixture.configPath, source);
+  const config = await loadConfig(fixture.root);
+  assert.equal(config.configPath, fixture.configPath);
+  assert.equal(path.basename(config.configPath), "mokly.config.ts");
+  await fs.promises.writeFile(
+    fixture.configPath,
+    source.replace("@mokly/mokly", "mokly"),
+  );
+  await assert.rejects(loadConfig(fixture.root), /Could not resolve "mokly"/);
+});
+
 test("explicit config loading is independent of the executing package directory", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));

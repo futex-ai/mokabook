@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import * as api from "mokly";
+import * as api from "@mokly/mokly";
 
 const expected = [
   "MockLink",

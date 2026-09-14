@@ -1,4 +1,4 @@
-import { defineComponent, MockLink, type ComponentProps } from "mokly";
+import { defineComponent, MockLink, type ComponentProps } from "@mokly/mokly";
 import { libraryMetadata } from "../metadata.js";
 import { text } from "../schemas.js";
 import { tagChip } from "../controls/tag-chip.js";

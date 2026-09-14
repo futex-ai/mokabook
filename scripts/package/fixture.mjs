@@ -24,11 +24,11 @@ export async function installConsumer(root, archivePath, packageJson) {
   );
   const installed = JSON.parse(
     await fs.promises.readFile(
-      path.join(root, "node_modules/mokly/package.json"),
+      path.join(root, "node_modules/@mokly/mokly/package.json"),
       "utf8",
     ),
   );
-  if (installed.name !== "mokly") {
+  if (installed.name !== "@mokly/mokly") {
     throw new Error(`consumer did not install ${archivePath}`);
   }
 }

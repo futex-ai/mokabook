@@ -15,7 +15,7 @@ const source = validEntrySource({
   body: '<MockLink asChild to="details"><button id="continue">Continue</button></MockLink><MockLink to="details" id="ordinary">Plain</MockLink>',
 }).replace(
   'import React from "react";',
-  'import React from "react"; import { MockLink } from "mokly";',
+  'import React from "react"; import { MockLink } from "@mokly/mokly";',
 );
 
 test("custom renderer casing cannot bypass child adaptation", async (context) => {

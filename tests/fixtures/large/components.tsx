@@ -1,5 +1,5 @@
 import { Button } from "@firna/ui/button";
-import { defineComponent } from "mokly";
+import { defineComponent } from "@mokly/mokly";
 
 const metadata = {
   dependencies: ["entries/components.tsx"],

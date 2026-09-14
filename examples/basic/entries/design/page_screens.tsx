@@ -1,6 +1,6 @@
 import { DetailsPanel } from "./parts/details.js";
 import { MetaRow } from "./parts/metadata_row.js";
-import { screen } from "mokly";
+import { screen } from "@mokly/mokly";
 
 import { ExampleDocument } from "../document.js";
 import { NavDrawer, NavTree, type NavNode } from "./parts/nav.js";

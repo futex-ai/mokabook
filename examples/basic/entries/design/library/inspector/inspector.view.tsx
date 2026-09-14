@@ -1,4 +1,4 @@
-import { MockLink } from "mokly";
+import { MockLink } from "@mokly/mokly";
 import { useDesignStyle } from "../style_context.js";
 import { useId, type CSSProperties } from "react";
 import {

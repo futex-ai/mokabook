@@ -235,7 +235,7 @@ test("dark fragments link within dark and fall back to light-only", async (conte
 });
 
 function routeSource(route: string): string {
-  return `import { defineScreen } from "mokly";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"], useCaseIds: [] };
 export const mockups = [
@@ -250,7 +250,7 @@ function orphanLinkSource(includeTarget: boolean): string {
   const target = includeTarget
     ? `defineScreen({ ...metadata, description: "Details", desktop: <main>Details</main>, id: "details", mobile: <main>Details</main>, route: "screens/details.html", title: "Details" })`
     : "";
-  return `import { defineScreen } from "mokly";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], relatedDocs: [] };
 export const mockups = [
@@ -261,7 +261,7 @@ export const mockups = [
 }
 
 function darkLinkSource(): string {
-  return `import { defineScreen } from "mokly";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], relatedDocs: [], useCaseIds: [] };
 export const mockups = [

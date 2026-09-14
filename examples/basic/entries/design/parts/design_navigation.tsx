@@ -1,4 +1,4 @@
-import { MockLink } from "mokly";
+import { MockLink } from "@mokly/mokly";
 import {
   createContext,
   useContext,
