@@ -45,8 +45,7 @@ export async function runServerChild(
   });
   const shutdown = waitForChildShutdown(server, config, manifest);
   process.send?.({ port: server.port, type: "ready", version: updateVersion });
-  if (!process.send)
-    process.stdout.write(`Mokabook listening at ${server.url}\n`);
+  if (!process.send) process.stdout.write(`Mokly listening at ${server.url}\n`);
   if (retainedRuntime && !initial) requestComponentRuntime();
   try {
     await shutdown;

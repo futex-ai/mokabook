@@ -1,7 +1,7 @@
 import { useDesignStyle } from "../style_context.js";
 import type { CSSProperties } from "react";
-import type { Viewport } from "mokabook";
-import { MockLink } from "mokabook";
+import type { Viewport } from "mokly";
+import { MockLink } from "mokly";
 import { DesignLink } from "../../parts/design_navigation.js";
 import type { DesignDestination } from "../../parts/destinations.js";
 import {

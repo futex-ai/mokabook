@@ -7,7 +7,7 @@ import http, { type ServerResponse } from "node:http";
 import { timeAsync, timeSync } from "../diagnostics/timings.js";
 
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import {
   catalogueSnapshotForConfig,
   loadServedCatalogueSnapshot,
@@ -163,7 +163,7 @@ export async function startCatalogueServer(
         "This request is not allowed.",
         request.method ?? "GET",
       );
-    if (controls && request.url?.startsWith("/__mokabook/components/")) {
+    if (controls && request.url?.startsWith("/__mokly/components/")) {
       const busy = activity.channel();
       busy(true);
       void handleControls(request, response, controls).finally(() =>
@@ -207,7 +207,7 @@ export async function startCatalogueServer(
   const address = server.address();
   if (!address || typeof address === "string") {
     server.close();
-    throw new MokabookError(
+    throw new MoklyError(
       "server-failed",
       "server did not expose a TCP address",
     );

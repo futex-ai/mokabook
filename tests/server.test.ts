@@ -22,7 +22,7 @@ test("server validates before bind and supports safe no-watch routes on port zer
   const config = await loadConfig(fixture.root);
   await assert.rejects(
     () => startCatalogueServer(config, { base: "origin/main", port: 0 }),
-    /could not read.*mokabook-manifest/,
+    /could not read.*mokly-manifest/,
   );
   await writeCompilation(await compileCatalogue(config), config);
   const server = await startCatalogueServer(config, {
@@ -34,12 +34,12 @@ test("server validates before bind and supports safe no-watch routes on port zer
   const home = await fetch(`${server.url}/`);
   assert.equal(home.status, 200);
   const homeHtml = await home.text();
-  assert.match(homeHtml, /data-mokabook-shell/);
+  assert.match(homeHtml, /data-mokly-shell/);
   assert.match(homeHtml, /aria-label="Catalogue"/);
   assert.match(homeHtml, /Browse the mockup catalogue/);
-  const shellCss = await fetch(`${server.url}/__mokabook/shell.css`);
+  const shellCss = await fetch(`${server.url}/__mokly/shell.css`);
   assert.equal(shellCss.status, 200);
-  assert.match(await shellCss.text(), /--mokabook-accent/);
+  assert.match(await shellCss.text(), /--mokly-accent/);
   const redirect = await fetch(`${server.url}/id/home`, { redirect: "manual" });
   assert.equal(redirect.status, 302);
   assert.equal(redirect.headers.get("location"), "/view/screens/home.html");
@@ -55,7 +55,7 @@ test("server validates before bind and supports safe no-watch routes on port zer
     (await fetch(`${server.url}/static/entries/fixture.mockup.tsx`)).status,
     404,
   );
-  const events = await fetch(`${server.url}/__mokabook/events`);
+  const events = await fetch(`${server.url}/__mokly/events`);
   const eventReader = events.body?.getReader();
   assert.ok(eventReader);
   assert.match(await readEvent(eventReader), /event: ready\ndata: 1/);
@@ -104,16 +104,12 @@ test("event-stream HEAD releases a keep-alive connection", async (context) => {
   const agent = new Agent({ keepAlive: true, maxSockets: 1 });
   context.after(() => agent.destroy());
 
-  const head = await nodeRequest(
-    `${server.url}/__mokabook/events`,
-    "HEAD",
-    agent,
-  );
+  const head = await nodeRequest(`${server.url}/__mokly/events`, "HEAD", agent);
   assert.equal(head.status, 200);
   assert.equal(head.body, "");
   const home = await nodeRequest(`${server.url}/`, "GET", agent);
   assert.equal(home.status, 200);
-  assert.match(home.body, /data-mokabook-shell/);
+  assert.match(home.body, /data-mokly-shell/);
 });
 
 test("malformed manifest routes fail before server readiness", async (context) => {
@@ -121,7 +117,7 @@ test("malformed manifest routes fail before server readiness", async (context) =
   context.after(() => removeFixture(fixture));
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
-  const manifestPath = path.join(fixture.mockupsDir, "mokabook-manifest.json");
+  const manifestPath = path.join(fixture.mockupsDir, "mokly-manifest.json");
   const manifest = JSON.parse(
     await fs.promises.readFile(manifestPath, "utf8"),
   ) as {
@@ -141,7 +137,7 @@ test("manifest relationships retain their required entry kinds", async (context)
   context.after(() => removeFixture(fixture));
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
-  const manifestPath = path.join(fixture.mockupsDir, "mokabook-manifest.json");
+  const manifestPath = path.join(fixture.mockupsDir, "mokly-manifest.json");
   const manifest = JSON.parse(
     await fs.promises.readFile(manifestPath, "utf8"),
   ) as {
@@ -191,7 +187,7 @@ test("CLI no-watch lifecycle becomes ready and exits cleanly on SIGTERM", async 
     /id="home"/,
   );
   await waitFor(async () =>
-    fs.existsSync(path.join(fixture.mockupsDir, "mokabook-manifest.json")),
+    fs.existsSync(path.join(fixture.mockupsDir, "mokly-manifest.json")),
   );
   child.kill("SIGTERM");
   const code = await new Promise<number | null>((resolve) =>
@@ -199,7 +195,7 @@ test("CLI no-watch lifecycle becomes ready and exits cleanly on SIGTERM", async 
   );
   assert.equal(code, 0);
   assert.equal(
-    fs.existsSync(path.join(fixture.mockupsDir, "mokabook-manifest.json")),
+    fs.existsSync(path.join(fixture.mockupsDir, "mokly-manifest.json")),
     true,
   );
 });
@@ -227,7 +223,7 @@ test(
     const stderr = captureOutput(child.stderr);
     const url = await outputUrl(child.stdout);
     const firstPort = new URL(url).port;
-    const events = await fetch(`${url}/__mokabook/events`);
+    const events = await fetch(`${url}/__mokly/events`);
     const eventReader = events.body?.getReader();
     assert.ok(eventReader);
     assert.match(await readEvent(eventReader), /event: ready/);
@@ -238,7 +234,7 @@ test(
     let generated = path.join(fixture.mockupsDir, "screens/home.desktop.html");
     await waitFor(async () =>
       (await fs.promises.readFile(generated, "utf8")).includes(
-        'data-mokabook-link="home"',
+        'data-mokly-link="home"',
       ),
     );
     assert.match(await readEvent(eventReader), /event: update/);
@@ -246,7 +242,7 @@ test(
     await waitFor(async () =>
       (
         await (await fetch(`${url}/static/screens/home.desktop.html`)).text()
-      ).includes('data-mokabook-link="home"'),
+      ).includes('data-mokly-link="home"'),
     );
     await fs.promises.writeFile(
       fixture.entryPath,
@@ -266,7 +262,7 @@ test(
     );
     assert.match(
       await (await fetch(`${url}/static/screens/start.desktop.html`)).text(),
-      /data-mokabook-link="details"/,
+      /data-mokly-link="details"/,
     );
     await fs.promises.writeFile(
       fixture.entryPath,
@@ -296,7 +292,7 @@ test(
     await waitFor(
       async () =>
         (await (await fetch(url)).text()).includes(
-          'data-mokabook-base="config-reloaded"',
+          'data-mokly-base="config-reloaded"',
         ),
       20_000,
     );
@@ -343,7 +339,7 @@ function outputUrl(stream: NodeJS.ReadableStream): Promise<string> {
     stream.on("data", (chunk: Buffer) => {
       output += chunk.toString("utf8");
       const match = output.match(
-        /Mokabook listening at (http:\/\/127\.0\.0\.1:\d+)/,
+        /Mokly listening at (http:\/\/127\.0\.0\.1:\d+)/,
       );
       if (match?.[1]) {
         clearTimeout(timeout);

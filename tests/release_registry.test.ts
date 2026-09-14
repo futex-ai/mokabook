@@ -59,7 +59,7 @@ test("registry misses include a newly published tarball ETARGET", async () => {
 
 test("post-publish verification retries a propagating tarball", async (context) => {
   const temporaryRoot = await fs.promises.mkdtemp(
-    path.join(os.tmpdir(), "mokabook-registry-test-"),
+    path.join(os.tmpdir(), "mokly-registry-test-"),
   );
   context.after(async () => {
     await fs.promises.rm(temporaryRoot, { force: true, recursive: true });

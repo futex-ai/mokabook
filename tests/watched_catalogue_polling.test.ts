@@ -18,7 +18,7 @@ function shell(version: number, changes?: number, pending = false): string {
     : changes === undefined
       ? "unavailable"
       : "ready";
-  return `<html data-mokabook-update-version="${version}" data-changes-status="${status}">${filter}</html>`;
+  return `<html data-mokly-update-version="${version}" data-changes-status="${status}">${filter}</html>`;
 }
 
 for (const { name, states, changes } of [

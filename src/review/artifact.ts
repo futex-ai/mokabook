@@ -26,7 +26,7 @@ export function renderReviewArtifact(
   addArtifactFile(files, "summary.md", summaryMarkdown(artifact.result));
   addArtifactFile(
     files,
-    ".mokabook-review-artifact",
+    ".mokly-review-artifact",
     `schemaVersion=${artifact.result.schemaVersion}\n`,
   );
   return files;
@@ -35,7 +35,7 @@ export function renderReviewArtifact(
 /** Create a concise deterministic CI summary. */
 export function summaryMarkdown(result: ReviewResult): string {
   if (result.schemaVersion === 3)
-    return `## Mokabook Review
+    return `## Mokly Review
 
 Base: ${markdownCode(result.baseRef)} (${markdownCode(result.baseCommit.slice(0, 12))})
 
@@ -52,7 +52,7 @@ ${result.changes.map((change) => `- ${change.kind}: ${markdownText((change.after
   for (const screen of result.screens)
     counts.set(screen.state, (counts.get(screen.state) ?? 0) + 1);
   const lines = [
-    "## Mokabook Review",
+    "## Mokly Review",
     "",
     `Base: ${markdownCode(result.baseRef)} (${markdownCode(result.baseCommit.slice(0, 12))})`,
     "",

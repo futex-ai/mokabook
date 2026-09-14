@@ -7,7 +7,7 @@ const capability = { token: "test-token", generation: "test-generation" };
 
 function shell(status?: string, usageComplete = true): string {
   const state = status ? `data-changes-status="${status}"` : "";
-  return `<body data-mokabook-update-version="4" ${state}><script data-workspace-data="">${JSON.stringify({ renderCapability: capability, usageComplete })}</script></body>`;
+  return `<body data-mokly-update-version="4" ${state}><script data-workspace-data="">${JSON.stringify({ renderCapability: capability, usageComplete })}</script></body>`;
 }
 
 test("completed usage does not settle controls while Changes is pending", () => {
@@ -38,9 +38,7 @@ test("settled controls require both authority and a published version", () => {
     undefined,
   );
   assert.equal(
-    settledRenderCapability(
-      ready.replace('data-mokabook-update-version="4"', ""),
-    ),
+    settledRenderCapability(ready.replace('data-mokly-update-version="4"', "")),
     undefined,
   );
   assert.equal(

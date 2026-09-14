@@ -20,8 +20,8 @@ export async function startPreviewFixture(
   const output = path.join(
     repositoryRoot,
     includeChanges
-      ? ".context/mokabook-preview-changes"
-      : ".context/mokabook-preview",
+      ? ".context/mokly-preview-changes"
+      : ".context/mokly-preview",
   );
   await execute(
     "npm",

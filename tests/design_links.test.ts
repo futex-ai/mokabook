@@ -53,7 +53,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       assert.deepEqual(
         [
           ...new Set(
-            controls.map((node) => attribute(node, "data-mokabook-link")),
+            controls.map((node) => attribute(node, "data-mokly-link")),
           ),
         ],
         targets,
@@ -64,7 +64,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
         for (const node of controls)
           assert.ok(
             textContent(node).includes(
-              attribute(node, "data-mokabook-link") ?? "missing",
+              attribute(node, "data-mokly-link") ?? "missing",
             ),
           );
       }
@@ -80,7 +80,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       viewport,
     );
     assert.equal(
-      attribute(byClass(document, "mbk-brand")[0]!, "data-mokabook-link"),
+      attribute(byClass(document, "mbk-brand")[0]!, "data-mokly-link"),
       "design-browse-home",
     );
     const links = byClass(document, "mbk-nav-row").filter(
@@ -89,7 +89,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
     assert.deepEqual(
       links.map((node) => [
         textContent(node).trim(),
-        attribute(node, "data-mokabook-link"),
+        attribute(node, "data-mokly-link"),
       ]),
       [
         ["Welcome", "design-browse-screen"],
@@ -100,7 +100,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       ],
     );
     assert.equal(
-      attribute(byClass(document, "mbk-menu-btn")[0]!, "data-mokabook-link"),
+      attribute(byClass(document, "mbk-menu-btn")[0]!, "data-mokly-link"),
       "design-browse-home",
     );
     assert.match(
@@ -112,7 +112,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       assert.equal(
         attribute(
           byClass(home.document, "mbk-menu-btn")[0]!,
-          "data-mokabook-link",
+          "data-mokly-link",
         ),
         "design-browse-navigation",
       );
@@ -140,7 +140,7 @@ test("every design link resolves to a real same-viewport design artifact without
         0,
       );
       for (const link of links) {
-        const id = attribute(link, "data-mokabook-link");
+        const id = attribute(link, "data-mokly-link");
         const target = designs.find((entry) => entry.id === id);
         assert.ok(
           target?.kind === "screen",
@@ -189,10 +189,10 @@ test("the canonical documented inventory exactly matches the complete design reg
   const spec = (
     await Promise.all(
       [
-        "docs/protocol/mokabook-shell-design.md",
-        "docs/protocol/mokabook-component-design.md",
-        "docs/protocol/mokabook-component-inspector-design.md",
-        "docs/protocol/mokabook-component-controls-design.md",
+        "docs/protocol/mokly-shell-design.md",
+        "docs/protocol/mokly-component-design.md",
+        "docs/protocol/mokly-component-inspector-design.md",
+        "docs/protocol/mokly-component-controls-design.md",
       ].map((file) => fs.readFile(path.join(repositoryRoot, file), "utf8")),
     )
   ).join("\n");

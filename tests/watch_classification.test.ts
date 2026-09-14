@@ -66,7 +66,7 @@ function snapshot(id: string): ComponentChangeSnapshot {
   return {
     baseline: {
       entries: [],
-      generatedBy: "mokabook",
+      generatedBy: "mokly",
       legacyPages: [{ route: `${id}.html`, sourcePath: `${id}.html` }],
       schemaVersion: 3,
     },

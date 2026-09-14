@@ -1,7 +1,7 @@
 .context/
-.mokabook-cache/
-.mokabook-review-*/
-.mokabook-write-*/
+.mokly-cache/
+.mokly-review-*/
+.mokly-write-*/
 .wrangler/
 coverage/
 dist/

@@ -13,7 +13,7 @@ export class ComponentValidationError extends Error {
     readonly path: string,
     readonly detail: string,
   ) {
-    super(`[mokabook/components] ${path}: ${detail}`);
+    super(`[mokly/components] ${path}: ${detail}`);
     this.name = "ComponentValidationError";
   }
 }

@@ -22,7 +22,7 @@ function IconSvg({ children, size }: IconProps & { children: ReactNode }) {
   );
 }
 
-/** Overlapping mobile and desktop screens in Mokabook's brand mark. */
+/** Overlapping mobile and desktop screens in Mokly's brand mark. */
 export function BrandIcon({ size }: IconProps) {
   return (
     <IconSvg size={size ?? 17}>

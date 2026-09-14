@@ -17,7 +17,7 @@ export async function refreshBrowseEvidence(
   while (!signal.aborted) {
     await waitForNavigation(doc, signal);
     const href = win.location.href;
-    const view = doc.querySelector("[data-mokabook-view]")?.firstElementChild;
+    const view = doc.querySelector("[data-mokly-view]")?.firstElementChild;
     const response = await win.fetch(href, {
       signal,
       cache: "no-store",
@@ -28,7 +28,7 @@ export async function refreshBrowseEvidence(
     if (
       navigationPending(doc) ||
       href !== win.location.href ||
-      view !== doc.querySelector("[data-mokabook-view]")?.firstElementChild
+      view !== doc.querySelector("[data-mokly-view]")?.firstElementChild
     )
       continue;
     if (!response.ok || response.url !== href.split("#")[0]) return;
@@ -41,11 +41,11 @@ export async function refreshBrowseEvidence(
       stamp.content !== current.content ||
       stamp.version < Math.max(version, current.version) ||
       doc
-        .querySelector("[data-mokabook-view]")
-        ?.getAttribute("data-mokabook-baseline") !==
+        .querySelector("[data-mokly-view]")
+        ?.getAttribute("data-mokly-baseline") !==
         next
-          .querySelector("[data-mokabook-view]")
-          ?.getAttribute("data-mokabook-baseline")
+          .querySelector("[data-mokly-view]")
+          ?.getAttribute("data-mokly-baseline")
     )
       return;
     const evidence = workspaceEvidence(doc, next);
@@ -53,10 +53,10 @@ export async function refreshBrowseEvidence(
     applyNavigationEvidence(doc, next);
     evidence();
     doc.documentElement.setAttribute(
-      "data-mokabook-update-version",
+      "data-mokly-update-version",
       String(stamp.version),
     );
-    doc.dispatchEvent(new win.Event("mokabook:evidence-updated"));
+    doc.dispatchEvent(new win.Event("mokly:evidence-updated"));
     return stamp.version;
   }
   return undefined;

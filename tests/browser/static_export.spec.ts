@@ -24,7 +24,7 @@ test("an isolated export contains a complete exact-file resource graph", async (
     404,
   );
   expect(
-    (await request.get(`${site.url}/__mokabook/diffs/review.json`)).status(),
+    (await request.get(`${site.url}/__mokly/diffs/review.json`)).status(),
   ).toBe(404);
 });
 
@@ -79,13 +79,13 @@ test("static search, tags, Changes, details, and flows retain the existing shell
   page,
 }) => {
   await page.goto(`${site.url}/view/screens/home.html`);
-  await page.locator("[data-mokabook-tag-toggle]").click();
-  await page.locator('#mb-tag-picker [data-mokabook-tag="forms"]').click();
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("tag:forms");
+  await page.locator("[data-mokly-tag-toggle]").click();
+  await page.locator('#mb-tag-picker [data-mokly-tag="forms"]').click();
+  await expect(page.locator("[data-mokly-search]")).toHaveValue("tag:forms");
   await expect(
     page.locator('[data-route="user-flows/tour.html"]'),
   ).toBeHidden();
-  await page.locator("[data-mokabook-search]").fill("");
+  await page.locator("[data-mokly-search]").fill("");
   await page.locator('[data-filter="changed"]').click();
   await expect(page.locator('[data-route="screens/home.html"]')).toBeVisible();
   await page.locator('[data-filter="all"]').click();

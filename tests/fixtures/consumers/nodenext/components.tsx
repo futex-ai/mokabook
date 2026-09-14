@@ -4,7 +4,7 @@ import {
   type ComponentProps,
   type DataPropSchema,
   type RenderResult,
-} from "mokabook";
+} from "mokly";
 
 const schema = {
   kind: "object",
@@ -38,7 +38,7 @@ const component = defineComponent({
     },
   ],
 });
-const valid = <component.Component label="Valid" mokabookInstance="first" />;
+const valid = <component.Component label="Valid" moklyInstance="first" />;
 // @ts-expect-error The declared label remains required.
 const missing = <component.Component amount={1} />;
 // @ts-expect-error Numeric props reject strings in consumer code.

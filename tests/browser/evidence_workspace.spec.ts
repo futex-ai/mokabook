@@ -34,7 +34,7 @@ test("Usage and Changes completion preserve edited props and their live preview"
     ).toBe(true);
     server.publishUpdate({ kind: "evidence" });
     await expect(page.locator("html")).toHaveAttribute(
-      "data-mokabook-update-version",
+      "data-mokly-update-version",
       "2",
     );
     await expect(label).toHaveValue("Keep this edit");
@@ -90,7 +90,7 @@ test("Usage and Changes completion preserve edited props and their live preview"
     );
     const demandUsage = page.waitForResponse(
       (response) =>
-        response.url().includes("/__mokabook/views/screens/home.") &&
+        response.url().includes("/__mokly/views/screens/home.") &&
         response.ok(),
     );
     await page.locator('a[data-route="screens/home.html"]').click();
@@ -119,7 +119,7 @@ test("Changes completion preserves keyboard focus on an unchanged Usage link", a
     ).toBe(true);
     server.publishUpdate({ kind: "evidence" });
     await expect(page.locator("html")).toHaveAttribute(
-      "data-mokabook-update-version",
+      "data-mokly-update-version",
       "2",
     );
     await page.getByRole("tab", { name: "Usage", exact: true }).click();
@@ -143,7 +143,7 @@ test("Changes completion preserves keyboard focus on an unchanged Usage link", a
     });
 
     await expect(page.locator("html")).toHaveAttribute(
-      "data-mokabook-update-version",
+      "data-mokly-update-version",
       "3",
     );
     await expect(usage).toContainText("Affected screens and components");

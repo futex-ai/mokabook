@@ -19,7 +19,7 @@ export function mockLink(id: string, fragment?: string): string {
   return `mock:${id}${fragment ? `#${fragment}` : ""}`;
 }
 
-/** Anchor props for an id-addressed Mokabook link. */
+/** Anchor props for an id-addressed Mokly link. */
 interface AnchorLinkProps extends Omit<
   AnchorHTMLAttributes<HTMLAnchorElement>,
   "href"
@@ -57,9 +57,9 @@ export function MockLink({ asChild, fragment, to, ...props }: MockLinkProps) {
   }
   return (
     <>
-      <template data-mokabook-link-child-start={href} />
+      <template data-mokly-link-child-start={href} />
       {props.children}
-      <template data-mokabook-link-child-end="" />
+      <template data-mokly-link-child-end="" />
     </>
   );
 }

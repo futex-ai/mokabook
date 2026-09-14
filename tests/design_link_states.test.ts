@@ -15,7 +15,7 @@ function destinations(nodes: Element[]) {
     .filter((node) => node.tagName === "a")
     .map((node) => [
       textContent(node).trim(),
-      attribute(node, "data-mokabook-link"),
+      attribute(node, "data-mokly-link"),
     ]);
 }
 
@@ -39,7 +39,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
         assert.deepEqual(
           elements(group, (node) => node.tagName === "a").map((node) => [
             attribute(node, "aria-label"),
-            attribute(node, "data-mokabook-link"),
+            attribute(node, "data-mokly-link"),
           ]),
           [[label, target]],
         );
@@ -129,10 +129,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
     ] as const) {
       const { document } = await designDocument(source, viewport);
       assert.equal(
-        attribute(
-          byClass(document, "mbk-search-tag")[0]!,
-          "data-mokabook-link",
-        ),
+        attribute(byClass(document, "mbk-search-tag")[0]!, "data-mokly-link"),
         toggle,
         source,
       );
@@ -140,7 +137,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       for (const chip of chips) {
         const tag = textContent(chip).trim();
         assert.equal(
-          attribute(chip, "data-mokabook-link"),
+          attribute(chip, "data-mokly-link"),
           active === tag ? "design-browse-screen" : `design-browse-tag-${tag}`,
           `${source}: ${tag}`,
         );

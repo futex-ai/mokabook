@@ -17,7 +17,7 @@ export function ViewControls({
 }) {
   return (
     <viewControls.Component
-      mokabookInstance={useDesignInstance("view-controls")}
+      moklyInstance={useDesignInstance("view-controls")}
       selection={viewport}
       scheme="light"
       destinations={{}}

@@ -28,8 +28,8 @@ test(
     const config = await loadConfig(fixture.root);
     await writeCompilation(await compileCatalogue(config), config);
     await git(fixture.root, "init", "-q", "-b", "main");
-    await git(fixture.root, "config", "user.name", "Mokabook Test");
-    await git(fixture.root, "config", "user.email", "mokabook@example.invalid");
+    await git(fixture.root, "config", "user.name", "Mokly Test");
+    await git(fixture.root, "config", "user.email", "mokly@example.invalid");
     await git(fixture.root, "add", ".");
     await git(fixture.root, "commit", "-qm", "test: baseline");
 
@@ -45,7 +45,7 @@ test(
     const url = await listeningUrl(child);
     const initial = await waitForClassifiedCount(url, 0);
     assert.match(initial, /class="mbk-nav-filter-count">0</);
-    const events = await fetch(`${url}/__mokabook/events`);
+    const events = await fetch(`${url}/__mokly/events`);
     const reader = events.body?.getReader();
     assert.ok(reader);
     assert.match(await readEvent(reader), /event: ready/);
@@ -97,7 +97,7 @@ test(
         await waitForClassifiedCount(url, 0),
         /class="mbk-nav-filter-count">0</,
       );
-      const events = await fetch(`${url}/__mokabook/events`);
+      const events = await fetch(`${url}/__mokly/events`);
       const reader = events.body?.getReader();
       assert.ok(reader);
       try {
@@ -151,7 +151,7 @@ function listeningUrl(child: ChildProcess): Promise<string> {
     child.stdout?.on("data", (chunk: Buffer) => {
       output += chunk.toString("utf8");
       const url = output.match(
-        /Mokabook listening at (http:\/\/127\.0\.0\.1:\d+)/,
+        /Mokly listening at (http:\/\/127\.0\.0\.1:\d+)/,
       )?.[1];
       if (!url) return;
       clearTimeout(timer);

@@ -1,4 +1,4 @@
-import { defineComponent } from "mokabook";
+import { defineComponent } from "mokly";
 import { action } from "./action.js";
 
 const dependency = "examples/basic/generated/example-components.css";
@@ -25,13 +25,13 @@ export const toolbar = defineComponent({
       <div>{props.children}</div>
       <div className="example-toolbar-actions">
         <action.Component
-          mokabookInstance="primary"
+          moklyInstance="primary"
           label="Browse details"
           tone="primary"
           destination="details"
         />
         <action.Component
-          mokabookInstance="secondary"
+          moklyInstance="secondary"
           label="Browse welcome"
           tone="secondary"
           destination="welcome"

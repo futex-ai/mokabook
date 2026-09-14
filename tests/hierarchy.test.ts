@@ -170,7 +170,7 @@ type MutableManifest = Omit<
     id: string;
     navPath: string[];
   }>;
-  generatedBy?: "mokabook";
+  generatedBy?: "mokly";
   schemaVersion: number;
 };
 

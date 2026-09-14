@@ -3,11 +3,15 @@ import crypto from "node:crypto";
 
 import type { ColorScheme, Viewport } from "../authoring/types.js";
 import type { Compilation } from "../build/compile.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
 import type { ManifestScreen } from "../registry/types.js";
 import { VIEWPORTS } from "../registry/views.js";
-import { normalizeReviewPair, normalizeSingleDocument } from "./ignore.js";
+import {
+  normalizeHistoricalDocument,
+  normalizeReviewPair,
+  normalizeSingleDocument,
+} from "./ignore.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import {
   aggregateState,
@@ -34,7 +38,7 @@ export async function compareScreen(
 ): Promise<ScreenReview> {
   const entry = head ?? base;
   if (!entry)
-    throw new MokabookError("review-invalid", "comparison route has no screen");
+    throw new MoklyError("review-invalid", "comparison route has no screen");
   const views: ViewReview[] = [];
   for (const viewport of VIEWPORTS) {
     for (const colorScheme of unionColorSchemes(base, head)) {
@@ -48,7 +52,7 @@ export async function compareScreen(
         ? baseDocuments.get(baseFragment)
         : undefined;
       if (baseFragment && !baseDocument) {
-        throw new MokabookError(
+        throw new MoklyError(
           "review-invalid",
           `base fragment is missing: ${baseFragment}`,
         );
@@ -60,7 +64,7 @@ export async function compareScreen(
         ? compilation.outputs.get(headFragment)
         : undefined;
       if (headFragment && after === undefined) {
-        throw new MokabookError(
+        throw new MoklyError(
           "review-invalid",
           `head fragment is missing: ${headFragment}`,
         );
@@ -121,8 +125,12 @@ function compareView(
   afterPath: string | undefined,
 ): ViewReview {
   const context = `${route} (${viewport}, ${colorScheme})`;
+  const historicalBefore =
+    before === undefined ? undefined : normalizeHistoricalDocument(before);
   const normalizedBefore =
-    before === undefined ? undefined : normalizeSingleDocument(before, context);
+    historicalBefore === undefined
+      ? undefined
+      : normalizeSingleDocument(historicalBefore, context);
   const normalizedAfter =
     after === undefined ? undefined : normalizeSingleDocument(after, context);
   if (before === undefined)
@@ -141,7 +149,11 @@ function compareView(
       state: "removed",
       viewport,
     };
-  const normalized = normalizeReviewPair(before, after, context);
+  const normalized = normalizeReviewPair(
+    normalizeHistoricalDocument(before),
+    after,
+    context,
+  );
   const normalizedEqual = digest(normalized.base) === digest(normalized.head);
   const rawEqual =
     digest(normalizedBefore ?? "") === digest(normalizedAfter ?? "");

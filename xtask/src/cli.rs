@@ -12,7 +12,7 @@ use crate::error::{Error, Result};
 use crate::rust_file_length::{RustFileLengthAuditor, SystemRustFileLengthAuditor};
 
 #[derive(Debug, Parser)]
-#[command(name = "xtask", about = "Mokabook repository automation")]
+#[command(name = "xtask", about = "Mokly repository automation")]
 struct Cli {
     #[command(subcommand)]
     command: Command,

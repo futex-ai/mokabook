@@ -34,7 +34,7 @@ export async function startNavigationFixture(): Promise<NavigationFixture> {
   await fs.promises.mkdir(path.join(fixture.mockupsDir, "screens"));
   await fs.promises.writeFile(
     path.join(fixture.mockupsDir, "screens", "nested.html"),
-    `<!doctype html><html><head><base target="_top"></head><body><div id="local"></div><a id="local-base" href="#local">Base-targeted</a><a id="local-unmarked" href="#local" target="_top">Local</a><a data-mokabook-link="details" href="./details.mobile.html" id="local-marked" target="_top">Marked-looking</a></body></html>`,
+    `<!doctype html><html><head><base target="_top"></head><body><div id="local"></div><a id="local-base" href="#local">Base-targeted</a><a id="local-unmarked" href="#local" target="_top">Local</a><a data-mokly-link="details" href="./details.mobile.html" id="local-marked" target="_top">Marked-looking</a></body></html>`,
   );
   await fs.promises.writeFile(
     fixture.configPath,
@@ -74,7 +74,7 @@ export async function startNavigationFixture(): Promise<NavigationFixture> {
 }
 
 function navigationSource(): string {
-  return `import { defineCollection, defineScreen, defineUseCase, MockLink } from "mokabook";
+  return `import { defineCollection, defineScreen, defineUseCase, MockLink } from "mokly";
 import React from "react";
 const metadata = { dependencies: [], relatedDocs: [] };
 function Home({ compact }) {
@@ -94,7 +94,7 @@ function Home({ compact }) {
     <a download="fixture.txt" href="data:text/plain,fixture" id="download-top" target="_top">Download</a>
     <form action="#home" id="top-form" target="_top"><button type="submit">Submit</button></form>
     <script>window.__consumerScriptRan = true;</script>
-    <iframe id="srcdoc-nested" srcDoc={'<a data-mokabook-link="details#section" href="./details.mobile.html" id="srcdoc-marked" target="_top">Marked</a><a href="#ordinary" id="srcdoc-unmarked" target="_top">Ordinary</a><a href="#popup" id="srcdoc-popup" target="_blank">Popup</a><script>parent.__nestedScriptRan=true</script>'} title="srcdoc nested" />
+    <iframe id="srcdoc-nested" srcDoc={'<a data-mokly-link="details#section" href="./details.mobile.html" id="srcdoc-marked" target="_top">Marked</a><a href="#ordinary" id="srcdoc-unmarked" target="_top">Ordinary</a><a href="#popup" id="srcdoc-popup" target="_blank">Popup</a><script>parent.__nestedScriptRan=true</script>'} title="srcdoc nested" />
     <iframe id="local-nested" src="./nested.html" title="local nested" />
     <iframe id="generated-nested" src={nestedGenerated} title="generated nested" />
     <iframe id="cross-nested" src="https://cross-origin.example.test/nested.html" title="cross-origin nested" />

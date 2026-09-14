@@ -29,7 +29,7 @@ export function parseControlMetadata(
   html: string,
   route: string,
 ): ParsedControlMetadata | undefined {
-  if (!/data-mokabook-link-(?:child-|control)/i.test(html)) return undefined;
+  if (!/data-mokly-link-(?:child-|control)/i.test(html)) return undefined;
   const duplicateOffsets: number[] = [];
   const document = parse(html, {
     sourceCodeLocationInfo: true,
@@ -105,7 +105,7 @@ function metadataRecords(html: string, route: string): string[] {
           .filter(
             (attr) =>
               attr.name.startsWith(CONTROL_MARKER) ||
-              ["id", "href", "data-nav-href", "data-mokabook-link"].includes(
+              ["id", "href", "data-nav-href", "data-mokly-link"].includes(
                 attr.name,
               ),
           )

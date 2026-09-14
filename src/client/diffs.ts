@@ -52,9 +52,9 @@ export function installDiffs(
         screen.dataset["diffVariant"],
       );
     }
-    doc.dispatchEvent(new win.Event("mokabook:comparison"));
+    doc.dispatchEvent(new win.Event("mokly:comparison"));
   };
-  doc.addEventListener("mokabook:evidence-updated", () => {
+  doc.addEventListener("mokly:evidence-updated", () => {
     request?.abort();
     request = undefined;
     loaded = undefined;
@@ -95,7 +95,7 @@ export function installDiffs(
       if (!comparison) {
         stage.textContent = "Loading comparison…";
         const endpoint = new URL(
-          delivery?.comparisonUrl ?? "/__mokabook/diffs/review.json",
+          delivery?.comparisonUrl ?? "/__mokly/diffs/review.json",
           win.location.href,
         );
         if (!delivery) {

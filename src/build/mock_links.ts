@@ -8,7 +8,7 @@ import type {
   Viewport,
 } from "../authoring/types.js";
 import { encodeUrlPath } from "../config/paths.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import {
   logicalMarker,
   parseLogicalTarget,
@@ -80,13 +80,8 @@ export function rewriteMockLinks(
         `contains duplicate reserved ${duplicate} metadata`,
       );
     }
-    if (
-      attributes.some((attribute) => attribute.name === "data-mokabook-link")
-    ) {
-      throw invalid(
-        sourceRoute,
-        "contains reserved data-mokabook-link metadata",
-      );
+    if (attributes.some((attribute) => attribute.name === "data-mokly-link")) {
+      throw invalid(sourceRoute, "contains reserved data-mokly-link metadata");
     }
     if (
       node.tagName === "base" &&
@@ -245,7 +240,7 @@ function markerInsertion(
   return {
     endOffset: offset,
     startOffset: offset,
-    value: ` data-mokabook-link="${marker}"`,
+    value: ` data-mokly-link="${marker}"`,
   };
 }
 
@@ -277,8 +272,8 @@ function applyReplacements(html: string, replacements: Replacement[]): string {
     );
 }
 
-function invalid(route: string, message: string): MokabookError {
-  return new MokabookError("build-invalid", `${route} ${message}`);
+function invalid(route: string, message: string): MoklyError {
+  return new MoklyError("build-invalid", `${route} ${message}`);
 }
 
 function visit(node: HtmlNode, callback: (node: HtmlNode) => void): void {

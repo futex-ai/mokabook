@@ -122,7 +122,7 @@ function isComparisonPath(file: string, config: ResolvedConfig): boolean {
   const parts = path.relative(config.mockupsDir, file).split(path.sep);
   return (
     parts.includes(".comparisons") ||
-    (parts.includes("__mokabook") && parts.includes("diffs"))
+    (parts.includes("__mokly") && parts.includes("diffs"))
   );
 }
 
@@ -131,8 +131,8 @@ function hasArtifactMarker(file: string, repoRoot: string): boolean {
   let directory = file;
   while (isInside(repoRoot, directory)) {
     if (
-      fs.existsSync(path.join(directory, ".mokabook-review-artifact")) ||
-      fs.existsSync(path.join(directory, ".mokabook-preview-artifact"))
+      fs.existsSync(path.join(directory, ".mokly-review-artifact")) ||
+      fs.existsSync(path.join(directory, ".mokly-preview-artifact"))
     )
       return true;
     if (directory === repoRoot) break;

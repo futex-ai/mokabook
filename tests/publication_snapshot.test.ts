@@ -89,7 +89,7 @@ for (const includeChanges of [false, true]) {
           rebuilt = true;
           await fs.promises.appendFile(
             fixture.entryPath,
-            '\nimport { definePage } from "mokabook"; mockups.push(definePage({ id: "publication-added", title: "Added during publication", route: "publication-added.html", description: "A new document", dependencies: [], relatedDocs: [], render: () => "<!doctype html><html><body>Added document</body></html>" }));\n',
+            '\nimport { definePage } from "mokly"; mockups.push(definePage({ id: "publication-added", title: "Added during publication", route: "publication-added.html", description: "A new document", dependencies: [], relatedDocs: [], render: () => "<!doctype html><html><body>Added document</body></html>" }));\n',
           );
           await writeCompilation(await compileCatalogue(config), config);
         }
@@ -134,7 +134,7 @@ test("a manifest change after its snapshot read aborts default publication and p
     path.join(output, "index.html"),
     "utf8",
   );
-  const manifestPath = path.join(fixture.mockupsDir, "mokabook-manifest.json");
+  const manifestPath = path.join(fixture.mockupsDir, "mokly-manifest.json");
   const original = fs.promises.readFile;
   let mutated = false;
   context.mock.method(
@@ -162,12 +162,12 @@ test("a manifest change after its snapshot read aborts default publication and p
     previous,
   );
   assert.deepEqual(await fs.promises.readdir(path.dirname(output)), [
-    ".mokabook-export-reservations",
+    ".mokly-export-reservations",
     "published",
   ]);
   assert.deepEqual(
     await fs.promises.readdir(
-      path.join(path.dirname(output), ".mokabook-export-reservations/locks"),
+      path.join(path.dirname(output), ".mokly-export-reservations/locks"),
     ),
     [],
   );

@@ -62,7 +62,7 @@ function RenderProbe() { appendFileSync(${JSON.stringify(renderLog)}, "render\\n
   );
 
   const response = await fetch(
-    `${server.url}/__mokabook/diffs/review.json?route=screens%2Fhome.html`,
+    `${server.url}/__mokly/diffs/review.json?route=screens%2Fhome.html`,
   );
   assert.equal(response.status, 200, await response.clone().text());
   const result = parseReviewResult(await response.json());
@@ -87,7 +87,7 @@ function RenderProbe() { appendFileSync(${JSON.stringify(renderLog)}, "render\\n
     /Updated content/,
   );
   const cached = await fetch(
-    `${server.url}/__mokabook/diffs/review.json?route=screens%2Fhome.html`,
+    `${server.url}/__mokly/diffs/review.json?route=screens%2Fhome.html`,
   );
   assert.equal(cached.url, response.url);
   assert.equal(reads.length, 4);
@@ -95,7 +95,7 @@ function RenderProbe() { appendFileSync(${JSON.stringify(renderLog)}, "render\\n
   assert.equal((await fetch(pane, { method: "HEAD" })).status, 200);
   for (const relative of [
     "summary.md",
-    "snapshots/after/mokabook-manifest.json",
+    "snapshots/after/mokly-manifest.json",
     "snapshots%2fafter%2fprivate.html",
   ])
     assert.equal((await fetch(new URL(relative, response.url))).status, 404);
@@ -109,21 +109,21 @@ function RenderProbe() { appendFileSync(${JSON.stringify(renderLog)}, "render\\n
     checked.replace("Updated content", "Unchecked content"),
   );
   const failed = await fetch(
-    `${server.url}/__mokabook/diffs/review.json?route=screens%2Fhome.html&refresh=1`,
+    `${server.url}/__mokly/diffs/review.json?route=screens%2Fhome.html&refresh=1`,
   );
   assert.equal(failed.status, 500);
   assert.match(await failed.text(), /changed since the catalogue was checked/);
   assert.match(await (await fetch(pane)).text(), /Updated content/);
   server.publishUpdate({ changesStatus: "pending" });
   const pending = await fetch(
-    `${server.url}/__mokabook/diffs/review.json?route=screens%2Fhome.html`,
+    `${server.url}/__mokly/diffs/review.json?route=screens%2Fhome.html`,
   );
   assert.equal(pending.status, 500);
   assert.match(await pending.text(), /not ready/);
   await fs.writeFile(edited, checked);
   server.publishUpdate({ componentChanges: changes });
   const refreshed = await fetch(
-    `${server.url}/__mokabook/diffs/review.json?route=screens%2Fhome.html`,
+    `${server.url}/__mokly/diffs/review.json?route=screens%2Fhome.html`,
   );
   assert.equal(refreshed.status, 200);
   assert.notEqual(refreshed.url, response.url);
@@ -150,7 +150,7 @@ test("component comparison snapshots contain only the selected saved variant", a
   });
   t.after(() => server.close());
   const response = await fetch(
-    `${server.url}/__mokabook/diffs/review.json?route=components%2Faction.html&variant=disabled`,
+    `${server.url}/__mokly/diffs/review.json?route=components%2Faction.html&variant=disabled`,
   );
   assert.equal(response.status, 200, await response.clone().text());
   const result = parseReviewResult(await response.json());
@@ -179,8 +179,7 @@ test("component comparison snapshots contain only the selected saved variant", a
     "variant=default",
   ])
     assert.equal(
-      (await fetch(`${server.url}/__mokabook/diffs/review.json?${query}`))
-        .status,
+      (await fetch(`${server.url}/__mokly/diffs/review.json?${query}`)).status,
       404,
     );
 });

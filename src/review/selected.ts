@@ -5,7 +5,7 @@ import { minimatch } from "minimatch";
 
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { ManifestScreen } from "../registry/types.js";
 import {
   copySnapshotDependencies,
@@ -86,7 +86,7 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
       if (side === "after")
         for (const route of routes)
           if (!Object.hasOwn(source.headDigests, route))
-            throw new MokabookError(
+            throw new MoklyError(
               "review-invalid",
               `Selected document has not been checked: ${route}`,
             );

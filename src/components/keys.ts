@@ -2,6 +2,9 @@ import { createHash } from "node:crypto";
 
 import type { ComponentInputOwner } from "./manifest_types.js";
 
+const INSTANCE_KEY_DOMAIN = "mokabook-instance-v1";
+const SLOT_KEY_DOMAIN = "mokabook-slot-v1";
+
 export const isComponentKey = (value: unknown): value is string =>
   typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
 
@@ -11,7 +14,7 @@ export function instanceKey(
   id: string,
 ): string {
   return digest([
-    "mokabook-instance-v1",
+    INSTANCE_KEY_DOMAIN,
     owner.kind,
     owner.kind === "instance" ? owner.instanceKey : null,
     slot ?? null,
@@ -19,7 +22,7 @@ export function instanceKey(
   ]);
 }
 export function slotKey(instance: string, name: string): string {
-  return digest(["mokabook-slot-v1", instance, name]);
+  return digest([SLOT_KEY_DOMAIN, instance, name]);
 }
 function digest(value: readonly unknown[]): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");

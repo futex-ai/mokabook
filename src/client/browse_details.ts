@@ -6,7 +6,7 @@ export interface DetailsPreferenceStorage {
   setItem(key: string, value: string): void;
 }
 
-const DETAILS_DISCLOSURE_KEY = "mokabook:details-disclosure";
+const DETAILS_DISCLOSURE_KEY = "mokly:details-disclosure";
 
 /** Remember and apply the user's latest details disclosure choice. */
 export class DetailsDisclosurePreference {
@@ -26,7 +26,7 @@ export class DetailsDisclosurePreference {
   /** Apply an explicit preference to the current route's details panel. */
   apply(doc: Document): void {
     const details = doc.querySelector<HTMLDetailsElement>(
-      "[data-mokabook-details]",
+      "[data-mokly-details]",
     );
     if (details && this.#open !== undefined) details.open = this.#open;
   }

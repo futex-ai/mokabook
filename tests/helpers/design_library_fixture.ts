@@ -25,7 +25,7 @@ export async function designLibraryFixture(t: {
     "examples/basic/generated",
     "examples/basic/renderer.tsx",
     "examples/basic/theme.ts",
-    "examples/basic/mokabook.config.ts",
+    "examples/basic/mokly.config.ts",
     "examples/basic/notes.md",
     "examples/basic/README.md",
     "docs/protocol",

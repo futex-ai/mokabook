@@ -1,4 +1,4 @@
-# Large Mokabook Consumer
+# Large Mokly Consumer
 
 A deterministic, synthetic workload for finding catalogue-size bottlenecks.
 It uses the real build, watched server, component usage collector, Firna controls,
@@ -13,11 +13,11 @@ npm run fixture:large -- --areas 2 --screens 10 --rows 6
 npm run benchmark:large -- --areas 2 --screens 10 --rows 6
 ```
 
-`fixture:large` creates a `.context/mokabook-large-*` directory, builds its output
-and commits a `main` baseline **inside that isolated fixture**, not in Mokabook's
+`fixture:large` creates a `.context/mokly-large-*` directory, builds its output
+and commits a `main` baseline **inside that isolated fixture**, not in Mokly's
 repository. It reports setup time separately and saves a size-keyed record for reuse.
 Ordinary `dev:large` and `benchmark:large` startup never repeats the baseline build
-or package compilation. Run `npm run build` explicitly after changing Mokabook's
+or package compilation. Run `npm run build` explicitly after changing Mokly's
 source. Missing setup fails with the matching preparation command; `--config`
 can select an existing fixture. `dev:large` serves until Ctrl-C.
 
@@ -65,5 +65,5 @@ Key files: `generate.ts` produces consumer sources; `area.tsx`, `components.tsx`
 and `screens.tsx` define the catalogue; `renderer.tsx` collects native styles;
 `scripts/large/setup.mjs` owns baseline setup and `benchmark.mjs` owns browser
 acceptance. The
-[diagnostic contract](../../../docs/protocol/mokabook-timings.md) describes timing
+[diagnostic contract](../../../docs/protocol/mokly-timings.md) describes timing
 records, inclusive durations and process boundaries.

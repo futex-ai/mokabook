@@ -48,7 +48,7 @@ export function validateComponentDefinition(
   for (const key of [...Object.keys(value.propSchema.properties), ...slots]) {
     if (
       [
-        "mokabookInstance",
+        "moklyInstance",
         "key",
         "ref",
         "__proto__",

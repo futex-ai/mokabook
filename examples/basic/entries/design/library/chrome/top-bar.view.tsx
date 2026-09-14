@@ -1,5 +1,5 @@
 import { useDesignStyle } from "../style_context.js";
-import type { Viewport } from "mokabook";
+import type { Viewport } from "mokly";
 import { DesignLink } from "../../parts/design_navigation.js";
 import { BrandIcon, SearchIcon, TagIcon } from "../../parts/icons.js";
 import { ViewIcon } from "../../components/parts/view_icons.js";
@@ -43,11 +43,11 @@ export function TopBarView({
         </DesignLink>
       ) : null}
       <DesignLink to={brandDestination}>
-        <span className="mbk-brand" aria-label="Mokabook">
+        <span className="mbk-brand" aria-label="Mokly">
           <span className="mbk-mark" aria-hidden="true">
             <BrandIcon />
           </span>
-          {viewport === "mobile" ? null : "Mokabook"}
+          {viewport === "mobile" ? null : "Mokly"}
         </span>
       </DesignLink>
       <div className="mbk-search">

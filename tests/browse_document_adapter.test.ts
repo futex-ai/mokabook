@@ -22,7 +22,7 @@ test("Browse authenticates markers while preserving live navigation attributes",
         <base target="InheritedFrame" />
         <a href="mock:details">Inherited</a>
         <a href="mock:details" target="">Own self</a>
-        <a data-mokabook-target="spoof" href="mock:details" target="_TOP">Top</a>
+        <a data-mokly-target="spoof" href="mock:details" target="_TOP">Top</a>
         <a href="mock:details" target="_blank">Blank</a>
         <a href="mock:details" target="Named.Frame:2">Named</a>
         <a href="mock:details" target=" invalid">Invalid</a>
@@ -33,7 +33,7 @@ test("Browse authenticates markers while preserving live navigation attributes",
         <a href="#local-target" target="NamedFrame">Hash</a>
         <map name="targets"><area href="mock:details" target="_parent" /></map>
         <svg><a href="mock:details" target="_blank"><text>SVG</text></a></svg>
-        <span data-mokabook-target="spoof" data-nav-href="mock:details">Metadata</span>
+        <span data-mokly-target="spoof" data-nav-href="mock:details">Metadata</span>
         <form target="_top"><button formTarget="_parent">Submit</button></form>
       </>`,
     }),
@@ -51,33 +51,30 @@ test("Browse authenticates markers while preserving live navigation attributes",
 
   assert.match(
     adapted,
-    /href="\.\/details\.mobile\.html" data-mokabook-link="details" data-mokabook-target="InheritedFrame">Inherited/,
+    /href="\.\/details\.mobile\.html" data-mokly-link="details" data-mokly-target="InheritedFrame">Inherited/,
   );
   assert.match(
     adapted,
-    /href="\.\/details\.mobile\.html" target="" data-mokabook-link="details">Own self/,
+    /href="\.\/details\.mobile\.html" target="" data-mokly-link="details">Own self/,
   );
-  assert.match(adapted, /target="_TOP"[^>]+data-mokabook-target="_top">Top/);
+  assert.match(adapted, /target="_TOP"[^>]+data-mokly-target="_top">Top/);
+  assert.match(adapted, /target="_blank"[^>]+data-mokly-target="_blank">Blank/);
   assert.match(
     adapted,
-    /target="_blank"[^>]+data-mokabook-target="_blank">Blank/,
-  );
-  assert.match(
-    adapted,
-    /target="Named\.Frame:2"[^>]+data-mokabook-target="Named\.Frame:2">Named/,
+    /target="Named\.Frame:2"[^>]+data-mokly-target="Named\.Frame:2">Named/,
   );
   assert.match(adapted, /target=" invalid">Invalid/);
-  assert.doesNotMatch(adapted, /target=" invalid"[^>]+data-mokabook-link/);
+  assert.doesNotMatch(adapted, /target=" invalid"[^>]+data-mokly-link/);
   assert.match(
     adapted,
     /download="" href="\.\/details\.mobile\.html" target="_top">Download/,
   );
   assert.doesNotMatch(
     adapted,
-    /target="_top"[^>]+data-mokabook-link[^>]*>Download/,
+    /target="_top"[^>]+data-mokly-link[^>]*>Download/,
   );
   assert.match(adapted, /data-nav-href="\.\/details\.mobile\.html">Metadata/);
-  assert.doesNotMatch(adapted, /data-mokabook-target="spoof"/);
+  assert.doesNotMatch(adapted, /data-mokly-target="spoof"/);
   assert.match(
     adapted,
     /href="https:\/\/example\.test\/" target="_top">External/,
@@ -89,29 +86,29 @@ test("Browse authenticates markers while preserving live navigation attributes",
   assert.match(adapted, /href="#local-target" target="NamedFrame">Hash/);
   assert.match(
     adapted,
-    /<area href="\.\/details\.mobile\.html" target="_parent"[^>]+data-mokabook-target="_parent"/,
+    /<area href="\.\/details\.mobile\.html" target="_parent"[^>]+data-mokly-target="_parent"/,
   );
   assert.match(
     adapted,
-    /<a href="\.\/details\.mobile\.html" target="_blank"[^>]+data-mokabook-target="_blank"><text>SVG/,
+    /<a href="\.\/details\.mobile\.html" target="_blank"[^>]+data-mokly-target="_blank"><text>SVG/,
   );
   assert.match(adapted, /<base target="InheritedFrame"/);
   assert.match(adapted, /<form target="_top"><button formTarget="_parent"/);
-  assert.equal(original.includes("data-mokabook-target"), true);
+  assert.equal(original.includes("data-mokly-target"), true);
 });
 
 test("Browse strips reserved metadata from unowned HTML", () => {
   const catalogue = createCatalogue({
     entries: [],
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     sourceFiles: [],
     schemaVersion: 5,
   });
-  const original = `<!doctype html><html><body><a data-mokabook-link="home" DATA-MOKABOOK-LINK="details" data-mokabook-target="_top" DATA-MOKABOOK-TARGET="_blank" href="./home.html">Home</a></body></html>`;
+  const original = `<!doctype html><html><body><a data-mokly-link="home" DATA-MOKLY-LINK="details" data-mokly-target="_top" DATA-MOKLY-TARGET="_blank" href="./home.html">Home</a></body></html>`;
   const adapted = adaptBrowseDocument(original, "unowned.html", catalogue);
 
   assert.match(adapted, /href="\.\/home\.html"/);
-  assert.doesNotMatch(adapted, /data-mokabook-(?:link|target)/i);
+  assert.doesNotMatch(adapted, /data-mokly-(?:link|target)/i);
 });
 
 test("Browse rejects duplicate reserved metadata in trusted HTML", async (context) => {
@@ -123,19 +120,19 @@ test("Browse rejects duplicate reserved metadata in trusted HTML", async (contex
   const original = compilation.outputs.get(route) ?? "";
   const mutations = [
     original.replace(
-      'data-mokabook-link="details"',
-      'data-mokabook-link="details" data-mokabook-link="home"',
+      'data-mokly-link="details"',
+      'data-mokly-link="details" data-mokly-link="home"',
     ),
     original.replace(
-      'data-mokabook-link="details"',
-      'data-mokabook-link="details" data-mokabook-target="_self" data-mokabook-target="_blank"',
+      'data-mokly-link="details"',
+      'data-mokly-link="details" data-mokly-target="_self" data-mokly-target="_blank"',
     ),
   ];
 
   for (const content of mutations) {
     assert.throws(
       () => adaptBrowseDocument(content, route, catalogue),
-      /duplicate reserved data-mokabook-(?:link|target)/,
+      /duplicate reserved data-mokly-(?:link|target)/,
     );
   }
 });
@@ -148,15 +145,12 @@ test("Browse fails closed when trusted ownership or marker bytes diverge", async
   const route = "screens/home.mobile.html";
   const original = compilation.outputs.get(route) ?? "";
   const mutations = [
-    original.replace("Generated by mokabook", "Generated elsewhere"),
+    original.replace("Generated by mokly", "Generated elsewhere"),
     original.replace(
       generatedHeader("entries/fixture.mockup.tsx"),
       generatedHeader("entries/other.mockup.tsx"),
     ),
-    original.replace(
-      'data-mokabook-link="details"',
-      'data-mokabook-link="missing"',
-    ),
+    original.replace('data-mokly-link="details"', 'data-mokly-link="missing"'),
     original.replace("./details.mobile.html", "./home.mobile.html"),
     original.replace("<head>", '<head><base href="https://example.test/">'),
   ];
@@ -183,7 +177,7 @@ test("Browse accepts CRLF generated ownership headers", async (context) => {
     createCatalogue(compilation.manifest),
   );
 
-  assert.match(adapted, /data-mokabook-link="details"/);
+  assert.match(adapted, /data-mokly-link="details"/);
 });
 
 test("Browse authenticates generated legacy links from their manifest owner", async (context) => {
@@ -224,7 +218,7 @@ test("Browse authenticates generated legacy links from their manifest owner", as
   );
 
   assert.match(adapted, /href="\.\/screens\/details\.desktop\.html"/);
-  assert.match(adapted, /data-mokabook-link="details"/);
+  assert.match(adapted, /data-mokly-link="details"/);
 
   const mobileRoute = "compact.mobile.html";
   const mobile = adaptBrowseDocument(
@@ -233,5 +227,5 @@ test("Browse authenticates generated legacy links from their manifest owner", as
     createCatalogue(compilation.manifest),
   );
   assert.match(mobile, /href="\.\/screens\/details\.desktop\.html"/);
-  assert.match(mobile, /data-mokabook-link="details"/);
+  assert.match(mobile, /data-mokly-link="details"/);
 });

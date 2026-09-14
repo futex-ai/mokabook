@@ -11,10 +11,10 @@ import {
 for (const name of [
   "index.html",
   "view/screens/home.html",
-  "__mokabook/shell.css",
-  "__mokabook/client/browse.js",
-  "__mokabook/navigation/delivery.js",
-  "__mokabook/fonts/InterVariable.woff2",
+  "__mokly/shell.css",
+  "__mokly/client/browse.js",
+  "__mokly/navigation/delivery.js",
+  "__mokly/fonts/InterVariable.woff2",
   "static/extra.txt",
 ]) {
   test(`deployment identity includes final ${name} bytes with unchanged comparisons`, async (context) => {
@@ -89,7 +89,7 @@ test("deployment identity covers alias edges and ignores map insertion order", a
 test("consumer lookalike descriptors are included verbatim, not stamped", async (context) => {
   const fixture = await createExportFixture();
   context.after(() => fixture.close());
-  const consumer = `<html data-mokabook-static="" data-mokabook-delivery='{"deploymentId":"${"0".repeat(64)}"}'><body>Consumer</body></html>`;
+  const consumer = `<html data-mokly-static="" data-mokly-delivery='{"deploymentId":"${"0".repeat(64)}"}'><body>Consumer</body></html>`;
   const result = await exportCatalogue(fixture.config, {
     outDir: "site",
     adapter: {

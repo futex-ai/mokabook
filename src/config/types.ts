@@ -80,7 +80,7 @@ export interface ModuleResolutionConfig {
 }
 
 /** Public, serializable host configuration. */
-export interface MokabookConfig {
+export interface MoklyConfig {
   /** Color schemes rendered for screens; defaults to light only. */
   colorSchemes?: readonly ColorScheme[];
   /** Config-relative structured mockup source directory. */

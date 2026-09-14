@@ -31,7 +31,7 @@ export const SHELL_VIEW_CSS = `
   margin-left: auto;
 }
 
-.mbk-screen-head > [data-mokabook-schemeswitch] {
+.mbk-screen-head > [data-mokly-schemeswitch] {
   display: none;
   margin-left: 0;
 }
@@ -172,7 +172,7 @@ export const SHELL_VIEW_CSS = `
   font-weight: 500;
 }
 
-body[data-mokabook-color-scheme="dark"]
+body[data-mokly-color-scheme="dark"]
   .mbk-frame-wrap[data-color-scheme-fallback]
   .mbk-frame-scheme-note {
   display: inline;
@@ -278,7 +278,7 @@ body[data-mokabook-color-scheme="dark"]
 
 .mbk-empty-link {
   margin-top: 8px;
-  color: var(--mokabook-accent);
+  color: var(--mokly-accent);
   font-weight: 600;
 }
 
@@ -298,11 +298,11 @@ body[data-mokabook-color-scheme="dark"]
 }
 
 @media (max-width: 56.25rem) {
-  .mbk-topbar > [data-mokabook-schemeswitch] {
+  .mbk-topbar > [data-mokly-schemeswitch] {
     display: none;
   }
 
-  .mbk-screen-head > [data-mokabook-schemeswitch] {
+  .mbk-screen-head > [data-mokly-schemeswitch] {
     display: inline-flex;
   }
 }

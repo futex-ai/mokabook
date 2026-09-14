@@ -3,7 +3,7 @@ export type {
   CompatibilityConfig,
   ModuleLoader,
   ModuleResolutionConfig,
-  MokabookConfig,
+  MoklyConfig,
   ReviewConfig,
   StylesheetRule,
   WatchAction,

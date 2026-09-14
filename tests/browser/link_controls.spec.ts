@@ -90,7 +90,7 @@ test("disabled, busy, and handler-less Firna controls stay inactive", async ({
   for (const id of ["disabled", "busy", "no-handler"]) {
     const button = frame.getByTestId(id);
     await expect(button).not.toHaveAttribute("href");
-    await expect(button).not.toHaveAttribute("data-mokabook-link");
+    await expect(button).not.toHaveAttribute("data-mokly-link");
     await button.dispatchEvent("click");
   }
   await expect(page).toHaveURL(/\/view\/screens\/home\.html$/);

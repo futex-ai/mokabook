@@ -11,7 +11,7 @@ can run directly.
 
 ## Prompt
 
-You are reviewing local changes for the Mokabook package repository.
+You are reviewing local changes for the Mokly package repository.
 
 Review the local diff against `origin/main`. You may inspect the repository
 read-only for context. Focus on concrete bugs, security issues, missing tests,

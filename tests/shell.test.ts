@@ -112,7 +112,7 @@ const manifest: ManifestV5 = {
       title: "Tour",
     },
   ],
-  generatedBy: "mokabook",
+  generatedBy: "mokly",
   sourceFiles: ["entries/fixture.mockup.tsx"],
   schemaVersion: 5,
 };
@@ -170,7 +170,7 @@ function tagIcon(size: number): string {
 function tagChip(tag: string): string {
   return (
     `<button aria-pressed="false" class="mbk-chip tag" ` +
-    `data-mokabook-tag="${tag}" type="button">${tagIcon(11)}${tag}</button>`
+    `data-mokly-tag="${tag}" type="button">${tagIcon(11)}${tag}</button>`
   );
 }
 
@@ -178,7 +178,7 @@ function tagChip(tag: string): string {
 const TAG_TOGGLE =
   '<button aria-controls="mb-tag-picker" aria-expanded="false" ' +
   'aria-label="Filter by tag" class="mbk-search-tag" ' +
-  `data-mokabook-tag-toggle="" type="button">${tagIcon(13)}</button>`;
+  `data-mokly-tag-toggle="" type="button">${tagIcon(13)}</button>`;
 
 /** The panel the tag control drops under the search field, closed. */
 function tagPicker(...tags: readonly string[]): string {
@@ -202,7 +202,7 @@ function tagsRow(...tags: readonly string[]): string {
 }
 
 const SCHEME_SWITCH =
-  '<span aria-label="Color scheme" class="mbk-seg" data-mokabook-schemeswitch="" role="group">' +
+  '<span aria-label="Color scheme" class="mbk-seg" data-mokly-schemeswitch="" role="group">' +
   '<button aria-pressed="true" data-color-scheme-option="light" type="button">Light</button>' +
   '<button aria-pressed="false" data-color-scheme-option="dark" type="button">Dark</button>' +
   "</span>";
@@ -336,7 +336,7 @@ test("catalogue nav marks active, changed, and iconed rows", () => {
   assert.match(html, /class="mbk-nav-ico folder"><svg/);
   assert.match(html, /class="mbk-nav-count">2</);
   assert.match(html, /Collapse all/);
-  assert.match(html, /data-mokabook-nav-resize=""/);
+  assert.match(html, /data-mokly-nav-resize=""/);
   assert.match(
     html,
     /aria-label="Resize navigation panel"[^>]*aria-orientation="vertical"[^>]*role="separator"/,
@@ -370,7 +370,7 @@ test("screen page renders device chrome, viewport switch, and details", () => {
   assert.match(html, /class="browser-frame"/);
   assert.match(html, /class="browser-expand"/);
   assert.match(html, /class="address-url">example\.test\/welcome</);
-  assert.match(html, /data-mokabook-stage="" data-viewport="both"/);
+  assert.match(html, /data-mokly-stage="" data-viewport="both"/);
   assert.match(html, /<option value="mobile">Mobile<\/option>/);
   assert.match(html, /aria-label="Viewport" data-workspace-viewport=""/);
   assert.equal(html.includes('class="mbk-viewbar"'), false);
@@ -409,12 +409,12 @@ test("scheme switch renders only for catalogues with dark fragments", () => {
   const lightOnly = createCatalogue(manifest);
   assert.equal(lightOnly.hasDarkFragments, false);
   assert.equal(
-    homePage(lightOnly, context).includes("data-mokabook-schemeswitch"),
+    homePage(lightOnly, context).includes("data-mokly-schemeswitch"),
     false,
   );
   assert.equal(
     routePage(lightOnly, "screens/welcome.html").includes(
-      "data-mokabook-schemeswitch",
+      "data-mokly-schemeswitch",
     ),
     false,
   );
@@ -423,14 +423,14 @@ test("scheme switch renders only for catalogues with dark fragments", () => {
   assert.equal(dark.hasDarkFragments, true);
   const home = homePage(dark, context);
   assert.ok(home.includes(SCHEME_SWITCH));
-  assert.equal(occurrences(home, "data-mokabook-schemeswitch"), 1);
+  assert.equal(occurrences(home, "data-mokly-schemeswitch"), 1);
   assert.match(
     home,
-    /data-mokabook-search[\s\S]*?<\/div><span aria-label="Color scheme"[\s\S]*?<\/span><\/header>/,
+    /data-mokly-search[\s\S]*?<\/div><span aria-label="Color scheme"[\s\S]*?<\/span><\/header>/,
   );
 
   const screen = routePage(dark, "screens/welcome.html");
-  assert.equal(occurrences(screen, "data-mokabook-schemeswitch"), 1);
+  assert.equal(occurrences(screen, "data-mokly-schemeswitch"), 1);
   assert.equal(occurrences(screen, "data-workspace-scheme"), 1);
   assert.match(
     screen,
@@ -438,15 +438,15 @@ test("scheme switch renders only for catalogues with dark fragments", () => {
   );
 
   const flow = routePage(dark, "user-flows/tour.html");
-  assert.equal(occurrences(flow, "data-mokabook-schemeswitch"), 2);
-  assert.equal(flow.includes("data-mokabook-viewswitch"), false);
+  assert.equal(occurrences(flow, "data-mokly-schemeswitch"), 2);
+  assert.equal(flow.includes("data-mokly-viewswitch"), false);
   assert.match(
     flow,
     /<\/div><span aria-label="Color scheme"[\s\S]*?<\/span><\/div><div class="mbk-flow"/,
   );
 
   const legacy = routePage(dark, "legacy/old.html");
-  assert.equal(occurrences(legacy, "data-mokabook-schemeswitch"), 1);
+  assert.equal(occurrences(legacy, "data-mokly-schemeswitch"), 1);
 });
 
 test("screen stage carries per-frame scheme fragment data", () => {
@@ -454,11 +454,11 @@ test("screen stage carries per-frame scheme fragment data", () => {
   const screen = routePage(dark, "screens/welcome.html");
   assert.match(
     screen,
-    /<iframe class="mbk-frag" data-mokabook-fragment-frame="" data-workspace-frame="mobile" data-fragment-dark="\/static\/screens\/welcome\.mobile\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.mobile\.html" sandbox="allow-same-origin" src="\/static\/screens\/welcome\.mobile\.html" title="Welcome — mobile"><\/iframe>/,
+    /<iframe class="mbk-frag" data-mokly-fragment-frame="" data-workspace-frame="mobile" data-fragment-dark="\/static\/screens\/welcome\.mobile\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.mobile\.html" sandbox="allow-same-origin" src="\/static\/screens\/welcome\.mobile\.html" title="Welcome — mobile"><\/iframe>/,
   );
   assert.match(
     screen,
-    /<iframe class="mbk-frag" data-mokabook-fragment-frame="" data-workspace-frame="desktop" data-fragment-dark="\/static\/screens\/welcome\.desktop\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.desktop\.html" sandbox="allow-same-origin" src="\/static\/screens\/welcome\.desktop\.html" title="Welcome — desktop"><\/iframe>/,
+    /<iframe class="mbk-frag" data-mokly-fragment-frame="" data-workspace-frame="desktop" data-fragment-dark="\/static\/screens\/welcome\.desktop\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.desktop\.html" sandbox="allow-same-origin" src="\/static\/screens\/welcome\.desktop\.html" title="Welcome — desktop"><\/iframe>/,
   );
   assert.equal(screen.includes("data-color-scheme-fallback"), false);
   assert.equal(screen.includes("mbk-frame-scheme-note"), false);
@@ -475,7 +475,7 @@ test("screen stage carries per-frame scheme fragment data", () => {
   );
   assert.match(
     fallback,
-    /<iframe class="mbk-frag" data-mokabook-fragment-frame="" data-workspace-frame="mobile" data-fragment-light="\/static\/screens\/details\.mobile\.html" sandbox="allow-same-origin" src="\/static\/screens\/details\.mobile\.html" title="Details — mobile"><\/iframe>/,
+    /<iframe class="mbk-frag" data-mokly-fragment-frame="" data-workspace-frame="mobile" data-fragment-light="\/static\/screens\/details\.mobile\.html" sandbox="allow-same-origin" src="\/static\/screens\/details\.mobile\.html" title="Details — mobile"><\/iframe>/,
   );
   assert.equal(fallback.includes("data-fragment-dark"), false);
   assertLightSrcMatchesAttribute(fallback, 2);
@@ -483,7 +483,7 @@ test("screen stage carries per-frame scheme fragment data", () => {
   const flow = routePage(dark, "user-flows/tour.html");
   assert.match(
     flow,
-    /<div class="mbk-flow-screen"><div class="browser-frame">[\s\S]*?<iframe class="mbk-frag" data-mokabook-fragment-frame="" data-fragment-dark="\/static\/screens\/welcome\.desktop\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.desktop\.html" sandbox="allow-same-origin"/,
+    /<div class="mbk-flow-screen"><div class="browser-frame">[\s\S]*?<iframe class="mbk-frag" data-mokly-fragment-frame="" data-fragment-dark="\/static\/screens\/welcome\.desktop\.dark\.html" data-fragment-light="\/static\/screens\/welcome\.desktop\.html" sandbox="allow-same-origin"/,
   );
   assert.match(
     flow,
@@ -500,7 +500,7 @@ test("screen stage carries per-frame scheme fragment data", () => {
   );
   assert.match(
     lightScreen,
-    /<iframe class="mbk-frag" data-mokabook-fragment-frame="" data-workspace-frame="mobile" sandbox="allow-same-origin" src="\/static\/screens\/welcome\.mobile\.html" title="Welcome — mobile"><\/iframe>/,
+    /<iframe class="mbk-frag" data-mokly-fragment-frame="" data-workspace-frame="mobile" sandbox="allow-same-origin" src="\/static\/screens\/welcome\.mobile\.html" title="Welcome — mobile"><\/iframe>/,
   );
   assert.equal(lightScreen.includes("data-fragment-"), false);
   assert.equal(lightScreen.includes("data-color-scheme-fallback"), false);
@@ -577,7 +577,7 @@ test("details inspector chips the tags an entry declares", () => {
 
   const untagged = detailsSection(routePage(dark, "user-flows/tour.html"));
   assert.equal(untagged.includes('mbk-meta-k">Tags'), false);
-  assert.equal(untagged.includes("data-mokabook-tag"), false);
+  assert.equal(untagged.includes("data-mokly-tag"), false);
 });
 
 test("a use case chips its tags in the same details row", () => {
@@ -613,7 +613,7 @@ test("the search field carries a tag control over a closed picker", () => {
   const html = homePage(createCatalogue(manifest), context);
   assert.ok(
     html.includes(
-      'aria-label="Search catalogue" data-mokabook-search="" placeholder="Search catalogue…" type="search"/>' +
+      'aria-label="Search catalogue" data-mokly-search="" placeholder="Search catalogue…" type="search"/>' +
         TAG_TOGGLE +
         tagPicker("billing", "forms", "onboarding") +
         "</div>",
@@ -621,7 +621,7 @@ test("the search field carries a tag control over a closed picker", () => {
   );
 
   const untagged = homePage(createCatalogue(untaggedManifest), context);
-  assert.match(untagged, /data-mokabook-search/);
+  assert.match(untagged, /data-mokly-search/);
   assert.equal(untagged.includes("mbk-search-tag"), false);
   assert.equal(untagged.includes("mb-tag-picker"), false);
 });
@@ -630,7 +630,7 @@ test("the brand names itself and the search bar drops that name", () => {
   const browse = homePage(createCatalogue(manifest), context);
   assert.ok(browse.includes('<header class="mbk-topbar" data-search="">'));
   const brand = browse.match(
-    /<a aria-label="Mokabook" class="mbk-brand" href="\/">(.*?)<\/a>/,
+    /<a aria-label="Mokly" class="mbk-brand" href="\/">(.*?)<\/a>/,
   )?.[1];
   assert.ok(brand);
   assert.match(
@@ -638,8 +638,8 @@ test("the brand names itself and the search bar drops that name", () => {
     /<span aria-hidden="true" class="mbk-mark"><svg aria-hidden="true"/,
   );
   assert.match(brand, /height="17" stroke="currentColor"/);
-  assert.ok(brand.endsWith('<span class="mbk-name">Mokabook</span>'));
-  assert.equal(brand.replace(/<[^>]*>/g, ""), "Mokabook");
+  assert.ok(brand.endsWith('<span class="mbk-name">Mokly</span>'));
+  assert.equal(brand.replace(/<[^>]*>/g, ""), "Mokly");
 
   assert.ok(
     flatCss(SHELL_CSS).includes(
@@ -719,21 +719,21 @@ test("filter renders in the nav only when changed routes are known", () => {
     ...context,
     changedRoutes: ["screens/welcome.html"],
   });
-  assert.match(withFilter, /data-mokabook-filter/);
+  assert.match(withFilter, /data-mokly-filter/);
   assert.match(withFilter, /class="mbk-nav-filter-count">1</);
   const withNoChanges = homePage(catalogue, {
     ...context,
     changedRoutes: [],
   });
-  assert.match(withNoChanges, /data-mokabook-filter/);
+  assert.match(withNoChanges, /data-mokly-filter/);
   assert.match(withNoChanges, /class="mbk-nav-filter-count">0</);
   const withoutFilter = homePage(catalogue, context);
-  assert.equal(withoutFilter.includes("data-mokabook-filter"), false);
-  assert.match(withoutFilter, /data-mokabook-search/);
+  assert.equal(withoutFilter.includes("data-mokly-filter"), false);
+  assert.match(withoutFilter, /data-mokly-search/);
 });
 
 test("shell stylesheet stays aligned with the design contract", () => {
-  assert.match(SHELL_CSS, /--mokabook-accent: #4f7864/);
+  assert.match(SHELL_CSS, /--mokly-accent: #4f7864/);
   assert.match(SHELL_CSS, /--mb-added: #1d7a3d/);
   assert.match(SHELL_CSS, /--mbk-dark-screen-bg: #121514/);
   assert.match(SHELL_CSS, /--mbk-dark-screen-ink: #eef1ef/);
@@ -791,19 +791,19 @@ test("tag chips select in the accent and the bar clears the scrim", () => {
   );
   assert.ok(
     css.includes(
-      ".mbk-chip.tag:hover { background: var(--mokabook-accent-soft); }",
+      ".mbk-chip.tag:hover { background: var(--mokly-accent-soft); }",
     ),
   );
   assert.ok(
     css.includes(
-      ".mbk-chip.tag.active { background: var(--mokabook-accent); " +
-        "border-color: var(--mokabook-accent); " +
-        "color: var(--mokabook-accent-contrast); }",
+      ".mbk-chip.tag.active { background: var(--mokly-accent); " +
+        "border-color: var(--mokly-accent); " +
+        "color: var(--mokly-accent-contrast); }",
     ),
   );
   assert.ok(
     css.includes(
-      ".mbk-chip.tag.active svg { color: var(--mokabook-accent-contrast); }",
+      ".mbk-chip.tag.active svg { color: var(--mokly-accent-contrast); }",
     ),
   );
   assert.ok(
@@ -859,7 +859,7 @@ test("the tag picker drops from the field and sheets under the bar", () => {
 test("dark scheme paints device screens and leaves the chrome light", () => {
   const css = flatCss(SHELL_CSS);
   const scope =
-    'body[data-mokabook-color-scheme="dark"] ' +
+    'body[data-mokly-color-scheme="dark"] ' +
     ":is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback]) ";
 
   assert.ok(
@@ -923,7 +923,7 @@ test("frame labels note a light-only screen only under a dark selection", () => 
   );
   assert.ok(
     css.includes(
-      'body[data-mokabook-color-scheme="dark"] ' +
+      'body[data-mokly-color-scheme="dark"] ' +
         ".mbk-frame-wrap[data-color-scheme-fallback] " +
         ".mbk-frame-scheme-note { display: inline; }",
     ),
@@ -934,15 +934,15 @@ test("one scheme switch instance shows per side of the breakpoint", () => {
   const css = flatCss(SHELL_CSS);
   assert.ok(
     css.includes(
-      ".mbk-screen-head > [data-mokabook-schemeswitch] " +
+      ".mbk-screen-head > [data-mokly-schemeswitch] " +
         "{ display: none; margin-left: 0; }",
     ),
   );
   assert.ok(
     css.includes(
       "@media (max-width: 56.25rem) { " +
-        ".mbk-topbar > [data-mokabook-schemeswitch] { display: none; } " +
-        ".mbk-screen-head > [data-mokabook-schemeswitch] " +
+        ".mbk-topbar > [data-mokly-schemeswitch] { display: none; } " +
+        ".mbk-screen-head > [data-mokly-schemeswitch] " +
         "{ display: inline-flex; } }",
     ),
   );

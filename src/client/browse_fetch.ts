@@ -26,7 +26,7 @@ export async function fetchBrowseDestination(
         if (!nextStamp || nextStamp.content !== currentStamp.content) break;
         if (nextStamp.version < currentStamp.version) continue;
       }
-      const view = parsed.querySelector("[data-mokabook-view]");
+      const view = parsed.querySelector("[data-mokly-view]");
       if (!view || !adoptStaticDelivery(doc, parsed)) break;
       return { parsed, view, url: response.url || url };
     }

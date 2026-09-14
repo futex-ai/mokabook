@@ -1,14 +1,14 @@
 import { MetaRow } from "../../parts/metadata_row.js";
 import { changeStatusBadge } from "../../library/controls/change-status.js";
 import { useDesignInstance } from "../../library/composition.js";
-import { MockLink } from "mokabook";
+import { MockLink } from "mokly";
 
 import type { ChangeStatus, ComparisonFixture } from "./comparison_fixtures.js";
 
 export function ChangeStatusBadge({ status }: { status: ChangeStatus }) {
   return (
     <changeStatusBadge.Component
-      mokabookInstance={useDesignInstance("status")}
+      moklyInstance={useDesignInstance("status")}
       status={status}
     />
   );

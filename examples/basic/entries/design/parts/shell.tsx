@@ -24,7 +24,7 @@ interface ShellProps {
   viewport: ArtboardViewport;
 }
 
-/** The Mokabook shell scaffold for one design mockup. */
+/** The Mokly shell scaffold for one design mockup. */
 export function Shell({
   activeTag,
   aside,
@@ -106,7 +106,7 @@ export function ScreenHead({
   const navigation = useDesignNavigation();
   return (
     <screenHeader.Component
-      mokabookInstance={useDesignInstance("header")}
+      moklyInstance={useDesignInstance("header")}
       title={title}
       crumbs={[
         {
@@ -138,7 +138,7 @@ export function ViewSwitch({ active }: ViewSwitchProps) {
   const nextScheme = scheme === "light" ? "dark" : "light";
   return (
     <viewControls.Component
-      mokabookInstance={useDesignInstance("viewport")}
+      moklyInstance={useDesignInstance("viewport")}
       selection={active}
       scheme={scheme}
       schemeDisabled={!navigation.schemeLinks?.[nextScheme]}

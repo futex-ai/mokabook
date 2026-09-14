@@ -1,4 +1,4 @@
-import { screen } from "mokabook";
+import { screen } from "mokly";
 
 import { DESTINATIONS } from "../../parts/destinations.js";
 import { MiniDetails, MiniWelcome } from "../../parts/mini_screens.js";

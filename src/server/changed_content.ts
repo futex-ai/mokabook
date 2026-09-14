@@ -5,8 +5,12 @@ import path from "node:path";
 import { isReservedSource } from "../build/source_inventory.js";
 import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
-import { LEGACY_MANIFEST_NAME, MANIFEST_NAME } from "../registry/manifest.js";
+import { MoklyError } from "../errors.js";
+import {
+  FORMER_MANIFEST_NAME,
+  LEGACY_MANIFEST_NAME,
+  MANIFEST_NAME,
+} from "../registry/manifest.js";
 import type { Manifest } from "../registry/types.js";
 import { VIEWPORTS } from "../registry/views.js";
 import {
@@ -17,6 +21,7 @@ import {
 import { baselineResourceConfig } from "../review/base_manifest.js";
 import type { GitClient } from "../review/git.js";
 import {
+  normalizeHistoricalDocument,
   normalizeReviewPair,
   normalizeSingleDocument,
 } from "../review/ignore.js";
@@ -60,7 +65,9 @@ export async function changedContentPaths(
       )
         return [];
       const route = toPosixPath(path.relative(config.mockupsDir, candidate));
-      return route === MANIFEST_NAME || route === LEGACY_MANIFEST_NAME
+      return route === MANIFEST_NAME ||
+        route === FORMER_MANIFEST_NAME ||
+        route === LEGACY_MANIFEST_NAME
         ? []
         : [route];
     }),
@@ -85,12 +92,14 @@ export async function changedContentPaths(
     for (const pair of batch) {
       const base = bases.get(pair.base);
       if (!base) {
-        throw new MokabookError(
+        throw new MoklyError(
           "review-invalid",
           `base fragment is missing: ${pair.base}`,
         );
       }
-      const before = Buffer.from(base).toString("utf8");
+      const before = normalizeHistoricalDocument(
+        Buffer.from(base).toString("utf8"),
+      );
       const after = Buffer.from(await headReader.read(pair.head)).toString(
         "utf8",
       );

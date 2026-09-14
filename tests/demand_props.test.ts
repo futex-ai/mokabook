@@ -20,7 +20,7 @@ test("Props renders only its view and freezes resources without copying linked p
   </section>`,
     }) +
     `
-    import { definePage } from "mokabook";
+    import { definePage } from "mokly";
     mockups.push(definePage({ id: "broken", title: "Broken", description: "Broken page",
       route: "broken.html", dependencies: [], relatedDocs: [],
       render: () => { throw new Error("unrelated page must not render"); } }));

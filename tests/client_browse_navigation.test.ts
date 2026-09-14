@@ -200,7 +200,7 @@ interface NavFixture {
 }
 
 function navFixture(): NavFixture {
-  const search = new FakeNode("input", { "data-mokabook-search": "" });
+  const search = new FakeNode("input", { "data-mokly-search": "" });
   const welcome = navRow(
     "screens/welcome.html",
     "Welcome",

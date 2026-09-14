@@ -8,12 +8,12 @@ variants, local controls, generated usage and reliable change attribution.
 
 Contracts:
 
-- [Adoption and ownership](../docs/protocol/mokabook-design-components.md)
-- [Component inventory, inputs and variants](../docs/protocol/mokabook-design-component-library.md)
-- Existing [design navigation](../docs/protocol/mokabook-design-links.md),
-  [shell design](../docs/protocol/mokabook-shell-design.md),
-  [component authoring](../docs/protocol/mokabook-components.md) and
-  [change attribution](../docs/protocol/mokabook-component-changes.md)
+- [Adoption and ownership](../docs/protocol/mokly-design-components.md)
+- [Component inventory, inputs and variants](../docs/protocol/mokly-design-component-library.md)
+- Existing [design navigation](../docs/protocol/mokly-design-links.md),
+  [shell design](../docs/protocol/mokly-shell-design.md),
+  [component authoring](../docs/protocol/mokly-components.md) and
+  [change attribution](../docs/protocol/mokly-component-changes.md)
 
 ## Baseline And Boundaries
 

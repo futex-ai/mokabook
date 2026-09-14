@@ -9,7 +9,7 @@ import { validEntrySource } from "./helpers/fixture.js";
 
 function pageSource(route = "handbook.html"): string {
   return `${validEntrySource()}
-import { definePage } from "mokabook";
+import { definePage } from "mokly";
 mockups.push(defineCollection({ id: "library", title: "Library", description: "Documents", dependencies: [], relatedDocs: [], childIds: ["handbook"] }),
 definePage({ id: "handbook", title: "Handbook", description: "Catalogue guidance", dependencies: [], relatedDocs: [], route: ${JSON.stringify(route)}, render: () => '<!doctype html><html><body><h1 id="start">Handbook</h1><a href="mock:home">Home</a></body></html>' }));`;
 }
@@ -22,7 +22,7 @@ test("consumer export builds unified pages and preserves a removed page's baseli
   const read = (name: string) =>
     fs.readFile(path.join(fixture.output, name), "utf8");
   assert.match(await read("id/handbook/index.html"), /Handbook/);
-  assert.match(await read("static/handbook.html"), /data-mokabook-link="home"/);
+  assert.match(await read("static/handbook.html"), /data-mokly-link="home"/);
   assert.doesNotMatch(
     await read("view/handbook.html"),
     /data-diff-screen|data-viewport-option/,

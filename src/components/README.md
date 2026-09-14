@@ -3,10 +3,10 @@
 Use `defineComponent` to give a shared React component its own catalogue page,
 saved variants, controls, and recorded usage in screens or other components.
 Callers render the returned `Component` and export its `entry` in `mockups`.
-Mokabook renders that wrapper in the consumer's existing React/provider graph.
+Mokly renders that wrapper in the consumer's existing React/provider graph.
 
 ```tsx
-import { defineComponent } from "mokabook";
+import { defineComponent } from "mokly";
 
 export const action = defineComponent({
   id: "action",
@@ -27,7 +27,7 @@ export const mockups = [action.entry];
 ```
 
 Render `<action.Component label="Save" />` in a screen. Give repeated siblings
-distinct `mokabookInstance` values; stable ids preserve their identity across
+distinct `moklyInstance` values; stable ids preserve their identity across
 edits. Registered children inside another registered component appear in its
 Nested components tab. React content belongs in declared `slots`; data belongs
 in `propSchema`. The schema infers TypeScript props and validates actual values. Registry preparation
@@ -56,6 +56,9 @@ changes still count directly. Exact `ownedDependencies` and renderer style or
 resource ownership records handle material outside the component's body. Global
 or mixed resources remain conservatively attributed. Dependency declarations
 and adopting an unrelated component alone do not invent a visible screen change.
+Historical Mokabook comparisons preserve the original document coordinates when
+applying recorded style ownership; internal marker renames alone do not create
+consumer changes or alter the retained snapshots.
 
 ## Development
 
@@ -71,7 +74,7 @@ node --import tsx --test tests/component_*.test.ts
 - `../server/controls`: supervised local rendering and transient storage.
 - `../client/workspace.ts`: shared saved-view explorer and inspector.
 
-See the [registered component contract](../../docs/protocol/mokabook-components.md),
-[manifest](../../docs/protocol/mokabook-component-manifest.md),
-[change attribution](../../docs/protocol/mokabook-component-changes.md), and
-[local controls](../../docs/protocol/mokabook-component-controls.md).
+See the [registered component contract](../../docs/protocol/mokly-components.md),
+[manifest](../../docs/protocol/mokly-component-manifest.md),
+[change attribution](../../docs/protocol/mokly-component-changes.md), and
+[local controls](../../docs/protocol/mokly-component-controls.md).

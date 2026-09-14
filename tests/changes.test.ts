@@ -21,7 +21,7 @@ test("review stays internal and output options belong only to export", () => {
     () => parseArguments(["serve", "--out", "report"]),
     /--out belongs to export/,
   );
-  assert.doesNotMatch(HELP, /mokabook review/);
+  assert.doesNotMatch(HELP, /mokly review/);
   assert.equal(parseArguments(["serve", "--base", "HEAD"]).base, "HEAD");
 });
 
@@ -58,14 +58,14 @@ test("Changes keeps screen comparisons lazy and has no separate Review route", a
     const page = await (
       await fetch(`${running.url}/view/screens/home.html`)
     ).text();
-    assert.doesNotMatch(page, /href="\/review"|Mokabook modes/);
+    assert.doesNotMatch(page, /href="\/review"|Mokly modes/);
     assert.match(page, /Changes/);
     assert.match(page, /data-diff-mode="current"/);
     assert.match(page, /data-diff-mode="overlay"/);
     assert.equal(fs.existsSync(config.review.outDir), false);
     assert.equal((await fetch(`${running.url}/review`)).status, 404);
     assert.equal(fs.existsSync(config.review.outDir), false);
-    const response = await fetch(`${running.url}/__mokabook/diffs/review.json`);
+    const response = await fetch(`${running.url}/__mokly/diffs/review.json`);
     assert.equal(response.status, 200);
     const comparison = (await response.json()) as ReviewResult;
     assert.equal(
@@ -80,7 +80,7 @@ test("Changes keeps screen comparisons lazy and has no separate Review route", a
     assert.ok(view?.beforePath);
     const snapshot = await fetch(new URL(view.beforePath, response.url));
     assert.equal(snapshot.status, 200);
-    assert.doesNotMatch(await snapshot.text(), /data-mokabook-update-version/);
+    assert.doesNotMatch(await snapshot.text(), /data-mokly-update-version/);
   } finally {
     await running.close();
   }

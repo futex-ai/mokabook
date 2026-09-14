@@ -68,7 +68,7 @@ test("manifest entry changes are attributed to their route", async (context) => 
   assert.deepEqual(
     changedManifestRoutes(manifest, baseManifest, config, [
       "entries/fixture.mockup.tsx",
-      "mockups/mokabook-manifest.json",
+      "mockups/mokly-manifest.json",
     ]),
     ["screens/home.html", "user-flows/tour.html"],
   );
@@ -168,8 +168,8 @@ test("branch comparisons exclude commits made only on the base branch", async (c
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
   await git(fixture.root, ["init", "-q", "-b", "main"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["config", "user.name", "Mokly Test"]);
+  await git(fixture.root, ["config", "user.email", "mokly@example.invalid"]);
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: common catalogue"]);
   const commonCommit = (await git(fixture.root, ["rev-parse", "HEAD"])).trim();

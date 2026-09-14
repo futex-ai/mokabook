@@ -8,8 +8,10 @@ import { validateGeneratedOutputPaths } from "../dist/build/output_paths.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import {
+  FORMER_MANIFEST_NAME,
   LEGACY_MANIFEST_NAME,
   MANIFEST_NAME,
+  parseManifest,
   readManifest,
 } from "../dist/registry/manifest.js";
 import {
@@ -29,7 +31,12 @@ import {
   validEntrySource,
 } from "./helpers/fixture.js";
 
-const metadataRoutes = [MANIFEST_NAME, LEGACY_MANIFEST_NAME, "metadata.json"];
+const metadataRoutes = [
+  MANIFEST_NAME,
+  FORMER_MANIFEST_NAME,
+  LEGACY_MANIFEST_NAME,
+  "metadata.json",
+];
 const publicJson = '{"theme":"light"}';
 
 test("a stale historical-manifest alias does not prevent ordinary public resources", async (context) => {
@@ -60,13 +67,13 @@ test("a stale historical-manifest alias does not prevent ordinary public resourc
 test("a pending manifest is not a public resource on the first build", async (context) => {
   const fixture = await createFixture(
     validEntrySource({
-      body: '<a href="../mokabook-manifest.json">Metadata</a>',
+      body: '<a href="../mokly-manifest.json">Metadata</a>',
     }),
   );
   context.after(() => removeFixture(fixture));
   await assert.rejects(
     compileCatalogue(await loadConfig(fixture.root)),
-    /missing target .*mokabook-manifest.json/,
+    /missing target .*mokly-manifest.json/,
   );
   assert.equal(
     fs.existsSync(path.join(fixture.mockupsDir, MANIFEST_NAME)),
@@ -99,6 +106,10 @@ test("HTTP and current Review deny internal manifests and aliases but allow publ
   await fs.promises.copyFile(
     path.join(fixture.mockupsDir, MANIFEST_NAME),
     path.join(fixture.mockupsDir, LEGACY_MANIFEST_NAME),
+  );
+  await fs.promises.copyFile(
+    path.join(fixture.mockupsDir, MANIFEST_NAME),
+    path.join(fixture.mockupsDir, FORMER_MANIFEST_NAME),
   );
   await fs.promises.symlink(
     MANIFEST_NAME,
@@ -141,6 +152,10 @@ for (const route of metadataRoutes) {
       path.join(fixture.mockupsDir, MANIFEST_NAME),
       path.join(fixture.mockupsDir, LEGACY_MANIFEST_NAME),
     );
+    await fs.promises.copyFile(
+      path.join(fixture.mockupsDir, MANIFEST_NAME),
+      path.join(fixture.mockupsDir, FORMER_MANIFEST_NAME),
+    );
     await fs.promises.symlink(
       MANIFEST_NAME,
       path.join(fixture.mockupsDir, "metadata.json"),
@@ -171,6 +186,10 @@ for (const includeChanges of [false, true]) {
     await fs.promises.copyFile(
       path.join(fixture.mockupsDir, MANIFEST_NAME),
       path.join(fixture.mockupsDir, LEGACY_MANIFEST_NAME),
+    );
+    await fs.promises.copyFile(
+      path.join(fixture.mockupsDir, MANIFEST_NAME),
+      path.join(fixture.mockupsDir, FORMER_MANIFEST_NAME),
     );
     await fs.promises.symlink(
       MANIFEST_NAME,
@@ -219,6 +238,45 @@ for (const includeChanges of [false, true]) {
   });
 }
 
+test("the former Mokabook manifest is accepted only from Git history", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const config = await loadConfig(fixture.root);
+  const compilation = await compileCatalogue(config);
+  const formerManifest = {
+    ...compilation.manifest,
+    generatedBy: "mokabook",
+  };
+  assert.throws(
+    () => parseManifest(formerManifest),
+    /expected Mokly manifest schema version 5/,
+  );
+  await fs.promises.writeFile(
+    path.join(fixture.mockupsDir, FORMER_MANIFEST_NAME),
+    JSON.stringify(formerManifest),
+  );
+  const runner = new NodeGitCommandRunner(fixture.root);
+  await runner.run(["init", "-q"]);
+  await runner.run(["add", "."]);
+  await runner.run([
+    "-c",
+    "user.name=Test",
+    "-c",
+    "user.email=test@example.invalid",
+    "commit",
+    "-qm",
+    "test: former Mokabook metadata",
+  ]);
+  const git = new RepositoryGitClient(runner);
+  const baseline = await readBaseManifest(git, "HEAD", config);
+  assert.deepEqual(baseline, compilation.manifest);
+  const reader = new GitReviewAssetReader(config, git, "HEAD", "mockups");
+  await assert.rejects(
+    reader.read(FORMER_MANIFEST_NAME),
+    /not a public static file/,
+  );
+});
+
 for (const schemaVersion of [2, 3, 4, 5]) {
   test(`historical v${schemaVersion} manifests remain readable internally but cannot become Review assets`, async (context) => {
     const fixture = await createFixture();
@@ -241,7 +299,7 @@ for (const schemaVersion of [2, 3, 4, 5]) {
           : {
               ...historical,
               schemaVersion,
-              generatedBy: schemaVersion === 2 ? "mockbook" : "mokabook",
+              generatedBy: schemaVersion === 2 ? "mockbook" : "mokly",
               legacyPages: [],
             };
     const filename = schemaVersion === 2 ? LEGACY_MANIFEST_NAME : MANIFEST_NAME;

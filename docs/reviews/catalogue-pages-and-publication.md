@@ -27,7 +27,7 @@ or checked against the implemented API, and their resolutions are recorded below
    skipped executable inputs outside the repository. Independent probes confirmed
    that an entry helper outside `repoRoot` changes generated HTML without
    changing `sourceFiles`; an outside config helper is also accepted and omitted.
-   This broke the [complete inventory contract](../protocol/mokabook-source-protection.md):
+   This broke the [complete inventory contract](../protocol/mokly-source-protection.md):
    watch, freshness, and publication consistency checks could not account for those
    authored inputs. Options: **A.** Reject outside source inputs at the shared
    graph boundary after excluding the package runtime and installed dependencies;
@@ -171,7 +171,7 @@ authorized by the user. They are resolved as described below.
    exclusions keep legitimate in-repository directory aliases working.
 
 3. **Low — the package protocol retains obsolete legacy guidance and omits pages. Resolved.**
-   The [package contract](../protocol/mokabook-package.md) described legacy
+   The [package contract](../protocol/mokly-package.md) described legacy
    `exclude` values, although config validation rejects the `legacy` key. Its
    public API and tags summaries omitted page helpers even though `PageInput` accepts
    tags and both page authoring forms are supported. This gives upgrading consumers

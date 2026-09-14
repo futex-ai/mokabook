@@ -60,11 +60,11 @@ export async function generateLargeFixture(
   );
   await fs.writeFile(
     path.join(root, ".gitignore"),
-    ".review/\n.mokabook-cache/\nnode_modules/\n",
+    ".review/\n.mokly-cache/\nnode_modules/\n",
   );
   await fs.writeFile(
-    path.join(root, "mokabook.config.ts"),
-    `import { defineConfig } from "mokabook";
+    path.join(root, "mokly.config.ts"),
+    `import { defineConfig } from "mokly";
 export default defineConfig({
   repoRoot: ".", entriesDir: "entries", mockupsDir: "mockups", renderer: "renderer.tsx",
   colorSchemes: ["light", "dark"],
@@ -75,7 +75,7 @@ export default defineConfig({
   );
   await fs.writeFile(
     path.join(entries, "catalogue.mockup.tsx"),
-    `import { defineCollection } from "mokabook";
+    `import { defineCollection } from "mokly";
 export const mockups = [defineCollection({ id: "large", title: "Large catalogue", description: "Synthetic product areas", dependencies: [], relatedDocs: ["notes.md"], childIds: ${JSON.stringify(areas)} })];\n`,
   );
   for (const id of areas) {
@@ -90,7 +90,7 @@ export const mockups = createArea(${JSON.stringify(id)}, ${size.screens}, ${size
   const flows = Math.ceil(size.screens / 10);
   return {
     root,
-    configPath: path.join(root, "mokabook.config.ts"),
+    configPath: path.join(root, "mokly.config.ts"),
     size,
     routes: size.areas * (size.screens + 2 + flows + 1),
     documents: size.areas * (size.screens * 4 + 2 * 3 * 4 + 1),

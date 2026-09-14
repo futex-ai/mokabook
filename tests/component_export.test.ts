@@ -59,10 +59,10 @@ test("static export keeps component Changes, affected screens, saved variants an
   assert.ok(files.has("id/action/index.html"));
   assert.equal(exported.idRoutes["action"], "/view/components/action.html");
   for (const view of action.views) assert.ok(files.has(`static/${view.path}`));
-  assert.ok(files.has("__mokabook/client/component_geometry.js"));
-  assert.ok(!files.has("__mokabook/client/browser.js"));
+  assert.ok(files.has("__mokly/client/component_geometry.js"));
+  assert.ok(!files.has("__mokly/client/browser.js"));
   assert.equal(
-    (await fs.readdir(path.join(fixture.output, "__mokabook"))).includes(
+    (await fs.readdir(path.join(fixture.output, "__mokly"))).includes(
       "components",
     ),
     false,

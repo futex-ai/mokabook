@@ -31,15 +31,15 @@ test("preview build snapshots a static Browse catalogue", async (context) => {
 
   await assertClientGraphIsComplete(output);
   const index = await read(output, "index.html");
-  assert.match(index, /<title>Mokabook<\/title>/);
-  assert.match(index, /data-mokabook-filter/);
+  assert.match(index, /<title>Mokly<\/title>/);
+  assert.match(index, /data-mokly-filter/);
   assert.match(index, /class="mbk-nav-filter-count">\d+</);
-  assert.match(index, /\/__mokabook\/client\/browse\.js/);
-  assert.doesNotMatch(index, /\/__mokabook\/client\/browser\.js/);
+  assert.match(index, /\/__mokly\/client\/browse\.js/);
+  assert.doesNotMatch(index, /\/__mokly\/client\/browser\.js/);
   assert.match(index, /href="\/view\/screens\/welcome"/);
   assert.doesNotMatch(index, /href="\/view\/screens\/welcome\.html"/);
   const welcome = await read(output, "view/screens/welcome.html");
-  assert.match(welcome, /Welcome · Mokabook/);
+  assert.match(welcome, /Welcome · Mokly/);
   assert.match(welcome, /data-diff-screen="screens\/welcome.html"/);
   for (const mode of ["current", "side", "overlay", "difference"])
     assert.match(welcome, new RegExp(`data-diff-mode="${mode}"`));
@@ -62,17 +62,17 @@ test("preview build snapshots a static Browse catalogue", async (context) => {
   assert.doesNotMatch(welcome, /data-fragment-(?:light|dark)="[^"]+\.html"/);
   assert.match(
     await read(output, "static/screens/welcome.desktop.html"),
-    /Welcome to Mokabook/,
+    /Welcome to Mokly/,
   );
   assert.match(
     await read(output, "static/screens/welcome.desktop.dark.html"),
     /data-color-scheme="dark"/,
   );
-  assert.match(await read(output, "__mokabook/shell.css"), /--mbk-/);
+  assert.match(await read(output, "__mokly/shell.css"), /--mbk-/);
   assert.ok(
     (
       await fs.promises.stat(
-        path.join(output, "__mokabook/fonts/InterVariable.woff2"),
+        path.join(output, "__mokly/fonts/InterVariable.woff2"),
       )
     ).size > 0,
   );
@@ -82,7 +82,7 @@ test("preview build snapshots a static Browse catalogue", async (context) => {
     /\/id\/example-welcome \/view\/screens\/welcome 302/,
   );
   assert.equal(
-    await read(output, ".mokabook-preview-artifact"),
+    await read(output, ".mokly-preview-artifact"),
     "schemaVersion=1\n",
   );
 });
@@ -110,7 +110,7 @@ test("preview build refuses to replace an unowned directory", async (context) =>
 });
 
 async function assertClientGraphIsComplete(output: string): Promise<void> {
-  const assetRoot = path.join(output, "__mokabook");
+  const assetRoot = path.join(output, "__mokly");
   const copied = await javascriptFiles(assetRoot);
   assert.ok(copied.length > 0);
   for (const module of copied) {

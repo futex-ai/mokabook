@@ -2,7 +2,7 @@
 
 import path from "node:path";
 
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { referencedRoutes } from "../review/asset_references.js";
 import type {
   OptionalReviewAssetReader,
@@ -49,7 +49,7 @@ export class ChangedResourceGraph {
       const bytes = asset.content;
       if (bytes === undefined) {
         if (!this.isChanged(route))
-          throw new MokabookError(
+          throw new MoklyError(
             "review-invalid",
             `referenced resource is missing: ${route}`,
           );

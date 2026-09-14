@@ -11,7 +11,7 @@ import { validEntrySource } from "./helpers/fixture.js";
 for (const includeChanges of [false, true]) {
   test(`preview migration retains valid public routes under build-directory names (changes: ${includeChanges})`, async (context) => {
     const source = `${validEntrySource()}
-import { definePage } from "mokabook";
+import { definePage } from "mokly";
 for (const directory of ["target", "node_modules"])
   mockups.push(definePage({ id: directory.replaceAll("_", "-"), title: directory, description: "A public document", dependencies: [], relatedDocs: [], route: directory + "/handbook.html", render: () => "<!doctype html><html><body>Handbook</body></html>" }));`;
     const fixture = await changedFixture(context, source);

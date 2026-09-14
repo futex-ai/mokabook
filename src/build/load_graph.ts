@@ -8,7 +8,7 @@ import { evaluateBundle, rememberBundle } from "./consumer_bundle.js";
 import type { RegistryDefinition } from "../authoring/types.js";
 import type { CompatibilityTransformer } from "../compatibility/types.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import type { ComponentGraphRenderer } from "../components/render.js";
 import type { Renderer } from "../renderer/types.js";
 import { discoverEntryModules } from "./discovery.js";
@@ -52,7 +52,7 @@ async function loadGraph(
   timingCounts("graph", () => ({ entryModules: entrySources.length }));
   const outputPath = path.join(
     path.dirname(config.configPath),
-    ".mokabook-consumer.cjs",
+    ".mokly-consumer.cjs",
   );
   try {
     const built = await timeAsync("graph.bundle", () =>
@@ -129,7 +129,7 @@ async function loadGraph(
       sourceFiles: sourceFiles.length,
     }));
     if (typeof imported.renderer !== "function") {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         "renderer module must default-export a function",
       );
@@ -138,7 +138,7 @@ async function loadGraph(
       config.compatibility.transformer &&
       typeof imported.compatibilityTransformer !== "function"
     ) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         "compatibility transformer module must default-export a function",
       );
@@ -159,8 +159,8 @@ async function loadGraph(
     rememberBundle(graph, bundle);
     return graph;
   } catch (error) {
-    if (error instanceof MokabookError) throw error;
-    throw new MokabookError(
+    if (error instanceof MoklyError) throw error;
+    throw new MoklyError(
       "build-invalid",
       `could not bundle consumer modules: ${errorMessage(error)}`,
       {

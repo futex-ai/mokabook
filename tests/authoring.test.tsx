@@ -34,7 +34,7 @@ const sourceRelativePath = "tests/authoring.test.tsx";
 const validationConfig: ResolvedConfig = {
   colorSchemes: ["light"],
   compatibility: { readManifestV2: false },
-  configPath: path.join(repositoryRoot, "mokabook.config.ts"),
+  configPath: path.join(repositoryRoot, "mokly.config.ts"),
   entriesDir: path.join(repositoryRoot, "tests"),
   mockupsDir: path.join(repositoryRoot, "mockups"),
   moduleResolution: { aliases: {}, loaders: {}, packageRoots: [] },
@@ -83,9 +83,9 @@ test("ReviewIgnore serializes to inert paired comments", () => {
       </ReviewIgnore>,
     ),
   );
-  assert.match(html, /<!--mokabook-review-ignore:start:shared-nav-->/);
-  assert.match(html, /<!--mokabook-review-ignore:end:shared-nav-->/);
-  assert.match(html, /<!--mokabook-review-material:shared-nav:[a-f0-9]{64}-->/);
+  assert.match(html, /<!--mokly-review-ignore:start:shared-nav-->/);
+  assert.match(html, /<!--mokly-review-ignore:end:shared-nav-->/);
+  assert.match(html, /<!--mokly-review-material:shared-nav:[a-f0-9]{64}-->/);
 });
 
 test("MockLink keeps fragment identity out of rendered package props", () => {

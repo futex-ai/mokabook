@@ -36,14 +36,14 @@ for (const viewport of ["mobile", "desktop"] as const) {
           document,
           (node) =>
             textContent(node).trim() === label &&
-            attribute(node, "data-mokabook-link-control") !== undefined,
+            attribute(node, "data-mokly-link-control") !== undefined,
         )[0];
         assert.ok(link, `${source}: missing styled ${label} link`);
         assert.equal(link.tagName, "a");
         assert.equal(attribute(link, "role"), undefined);
         assert.equal(attribute(link, "aria-disabled"), undefined);
         assert.equal(
-          attribute(link, "data-mokabook-link"),
+          attribute(link, "data-mokly-link"),
           target + (fragment ? `#${fragment}` : ""),
         );
         const href = attribute(link, "href");
@@ -68,7 +68,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
               node.tagName === "a" && textContent(node).trim() === title,
           );
           assert.equal(nested.length, 1);
-          assert.equal(attribute(nested[0]!, "data-mokabook-link"), id);
+          assert.equal(attribute(nested[0]!, "data-mokly-link"), id);
         }
         if (fragment)
           assert.ok(
