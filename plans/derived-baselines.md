@@ -195,19 +195,28 @@ Tags: ui
       `mokabook-timings.md` if implementation revealed gaps.
 - [x] Run tests, typecheck, lint, `cargo xtask check`, commit, and push.
 
-## Milestone 7: Repository tooling for derived mode
+## Milestone 7: Repository tooling for derived mode — completed
 
-- [ ] Add a repository-level baseline build for this repo's example:
+- [x] Add a repository-level baseline build for this repo's example:
       `["npm", "ci"]`, `["npm", "run", "build"]`,
       `["npm", "run", "example:build"]`, expressed in
-      `examples/basic/mokabook.config.ts`.
-- [ ] Add a derived-mode variant to the large fixture setup so the benchmark
+      `examples/basic/mokabook.config.ts`. Keep it commented until Milestone 8:
+      committed mode continues to reject `baselineBuild`.
+- [x] Add a derived-mode variant to the large fixture setup so the benchmark
       covers cold-cache first Changes and warm-cache restart; record the budget
       the benchmark enforces for each.
-- [ ] Confirm `ci.yml` and `preview.yml` keep `fetch-depth: 0` and that the PR
+- [x] Confirm `ci.yml` and `preview.yml` keep `fetch-depth: 0` and that the PR
       preview job installs the base commit's dependencies within the job's time
       budget; add npm cache for the base lockfile if needed.
-- [ ] Run tests, typecheck, lint, `cargo xtask check`, commit, and push.
+- [x] Add opt-in baseline resolution, extraction, command and adoption timing
+      spans, including the cache-hit flag, without changing Serve lifecycle.
+- [x] Test fixture modes, archived tooling, timing success/failure and benchmark
+      cache-state enforcement; smoke-test full-sized cold and warm derived runs.
+- [x] Run format, tests, typecheck, lint, example check and `cargo xtask check`.
+- [x] Commit and push after the mainline-preservation audit passes. The audit
+      showed no deletions relative to `HEAD`; the two paths reported against
+      `origin/main` were additions on main after the branch point and are
+      integrated by the merge that follows this commit.
 
 ## Milestone 8: Switch this repository to derived output
 
@@ -215,7 +224,8 @@ Requires explicit user approval before deleting tracked files on `origin/main`.
 
 - [ ] Obtain approval to remove the 261 tracked HTML files and the manifest
       under `examples/basic/generated`; record the approval in the commit body.
-- [ ] Set `generatedOutput: "derived"` in the example config.
+- [ ] Set `generatedOutput: "derived"` and enable the staged
+      `review.baselineBuild` recipe in the example config together.
 - [ ] Add ignore rules for `examples/basic/generated/**/*.html` and the
       manifest; keep the authored CSS tracked.
 - [ ] `git rm --cached` the generated routes and manifest; verify

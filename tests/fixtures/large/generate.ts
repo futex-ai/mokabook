@@ -22,6 +22,7 @@ export function largeSize(input: Partial<LargeSize>): LargeSize {
 export async function generateLargeFixture(
   root: string,
   input: Partial<LargeSize>,
+  generatedOutput: "committed" | "derived" = "committed",
 ) {
   const size = largeSize(input);
   if ((await fs.readdir(root)).length)
@@ -60,17 +61,25 @@ export async function generateLargeFixture(
   );
   await fs.writeFile(
     path.join(root, ".gitignore"),
-    ".review/\n.mokabook-cache/\nnode_modules/\n",
+    ".review/\n.mokabook-cache/\nnode_modules/\n" +
+      (generatedOutput === "derived"
+        ? "mockups/**/*.html\nmockups/mokabook-manifest.json\n"
+        : ""),
   );
   await fs.writeFile(
     path.join(root, "mokabook.config.ts"),
     `import { defineConfig } from "mokabook";
 export default defineConfig({
+  generatedOutput: ${JSON.stringify(generatedOutput)},
   repoRoot: ".", entriesDir: "entries", mockupsDir: "mockups", renderer: "renderer.tsx",
   colorSchemes: ["light", "dark"],
   moduleResolution: { aliases: { "react-native": "react-native-web" }, conditions: ["react-native", "import", "module", "default"], loaders: { ".js": "jsx" }, mainFields: ["react-native", "module", "main"], resolveExtensions: [".web.tsx", ".web.ts", ".web.js", ".tsx", ".ts", ".js", ".jsx", ".json"] },
   stylesheets: [{ match: "**/*.html", stylesheets: ["assets/catalogue.css"] }],
-  review: { base: "main", outDir: ".review" }
+  review: { base: "main", outDir: ".review"${
+    generatedOutput === "derived"
+      ? ', baselineBuild: [["npm", "ci"], ["npx", "--no-install", "mokabook", "build", "--config", "mokabook.config.ts"]]'
+      : ""
+  } }
 });\n`,
   );
   await fs.writeFile(
@@ -90,6 +99,7 @@ export const mockups = createArea(${JSON.stringify(id)}, ${size.screens}, ${size
   const flows = Math.ceil(size.screens / 10);
   return {
     root,
+    generatedOutput,
     configPath: path.join(root, "mokabook.config.ts"),
     size,
     routes: size.areas * (size.screens + 2 + flows + 1),

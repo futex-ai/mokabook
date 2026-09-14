@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { setTimeout } from "node:timers/promises";
+import { timingCollector } from "./timings.mjs";
 
 /** Stream diagnostics live while retaining the small CLI log for readiness checks. */
 export function start(args, cwd) {
@@ -9,12 +10,14 @@ export function start(args, cwd) {
   });
   let stdout = "";
   let stderr = "";
+  const timings = timingCollector();
   child.stdout.on("data", (chunk) => {
     stdout += chunk;
     process.stdout.write(chunk);
   });
   child.stderr.on("data", (chunk) => {
     stderr += chunk;
+    timings.accept(chunk);
     process.stderr.write(chunk);
   });
   const done = new Promise((resolve, reject) => {
@@ -25,7 +28,12 @@ export function start(args, cwd) {
     });
   });
   void done.catch(() => {});
-  return { child, done, output: () => stdout + "\n" + stderr };
+  return {
+    child,
+    done,
+    output: () => stdout + "\n" + stderr,
+    timings: timings.records,
+  };
 }
 
 export async function stop(running) {

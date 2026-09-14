@@ -33,6 +33,12 @@ export default defineConfig({
   renderer: "renderer.tsx",
   repoRoot: "../..",
   review: {
+    // Enable together with generatedOutput: "derived" in Milestone 8.
+    // baselineBuild: [
+    //   ["npm", "ci"],
+    //   ["npm", "run", "build"],
+    //   ["npm", "run", "example:build"],
+    // ],
     outDir: ".context/basic-review",
     sharedImpact: [
       "examples/basic/generated/design-review.css",

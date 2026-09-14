@@ -17,6 +17,7 @@ import type {
 import { projectRealPath, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { CommittedBaselineReader } from "./committed.js";
 import {
   NodeGitCommandRunner,
@@ -74,14 +75,16 @@ export async function prepareReviewRepository(
   const evidence = new GitRepositoryEvidence(runner);
   let commit: string;
   try {
-    options.signal?.throwIfAborted();
-    const root = (await runner.run(["rev-parse", "--show-toplevel"])).trim();
-    if (projectRealPath(root) !== projectRealPath(config.repoRoot))
-      throw new MokabookError(
-        "git-failed",
-        "Comparison requires the configured Git repository root",
-      );
-    commit = options.commit ?? (await evidence.mergeBase(base, "HEAD"));
+    commit = await timeAsync("baseline.resolve", async () => {
+      options.signal?.throwIfAborted();
+      const root = (await runner.run(["rev-parse", "--show-toplevel"])).trim();
+      if (projectRealPath(root) !== projectRealPath(config.repoRoot))
+        throw new MokabookError(
+          "git-failed",
+          "Comparison requires the configured Git repository root",
+        );
+      return options.commit ?? (await evidence.mergeBase(base, "HEAD"));
+    });
   } catch (error) {
     if (config.generatedOutput !== "derived") throw error;
     assertBaselineActive(options.signal);

@@ -5,8 +5,8 @@
 Implementation is tracked by the [derived baselines plan](../../plans/derived-baselines.md).
 Milestones 2–4 implement the separate readers, cached builder, configuration,
 build/check modes and awaiting preparation in Serve/export. Milestone 6 adds the
-`preparing` presentation and the commit-scoped watch lifecycle. The detailed
-rebuild timings below remain a target.
+`preparing` presentation and the commit-scoped watch lifecycle. Milestone 7 adds
+the detailed rebuild timings and derived scale fixture below.
 
 ## Purpose
 
@@ -51,6 +51,9 @@ Arguments must be strings without NUL; the executable must not be blank.
 An explicit empty command list is allowed when the archived tree already has
 valid output. Derived `mockupsDir` must be below `repoRoot`; it may be absent
 in a fresh checkout. Existing ancestors and symlinks remain confined.
+The repository example stages its `npm ci`, `npm run build`, and
+`npm run example:build` recipe as a comment while it remains committed. Enable
+the recipe and derived mode together; committed mode never accepts inert commands.
 
 ## Trust Statement
 
@@ -235,10 +238,14 @@ rules; default publication without Changes needs no baseline in either mode.
 
 `--debug-timings` adds `baseline.resolve`, `baseline.extract`,
 `baseline.command[<index>]`, and `baseline.adopt` phases, with a `cacheHit`
-flag on the parent baseline phase. The large fixture gains a derived variant
-whose setup records both a cold-cache and a warm-cache Serve start; the
+boolean on successful ends of the parent `baseline` builder phase. Resolution
+precedes that phase; the builder span includes cache validation, lock waiting,
+rebuilding and cleanup. Warm hits omit extraction, command and adoption spans.
+The large fixture has a `--derived` variant
+whose benchmark records both a cold-cache and a warm-cache Serve start; the
 benchmark asserts the existing five-second navigation target for both and
 records the separate time to a complete `preparing → pending` transition.
+The benchmark uses builder timings even before Serve publishes `preparing`.
 
 ## Acceptance
 

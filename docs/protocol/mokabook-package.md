@@ -184,11 +184,13 @@ order.
 `generatedOutput` defaults to `"committed"`; `"derived"` and the derived-only
 `review.baselineBuild` argv list follow the
 [derived baselines contract](./mokabook-derived-baselines.md).
+`baselineBuild` is invalid in committed mode, including a staged migration;
+enable a repository-specific recipe together with the derived mode switch.
 Derived Check accepts absent local generated output, rejects Git-tracked routes,
 the manifest and cache files, and prints their paths plus ignore guidance.
 Build writes transactionally in both modes. Serve and export await preparation
-before classification; Serve currently retains its loading presentation until
-the separate preparing-state milestone lands.
+before classification; Serve publishes `preparing` when a rebuild is needed,
+then `pending` while classification runs. Cache hits skip `preparing`.
 `watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
 globs, while stylesheet `match` matches catalogue routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
 matches and watch paths are invalid. Additional watch rules cannot override

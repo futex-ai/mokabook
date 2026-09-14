@@ -1,6 +1,7 @@
 import path from "node:path";
 
 import { errorMessage } from "../errors.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { baselineEnvironment, runBaselineCommands } from "./commands.js";
 import { completedBaseline, removePartialBaseline } from "./cache.js";
 import {
@@ -40,7 +41,19 @@ export class CachedBaselineBuilder implements BaselineBuilder {
     private readonly options: BaselineBuilderOptions,
   ) {}
 
-  async build(request: BaselineBuildRequest): Promise<RebuiltBaseline> {
+  build(request: BaselineBuildRequest): Promise<RebuiltBaseline> {
+    return timeAsync(
+      "baseline",
+      () => this.prepare(request),
+      (result) => ({
+        cacheHit: result.cacheHit,
+      }),
+    );
+  }
+
+  private async prepare(
+    request: BaselineBuildRequest,
+  ): Promise<RebuiltBaseline> {
     try {
       assertBaselineActive(request.signal);
       assertMockupsPath(request.mockupsPath);
@@ -110,14 +123,16 @@ export class CachedBaselineBuilder implements BaselineBuilder {
           this.options.environment,
           request.commit,
         );
-        await extractBaseline(
-          this.fs,
-          this.runner,
-          request.repoRoot,
-          request.commit,
-          layout.source,
-          env,
-          request.signal,
+        await timeAsync("baseline.extract", () =>
+          extractBaseline(
+            this.fs,
+            this.runner,
+            request.repoRoot,
+            request.commit,
+            layout.source,
+            env,
+            request.signal,
+          ),
         );
         await runBaselineCommands(
           this.runner,
@@ -126,34 +141,37 @@ export class CachedBaselineBuilder implements BaselineBuilder {
           env,
           request.signal,
         );
-        const output = path.join(layout.source, request.mockupsPath);
-        const manifestVersion = await baselineManifestVersion(
-          this.fs,
-          request.repoRoot,
-          output,
-          request.allowManifestV2,
-          request.signal,
-        );
-        await validateOutputTree(this.fs, output, request.signal);
-        assertBaselineActive(request.signal);
-        await this.fs.rename(output, layout.output);
-        await this.fs.remove(layout.source);
-        assertBaselineActive(request.signal);
-        const marker: CompletionMarker = {
-          schemaVersion: 1,
-          commit: request.commit,
-          finishedAt: new Date(this.clock.now()).toISOString(),
-          commands: request.commands.map((argv) => [...argv]),
-          manifestVersion,
-        };
-        await this.fs.write(
-          path.join(layout.entry, "inputs.json"),
-          Buffer.from(JSON.stringify(request.mockupsPath)),
-        );
-        await this.fs.write(
-          layout.marker,
-          Buffer.from(`${JSON.stringify(marker)}\n`),
-        );
+        const marker = await timeAsync("baseline.adopt", async () => {
+          const output = path.join(layout.source, request.mockupsPath);
+          const manifestVersion = await baselineManifestVersion(
+            this.fs,
+            request.repoRoot,
+            output,
+            request.allowManifestV2,
+            request.signal,
+          );
+          await validateOutputTree(this.fs, output, request.signal);
+          assertBaselineActive(request.signal);
+          await this.fs.rename(output, layout.output);
+          await this.fs.remove(layout.source);
+          assertBaselineActive(request.signal);
+          const marker: CompletionMarker = {
+            schemaVersion: 1,
+            commit: request.commit,
+            finishedAt: new Date(this.clock.now()).toISOString(),
+            commands: request.commands.map((argv) => [...argv]),
+            manifestVersion,
+          };
+          await this.fs.write(
+            path.join(layout.entry, "inputs.json"),
+            Buffer.from(JSON.stringify(request.mockupsPath)),
+          );
+          await this.fs.write(
+            layout.marker,
+            Buffer.from(`${JSON.stringify(marker)}\n`),
+          );
+          return marker;
+        });
         assertBaselineActive(request.signal);
         await cleanupBaselines(
           this.fs,

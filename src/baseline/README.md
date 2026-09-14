@@ -37,8 +37,12 @@ The observer is synchronous and must not throw. A cache hit emits only
 another caller's rebuild. Await `build()` to include lock release and cleanup.
 Callers should keep their own sequence/commit guard to ignore superseded events.
 Abort the request and await settlement before terminating a worker or shutting
-down its host. Detailed timing phases and the Serve `preparing` presentation
-belong to the later integration milestone.
+down its host. With `--debug-timings`, `baseline.resolve` measures commit
+resolution before the parent `baseline` builder span. The builder emits
+`baseline.extract`, `baseline.command[<index>]` and `baseline.adopt` child spans
+on a miss. Its successful end includes a boolean `cacheHit`; it settles only
+after cleanup and lock release. Command argv and diagnostics never enter timing
+records. See the [timing contract](../../docs/protocol/mokabook-timings.md).
 
 Mode selection now lives in `review/repository.ts`:
 `prepareReviewRepository(config, base, { signal, onProgress })` creates the Node

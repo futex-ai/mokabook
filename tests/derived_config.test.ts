@@ -4,9 +4,57 @@ import path from "node:path";
 import test from "node:test";
 
 import { resolveConfig } from "../dist/config/validate.js";
-import { createFixture, removeFixture } from "./helpers/fixture.js";
+import { loadConfig } from "../dist/config/load.js";
+import {
+  createFixture,
+  removeFixture,
+  repositoryRoot,
+} from "./helpers/fixture.js";
 
 const input = { entriesDir: "entries", mockupsDir: "mockups" };
+
+test("the example stages its repository recipe until derived mode is enabled", async () => {
+  const configPath = path.join(
+    repositoryRoot,
+    "examples/basic/mokabook.config.ts",
+  );
+  const config = await loadConfig(repositoryRoot, configPath);
+  assert.equal(config.generatedOutput, "committed");
+  assert.equal(config.review.baselineBuild, undefined);
+  const recipe = [
+    ["npm", "ci"],
+    ["npm", "run", "build"],
+    ["npm", "run", "example:build"],
+  ];
+  for (const generatedOutput of [undefined, "committed"])
+    assert.throws(
+      () =>
+        resolveConfig(
+          {
+            entriesDir: "entries",
+            mockupsDir: "generated",
+            repoRoot: "../..",
+            generatedOutput,
+            review: { baselineBuild: recipe },
+          },
+          configPath,
+        ),
+      { code: "config-invalid" },
+    );
+  assert.deepEqual(
+    resolveConfig(
+      {
+        entriesDir: "entries",
+        mockupsDir: "generated",
+        repoRoot: "../..",
+        generatedOutput: "derived",
+        review: { baselineBuild: recipe },
+      },
+      configPath,
+    ).review.baselineBuild,
+    recipe,
+  );
+});
 
 test("generated output defaults to committed and derives exact default argv", async (t) => {
   const fixture = await createFixture();

@@ -234,6 +234,10 @@ searchable navigation and a real preview within five seconds for both a fresh
 process and a warm restart, exercises Props, themes, viewports and pages, and
 waits for Changes separately. Use matching `--areas 2 --screens 10 --rows 6`
 options for smaller setup and benchmark runs. Fixtures stay under `.context`.
+Pass `--derived` to fixture setup and benchmark for a separately recorded
+source-only baseline with its own packaged Mokabook and dependency lockfile.
+The benchmark requires a cold rebuild and a warm cache hit, reporting baseline
+preparation separately while keeping the five-second navigation target for both.
 See the [large fixture guide](./tests/fixtures/large/README.md).
 
 Serve validates a lightweight catalogue index and makes navigation and local Props

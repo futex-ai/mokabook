@@ -1,3 +1,4 @@
+import { timeAsync } from "../diagnostics/timings.js";
 import { validCommands } from "./cache_layout.js";
 import {
   assertBaselineActive,
@@ -35,31 +36,33 @@ export async function runBaselineCommands(
       "Invalid baseline command list",
     );
   for (const [index, argv] of commands.entries()) {
-    assertBaselineActive(signal);
-    try {
-      const result = await runner.run({
-        argv,
-        cwd,
-        env,
-        ...(signal ? { signal } : {}),
-      });
+    await timeAsync(`baseline.command[${index}]`, async () => {
       assertBaselineActive(signal);
-      if (result.exitCode !== 0)
-        throw new BaselineCommandError(
-          index,
-          [...argv],
-          result.exitCode,
-          result.signal,
-          result.output
-            .slice(-64 * 1024)
-            .trimEnd()
-            .split(/\r?\n/)
-            .slice(-40),
-        );
-    } catch (error) {
-      assertBaselineActive(signal);
-      if (error instanceof BaselineError) throw error;
-      throw new BaselineCommandError(index, [...argv], null, null, [], error);
-    }
+      try {
+        const result = await runner.run({
+          argv,
+          cwd,
+          env,
+          ...(signal ? { signal } : {}),
+        });
+        assertBaselineActive(signal);
+        if (result.exitCode !== 0)
+          throw new BaselineCommandError(
+            index,
+            [...argv],
+            result.exitCode,
+            result.signal,
+            result.output
+              .slice(-64 * 1024)
+              .trimEnd()
+              .split(/\r?\n/)
+              .slice(-40),
+          );
+      } catch (error) {
+        assertBaselineActive(signal);
+        if (error instanceof BaselineError) throw error;
+        throw new BaselineCommandError(index, [...argv], null, null, [], error);
+      }
+    });
   }
 }

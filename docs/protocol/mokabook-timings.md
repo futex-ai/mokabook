@@ -16,6 +16,7 @@ session began. `event` is `start`, `end`, or `counts`. Span ends add `durationMs
 and `status` (`ok` or `error`). Counts carry named numeric totals. The stage
 names and available counts are diagnostic details, not a stable public API.
 No documents, props, file contents, environment values, or error text are logged.
+Successful `baseline` span ends additionally carry a boolean `cacheHit`.
 
 Parent spans include their children; never sum parent and child durations.
 Asynchronous work may overlap or outlive its parent. Process-local elapsed times
@@ -41,6 +42,24 @@ resource discovery, transactional output, and Changes have separate spans.
 Graph work for watcher inventory and source-freshness validation is deliberately
 visible even when it repeats compilation's graph work.
 
+## Historical baseline phases
+
+`baseline.resolve` measures repository-root validation and resolving (or accepting
+an already pinned) merge-base commit. It precedes the `baseline` builder span,
+which includes cache validation, lock waiting, extraction, commands, output
+adoption and cleanup. Both run in the process owning preparation, never inside
+the disposable classification worker. A failed phase ends with `status: error`;
+diagnostics retain neither the command argv nor captured error output.
+
+On a cache miss, `baseline.extract` includes Git object validation, archive
+reading and confined extraction. Each configured argv has its own zero-based
+`baseline.command[<index>]` span, including non-zero-exit validation. The exact
+configured command list is unchanged by profiling. `baseline.adopt` includes
+historical-manifest/output validation, output adoption, deleting source and
+writing the completion marker. The parent ends after cleanup and lock release,
+with `cacheHit: false`. A reused entry ends with `cacheHit: true` and omits the
+extraction, command and adoption spans. A waiter can also finish as a cache hit.
+
 ## Representative local fixture
 
 The repository's large consumer is synthetic and opt-in. Its generator and
@@ -59,13 +78,29 @@ or timings. It must provide a Git baseline so Changes performs real comparison.
 
 `fixture:large` explicitly prepares and records an isolated baseline under
 `.context`; setup time includes exhaustive Build and Git and is reported separately.
-`dev:large` and `benchmark:large` reuse that fixture without compiling the package
-or rebuilding a baseline. Rebuild Mokabook explicitly after package-source edits.
-The derived-mode fixture variant additionally records cold-cache and warm-cache
-starts and the `baseline.*` phases defined in the
-[derived baselines contract](./mokabook-derived-baselines.md).
+`dev:large` and `benchmark:large` reuse that fixture without compiling the package.
+Rebuild Mokabook explicitly after package-source edits. Committed mode reuses the
+generated files in Git. Pass `--derived` to setup, Serve and benchmark to select
+a separate record for the same dimensions. Derived setup archives a packaged
+Mokabook version and a consumer lockfile, installs the head dependencies, and
+commits only source, authored resources and tooling. Serve rebuilds the archived
+commit through its `baselineBuild` recipe; no cached or committed HTML stands in
+for that build.
 The benchmark launches Chrome before timing a fresh Serve subprocess and measures
 searchable navigation with real preview content, then repeats in a fresh server
 and browser context for an OS-warm restart. “Cold” means application-cold, not a
 flushed OS page cache. It also verifies theme/viewport changes, a real Props edit,
 whole-document pages and eventual Changes. Stdout reports each measurement as JSON.
+
+For derived mode, the benchmark clears only the pinned cache entry under the
+builder's exclusive lock before the cold run. A locked entry fails setup; stop
+other fixture servers before benchmarking. The warm run retains that output.
+Both runs enforce `usableMs < 5000` and require successful baseline timings with
+`cacheHit: false` and `true` respectively. `baselineMs` measures the whole builder;
+`baselineReadyMs` measures command start to receipt of its completion, using the
+benchmark process's clock. `preparingToPendingMs` is the cold builder duration,
+or zero when preparing is skipped on a hit. This phase measurement remains
+available even on Serve versions without the `preparing` presentation; it is
+not a browser paint measurement. `baselinePhases` records extraction, each
+command, and adoption separately. `changesReadyMs` still waits for delivered
+complete Changes in Browse. No wall-clock threshold is imposed on rebuilds.

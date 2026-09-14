@@ -3,8 +3,14 @@ import path from "node:path";
 import { chromium, expect } from "@playwright/test";
 import { start, stop, waitFor } from "./process.mjs";
 import { waitForBrowseChanges } from "./browse.mjs";
+import { loadConfig } from "../../dist/config/load.js";
+import { resetFixtureBaseline } from "./baseline.mjs";
+import { baselineMeasurement } from "./timings.mjs";
 
 export async function benchmark(repository, fixture) {
+  const config = await loadConfig(fixture.root, fixture.configPath);
+  const derived = config.generatedOutput === "derived";
+  if (derived) await resetFixtureBaseline(config);
   const browser = await chromium.launch({
     channel: process.env.PLAYWRIGHT_CHANNEL ?? "chrome",
   });
@@ -117,7 +123,10 @@ export async function benchmark(repository, fixture) {
         expect(classified).toMatch(/class="mbk-nav-filter-count">0</);
         const changesReadyMs = Math.round(performance.now() - beginning);
         expect(errors).toEqual([]);
-        runs.push({ ...measured, changesReadyMs });
+        const baseline = derived
+          ? baselineMeasurement(running.timings, beginning, state === "warm")
+          : {};
+        runs.push({ ...measured, changesReadyMs, ...baseline });
         if (usableMs >= 5000)
           throw new Error(
             `${state} usable startup exceeded 5 seconds: ${usableMs}ms`,
@@ -132,5 +141,7 @@ export async function benchmark(repository, fixture) {
   } finally {
     await browser.close();
   }
-  process.stdout.write(`Benchmark ${JSON.stringify({ ...fixture, runs })}\n`);
+  process.stdout.write(
+    `Benchmark ${JSON.stringify({ ...fixture, generatedOutput: config.generatedOutput, runs })}\n`,
+  );
 }

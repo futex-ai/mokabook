@@ -194,11 +194,16 @@ npm run example:check
 npm run preview:build
 ```
 
-Generated HTML and the schema-v4 manifest are committed under `generated/` so
+Generated HTML and the schema-v5 manifest are committed under `generated/` so
 the fixture also exercises stale and deterministic-output checks. The
 hand-authored stylesheets (`styles.css`, `design.css`, `design-stage.css`,
 `design-review.css`, and the component design stylesheets) also live under `generated/` because it doubles as the
-public static root. `preview:build` exports this catalogue through the shared
+public static root. The config stages the derived baseline recipe as a comment:
+`npm ci`, `npm run build`, then `npm run example:build`. Enable it together with
+`generatedOutput: "derived"` in Milestone 8, after approval to untrack generated
+files. Committed mode continues to reject `baselineBuild`; the package build
+step ensures historical comparisons use that commit's own Mokabook code.
+`preview:build` exports this catalogue through the shared
 package engine into `.context/mokabook-preview` for Cloudflare Pages; it is the same
 current catalogue used by the main preview workflow. It preserves search, tags,
 navigation, Light/Dark choices, client assets, and light/dark fragment files.
