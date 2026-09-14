@@ -34,9 +34,10 @@ release workflow.
 
 `publishConfig` targets the public npm registry with public access. The package
 contains compiled runtime code, declarations, package-owned shell assets,
-README, LICENSE, CHANGELOG, and package metadata only. Source fixtures, tests,
-plans, protocol docs, caches, review artifacts, and generated demo output are
-not published unless a documented runtime requirement proves otherwise.
+README, LICENSE, CHANGELOG, package metadata and `docs/protocol`. The protocol
+documents ship with the exact package version so independent upload receivers
+can implement its documented file boundary. Source fixtures, tests, plans,
+caches, review artifacts and generated demo output are not published.
 
 Runtime dependencies are intentional and minimal. Mokly does not take a
 runtime dependency on `@firna/ui`, Accounting, Juno, Playwright, or a consumer's
@@ -45,6 +46,8 @@ dependencies.
 The exporter's Koffi dependency supplies OS-enforced exclusive directory rename;
 its optional platform binaries must remain available for export. The native
 bridge is lazy and does not load for build/check/serve or help.
+Publish uses `tar-stream` to encode finalized export bytes as portable USTAR/PAX
+without invoking a platform tar executable or walking the output again.
 
 ## Local Verification
 
@@ -65,6 +68,8 @@ to npm scripts and includes:
 - local-npx and clean-cache npx-style execution from the packed artifact;
 - consumer exports from the installed CLI, including custom configs/bases,
   cross-platform renderers, registered pages, and the compiled static client graph;
+- installed `publish` uploads with and without comparisons to a local receiver,
+  inspecting the gzip tarball, documented metadata and exact exported bytes;
 - source-tree ESM, declaration, CLI, workspace-resolution, server, Review, and
   watched-runtime regressions;
 - Playwright Browse and Review regressions using Chromium, including isolated

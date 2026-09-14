@@ -54,6 +54,7 @@ mokly serve           Serve the catalogue and diffs; watch by default
 mokly build           Generate static artifacts and the manifest
 mokly check           Validate source and committed generated output
 mokly export --out <path>  Build a complete static catalogue for hosting
+mokly publish         Export and upload to a configured catalogue service
 mokly --help          Show commands, options, and config discovery
 mokly --version       Show the installed package version
 ```
@@ -61,10 +62,18 @@ mokly --version       Show the installed package version
 Common options include `--config <path>` and opt-in `--debug-timings`
 ([diagnostic contract](./mokly-timings.md)). Serve accepts `--port`, `--base`,
 `--watch`, and `--no-watch`. Export requires `--out` and accepts `--base`;
-`--out` on any other command and the removed `review` command are rejected.
+Publish accepts an optional `--out` and the options in the
+[upload contract](./mokly-upload.md). `--out` on other commands and the removed
+`review` command are rejected.
 Screen comparisons are requested from the catalogue. A flag after
 the package name belongs to Mokly; docs must show npx arguments in a form
 that is unambiguous to current npm.
+
+Every long option taking a value accepts `--name=value` as well as
+`--name value`. Split at the first `=` only. Assigned values may start with `-`;
+separate values may not. Empty values, unknown options and assignments to
+boolean flags (including `--help=false`) fail. The same value validation and
+command restrictions apply to both forms; short flags do not take assignments.
 
 The consumer `export` command and its config-relative `--out` option follow the
 [static export contract](./mokly-export.md). It builds first, packages

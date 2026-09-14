@@ -16,6 +16,9 @@ export async function stageExport(
   shells: ReadonlyMap<string, StaticDelivery>,
   aliases: ReadonlyMap<string, string>,
   signal?: AbortSignal,
+  capture?: (
+    files: ReadonlyMap<string, ReviewArtifactContent>,
+  ) => Promise<void>,
 ): Promise<string> {
   const files = new ExportInventory();
   for (const [name, bytes] of contents) files.add(name, Buffer.from(bytes));
@@ -31,5 +34,6 @@ export async function stageExport(
     await fs.promises.mkdir(path.dirname(target), { recursive: true });
     await fs.promises.writeFile(target, bytes);
   }
+  await capture?.(files.files);
   return deploymentId;
 }

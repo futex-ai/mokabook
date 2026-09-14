@@ -7,6 +7,7 @@ import { readBaseManifest } from "../review/base_manifest.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { compareReview } from "../review/compare.js";
 import { NodeGitCommandRunner, RepositoryGitClient } from "../review/git.js";
+import type { ReviewArtifact } from "../review/types.js";
 import { changedContentPaths } from "../server/changed_content.js";
 import { withExportCleanup } from "./cleanup.js";
 import { assertExportActive, exportError } from "./error.js";
@@ -52,8 +53,13 @@ async function generateExport(
       new NodeGitCommandRunner(config.repoRoot),
     );
     const base = options.base ?? config.review.base;
-    const commit = await git.mergeBase(base, "HEAD");
-    const baseline = await readBaseManifest(git, commit, config);
+    const commit = options.noChanges
+      ? undefined
+      : await git.mergeBase(base, "HEAD");
+    const baseline =
+      commit === undefined
+        ? undefined
+        : await readBaseManifest(git, commit, config);
     const compilation = await compileCatalogue(config);
     config = { ...config, sourceFiles: compilation.manifest.sourceFiles };
     assertExportActive(options.signal);
@@ -61,41 +67,48 @@ async function generateExport(
     const publicFiles = await capturePublicFiles(config);
     const assetReader = capturedAssetReader(publicFiles, config);
     const exclusions = [output, transaction.reservationRoot];
-    const changed = await reviewChangedPaths(
-      git,
-      commit,
-      config,
-      config.review.outDir,
-      exclusions,
-    );
-    const comparison = await compareReview(
-      compilation,
-      config,
-      pinnedGit(git, commit, changed),
-      base,
-      transaction.stage,
-      assetReader,
-      exclusions,
-    );
-    const contentChanges = await changedContentPaths(
-      compilation.manifest,
-      baseline,
-      config,
-      git,
-      commit,
-      changed,
-      assetReader,
-      comparison.result.schemaVersion === 3 ? "pages" : "all",
-    );
+    const changed =
+      commit === undefined
+        ? []
+        : await reviewChangedPaths(
+            git,
+            commit,
+            config,
+            config.review.outDir,
+            exclusions,
+          );
+    let comparison: ReviewArtifact | undefined;
+    let contentChanges: readonly string[] = [];
+    if (commit !== undefined && baseline !== undefined) {
+      comparison = await compareReview(
+        compilation,
+        config,
+        pinnedGit(git, commit, changed),
+        base,
+        transaction.stage,
+        assetReader,
+        exclusions,
+      );
+      contentChanges = await changedContentPaths(
+        compilation.manifest,
+        baseline,
+        config,
+        git,
+        commit,
+        changed,
+        assetReader,
+        comparison.result.schemaVersion === 3 ? "pages" : "all",
+      );
+    }
     const site = assembleExport(
       config,
       compilation,
-      baseline,
+      baseline ?? compilation.manifest,
       comparison,
       publicFiles,
       contentChanges,
     );
-    if (site.delivery.comparisonUrl === null)
+    if (!options.noChanges && site.delivery.comparisonUrl === null)
       throw exportError("Consumer export comparison metadata is missing.");
     const routes: ExportRoutes = Object.freeze({
       outDir: output,
@@ -111,6 +124,7 @@ async function generateExport(
       site.shells,
       aliases,
       options.signal,
+      options.capture,
     );
     await assertInputsUnchanged(
       config,

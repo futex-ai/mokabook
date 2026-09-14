@@ -1,0 +1,33 @@
+# Catalogue publishing
+
+This internal module implements `mokly publish`. Consumers and self-hosted
+receivers use the installed npm executable and the
+[upload v1 protocol](../../docs/protocol/mokly-upload.md), never deep imports.
+The protocol documents are included in the npm package.
+
+`run.ts` composes injected Git, export, HTTP and time boundaries. It pins the
+actual checkout HEAD, adds an owned manifest through the exporter, compresses
+its finalized bytes before installation, rechecks HEAD and uploads once. HTTP
+failure leaves the complete local export intact. Archive failure happens before
+installation and retains the previous export through the normal transaction.
+
+`metadata.ts` handles repository remotes and Actions context. `manifest.ts` and
+`validation.ts` define the upload envelope invariants. `bundle.ts` uses
+`tar-stream` without filesystem traversal, enforcing file/path limits and bounded
+uncompressed/compressed streams. `http.ts` accepts an injectable fetch function,
+uses a 120-second timeout, disables redirects and maps statuses to fixed errors.
+Remote bodies and exceptions never become user diagnostics. `cli/secrets.ts`
+also redacts tokens from parser/config/build errors and diagnostic stacks.
+Shared CLI value parsing accepts `--name=value`, preserving leading dashes and
+token padding; boolean flags retain their no-value syntax. The packed-consumer
+smoke exercises a leading-dash token and the public ownership fixtures without
+importing package internals.
+
+```bash
+npm run build
+node --import tsx --test --test-concurrency=2 tests/publish*.test.ts tests/export_current.test.ts
+npm run package:smoke
+```
+
+See the [action usage](../../.github/actions/publish/README.md),
+[export internals](../export/README.md) and [plan index](../../plans/README.md).

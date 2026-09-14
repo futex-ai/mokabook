@@ -40,8 +40,9 @@ npx mokly export --config docs/mokly.config.ts --out ../site --base main
 - Missing values, empty output, unknown/extra arguments, and `--port`,
   `--watch`, or `--no-watch` on `export` fail as CLI errors.
 - `--out` remains invalid on `serve`, `build`, and `check`. The removed
-  `review` command is not restored. No `publish` alias or new config section
-  is introduced in this release.
+  `review` command is not restored. The separate [`publish` command](./mokly-upload.md)
+  runs this exporter then uploads its result; export itself never uploads.
+  No new config section is introduced.
 - Success exits zero after installation and prints the output directory plus
   the instruction to deploy its contents as the site's document root.
 - Failure exits non-zero with an actionable existing error category or the
@@ -54,8 +55,12 @@ their existing execution boundary; export adds no hosting network calls.
 
 ## Baseline And Comparisons
 
-The consumer command always includes comparisons. The separate repository
-preview keeps its optional Changes contract. A Git checkout with `HEAD`, the selected base, their merge base, and
+The `export` command always includes comparisons. `publish --no-changes` uses
+the same transactional engine with current-only assembly, no baseline reads,
+and the same source/public-byte consistency checks. It omits removed entries,
+diff files and comparison controls; delivery metadata has a null comparison URL.
+The separate repository preview keeps its optional Changes contract.
+A comparison export requires a Git checkout with `HEAD`, the selected base, their merge base, and
 the required committed baseline artifacts is necessary at export time. CI must
 fetch sufficient history before invoking the command; export never fetches it.
 Unavailable or invalid baselines fail explicitly, including shallow-history
@@ -146,8 +151,9 @@ metadata, dependency directories, and package runtime directories as targets.
 These checks also apply when the requested directory does not yet exist.
 
 Accept a missing destination or an empty real directory. A nonempty directory
-must have a regular `.mokly-export-artifact` ownership file using version 1
-and an inventory of generated relative paths. Reject missing/malformed markers,
+must have a regular `.mokly-export-artifact` ownership file using the
+[public v1 schema](./mokly-export-ownership.md) and its generated-file inventory.
+Reject missing/malformed markers,
 unexpected files outside the inventory, unsafe inventory paths, symlink entries,
 and unsupported versions. Treat the marker as public-safe metadata: no absolute
 checkout paths, credentials, or timestamps. Never use its strings as unchecked

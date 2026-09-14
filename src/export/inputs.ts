@@ -65,7 +65,7 @@ export async function assertInputsUnchanged(
   compilation: Compilation,
   publicFiles: ReadonlyMap<string, Buffer>,
   git: GitClient,
-  commit: string,
+  commit: string | undefined,
   changed: readonly string[],
   exclusions: readonly string[],
 ): Promise<void> {
@@ -73,13 +73,16 @@ export async function assertInputsUnchanged(
   const fresh = await compileCatalogue(freshConfig);
   freshConfig.sourceFiles = fresh.manifest.sourceFiles;
   const publicNow = await capturePublicFiles(freshConfig);
-  const changedNow = await reviewChangedPaths(
-    git,
-    commit,
-    config,
-    config.review.outDir,
-    exclusions,
-  );
+  const changedNow =
+    commit === undefined
+      ? []
+      : await reviewChangedPaths(
+          git,
+          commit,
+          config,
+          config.review.outDir,
+          exclusions,
+        );
   if (
     !isDeepStrictEqual(config, freshConfig) ||
     !isDeepStrictEqual(compilation, fresh) ||

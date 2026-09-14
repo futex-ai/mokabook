@@ -161,6 +161,10 @@ fall back to the registry. A clean machine may use
 `npx --package @mokly/mokly mokly` without adding a dependency. The unscoped
 name is not a package alias; imports also use `@mokly/mokly`.
 
+Value options also accept `--name=value`, which supports values beginning with
+`-`, such as `--config=-catalogue.config.ts`. Empty values and assignments to
+boolean flags are rejected.
+
 | Command                     | Outcome                                                   |
 | --------------------------- | --------------------------------------------------------- |
 | `mokly`                     | Browse on demand and watch using a stable development URL |
@@ -168,6 +172,7 @@ name is not a package alias; imports also use `@mokly/mokly`.
 | `mokly build`               | Validate and transactionally write generated output       |
 | `mokly check`               | Compare expected and committed bytes without writing      |
 | `mokly export --out <path>` | Build a complete static catalogue for your host           |
+| `mokly publish`             | Export and upload a catalogue to your chosen service      |
 | `mokly --help`              | Show commands and their supported options                 |
 | `mokly --version`           | Print the installed package version                       |
 
@@ -306,7 +311,7 @@ uses CSS blending, without inventing pixel measurements. Immutable generations
 keep snapshots coherent during refresh, retain replaced resources briefly, and
 drain generation work before shutdown. The former Review tab, standalone report,
 `mokly review` command, and its report-output option have been removed.
-`--out` is supported only by the separate `export` command.
+`--out` is supported by the separate `export` and `publish` commands.
 
 Consumer documents run in sandboxed frames. Comparisons keep unmodified base/head
 documents in separate snapshot trees and copies their referenced local CSS,
@@ -604,8 +609,8 @@ current assets and comparison snapshots. A package root equal to `mockupsDir`
 is rejected; use a separate public output directory. Local navigation links
 must also target existing document anchors.
 
-Deploy the directory's contents with your own hosting provider. Mokly does
-not upload files or manage hosting credentials. Serve it at the HTTP(S) origin
+Deploy the directory's contents with your own hosting provider. `export` never
+uploads files. Serve it at the HTTP(S) origin
 root with correct MIME types and directory indexes; no Mokly process, Git,
 source tree, or rewrite rules are needed there. Subpath hosting and `file://`
 catalogue browsing are unsupported. Configure shell and mutable-asset revalidation and comparison
@@ -651,6 +656,41 @@ generated file. See the [recovery contract](./docs/protocol/mokly-export-recover
 publication scenarios remain responsive alongside other development work.
 Long resource-watch scenarios allow three minutes for their complete sequence;
 production child-startup and individual watched-update deadlines stay separate.
+
+### Upload To A Catalogue Service
+
+`publish` runs the export and uploads one versioned gzip tarball to the exact
+endpoint you provide. The same command works with Mokly Cloud or a self-hosted
+receiver implementing the [upload v1 protocol](./docs/protocol/mokly-upload.md).
+
+```bash
+# Set MOKLY_ENDPOINT and MOKLY_TOKEN in your shell or CI secrets first.
+npx mokly publish
+npx mokly publish --config tools/mokly.config.ts --out site --base main
+npx mokly publish --no-changes --repository git.example.com/team/project
+```
+
+`--endpoint <url>` and `--token <token>` override those environment variables;
+prefer the token environment variable to avoid shell history. `--out` defaults
+to `.context/mokly-publish` beside the config. Comparisons are included unless
+`--no-changes` is given; that option needs no baseline history and cannot be
+combined with `--base`. Publish still requires a committed Git checkout for
+revision metadata. Git remote `origin` (or the sole remote) supplies repository
+identity; `--repository <host>/<owner>/<name>` overrides it.
+
+For a token beginning with `-`, use `--token=-TOKEN` or `MOKLY_TOKEN`.
+
+The output includes an owned `mokly-upload.json` containing repository, revision
+and pinned comparison metadata. Upload failure leaves that local export intact.
+The CLI exits nonzero with typed errors, does not follow redirects or retry, and
+never prints the token. The upload contract defines receiver validation, limits
+and exact rejection categories. Protocol files are included in the npm package.
+The [ownership v1 schema and fixtures](./docs/protocol/mokly-export-ownership.md)
+define the required file inventory for independent receivers.
+
+Use the [public composite GitHub Action](./.github/actions/publish/README.md)
+with an exact released Mokly package version. Check out the consumer, install
+its dependencies, and fetch comparison history before invoking it.
 
 ## Preview Deployments
 
@@ -774,6 +814,8 @@ canonical destinations and the controls that remain visual depictions.
 
 - [`src/index.ts`](./src/index.ts) — supported public authoring API.
 - [`src/config`](./src/config) — config discovery, loading, and confinement.
+- [`src/publish`](./src/publish/README.md) — upload manifests, archive limits,
+  Git identity and the injectable HTTP boundary.
 - [`src/build`](./src/build) — single-graph bundling, compilation, links, check,
   and transactional writes.
 - [`src/server`](./src/server) — manifest-backed HTTP, the responsive shell,

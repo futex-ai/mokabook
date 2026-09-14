@@ -1,6 +1,3 @@
-import fs from "node:fs";
-import { fileURLToPath } from "node:url";
-
 import { compileCatalogue } from "../build/compile.js";
 import { FileSystemGeneratedOutputStore } from "../build/output_store.js";
 import { loadConfig } from "../config/load.js";
@@ -12,6 +9,8 @@ import { serve, type RunningServe } from "../server/serve.js";
 import { parseArguments, type CliArguments } from "./arguments.js";
 import { runExport } from "./export.js";
 import { HELP } from "./help.js";
+import { runPublish } from "./publish.js";
+import { packageVersion } from "./version.js";
 
 /** Execute one CLI invocation and return its process exit code. */
 export async function run(
@@ -36,6 +35,11 @@ export async function run(
 }
 
 async function execute(arguments_: CliArguments, cwd: string): Promise<number> {
+  if (arguments_.command === "publish") {
+    await timeAsync("publish", () => runPublish(arguments_, cwd));
+    process.stdout.write("Published Mokly catalogue.\n");
+    return 0;
+  }
   const runtimeStartup =
     arguments_.command === "__serve-child" && arguments_.retainedRuntime
       ? await timeAsync("child.startup-transfer", () =>
@@ -118,18 +122,6 @@ function waitForShutdown(running: RunningServe): Promise<void> {
     process.once("SIGINT", () => void close());
     process.once("SIGTERM", () => void close());
   });
-}
-
-function packageVersion(): string {
-  const packagePath = fileURLToPath(
-    new URL("../../package.json", import.meta.url),
-  );
-  const value = JSON.parse(fs.readFileSync(packagePath, "utf8")) as {
-    version?: unknown;
-  };
-  if (typeof value.version !== "string")
-    throw new MoklyError("cli-invalid", "package version is missing");
-  return value.version;
 }
 
 function assertSupportedNode(): void {
