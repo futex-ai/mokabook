@@ -33,7 +33,7 @@ export function assembleExport(
   config: ResolvedConfig,
   compilation: Compilation,
   baseline: Manifest,
-  comparison: ReviewArtifact,
+  comparison: ReviewArtifact | undefined,
   publicFiles: ReadonlyMap<string, Buffer>,
   contentChanges: readonly string[],
 ): {
@@ -62,20 +62,21 @@ export function assembleExport(
       continue;
     idRoutes[entry.id] = catalogueViewHref(entry.route);
   }
-  const comparisonFiles = new Map(comparison.files);
-  if (comparison.result.schemaVersion === 3)
+  const comparisonFiles = new Map(comparison?.files);
+  if (comparison?.result.schemaVersion === 3)
     parseReviewResult(comparison.result);
-  comparisonFiles.set(
-    "review.json",
-    `${comparison.result.schemaVersion === 3 ? canonicalJson(comparison.result, 2) : JSON.stringify(comparison.result, null, 2)}\n`,
-  );
+  if (comparison)
+    comparisonFiles.set(
+      "review.json",
+      `${comparison.result.schemaVersion === 3 ? canonicalJson(comparison.result, 2) : JSON.stringify(comparison.result, null, 2)}\n`,
+    );
   const generation = comparisonContentId(comparisonFiles);
   const prefix = `__mokly/diffs/__generations/${generation}`;
   const delivery = parseStaticDelivery({
     schemaVersion: 2,
     deploymentId: STAGED_DEPLOYMENT_ID,
     canonicalPath: "/",
-    comparisonUrl: `/${prefix}/review.json`,
+    comparisonUrl: comparison ? `/${prefix}/review.json` : null,
     idRoutes,
   });
   if (!delivery)
@@ -109,7 +110,7 @@ export function assembleExport(
     ),
   );
   const changes =
-    comparison.result.schemaVersion === 3
+    comparison?.result.schemaVersion === 3
       ? [
           ...comparison.result.changes.map(
             (item) => (item.after ?? item.before)!.route,
@@ -118,17 +119,21 @@ export function assembleExport(
         ]
       : materialRoutes;
   const context: ShellContext = {
-    base: comparison.result.baseRef,
-    changedRoutes: [
-      ...new Set([...changes, ...removed.map((entry) => entry.route)]),
-    ],
-    comparisons: true,
-    componentChanges: {
-      baseline,
-      ...(comparison.result.schemaVersion === 3
-        ? { result: comparison.result }
-        : {}),
-    },
+    base: comparison?.result.baseRef ?? "",
+    ...(comparison
+      ? {
+          changedRoutes: [
+            ...new Set([...changes, ...removed.map((entry) => entry.route)]),
+          ],
+          comparisons: true,
+          componentChanges: {
+            baseline,
+            ...(comparison.result.schemaVersion === 3
+              ? { result: comparison.result }
+              : {}),
+          },
+        }
+      : { comparisons: false }),
     updateVersion: 0,
     delivery,
   };

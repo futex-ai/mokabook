@@ -32,6 +32,7 @@ test("derived export rebuilds and pins a baseline, captures compiled head bytes 
       },
     },
   });
+  assert.ok(exported.comparisonUrl);
   const reviewPath = path.join(exported.outDir, exported.comparisonUrl);
   const review = JSON.parse(await fs.readFile(reviewPath, "utf8"));
   assert.equal(review.baseCommit, fixture.commit);

@@ -12,7 +12,12 @@ export type MoklyErrorCode =
   | "git-failed"
   | "manifest-invalid"
   | "review-invalid"
-  | "server-failed";
+  | "server-failed"
+  | "upload-failed"
+  | "upload-invalid-bundle"
+  | "upload-too-large"
+  | "upload-unauthorized"
+  | "upload-unsupported-version";
 
 /** Typed user-facing failure from a Mokly boundary. */
 export class MoklyError extends Error {

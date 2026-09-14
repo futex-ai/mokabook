@@ -37,6 +37,7 @@ test("export builds a complete consumer catalogue with an isolated comparison", 
     "static/screens/home.mobile.html",
   ])
     assert.ok(files.has(name), name);
+  assert.ok(result.comparisonUrl);
   const review = JSON.parse(
     files.get(result.comparisonUrl.slice(1))!.toString(),
   ) as ReviewResult;

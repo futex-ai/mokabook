@@ -3,7 +3,7 @@
 ## Opt-in timings
 
 `--debug-timings` is a common boolean CLI option for `serve` (including the
-default command), `build`, `check`, and `export`. It takes no value. Help and
+default command), `build`, `check`, `export`, and `publish`. It takes no value. Help and
 version remain immediate. Ordinary commands emit no timing output.
 
 Enabled commands write JSON lines to stderr prefixed with `[mokly:timing] `.

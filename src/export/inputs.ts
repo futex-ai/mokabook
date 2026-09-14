@@ -9,6 +9,7 @@ import type { ResolvedConfig } from "../config/types.js";
 import type { OptionalReviewAssetReader } from "../review/assets.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import type { RepositoryEvidence } from "../review/git.js";
+import type { PreparedReviewRepository } from "../review/prepare.js";
 
 import { exportError } from "./error.js";
 import { capturePublicFiles } from "./public_files.js";
@@ -54,11 +55,9 @@ export async function assertInputsUnchanged(
   config: ResolvedConfig,
   compilation: Compilation,
   publicFiles: ReadonlyMap<string, Buffer>,
-  git: RepositoryEvidence,
-  commit: string,
+  prepared: PreparedReviewRepository | undefined,
   changed: readonly string[],
   exclusions: readonly string[],
-  assertBaselineUnchanged?: () => Promise<void>,
 ): Promise<void> {
   const freshConfig = await loadConfig(config.repoRoot, config.configPath);
   const fresh = await compileCatalogue(freshConfig);
@@ -67,13 +66,15 @@ export async function assertInputsUnchanged(
     freshConfig,
     freshConfig.generatedOutput === "derived" ? fresh.outputs : undefined,
   );
-  const changedNow = await reviewChangedPaths(
-    git,
-    commit,
-    config,
-    config.review.outDir,
-    exclusions,
-  );
+  const changedNow = prepared
+    ? await reviewChangedPaths(
+        prepared.evidence,
+        prepared.commit,
+        config,
+        config.review.outDir,
+        exclusions,
+      )
+    : [];
   if (
     !isDeepStrictEqual(config, freshConfig) ||
     !isDeepStrictEqual(compilation, fresh) ||
@@ -83,5 +84,5 @@ export async function assertInputsUnchanged(
     throw exportError(
       "Export inputs changed during generation; retry the export.",
     );
-  await assertBaselineUnchanged?.();
+  await prepared?.assertUnchanged();
 }

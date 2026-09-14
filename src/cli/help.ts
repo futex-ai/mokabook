@@ -6,23 +6,35 @@ Usage:
   mokly build [--config <path>]
   mokly check [--config <path>]
   mokly export --out <path> [--config <path>] [--base <ref>]
+  mokly publish [--endpoint <url>] [--token <token>] [--out <path>]
+                [--config <path>] [--base <ref> | --no-changes]
+                [--repository <host>/<owner>/<name>]
 
 Commands:
   serve    Build and serve the catalogue with on-demand diffs
   build    Transactionally generate static HTML documents and the manifest
   check    Validate source and generated output for the configured mode
   export   Build a complete static catalogue to deploy with your own host
+  publish  Export and upload a catalogue to your chosen service
 
 Options:
   --config <path>  Use an explicit mokly.config file
   --debug-timings  Report phase timings and catalogue counts to stderr
   --port <port>    Starting port; advances if occupied, 0 selects any free port
   --base <ref>     Git base ref used to find the branch point
-  --out <path>     Export directory, relative to the config file (export only)
+  --out <path>     Config-relative export directory (required for export)
+                   Publish default: .context/mokly-publish
+  --endpoint <url> Upload URL (publish; or MOKLY_ENDPOINT)
+  --token <token>  Bearer token (publish; or MOKLY_TOKEN)
+  --repository <host>/<owner>/<name>  Override publish repository identity
+  --no-changes     Publish current catalogue without a comparison baseline
   --watch          Watch consumer inputs (serve default)
   --no-watch       Serve one deterministic snapshot
   -h, --help       Show help
   -v, --version    Show installed version
+
+Value options also accept --name=value. Use --token=-TOKEN for a leading dash.
+Boolean flags take no value.
 
 Configuration:
   generatedOutput       "committed" (default) checks files match source;

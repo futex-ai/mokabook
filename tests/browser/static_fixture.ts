@@ -11,7 +11,10 @@ import { repositoryRoot, validEntrySource } from "../helpers/fixture.js";
 import { serveStaticFiles } from "../helpers/static_server.js";
 
 /** Export an independent consumer, then remove its entire source/Git repository. */
-export async function startStaticFixture(comparisons = false) {
+export async function startStaticFixture(
+  comparisons = false,
+  noChanges = false,
+) {
   const source = (changed: boolean) =>
     comparisons
       ? comparisonEntrySource(changed).replaceAll(
@@ -31,7 +34,7 @@ export async function startStaticFixture(comparisons = false) {
   );
   try {
     await fs.promises.writeFile(fixture.entryPath, source(true));
-    await exportCatalogue(fixture.config, { outDir: "site" });
+    await exportCatalogue(fixture.config, { outDir: "site", noChanges });
     await fs.promises.cp(fixture.output, isolated, { recursive: true });
     await fixture.close();
     const files = await directoryFiles(isolated);
