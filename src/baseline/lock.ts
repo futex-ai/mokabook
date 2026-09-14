@@ -24,11 +24,11 @@ export async function tryBaselineLock(
   const bytes = Buffer.from(
     JSON.stringify({ pid: runner.pid, startedAt: clock.now() }),
   );
-  if (!(await fs.acquireLock(layout.lock, bytes))) return;
-  const identity = (await fs.stat(layout.lock))?.identity;
+  const ownership = await fs.acquireLock(layout.lock, bytes);
+  if (!ownership) return;
   return {
     async release() {
-      if ((await fs.stat(layout.lock))?.identity === identity)
+      if ((await fs.stat(layout.lock))?.identity === ownership.identity)
         await fs.remove(layout.lock);
     },
   };

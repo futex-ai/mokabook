@@ -2,6 +2,7 @@ import path from "node:path";
 
 import type {
   BaselineFileSystem,
+  BaselineLockIdentity,
   BaselineStat,
 } from "../../dist/baseline/types.js";
 
@@ -74,10 +75,13 @@ export class MemoryBaselineFileSystem implements BaselineFileSystem {
     this.put(file, "symlink");
     this.files.get(file)!.target = target;
   }
-  async acquireLock(file: string, bytes: Uint8Array): Promise<boolean> {
-    if (this.files.has(file)) return false;
+  async acquireLock(
+    file: string,
+    bytes: Uint8Array,
+  ): Promise<BaselineLockIdentity | undefined> {
+    if (this.files.has(file)) return;
     this.put(file, "regular", bytes);
-    return true;
+    return { identity: this.files.get(file)!.identity };
   }
   async reclaimLock(file: string, identity: string): Promise<boolean> {
     if (this.files.get(file)?.identity !== identity) return false;

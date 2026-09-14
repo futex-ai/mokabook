@@ -80,7 +80,9 @@ export async function prepareReviewRepository(
       error,
     );
   }
-  const filesystem = options.filesystem ?? new NodeBaselineFileSystem();
+  const maintenance = new StderrBaselineMaintenanceReporter();
+  const filesystem =
+    options.filesystem ?? new NodeBaselineFileSystem(maintenance);
   const request = {
     repoRoot: config.repoRoot,
     commit,
@@ -98,7 +100,7 @@ export async function prepareReviewRepository(
             filesystem,
             new NodeBaselineProcessRunner(),
             new SystemBaselineClock(),
-            new StderrBaselineMaintenanceReporter(),
+            maintenance,
             { environment: process.env },
           )
         ).build(request)

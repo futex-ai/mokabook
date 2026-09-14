@@ -82,6 +82,11 @@ explicitly and remains intact. Remove that commit's cache entry before changing
 its catalogue/build settings. Partial entries are rebuilt under the entry lock.
 
 Lock publication uses a fully written temporary file and an exclusive hard link.
+The filesystem captures the temporary file's identity before publication and
+returns that identity as ownership; callers perform no fallible metadata read
+between publication and receiving their release handle. Temporary-file cleanup
+reports through the injected maintenance reporter without changing successful
+ownership, contention, or the original publication error.
 Dead-holder reclamation retains an identity-specific hard-link tombstone so
 simultaneous stale observers cannot unlink a replacement lock. Waiters poll every
 100 ms for at most two minutes by default. Cleanup retains three completed
@@ -99,11 +104,21 @@ single-chunk entry buffers. The runtime `tar` dependency supplies its mature
 parser; implementing a second archive parser would duplicate security-sensitive code.
 Commands run without a shell and receive only the documented directory,
 locale, network and executable-lookup variables, CI=1 and MOKLY_BASELINE_COMMIT.
-`executable.ts` invokes Windows npm/npx through the selected installation's
-JavaScript entry point, preserving literal arguments. Combined diagnostics
+`executable.ts` resolves Windows npm/npx in working-directory, PATH and PATHEXT
+order. Native `.exe`/`.com` launchers run directly; only the selected `.cmd`
+shim is translated to its installation's JavaScript entry point. Explicit
+`.cmd` paths remain explicit. Unsupported selected launchers fail instead of
+falling through to a different installation. Arguments remain literal. Combined diagnostics
 retain at most 64 KiB; command errors expose the last 40 lines and a zero-based
-command index, argv, exit code and signal. Cancellation sends TERM then KILL to
-the process group and waits for the process and pipes to close.
+command index, argv, exit code and signal. `process_scope.ts` owns command
+lifecycle: POSIX uses process groups with TERM then KILL; Windows uses a native
+kill-on-close Job Object through the existing Koffi bridge. `process_worker.ts`
+waits for the parent's release until job assignment succeeds, so commands cannot
+start descendants before ownership is established. Job termination does not
+depend on the launcher's PID remaining alive. Disposal waits for zero active job
+processes and closed output pipes, and also stops silent background descendants
+after normal command completion. Missing native support or failed job assignment
+fails before historical code starts; there is no child-only fallback.
 
 `RebuiltBaselineReader(fs, repoRoot, outputDir, commit, mockupsPath, signal?)`
 reads only a completed output tree. Its `BaselineReader` API retains
@@ -124,3 +139,8 @@ interruption and symlink rejection. See the
 [derived-baseline contract](../../docs/protocol/mokly-derived-baselines.md)
 and [storage and execution rules](../../docs/protocol/mokly-baseline-storage.md)
 and [review boundaries](../review/README.md).
+
+`baseline_process_tree.test.ts` runs real nested commands on Linux and in the
+Windows/macOS CI jobs, including cancellation after the launcher exits. Native
+binding fault tests exercise assignment, setup and ownership ordering without
+requiring a Windows host.

@@ -456,6 +456,12 @@ and [storage rules](./docs/protocol/mokly-baseline-storage.md) for cache limits,
 network configuration, Windows npm/npx launching, and the one-catalogue-per-commit
 cache boundary. Ordinary edits keep an active baseline rebuild running; changing
 the branch point or build settings replaces it.
+Windows builds preserve native npm/npx launchers and use operating-system job
+ownership so cancelling a build also stops programs it started, even after its
+launcher exits. Keep the package's optional native dependencies installed;
+missing process-tree support fails before the historical build starts.
+Temporary cache-lock cleanup failures are reported separately without losing
+the build's lock ownership.
 
 ## Whole-document pages
 

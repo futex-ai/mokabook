@@ -8,6 +8,11 @@ export interface BaselineStat {
   readonly identity: string;
 }
 
+/** The identity captured before publication; returning it transfers lock ownership. */
+export interface BaselineLockIdentity {
+  readonly identity: string;
+}
+
 /** Filesystem operations, including atomic lock publication and reclamation. */
 export interface BaselineFileSystem {
   stat(file: string): Promise<BaselineStat | undefined>;
@@ -18,8 +23,11 @@ export interface BaselineFileSystem {
   remove(file: string): Promise<void>;
   rename(from: string, to: string): Promise<void>;
   symlink(target: string, file: string): Promise<void>;
-  /** Publish fully written contents exclusively; false means already locked. */
-  acquireLock(file: string, bytes: Uint8Array): Promise<boolean>;
+  /** Publish exclusively; cleanup cannot change ownership, contention, or the publication error. */
+  acquireLock(
+    file: string,
+    bytes: Uint8Array,
+  ): Promise<BaselineLockIdentity | undefined>;
   /** Reclaim this identity at most once, without unlinking a successor's lock. */
   reclaimLock(file: string, identity: string): Promise<boolean>;
 }

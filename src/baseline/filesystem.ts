@@ -3,10 +3,22 @@ import { constants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import type { BaselineFileSystem, BaselineStat } from "./types.js";
+import {
+  StderrBaselineMaintenanceReporter,
+  type BaselineMaintenanceReporter,
+} from "./maintenance.js";
+import type {
+  BaselineFileSystem,
+  BaselineLockIdentity,
+  BaselineStat,
+} from "./types.js";
 
 /** Local files without link following; lock contents are published atomically. */
 export class NodeBaselineFileSystem implements BaselineFileSystem {
+  constructor(
+    private readonly maintenance: BaselineMaintenanceReporter = new StderrBaselineMaintenanceReporter(),
+  ) {}
+
   async stat(file: string): Promise<BaselineStat | undefined> {
     try {
       const stat = await fs.lstat(file, { bigint: true });
@@ -86,20 +98,30 @@ export class NodeBaselineFileSystem implements BaselineFileSystem {
     await fs.symlink(target, file);
   }
 
-  async acquireLock(file: string, bytes: Uint8Array): Promise<boolean> {
+  async acquireLock(
+    file: string,
+    bytes: Uint8Array,
+  ): Promise<BaselineLockIdentity | undefined> {
     const temporary = path.join(
       path.dirname(file),
       `.lock-${process.pid}-${randomUUID()}`,
     );
     await this.write(temporary, bytes);
     try {
+      const stat = await this.stat(temporary);
+      if (stat?.kind !== "regular")
+        throw new Error(`Not a regular baseline lock: ${temporary}`);
       await fs.link(temporary, file);
-      return true;
+      return { identity: stat.identity };
     } catch (error) {
-      if (hasCode(error, "EEXIST")) return false;
+      if (hasCode(error, "EEXIST")) return;
       throw error;
     } finally {
-      await this.remove(temporary);
+      try {
+        await this.remove(temporary);
+      } catch (error) {
+        this.maintenance.report({ entry: temporary, error });
+      }
     }
   }
 

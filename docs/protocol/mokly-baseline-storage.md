@@ -46,7 +46,7 @@ and is not converted to a baseline history error.
    post-steps; their failures are reported on stderr and do not fail the build.
 
 Before the marker commit point, cancellation terminates the running command's
-process group, waits for exit, removes the partial entry, and reports
+owned process tree, waits for exit and output closure, removes the partial entry, and reports
 `baseline-interrupted`. Cancellation after the marker write returns the completed
 cached result, skips remaining retention cleanup and still attempts lock release.
 If partial-entry removal or lock release fails while a build is already failing,
@@ -82,7 +82,12 @@ different `inputs.json` output path or command list fails as
 `baseline-output-invalid` and remains intact. The commit-only cache holds one
 catalogue/build configuration; remove that entry before changing those settings.
 
-Lock contents are published atomically. Dead-holder reclamation retains an
+Lock contents are published atomically using an exclusively linked temporary
+file. Its identity is captured before publication and returned with ownership;
+no subsequent metadata operation is required before the caller receives its
+release handle. Failure to remove the temporary name is reported separately and
+must not change ownership, contention, or the original publication error.
+Dead-holder reclamation retains an
 identity-specific tombstone until entry cleanup, preventing stale concurrent
 observers from unlinking a replacement lock. Lock holders whose process no
 longer exists are reclaimed. Other waiters poll every 100 ms
@@ -112,13 +117,28 @@ Execution hooks such as `NODE_OPTIONS`, Git overrides, token variables, and
 unrelated secrets are excluded. Historical dependency installation still uses
 project/user npm configuration files; this allowlist is not a sandbox.
 
-On Windows, `npm` and `npx` (including explicit `.cmd` paths) resolve the
-selected installation's JavaScript entry point and invoke it with Node.
-PATH order and explicit locations are respected; unresolved custom shims fail
+On Windows, bare `npm` and `npx` search the working directory, then PATH directories
+in order, trying each directory's extensions in PATHEXT order (default
+`.COM;.EXE;.BAT;.CMD`). Native `.exe` and `.com` launchers run directly.
+Only the selected `.cmd` launcher resolves its installation's JavaScript entry
+point and invokes it with Node. Explicit `.cmd` names or paths select only that
+extension, regardless of PATHEXT. Extensionless explicit paths search only their
+named directory. Unsupported selected launchers and unresolved custom shims fail
 instead of silently selecting another installation. Arguments remain literal,
 including spaces, quotes, percent signs and shell metacharacters. Other Windows
 recipes must name native executables or run JavaScript explicitly with Node;
 Mokly does not enable a shell to interpret arbitrary batch scripts.
+
+POSIX commands run in an owned process group; cancellation sends TERM then KILL
+after one second. Windows commands belong to a non-inheritable, kill-on-close
+Job Object created through the package's existing native bridge. A Node gate
+worker is assigned before it receives the command, preventing an assignment race
+with fast descendants. Assignment or native-bridge failures fail closed before
+historical code starts. Windows cancellation terminates the entire job even if
+the immediate launcher has exited; disposal waits until the job has no active
+processes and all captured pipes close. Successful commands also dispose their
+job, terminating any silent background descendants. If the owning Mokly process
+exits abruptly, Windows closes its job handle and terminates the owned tree.
 
 ## Crash Leftovers
 
