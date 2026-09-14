@@ -1,41 +1,44 @@
 import { execFile } from "node:child_process";
+import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
 import { expect, test } from "@playwright/test";
 
 import { exportCatalogue } from "../../dist/export/run.js";
-import { designLibraryFixture } from "../helpers/design_library_fixture.js";
+import { createExampleBaseline } from "../helpers/example_baseline.js";
+import { repositoryRoot } from "../helpers/fixture.js";
 import { serveStaticFiles } from "../helpers/static_server.js";
 import { chooseViewport } from "./workspace_actions.js";
 
 let site: Awaited<ReturnType<typeof serveStaticFiles>>;
-const cleanup: (() => Promise<void>)[] = [];
+let root: string;
 test.beforeAll(async () => {
   test.setTimeout(180_000);
-  const fixture = await designLibraryFixture({
-    after: (fn) => cleanup.push(fn),
-  });
-  await fixture.write(fixture.before);
+  await fs.mkdir(path.join(repositoryRoot, ".context"), { recursive: true });
+  root = await fs.mkdtemp(path.join(repositoryRoot, ".context/design-export-"));
+  const config = await createExampleBaseline(root);
   const git = (...args: string[]) =>
-    promisify(execFile)("git", args, { cwd: fixture.root });
-  await git("init", "-q");
-  await git("config", "user.email", "test@example.invalid");
-  await git("config", "user.name", "Test");
-  await git("add", ".");
-  await git("commit", "-qm", "test: registered design baseline");
-  await git("update-ref", "refs/remotes/origin/main", "HEAD");
-  await fixture.edit(
+    promisify(execFile)("git", args, { cwd: root });
+  const tracked = (await git("ls-files", "examples/basic/generated")).stdout
+    .trim()
+    .split("\n");
+  expect(tracked).toHaveLength(28);
+  expect(tracked.every((file) => file.endsWith(".css"))).toBe(true);
+  const file = path.join(
+    root,
     "examples/basic/entries/design/library/controls/tag-chip.view.tsx",
-    (source) => source.replace("{label}", "{label} revised"),
   );
-  const output = path.join(fixture.root, "site");
-  await exportCatalogue(fixture.config, { outDir: output });
+  const source = await fs.readFile(file, "utf8");
+  expect(source).toContain("{label}");
+  await fs.writeFile(file, source.replace("{label}", "{label} revised"));
+  const output = path.join(root, "site");
+  await exportCatalogue(config, { base: "HEAD", outDir: output });
   site = await serveStaticFiles(output);
 });
 test.afterAll(async () => {
   await site?.close();
-  for (const dispose of cleanup.reverse()) await dispose();
+  if (root) await fs.rm(root, { recursive: true, force: true });
 });
 
 for (const viewport of ["desktop", "mobile"] as const)

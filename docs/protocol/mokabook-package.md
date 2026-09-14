@@ -3,7 +3,7 @@
 ## Scope
 
 Mokabook is shared developer tooling for repositories that keep visual mockups
-as code and committed static artifacts. The package owns catalogue definitions,
+as code with committed or derived static artifacts. The package owns catalogue definitions,
 generation, validation, browsing, and on-demand comparisons. A consumer owns all product
 screens, product copy, product components, styling, theme setup, and generated
 product output.

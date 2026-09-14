@@ -29,7 +29,7 @@ Create `mokabook.config.ts`:
 import { defineConfig } from "mokabook";
 
 export default defineConfig({
-  generatedOutput: "committed",
+  generatedOutput: "derived",
   colorSchemes: ["light", "dark"],
   repoRoot: ".",
   entriesDir: "docs/mockups/src/entries",
@@ -44,8 +44,9 @@ export default defineConfig({
 });
 ```
 
-`generatedOutput` defaults to `"committed"`. To keep generated HTML out of Git,
-set it to `"derived"`. Build still writes transactionally; Check validates the
+`generatedOutput` defaults to `"committed"`. The configuration above and this
+repository's example select `"derived"` to keep generated HTML out of Git.
+Build still writes transactionally; Check validates the
 compilation and rejects tracked generated files or cache contents, without
 requiring local generated files to exist or match. Authored public CSS and HTML
 remain allowed in Git. Add ignore rules for your generated routes and manifest,
@@ -534,8 +535,9 @@ forcing React peers to the consumer's one runtime.
 - **A watched edit fails:** fix the reported candidate build/config error. The
   last-good server remains active and adopts the next valid change.
 - **Export cannot find its baseline:** fetch the configured base with enough
-  Git history and retain its committed manifest/fragments. Export never fetches
-  history and does not silently omit comparisons.
+  Git history. Committed mode needs its manifest/fragments in Git; derived mode
+  needs a working historical install/build recipe. Export never fetches history
+  and does not silently omit comparisons.
 - **Export refuses its destination:** choose a missing/empty directory outside
   source, generated, dependency, and comparison roots. Keep unrelated files out
   of owned exports. For a retained reservation, confirm no export is running,
@@ -550,12 +552,19 @@ repository tasks.
 ```bash
 npm ci
 npm run build
+npm run example:build
 npm test
 npm run test:browser
-npm run example:build
 npm run example:check
 cargo xtask check
 ```
+
+The example's generated HTML and manifest are ignored local artifacts; its
+authored CSS remains tracked. Both test entrypoints build the package and example
+before loading tests, including direct-from-disk design checks. `example:check`
+validates compilation and rejects tracked generated output even when the local
+files are absent. Example baselines run `npm ci`, `npm run build`, then
+`npm run example:build` in the historical extraction.
 
 For local development after installing dependencies, run:
 
@@ -614,13 +623,13 @@ recovery and reports the last published state if it times out.
 
 `cargo xtask check` is the authoritative local gate. It starts with a live
 dependency audit (`npm run dependencies:check`), then includes formatting,
-lint, typechecking, unit/integration tests, the committed example, package
+lint, typechecking, unit/integration tests, the derived example, package
 allowlist and license checks, clean packed ESM/NodeNext/npx/Accounting/Juno
 consumers, Chromium tests, and all Rust checks. It also audits the freshly
 resolved packed consumer's production dependencies. Registry access is required;
 known advisories or registry errors fail verification. See the
 [dependency security contract](./docs/protocol/dependency-security.md).
-`npm test` limits test-file parallelism to four workers to keep subprocess-heavy
+`npm test` limits test-file parallelism to two workers to keep subprocess-heavy
 fixtures within their existing startup deadlines on shared developer machines.
 All tests still run, including their explicit concurrent-writer and race cases.
 Watcher tests use `tests/helpers/watched_catalogue.ts` to await a newer version
@@ -642,7 +651,8 @@ Export builds first, then packages the complete catalogue, real id aliases,
 assets, and Git comparisons. `--out` is required and config-relative, not
 working-directory-relative; absolute paths must remain inside `repoRoot`.
 `--base` overrides `review.base` (default `origin/main`). The Git branch point
-must contain the committed manifest and required fragments/assets; CI should
+must contain the required authored assets and either committed generated output
+or the source and tooling needed by the derived baseline recipe; CI should
 check out full history. Normal build validation, including nonempty registry
 requirements, still applies.
 

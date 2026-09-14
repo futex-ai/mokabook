@@ -10,32 +10,23 @@ import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { classifyComponents } from "../../dist/review/component_classification.js";
 import type { ReviewRepository } from "../../dist/review/git.js";
+import { copyExampleSources } from "./example_sources.js";
 import { repositoryRoot } from "./fixture.js";
 
 /** Copy the actual consumer so source-edit tests never mutate the working catalogue. */
-export async function designLibraryFixture(t: {
-  after(fn: () => Promise<void>): void;
-}) {
+export async function designLibraryFixture(
+  t: { after(fn: () => Promise<void>): void },
+  mode?: "committed" | "derived",
+) {
+  await fs.mkdir(path.join(repositoryRoot, ".context"), { recursive: true });
   const root = await fs.mkdtemp(
     path.join(repositoryRoot, ".context/design-library-test-"),
   );
   t.after(() => fs.rm(root, { recursive: true, force: true }));
-  for (const name of [
-    "examples/basic/entries",
-    "examples/basic/generated",
-    "examples/basic/renderer.tsx",
-    "examples/basic/theme.ts",
-    "examples/basic/mokabook.config.ts",
-    "examples/basic/notes.md",
-    "examples/basic/README.md",
-    "docs/protocol",
-    "README.md",
-  ]) {
-    await fs.cp(path.join(repositoryRoot, name), path.join(root, name), {
-      recursive: true,
-    });
-  }
+  await copyExampleSources(root);
   const config = await loadConfig(path.join(root, "examples/basic"));
+  if (mode) config.generatedOutput = mode;
+  if (mode === "committed") delete config.review.baselineBuild;
   const before = await compileCatalogue(config);
   const resources = new Map<string, string>();
   for (const file of await fs.readdir(config.mockupsDir, { recursive: true })) {

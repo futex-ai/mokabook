@@ -218,23 +218,37 @@ Tags: ui
       `origin/main` were additions on main after the branch point and are
       integrated by the merge that follows this commit.
 
-## Milestone 8: Switch this repository to derived output
+## Milestone 8: Switch this repository to derived output — completed
 
 Requires explicit user approval before deleting tracked files on `origin/main`.
 
-- [ ] Obtain approval to remove the 261 tracked HTML files and the manifest
-      under `examples/basic/generated`; record the approval in the commit body.
-- [ ] Set `generatedOutput: "derived"` and enable the staged
+- [x] Obtain approval to remove the 269 tracked HTML files and the manifest
+      under `examples/basic/generated`. The user explicitly confirmed approval
+      when requesting Milestone 8; record that approval in the commit body.
+- [x] Set `generatedOutput: "derived"` and enable the staged
       `review.baselineBuild` recipe in the example config together.
-- [ ] Add ignore rules for `examples/basic/generated/**/*.html` and the
+- [x] Add ignore rules for `examples/basic/generated/**/*.html` and the
       manifest; keep the authored CSS tracked.
-- [ ] `git rm --cached` the generated routes and manifest; verify
+- [x] `git rm --cached` the generated routes and manifest; verify
       `npm run example:check` passes in derived mode and
       `git diff --diff-filter=D --name-status origin/main` lists only the
       approved paths.
-- [ ] Update `README.md`, `examples/basic/README.md`, and
+- [x] Update `README.md`, `examples/basic/README.md`, and
       `docs/architecture/build-pipeline.md`.
-- [ ] Run tests, typecheck, lint, `cargo xtask check`, commit, and push.
+- [x] Build local example output before both test entrypoints; ensure example
+      fixtures copy only authored inputs and rebuild historical output through
+      normal derived composition using their own source and lockfile.
+- [x] Verify the preview job's full Git history, Node 24 and baseline lockfile
+      cache, and smoke-test publication with Changes.
+- [x] Allow shared browser setup to wait for the initial historical install
+      and build while preserving normal watch-test deadlines and assertions.
+- [x] Move the design-library export fixture to a source-only Git baseline
+      with archived tooling, and assert that it tracks only authored CSS.
+- [x] Run the test suite and derived check in a fresh clone with no generated
+      example output or baseline cache.
+- [x] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
+      `npm test`, `npm run example:check`, `npm run test:browser`, and
+      `cargo xtask check`; commit and push.
 
 ## Milestone 9: Review
 

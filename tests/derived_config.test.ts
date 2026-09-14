@@ -13,19 +13,19 @@ import {
 
 const input = { entriesDir: "entries", mockupsDir: "mockups" };
 
-test("the example stages its repository recipe until derived mode is enabled", async () => {
+test("the example rebuilds derived baselines with its own package tooling", async () => {
   const configPath = path.join(
     repositoryRoot,
     "examples/basic/mokabook.config.ts",
   );
   const config = await loadConfig(repositoryRoot, configPath);
-  assert.equal(config.generatedOutput, "committed");
-  assert.equal(config.review.baselineBuild, undefined);
+  assert.equal(config.generatedOutput, "derived");
   const recipe = [
     ["npm", "ci"],
     ["npm", "run", "build"],
     ["npm", "run", "example:build"],
   ];
+  assert.deepEqual(config.review.baselineBuild, recipe);
   for (const generatedOutput of [undefined, "committed"])
     assert.throws(
       () =>

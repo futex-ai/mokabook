@@ -209,8 +209,8 @@ test("screen query and field values remain direct changes in their owning design
     });
 });
 
-test("the expanded registered catalogue uses one baseline view batch and agrees across Serve and comparison", async (t) => {
-  const fixture = await designLibraryFixture(t);
+test("the committed catalogue uses one baseline view batch and agrees across Serve and comparison", async (t) => {
+  const fixture = await designLibraryFixture(t, "committed");
   const file =
     "examples/basic/entries/design/library/controls/tag-chip.view.tsx";
   await fixture.edit(file, (source) =>

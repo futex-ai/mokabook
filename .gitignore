@@ -5,6 +5,8 @@
 .wrangler/
 coverage/
 dist/
+examples/basic/generated/**/*.html
+examples/basic/generated/mokabook-manifest.json
 node_modules/
 target/
 *.tgz

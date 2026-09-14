@@ -51,9 +51,10 @@ Arguments must be strings without NUL; the executable must not be blank.
 An explicit empty command list is allowed when the archived tree already has
 valid output. Derived `mockupsDir` must be below `repoRoot`; it may be absent
 in a fresh checkout. Existing ancestors and symlinks remain confined.
-The repository example stages its `npm ci`, `npm run build`, and
-`npm run example:build` recipe as a comment while it remains committed. Enable
-the recipe and derived mode together; committed mode never accepts inert commands.
+The repository example uses derived mode with `npm ci`, `npm run build`, and
+`npm run example:build`, enabling its recipe together with the mode switch.
+Generated HTML and the manifest are ignored; authored public CSS remains tracked.
+Committed mode never accepts inert commands.
 
 ## Trust Statement
 

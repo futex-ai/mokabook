@@ -19,7 +19,7 @@ For a much larger synthetic catalogue, first prepare it with `npm run fixture:la
 then use `npm run dev:large -- --debug-timings` or `npm run benchmark:large`.
 The [large fixture](../../tests/fixtures/large/README.md)
 uses the same Firna/React Native Web rendering stack with configurable volume,
-without expanding this committed example or slowing ordinary development startup.
+without expanding this example or slowing ordinary development startup.
 
 Mokabook's 64 design screens now use 15 registered shared components, including
 the footer tabs panel. Open **Components → Design → Shared components** for Chrome, Controls,
@@ -122,7 +122,8 @@ use separate rounded chips with a gap above the highlighted region.
 Open `design/components/overview.html` in Browse, or open
 [`generated/design/components/overview.desktop.html`](./generated/design/components/overview.desktop.html)
 and [`overview.mobile.html`](./generated/design/components/overview.mobile.html)
-directly from disk. The catalogue hierarchy links all owning design pages;
+directly from disk after `npm run build && npm run example:build`.
+The catalogue hierarchy links all owning design pages;
 there is no navigation footer inside an artboard. Product links connect
 component pages, variants, and consuming screens. The `controls` collection
 provides the canonical controls example plus Editing, States, and Published
@@ -130,7 +131,7 @@ galleries; `inspector` shows both closed-panel layouts.
 Each child gallery lists at most five owning screens; inspection also links
 two selected-instance screens in a nested gallery.
 
-All fifty-six design screens use `colorSchemes: ["light"]`: they draw the
+All sixty-four design screens use `colorSchemes: ["light"]`: they draw the
 Mokabook shell, including the existing dark-selection examples. The two product
 screens inherit the catalogue's light/dark settings and prove dark generation.
 Design headers retain the approved screen-stack logo: 17px overlapping mobile
@@ -189,20 +190,27 @@ Mokabook's own `src/` files.
 For one-off generation, verification, or publishing an artifact:
 
 ```bash
+npm ci
+npm run build
 npm run example:build
 npm run example:check
 npm run preview:build
 ```
 
-Generated HTML and the schema-v5 manifest are committed under `generated/` so
-the fixture also exercises stale and deterministic-output checks. The
+This example uses `generatedOutput: "derived"`. Generated HTML and the schema-v5
+manifest under `generated/` are ignored local artifacts, absent in a fresh clone.
+`example:build` writes them transactionally; `example:check` validates the current
+compilation and rejects tracked generated output without requiring files on disk.
+Committed-mode stale and deterministic-output tests use isolated consumer fixtures.
+Both `npm test` and `npm run test:browser` build the example before tests read its
+generated files. Baseline fixtures copy authored inputs and use the normal cached
+rebuild through the historical commit's own package source and lockfile. The
 hand-authored stylesheets (`styles.css`, `design.css`, `design-stage.css`,
 `design-review.css`, and the component design stylesheets) also live under `generated/` because it doubles as the
-public static root. The config stages the derived baseline recipe as a comment:
-`npm ci`, `npm run build`, then `npm run example:build`. Enable it together with
-`generatedOutput: "derived"` in Milestone 8, after approval to untrack generated
-files. Committed mode continues to reject `baselineBuild`; the package build
-step ensures historical comparisons use that commit's own Mokabook code.
+public static root and remain tracked. The config's `review.baselineBuild` runs
+`npm ci`, `npm run build`, then `npm run example:build` in the historical commit's
+extraction. The package build step ensures comparisons use that commit's own
+Mokabook code. The resulting baseline is cached under `.mokabook-cache/`.
 `preview:build` exports this catalogue through the shared
 package engine into `.context/mokabook-preview` for Cloudflare Pages; it is the same
 current catalogue used by the main preview workflow. It preserves search, tags,
@@ -245,6 +253,7 @@ node dist/cli/bin.js export --config examples/basic/mokabook.config.ts --out ../
 
 Output is config-relative. This command builds the example itself, retains exact
 `.html` URLs and real `/id/<id>/index.html` aliases, and needs no provider rewrites.
-The consumer export command requires the configured Git baseline and committed
-baseline output; the default repository preview does not.
+The consumer export command requires the configured Git history and rebuilds its
+baseline with the recipe above. The default repository preview exports current
+content without a baseline; preview Changes uses the same cached rebuild.
 See the [consumer publishing recipe](../../README.md#export-and-publish-a-consumer-build).

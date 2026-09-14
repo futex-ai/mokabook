@@ -13,6 +13,8 @@ without a server. In [derived mode](./mokabook-derived-baselines.md) they are
 local artifacts and the baseline is rebuilt from the merge-base commit. Browsing
 and comparisons consume those same artifacts and definitions; neither may
 introduce a second screen renderer or catalogue.
+This repository's basic example uses derived mode: only its authored inputs,
+including public CSS, are tracked. Build generates its local HTML and manifest.
 
 ## Delivery Status
 
@@ -59,8 +61,9 @@ diagnostics use repo-relative paths and deterministic ordering.
 
 ## Check
 
-`mokabook check` computes expected output without mutating committed files. In
-derived mode it also fails when Git tracks generated routes or the manifest. It
+`mokabook check` computes expected output without mutating files. In
+derived mode it fails when Git tracks generated routes, the manifest or cache
+contents, and does not require generated output to exist or match on disk. It
 fails for:
 
 - invalid config or registry metadata;
@@ -76,7 +79,7 @@ fails for:
 - missing `lightStylesheets` / `darkStylesheets` files, or a stylesheet path one
   rule would link twice into the same fragment;
 - invalid or colliding `darkFragments` manifest routes;
-- stale, missing, or proven-orphan generated output;
+- stale, missing, or proven-orphan generated output in committed mode;
 - malformed Review-ignore markers or material keys;
 - protected-source or source-inventory violations.
 

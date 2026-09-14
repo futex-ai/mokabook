@@ -26,7 +26,9 @@ validate markers/links/resources
         v
 mobile/desktop light and optional dark HTML, saved component variants, whole documents + schema-v5 manifest in memory
         |
-        +---- check: compare with committed bytes, write nothing
+        +---- check (committed): compare with disk, write nothing
+        |
+        +---- check (derived): reject Git-tracked generated output, write nothing
         |
         `---- build: stage, back up owned files, rename, roll back on failure
 ```
@@ -174,8 +176,18 @@ ordinary and `data-nav-href` links, anchors, local HTML resource attributes,
 `srcset`, inline/style-block CSS, transitive CSS imports/URLs,
 Review-ignore/material markers, protected source inventory, and manifest data are
 validated before output changes. All expected bytes are held in memory.
-`check` compares those bytes with disk and reports grouped missing, stale, and
-proven-orphan paths.
+In committed mode, `check` compares those bytes with disk and reports grouped
+missing, stale, and proven-orphan paths. In derived mode, it rejects Git-tracked
+generated routes, the manifest and cache contents; local generated files may be
+absent or stale. Authored public assets remain tracked in either mode.
+
+This repository's example uses derived mode. Both test entrypoints build the
+package and example before tests read generated files, so the verification order
+(`npm test` before `example:check`) works on a fresh clone. Comparisons rebuild
+the baseline commit with `npm ci`, `npm run build`, then `npm run example:build`
+inside its extraction and read the validated cached output. Head and baseline
+compilation use their respective source and package versions; see the
+[derived baseline contract](../protocol/mokabook-derived-baselines.md).
 
 Declared dependency paths may be files or directories. The manifest preserves
 that declaration, and downstream Browse/Review impact matching treats a
