@@ -359,15 +359,58 @@ with regressions.
 
 Tags: ui
 
-- [ ] Extend `src/client/workspace_evidence.ts` and the inspector rendering to
+Completed. Delivered by an Opus 5 agent and verified by the coordinator:
+`src/client/style_evidence.ts`, inspector rendering of matched, unresolved,
+and excluded evidence, the client-derived stage heading, unit tests, and a
+browser spec. Review found that catalogues without registered components
+receive no per-view evidence in the shell; Milestones 8 and 9 below cover
+that backend and UI work.
+
+- [x] Extend `src/client/workspace_evidence.ts` and the inspector rendering to
       show matched selectors under a dependency reason and to list excluded
       resources in a secondary details section.
-- [ ] Add client tests and a browser spec under `tests/browser` asserting the
+- [x] Add client tests and a browser spec under `tests/browser` asserting the
       copy and that excluded resources never appear as Changes rows.
+- [x] Run tests, typecheck, lint, format check, browser tests, and
+      `cargo xtask check`.
+
+## Milestone 8: Deliver per-view evidence for screen-only catalogues
+
+Catalogues without registered components produce a schema-v2 result, and the
+shell only receives per-view evidence from the schema-v3 workspace payload.
+Their matched, unresolved, and excluded stylesheet evidence is therefore
+computed but never shown. Deliver that evidence to the shell without forcing
+component classification on screen-only catalogues.
+
+- [ ] Add a failing browser or client test first: a screen-only catalogue with
+      a shared stylesheet edit must show the excluded section on an unaffected
+      screen and the matched list on an affected screen.
+- [ ] Extend the shell workspace payload so a schema-v2 catalogue supplies the
+      same per-view `reasons` and `excludedResources` slice the v3 payload
+      does, produced by the existing v2 classification rather than a second
+      analysis pass. Keep the schema versions unchanged.
+- [ ] Make `renderWorkspaceEvidence` merge the loaded comparison's evidence
+      with the classification evidence instead of replacing the panel, so the
+      legacy v2 evidence card in `src/client/diff_views.ts` is either reached
+      or deleted. Remove it if it becomes redundant.
+- [ ] Update `docs/protocol/mokly-css-attribution.md` Delivery Status and
+      `docs/protocol/mokly-changes.md` so v2 catalogues are no longer listed
+      as an exception.
 - [ ] Run tests, typecheck, lint, format check, browser tests, and
       `cargo xtask check`.
 
-## Milestone 8: Documentation, examples, and timings
+## Milestone 9: Show evidence for screen-only catalogues in the shell
+
+Tags: ui
+
+- [ ] Wire the new v2 evidence slice into the inspector using the helpers in
+      `src/client/style_evidence.ts`; no new copy or layout.
+- [ ] Extend `tests/browser/css_evidence.spec.ts` with a screen-only fixture
+      asserting matched, unresolved, and excluded rendering in both viewports.
+- [ ] Run tests, typecheck, lint, format check, browser tests, and
+      `cargo xtask check`.
+
+## Milestone 10: Documentation, examples, and timings
 
 - [ ] Update `README.md`, `examples/basic/README.md`, and
       `docs/protocol/mokly-package.md` so guidance on `review.sharedImpact`

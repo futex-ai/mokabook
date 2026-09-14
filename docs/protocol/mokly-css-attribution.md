@@ -3,9 +3,12 @@
 ## Delivery Status
 
 Rule parsing, diffing, document matching, and classification are implemented in
-both result versions, live Serve, watched updates, and publication. The inspector
-presentation below remains the approved target of the next milestone in
-[CSS Change Attribution](../../plans/css-change-attribution.md).
+both result versions, live Serve, watched updates, and publication. The
+inspector presentation below is implemented for catalogues whose comparison
+evidence reaches the shell. A catalogue without registered components still
+classifies Changes correctly, but the shell receives no per-view evidence for
+it, so its retained and excluded stylesheets are not yet visible in the
+inspector. See [CSS Change Attribution](../../plans/css-change-attribution.md).
 
 ## Purpose
 
@@ -292,6 +295,30 @@ recorded in the
 - Selector text, status names, and analysis vocabulary never appear in a
   heading or in the catalogue tree; they appear only inside the secondary
   details list, and only where the detail has review value.
+
+### Shell Derivation
+
+`ReviewState` has no resource-only variant, so the browser derives the style
+heading from the view's own evidence instead of a schema change. A view reads
+"Styles this screen uses changed" when its state is `changed`, it retains at
+least one reason, and every retained reason is a stylesheet dependency carrying
+an `analysis` record; a saved variant reads "Styles this variant uses changed".
+Any other retained reason, such as a changed font or image, keeps the existing
+state label. A view whose document also changed materially is indistinguishable
+from a resource-only view at this boundary and reads as a style outcome; its
+before and current panes still carry the material difference.
+
+The Details inspector lists the entry's retained dependency paths under
+"Changes to these files may affect this screen:", then groups analysed
+selectors by outcome, so one screen shows at most one matched list and one
+unresolved list however many stylesheets changed. Selectors are unioned,
+deduplicated, and sorted; an `unresolved` outcome with no serialized selector
+renders its sentence without a list. Excluded stylesheets come from the
+compared views of the selected entry or saved variant, unioned and sorted, and
+never include a path any of those views retains. Their lead sentence
+pluralizes when it lists more than one stylesheet. Viewport and color-scheme
+controls never change this evidence, and the mobile inspector sheet and the
+desktop inspector dock render it identically.
 
 ## Non-goals
 

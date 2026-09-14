@@ -3,6 +3,14 @@ import type { WorkspaceData } from "../server/shell/workspace_data.js";
 import { element } from "./inspector_panels.js";
 import { decodeProps } from "../components/codec.js";
 import { propText } from "./prop_display.js";
+import {
+  appendChangedFiles,
+  appendExcludedStylesheets,
+  appendStyleOutcomes,
+  excludedStylesheets,
+  retainedPaths,
+  styleOutcomes,
+} from "./style_evidence.js";
 
 export function renderWorkspaceEvidence(
   panel: HTMLElement,
@@ -52,23 +60,26 @@ export function renderWorkspaceEvidence(
       );
   }
   for (const reason of data.change?.reasons ?? [])
-    panel.append(
-      element(
-        doc,
-        "p",
-        reason.kind === "dependency"
-          ? `Related file changed: ${reason.path}`
-          : reason.kind === "screen"
+    if (reason.kind !== "dependency")
+      panel.append(
+        element(
+          doc,
+          "p",
+          reason.kind === "screen"
             ? `A screen in this flow changed: ${reason.route}`
             : labels[reason.kind],
-      ),
-    );
+        ),
+      );
+  const retained = retainedPaths(data.change?.reasons);
+  appendChangedFiles(doc, panel, retained);
+  appendStyleOutcomes(doc, panel, styleOutcomes(data.change?.reasons));
   if (data.comparison) {
     const views =
       "variants" in data.comparison
         ? (data.comparison.variants.find((item) => item.id === variantId)
             ?.views ?? [])
         : data.comparison.views;
+    appendExcludedStylesheets(doc, panel, excludedStylesheets(views, retained));
     const ignored = [...new Set(views.flatMap((view) => view.ignoredIds))];
     if (ignored.length)
       panel.append(
