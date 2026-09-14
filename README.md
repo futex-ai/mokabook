@@ -29,7 +29,6 @@ Create `mokabook.config.ts`:
 import { defineConfig } from "mokabook";
 
 export default defineConfig({
-  generatedOutput: "derived",
   colorSchemes: ["light", "dark"],
   repoRoot: ".",
   entriesDir: "docs/mockups/src/entries",
@@ -44,48 +43,11 @@ export default defineConfig({
 });
 ```
 
-`generatedOutput` defaults to `"committed"`. The configuration above and this
-repository's example select `"derived"` to keep generated HTML out of Git.
-Build still writes transactionally; Check validates the
-compilation and rejects tracked generated files or cache contents, without
-requiring local generated files to exist or match. Authored public CSS and HTML
-remain allowed in Git. Add ignore rules for your generated routes and manifest,
-plus `.mokabook-cache/`, and remove any already tracked generated files from the
-index with `git rm --cached`.
-
-Derived comparisons rebuild the merge-base commit in an isolated extraction,
-using that commit's dependencies and Mokabook version, then cache its output.
-This executes historical code: use a trusted mainline as the base. The default
-commands are `npm ci` followed by
-`npx --no-install mokabook build --config <repository-relative-config-path>`.
-Override the exact ordered argv list when your project needs additional steps:
-
-```ts
-export default defineConfig({
-  generatedOutput: "derived",
-  entriesDir: "docs/mockups/src/entries",
-  mockupsDir: "docs/mockups",
-  review: {
-    baselineBuild: [
-      ["npm", "ci"],
-      ["npm", "run", "build:tooling"],
-      [
-        "npx",
-        "--no-install",
-        "mokabook",
-        "build",
-        "--config",
-        "mokabook.config.ts",
-      ],
-    ],
-  },
-});
-```
-
-Commands run from the historical repository root without a shell; no commands
-are appended to an explicit list. `baselineBuild` is rejected in committed
-mode. See the [derived baseline contract](./docs/protocol/mokabook-derived-baselines.md)
-for cache limits, failure behavior, and the one-catalogue-per-commit cache boundary.
+This configuration uses the default `generatedOutput: "committed"`. Commit the
+generated HTML and manifest alongside their source. Check verifies that generated
+bytes match the current compilation; comparisons read their baseline from Git
+without executing historical code. [Derived output](#derived-output) is an
+optional mode for repositories that want to keep generated files out of Git.
 
 An entry module ends in `.mockup.ts` or `.mockup.tsx` and exports `mockups`:
 
@@ -450,6 +412,51 @@ Assets referenced only by public HTML/CSS URLs remain public resources.
 Use `MockLink` for catalogue destinations. Raw relative links remain suitable
 for real static assets and complete documents, but logical screen/use-case routes
 do not name generated files in schema v5.
+
+### Derived output
+
+Set `generatedOutput: "derived"` to keep generated HTML out of Git, as this
+repository's example does.
+Build still writes transactionally; Check validates the
+compilation and rejects tracked generated files or cache contents, without
+requiring local generated files to exist or match. Authored public CSS and HTML
+remain allowed in Git. Add ignore rules for your generated routes and manifest,
+plus `.mokabook-cache/`, and remove any already tracked generated files from the
+index with `git rm --cached`.
+
+Derived comparisons rebuild the merge-base commit in an isolated extraction,
+using that commit's dependencies and Mokabook version, then cache its output.
+This executes historical code: use a trusted mainline as the base. The default
+commands are `npm ci` followed by
+`npx --no-install mokabook build --config <repository-relative-config-path>`.
+Override the exact ordered argv list when your project needs additional steps:
+
+```ts
+export default defineConfig({
+  generatedOutput: "derived",
+  entriesDir: "docs/mockups/src/entries",
+  mockupsDir: "docs/mockups",
+  review: {
+    baselineBuild: [
+      ["npm", "ci"],
+      ["npm", "run", "build:tooling"],
+      [
+        "npx",
+        "--no-install",
+        "mokabook",
+        "build",
+        "--config",
+        "mokabook.config.ts",
+      ],
+    ],
+  },
+});
+```
+
+Commands run from the historical repository root without a shell; no commands
+are appended to an explicit list. `baselineBuild` is rejected in committed
+mode. See the [derived baseline contract](./docs/protocol/mokabook-derived-baselines.md)
+for cache limits, failure behavior, and the one-catalogue-per-commit cache boundary.
 
 ## Whole-document pages
 

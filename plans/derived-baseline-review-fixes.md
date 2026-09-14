@@ -81,12 +81,12 @@ Make adoption a committed step that cleanup and cancellation cannot undo.
       to state the commit point and best-effort cleanup.
 - [x] Run gates, commit and push.
 
-## Milestone 3: README quick start shows the default
+## Milestone 3: README quick start shows the default — completed
 
-- [ ] Remove `generatedOutput: "derived"` from the first `defineConfig`
+- [x] Remove `generatedOutput: "derived"` from the first `defineConfig`
       example in `README.md`; keep the derived example only in its dedicated
       section with the trust statement and ignore rules.
-- [ ] Validate Markdown, commit and push.
+- [x] Validate Markdown, commit and push.
 
 ## Milestone 4: Review
 
