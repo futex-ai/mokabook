@@ -31,7 +31,7 @@ Install an explicitly pinned npm release and run the supported CLI.
 - [x] Implement the action under `.github/actions/publish` and document consumer setup.
 - [x] Smoke-test action execution and the packed CLI against a local HTTP receiver.
 
-## Milestone 4: Verification and delivery
+## Milestone 4: Verification and delivery — completed
 
 Complete branch work before review; merge remains the plan completion boundary.
 
@@ -39,8 +39,13 @@ Complete branch work before review; merge remains the plan completion boundary.
 - [x] Update release-package fixtures to include publish code and the distributed receiver protocol, retaining release integrity checks.
 - [x] Capture raw temporary-storage setup failures in a failing CLI test, then add a typed publish fallback without exposing raw exceptions.
 - [x] Run `cargo xtask check` and resolve any failures.
-- [ ] After checks pass, `git add -A`, commit all work with Conventional Commits and push the branch.
-- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md) to review the complete local diff against `origin/main`; report numbered, severity-rated findings with options/recommendations without changing the implementation.
+- [x] After checks pass, `git add -A`, commit all work with Conventional Commits and push the branch.
+- [x] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md) to review the complete local diff against `origin/main`; report numbered, severity-rated findings with options/recommendations without changing the implementation.
+
+Implementation commit `e7d46d7` was pushed before the read-only review against
+`origin/main` (`5b4c647`). The [review report](../docs/reviews/publish-catalogue.md)
+records two unaddressed P2 findings and their recommended follow-up scopes.
+All branch milestones are complete; this plan stays active until its PR merges.
 
 ## Post-merge follow-up (non-blocking)
 
