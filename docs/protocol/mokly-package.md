@@ -26,16 +26,19 @@ discovery, and rendering adapters; consumers use ordinary page definitions.
 
 ## Package Identity
 
-- The public package name is `mokly`.
+- The public package name is `@mokly/mokly`.
 - The package exposes one executable named `mokly`.
 - With no subcommand, the executable runs watched Browse mode.
-- Zero-install and locally installed usage both use `npx mokly`; npm can
-  infer the package's sole executable.
-- The unscoped package is always public. Mokly is its author, and the `mokly`
+- Install with `npm install --save-dev @mokly/mokly react react-dom`, then use
+  `npx mokly`. Zero-install usage explicitly selects the scoped package with
+  `npx --package @mokly/mokly mokly`.
+- The scoped package is always public. Mokly is its author, and the `mokly`
   npm organization manages approved maintainer-team access and the release
   workflow.
-- `mokabook`, `mockbook`, and scoped spellings are not package or executable
-  aliases. They appear only in migration or historical documentation.
+- The unscoped `mokly`, `mokabook`, and `mockbook` names are not package aliases.
+  The latter two are not executable aliases either. Config discovery continues
+  to use `mokly.config.*`; generator identities, ownership markers, and
+  `MOKLY_*` environment variables do not include the npm scope.
 
 The initial supported runtime is Node.js 22.14 or newer. CI must exercise the
 minimum supported release and the current Firna release runtime. Unsupported
@@ -316,7 +319,7 @@ carrying the key at all, so `tags: undefined` is as much a violation as
 `tags: ["forms"]`. Tags are optional catalogue vocabulary, not a second
 hierarchy: an untagged catalogue stays valid.
 
-Imports of `mokly` from modules beneath `entriesDir` bind the authoring
+Imports of `@mokly/mokly` from modules beneath `entriesDir` bind the authoring
 helpers to that importing module. Definitions created at module evaluation or
 later through a shared helper factory therefore retain the helper module's
 repo-relative source path without process-global attribution state.
@@ -388,7 +391,7 @@ import type {
   ComponentStyleOwnership,
   ComponentResourceOwnership,
   Viewport,
-} from "mokly";
+} from "@mokly/mokly";
 
 interface RenderInput {
   colorScheme: ColorScheme;
@@ -433,7 +436,7 @@ hook on the complete document; Mokly does not own product theme state.
 All entry modules and the renderer are bundled into one build-time graph with
 one React instance. This must work when Mokly is installed locally and when
 it is fetched into npm's npx cache. Consumer dependencies resolve from the
-consumer project, while imports of `mokly` resolve to the executing
+consumer project, while imports of `@mokly/mokly` resolve to the executing
 package version.
 Config dependencies are bundled from the config directory before the temporary
 module is evaluated, so bare workspace/package imports never resolve from the

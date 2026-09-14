@@ -1,4 +1,4 @@
-import { defineComponent, type ComponentProps } from "mokly";
+import { defineComponent, type ComponentProps } from "@mokly/mokly";
 import { libraryMetadata } from "../metadata.js";
 import { destination, flag, optionalText, text } from "../schemas.js";
 import { NAV_TREE } from "../../parts/nav_data.js";

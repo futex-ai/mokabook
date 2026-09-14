@@ -16,7 +16,7 @@ test("background baselines reconcile removed rows and invalidate changed histori
   const before = await createFixture(
     reparentedEntrySource("screens") +
       `
-    import { defineComponent, definePage } from "mokly";
+    import { defineComponent, definePage } from "@mokly/mokly";
     mockups.push(
       defineScreen({ ...metadata, id: "old-screen", title: "Old screen", description: "Previous screen",
         route: "removed/z-screen.html", mobile: <main>Previous</main>, desktop: <main>Previous</main>, useCaseIds: [] }),

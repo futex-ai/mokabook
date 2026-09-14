@@ -3,7 +3,7 @@ import {
   definePage,
   defineScreen,
   defineUseCase,
-} from "mokly";
+} from "@mokly/mokly";
 import { createComponents } from "./components.js";
 import { DesktopScreen, MobileScreen } from "./screens.js";
 

@@ -8,7 +8,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createSharedUiTheme, SharedUiThemeProvider } from "@firna/ui/theme";
 import { AppRegistry } from "react-native-web";
 
-import type { RenderInput } from "mokly";
+import type { RenderInput } from "@mokly/mokly";
 
 import { darkTokens, tokens } from "./theme.js";
 import { LibraryHost } from "./entries/design/library/host.js";

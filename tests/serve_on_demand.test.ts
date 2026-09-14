@@ -18,7 +18,7 @@ for (const watch of [false, true]) {
     const fixture = await createFixture(
       validEntrySource() +
         `
-      import { definePage } from "mokly";
+      import { definePage } from "@mokly/mokly";
       mockups.push(definePage({ id: "broken", title: "Broken", description: "Broken page",
         route: "broken.html", dependencies: [], relatedDocs: [],
         render: () => { throw new Error("unrequested page rendered"); } }));
@@ -83,7 +83,7 @@ test(
     const fixture = await createFixture(
       validEntrySource({ body: '<img src="../image.svg" alt="Example" />' }) +
         `
-    import { definePage } from "mokly";
+    import { definePage } from "@mokly/mokly";
     mockups.push(definePage({ id: "broken", title: "Broken", description: "Broken page",
       route: "broken.html", dependencies: [], relatedDocs: [],
       render: () => { throw new Error("background cannot complete"); } }));

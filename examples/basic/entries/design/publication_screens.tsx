@@ -1,4 +1,4 @@
-import { screen } from "mokly";
+import { screen } from "@mokly/mokly";
 
 import { DetailsPanel } from "./parts/details.js";
 import { NavTree } from "./parts/nav.js";

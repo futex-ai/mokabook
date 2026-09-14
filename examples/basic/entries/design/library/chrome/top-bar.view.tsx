@@ -1,5 +1,5 @@
 import { useDesignStyle } from "../style_context.js";
-import type { Viewport } from "mokly";
+import type { Viewport } from "@mokly/mokly";
 import { DesignLink } from "../../parts/design_navigation.js";
 import { BrandIcon, SearchIcon, TagIcon } from "../../parts/icons.js";
 import { ViewIcon } from "../../components/parts/view_icons.js";

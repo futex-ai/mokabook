@@ -1,5 +1,5 @@
 import { MetaRow } from "../../parts/metadata_row.js";
-import { MockLink } from "mokly";
+import { MockLink } from "@mokly/mokly";
 
 import { PropValues } from "./prop_values.js";
 import { toolbarPrompt } from "./fixtures.js";

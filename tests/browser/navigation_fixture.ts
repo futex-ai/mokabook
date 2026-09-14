@@ -74,7 +74,7 @@ export async function startNavigationFixture(): Promise<NavigationFixture> {
 }
 
 function navigationSource(): string {
-  return `import { defineCollection, defineScreen, defineUseCase, MockLink } from "mokly";
+  return `import { defineCollection, defineScreen, defineUseCase, MockLink } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], relatedDocs: [] };
 function Home({ compact }) {

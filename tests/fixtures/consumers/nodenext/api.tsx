@@ -43,7 +43,7 @@ import {
   type WatchAction,
   type WatchConfig,
   type WatchRule,
-} from "mokly";
+} from "@mokly/mokly";
 
 const config: MoklyConfig = defineConfig({
   entriesDir: "entries",

@@ -9,7 +9,7 @@ export function componentEntrySource(
   } = {},
 ): string {
   return `import React from "react";
-import { defineComponent, defineCollection, defineScreen, MockLink, ReviewIgnore } from "mokly";
+import { defineComponent, defineCollection, defineScreen, MockLink, ReviewIgnore } from "@mokly/mokly";
 const metadata = { dependencies: ["notes.md"], relatedDocs: [] };
 const action = defineComponent({ ...metadata,
   id: "action", title: "Action", description: "A shared action", route: "components/action.html",

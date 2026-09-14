@@ -19,7 +19,7 @@ paths, and synthetic tests.
 
 ## Dependency Direction
 
-`mokly` has React and React DOM peer dependencies. It does not depend on
+`@mokly/mokly` has React and React DOM peer dependencies. It does not depend on
 React Native, React Native Web, `@firna/ui`, Accounting, Juno, or a consumer's
 workspace layout. At build time, React imports are resolved from the consumer's
 config file and every React-bearing source is bundled in one graph.

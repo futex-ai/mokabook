@@ -1,4 +1,4 @@
-import { screen } from "mokly";
+import { screen } from "@mokly/mokly";
 
 import { useCaseScreen } from "./browse/views/use-case.js";
 import { DesignNavigation } from "./parts/design_navigation.js";

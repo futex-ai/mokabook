@@ -6,7 +6,7 @@ Callers render the returned `Component` and export its `entry` in `mockups`.
 Mokly renders that wrapper in the consumer's existing React/provider graph.
 
 ```tsx
-import { defineComponent } from "mokly";
+import { defineComponent } from "@mokly/mokly";
 
 export const action = defineComponent({
   id: "action",

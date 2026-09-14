@@ -190,7 +190,7 @@ test("logical destinations include use cases and reject non-routed ids", async (
 });
 
 function fragmentSource(mobileAnchor: string, desktopAnchor: string): string {
-  return `import { defineScreen } from "mokly";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], navPath: ["Fixture"], relatedDocs: [], useCaseIds: [] };
 export const mockups = [
@@ -201,7 +201,7 @@ export const mockups = [
 }
 
 function useCaseFragmentSource(): string {
-  return `import { defineCollection, defineScreen, defineUseCase } from "mokly";
+  return `import { defineCollection, defineScreen, defineUseCase } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], navPath: ["Fixture"], relatedDocs: [] };
 export const mockups = [

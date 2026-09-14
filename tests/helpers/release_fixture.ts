@@ -27,7 +27,7 @@ export function packageReport(): PackageReport {
       { path: "package.json", size: 1 },
     ],
     integrity: `sha512-${"a".repeat(12)}`,
-    name: "mokly",
+    name: "@mokly/mokly",
     shasum: "b".repeat(40),
     version: "1.2.3",
   };

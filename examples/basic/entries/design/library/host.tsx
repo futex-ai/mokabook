@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { RenderInput } from "mokly";
+import type { RenderInput } from "@mokly/mokly";
 import { PreviewWorkspace } from "../components/parts/workspace.js";
 
 /** Standalone samples share tokens and layout constraints, without scenario data. */

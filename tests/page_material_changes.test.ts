@@ -12,7 +12,7 @@ const document =
 const source =
   validEntrySource() +
   `
-import { definePage } from "mokly";
+import { definePage } from "@mokly/mokly";
 mockups.push(definePage({ id: "handbook", title: "Handbook", description: "A document", route: "handbook.html", dependencies: ["notes.md"], relatedDocs: [], render: () => ${JSON.stringify(document)} }));
 `;
 

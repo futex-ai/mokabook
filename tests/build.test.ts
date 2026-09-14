@@ -200,7 +200,7 @@ test("registry rejects duplicate ids, broken relationships, and fragment collisi
 
 test("registry reports malformed relationship arrays without leaking a TypeError", async (context) => {
   const fixture = await createFixture(`
-import { defineCollection } from "mokly";
+import { defineCollection } from "@mokly/mokly";
 export const mockups = [defineCollection({
   childIds: null as unknown as string[],
   dependencies: [],
@@ -220,7 +220,7 @@ export const mockups = [defineCollection({
 
 test("registry reports source-attributed collection forest violations", async (context) => {
   const fixture = await createFixture(`
-import { defineCollection, defineScreen } from "mokly";
+import { defineCollection, defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], relatedDocs: [] };
 export const mockups = [
@@ -418,7 +418,7 @@ function stylesheetHrefs(html: string): string[] {
 }
 
 function screenWithColorSchemes(colorSchemes: string): string {
-  return `import { defineScreen } from "mokly";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 export const mockups = [defineScreen({
   colorSchemes: ${colorSchemes} as ("dark" | "light")[],

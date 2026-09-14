@@ -9,7 +9,7 @@ import { validEntrySource } from "./helpers/fixture.js";
 
 function pageSource(route = "handbook.html"): string {
   return `${validEntrySource()}
-import { definePage } from "mokly";
+import { definePage } from "@mokly/mokly";
 mockups.push(defineCollection({ id: "library", title: "Library", description: "Documents", dependencies: [], relatedDocs: [], childIds: ["handbook"] }),
 definePage({ id: "handbook", title: "Handbook", description: "Catalogue guidance", dependencies: [], relatedDocs: [], route: ${JSON.stringify(route)}, render: () => '<!doctype html><html><body><h1 id="start">Handbook</h1><a href="mock:home">Home</a></body></html>' }));`;
 }

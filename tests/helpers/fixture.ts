@@ -31,7 +31,7 @@ export async function createFixture(
   const configPath = path.join(root, "mokly.config.ts");
   await fs.promises.writeFile(
     configPath,
-    `import { defineConfig } from "mokly";
+    `import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
@@ -63,7 +63,7 @@ export async function registerFixturePage(
     .join("/");
   await fs.promises.appendFile(
     fixture.entryPath,
-    `\nimport { definePage as definePage_${suffix} } from "mokly";\nimport { ${exportName} as render_${suffix} } from ${JSON.stringify(imported.startsWith(".") ? imported : `./${imported}`)};\nmockups.push(definePage_${suffix}({ id: ${JSON.stringify(id)}, route: ${JSON.stringify(route)}, title: ${JSON.stringify(id)}, description: "Complete fixture document", dependencies: [], relatedDocs: [], render: render_${suffix} }));\n`,
+    `\nimport { definePage as definePage_${suffix} } from "@mokly/mokly";\nimport { ${exportName} as render_${suffix} } from ${JSON.stringify(imported.startsWith(".") ? imported : `./${imported}`)};\nmockups.push(definePage_${suffix}({ id: ${JSON.stringify(id)}, route: ${JSON.stringify(route)}, title: ${JSON.stringify(id)}, description: "Complete fixture document", dependencies: [], relatedDocs: [], render: render_${suffix} }));\n`,
   );
 }
 
@@ -107,7 +107,7 @@ function fixtureEntrySource(
 ): string {
   const body = options.body ?? `<a href="mock:details">Details</a>`;
   const firstTitle = options.firstTitle ?? "Home";
-  return `import { defineCollection, defineScreen, defineUseCase } from "mokly";
+  return `import { defineCollection, defineScreen, defineUseCase } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"] };
 export const mockups = [

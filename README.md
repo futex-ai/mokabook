@@ -5,9 +5,9 @@ HTML, exports complete catalogues for hosting, serves them during development, a
 with their Git baseline on demand. It is app-independent: product screens, component libraries,
 themes, styles, and compatibility adapters stay in the consuming repository.
 
-The public [npm package](https://www.npmjs.com/package/mokly) and executable
-are both named `mokly`. Releases remain pre-1.0 while the consumer contract
-settles.
+The public [npm package](https://www.npmjs.com/package/@mokly/mokly) is
+`@mokly/mokly`; its executable remains `mokly`. Releases remain pre-1.0 while
+the consumer contract settles.
 
 Shared components can have their own pages, saved variants and editable props in
 local Serve. Screens record their actual component usage for inspection and
@@ -20,13 +20,13 @@ changes. See the [component authoring guide](./src/components/README.md).
 Install Mokly and its React peers in the repository that owns the screens:
 
 ```bash
-npm install --save-dev mokly react react-dom
+npm install --save-dev @mokly/mokly react react-dom
 ```
 
 Create `mokly.config.ts`:
 
 ```ts
-import { defineConfig } from "mokly";
+import { defineConfig } from "@mokly/mokly";
 
 export default defineConfig({
   colorSchemes: ["light", "dark"],
@@ -46,7 +46,7 @@ export default defineConfig({
 An entry module ends in `.mockup.ts` or `.mockup.tsx` and exports `mockups`:
 
 ```tsx
-import { defineCollection, defineScreen, MockLink } from "mokly";
+import { defineCollection, defineScreen, MockLink } from "@mokly/mokly";
 
 export const mockups = [
   defineCollection({
@@ -98,7 +98,7 @@ runtime as well: ids and fragments must be strings before their respective
 grammars are applied.
 
 ```tsx
-import { mockLink } from "mokly";
+import { mockLink } from "@mokly/mokly";
 
 const detailsHref = mockLink("account-detail", "summary");
 // "mock:account-detail#summary"
@@ -143,7 +143,7 @@ defineScreen({
 Light-only catalogues omit `colorSchemes`, keep their existing renderer, and
 produce the same fragment names and manifest bytes as before.
 
-Run the CLI through a local dependency or directly with npx:
+After installing, run the local CLI with npx:
 
 ```bash
 npx mokly                         # browse immediately, render on demand, and watch
@@ -158,7 +158,8 @@ Options follow the command, so an explicit config is
 `npx mokly build --config path/to/mokly.config.ts`. With a local
 development dependency, `npx --no-install mokly` guarantees npm does not
 fall back to the registry. A clean machine may use
-`npx --package mokly mokly` without adding a dependency.
+`npx --package @mokly/mokly mokly` without adding a dependency. The unscoped
+name is not a package alias; imports also use `@mokly/mokly`.
 
 | Command                     | Outcome                                                   |
 | --------------------------- | --------------------------------------------------------- |
@@ -408,7 +409,7 @@ Use a page for an existing complete HTML document without inventing device
 variants. Add its ID to the owning collection's `childIds`:
 
 ```tsx
-import { definePage } from "mokly";
+import { definePage } from "@mokly/mokly";
 import { source } from "../pages/handbook.source.js";
 
 export const mockups = [

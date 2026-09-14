@@ -1,4 +1,4 @@
-import { defineConfig } from "mokly";
+import { defineConfig } from "@mokly/mokly";
 
 export default defineConfig({
   entriesDir: "../spec/catalogue",

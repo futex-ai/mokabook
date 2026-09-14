@@ -61,9 +61,9 @@ export async function createBootstrapArchive({
     assert.equal(
       packed.report.version,
       "0.8.0",
-      "bootstrap is restricted to mokly@0.8.0",
+      "bootstrap is restricted to @mokly/mokly@0.8.0",
     );
-    assert.equal(packed.report.filename, "mokly-0.8.0.tgz");
+    assert.equal(packed.report.filename, "mokly-mokly-0.8.0.tgz");
     const sourceTree = await verifySource(checkout, expectedCommit);
     await verifySource(repositoryRoot, expectedCommit);
     const bytes = await fs.readFile(packed.archivePath);
@@ -127,8 +127,8 @@ async function verifyPackage(repositoryRoot) {
   );
   assert.equal(
     `${metadata.name}@${metadata.version}`,
-    "mokly@0.8.0",
-    "bootstrap is restricted to mokly@0.8.0",
+    "@mokly/mokly@0.8.0",
+    "bootstrap is restricted to @mokly/mokly@0.8.0",
   );
 }
 

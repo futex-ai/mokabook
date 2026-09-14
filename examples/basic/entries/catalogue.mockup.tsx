@@ -10,7 +10,7 @@ import {
   MockLink,
   ReviewIgnore,
   reviewMaterialKey,
-} from "mokly";
+} from "@mokly/mokly";
 
 import { renderExampleDocument } from "./document.js";
 

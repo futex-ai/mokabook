@@ -34,7 +34,7 @@ export async function bootstrapModule(): Promise<BootstrapModule> {
 
 export async function bootstrapFixture(
   t: { after(fn: () => Promise<void>): void },
-  options: { version?: string; afterBuild?: string } = {},
+  options: { name?: string; version?: string; afterBuild?: string } = {},
 ) {
   const temporaryRoot = await fs.mkdtemp(
     path.join(os.tmpdir(), "mokly-bootstrap-test-"),
@@ -44,10 +44,11 @@ export async function bootstrapFixture(
   const destination = path.join(temporaryRoot, "artifact");
   await fs.mkdir(root);
   const packageJson = {
-    name: "mokly",
+    name: options.name ?? "@mokly/mokly",
     version: options.version ?? "0.8.0",
     type: "module",
     license: "MIT",
+    bin: { mokly: "./dist/cli/bin.js" },
     files: ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
     scripts: { prepack: "node build.mjs" },
   };

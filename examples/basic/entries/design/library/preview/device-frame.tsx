@@ -1,4 +1,4 @@
-import { defineComponent, type ComponentProps } from "mokly";
+import { defineComponent, type ComponentProps } from "@mokly/mokly";
 import { MiniWelcome } from "../../parts/mini_screens.js";
 import { libraryMetadata } from "../metadata.js";
 import { flag, optionalText, text } from "../schemas.js";

@@ -15,7 +15,7 @@ import { validEntrySource } from "./helpers/fixture.js";
 import { observeBackgroundClassification } from "./helpers/background_classification.js";
 
 const page = `
-import { definePage } from "mokly";
+import { definePage } from "@mokly/mokly";
 mockups.push(definePage({ id: "guide", title: "Guide", route: "guide.html", description: "Guide", dependencies: [], relatedDocs: [], render: () => "<!doctype html><html><body>Guide</body></html>" }));
 `;
 

@@ -1,4 +1,4 @@
-import { collection, screen } from "mokly";
+import { collection, screen } from "@mokly/mokly";
 
 import { componentStyleDependencies } from "../parts/styles.js";
 import { editingScreens } from "./editing/screens.js";

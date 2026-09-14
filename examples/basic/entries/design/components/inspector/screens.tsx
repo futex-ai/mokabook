@@ -1,4 +1,4 @@
-import { screen } from "mokly";
+import { screen } from "@mokly/mokly";
 
 import { ComponentPage } from "../parts/component_page.js";
 import { ScreenPage } from "../parts/screen_page.js";

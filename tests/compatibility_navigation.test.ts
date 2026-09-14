@@ -199,7 +199,7 @@ async function writeTransformer(
 ): Promise<void> {
   await fs.promises.writeFile(
     path.join(root, "compatibility.ts"),
-    `import type { CompatibilityTransformInput } from "mokly";
+    `import type { CompatibilityTransformInput } from "@mokly/mokly";
 export default function transform(input: CompatibilityTransformInput): string {
   if (${options.unchangedWhen ?? 'input.route !== "screens/home.mobile.html" && !input.route.includes("details")'}) return input.content;
   return input.content${mutation};
@@ -220,7 +220,7 @@ export default function transform(input: CompatibilityTransformInput): string {
 }
 
 function fragmentSource(): string {
-  return `import { defineScreen } from "mokly";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], navPath: ["Fixture"], relatedDocs: [], useCaseIds: [] };
 export const mockups = [

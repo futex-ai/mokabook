@@ -31,7 +31,7 @@ test("config imports resolve consumer packages from the config location", async 
   );
   await fs.promises.writeFile(
     fixture.configPath,
-    `import { defineConfig } from "mokly";
+    `import { defineConfig } from "@mokly/mokly";
 import { paths } from "@fixture/mokly-paths";
 export default defineConfig({ ...paths, repoRoot: "." });
 `,

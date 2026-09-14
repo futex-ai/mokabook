@@ -19,7 +19,7 @@ for (const field of required) {
     throw new Error(`package.json is missing ${field}`);
 }
 if (
-  packageJson.name !== "mokly" ||
+  packageJson.name !== "@mokly/mokly" ||
   packageJson.bin?.mokly !== "./dist/cli/bin.js"
 ) {
   throw new Error("package identity or executable is invalid");

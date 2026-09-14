@@ -103,7 +103,7 @@ export async function smokeNodeNextConsumer(context) {
   );
   await runCommand(
     "node",
-    ["--input-type=module", "--eval", 'await import("mokly")'],
+    ["--input-type=module", "--eval", 'await import("@mokly/mokly")'],
     { cwd: root },
   );
 }
@@ -125,7 +125,10 @@ export async function smokeCleanCacheExecution(context) {
     ["install", "--ignore-scripts", "--no-audit", "--no-fund"],
     { cwd: root },
   );
-  assert.equal(fs.existsSync(path.join(root, "node_modules/mokly")), false);
+  assert.equal(
+    fs.existsSync(path.join(root, "node_modules/@mokly/mokly")),
+    false,
+  );
   const cache = path.join(context.workingRoot, "empty-npx-cache");
   const packageSpec = `file:${context.archivePath}`;
   const npx = [
@@ -168,7 +171,10 @@ export async function smokeCleanCacheExecution(context) {
     { cwd: root },
   );
   await inspectConsumerExport(root, "published", "export-baseline");
-  assert.equal(fs.existsSync(path.join(root, "node_modules/mokly")), false);
+  assert.equal(
+    fs.existsSync(path.join(root, "node_modules/@mokly/mokly")),
+    false,
+  );
 }
 
 export async function smokeAccountingFixture(context) {
@@ -288,7 +294,9 @@ function consumerPackage(name, context, installMokly) {
     private: true,
     type: "module",
     dependencies: {
-      ...(installMokly ? { mokly: `file:${context.archivePath}` } : {}),
+      ...(installMokly
+        ? { "@mokly/mokly": `file:${context.archivePath}` }
+        : {}),
       react: context.versions.react,
       "react-dom": context.versions.reactDom,
     },

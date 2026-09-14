@@ -74,8 +74,10 @@ test("bootstrap packs isolated reviewed bytes and records their source and hashe
     ...fixture,
     repositoryRoot: fixture.root,
   });
-  assert.equal(report.name, "mokly");
+  assert.equal(report.name, "@mokly/mokly");
   assert.equal(report.version, "0.8.0");
+  assert.equal(report.filename, "mokly-mokly-0.8.0.tgz");
+  assert.equal(path.basename(archivePath), report.filename);
   assert.equal(report.sourceCommit, fixture.expectedCommit);
   assert.equal(
     report.sourceTree,
@@ -109,6 +111,14 @@ test("bootstrap packs isolated reviewed bytes and records their source and hashe
     "package/dist/index.js",
   ]);
   assert.equal(packed.stdout, "reviewed source\n");
+  const metadata = await execute("tar", [
+    "-xOf",
+    archivePath,
+    "package/package.json",
+  ]);
+  assert.deepEqual(JSON.parse(metadata.stdout).bin, {
+    mokly: "./dist/cli/bin.js",
+  });
   assert.equal(
     await fs.readFile(path.join(fixture.root, "dist/index.js"), "utf8"),
     "stale build",
@@ -129,10 +139,21 @@ test("bootstrap refuses release-managed versions after registration", async (t) 
   const { createBootstrapArchive } = await bootstrapModule();
   await assert.rejects(
     createBootstrapArchive({ ...fixture, repositoryRoot: fixture.root }),
-    /mokly@0\.8\.0/,
+    /@mokly\/mokly@0\.8\.0/,
   );
   await assert.rejects(fs.stat(fixture.destination), { code: "ENOENT" });
 });
+
+for (const name of ["mokly", "mokabook", "@other/mokly"])
+  test(`bootstrap refuses the wrong package identity ${name}`, async (t) => {
+    const fixture = await bootstrapFixture(t, { name });
+    const { createBootstrapArchive } = await bootstrapModule();
+    await assert.rejects(
+      createBootstrapArchive({ ...fixture, repositoryRoot: fixture.root }),
+      /@mokly\/mokly@0\.8\.0/,
+    );
+    await assert.rejects(fs.stat(fixture.destination), { code: "ENOENT" });
+  });
 
 test("bootstrap needs only the reviewed tree from a partial source clone", async (t) => {
   const fixture = await bootstrapFixture(t);

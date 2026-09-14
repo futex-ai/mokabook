@@ -11,7 +11,7 @@ import {
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
-const pageSource = `import { definePage } from "mokly";
+const pageSource = `import { definePage } from "@mokly/mokly";
 export const mockups = [definePage({ id: "handbook", title: "Handbook", description: "Document", dependencies: [], relatedDocs: [], route: "handbook.html", render: () => "<html><body>Handbook</body></html>" })];`;
 
 test("the current manifest combines pages and complete component usage without legacy roots", async (context) => {

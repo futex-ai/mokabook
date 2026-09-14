@@ -1,4 +1,4 @@
-import { MockLink } from "mokly";
+import { MockLink } from "@mokly/mokly";
 
 import { BrowserFrame, PhoneFrame } from "../../parts/stage.js";
 import type { ArtboardViewport } from "../../parts/shell.js";

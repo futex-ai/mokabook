@@ -11,7 +11,7 @@ Replace the consumer's `Nav` wrapper with an explicit catalogue link:
 
 ```tsx
 import { Button } from "@firna/ui";
-import { MockLink } from "mokly";
+import { MockLink } from "@mokly/mokly";
 
 const noop = () => {};
 
