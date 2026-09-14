@@ -144,3 +144,6 @@ and [review boundaries](../review/README.md).
 Windows/macOS CI jobs, including cancellation after the launcher exits. Native
 binding fault tests exercise assignment, setup and ownership ordering without
 requiring a Windows host.
+The Windows fixture detaches its descendant from Node's automatic
+kill-child-on-parent-exit relationship. It must still belong to Mokly's enclosing
+job; otherwise the fixture would exit automatically before testing cancellation.

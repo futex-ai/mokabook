@@ -33,7 +33,7 @@ for (const exitLauncher of [false, true]) {
       setInterval(() => {}, 1000);
     `;
       const script = `
-      const child = require("node:child_process").spawn(process.execPath, ["-e", ${JSON.stringify(descendant)}], { stdio: "inherit" });
+      const child = require("node:child_process").spawn(process.execPath, ["-e", ${JSON.stringify(descendant)}], { stdio: "inherit", detached: process.platform === "win32" });
       require("node:fs").writeFileSync("launcher.pid", String(process.pid));
       ${exitLauncher ? "child.unref();" : "setInterval(() => {}, 1000);"}
     `;
