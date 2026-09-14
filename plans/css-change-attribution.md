@@ -408,11 +408,17 @@ legacy v2 card was removed.
 
 Tags: ui
 
-- [ ] Wire the new v2 evidence slice into the inspector using the helpers in
+Completed. Verified by an Opus 5 agent that no production wiring was needed;
+browser coverage now asserts matched, unresolved, and excluded rendering for
+screen-only catalogues in both viewports. Review noted that the mockups show
+the stage heading above the current preview while the shell only renders it
+inside a loaded comparison; that is carried into the final review.
+
+- [x] Wire the new v2 evidence slice into the inspector using the helpers in
       `src/client/style_evidence.ts`; no new copy or layout.
-- [ ] Extend `tests/browser/css_evidence.spec.ts` with a screen-only fixture
+- [x] Extend `tests/browser/css_evidence.spec.ts` with a screen-only fixture
       asserting matched, unresolved, and excluded rendering in both viewports.
-- [ ] Run tests, typecheck, lint, format check, browser tests, and
+- [x] Run tests, typecheck, lint, format check, browser tests, and
       `cargo xtask check`.
 
 ## Milestone 10: Documentation, examples, and timings

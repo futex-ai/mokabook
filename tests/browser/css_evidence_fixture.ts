@@ -11,7 +11,13 @@ import { waitForClassifiedCount } from "../helpers/watched_catalogue.js";
 
 const BASELINE_CSS = ".auth { color: black; }\n.guide { color: black; }\n";
 
-/** Two screens sharing a stylesheet, with optional component registration. */
+/**
+ * Screens sharing a stylesheet, with optional component registration.
+ *
+ * Screen-only catalogues also carry `compact`, whose sign-in button exists on
+ * mobile only, so one screen can hold a retained mobile view and a released
+ * desktop view of the same stylesheet.
+ */
 function evidenceEntrySource(components: boolean): string {
   return `import React from "react";
 import { defineCollection, defineComponent, defineScreen } from "@mokly/mokly";
@@ -23,14 +29,21 @@ const badge = defineComponent({ ...metadata,
   variants: [{ id: "default", title: "Default", props: { label: "New" } }]
 });
 export const mockups = [
-  defineCollection({ ...metadata, id: "fixture", title: "Fixture", description: "Fixture collection", childIds: [${components ? '"badge", ' : ""}"home", "details"] }),
+  defineCollection({ ...metadata, id: "fixture", title: "Fixture", description: "Fixture collection", childIds: [${components ? '"badge", ' : '"compact", '}"home", "details"] }),
   ${components ? "badge.entry," : ""}
   defineScreen({ ...metadata, id: "home", title: "Home", description: "Home screen", route: "screens/home.html",
     mobile: <main id="home"><button className="auth">Sign in</button></main>,
     desktop: <main id="home"><button className="auth">Sign in</button></main> }),
   defineScreen({ ...metadata, id: "details", title: "Details", description: "Detail screen", route: "screens/details.html",
     mobile: <main id="details"><p className="guide">Guide</p></main>,
-    desktop: <main id="details"><p className="guide">Guide</p></main> })
+    desktop: <main id="details"><p className="guide">Guide</p></main> })${
+      components
+        ? ""
+        : `,
+  defineScreen({ ...metadata, id: "compact", title: "Compact", description: "Compact screen", route: "screens/compact.html",
+    mobile: <main id="compact"><button className="auth">Sign in</button></main>,
+    desktop: <main id="compact"><p className="note">Sign in on mobile</p></main> })`
+    }
 ];
 `;
 }

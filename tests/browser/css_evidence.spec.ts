@@ -1,15 +1,17 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { cssEvidenceFixture } from "./css_evidence_fixture.js";
+import {
+  EXCLUDED_LEAD,
+  FILES_LEAD,
+  INSPECTOR_VIEWPORTS,
+  MATCHED_LEAD,
+  STYLESHEET,
+  UNRESOLVED_LEAD,
+  openCatalogue,
+  openEvidence,
+} from "./css_evidence_page.js";
 import { chooseScheme, chooseViewport } from "./workspace_actions.js";
-
-const STYLESHEET = "mockups/shared.css";
-const FILES_LEAD = "Changes to these files may affect this screen:";
-const MATCHED_LEAD = "Changed styles that apply to this screen:";
-const UNRESOLVED_LEAD =
-  "This change can apply anywhere on the screen, so the screen stays in Changes:";
-const EXCLUDED_LEAD =
-  "This stylesheet changed, but none of the changed styles apply to this screen.";
 
 let matched: Awaited<ReturnType<typeof cssEvidenceFixture>>;
 let unresolved: Awaited<ReturnType<typeof cssEvidenceFixture>>;
@@ -23,10 +25,7 @@ test.afterAll(async () => {
   await unresolved?.close();
 });
 
-for (const [name, size] of [
-  ["desktop", { width: 1440, height: 1000 }],
-  ["mobile", { width: 390, height: 844 }],
-] as const) {
+for (const [name, size] of INSPECTOR_VIEWPORTS) {
   test.describe(`${name} stylesheet evidence`, () => {
     test.use({ viewport: size });
 
@@ -127,16 +126,4 @@ for (const [name, size] of [
       ).toBeGreaterThanOrEqual(2);
     });
   });
-}
-
-async function openEvidence(page: Page): Promise<Locator> {
-  await page.getByRole("tab", { name: "Details", exact: true }).click();
-  const evidence = page.locator("[data-workspace-evidence]");
-  await expect(evidence).toContainText("Comparison details");
-  return evidence;
-}
-
-async function openCatalogue(page: Page, viewport: string): Promise<void> {
-  if (viewport === "desktop") return;
-  await page.getByRole("button", { name: "Open catalogue navigation" }).click();
 }
