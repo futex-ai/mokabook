@@ -41,8 +41,8 @@ down its host. With `--debug-timings`, `baseline.resolve` measures commit
 resolution before the parent `baseline` builder span. The builder emits
 `baseline.extract`, `baseline.command[<index>]` and `baseline.adopt` child spans
 on a miss. Its successful end includes a boolean `cacheHit`; it settles only
-after cleanup and lock release. Command argv and diagnostics never enter timing
-records. See the [timing contract](../../docs/protocol/mokabook-timings.md).
+after best-effort cleanup and lock release. Command argv and diagnostics never
+enter timing records. See the [timing contract](../../docs/protocol/mokabook-timings.md).
 
 Preparation lives in `review/prepare.ts`; read-only factories live separately
 in `review/repository.ts`:
@@ -60,7 +60,13 @@ same composition and rechecks the marker.
 `cache_layout.ts` owns `.mokabook-cache/baselines/<commit>`. The builder extracts
 to `source`, runs commands, validates the historical manifest and output tree,
 moves the generated directory to `output`, deletes the extraction, and writes
-`complete.json`. `inputs.json` records the repository-relative output path;
+`complete.json`. Completion of the marker write commits the result immediately.
+Cancellation before that point removes partial output; cancellation afterward
+returns the completed result and skips remaining retention work. Cleanup and
+lock release cannot reject or erase a completed build. `cleanup.ts` returns
+per-entry maintenance failures and continues with other eligible entries;
+`maintenance.ts` reports diagnostics on stderr without adding failure events to
+the successful build. `inputs.json` records the repository-relative output path;
 the marker records the commands. A complete entry for different settings fails
 explicitly and remains intact. Remove that commit's cache entry before changing
 its catalogue/build settings. Partial entries are rebuilt under the entry lock.

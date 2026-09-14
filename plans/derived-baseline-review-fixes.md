@@ -54,29 +54,32 @@ handing the child a read-only repository from the parent.
 - [x] Run format, lint, typecheck, `npm test`, `npm run example:check`,
       browser tests, `cargo xtask check`; commit and push.
 
-## Milestone 2: Publish before cleanup
+## Milestone 2: Publish before cleanup — completed
 
 Make adoption a committed step that cleanup and cancellation cannot undo.
 
-- [ ] In `src/baseline/rebuild.ts`, restructure `prepare` so writing the
+- [x] In `src/baseline/rebuild.ts`, restructure `prepare` so writing the
       completion marker is the commit point: set the adopted state immediately
       after the marker write and return the result from that step. Cleanup and
       lock release become separate post-steps that cannot fail the build.
-- [ ] Make `cleanupBaselines` tolerate per-entry failures: catch errors from
+- [x] Make `cleanupBaselines` tolerate per-entry failures: catch errors from
       stat, lock, rename and remove for each victim, record them, continue,
       and report them through the progress observer or stderr without
       throwing.
-- [ ] Move the post-adoption `assertBaselineActive` check: cancellation after
+- [x] Move the post-adoption `assertBaselineActive` check: cancellation after
       the marker is written completes the build with the cached result and
       skips cleanup.
-- [ ] Tests in `tests/baseline_rebuild.test.ts` using the existing fake
+- [x] Tests in `tests/baseline_rebuild.test.ts` and `tests/baseline_cleanup.test.ts`
+      using the existing fake
       filesystem: cleanup rename failure keeps the marker and output; abort
       signalled between marker write and cleanup returns a completed baseline;
       concurrent removal of a victim entry during cleanup does not fail the
       build.
-- [ ] Update the Rebuild Procedure and Cache Layout sections of the protocol
+- [x] Also cover root listing, victim stat/lock/remove, and active lock-release
+      failures; preserve successful progress and prove cleanup continues.
+- [x] Update the Rebuild Procedure and Cache Layout sections of the protocol
       to state the commit point and best-effort cleanup.
-- [ ] Run gates, commit and push.
+- [x] Run gates, commit and push.
 
 ## Milestone 3: README quick start shows the default
 

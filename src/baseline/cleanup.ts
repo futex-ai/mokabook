@@ -6,8 +6,8 @@ import {
   parseCompletionMarker,
   type CacheLayout,
 } from "./cache_layout.js";
-import { assertBaselineActive } from "./errors.js";
 import { tryBaselineLock } from "./lock.js";
+import type { BaselineMaintenanceFailure } from "./maintenance.js";
 import type {
   BaselineBuildRequest,
   BaselineClock,
@@ -23,14 +23,22 @@ export async function cleanupBaselines(
   active: CacheLayout,
   request: BaselineBuildRequest,
   retained: number,
-): Promise<void> {
+): Promise<readonly BaselineMaintenanceFailure[]> {
+  const failures: BaselineMaintenanceFailure[] = [];
+  if (request.signal?.aborted) return failures;
+  let candidates: readonly string[];
+  try {
+    candidates = await fs.list(active.root);
+  } catch (error) {
+    return [{ entry: active.root, error }];
+  }
   const entries: { layout: CacheLayout; finishedAt: number }[] = [];
-  for (const commit of await fs.list(active.root)) {
-    assertBaselineActive(request.signal);
+  for (const commit of candidates) {
+    if (request.signal?.aborted) return failures;
     if (!/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(commit)) continue;
     const layout = cacheLayout(request.repoRoot, commit);
-    if ((await fs.stat(layout.entry))?.kind !== "directory") continue;
     try {
+      if ((await fs.stat(layout.entry))?.kind !== "directory") continue;
       if ((await fs.stat(layout.marker))?.kind !== "regular") continue;
       const marker = parseCompletionMarker(
         JSON.parse(
@@ -42,8 +50,8 @@ export async function cleanupBaselines(
       );
       if (marker)
         entries.push({ layout, finishedAt: Date.parse(marker.finishedAt) });
-    } catch {
-      continue;
+    } catch (error) {
+      failures.push({ entry: layout.entry, error });
     }
   }
   entries.sort(
@@ -53,20 +61,32 @@ export async function cleanupBaselines(
   );
   let kept = 1;
   for (const { layout } of entries) {
-    assertBaselineActive(request.signal);
+    if (request.signal?.aborted) break;
     if (layout.entry === active.entry) continue;
     if (kept++ < retained) continue;
-    const lock = await tryBaselineLock(fs, runner, clock, layout);
-    if (!lock) continue;
-    const trash = path.join(
-      active.entry,
-      `discard-${path.basename(layout.entry)}`,
-    );
     try {
-      await fs.rename(layout.entry, trash);
-      await fs.remove(trash);
-    } finally {
-      await lock.release();
+      const lock = await tryBaselineLock(fs, runner, clock, layout);
+      if (!lock) continue;
+      const trash = path.join(
+        active.entry,
+        `discard-${path.basename(layout.entry)}`,
+      );
+      try {
+        if (request.signal?.aborted) break;
+        await fs.rename(layout.entry, trash);
+        await fs.remove(trash);
+      } catch (error) {
+        failures.push({ entry: layout.entry, error });
+      } finally {
+        try {
+          await lock.release();
+        } catch (error) {
+          failures.push({ entry: layout.lock, error });
+        }
+      }
+    } catch (error) {
+      failures.push({ entry: layout.entry, error });
     }
   }
+  return failures;
 }

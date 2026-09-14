@@ -137,12 +137,17 @@ The builder runs the following steps for one merge-base commit.
    commits is therefore unsupported in derived mode until the move is merged.
 6. Move `<source>/<mockupsDir>` to the entry's `output` directory, delete the
    remaining `source` extraction including installed dependencies, write the
-   completion marker, then release the lock.
+   completion marker. Successful completion of that write is the commit point:
+   the result is adopted immediately and cannot be removed by this build's
+   failure path. Retention cleanup and lock release are separate best-effort
+   post-steps; their failures are reported on stderr and do not fail the build.
 
-Every step is cancellable. Cancellation terminates the running command's
+Before the marker commit point, cancellation terminates the running command's
 process group, waits for exit, removes the partial entry, and reports
-`baseline-interrupted`. Serve's shutdown drain includes rebuild processes
-using the same rules as its Git processes.
+`baseline-interrupted`. Cancellation after the marker write returns the completed
+cached result, skips remaining retention cleanup and still attempts lock release.
+Serve's shutdown drain includes rebuild processes using the same rules as its
+Git processes.
 
 ## Cache Layout
 
@@ -181,7 +186,12 @@ the default two-minute lock timeout fails as `baseline-lock-timeout`.
 After a successful rebuild the builder removes complete entries beyond the
 retained count, newest markers first, defaulting to three. It never removes the
 entry it just built, an entry another process holds locked, or partial entries
-belonging to a live lock holder.
+belonging to a live lock holder. Cleanup records each entry's stat, lock,
+rename, remove and release failures, continues with other eligible entries,
+and reports those failures on stderr. A concurrent entry removal is tolerated.
+Root listing failures skip cleanup. Failure or cancellation of these post-steps
+never removes the active completion marker or output and never rejects a
+successful rebuild; a failed retirement may leave files for later maintenance.
 
 ## Baseline Reads
 

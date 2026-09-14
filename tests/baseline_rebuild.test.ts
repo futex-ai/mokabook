@@ -4,7 +4,6 @@ import test from "node:test";
 
 import { cacheLayout } from "../dist/baseline/cache_layout.js";
 import { BaselineCommandError } from "../dist/baseline/errors.js";
-import { CachedBaselineBuilder } from "../dist/baseline/rebuild.js";
 import type { BaselineProgress } from "../dist/baseline/types.js";
 import { baselineFixture, success } from "./helpers/baseline_fixture.js";
 
@@ -52,6 +51,39 @@ test("baseline rebuild adopts once and a cache hit executes no commands", async 
     MOKABOOK_BASELINE_COMMIT: request.commit,
   });
   assert.deepEqual(calls[2]?.argv, request.commands[0]);
+});
+
+test("cancellation at the marker commit point completes and skips cleanup", async (t) => {
+  const { builder, request, fs, calls } = baselineFixture();
+  const layout = cacheLayout(request.repoRoot, request.commit);
+  const controller = new AbortController();
+  const write = fs.write.bind(fs);
+  t.mock.method(fs, "write", async (file: string, bytes: Uint8Array) => {
+    await write(file, bytes);
+    if (file === layout.marker) controller.abort();
+  });
+  const list = fs.list.bind(fs);
+  const cleanup = t.mock.method(fs, "list", async (directory: string) => {
+    assert.notEqual(directory, layout.root, "cleanup ran after cancellation");
+    return list(directory);
+  });
+  const events: BaselineProgress[] = [];
+  const result = await builder.build({
+    ...request,
+    signal: controller.signal,
+    onProgress: (event) => events.push(event),
+  });
+  assert.equal(result.cacheHit, false);
+  assert.deepEqual(
+    events.map((event) => event.type),
+    ["start", "complete"],
+  );
+  assert.ok(await fs.stat(layout.marker));
+  assert.ok(await fs.stat(layout.output));
+  assert.equal(await fs.stat(layout.lock), undefined);
+  cleanup.mock.restore();
+  assert.equal((await builder.build(request)).cacheHit, true);
+  assert.equal(calls.length, 3);
 });
 
 test("concurrent baseline builders wait for the same completed output", async () => {
@@ -171,30 +203,6 @@ test("aborted command removes partial output and emits a typed failure", async (
   assert.equal(await fs.stat(layout.marker), undefined);
   assert.equal(await fs.stat(layout.output), undefined);
   assert.equal(await fs.stat(layout.source), undefined);
-});
-
-test("retention protects the active entry and every locked entry", async () => {
-  const fixture = baselineFixture();
-  const commits = ["a", "b", "c", "d", "e"].map((letter) => letter.repeat(40));
-  for (const commit of commits.slice(0, 4)) {
-    await fixture.builder.build({ ...fixture.request, commit });
-    fixture.clock.time++;
-  }
-  const locked = cacheLayout("/repo", commits[1]!);
-  fixture.fs.put(locked.lock, "regular", Buffer.from('{"pid":42}'));
-  const builder = new CachedBaselineBuilder(
-    fixture.fs,
-    fixture.runner,
-    fixture.clock,
-    { ...fixture.options, retainedCount: 1 },
-  );
-  await builder.build({ ...fixture.request, commit: commits[4]! });
-  assert.ok(await fixture.fs.stat(locked.output));
-  assert.ok(await fixture.fs.stat(cacheLayout("/repo", commits[4]!).output));
-  assert.equal(
-    await fixture.fs.stat(cacheLayout("/repo", commits[2]!).entry),
-    undefined,
-  );
 });
 
 test("different catalogue settings cannot reuse or erase a completed baseline", async () => {

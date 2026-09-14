@@ -17,6 +17,7 @@ import { assertBaselineActive, BaselineError } from "./errors.js";
 import { extractBaseline } from "./extract.js";
 import { acquireBaselineLock } from "./lock.js";
 import { baselineManifestVersion } from "./manifest.js";
+import { reportBaselineMaintenance } from "./maintenance.js";
 import type {
   BaselineBuilder,
   BaselineBuildRequest,
@@ -141,64 +142,78 @@ export class CachedBaselineBuilder implements BaselineBuilder {
           env,
           request.signal,
         );
-        const marker = await timeAsync("baseline.adopt", async () => {
-          const output = path.join(layout.source, request.mockupsPath);
-          const manifestVersion = await baselineManifestVersion(
-            this.fs,
-            request.repoRoot,
-            output,
-            request.allowManifestV2,
-            request.signal,
-          );
-          await validateOutputTree(this.fs, output, request.signal);
-          assertBaselineActive(request.signal);
-          await this.fs.rename(output, layout.output);
-          await this.fs.remove(layout.source);
-          assertBaselineActive(request.signal);
-          const marker: CompletionMarker = {
-            schemaVersion: 1,
-            commit: request.commit,
-            finishedAt: new Date(this.clock.now()).toISOString(),
-            commands: request.commands.map((argv) => [...argv]),
-            manifestVersion,
-          };
-          await this.fs.write(
-            path.join(layout.entry, "inputs.json"),
-            Buffer.from(JSON.stringify(request.mockupsPath)),
-          );
-          await this.fs.write(
-            layout.marker,
-            Buffer.from(`${JSON.stringify(marker)}\n`),
-          );
-          return marker;
-        });
-        assertBaselineActive(request.signal);
-        await cleanupBaselines(
-          this.fs,
-          this.runner,
-          this.clock,
-          layout,
-          request,
-          retained,
+        const result = await timeAsync(
+          "baseline.adopt",
+          async (): Promise<RebuiltBaseline> => {
+            const output = path.join(layout.source, request.mockupsPath);
+            const manifestVersion = await baselineManifestVersion(
+              this.fs,
+              request.repoRoot,
+              output,
+              request.allowManifestV2,
+              request.signal,
+            );
+            await validateOutputTree(this.fs, output, request.signal);
+            assertBaselineActive(request.signal);
+            await this.fs.rename(output, layout.output);
+            await this.fs.remove(layout.source);
+            assertBaselineActive(request.signal);
+            const marker: CompletionMarker = {
+              schemaVersion: 1,
+              commit: request.commit,
+              finishedAt: new Date(this.clock.now()).toISOString(),
+              commands: request.commands.map((argv) => [...argv]),
+              manifestVersion,
+            };
+            await this.fs.write(
+              path.join(layout.entry, "inputs.json"),
+              Buffer.from(JSON.stringify(request.mockupsPath)),
+            );
+            assertBaselineActive(request.signal);
+            await this.fs.write(
+              layout.marker,
+              Buffer.from(`${JSON.stringify(marker)}\n`),
+            );
+            adopted = true;
+            return {
+              commit: request.commit,
+              outputDir: layout.output,
+              marker,
+              cacheHit: false,
+            };
+          },
         );
-        adopted = true;
+        if (!request.signal?.aborted) {
+          try {
+            for (const failure of await cleanupBaselines(
+              this.fs,
+              this.runner,
+              this.clock,
+              layout,
+              request,
+              retained,
+            ))
+              reportBaselineMaintenance(failure);
+          } catch (error) {
+            reportBaselineMaintenance({ entry: layout.root, error });
+          }
+        }
         request.onProgress?.({
           type: "complete",
           commit: request.commit,
           cacheHit: false,
         });
-        return {
-          commit: request.commit,
-          outputDir: layout.output,
-          marker,
-          cacheHit: false,
-        };
+        return result;
       } finally {
         try {
           if (rebuilding && !adopted)
             await removePartialBaseline(this.fs, layout);
         } finally {
-          await lock.release();
+          try {
+            await lock.release();
+          } catch (error) {
+            reportBaselineMaintenance({ entry: layout.lock, error });
+          }
         }
       }
     } catch (error) {
