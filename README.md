@@ -730,13 +730,18 @@ bounded post-publish check tolerates npm metadata, tarball, dist-tag, and
 signature propagation before proving the registry artifact. A manual
 `publish_ref` retries only an existing tag. See the
 [release protocol](./docs/protocol/npm-release.md) for the current release/retry
-procedure and maintainer settings. Package versions are release-managed;
-complete the one-time [Mokly registry bootstrap](./docs/protocol/npm-bootstrap.md)
-before the first release, then do not repeat it. Its dedicated
-`node scripts/release/bootstrap.mjs <reviewed-full-commit-sha> <new-output-dir>`
-command builds an isolated checkout and records the source SHA alongside the
-tarball hashes. Verify the [GitHub publishing protections](./docs/protocol/npm-github-protections.md)
-with an authorized maintainer account. Do not add an npm write token to GitHub.
+procedure and maintainer settings. Package versions are release-managed.
+
+The one-time [Mokly registry bootstrap](./docs/protocol/npm-bootstrap.md) is
+complete: `@mokly/mokly@0.8.0` is the accepted initial `latest` release and also
+retains the `bootstrap` tag. Do not repeat registration or reset release state.
+Later reviewed releases advance `latest`; `bootstrap` remains on `0.8.0`. The
+bootstrap record retains the isolated-build procedure and reviewed source SHA.
+Before the first automated release, complete and verify the GitHub release
+token's repository access and the
+[GitHub publishing protections](./docs/protocol/npm-github-protections.md)
+with an authorized maintainer account. The interactive bootstrap does not prove
+OIDC publishing works. Do not add an npm write token to GitHub.
 
 The synthetic fixture at [`examples/basic`](./examples/basic/README.md) proves
 custom rendering, stylesheets, id links, collections, use cases, and
