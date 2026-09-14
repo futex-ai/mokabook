@@ -87,37 +87,42 @@ baselines.
       `npm test`, `npm run example:check`, and `cargo xtask check`; commit and
       push.
 
-## Milestone 3: Rebuilt baseline builder and reader
+## Milestone 3: Rebuilt baseline builder and reader — completed
 
 New `src/baseline/` module family. Unit tests inject the process runner, clock,
 and filesystem; one integration test uses a real temporary Git repository with
 a tiny consumer catalogue.
 
-- [ ] Add `src/baseline/cache_layout.ts`: paths under `.mokabook-cache/baselines`,
+- [x] Add `src/baseline/cache_layout.ts`: paths under `.mokabook-cache/baselines`,
       completion marker format, and the lock file location.
-- [ ] Add `src/baseline/extract.ts`: `git archive <commit>` piped into the
+- [x] Add `src/baseline/extract.ts`: `git archive <commit>` piped into the
       source directory, refusing to write outside it.
-- [ ] Add `src/baseline/commands.ts`: run the configured argv list in the
+- [x] Add `src/baseline/commands.ts`: run the configured argv list in the
       extraction root with a bounded environment, captured output retained for
       the failure message, cancellation through `AbortSignal`, and no shell.
-- [ ] Add `src/baseline/rebuild.ts` behind a `BaselineBuilder` interface:
+- [x] Add `src/baseline/rebuild.ts` behind a `BaselineBuilder` interface:
       acquire the lock, reuse a complete cache entry, otherwise extract, run
       commands, validate the produced manifest with the historical-manifest
       parser, adopt output, write the marker, and clean stale entries beyond a
       retained count.
-- [ ] Add `src/baseline/reader.ts`: `RebuiltBaselineReader` implementing
+- [x] Add `src/baseline/reader.ts`: `RebuiltBaselineReader` implementing
       `BaselineReader` over the cached output tree using the confined public
       file reader, rejecting symlinks and non-regular files exactly as the Git
       reader does.
-- [ ] Add typed errors: history unavailable, extraction failed, command failed
+- [x] Add typed errors: history unavailable, extraction failed, command failed
       with exit code and last output lines, interrupted rebuild, invalid rebuilt
       manifest, lock timeout.
-- [ ] Tests: cache hit skips commands; concurrent rebuilds of one commit share
+- [x] Tests: cache hit skips commands; concurrent rebuilds of one commit share
       the lock; interrupted rebuild leaves no marker and is rebuilt next time;
       command failure surfaces the command and exit code; retained-count
       cleanup never removes the active commit; reader rejects symlinks.
-- [ ] Update `src/review/README.md` or add `src/baseline/README.md`.
-- [ ] Run tests, typecheck, lint, `cargo xtask check`, commit, and push.
+- [x] Update `src/review/README.md` or add `src/baseline/README.md`.
+- [x] Cover cache-setting collisions, stale-lock reclamation races, ancestor
+      symlinks, compressed archives, and bounded filesystem batches; clarify
+      the corresponding protocol boundaries.
+- [x] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
+      `npm test`, `npm run example:check`, and `cargo xtask check`; commit and
+      push.
 
 ## Milestone 4: Config, build, and check modes
 

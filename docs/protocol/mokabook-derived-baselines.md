@@ -95,13 +95,18 @@ The builder runs the following steps for one merge-base commit.
    No command runs in that case.
 3. Acquire the entry lock. Extract the commit with Git's archive format into
    the entry's `source` directory. Entries that escape the directory, symlinks
-   that resolve outside it, and non-regular files other than directories fail
-   as `baseline-extraction-failed`.
+   that resolve outside it, hard links, and special files fail
+   as `baseline-extraction-failed`. Archive input is uncompressed and bounded
+   to 64 MiB; malformed archives and larger input fail explicitly. All entry
+   paths and symlink chains are validated before extraction writes begin.
+   Confined source symlinks are preserved; output symlinks are rejected.
 4. Run each `baselineBuild` command in the `source` directory with a bounded
    environment: `PATH`, `HOME`, locale and temp variables, `CI=1`, and
    `MOKABOOK_BASELINE_COMMIT=<commit>`. Standard output and error are captured
-   and bounded. A non-zero exit fails as `baseline-command-failed` with the
-   command index, argv, exit code or signal, and the last lines of output.
+   and bounded to a combined 64 KiB tail. A non-zero exit fails as
+   `baseline-command-failed` with the
+   zero-based command index, argv, exit code or signal, and the last 40 output
+   lines.
 5. Locate `<source>/<mockupsDir>` using the current config's repository-relative
    `mockupsDir`. Parse its manifest with the historical-manifest reader; the
    same version rules apply as for committed baselines. A missing directory,
@@ -132,16 +137,24 @@ destination. Consumers add `.mokabook-cache/` to their ignore file; derived
   source/         # extraction, removed after adoption
   output/         # the rebuilt mockupsDir tree
   complete.json   # completion marker
+  inputs.json     # JSON string containing repository-relative mockupsDir
 ```
 
 `complete.json` is `{ schemaVersion: 1, commit, finishedAt, commands,
 manifestVersion }`. An entry is complete only when the marker parses, its
 `commit` matches the directory name, and `output/<manifest>` exists. Anything
-else is a partial entry and is removed before the next attempt.
+else is a partial entry and is removed under the lock before the next attempt.
+The historical manifest is validated again on reuse. A complete entry with a
+different `inputs.json` output path or command list fails as
+`baseline-output-invalid` and remains intact. The commit-only cache holds one
+catalogue/build configuration; remove that entry before changing those settings.
 
-Lock holders whose process no longer exists are reclaimed. Other waiters poll
+Lock contents are published atomically. Dead-holder reclamation retains an
+identity-specific tombstone until entry cleanup, preventing stale concurrent
+observers from unlinking a replacement lock. Lock holders whose process no
+longer exists are reclaimed. Other waiters poll every 100 ms
 until the holder finishes, then reuse the completed entry. Waiting longer than
-the bounded lock timeout fails as `baseline-lock-timeout`.
+the default two-minute lock timeout fails as `baseline-lock-timeout`.
 
 After a successful rebuild the builder removes complete entries beyond the
 retained count, newest markers first, defaulting to three. It never removes the
@@ -151,10 +164,12 @@ belonging to a live lock holder.
 ## Baseline Reads
 
 `RebuiltBaselineReader` implements the same reader interface as the Git blob
-reader over `output/`. Paths are `mockupsDir`-relative, confined to `output/`,
-and must resolve to regular files; symlinks, directories, and escapes are
+reader over `output/`. The interface accepts commit and repository-relative
+paths, strips the configured `mockupsDir` prefix, and confines the result to
+`output/`. Files must resolve to regular files; symlinks, directories, and escapes are
 rejected exactly as symlink and non-regular Git blobs are. Bulk reads batch
-filesystem access and are subject to the same object-count and byte budgets.
+filesystem access (at most 32 reads in flight) and use the same 4,096-object
+and 48 MiB per-batch budgets as committed reads, including metadata overhead.
 Source protection applies the baseline's own manifest inventory, entry source
 paths, and reserved basenames, as for any historical manifest.
 

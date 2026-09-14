@@ -1,5 +1,9 @@
+import type { BaselineErrorCode } from "./baseline/errors.js";
+
 /** Stable error codes callers and CLI formatting may branch on. */
+
 export type MokabookErrorCode =
+  | BaselineErrorCode
   | "build-invalid"
   | "cli-invalid"
   | "config-invalid"

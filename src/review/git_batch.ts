@@ -1,8 +1,8 @@
 import { MokabookError, errorMessage } from "../errors.js";
 import type { GitCommandRunner, GitFile, GitFileKind } from "./git.js";
 
-const MAX_BATCH_OUTPUT_BYTES = 48 * 1024 * 1024;
-const MAX_BLOBS_PER_BATCH = 4_096;
+export const MAX_BATCH_OUTPUT_BYTES = 48 * 1024 * 1024;
+export const MAX_BLOBS_PER_BATCH = 4_096;
 const MAX_TREE_PATHS_PER_BATCH = 256;
 const MAX_TREE_PATHSPEC_BYTES = 24 * 1024;
 

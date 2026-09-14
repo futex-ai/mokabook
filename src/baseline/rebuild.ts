@@ -1,0 +1,208 @@
+import path from "node:path";
+
+import { errorMessage } from "../errors.js";
+import { baselineEnvironment, runBaselineCommands } from "./commands.js";
+import { completedBaseline, removePartialBaseline } from "./cache.js";
+import {
+  assertMockupsPath,
+  cacheLayout,
+  DEFAULT_RETAINED_COUNT,
+  validCommands,
+  type CompletionMarker,
+} from "./cache_layout.js";
+import { cleanupBaselines } from "./cleanup.js";
+import { ensureBaselineDirectory, validateOutputTree } from "./confinement.js";
+import { assertBaselineActive, BaselineError } from "./errors.js";
+import { extractBaseline } from "./extract.js";
+import { acquireBaselineLock } from "./lock.js";
+import { baselineManifestVersion } from "./manifest.js";
+import type {
+  BaselineBuilder,
+  BaselineBuildRequest,
+  BaselineClock,
+  BaselineFileSystem,
+  BaselineProcessRunner,
+  RebuiltBaseline,
+} from "./types.js";
+
+export interface BaselineBuilderOptions {
+  readonly environment: Readonly<Record<string, string | undefined>>;
+  readonly retainedCount?: number;
+  readonly lockTimeoutMs?: number;
+}
+
+/** Serialize rebuilding and publish an immutable completed output tree per commit. */
+export class CachedBaselineBuilder implements BaselineBuilder {
+  constructor(
+    private readonly fs: BaselineFileSystem,
+    private readonly runner: BaselineProcessRunner,
+    private readonly clock: BaselineClock,
+    private readonly options: BaselineBuilderOptions,
+  ) {}
+
+  async build(request: BaselineBuildRequest): Promise<RebuiltBaseline> {
+    try {
+      assertBaselineActive(request.signal);
+      assertMockupsPath(request.mockupsPath);
+      if (!validCommands(request.commands))
+        throw new BaselineError(
+          "baseline-command-failed",
+          "Invalid baseline build commands",
+        );
+      const retained = this.options.retainedCount ?? DEFAULT_RETAINED_COUNT;
+      if (!Number.isSafeInteger(retained) || retained < 1)
+        throw new Error("Baseline retained count must be a positive integer");
+      const layout = cacheLayout(request.repoRoot, request.commit);
+      await ensureBaselineDirectory(
+        this.fs,
+        request.repoRoot,
+        layout.entry,
+        request.signal,
+      );
+      if (!(await this.fs.stat(layout.lock))) {
+        const marker = await completedBaseline(this.fs, layout, request);
+        if (marker) {
+          assertBaselineActive(request.signal);
+          request.onProgress?.({
+            type: "complete",
+            commit: request.commit,
+            cacheHit: true,
+          });
+          return {
+            commit: request.commit,
+            outputDir: layout.output,
+            marker,
+            cacheHit: true,
+          };
+        }
+      }
+      request.onProgress?.({ type: "start", commit: request.commit });
+      const lock = await acquireBaselineLock(
+        this.fs,
+        this.runner,
+        this.clock,
+        layout,
+        request.signal,
+        this.options.lockTimeoutMs,
+      );
+      let adopted = false;
+      let rebuilding = false;
+      try {
+        assertBaselineActive(request.signal);
+        const cached = await completedBaseline(this.fs, layout, request);
+        if (cached) {
+          adopted = true;
+          request.onProgress?.({
+            type: "complete",
+            commit: request.commit,
+            cacheHit: true,
+          });
+          return {
+            commit: request.commit,
+            outputDir: layout.output,
+            marker: cached,
+            cacheHit: true,
+          };
+        }
+        rebuilding = true;
+        await removePartialBaseline(this.fs, layout);
+        const env = baselineEnvironment(
+          this.options.environment,
+          request.commit,
+        );
+        await extractBaseline(
+          this.fs,
+          this.runner,
+          request.repoRoot,
+          request.commit,
+          layout.source,
+          env,
+          request.signal,
+        );
+        await runBaselineCommands(
+          this.runner,
+          request.commands,
+          layout.source,
+          env,
+          request.signal,
+        );
+        const output = path.join(layout.source, request.mockupsPath);
+        const manifestVersion = await baselineManifestVersion(
+          this.fs,
+          request.repoRoot,
+          output,
+          request.allowManifestV2,
+          request.signal,
+        );
+        await validateOutputTree(this.fs, output, request.signal);
+        assertBaselineActive(request.signal);
+        await this.fs.rename(output, layout.output);
+        await this.fs.remove(layout.source);
+        assertBaselineActive(request.signal);
+        const marker: CompletionMarker = {
+          schemaVersion: 1,
+          commit: request.commit,
+          finishedAt: new Date(this.clock.now()).toISOString(),
+          commands: request.commands.map((argv) => [...argv]),
+          manifestVersion,
+        };
+        await this.fs.write(
+          path.join(layout.entry, "inputs.json"),
+          Buffer.from(JSON.stringify(request.mockupsPath)),
+        );
+        await this.fs.write(
+          layout.marker,
+          Buffer.from(`${JSON.stringify(marker)}\n`),
+        );
+        assertBaselineActive(request.signal);
+        await cleanupBaselines(
+          this.fs,
+          this.runner,
+          this.clock,
+          layout,
+          request,
+          retained,
+        );
+        adopted = true;
+        request.onProgress?.({
+          type: "complete",
+          commit: request.commit,
+          cacheHit: false,
+        });
+        return {
+          commit: request.commit,
+          outputDir: layout.output,
+          marker,
+          cacheHit: false,
+        };
+      } finally {
+        try {
+          if (rebuilding && !adopted)
+            await removePartialBaseline(this.fs, layout);
+        } finally {
+          await lock.release();
+        }
+      }
+    } catch (error) {
+      const failure = request.signal?.aborted
+        ? new BaselineError(
+            "baseline-interrupted",
+            "Baseline preparation was interrupted",
+            error,
+          )
+        : error instanceof BaselineError
+          ? error
+          : new BaselineError(
+              "baseline-output-invalid",
+              `Could not prepare baseline: ${errorMessage(error)}`,
+              error,
+            );
+      request.onProgress?.({
+        type: "fail",
+        commit: request.commit,
+        error: failure,
+      });
+      throw failure;
+    }
+  }
+}
