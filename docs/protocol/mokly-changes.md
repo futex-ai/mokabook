@@ -302,6 +302,7 @@ interface ReviewResult {
       beforePath?: string;
       afterPath?: string;
       ignoredIds: readonly string[];
+      material?: true;
       reasons?: readonly {
         kind: "dependency";
         path: string;
@@ -319,8 +320,9 @@ interface ReviewResult {
 }
 ```
 
-Optional view `reasons` and `excludedResources` implement
-[CSS change attribution](./mokly-css-attribution.md). Empty optional lists are
+Optional view `material`, `reasons`, and `excludedResources` implement
+[CSS change attribution](./mokly-css-attribution.md). `material` is present
+exactly when the view's normalized documents differ. Empty optional lists are
 omitted; historical results without them remain valid. Retained resource reasons
 make paired views changed. Entry `sharedImpact` includes a stylesheet only if
 some view kept it, and summary counts follow these states.

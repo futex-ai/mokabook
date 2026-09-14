@@ -3,8 +3,8 @@
 ## Status And Outcome
 
 Milestones 1 through 10 are complete, committed, and pushed. The final review
-ran after the push; its fourteen findings were reported to the user without
-changing the implementation and await their decision.
+reported fourteen findings; the user chose to address all of them. Milestones
+11 through 15 carry that work.
 
 A single edit to a shared stylesheet currently marks every screen that links
 that stylesheet as a dependency change, and a broad `review.sharedImpact` glob
@@ -375,7 +375,7 @@ with regressions.
 - [x] Apply the same rule in the v2 path in `src/review/screen_compare.ts` so
       catalogues without registered components get identical behaviour.
 - [x] Apply the same rule in the live Serve membership calculation in
-      `src/server/changed.ts` so the Changes count, background classification,
+      `src/server/changed_content.ts` and `src/server/changed_resources.ts` so the Changes count, background classification,
       and complete comparison agree.
 - [x] Ensure the analysis reads base CSS through the existing batched Git
       reader and never falls back to individual reads for the CSS pass.
@@ -486,6 +486,131 @@ inside a loaded comparison; that is carried into the final review.
 - [x] Add `CHANGELOG.md` entry under the unreleased heading.
 - [x] Run `git add -A`, commit using Conventional Commits, and push the branch.
 - [x] Review the complete local diff against `origin/main` using
+      `docs/implementation-review-prompt.md` after the push. Report findings
+      with severity, context, impact, lettered options, and a recommendation;
+      do not change the implementation.
+
+## Milestone 11: Define the review-fix contract
+
+Documentation-only milestone. Record the contract changes the review fixes
+need before code lands.
+
+- [x] In `docs/protocol/mokly-css-attribution.md`, add an "Analysis scope"
+      rule: a stylesheet is in scope for rule analysis only when it is a public
+      file inside `mockupsDir`; stylesheets outside that scope keep file-level
+      `sharedImpact` evidence in both result versions, and both classification
+      paths use one shared predicate. Amend the Membership Rule and Validation
+      sections accordingly.
+- [x] Add `material?: true` to `ViewReview` in the Evidence Schema section:
+      present exactly when the view's normalized documents differ. Update the
+      Shell Derivation rule so a view reads as a style outcome only when
+      `material` is absent, and drop the sentence saying material and
+      resource-only views are indistinguishable. Mirror the field in
+      `docs/protocol/mokly-changes.md` and `docs/protocol/mokly-component-review.md`.
+- [x] In Shell Presentation, state that the stage heading is rendered only
+      inside a loaded comparison and is never shown for an excluded-only screen;
+      state that the unresolved lead without selectors ends without a colon;
+      state that the terminal status line uses the entry kind ("screen" or
+      "saved view"); and state that the evidence container uses the mockup's
+      paragraph and list spacing.
+- [x] In the Kept Constructs section, add that any failure escaping the
+      matcher or parser for one resource is converted to an `unresolved`
+      reason for that resource rather than aborting classification.
+- [x] Add to the Inputs section that per-view evidence records are emitted
+      only for views with at least one reason or excluded resource.
+- [x] Correct the Milestone 6 checklist reference from `src/server/changed.ts`
+      to `src/server/changed_content.ts` and `src/server/changed_resources.ts`.
+- [x] Validate Markdown and relative links.
+
+## Milestone 12: Backend review fixes
+
+Fix the classification, analysis, payload, and documentation findings.
+
+- [ ] Finding 1. Add `analysisOwnsStylesheet(path, config)` to
+      `src/review/css/paths.ts` and use it in both `screen_compare.ts` and
+      `component_classification.ts` so only public stylesheets under
+      `mockupsDir` are stripped from `sharedImpact`. Add a failing test first:
+      a screen-only catalogue with a `src/styles/**` glob keeps a token
+      stylesheet in `sharedImpact` in v2 and v3.
+- [ ] Finding 2. Emit `material: true` on a view when its normalized documents
+      differ, in `screen_compare.ts` and `component_view.ts`; validate and
+      round-trip it in `result_records.ts`, `result_validation.ts`, and the
+      client decoder; require its absence in `isStyleOnlyView`. Test: a view
+      with both a material change and a matched stylesheet reads "Screen
+      changed".
+- [ ] Finding 6. Defer base-side work in `src/server/changed_content.ts` and
+      `src/server/changed_resources.ts`: read and normalize the base fragment
+      and traverse the base resource graph only when the view has at least one
+      changed stylesheet resource. Re-run `benchmark:large` on the Milestone 3
+      fixture and record the corrected end-to-end delta beside the CSS share
+      in the timings section, naming the cause.
+- [ ] Finding 7. Skip per-view evidence records with no reasons and no
+      excluded resources, and screens left with no views, in
+      `classifyChangedContent` and `assembleExport`. Add tests.
+- [ ] Finding 8. Wrap the per-resource analysis in
+      `CssResourceAnalysis.analyze` so any escaping error becomes an
+      `unresolved` reason for that resource; move `selectOne` inside the
+      guarded region in `document_query.ts`. Add a test with an injected
+      throwing matcher.
+- [ ] Finding 9. Remove the strict `readMany` fallback from
+      `SelectedAssetReader.readManyIfExists`; fall through to per-route
+      optional reads. Add a test with a reader that has `readMany` only.
+- [ ] Finding 10. Delete the `.mb-impact-card` rules from
+      `src/server/shell/css_review.ts`.
+- [ ] Finding 12. Make `extractCssReferences` in `src/html_references.ts` use
+      the CSS tokenizer in `src/review/css/source.ts` for `url()` and
+      `@import` extraction so one tokenizer defines URL boundaries. Add tests
+      for `url(a/*/b.svg)`, a quoted URL containing `/*`, and a comment
+      before `url(`.
+- [ ] Finding 13. Correct `README.md` to say two test workers.
+- [ ] Finding 14. Add a file-level doc comment to each module under
+      `src/review/css/` that lacks one.
+- [ ] Run tests, typecheck, lint, format check, and `cargo xtask check`.
+
+## Milestone 13: Correct the stylesheet evidence mockups
+
+Tags: mockup
+
+- [ ] Finding 3. Change the matched and unresolved design screens to depict a
+      loaded comparison stage (side by side, as `design-review-changed` does)
+      with the "Styles this screen uses changed" heading inside that stage.
+      Remove the stage heading from the excluded screen so it shows the plain
+      current preview.
+- [ ] Finding 4. Add the terminal "No changes to this screen." line to the
+      excluded mockup card, after the examined-and-excluded list.
+- [ ] Finding 5. Add an unresolved example without selectors, using the lead
+      "This change can apply anywhere on the screen, so the screen stays in
+      Changes." with no list, inside the existing unresolved screen or as a
+      variant of it within the five-screen limit.
+- [ ] Finding 11. Record in `docs/protocol/mokly-shell-design.md` that the
+      shell evidence container adopts the mockup's paragraph and list spacing
+      while keeping its separator treatment; adjust the mockup card only if
+      that decision changes its appearance.
+- [ ] Build and check the example, run the design tests, and open each changed
+      page from disk in both variants.
+
+## Milestone 14: Shell review fixes
+
+Tags: ui
+
+- [ ] Finding 4. Branch the terminal status line on entry kind: "No changes
+      to this screen." for screens and "No changes to this saved view." for
+      variants, through one shared wording helper also used by
+      `diff_views.ts`.
+- [ ] Finding 5. Use a colon-free unresolved lead when there are no
+      selectors; update the existing empty-selector test.
+- [ ] Finding 11. Add paragraph and list spacing rules to
+      `.mbk-comparison-evidence` matching the mockup card.
+- [ ] Extend the client unit tests and `tests/browser/css_evidence.spec.ts`
+      for the corrected copy, the material-plus-stylesheet heading, and the
+      empty unresolved case.
+- [ ] Run tests, typecheck, lint, format check, browser tests, and
+      `cargo xtask check`.
+
+## Milestone 15: Commit and review the fixes
+
+- [ ] Run `git add -A`, commit using Conventional Commits, and push the branch.
+- [ ] Review the complete local diff against `origin/main` using
       `docs/implementation-review-prompt.md` after the push. Report findings
       with severity, context, impact, lettered options, and a recommendation;
       do not change the implementation.

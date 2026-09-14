@@ -38,6 +38,21 @@ broad `review.sharedImpact` globs continue to add nothing on their own.
 Resources that are not stylesheets, including fonts, images, and embedded
 documents, keep their existing file-level attribution unchanged.
 
+### Analysis scope
+
+A stylesheet is in scope for rule analysis only when it is a public file
+inside `mockupsDir`; only such files can be reached from a view document. A
+stylesheet outside that scope, such as a source or token module matched by a
+`review.sharedImpact` glob or a declared dependency directory, is never
+analysed and keeps its file-level `sharedImpact` evidence in both result
+versions. One shared predicate answers "is this stylesheet in analysis scope"
+for every classification path; a path is stripped from `sharedImpact` only when
+that predicate is true.
+
+Per-view evidence records are emitted only for views with at least one reason
+or excluded resource. Views and screens with neither carry no record in the
+live classification snapshot or in static exports.
+
 ## Stages
 
 1. **Rule diff.** Parse both sides of the stylesheet into an ordered list of
@@ -135,6 +150,11 @@ exclusions beyond it.
   attributes the referenced file; the analysis must not weaken that path.
 - A parse failure on either side of the stylesheet.
 
+Any failure that escapes the parser or matcher while analysing one resource
+for one view is converted to an `unresolved` reason for that resource with the
+selectors that could be serialized. It never aborts classification and never
+excludes the resource.
+
 Apply these checks in the order above before ordinary matching. Global and
 shadow detection includes nested selector arguments and nesting parents, not
 literal attribute values or synthetic universals introduced by state stripping.
@@ -200,6 +220,20 @@ lexically by UTF-16 code units and duplicate-free. For `unresolved` reasons it
 lists the selectors that could be serialized and may be empty when the kept
 construct has no selector.
 
+A view also records whether its own normalized documents differ:
+
+```ts
+interface ViewReview {
+  // existing fields unchanged
+  material?: true;
+}
+```
+
+`material` is present exactly when the paired ignore-normalized before and
+after documents differ, in both result versions. It is omitted otherwise and
+never carries `false`. Historical results without it remain valid and are
+treated as unknown, not as unchanged.
+
 Examined-and-excluded resources are recorded on the view, not as reasons:
 
 ```ts
@@ -262,7 +296,11 @@ paths and sides. Parsing a shared stylesheet therefore does not repeat per view.
 - View reasons and exclusions sort uniquely by path. Entry analysis is the
   union of its eligible saved-view and actual-invocation analyses; a view's
   exclusion does not conflict with another view retaining the same path.
-- `analysis` may appear only on stylesheet paths.
+- `analysis` may appear only on stylesheet paths in analysis scope; a path
+  outside that scope may appear in `sharedImpact` but never as an analysed
+  reason or an excluded resource.
+- `material` is absent or `true`; a view with `material` has state `changed`,
+  `added`, or `removed`.
 - Optional fields are omitted when empty, matching the existing canonical
   output rules.
 - Browse's lightweight classification, complete comparison generation,
@@ -283,15 +321,25 @@ recorded in the
 `design-review-style-matched`, `design-review-style-unresolved`, and
 `design-review-style-excluded`. It fixes three presentation rules:
 
-- A `matched` or `unresolved` reason reads as one outcome in the preview
-  heading, "Styles this screen uses changed". The two statuses differ only in
-  the secondary details: `matched` lists the changed styles that apply to the
-  screen, while `unresolved` says the change can apply anywhere on the screen
-  before listing what it could serialize.
+- A `matched` or `unresolved` reason reads as one outcome in the comparison
+  stage heading, "Styles this screen uses changed". That heading is rendered
+  only inside a loaded comparison; the plain current preview has no stage
+  heading. The two statuses differ only in the secondary details: `matched`
+  lists the changed styles that apply to the screen, while `unresolved` says
+  the change can apply anywhere on the screen. With serialized selectors the
+  unresolved sentence ends with a colon and a list; without them it ends with
+  a full stop and no list.
 - An excluded resource leads with the outcome, "This stylesheet changed, but
   none of the changed styles apply to this screen", and lists the stylesheet
-  under an "Examined and excluded" heading. The screen's own status stays "No
-  changes to this screen".
+  under an "Examined and excluded" heading. An excluded-only screen is not in
+  Changes, offers no comparison, and shows no stage heading; its evidence panel
+  ends with the terminal status line "No changes to this screen." A saved
+  variant's terminal line reads "No changes to this saved view." The wording
+  follows the entry kind through one shared helper.
+- The evidence container uses the approved mockup card's paragraph and list
+  spacing: eight pixels above each paragraph or list and fourteen pixels
+  between a list and the paragraph that follows it. The shell keeps its
+  separator treatment rather than the mockup's bordered card.
 - Selector text, status names, and analysis vocabulary never appear in a
   heading or in the catalogue tree; they appear only inside the secondary
   details list, and only where the detail has review value.
@@ -316,21 +364,20 @@ Component ownership facts continue to come from entry reasons and the complete
 classification; a v2 resource change never implies a changed shared component.
 
 `ReviewState` has no resource-only variant, so the browser derives the style
-heading from the view's own evidence instead of a schema change. A view reads
-"Styles this screen uses changed" when its state is `changed`, it retains at
+heading from the view's own evidence. A view reads "Styles this screen uses
+changed" when its state is `changed`, `material` is absent, it retains at
 least one reason, and every retained reason is a stylesheet dependency carrying
 an `analysis` record; a saved variant reads "Styles this variant uses changed".
-Any other retained reason, such as a changed font or image, keeps the existing
-state label. A view whose document also changed materially is indistinguishable
-from a resource-only view at this boundary and reads as a style outcome; its
-before and current panes still carry the material difference.
+Any other retained reason, such as a changed font or image, or a present
+`material` flag, keeps the existing "Screen changed" label. A historical result
+without `material` is treated as unknown and also keeps the existing label.
 
 The Details inspector lists the entry's retained dependency paths under
 "Changes to these files may affect this screen:", then groups analysed
 selectors by outcome, so one screen shows at most one matched list and one
 unresolved list however many stylesheets changed. Selectors are unioned,
 deduplicated, and sorted; an `unresolved` outcome with no serialized selector
-renders its sentence without a list. Excluded stylesheets come from the
+renders its sentence with a full stop and no list. Excluded stylesheets come from the
 compared views of the selected entry or saved variant, unioned and sorted, and
 never include a path any of those views retains. Their lead sentence
 pluralizes when it lists more than one stylesheet. Viewport and color-scheme
