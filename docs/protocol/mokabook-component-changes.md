@@ -122,7 +122,11 @@ evidence and keeps the screen in Changes.
 
 Renderer, theme, global stylesheet, or mixed source-file changes whose effects
 cannot be assigned exclusively retain the existing conservative shared-impact
-behavior. Ownership is not inferred from a filename, one import, or the presence
+behavior. For linked stylesheets that behavior is narrowed by
+[CSS change attribution](./mokabook-css-attribution.md): the stylesheet keeps a
+consuming view in Changes only when a changed rule could match that view's
+document or cannot be resolved, and otherwise is recorded as examined and
+excluded. Ownership and rule analysis compose; neither widens the other. Ownership is not inferred from a filename, one import, or the presence
 of a component marker somewhere in the document. Screen/component-owned
 dependency overlap must be validated and explained rather than silently dropped.
 

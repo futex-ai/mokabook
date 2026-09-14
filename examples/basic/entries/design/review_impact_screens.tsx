@@ -4,35 +4,16 @@ import { PreviewWorkspace } from "./components/parts/workspace.js";
 import { ComparisonStage } from "./parts/compare.js";
 import { DESTINATIONS } from "./parts/destinations.js";
 import { DetailsPanel } from "./parts/details.js";
-import { MiniWelcome } from "./parts/mini_screens.js";
 import { NavDrawer, NavTree } from "./parts/nav.js";
 import {
   EmptyReviewNav,
   IgnoredImpactCard,
   SharedImpactCard,
+  WelcomeShot,
 } from "./parts/review.js";
 import { ScreenHead, Shell, ViewSwitch } from "./parts/shell.js";
-import { BrowserFrame, PhoneFrame } from "./parts/stage.js";
 
 type ReviewViewport = "desktop" | "mobile";
-
-function WelcomeShot({
-  viewport,
-  comparison = true,
-}: {
-  viewport: ReviewViewport;
-  comparison?: boolean;
-}) {
-  return viewport === "desktop" ? (
-    <BrowserFrame address="example.test/welcome" expandable={!comparison}>
-      <MiniWelcome />
-    </BrowserFrame>
-  ) : (
-    <PhoneFrame small>
-      <MiniWelcome compact />
-    </PhoneFrame>
-  );
-}
 
 function SharedImpactSummary({ viewport }: { viewport: ReviewViewport }) {
   return (

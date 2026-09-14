@@ -46,6 +46,8 @@ when the historical primary file is absent, never when it is invalid.
 - [Current manifest v5 schema](./mokabook-component-manifest.md)
 - [Component comparison v3 schema](./mokabook-component-review.md)
 - [Component change attribution](./mokabook-component-changes.md)
+- [CSS change attribution](./mokabook-css-attribution.md) — approved
+  target: rule-aware stylesheet evidence.
 - [Component pages and screen inspection](./mokabook-component-explorer.md)
 - [Component explorer design catalogue](./mokabook-component-design.md)
 - [Component icon inspector design](./mokabook-component-inspector-design.md)

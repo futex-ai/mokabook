@@ -2,7 +2,7 @@
 
 ## Delivery Status
 
-Implemented in the 30 design screens and two real example screens using
+Implemented in the 33 design screens and two real example screens using
 `MockLink` and `MockLink asChild`. Verification and delivery are tracked by the
 [implementation plan](../../plans/mokabook-design-mocklinks.md).
 
@@ -170,6 +170,21 @@ Shared-impact/ignored-only and empty Changes keep a Current preview
 without comparison modes; factual evidence lives in Details. Their existing
 routes and All escape remain available. A future interactive mode needs its
 own contract and owning screen first.
+
+The three stylesheet-evidence states keep the same preview and inspector
+treatment and are entered through the existing filter controls:
+
+| Control/context                   | Destination                                                      |
+| --------------------------------- | ---------------------------------------------------------------- |
+| Shared impact: Changes filter     | Matched stylesheet evidence, `design-review-style-matched`       |
+| Ignored only: Changes filter      | Unresolved stylesheet evidence, `design-review-style-unresolved` |
+| Matched evidence: All filter      | Excluded stylesheet evidence, `design-review-style-excluded`     |
+| Unresolved evidence: All filter   | Canonical All Welcome, `design-browse-screen`                    |
+| Excluded evidence: Changes filter | Empty Changes, `design-review-empty`                             |
+
+Matched and unresolved depict Changes holding only the screen their evidence
+keeps; excluded depicts All with no Changes. None of them offers comparison
+modes, a scheme pair, or tag transitions.
 
 Tag interactions are restricted to the canonical Welcome light states:
 

@@ -30,6 +30,7 @@ const STATE_LABELS: Record<ReviewState, string> = {
   changed: "Screen changed",
   "ignored-only": "Only excluded content changed",
   removed: "Screen removed",
+  "styles-changed": "Styles this screen uses changed",
   unchanged: "No changes to this screen",
 };
 

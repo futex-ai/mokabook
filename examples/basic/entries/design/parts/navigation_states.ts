@@ -111,9 +111,12 @@ export const NAVIGATION_STATES: Record<DesignDestination, NavigationState> = {
     scheme: "dark",
     schemeLinks: { light: D.changed },
   },
-  [D.shared]: { ...welcomeFilters },
-  [D.ignored]: { ...welcomeFilters },
+  [D.shared]: { all: D.welcome, changes: D.styleMatched },
+  [D.ignored]: { all: D.welcome, changes: D.styleUnresolved },
   [D.empty]: { all: D.welcome },
+  [D.styleMatched]: { all: D.styleExcluded, changes: D.styleMatched },
+  [D.styleUnresolved]: { all: D.welcome, changes: D.styleUnresolved },
+  [D.styleExcluded]: { all: D.styleExcluded, changes: D.empty },
 };
 
 /** Open/close preserves the depicted query; a selection closes the picker. */

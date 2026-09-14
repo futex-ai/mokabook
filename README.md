@@ -747,7 +747,7 @@ adding navigation footers to the artboards. The [workspace designs](./docs/proto
 eligible comparisons retain an opaque toolbar. The desktop grip sits on its
 divider line.
 
-All 56 design screens reuse the 15 registered components in
+All 65 design screens reuse the 15 registered components in
 **Design → Shared components**, including the footer tabs panel. The library
 provides 56 saved variants, local prop controls, real usage and component-owned
 change attribution. See the [shared design library guide](./examples/basic/entries/design/library/README.md).

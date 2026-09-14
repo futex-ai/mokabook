@@ -78,6 +78,9 @@ for (const viewport of ["mobile", "desktop"] as const) {
       "design-review-removed",
       "design-browse-dark-scheme",
       "design-browse-light-only",
+      "design-review-style-matched",
+      "design-review-style-unresolved",
+      "design-review-style-excluded",
     ]) {
       const { document } = await designDocument(source, viewport);
       assert.equal(byClass(document, "mbk-cmp-toolbar").length, 0, source);

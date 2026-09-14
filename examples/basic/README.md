@@ -21,7 +21,7 @@ The [large fixture](../../tests/fixtures/large/README.md)
 uses the same Firna/React Native Web rendering stack with configurable volume,
 without expanding this committed example or slowing ordinary development startup.
 
-Mokabook's 56 design screens now use 15 registered shared components, including
+Mokabook's 65 design screens now use 15 registered shared components, including
 the footer tabs panel. Open **Design → Shared components** for Chrome, Controls,
 Inspector and Preview galleries with 56 saved variants, real mobile/desktop
 previews and editable local props. The outer Components and Usage tabs show actual
@@ -85,8 +85,9 @@ render plain React DOM need none of this and can keep a plain
 `renderToStaticMarkup` adapter.
 
 The `Design` navigation group is the owning design catalogue for Mokabook's
-Browse and Changes views. Its thirty Browse, page, publication and Changes screens cover navigation,
-Details, tags, color schemes, and comparison outcomes. Thirty-two component
+Browse and Changes views. Its thirty-three Browse, page, publication and Changes
+screens cover navigation, Details, tags, color schemes, comparison outcomes, and
+stylesheet evidence. Thirty-two component
 explorer screens add component pages, saved variants, affected screens,
 repeated/nested inspection, highlighting, and empty or removed states. The shared icon inspector and complete controls
 mockups include edited/reset, optional, loading, validation, retry, comparison,
@@ -129,7 +130,7 @@ galleries; `inspector` shows both closed-panel layouts.
 Each child gallery lists at most five owning screens; inspection also links
 two selected-instance screens in a nested gallery.
 
-All fifty-six design screens use `colorSchemes: ["light"]`: they draw the
+All sixty-five design screens use `colorSchemes: ["light"]`: they draw the
 Mokabook shell, including the existing dark-selection examples. The two product
 screens inherit the catalogue's light/dark settings and prove dark generation.
 Design headers retain the approved screen-stack logo: 17px overlapping mobile
@@ -146,7 +147,7 @@ A shared implementation edit appears on its component page and lists consuming
 screens as affected; independent screen inputs, slots or instance changes still
 appear in Changes. This is tested against fully registered baseline snapshots.
 
-The shared inspector/workspace sheets cover all 56 design screens and standalone
+The shared inspector/workspace sheets cover all 65 design screens and standalone
 library hosts. Other mixed component-design sheets remain scoped to the 32
 component-design routes and hosts; the controls sheet additionally remains
 scoped to its eleven owning screen routes. Global `review.sharedImpact` policy is
@@ -171,6 +172,11 @@ disclosure are independent. The
 shared-impact and ignored-only examples open from All with zero Changes and one
 Current preview. Dependency evidence remains available in Details, while
 unchanged output and paired ignored-only edits do not fill the review list.
+The nested `design/review/impact/stylesheets/` group adds the rule-aware
+stylesheet states: a changed stylesheet whose changed styles apply to the
+screen, one whose change can apply anywhere, and one examined and excluded so
+the screen stays out of Changes. Their contract is
+[CSS change attribution](../../docs/protocol/mokabook-css-attribution.md).
 
 From the repository root:
 

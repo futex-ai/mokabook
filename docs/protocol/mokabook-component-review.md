@@ -49,7 +49,14 @@ type EntryChangeReason =
       kind:
         "added" | "removed" | "metadata" | "material" | "inputs" | "structure";
     }
-  | { kind: "dependency"; path: string }
+  | {
+      kind: "dependency";
+      path: string;
+      analysis?: {
+        status: "matched" | "unresolved";
+        selectors: readonly string[];
+      };
+    }
   | { kind: "screen"; route: string };
 
 interface ChangedEntry extends ReviewEntrySides {
@@ -137,7 +144,11 @@ means caller-owned logical occurrence identity/order changed. Record every
 applicable reason, without deriving membership from raw fragment paths alone.
 
 A dependency reason's path must be in `changedPaths` and be independent evidence
-under the ownership rules. A screen reason is allowed only on a use case and
+under the ownership rules. A stylesheet dependency reason may carry the
+[CSS change attribution](./mokabook-css-attribution.md) `analysis` record;
+its `selectors` are sorted and duplicate-free, `analysis` appears only on
+stylesheet paths, and a view's `excludedResources` paths must be in
+`changedPaths` and never coincide with that view's dependency reasons. A screen reason is allowed only on a use case and
 must reference a directly changed screen actually used on at least one side.
 Use cases also retain their own metadata/dependency reasons. One screen with
 only affected component evidence cannot produce a use-case screen reason.

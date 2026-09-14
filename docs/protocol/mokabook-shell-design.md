@@ -65,6 +65,9 @@ contract until their standalone screens are implemented.
 | `design-review-shared-impact`         | `design/review/impact/shared-impact.html`          | Unchanged screen from All with evidence                   |
 | `design-review-ignored-only`          | `design/review/impact/ignored-only.html`           | Ignored-only Current view with evidence                   |
 | `design-review-empty`                 | `design/review/impact/empty.html`                  | Empty Changes filter retaining Current                    |
+| `design-review-style-matched`         | `design/review/impact/stylesheets/matched.html`    | Changed styles that apply to the screen                   |
+| `design-review-style-unresolved`      | `design/review/impact/stylesheets/unresolved.html` | A style change that can reach anything on the screen      |
+| `design-review-style-excluded`        | `design/review/impact/stylesheets/excluded.html`   | Changed stylesheet examined and excluded                  |
 | `design-page-view`                    | `design/browse/pages/view.html`                    | Complete document in its declared collection              |
 | `design-page-details`                 | `design/browse/pages/details.html`                 | Document metadata and close action                        |
 | `design-page-navigation`              | `design/browse/pages/navigation.html`              | Document with its narrow drawer open                      |
@@ -79,6 +82,12 @@ Additional owning groups keep each new page at no more than five screens:
   behavior.
 - `design/browse/publication/catalogue.html` and `changes.html` specify review
   omitted and included, using the existing Welcome stage.
+- `design/review/impact/stylesheets/matched.html`, `unresolved.html`, and
+  `excluded.html` specify rule-aware stylesheet evidence beneath the impact
+  states, so the impact page itself keeps its three screens. Matched and
+  unresolved stay in Changes; excluded is viewed from All and stays out. Their
+  evidence contract is
+  [CSS change attribution](./mokabook-css-attribution.md).
 
 Every screen ships one mobile and one desktop variant. Mockup implementation
 notes live in entry descriptions, rationale, and related docs — never inside
@@ -368,7 +377,11 @@ eligibility, evidence availability, and initial inspector disclosure are modeled
 independently in the mockups, matching the runtime rather than using the presence
 of a mode band to decide whether Details exists or starts open.
 
-Both viewports reuse the existing device-frame components. Before and current
+Both viewports reuse the existing device-frame components. Stylesheet evidence
+uses the same secondary details: a changed stylesheet that reaches the screen
+names the changed styles that apply, and a changed stylesheet that reaches
+nothing is listed as examined and excluded without producing a Changes row.
+Before and current
 snapshots remain in script-disabled iframes. Overlay composites the current
 pane at 50% opacity; Difference uses CSS difference blending. Missing panes for
 eligible Removed component variants remain side by side for readability in every mode. No pixel percentages are

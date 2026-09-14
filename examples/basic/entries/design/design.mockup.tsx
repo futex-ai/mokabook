@@ -12,6 +12,7 @@ import { browseStateScreens, browseViewScreens } from "./browse_screens.js";
 import { browseTagScreens } from "./browse_tag_screens.js";
 import { changesScreens } from "./changes_screens.js";
 import { reviewImpactScreens } from "./review_impact_screens.js";
+import { reviewStyleScreens } from "./review_style_screens.js";
 import { componentDesign } from "./components/index.js";
 
 import { reviewOutcomeScreens } from "./review_outcome_screens.js";
@@ -99,7 +100,17 @@ const designMockups = defineRoot({
           title: "Comparison outcomes",
         }),
         collection({
-          children: reviewImpactScreens,
+          children: [
+            ...reviewImpactScreens,
+            collection({
+              children: reviewStyleScreens,
+              description:
+                "Rule-aware stylesheet evidence: styles that apply, styles that could apply anywhere, and a stylesheet examined and excluded.",
+              id: "design-review-stylesheets",
+              segment: "stylesheets",
+              title: "Stylesheet evidence",
+            }),
+          ],
           description:
             "Aggregate review states: shared impact, ignored regions, empty.",
           id: "design-review-impact",

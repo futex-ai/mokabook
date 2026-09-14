@@ -67,6 +67,14 @@ resources fail validation rather than being treated as deletions. Snapshot
 generation still requires current references to resolve, including resources
 whose verified deletion made their consumers eligible for Changes.
 
+Linked stylesheet edits are narrowed by
+[CSS change attribution](./mokabook-css-attribution.md) once that approved
+target lands: a changed stylesheet keeps a view in Changes only when a changed
+rule could match that view's document or the analysis cannot resolve the rule.
+Stylesheets whose changed rules match nothing on a view are recorded as examined
+and excluded rather than as dependency evidence. Fonts, images, and embedded
+documents keep file-level attribution.
+
 This detection reads files without rebuilding the baseline, writing snapshots,
 or generating a comparison. Baseline reads are batched; shared resource edges
 are cached within one calculation and cycles terminate. Apart from verified
@@ -279,10 +287,18 @@ interface ReviewResult {
       beforePath?: string;
       afterPath?: string;
       ignoredIds: readonly string[];
+      excludedResources?: readonly {
+        path: string;
+        reason: "no-matching-rule";
+      }[];
     }[];
   }[];
 }
 ```
+
+`excludedResources` is the approved
+[CSS change attribution](./mokabook-css-attribution.md) extension; it is
+omitted until that analysis runs.
 
 Routes sort in deterministic catalogue order; views sort by viewport
 (`mobile`, then `desktop`) and then color scheme (`light`, then `dark`).
