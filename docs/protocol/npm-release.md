@@ -1,4 +1,4 @@
-# Mokabook CI And Npm Release Contract
+# Mokly CI And Npm Release Contract
 
 ## Breaking Page Upgrade Release Note
 
@@ -8,7 +8,7 @@ options, and route aliases. Consumers must register complete documents with
 `definePage` or nested `page`, import existing render helpers, preserve explicit
 routes, and regenerate manifest v5 with `sourceFiles`. Current v2/v3 output is
 rejected; historical readers remain available only for Git comparisons. Follow
-[the migration procedure](./mokabook-page-migration.md) before replacing old
+[the migration procedure](./mokly-page-migration.md) before replacing old
 owned artifacts. Screen and use-case authoring remains supported.
 
 The repository preview command now exports the current catalogue by default.
@@ -18,15 +18,19 @@ as breaking; version numbers and `CHANGELOG.md` remain release-PR owned.
 
 ## Package Metadata
 
-`package.json` describes the published, unscoped public ESM package `mokabook`,
-with a release-managed version, MIT licensing, Firna authorship, exact
-repository/bugs/homepage metadata for `futex-ai/mokabook`, a Node engine floor,
-one `mokabook` bin, explicit exports/types, and a restrictive `files` allowlist.
+`package.json` describes the published, scoped public ESM package `@mokly/mokly`,
+with a release-managed version, MIT licensing, Mokly authorship, exact
+repository/bugs/homepage metadata for `mokly-ai/mokly`, a Node engine floor,
+one `mokly` bin, explicit exports/types, and a restrictive `files` allowlist.
 
 Read the checkout's version from `package.json`; `.release-please-manifest.json`
 tracks release-please's version state, and `package-lock.json` mirrors package
-metadata. Release PRs update these together. Neither this document nor consumer
-export instructions pin a current version or require another bootstrap publish.
+metadata. Release PRs update these together. The completed one-time
+[registry bootstrap](./npm-bootstrap.md) registered `@mokly/mokly@0.8.0` without
+changing those release-managed files. It is the accepted initial `latest`
+release and also retains the `bootstrap` tag. Do not repeat the bootstrap
+publication; later reviewed releases advance `latest` through the normal
+release workflow.
 
 `publishConfig` targets the public npm registry with public access. The package
 contains compiled runtime code, declarations, package-owned shell assets,
@@ -34,7 +38,7 @@ README, LICENSE, CHANGELOG, and package metadata only. Source fixtures, tests,
 plans, protocol docs, caches, review artifacts, and generated demo output are
 not published unless a documented runtime requirement proves otherwise.
 
-Runtime dependencies are intentional and minimal. Mokabook does not take a
+Runtime dependencies are intentional and minimal. Mokly does not take a
 runtime dependency on `@firna/ui`, Accounting, Juno, Playwright, or a consumer's
 component system. Development and browser-test packages remain development
 dependencies.
@@ -103,28 +107,29 @@ permissions.
 
 ## Preview Deployments
 
-The [publication option](./mokabook-publication.md) is implemented. The main
+The [publication option](./mokly-publication.md) is implemented. The main
 job publishes the current catalogue with `npm run preview:build`; PR previews
 use `npm run preview:build -- --include-changes --base origin/main`.
 
-The [consumer static exporter](./mokabook-export.md) provides shared output safety and static
+The [consumer static exporter](./mokly-export.md) provides shared output safety and static
 delivery. This section describes the repository's deployment adapter;
-consumer `mokabook export` produces files without deploying or publishing npm.
+consumer `mokly export` produces files without deploying or publishing npm.
 
 `.github/workflows/preview.yml` deploys a browsable copy of the synthetic basic
-consumer to the direct-upload Cloudflare Pages project `mokabook`. A `main`
+consumer to the existing direct-upload Cloudflare Pages project `mokabook`. The
+infrastructure identifier remains unchanged during the npm rename. A `main`
 push updates the production deployment at `https://mokabook.pages.dev`.
 Same-repository pull requests, except Release Please pull requests, deploy to a
 stable `pr-<number>` branch alias and receive one updated sticky comment with
 the deployment result, URL, commit, and workflow run. Fork pull requests never
 receive Cloudflare credentials or write-capable execution.
 
-`npm run preview:build` first rebuilds Mokabook and its committed basic
+`npm run preview:build` first rebuilds Mokly and its committed basic
 consumer. The repository-only preview builder starts the real Browse server on
 an ephemeral loopback port and snapshots the home, not-found, current catalogue
 routes, plus removed-entry routes only when Changes is included. It copies the shell stylesheet, browser and
 shared navigation modules, fonts, id redirects, and every validated public
-consumer asset into `.context/mokabook-preview`. HTML copies pass through the
+consumer asset into `.context/mokly-preview`. HTML copies pass through the
 same manifest/header-aware logical-link adapter as served Browse; unowned
 reserved metadata is removed and invalid trusted output fails the build.
 Preview shell links use Cloudflare
@@ -145,11 +150,11 @@ the stable comparison redirect remains available when Changes is enabled.
 Eligible changed views offer comparison controls; known unchanged views show
 Unmodified, while unknown evidence has no invented status. Pages retain Changes
 membership but never offer visual comparisons.
-The [Changes contract](./mokabook-changes.md) owns the shared interaction and
+The [Changes contract](./mokly-changes.md) owns the shared interaction and
 snapshot rules. Artifact
 replacement uses the shared exclusive reservation, ownership inventory, and
 rollback transaction. Only this adapter can migrate a valid legacy
-`.mokabook-preview-artifact` directory; consumer export cannot claim it.
+`.mokly-preview-artifact` directory; consumer export cannot claim it.
 
 Closing a same-repository pull request marks its sticky comment inactive and
 attempts to delete all Cloudflare deployments carrying that PR branch alias.
@@ -194,7 +199,7 @@ The release workflow then:
    provenance, and unexpected transport failures remain fail-closed.
 
 Publishing occurs in the same workflow invocation that creates the GitHub
-release. A manual `publish_ref` dispatch may retry an existing `vX.Y.Z` tag and
+release. A manual `publish_ref` dispatch from workflow ref `main` may retry an existing `vX.Y.Z` tag and
 runs the identical verification path. Concurrency never cancels an in-progress
 publish.
 
@@ -207,36 +212,33 @@ workflow falls back to `GITHUB_TOKEN`; GitHub suppresses most follow-on workflow
 events created with that token, so maintainers must verify the release PR's
 required checks when using the fallback.
 
-## First Publication — Completed History
+## Mokly Registry Bootstrap
 
-Package bootstrap is complete. This section preserves the original one-time
-sequence for historical context, not instructions for the next release. Current
-releases and failed-publication retries follow **Release Management** above.
+The repository and release history moved from `futex-ai/mokabook` to
+`mokly-ai/mokly`, but npm package names do not move with GitHub repositories.
+The former unscoped `mokabook` package remains reserved at `0.8.0`; it is not a
+runtime alias or a second publication target. Because npm trusted publishing can
+only be configured after a package exists, the scoped `@mokly/mokly` package
+required one reviewed bootstrap publication before normal releases could use OIDC.
+The attempted unscoped `mokly` registration was rejected by npm's name-similarity
+policy; it was never published. The scope change does not reset release history
+or rename the `mokly` executable.
 
-1. The reviewed bootstrap started from the renamed `futex-ai/mokabook`
-   repository's clean `main` at `0.0.0`, with `Required CI` passing and the
-   first release PR still unmerged.
-2. The first public publish required checking availability of the unscoped name
-   and explicit maintainer approval because npm publication is irreversible.
-3. The checked commit's exact packed tarball was the bootstrap artifact, after
-   `cargo xtask check` and report inspection. The procedure used an approved
-   maintainer's interactive npm authentication and the non-consumer `bootstrap`
-   dist-tag, not a GitHub npm write token.
-4. Package creation enabled trusted-publisher configuration for organization
-   `futex-ai`, repository `mokabook`, workflow `release.yml`, environment `npm`,
-   and the workflow's `npm publish` action. Verification, token-publishing
-   restrictions, and obsolete-token removal were part of maintainer setup.
-5. A one-time `release-as: 0.1.0` override selected the first supported consumer
-   release instead of release-please's unreleased-manifest default. That
-   override was removed after publication; do not restore it for normal releases.
-   Bare `vX.Y.Z` tags (`include-component-in-tag: false`) remain the contract.
-6. Bootstrap verification covered visibility, metadata, README, license, owners,
-   provenance/signatures, dist tags, `npx mokabook --version`, and a minimal
-   build/serve fixture from a clean directory.
+Registration completed on 14 September 2026 as `@mokly/mokly@0.8.0`. npm assigned
+both `bootstrap` and `latest` despite the explicit bootstrap tag, and the
+maintainer accepted that initial `latest`. Keep `bootstrap` on `0.8.0`; do not
+remove `latest` or republish to undo registration. The
+[bootstrap record](./npm-bootstrap.md) retains the reviewed source and archive
+procedure. Its dedicated `scripts/release/bootstrap.mjs` command builds a fresh
+isolated checkout of an explicit reviewed full commit SHA and records source
+identity beside the archive hashes; ordinary `pack.mjs` does not supply this
+bootstrap source proof.
 
-The historical `0.0.0` bootstrap is not a supported consumer version. Do not
-repeat name reservation, reset package/manifest versions, or manually publish
-bootstrap artifacts when preparing a new release.
+The bootstrap used interactive maintainer authentication, not OIDC. Trusted
+publishing is configured, but GitHub release-token permissions and publishing
+protections still need verification, followed by a successful automated release
+and its provenance verification. Accepting initial `latest` does not waive any
+of those requirements or reset release-please state.
 
 ## Maintainer Setup
 
@@ -249,17 +251,21 @@ Before enabling publish, maintainers must configure and verify:
   branch `main`, repository variable `CLOUDFLARE_ACCOUNT_ID` is set, and
   repository secret `CLOUDFLARE_PAGES_API_TOKEN` or `CLOUDFLARE_API_TOKEN`
   holds a least-privilege token with Pages write access;
-- the protected `npm` environment has the approved deployment branches/tags and
-  reviewers, without storing an npm token;
+- the protected `npm` environment allows only the workflow's `main` branch,
+  requires an approved reviewer, and disables administrator bypass, without
+  storing an npm token. Checking out a release tag does not change the workflow
+  deployment ref; manual retries must also dispatch from `main`;
 - the `RELEASE_PLEASE_TOKEN` credential owner, least-privilege repository
   access, expiry/rotation, and fallback behavior;
-- approved Firna npm maintainer accounts, enforced 2FA, public unscoped-package
-  access, and the intended initial owner list;
+- approved Mokly npm maintainer accounts and teams, enforced 2FA, public
+  scoped-package access, and the intended initial owner list;
 - the trusted-publisher repository, workflow filename, environment, and publish
   action exactly match the values above; and
-- immutable tag/GitHub release protection and who may invoke the manual retry.
+- immutable `v*` tag update/deletion protection and who may invoke the manual retry.
 
 No long-lived npm write token is stored in GitHub Actions.
+See [GitHub publishing protections](./npm-github-protections.md) for exact setup,
+read-back verification, sole-maintainer approval policy, and credential blockers.
 
 ## Release Evidence
 
@@ -275,7 +281,7 @@ Implementation must re-check these primary references because release tooling
 changes over time:
 
 - [npm trusted publishers](https://docs.npmjs.com/trusted-publishers/)
-- [npm unscoped public packages](https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages/)
+- [npm scoped public packages](https://docs.npmjs.com/creating-and-publishing-scoped-public-packages/)
 - [npm package executables](https://docs.npmjs.com/cli/npm-exec/)
 - [npm package metadata](https://docs.npmjs.com/files/package.json/)
 - [release-please action](https://github.com/googleapis/release-please-action)
@@ -290,5 +296,5 @@ provenance automatically on supported GitHub-hosted runners.
 
 ## Related Docs
 
-- [Package and authoring contract](./mokabook-package.md)
-- [Build, Browse, and Review runtime](./mokabook-runtime.md)
+- [Package and authoring contract](./mokly-package.md)
+- [Build, Browse, and Review runtime](./mokly-runtime.md)

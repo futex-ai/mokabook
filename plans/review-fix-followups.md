@@ -7,8 +7,8 @@ Address the four findings from the
 using the recommended option for each. Backend and tooling only; no mockup or
 UI work.
 
-Protocol owner: [package and authoring contract](../docs/protocol/mokabook-package.md)
-for the `repoRoot` rule; [derived baselines](../docs/protocol/mokabook-derived-baselines.md)
+Protocol owner: [package and authoring contract](../docs/protocol/mokly-package.md)
+for the `repoRoot` rule; [derived baselines](../docs/protocol/mokly-derived-baselines.md)
 for the rebuild post-steps.
 
 ## Milestone 1: Validate the Git top level at config resolution — completed
@@ -24,7 +24,7 @@ for the rebuild post-steps.
       be the Git top level" so its fixture has a manifest and it asserts the
       typed error code from a nested `repoRoot`; add the same assertion for
       the unselected comparison route in a committed-mode child.
-- [x] Document the rule in `mokabook-package.md` under `repoRoot` and remove
+- [x] Document the rule in `mokly-package.md` under `repoRoot` and remove
       the comparison-specific wording from the derived baselines doc.
 - [x] Apply the same config-owned guard to derived tracking checks, pinned and
       selected readers, classification and reference polling; retain All when

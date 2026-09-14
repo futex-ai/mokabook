@@ -60,9 +60,7 @@ export function runWithTimings<T>(
         write:
           sink.write ??
           ((event) =>
-            process.stderr.write(
-              `[mokabook:timing] ${JSON.stringify(event)}\n`,
-            )),
+            process.stderr.write(`[mokly:timing] ${JSON.stringify(event)}\n`)),
       },
     },
     operation,

@@ -25,7 +25,7 @@ export function ComponentWorkspace({
       ? (data.variants[0]?.comparisonEligible ?? false)
       : data.comparisonEligible;
   const stage = data.removed ? (
-    <div className="mbk-empty" data-mokabook-stage="" data-viewport="both">
+    <div className="mbk-empty" data-mokly-stage="" data-viewport="both">
       <h2>This {entry.kind} was removed</h2>
       <p>
         {entry.kind === "component"

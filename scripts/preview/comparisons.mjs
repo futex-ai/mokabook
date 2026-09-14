@@ -5,7 +5,7 @@ import { comparisonContentId } from "../../dist/export/content_id.js";
 import { ownedEntries } from "../../dist/export/ownership.js";
 import { configuredServedReview } from "../../dist/server/review_routes.js";
 
-const comparisonRoute = "/__mokabook/diffs/review.json";
+const comparisonRoute = "/__mokly/diffs/review.json";
 
 /** Keep publishing isolated from another server's configured comparison output. */
 export function previewComparisonProvider(config, stage, base, git) {
@@ -29,7 +29,7 @@ export async function captureComparison(serverUrl) {
   const url = new URL(response.url);
   if (
     url.origin !== new URL(serverUrl).origin ||
-    !/^\/__mokabook\/diffs\/__generations\/[A-Za-z0-9-]+\/review\.json$/.test(
+    !/^\/__mokly\/diffs\/__generations\/[A-Za-z0-9-]+\/review\.json$/.test(
       url.pathname,
     )
   )
@@ -47,16 +47,16 @@ export async function captureComparison(serverUrl) {
 export async function publishComparison(provider, comparison, stage) {
   const files = new Map();
   for (const name of (await ownedEntries(provider.outDir)).files)
-    if (![".mokabook-review-artifact", "summary.md"].includes(name))
+    if (![".mokly-review-artifact", "summary.md"].includes(name))
       files.set(
         name,
         await fs.promises.readFile(path.join(provider.outDir, name)),
       );
-  const directory = `__mokabook/diffs/__generations/${comparisonContentId(files)}`;
+  const directory = `__mokly/diffs/__generations/${comparisonContentId(files)}`;
   const target = path.join(stage, directory);
   await fs.promises.mkdir(path.dirname(target), { recursive: true });
   await fs.promises.rename(provider.outDir, target);
-  await fs.promises.rm(path.join(target, ".mokabook-review-artifact"));
+  await fs.promises.rm(path.join(target, ".mokly-review-artifact"));
   await fs.promises.rm(path.join(target, "summary.md"));
   return {
     ...comparison,
@@ -68,7 +68,7 @@ export async function publishComparison(provider, comparison, stage) {
 /** Preserve the repository's immutable-generation alias and hosting policy. */
 export function comparisonMetadata(comparisonUrl) {
   if (
-    !/^\/__mokabook\/diffs\/__generations\/[a-f0-9]{64}\/review\.json$/.test(
+    !/^\/__mokly\/diffs\/__generations\/[a-f0-9]{64}\/review\.json$/.test(
       comparisonUrl,
     )
   )
@@ -76,8 +76,8 @@ export function comparisonMetadata(comparisonUrl) {
       "preview comparison did not resolve an immutable generation",
     );
   return {
-    redirect: `/__mokabook/diffs/review.json ${comparisonUrl} 302`,
+    redirect: `/__mokly/diffs/review.json ${comparisonUrl} 302`,
     headers:
-      "/__mokabook/diffs/*\n  Cache-Control: no-store\n  X-Content-Type-Options: nosniff\n",
+      "/__mokly/diffs/*\n  Cache-Control: no-store\n  X-Content-Type-Options: nosniff\n",
   };
 }

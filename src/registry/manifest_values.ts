@@ -1,10 +1,10 @@
 import { isSafeCatalogueRoute, isSafeRepositoryPath } from "../config/paths.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 
 /** Validate a portable routed catalogue URL. */
 export function validateRoute(route: string, label: string): void {
   if (!isSafeCatalogueRoute(route)) {
-    throw new MokabookError("manifest-invalid", `${label} has an unsafe route`);
+    throw new MoklyError("manifest-invalid", `${label} has an unsafe route`);
   }
 }
 
@@ -24,7 +24,7 @@ export function nonEmptyString(value: unknown): value is string {
 /** Validate one repository-relative inventory or metadata path. */
 export function validateRepoPath(value: string, label: string): void {
   if (!isSafeRepositoryPath(value)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${label} must be a safe repository-relative path`,
     );

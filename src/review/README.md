@@ -60,6 +60,6 @@ npm run build
 node --import tsx --test tests/review*.test.ts tests/server_changed.test.ts
 ```
 
-See the [Changes contract](../../docs/protocol/mokabook-changes.md),
-[derived baselines contract](../../docs/protocol/mokabook-derived-baselines.md),
+See the [Changes contract](../../docs/protocol/mokly-changes.md),
+[derived baselines contract](../../docs/protocol/mokly-derived-baselines.md),
 and [export boundary](../export/README.md).

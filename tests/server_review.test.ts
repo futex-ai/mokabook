@@ -14,7 +14,7 @@ import {
   type TestFixture,
 } from "./helpers/fixture.js";
 
-const endpoint = "/__mokabook/diffs/review.json";
+const endpoint = "/__mokly/diffs/review.json";
 
 function countingReview(
   outDir: string,
@@ -42,7 +42,7 @@ function countingReview(
         `/* Generation ${this.generations} */`,
       );
       await fs.promises.writeFile(
-        path.join(outDir, ".mokabook-review-artifact"),
+        path.join(outDir, ".mokly-review-artifact"),
         "schemaVersion=2\n",
       );
       if (this.generations === this.failAt)
@@ -178,7 +178,7 @@ test("failed refresh restores previous snapshots and shutdown removes archives",
   closed = true;
   assert.equal(
     (await fs.promises.readdir(fixture.root)).some((entry) =>
-      entry.startsWith(".mokabook-review-served-"),
+      entry.startsWith(".mokly-review-served-"),
     ),
     false,
   );

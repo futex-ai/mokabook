@@ -140,7 +140,7 @@ test("light-only manifests remain deterministic without variant metadata", () =>
         viewports: ["mobile", "desktop"],
       },
     ],
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     sourceFiles: ["entries/a.mockup.tsx"],
     schemaVersion: 5,
   });

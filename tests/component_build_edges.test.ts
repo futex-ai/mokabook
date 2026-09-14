@@ -91,7 +91,7 @@ test("saved variants share transactional collision and orphan protection", async
 for (const [name, transform, error] of [
   [
     "removed ownership",
-    'content.replace(/<!--mokabook-component:[\\s\\S]*?-->/g, "")',
+    'content.replace(/<!--mokly-component:[\\s\\S]*?-->/g, "")',
     /component boundar/,
   ],
   [

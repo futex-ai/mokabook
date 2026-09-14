@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import {
   controlsFixtures,

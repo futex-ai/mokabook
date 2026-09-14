@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
-import { MokabookError } from "../dist/errors.js";
+import { MoklyError } from "../dist/errors.js";
 import { GitRepositoryEvidence } from "../dist/review/git_evidence.js";
 import { committedReviewRepository } from "../dist/review/repository.js";
 import { NodeCatalogueServerFactory } from "../dist/server/factory.js";
@@ -16,7 +16,7 @@ import { componentEntrySource } from "./helpers/component_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 
 const page = `
-import { definePage } from "mokabook";
+import { definePage } from "@mokly/mokly";
 mockups.push(definePage({ id: "guide", title: "Guide", route: "guide.html", description: "Guide", dependencies: [], relatedDocs: [], render: () => "<!doctype html><html><body>Guide</body></html>" }));
 `;
 
@@ -64,7 +64,7 @@ test("unavailable startup Changes leaves a complete current catalogue without re
     "mergeBase",
     async () => {
       calls++;
-      throw new MokabookError("git-failed", "history is unavailable");
+      throw new MoklyError("git-failed", "history is unavailable");
     },
   );
   const running = await serve(fixture.config, {
@@ -85,7 +85,7 @@ test("unavailable startup Changes leaves a complete current catalogue without re
 test("server startup rejects invalid current metadata before querying history", async (context) => {
   const fixture = await changedFixture(context);
   await fs.writeFile(
-    path.join(fixture.mockupsDir, "mokabook-manifest.json"),
+    path.join(fixture.mockupsDir, "mokly-manifest.json"),
     "{}",
   );
   let calls = 0;
@@ -124,10 +124,7 @@ test("no-watch HTTP startup reuses the catalogue validated before factory handof
       this: NodeCatalogueServerFactory,
       ...args: Parameters<typeof start>
     ) {
-      const manifestPath = path.join(
-        fixture.mockupsDir,
-        "mokabook-manifest.json",
-      );
+      const manifestPath = path.join(fixture.mockupsDir, "mokly-manifest.json");
       const bytes = await fs.readFile(manifestPath, "utf8");
       await fs.writeFile(
         manifestPath,

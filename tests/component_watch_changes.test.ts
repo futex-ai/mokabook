@@ -81,7 +81,7 @@ test(
     await assert.rejects(fs.stat(path.join(fixture.root, ".review")), {
       code: "ENOENT",
     });
-    const response = await fetch(server.url + "/__mokabook/diffs/review.json");
+    const response = await fetch(server.url + "/__mokly/diffs/review.json");
     assert.equal(response.status, 200);
     const review = await response.json();
     assert.equal(review.schemaVersion, 3);

@@ -19,7 +19,7 @@ import { ConfiguredGitCommandRunner } from "../config/git.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { GitCommandRunner } from "./git.js";
 import { GitRepositoryEvidence } from "./git_evidence.js";
 import {
@@ -69,7 +69,7 @@ export async function prepareReviewRepository(
   } catch (error) {
     if (
       config.generatedOutput !== "derived" ||
-      (error instanceof MokabookError && error.code === "config-invalid")
+      (error instanceof MoklyError && error.code === "config-invalid")
     )
       throw error;
     assertBaselineActive(options.signal);

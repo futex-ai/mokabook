@@ -2,7 +2,7 @@ import { compileCatalogue } from "../build/compile.js";
 import { writeCompilation } from "../build/transaction.js";
 import { projectRealPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import { readBaseManifest } from "../review/base_manifest.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { compareReview } from "../review/compare.js";
@@ -139,7 +139,7 @@ async function generateExport(
     await transaction.install(options.signal);
     return { ...routes, deploymentId };
   } catch (error) {
-    if (error instanceof MokabookError) throw error;
+    if (error instanceof MoklyError) throw error;
     throw exportError(
       `Could not export catalogue: ${errorMessage(error)}`,
       error,

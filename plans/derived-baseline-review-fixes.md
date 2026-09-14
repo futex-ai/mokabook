@@ -17,7 +17,7 @@ Findings 3 to 11 of that review remain recorded for later decisions and are
 out of scope here. The fixes are backend and documentation only; no mockup or
 UI work is involved.
 
-Protocol owner: [derived baselines](../docs/protocol/mokabook-derived-baselines.md).
+Protocol owner: [derived baselines](../docs/protocol/mokly-derived-baselines.md).
 
 ## Milestone 1: Build capability as a type — completed
 
@@ -43,12 +43,12 @@ handing the child a read-only repository from the parent.
       `configuredServedReview`. Before the first completion the child has none
       and the unselected route returns a typed `review-invalid` error whose
       message says the comparison is not prepared; no command is spawned.
-- [x] Tests: the child serves `/__mokabook/diffs/review.json` without `route`
+- [x] Tests: the child serves `/__mokly/diffs/review.json` without `route`
       in derived mode with `CachedBaselineBuilder.prototype.build` mocked to
       throw; the child swaps readers when the merge base moves; the child
       factory module has no import path to the builder; committed-mode
       behavior is byte-identical.
-- [x] Update `docs/protocol/mokabook-derived-baselines.md` (Serve And Watch)
+- [x] Update `docs/protocol/mokly-derived-baselines.md` (Serve And Watch)
       and `src/review/README.md` / `src/server/README.md` to describe the
       typed capability and the IPC handoff.
 - [x] Run format, lint, typecheck, `npm test`, `npm run example:check`,

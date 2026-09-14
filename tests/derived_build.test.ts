@@ -39,15 +39,15 @@ test("derived check lists every tracked generated or cache path with ignore guid
   const fixture = await derivedFixture(t);
   const store = new FileSystemGeneratedOutputStore();
   await store.write(fixture.baseline, fixture.config);
-  await fs.mkdir(path.join(fixture.root, ".mokabook-cache"));
+  await fs.mkdir(path.join(fixture.root, ".mokly-cache"));
   await fs.writeFile(
-    path.join(fixture.root, ".mokabook-cache", "forced.txt"),
+    path.join(fixture.root, ".mokly-cache", "forced.txt"),
     "cache",
   );
   const tracked = [
     "mockups/screens/home.mobile.html",
     `mockups/${MANIFEST_NAME}`,
-    ".mokabook-cache/forced.txt",
+    ".mokly-cache/forced.txt",
   ];
   await fixture.git("add", "-f", "--", ...tracked);
   await assert.rejects(

@@ -23,7 +23,7 @@ export function waitForInitialChanges(
 
 /** Extract the server version stamped into one shell response. */
 export function version(html: string): number {
-  const value = html.match(/data-mokabook-update-version="(\d+)"/)?.[1];
+  const value = html.match(/data-mokly-update-version="(\d+)"/)?.[1];
   assert.ok(value);
   return Number(value);
 }

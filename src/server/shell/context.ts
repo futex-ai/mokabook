@@ -3,7 +3,7 @@ import type { ChangesStatus } from "../update_messages.js";
 import type { RenderCapability } from "../../components/render_types.js";
 import type { StaticDelivery } from "../../navigation/delivery.js";
 
-/** Server-side context shared by every served Mokabook shell page. */
+/** Server-side context shared by every served Mokly shell page. */
 
 /** Server-side context shared by every shell page. */
 export interface ShellContext {

@@ -14,7 +14,7 @@ export function workspaceLoader(
     for (const view of views) {
       if (view.usage || requested.has(view.path)) continue;
       requested.add(view.path);
-      const url = `/__mokabook/views/${view.path.split("/").map(encodeURIComponent).join("/")}?generation=${data.previewGeneration}`;
+      const url = `/__mokly/views/${view.path.split("/").map(encodeURIComponent).join("/")}?generation=${data.previewGeneration}`;
       void fetch(url, { signal })
         .then(async (response) => {
           if (!response.ok) return;

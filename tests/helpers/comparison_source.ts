@@ -1,7 +1,7 @@
 /** Authored fixtures covering changed, added, removed, and light-only screens. */
 export function comparisonEntrySource(changed: boolean): string {
   const third = changed ? "added" : "removed";
-  return `import { defineCollection, defineScreen } from "mokabook";
+  return `import { defineCollection, defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"] };
 export const mockups = [

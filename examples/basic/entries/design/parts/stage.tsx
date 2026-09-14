@@ -24,7 +24,7 @@ export function PhoneFrame({
 }: PhoneFrameProps) {
   return (
     <deviceFrame.Component
-      mokabookInstance={useDesignInstance("phone")}
+      moklyInstance={useDesignInstance("phone")}
       device="phone"
       dark={dark ?? false}
       lightOnly={lightOnly ?? false}
@@ -57,7 +57,7 @@ export function BrowserFrame({
 }: BrowserFrameProps) {
   return (
     <deviceFrame.Component
-      mokabookInstance={useDesignInstance("browser")}
+      moklyInstance={useDesignInstance("browser")}
       device="browser"
       address={address}
       dark={dark ?? false}

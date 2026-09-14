@@ -19,7 +19,7 @@ export function baselineEnvironment(
       /^(?:PATH|HOME|LANG|LANGUAGE|LC_[A-Z_]+|TMPDIR|TMP|TEMP)$/.test(key)
     )
       result[key] = value;
-  return { ...result, CI: "1", MOKABOOK_BASELINE_COMMIT: commit };
+  return { ...result, CI: "1", MOKLY_BASELINE_COMMIT: commit };
 }
 
 /** Execute the exact ordered argv list; no implicit commands or shell expansion. */

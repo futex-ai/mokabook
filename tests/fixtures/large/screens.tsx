@@ -1,7 +1,7 @@
 import { Badge } from "@firna/ui/badge";
 import { Input } from "@firna/ui/input";
 
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import type { AreaComponents } from "./components.js";
 
@@ -62,7 +62,7 @@ function Screen({
       </panel.Component>
       <RecordList compact={compact} rows={rows} />
       <footer>
-        <action.Component mokabookInstance="footer" label="Save changes" />
+        <action.Component moklyInstance="footer" label="Save changes" />
         <MockLink to={next} fragment="summary">
           Next activity
         </MockLink>

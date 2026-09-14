@@ -45,7 +45,7 @@ for (const mobile of [false, true]) {
       await frame
         .locator("body")
         .evaluate((body) => body.setAttribute("data-test-retained", "true"));
-      if (mobile) await page.locator("[data-mokabook-menu]").click();
+      if (mobile) await page.locator("[data-mokly-menu]").click();
       await page
         .locator('[data-nav-collection="collection:archive"] > summary')
         .click();
@@ -53,7 +53,7 @@ for (const mobile of [false, true]) {
         .locator('[data-nav-collection="collection:screens"] > summary')
         .click();
       await page.locator('[data-nav-section="pages"] > summary').click();
-      await page.locator("[data-mokabook-nav-scroll]").evaluate((tree) => {
+      await page.locator("[data-mokly-nav-scroll]").evaluate((tree) => {
         tree.scrollTop = 120;
       });
       await page.locator('[data-filter="all"]').focus();
@@ -65,7 +65,7 @@ for (const mobile of [false, true]) {
 
       server.publishUpdate({ kind: "evidence" });
       await expect(page.locator("html")).toHaveAttribute(
-        "data-mokabook-update-version",
+        "data-mokly-update-version",
         "2",
       );
       expect(await navigationState(page)).toEqual(before);
@@ -94,7 +94,7 @@ for (const mobile of [false, true]) {
       for (const row of originalRows)
         expect(await row.evaluate((node) => node.isConnected)).toBe(true);
 
-      await page.locator("[data-mokabook-search]").fill("tour");
+      await page.locator("[data-mokly-search]").fill("tour");
       const searched = await navigationState(page);
       server.publishUpdate({
         kind: "evidence",
@@ -103,7 +103,7 @@ for (const mobile of [false, true]) {
       });
       await expect(page.locator(".mbk-nav-filter-count")).toHaveText("0");
       expect(await navigationState(page)).toEqual(searched);
-      await expect(page.locator("[data-mokabook-search]")).toBeFocused();
+      await expect(page.locator("[data-mokly-search]")).toBeFocused();
       await expect(page.locator("[data-workspace-status]")).toHaveText(
         "Unmodified",
       );
@@ -127,11 +127,13 @@ async function navigationState(page: Page) {
     all: document
       .querySelector('[data-filter="all"]')
       ?.getAttribute("aria-pressed"),
-    search: document.querySelector<HTMLInputElement>("[data-mokabook-search]")
+    search: document.querySelector<HTMLInputElement>("[data-mokly-search]")
       ?.value,
-    drawer: document.querySelector<HTMLElement>("[data-mokabook-shell]")
-      ?.dataset["drawer"],
-    scroll: document.querySelector("[data-mokabook-nav-scroll]")?.scrollTop,
+    drawer:
+      document.querySelector<HTMLElement>("[data-mokly-shell]")?.dataset[
+        "drawer"
+      ],
+    scroll: document.querySelector("[data-mokly-nav-scroll]")?.scrollTop,
     groups: [
       ...document.querySelectorAll<HTMLDetailsElement>("[data-nav-disclosure]"),
     ].map((node) => [node.dataset["navDisclosure"], node.open, node.hidden]),

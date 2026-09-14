@@ -1,14 +1,14 @@
 /** Live routing metadata is deliberately not a publishable manifest. */
 import type { ColorScheme, ResolvedRegistryEntry } from "../authoring/types.js";
 import { validateDependencyDeclarations } from "../components/dependency_validation.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { createManifest } from "./manifest.js";
 import { validateManifestMetadata } from "./manifest_validation.js";
 import type { Manifest, ManifestV5 } from "./types.js";
 
 export interface CatalogueIndex {
   schemaVersion: "live-index-1";
-  generatedBy: "mokabook";
+  generatedBy: "mokly";
   sourceFiles: readonly string[];
   entries: ManifestV5["entries"];
 }
@@ -34,10 +34,7 @@ export function parseCatalogueIndex(value: unknown): CatalogueIndex {
     !("schemaVersion" in value) ||
     value.schemaVersion !== "live-index-1"
   )
-    throw new MokabookError(
-      "manifest-invalid",
-      "expected a live catalogue index",
-    );
+    throw new MoklyError("manifest-invalid", "expected a live catalogue index");
   const metadata = validateManifestMetadata({
     ...value,
     schemaVersion: 5,
@@ -53,7 +50,7 @@ export function parseCatalogueIndex(value: unknown): CatalogueIndex {
             variant.componentViews.length > 0,
         ))
     )
-      throw new MokabookError(
+      throw new MoklyError(
         "manifest-invalid",
         "live index cannot contain rendered usage",
       );

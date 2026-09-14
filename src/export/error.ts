@@ -1,8 +1,8 @@
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 
 /** Contextual failure at the static-export boundary. */
-export function exportError(message: string, cause?: unknown): MokabookError {
-  return new MokabookError("export-invalid", message, { cause });
+export function exportError(message: string, cause?: unknown): MoklyError {
+  return new MoklyError("export-invalid", message, { cause });
 }
 
 /** Stop before committing output after a cancellation request. */

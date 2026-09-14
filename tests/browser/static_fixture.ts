@@ -27,7 +27,7 @@ export async function startStaticFixture(comparisons = false) {
     extraConfig: 'colorSchemes: ["light", "dark"],',
   });
   const isolated = await fs.promises.mkdtemp(
-    path.join(repositoryRoot, ".context/mokabook-static-"),
+    path.join(repositoryRoot, ".context/mokly-static-"),
   );
   try {
     await fs.promises.writeFile(fixture.entryPath, source(true));

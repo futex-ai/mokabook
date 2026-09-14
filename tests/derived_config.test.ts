@@ -16,7 +16,7 @@ const input = { entriesDir: "entries", mockupsDir: "mockups" };
 test("the example rebuilds derived baselines with its own package tooling", async () => {
   const configPath = path.join(
     repositoryRoot,
-    "examples/basic/mokabook.config.ts",
+    "examples/basic/mokly.config.ts",
   );
   const config = await loadConfig(repositoryRoot, configPath);
   assert.equal(config.generatedOutput, "derived");
@@ -77,7 +77,7 @@ test("generated output defaults to committed and derives exact default argv", as
     [
       "npx",
       "--no-install",
-      "mokabook",
+      "mokly",
       "build",
       "--config",
       "config/catalogue.ts",
@@ -166,9 +166,9 @@ test("only derived output may be absent and its projected root stays confined", 
 test("cache paths and physical aliases cannot be configured as catalogue roots", async (t) => {
   const fixture = await createFixture();
   t.after(() => removeFixture(fixture));
-  await fs.mkdir(path.join(fixture.root, ".mokabook-cache"));
-  await fs.symlink(".mokabook-cache", path.join(fixture.root, "cache-alias"));
-  for (const root of [".mokabook-cache", "cache-alias"])
+  await fs.mkdir(path.join(fixture.root, ".mokly-cache"));
+  await fs.symlink(".mokly-cache", path.join(fixture.root, "cache-alias"));
+  for (const root of [".mokly-cache", "cache-alias"])
     for (const field of ["entriesDir", "mockupsDir", "outDir"])
       assert.throws(
         () =>

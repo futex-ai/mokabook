@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { requireDirectory } from "./path_validation.js";
 import { resolveInside } from "./paths.js";
 import type {
@@ -176,6 +176,6 @@ function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function invalid(message: string): MokabookError {
-  return new MokabookError("config-invalid", message);
+function invalid(message: string): MoklyError {
+  return new MoklyError("config-invalid", message);
 }

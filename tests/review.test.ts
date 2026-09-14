@@ -34,9 +34,9 @@ const execFileAsync = promisify(execFile);
 
 test("Review ignore normalizes paired regions and retains malformed content", () => {
   const base =
-    "<main><!--mokabook-review-ignore:start:nav--><nav>A</nav><!--mokabook-review-ignore:end:nav--><p>Body</p></main>";
+    "<main><!--mokly-review-ignore:start:nav--><nav>A</nav><!--mokly-review-ignore:end:nav--><p>Body</p></main>";
   const head =
-    "<main><!--mokabook-review-ignore:start:nav--><nav>B</nav><!--mokabook-review-ignore:end:nav--><p>Body</p></main>";
+    "<main><!--mokly-review-ignore:start:nav--><nav>B</nav><!--mokly-review-ignore:end:nav--><p>Body</p></main>";
   const pair = normalizeReviewPair(base, head, "screen.mobile.html");
   assert.equal(pair.base, pair.head);
   assert.deepEqual(pair.ignoredIds, ["nav"]);
@@ -94,12 +94,12 @@ test("Review classifies added, removed, and unchanged routes independently", asy
   };
   const baseManifest = {
     entries: [{ ...detail, useCaseIds: [] }, old],
-    generatedBy: "mokabook" as const,
+    generatedBy: "mokly" as const,
     sourceFiles: compilation.manifest.sourceFiles,
     schemaVersion: 5 as const,
   };
   const gitFiles = new Map<string, string>([
-    ["mockups/mokabook-manifest.json", `${JSON.stringify(baseManifest)}\n`],
+    ["mockups/mokly-manifest.json", `${JSON.stringify(baseManifest)}\n`],
     [
       "mockups/screens/details.mobile.html",
       compilation.outputs.get("screens/details.mobile.html") ?? "",
@@ -263,7 +263,7 @@ test("removing dark classifies dark views removed", async (context) => {
   const darkCompilation = await compileCatalogue(darkConfig);
   await fs.promises.writeFile(
     fixture.configPath,
-    `import { defineConfig } from "mokabook";
+    `import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
@@ -340,8 +340,8 @@ test("Review compares Git base without checkout and writes deterministic artifac
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
   await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["config", "user.name", "Mokly Test"]);
+  await git(fixture.root, ["config", "user.email", "mokly@example.invalid"]);
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: base catalogue"]);
 
@@ -401,8 +401,8 @@ test("Review reports descendants of directory dependencies", async (context) => 
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
   await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["config", "user.name", "Mokly Test"]);
+  await git(fixture.root, ["config", "user.email", "mokly@example.invalid"]);
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: base directory dependency"]);
   await fs.promises.writeFile(component, "export const label = 'After';\n");
@@ -478,10 +478,10 @@ function filesForCompilation(
   compilation: Compilation,
 ): Map<string, string> {
   const files = new Map<string, string>([
-    ["mockups/mokabook-manifest.json", `${JSON.stringify(manifest)}\n`],
+    ["mockups/mokly-manifest.json", `${JSON.stringify(manifest)}\n`],
   ]);
   for (const [route, content] of compilation.outputs) {
-    if (route === "mokabook-manifest.json") continue;
+    if (route === "mokly-manifest.json") continue;
     files.set(`mockups/${route}`, content);
   }
   return files;
@@ -531,9 +531,9 @@ function insertIgnoredRegions(
   const regions = ids
     .map(
       (id) =>
-        `<!--mokabook-review-ignore:start:${id}-->` +
+        `<!--mokly-review-ignore:start:${id}-->` +
         `<span>${label}-${id}</span>` +
-        `<!--mokabook-review-ignore:end:${id}-->`,
+        `<!--mokly-review-ignore:end:${id}-->`,
     )
     .join("");
   if (!content.includes("</main>")) throw new Error("missing main close tag");

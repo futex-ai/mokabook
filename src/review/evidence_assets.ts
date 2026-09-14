@@ -1,7 +1,7 @@
 /** Record the checked bytes so later comparisons cannot silently use edited output. */
 import { createHash } from "node:crypto";
 
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { type LocatedReviewAsset, type ReviewAssetReader } from "./assets.js";
 import { CompiledReviewAssetReader } from "./head_assets.js";
 
@@ -51,7 +51,7 @@ export class SelectedAssetReader implements ReviewAssetReader {
         ? loaded.get(route)
         : await this.reader.read(route);
       if (content === undefined)
-        throw new MokabookError(
+        throw new MoklyError(
           "review-invalid",
           `Snapshot file is missing: ${route}`,
         );
@@ -63,7 +63,7 @@ export class SelectedAssetReader implements ReviewAssetReader {
         throw changedAsset(route);
       this.bytes += content.byteLength;
       if (this.bytes > 64 * 1024 * 1024)
-        throw new MokabookError(
+        throw new MoklyError(
           "review-invalid",
           "Selected comparison exceeds 64 MiB",
         );
@@ -78,8 +78,8 @@ function assetDigest(content: Uint8Array): string {
   return createHash("sha256").update(content).digest("hex");
 }
 
-function changedAsset(route: string): MokabookError {
-  return new MokabookError(
+function changedAsset(route: string): MoklyError {
+  return new MoklyError(
     "review-invalid",
     `Comparison input changed since the catalogue was checked: ${route}`,
   );

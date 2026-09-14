@@ -1,4 +1,4 @@
-// Route stage renderers for the served Mokabook shell: the framed screen
+// Route stage renderers for the served Mokly shell: the framed screen
 // stage, ordered use-case flow, whole-document embed, and quiet empty stage shared
 // by home and missing routes. All embedded consumer documents are sandboxed
 // without script permission.
@@ -71,11 +71,11 @@ function EmbedStage(props: {
   fragment?: string;
 }) {
   return (
-    <div className="mbk-stage-embed" data-mokabook-scroll="embed">
+    <div className="mbk-stage-embed" data-mokly-scroll="embed">
       <iframe
         className="mbk-frag"
         sandbox="allow-same-origin"
-        data-mokabook-fragment-frame=""
+        data-mokly-fragment-frame=""
         src={fragmentSrc(props.route, props.fragment)}
         title={props.title}
       />
@@ -106,8 +106,8 @@ function FramesStage(props: {
   return (
     <div
       className="mbk-stage mbk-live"
-      data-mokabook-scroll="stage"
-      data-mokabook-stage=""
+      data-mokly-scroll="stage"
+      data-mokly-stage=""
       data-viewport="both"
     >
       <div
@@ -118,7 +118,7 @@ function FramesStage(props: {
         <PhoneFrame>
           <iframe
             className="mbk-frag"
-            data-mokabook-fragment-frame=""
+            data-mokly-fragment-frame=""
             data-workspace-frame="mobile"
             data-fragment-dark={mobile.dark}
             data-fragment-light={mobile.light}
@@ -136,7 +136,7 @@ function FramesStage(props: {
         <BrowserFrame address={address}>
           <iframe
             className="mbk-frag"
-            data-mokabook-fragment-frame=""
+            data-mokly-fragment-frame=""
             data-workspace-frame="desktop"
             data-fragment-dark={desktop.dark}
             data-fragment-light={desktop.light}
@@ -172,7 +172,7 @@ function FlowScreen(props: {
       <BrowserFrame address={screen.address ?? screen.route}>
         <iframe
           className="mbk-frag"
-          data-mokabook-fragment-frame={props.fragmentFrame ? "" : undefined}
+          data-mokly-fragment-frame={props.fragmentFrame ? "" : undefined}
           data-fragment-dark={desktop.dark}
           data-fragment-light={desktop.light}
           sandbox="allow-same-origin"
@@ -190,7 +190,7 @@ function UseCaseFlowStage(props: {
   fragment?: string;
 }) {
   return (
-    <div className="mbk-flow" data-mokabook-scroll="flow">
+    <div className="mbk-flow" data-mokly-scroll="flow">
       <div className="flow-track">
         {props.entry.steps.map((step, index) => {
           const candidate = props.catalogue.byId.get(step.screenId);

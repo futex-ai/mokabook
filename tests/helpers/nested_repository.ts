@@ -15,7 +15,7 @@ export async function nestedRepository(t: TestContext) {
   t.after(() => removeFixture(fixture));
   const nested = path.join(fixture.root, "catalogue");
   await fs.mkdir(nested);
-  for (const name of ["entries", "mockups", "notes.md", "mokabook.config.ts"])
+  for (const name of ["entries", "mockups", "notes.md", "mokly.config.ts"])
     await fs.rename(path.join(fixture.root, name), path.join(nested, name));
   const config = await loadConfig(nested);
   const compilation = await compileCatalogue(config);

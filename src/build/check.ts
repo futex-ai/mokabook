@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { Compilation } from "./compile.js";
 import { pendingGeneratedOrphanRoutes } from "./ownership.js";
 
@@ -32,9 +32,9 @@ export function checkCompilation(
     formatGroup("stale generated files", stale),
     formatGroup("orphan generated files", orphan),
   ].filter(Boolean);
-  throw new MokabookError(
+  throw new MoklyError(
     "build-invalid",
-    `committed output does not match source; run mokabook build:\n${groups.join("\n")}`,
+    `committed output does not match source; run mokly build:\n${groups.join("\n")}`,
   );
 }
 

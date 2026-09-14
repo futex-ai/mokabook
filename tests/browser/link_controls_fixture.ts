@@ -31,7 +31,7 @@ moduleResolution: { aliases: { "react-native": "react-native-web" }, conditions:
     const run = promisify(execFile);
     for (const args of [
       ["init", "-q", "--initial-branch=main"],
-      ["config", "user.name", "Mokabook Fixture"],
+      ["config", "user.name", "Mokly Fixture"],
       ["config", "user.email", "fixture@example.invalid"],
       ["add", "-A"],
       ["commit", "-qm", "test: base styled controls"],
@@ -71,7 +71,7 @@ function controlSource(firstTitle = "Home"): string {
   return validEntrySource({ firstTitle, body: `<Controls />` }).replace(
     'import React from "react";',
     `import React from "react";
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 import { Button } from "@firna/ui/button";
 const noop = () => {};
 function Controls() { return <>

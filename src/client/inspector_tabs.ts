@@ -85,7 +85,7 @@ export function installInspectorTabs(root: HTMLElement, signal: AbortSignal) {
     { signal },
   );
   doc.addEventListener(
-    "mokabook:inspector-restore",
+    "mokly:inspector-restore",
     () =>
       open(inspector.dataset["open"] === "true" ? "details" : undefined, false),
     { signal },

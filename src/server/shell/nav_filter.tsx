@@ -21,7 +21,7 @@ export function NavFilter({ context }: { context: ShellContext }) {
     <div
       aria-label="Catalogue filter"
       className="mbk-nav-filter"
-      data-mokabook-filter=""
+      data-mokly-filter=""
       data-changes-status={status}
       role="group"
     >

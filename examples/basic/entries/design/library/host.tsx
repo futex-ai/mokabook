@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { RenderInput } from "mokabook";
+import type { RenderInput } from "@mokly/mokly";
 
 import { PreviewWorkspace } from "../components/parts/workspace.js";
 

@@ -1,4 +1,4 @@
-import { collection, screen } from "mokabook";
+import { collection, screen } from "@mokly/mokly";
 
 import { componentStyleDependencies } from "../parts/styles.js";
 import { editingScreens } from "./editing/screens.js";
@@ -25,8 +25,8 @@ export const controlsDesign = collection({
     "examples/basic/generated/design-component-controls.css",
   ],
   relatedDocs: [
-    "docs/protocol/mokabook-component-controls-design.md",
-    "docs/protocol/mokabook-component-controls.md",
+    "docs/protocol/mokly-component-controls-design.md",
+    "docs/protocol/mokly-component-controls.md",
   ],
   children: [
     screen({

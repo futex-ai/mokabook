@@ -1,4 +1,4 @@
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { BaselineReader, GitFile, GitFileKind } from "./git.js";
 import { readGitFiles } from "./git_batch.js";
 import { GitCommands } from "./git_commands.js";
@@ -42,7 +42,7 @@ export class CommittedBaselineReader
       .filter(Boolean);
     if (modes.length === 0) return "missing";
     if (modes.length !== 1) {
-      throw new MokabookError(
+      throw new MoklyError(
         "git-failed",
         `Git returned multiple entries for ${repoRelativePath}`,
       );

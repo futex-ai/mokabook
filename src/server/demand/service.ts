@@ -8,7 +8,7 @@ import { DocumentCache } from "../../build/document_cache.js";
 import type { CompiledDocument } from "../../build/document_compiler.js";
 import { generatedViews } from "../../components/views.js";
 import { timeAsync } from "../../diagnostics/timings.js";
-import { MokabookError } from "../../errors.js";
+import { MoklyError } from "../../errors.js";
 
 interface Job {
   route: string;
@@ -173,7 +173,7 @@ export class DocumentService {
       if (settled) return;
       if (!value.ok || !value.document)
         return failed(
-          new MokabookError(
+          new MoklyError(
             "build-invalid",
             value.error ?? "Could not render preview",
           ),

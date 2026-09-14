@@ -36,7 +36,7 @@ export async function smokeEsmConsumer(context) {
   );
   await runCommand("node", ["verify-api.mjs"], { cwd: root });
   const help = await runBin(root, ["--help"]);
-  assert.match(help.stdout, /mokabook build/);
+  assert.match(help.stdout, /mokly build/);
   const version = await runBin(root, ["--version"]);
   assert.equal(version.stdout.trim(), context.packageVersion);
   const nested = path.join(root, "nested/config/discovery");
@@ -50,10 +50,10 @@ export async function smokeEsmConsumer(context) {
   assert.match(fragment, /data-fixture="esm-desktop"/);
   assert.match(
     fragment,
-    /href="\.\/detail\.desktop\.html#packed-section"[^>]+data-mokabook-link="packed-detail#packed-section"/,
+    /href="\.\/detail\.desktop\.html#packed-section"[^>]+data-mokly-link="packed-detail#packed-section"/,
   );
   await smokeServer(root);
-  await runCommand("npx", ["--no-install", "mokabook", "--help"], {
+  await runCommand("npx", ["--no-install", "mokly", "--help"], {
     cwd: root,
   });
 
@@ -67,7 +67,7 @@ export async function smokeEsmConsumer(context) {
   await runBin(root, ["build"]);
   let review;
   await smokeServer(root, ["--base", "HEAD"], async (url) => {
-    const response = await fetch(`${url}/__mokabook/diffs/review.json`);
+    const response = await fetch(`${url}/__mokly/diffs/review.json`);
     assert.equal(response.status, 200);
     review = await response.json();
   });
@@ -103,7 +103,7 @@ export async function smokeNodeNextConsumer(context) {
   );
   await runCommand(
     "node",
-    ["--input-type=module", "--eval", 'await import("mokabook")'],
+    ["--input-type=module", "--eval", 'await import("@mokly/mokly")'],
     { cwd: root },
   );
 }
@@ -125,7 +125,10 @@ export async function smokeCleanCacheExecution(context) {
     ["install", "--ignore-scripts", "--no-audit", "--no-fund"],
     { cwd: root },
   );
-  assert.equal(fs.existsSync(path.join(root, "node_modules/mokabook")), false);
+  assert.equal(
+    fs.existsSync(path.join(root, "node_modules/@mokly/mokly")),
+    false,
+  );
   const cache = path.join(context.workingRoot, "empty-npx-cache");
   const packageSpec = `file:${context.archivePath}`;
   const npx = [
@@ -136,16 +139,16 @@ export async function smokeCleanCacheExecution(context) {
     "--package",
     packageSpec,
     "--",
-    "mokabook",
+    "mokly",
   ];
   await runCommand("npm", [...npx, "build"], { cwd: root });
   await runCommand("npm", [...npx, "check"], { cwd: root });
   assert.equal(
-    fs.existsSync(path.join(root, "mockups/mokabook-manifest.json")),
+    fs.existsSync(path.join(root, "mockups/mokly-manifest.json")),
     true,
   );
   await fs.promises.rename(
-    path.join(root, "mokabook.config.ts"),
+    path.join(root, "mokly.config.ts"),
     path.join(root, "custom.config.ts"),
   );
   await initializeGit(root);
@@ -168,7 +171,10 @@ export async function smokeCleanCacheExecution(context) {
     { cwd: root },
   );
   await inspectConsumerExport(root, "published", "export-baseline");
-  assert.equal(fs.existsSync(path.join(root, "node_modules/mokabook")), false);
+  assert.equal(
+    fs.existsSync(path.join(root, "node_modules/@mokly/mokly")),
+    false,
+  );
 }
 
 export async function smokeAccountingFixture(context) {
@@ -198,9 +204,9 @@ export async function smokeAccountingFixture(context) {
   assert.match(appFragment, /data-theme="fixture-theme"/);
   assert.match(
     appFragment,
-    /<a[^>]*class="fixture-button"[^>]*data-mokabook-link="accounting-campaign"/,
+    /<a[^>]*class="fixture-button"[^>]*data-mokly-link="accounting-campaign"/,
   );
-  assert.doesNotMatch(appFragment, /data-mokabook-link-child-/);
+  assert.doesNotMatch(appFragment, /data-mokly-link-child-/);
   assert.match(appFragment, /href="\.\.\/app\.css"/);
   assert.match(campaignFragment, /href="\.\.\/marketing\.css"/);
   assert.equal(
@@ -209,7 +215,7 @@ export async function smokeAccountingFixture(context) {
   );
   const pageManifest = JSON.parse(
     await fs.promises.readFile(
-      path.join(root, "docs/mockups/mokabook-manifest.json"),
+      path.join(root, "docs/mockups/mokly-manifest.json"),
       "utf8",
     ),
   );
@@ -236,7 +242,7 @@ export async function smokeAccountingFixture(context) {
   await runBin(root, ["build"]);
   let review;
   await smokeServer(root, ["--base", "HEAD"], async (url) => {
-    const response = await fetch(`${url}/__mokabook/diffs/review.json`);
+    const response = await fetch(`${url}/__mokly/diffs/review.json`);
     assert.equal(response.status, 200);
     review = await response.json();
   });
@@ -258,7 +264,7 @@ export async function smokeJunoFixture(context) {
     context.archivePath,
     consumerPackage("juno-shaped-consumer", context, true),
   );
-  const config = ["--config", "tools/mokabook.config.ts"];
+  const config = ["--config", "tools/mokly.config.ts"];
   await runBin(root, ["build", ...config]);
   await runBin(root, ["check", ...config]);
   const fragment = await fs.promises.readFile(
@@ -282,13 +288,15 @@ export async function smokeJunoFixture(context) {
   ]);
 }
 
-function consumerPackage(name, context, installMokabook) {
+function consumerPackage(name, context, installMokly) {
   return {
     name,
     private: true,
     type: "module",
     dependencies: {
-      ...(installMokabook ? { mokabook: `file:${context.archivePath}` } : {}),
+      ...(installMokly
+        ? { "@mokly/mokly": `file:${context.archivePath}` }
+        : {}),
       react: context.versions.react,
       "react-dom": context.versions.reactDom,
     },

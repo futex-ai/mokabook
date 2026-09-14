@@ -2,7 +2,7 @@ import { parse } from "parse5";
 
 import { hasGeneratedOwnershipHeader } from "../build/ownership.js";
 import { validateComponentRanges } from "../components/ranges.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { logicalMarker, parseLogicalMarker } from "../navigation/logical.js";
 import {
   duplicateReservedAttributeName,
@@ -91,7 +91,7 @@ export function adaptBrowseDocument(
     }
   });
   const marked = nodes.filter((node) =>
-    attributesOf(node).has("data-mokabook-link"),
+    attributesOf(node).has("data-mokly-link"),
   );
   if (hasBaseHref && marked.length > 0) {
     throw invalid(
@@ -101,12 +101,12 @@ export function adaptBrowseDocument(
   }
   for (const node of nodes) {
     const attributes = attributesOf(node);
-    if (attributes.has("data-mokabook-target")) {
+    if (attributes.has("data-mokly-target")) {
       replacements.push(
-        removeReservedAttribute(content, route, node, "data-mokabook-target"),
+        removeReservedAttribute(content, route, node, "data-mokly-target"),
       );
     }
-    const marker = attributes.get("data-mokabook-link");
+    const marker = attributes.get("data-mokly-link");
     if (marker === undefined) continue;
     const destination = parseLogicalMarker(marker);
     if (!destination || logicalMarker(destination) !== marker) {
@@ -133,7 +133,7 @@ export function adaptBrowseDocument(
     const target = parseBrowsingTarget(ownTarget);
     if (attributes.has("download") || target.kind === "invalid") {
       replacements.push(
-        removeReservedAttribute(content, route, node, "data-mokabook-link"),
+        removeReservedAttribute(content, route, node, "data-mokly-link"),
       );
       continue;
     }
@@ -144,7 +144,7 @@ export function adaptBrowseDocument(
           content,
           route,
           node,
-          `data-mokabook-target="${serializedTarget}"`,
+          `data-mokly-target="${serializedTarget}"`,
         ),
       );
     }
@@ -242,8 +242,8 @@ function applyReplacements(
     );
 }
 
-function invalid(route: string, message: string): MokabookError {
-  return new MokabookError("build-invalid", `${route}: ${message}`);
+function invalid(route: string, message: string): MoklyError {
+  return new MoklyError("build-invalid", `${route}: ${message}`);
 }
 
 function visit(node: HtmlNode, callback: (node: HtmlNode) => void): void {

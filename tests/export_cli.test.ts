@@ -47,7 +47,7 @@ test("export CLI requires an explicit output and rejects misplaced options", () 
   );
   assert.throws(() => parseArguments(["publish"]), /unknown command/);
   assert.equal(parseArguments(["export", "--help"]).help, true);
-  assert.match(HELP, /mokabook export --out <path>/);
+  assert.match(HELP, /mokly export --out <path>/);
 });
 
 test("export help needs no consumer config or output", async () => {
@@ -78,13 +78,13 @@ test("discovered nested invocations build before exporting and honor configured 
     [cli, "export", "--out", "site"],
     { cwd: fixture.entriesDir },
   );
-  assert.match(stdout, /Exported Mokabook/);
+  assert.match(stdout, /Exported Mokly/);
   const html = await fs.promises.readFile(
     path.join(fixture.output, "view/screens/home.html"),
     "utf8",
   );
   assert.match(html, /Published home/);
-  assert.match(html, /data-mokabook-base="release"/);
+  assert.match(html, /data-mokly-base="release"/);
   await execute(process.execPath, [cli, "check"], { cwd: fixture.root });
   await execute(
     process.execPath,
@@ -93,7 +93,7 @@ test("discovered nested invocations build before exporting and honor configured 
   );
   assert.match(
     await fs.promises.readFile(path.join(fixture.output, "index.html"), "utf8"),
-    /data-mokabook-base="HEAD"/,
+    /data-mokly-base="HEAD"/,
   );
 });
 

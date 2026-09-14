@@ -16,7 +16,7 @@ export function MetaRow({
 }) {
   return (
     <metadataRow.Component
-      mokabookInstance={useDesignInstance(name)}
+      moklyInstance={useDesignInstance(name)}
       label={label}
       presentation={presentation}
     >

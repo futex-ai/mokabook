@@ -20,7 +20,7 @@ for (const width of [390, 1280]) {
       "choose another item from the navigation",
     );
     await page.getByRole("link", { name: "Go to the catalogue home" }).click();
-    await expect(page.locator("#mb-main h2")).toHaveText("Mokabook");
+    await expect(page.locator("#mb-main h2")).toHaveText("Mokly");
   });
 
   test(`document pages retain metadata, anchors and mixed navigation at ${width}px`, async ({
@@ -44,14 +44,14 @@ for (const width of [390, 1280]) {
     await expect(
       page.frameLocator(".mbk-stage-embed iframe").locator("#next-steps"),
     ).toBeVisible();
-    await page.locator("[data-mokabook-details] summary").click();
-    await expect(page.locator("[data-mokabook-details]")).toContainText(
+    await page.locator("[data-mokly-details] summary").click();
+    await expect(page.locator("[data-mokly-details]")).toContainText(
       "handbook.html",
     );
-    await expect(page.locator("[data-mokabook-details]")).toContainText(
+    await expect(page.locator("[data-mokly-details]")).toContainText(
       "documents",
     );
-    await page.locator("[data-mokabook-details] summary").click();
+    await page.locator("[data-mokly-details] summary").click();
     if (width < 700)
       await page
         .getByRole("button", { name: "Open catalogue navigation" })

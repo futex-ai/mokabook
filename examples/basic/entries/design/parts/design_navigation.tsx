@@ -5,7 +5,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import type { DesignDestination } from "./destinations.js";
 import {

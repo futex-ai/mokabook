@@ -1,4 +1,4 @@
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { NodeGitCommandRunner, type GitCommandRunner } from "../review/git.js";
 import { projectRealPath } from "./paths.js";
 import type { ResolvedConfig } from "./types.js";
@@ -12,7 +12,7 @@ export async function requireGitTopLevel(
 ): Promise<void> {
   const root = (await runner.run(["rev-parse", "--show-toplevel"])).trim();
   if (projectRealPath(root) !== projectRealPath(config.repoRoot))
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `repoRoot must be the Git top level: configured ${config.repoRoot}, Git reports ${root}`,
     );

@@ -280,13 +280,13 @@ body.frame-expanded::before {
   box-shadow: 0 40px 120px rgba(20, 28, 22, 0.4);
 }
 
-body[data-mokabook-color-scheme="dark"]
+body[data-mokly-color-scheme="dark"]
   :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
   .phone-screen {
   background: var(--mbk-dark-screen-bg);
 }
 
-body[data-mokabook-color-scheme="dark"]
+body[data-mokly-color-scheme="dark"]
   :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
   .phone-screen::after {
   content: "";
@@ -302,25 +302,25 @@ body[data-mokabook-color-scheme="dark"]
   pointer-events: none;
 }
 
-body[data-mokabook-color-scheme="dark"]
+body[data-mokly-color-scheme="dark"]
   :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
   .phone-status {
   color: var(--mbk-dark-screen-ink);
 }
 
-body[data-mokabook-color-scheme="dark"]
+body[data-mokly-color-scheme="dark"]
   :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
   .phone-home {
   background: color-mix(in srgb, var(--mbk-dark-screen-ink) 40%, transparent);
 }
 
-body[data-mokabook-color-scheme="dark"]
+body[data-mokly-color-scheme="dark"]
   :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
   .browser-viewport {
   background: var(--mbk-dark-screen-bg);
 }
 
-body[data-mokabook-color-scheme="dark"]
+body[data-mokly-color-scheme="dark"]
   :is(.mbk-frame-wrap, .mbk-flow-screen):not([data-color-scheme-fallback])
   .mbk-frag {
   background: var(--mbk-dark-screen-bg);
@@ -364,8 +364,8 @@ body[data-mokabook-color-scheme="dark"]
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  background: var(--mokabook-accent);
-  color: var(--mokabook-accent-contrast);
+  background: var(--mokly-accent);
+  color: var(--mokly-accent-contrast);
   font-size: 13px;
   font-weight: 800;
 }
@@ -388,7 +388,7 @@ body[data-mokabook-color-scheme="dark"]
   margin-top: 8px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--mokabook-accent);
+  color: var(--mokly-accent);
   text-decoration: none;
 }
 

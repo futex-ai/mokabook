@@ -16,7 +16,7 @@ const descriptor = {
   deploymentId: "a".repeat(64),
   canonicalPath: "/view/screens/home.html",
   idRoutes: { home: "/view/screens/home.html" },
-  comparisonUrl: `/__mokabook/diffs/__generations/${"a".repeat(64)}/review.json`,
+  comparisonUrl: `/__mokly/diffs/__generations/${"a".repeat(64)}/review.json`,
 };
 
 test("static metadata never authorizes external URLs, traversal, or unknown ids", () => {
@@ -56,15 +56,15 @@ test("a static document with missing or malformed metadata never falls back to t
     }) as unknown as Document;
   assert.equal(readStaticDelivery(document({})), undefined);
   for (const contents of [undefined, "{}", "{"]) {
-    const attrs: Record<string, string> = { "data-mokabook-static": "" };
-    if (contents !== undefined) attrs["data-mokabook-delivery"] = contents;
+    const attrs: Record<string, string> = { "data-mokly-static": "" };
+    if (contents !== undefined) attrs["data-mokly-delivery"] = contents;
     assert.throws(() => readStaticDelivery(document(attrs)), /unavailable/);
   }
   assert.deepEqual(
     readStaticDelivery(
       document({
-        "data-mokabook-static": "",
-        "data-mokabook-delivery": JSON.stringify(descriptor),
+        "data-mokly-static": "",
+        "data-mokly-delivery": JSON.stringify(descriptor),
       }),
     ),
     parseStaticDelivery(descriptor),
@@ -74,11 +74,8 @@ test("a static document with missing or malformed metadata never falls back to t
 test("different deployment identities never adopt a route with the same comparison URL", () => {
   const document = (deploymentId: string) => {
     const values = new Map([
-      ["data-mokabook-static", ""],
-      [
-        "data-mokabook-delivery",
-        JSON.stringify({ ...descriptor, deploymentId }),
-      ],
+      ["data-mokly-static", ""],
+      ["data-mokly-delivery", JSON.stringify({ ...descriptor, deploymentId })],
     ]);
     return {
       documentElement: {
@@ -88,10 +85,10 @@ test("different deployment identities never adopt a route with the same comparis
     } as unknown as Document;
   };
   const current = document("a".repeat(64));
-  const before = current.documentElement.getAttribute("data-mokabook-delivery");
+  const before = current.documentElement.getAttribute("data-mokly-delivery");
   assert.equal(adoptStaticDelivery(current, document("b".repeat(64))), false);
   assert.equal(
-    current.documentElement.getAttribute("data-mokabook-delivery"),
+    current.documentElement.getAttribute("data-mokly-delivery"),
     before,
   );
   assert.equal(adoptStaticDelivery(current, document("a".repeat(64))), true);

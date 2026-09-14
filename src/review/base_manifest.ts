@@ -3,6 +3,7 @@ import path from "node:path";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import {
+  FORMER_MANIFEST_NAME,
   MANIFEST_NAME,
   parseHistoricalManifest,
   selectManifestInput,
@@ -20,6 +21,7 @@ export async function readBaseManifest(
   const canonicalPath = joinGit(prefix, MANIFEST_NAME);
   const selection = selectManifestInput(
     await git.fileExists(commit, canonicalPath),
+    await git.fileExists(commit, joinGit(prefix, FORMER_MANIFEST_NAME)),
     config.compatibility.readManifestV2,
   );
   return parseHistoricalManifest(

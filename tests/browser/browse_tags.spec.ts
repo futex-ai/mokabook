@@ -2,15 +2,15 @@ import { expect, test, type Page } from "@playwright/test";
 
 const detailsRow = 'a[data-nav-row][data-route="screens/details.html"]';
 const inspectorChip =
-  '[data-inspector-panel="details"] [data-mokabook-tag="forms"]';
+  '[data-inspector-panel="details"] [data-mokly-tag="forms"]';
 const panel = "#mb-tag-picker";
-const search = "[data-mokabook-search]";
-const toggle = "[data-mokabook-tag-toggle]";
+const search = "[data-mokly-search]";
+const toggle = "[data-mokly-tag-toggle]";
 const tourRow = 'a[data-nav-row][data-route="user-flows/example-tour.html"]';
 const welcomeRow = 'a[data-nav-row][data-route="screens/welcome.html"]';
 
 function chip(tag: string): string {
-  return `${panel} [data-mokabook-tag="${tag}"]`;
+  return `${panel} [data-mokly-tag="${tag}"]`;
 }
 
 async function openPicker(page: Page): Promise<void> {

@@ -51,7 +51,7 @@ test("publication pins one baseline for Changes and comparisons when its ref adv
   const read = (file: string) =>
     fs.promises.readFile(path.join(fixture.output, file), "utf8");
   const jsonPath = (await read("_redirects")).match(
-    /^\/__mokabook\/diffs\/review.json \/(\S+) 302$/m,
+    /^\/__mokly\/diffs\/review.json \/(\S+) 302$/m,
   )?.[1];
   assert.ok(jsonPath);
   const review: ReviewResult = JSON.parse(await read(jsonPath));

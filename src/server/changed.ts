@@ -1,7 +1,7 @@
 /** Optional changed-route detection powering the Browse changed/all filter. */
 import { compileCatalogue } from "../build/compile.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import {
   removedManifestEntries,
   type CatalogueChangeSnapshot,
@@ -28,7 +28,7 @@ export async function computeChangedRoutes(
   try {
     return (await computeCatalogueChanges(config, base, git)).changedRoutes;
   } catch (error) {
-    if (error instanceof MokabookError && error.code === "config-invalid")
+    if (error instanceof MoklyError && error.code === "config-invalid")
       throw error;
     return undefined;
   }

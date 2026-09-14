@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
-import type { Viewport } from "mokabook";
-import { MockLink } from "mokabook";
+import type { Viewport } from "@mokly/mokly";
+import { MockLink } from "@mokly/mokly";
 
 import { useDesignStyle } from "../style_context.js";
 import {

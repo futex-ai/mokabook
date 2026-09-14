@@ -17,19 +17,18 @@ test.afterAll(async () => {
   await fixture.close();
 });
 
-const endpoint = "**/__mokabook/diffs/review.json*";
+const endpoint = "**/__mokly/diffs/review.json*";
 
 test("Changes and screen browsing stay lazy until a diff is selected", async ({
   page,
 }) => {
   const requests: string[] = [];
   page.on("request", (request) => {
-    if (request.url().includes("/__mokabook/diffs/"))
-      requests.push(request.url());
+    if (request.url().includes("/__mokly/diffs/")) requests.push(request.url());
   });
   await page.goto(`${fixture.url}/view/screens/home.html`);
   await expect(
-    page.getByRole("navigation", { name: "Mokabook modes" }),
+    page.getByRole("navigation", { name: "Mokly modes" }),
   ).toHaveCount(0);
   await expect(
     page.getByRole("link", { name: "Review", exact: true }),
@@ -225,7 +224,7 @@ test("approved changes mockups render directly from disk", async ({ page }) => {
         page.getByRole("group", { name: "Comparison mode" }),
       ).toContainText("Current");
       await expect(
-        page.getByRole("navigation", { name: "Mokabook modes" }),
+        page.getByRole("navigation", { name: "Mokly modes" }),
       ).toHaveCount(0);
     }
   }

@@ -7,11 +7,11 @@ test("preview fragment queries update every applicable frame source", () => {
   const first = frame({
     "data-fragment-dark": "/static/screen.dark",
     "data-fragment-light": "/static/screen",
-    "data-mokabook-fragment-frame": "",
+    "data-mokly-fragment-frame": "",
     src: "/static/screen",
   });
   const second = frame({
-    "data-mokabook-fragment-frame": "",
+    "data-mokly-fragment-frame": "",
     src: "/static/light-only",
   });
   const laterFlowStep = frame({
@@ -46,7 +46,7 @@ test("preview fragment queries fail closed without interpreting selectors", () =
     const target = frame({
       "data-fragment-dark": "/static/screen.dark#old",
       "data-fragment-light": "/static/screen#old",
-      "data-mokabook-fragment-frame": "",
+      "data-mokly-fragment-frame": "",
       src: "/static/screen#old",
     });
     const doc = documentWith([target]);
@@ -67,7 +67,7 @@ test("preview fragment queries fail closed without interpreting selectors", () =
 
 test("a valid absent anchor retains its encoded hash without DOM lookup", () => {
   const target = frame({
-    "data-mokabook-fragment-frame": "",
+    "data-mokly-fragment-frame": "",
     src: "/static/screen?mode=preview#old",
   });
   const doc = documentWith([target]);
@@ -125,11 +125,11 @@ class FakeDocument {
   constructor(private readonly frames: readonly FakeFrame[]) {}
 
   querySelectorAll(selector: string): readonly FakeFrame[] {
-    if (selector !== "iframe[data-mokabook-fragment-frame]") {
+    if (selector !== "iframe[data-mokly-fragment-frame]") {
       this.selectorQueries += 1;
     }
     return this.frames.filter(
-      (frame) => frame.getAttribute("data-mokabook-fragment-frame") !== null,
+      (frame) => frame.getAttribute("data-mokly-fragment-frame") !== null,
     );
   }
 }

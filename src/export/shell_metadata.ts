@@ -32,11 +32,11 @@ export function markCapturedShell(
     start === undefined ||
     html.slice(start, start + 5).toLowerCase() !== "<html" ||
     root.attrs.some((attr) =>
-      ["data-mokabook-static", "data-mokabook-delivery"].includes(attr.name),
+      ["data-mokly-static", "data-mokly-delivery"].includes(attr.name),
     )
   )
     throw invalidShell(name);
-  return `${html.slice(0, start + 5)} data-mokabook-static="" ${deliveryAttribute(delivery)}${html.slice(start + 5)}`;
+  return `${html.slice(0, start + 5)} data-mokly-static="" ${deliveryAttribute(delivery)}${html.slice(start + 5)}`;
 }
 
 /** Require adapters to preserve the original shell-owned routing contract. */
@@ -56,12 +56,12 @@ export function readExportShellMetadata(
   const root = document.childNodes.find((node) => node.nodeName === "html");
   if (!root || !("attrs" in root)) throw invalidShell(name);
   const startTag = root.sourceCodeLocation?.startTag;
-  const location = root.sourceCodeLocation?.attrs?.["data-mokabook-delivery"];
+  const location = root.sourceCodeLocation?.attrs?.["data-mokly-delivery"];
   const raw = root.attrs.find(
-    (attr) => attr.name === "data-mokabook-delivery",
+    (attr) => attr.name === "data-mokly-delivery",
   )?.value;
   const mode = root.attrs.find(
-    (attr) => attr.name === "data-mokabook-static",
+    (attr) => attr.name === "data-mokly-static",
   )?.value;
   if (
     !startTag ||
@@ -105,7 +105,7 @@ function deliveryAttribute(delivery: StaticDelivery): string {
     .replaceAll('"', "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
-  return `data-mokabook-delivery="${value}"`;
+  return `data-mokly-delivery="${value}"`;
 }
 
 function invalidShell(name: string, cause?: unknown) {

@@ -8,7 +8,7 @@ import { ComponentValidationError } from "../components/data.js";
 import { validateComponentDefinition } from "../components/definition.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { problem, validateEntry } from "./entry_validation.js";
 import {
   crossReferenceViolations,
@@ -107,15 +107,13 @@ function compareEntries(
           : 0;
 }
 
-function invalidRegistry(
-  violations: readonly RegistryViolation[],
-): MokabookError {
+function invalidRegistry(violations: readonly RegistryViolation[]): MoklyError {
   const ordered = [...violations].sort((left, right) =>
     `${left.code}:${left.sourceRelativePath}:${left.message}`.localeCompare(
       `${right.code}:${right.sourceRelativePath}:${right.message}`,
     ),
   );
-  return new MokabookError(
+  return new MoklyError(
     "build-invalid",
     `catalogue is invalid:\n${ordered.map((item) => `- [${item.code}] ${item.sourceRelativePath}${item.id ? ` (${item.id})` : ""}: ${item.message}`).join("\n")}`,
   );

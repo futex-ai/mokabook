@@ -85,7 +85,7 @@ the metadata-only qualification for affected-consumer completeness. Its log is
    This keeps useful titles while consistently protecting generated summaries.
 
 6. **Low — current protocol wording conflicts on supported versions.**
-   [The export contract](../protocol/mokabook-export.md) still unconditionally
+   [The export contract](../protocol/mokly-export.md) still unconditionally
    says to retain Review schema v2, while its component section specifies v3.
    [The root README](../../README.md) describes the v2 compatibility fallback as
    applying only when v3 is absent, without mentioning the new v4 format.

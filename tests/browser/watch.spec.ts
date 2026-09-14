@@ -39,7 +39,7 @@ test.beforeAll(async () => {
     );
     child.stdout?.on("data", (chunk: Buffer) => {
       buffered += chunk.toString();
-      const match = buffered.match(/Mokabook listening at (http:\/\/[^\s]+)/);
+      const match = buffered.match(/Mokly listening at (http:\/\/[^\s]+)/);
       if (match?.[1]) {
         clearTimeout(timer);
         resolve(match[1]);
@@ -64,7 +64,7 @@ test("watched serve rebuilds and reloads after an authored change", async ({
     releaseFirstEventRequest = resolve;
   });
   let blockFirstEventRequest = true;
-  await page.route(`${url}/__mokabook/events`, async (route) => {
+  await page.route(`${url}/__mokly/events`, async (route) => {
     if (blockFirstEventRequest) {
       blockFirstEventRequest = false;
       await firstEventRequestBlocked;
@@ -83,7 +83,7 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   await screens.locator("summary").click();
   await expect(screens).not.toHaveAttribute("open", "");
   await expect(archive).not.toHaveAttribute("open", "");
-  await page.fill("[data-mokabook-search]", "html");
+  await page.fill("[data-mokly-search]", "html");
   await expect(screens).toHaveAttribute("open", "");
   await expect(archive).toHaveAttribute("open", "");
   await chooseViewport(page, "mobile");
@@ -99,7 +99,7 @@ test("watched serve rebuilds and reloads after an authored change", async ({
   await page.getByRole("tab", { name: "Details", exact: true }).click();
   await expect(details).not.toHaveAttribute("data-open", "true");
   await page.setViewportSize({ height: 900, width: 420 });
-  await page.click("[data-mokabook-menu]");
+  await page.click("[data-mokly-menu]");
   await fs.promises.writeFile(
     fixture.entryPath,
     reparentedEntrySource("screens", {
@@ -124,13 +124,13 @@ test("watched serve rebuilds and reloads after an authored change", async ({
       .locator('[data-watch-version="2"]'),
   ).toHaveText("Reloaded", { timeout: 45_000 });
   await expect(page.locator("#mb-main h2")).toHaveText("Home");
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("html");
+  await expect(page.locator("[data-mokly-search]")).toHaveValue("html");
   await expect(screens).toHaveAttribute("open", "");
   await expect(archive).toHaveAttribute("open", "");
   await expect(page.locator(".mbk-frame-mobile")).toBeVisible();
   await expect(page.locator(".mbk-frame-desktop")).toBeHidden();
   await expect(page.locator("body")).toHaveAttribute(
-    "data-mokabook-color-scheme",
+    "data-mokly-color-scheme",
     "dark",
   );
   await expectFrameSource(
@@ -142,11 +142,11 @@ test("watched serve rebuilds and reloads after an authored change", async ({
     "true",
   );
   await expect(details).not.toHaveAttribute("data-open", "true");
-  await expect(page.locator("[data-mokabook-shell]")).toHaveAttribute(
+  await expect(page.locator("[data-mokly-shell]")).toHaveAttribute(
     "data-drawer",
     "open",
   );
-  await page.fill("[data-mokabook-search]", "");
+  await page.fill("[data-mokly-search]", "");
   await expect(screens).not.toHaveAttribute("open", "");
   await expect(archive).not.toHaveAttribute("open", "");
 });
@@ -161,7 +161,7 @@ test("watched reload reopens collapsed active route ancestry", async ({
   await expect(screens).toHaveAttribute("open", "");
   await screens.locator("summary").click();
   await expect(screens).not.toHaveAttribute("open", "");
-  await page.fill("[data-mokabook-search]", "html");
+  await page.fill("[data-mokly-search]", "html");
   await expect(screens).toHaveAttribute("open", "");
   await screens.locator("summary").click();
   await expect(screens).not.toHaveAttribute("open", "");
@@ -178,9 +178,9 @@ test("watched reload reopens collapsed active route ancestry", async ({
       .frameLocator(".mbk-frame-mobile iframe")
       .locator('[data-watch-version="3"]'),
   ).toHaveText("Active route", { timeout: 45_000 });
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("html");
+  await expect(page.locator("[data-mokly-search]")).toHaveValue("html");
   await expect(screens).toHaveAttribute("open", "");
-  await page.fill("[data-mokabook-search]", "");
+  await page.fill("[data-mokly-search]", "");
   await expect(screens).toHaveAttribute("open", "");
 });
 
@@ -249,7 +249,7 @@ test("duplicate titles retain independent disclosure across reloads", async ({
   await expect(archive).toHaveAttribute("open", "");
   await expect
     .poll(() =>
-      page.evaluate(() => localStorage.getItem("mokabook:nav-disclosure:v2")),
+      page.evaluate(() => localStorage.getItem("mokly:nav-disclosure:v2")),
     )
     .toContain("collection:pages:screens");
 

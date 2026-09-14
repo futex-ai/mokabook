@@ -21,7 +21,7 @@ export class StderrBaselineMaintenanceReporter implements BaselineMaintenanceRep
   report(failure: BaselineMaintenanceFailure): void {
     try {
       this.write(
-        `[mokabook/baseline-cleanup] ${failure.entry}: ${errorMessage(failure.error)}\n`,
+        `[mokly/baseline-cleanup] ${failure.entry}: ${errorMessage(failure.error)}\n`,
       );
     } catch {
       // A closed diagnostic stream cannot replace the build's outcome.

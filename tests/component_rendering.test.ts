@@ -106,7 +106,7 @@ test("component boundaries support multi-root text and reject removed or physica
   assert.throws(
     () =>
       validateComponentRanges(
-        html.replace("<!--mokabook-component:end:r-0-->", ""),
+        html.replace("<!--mokly-component:end:r-0-->", ""),
         view.ranges,
       ),
     /component boundar/,

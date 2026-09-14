@@ -14,10 +14,10 @@ export async function handleDemandRequest(
   catalogue: Catalogue,
   documents: DocumentService,
 ): Promise<boolean> {
-  const metadata = url.pathname.startsWith("/__mokabook/views/");
+  const metadata = url.pathname.startsWith("/__mokly/views/");
   if (!metadata && !url.pathname.startsWith("/static/")) return false;
   const route = safeDecodePath(
-    url.pathname.slice(metadata ? "/__mokabook/views/".length : 8),
+    url.pathname.slice(metadata ? "/__mokly/views/".length : 8),
   );
   if (!route || !documents.routes.has(route)) return false;
   if (method !== "GET" && method !== "HEAD") {

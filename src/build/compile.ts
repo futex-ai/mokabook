@@ -6,7 +6,7 @@ import { validateComponentRanges } from "../components/ranges.js";
 import { rebaseStyleOwnership } from "../components/style_ownership.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync, timeSync, timingCounts } from "../diagnostics/timings.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import {
   createManifest,
   fragmentRoute,
@@ -126,7 +126,7 @@ async function compileMeasured(
   );
   for (const route of routedEntries) {
     if (fragmentRoutes.has(route)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `fragment route collides with registry route: ${route}`,
       );

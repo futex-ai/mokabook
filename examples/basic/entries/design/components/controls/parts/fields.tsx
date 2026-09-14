@@ -17,7 +17,7 @@ export function ControlFields({
   return (
     <div className="ce-control-fields">
       <propField.Component
-        mokabookInstance={scope + "-label"}
+        moklyInstance={scope + "-label"}
         label="label"
         inputId={id("label")}
         optional={false}
@@ -27,7 +27,7 @@ export function ControlFields({
         }
       />
       <propField.Component
-        mokabookInstance={scope + "-disabled"}
+        moklyInstance={scope + "-disabled"}
         label="disabled"
         inputId={id("disabled")}
         optional={false}
@@ -43,7 +43,7 @@ export function ControlFields({
         }
       />
       <propField.Component
-        mokabookInstance={scope + "-radius"}
+        moklyInstance={scope + "-radius"}
         label="cornerRadius"
         inputId={id("radius")}
         optional={false}
@@ -69,7 +69,7 @@ export function ControlFields({
         }
       />
       <propField.Component
-        mokabookInstance={scope + "-emphasis"}
+        moklyInstance={scope + "-emphasis"}
         label="emphasis"
         inputId={id("emphasis")}
         optional={false}
@@ -82,7 +82,7 @@ export function ControlFields({
         }
       />
       <propField.Component
-        mokabookInstance={scope + "-hint"}
+        moklyInstance={scope + "-hint"}
         label="hint"
         inputId={id("hint")}
         optional

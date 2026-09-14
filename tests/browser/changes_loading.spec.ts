@@ -33,11 +33,11 @@ for (const mobile of [false, true]) {
       await page
         .locator("html")
         .evaluate((root) => root.setAttribute("data-test-retained", "true"));
-      if (mobile) await page.locator("[data-mokabook-menu]").click();
+      if (mobile) await page.locator("[data-mokly-menu]").click();
       const all = page.locator('[data-filter="all"]');
       const changes = page.locator('[data-filter="changed"]');
-      const filter = page.locator("[data-mokabook-filter]");
-      const tree = page.locator("[data-mokabook-nav-scroll]");
+      const filter = page.locator("[data-mokly-filter]");
+      const tree = page.locator("[data-mokly-nav-scroll]");
       const status = page.locator("[data-nav-status]");
       await expect(all).toBeVisible();
       await expect(changes).toBeVisible();

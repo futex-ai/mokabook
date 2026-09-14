@@ -24,7 +24,7 @@ test("Review batches base viewport reads", async (context) => {
     (entry) => entry.kind === "screen",
   );
   const files = new Map<string, string>([
-    ["mockups/mokabook-manifest.json", JSON.stringify(compilation.manifest)],
+    ["mockups/mokly-manifest.json", JSON.stringify(compilation.manifest)],
   ]);
   for (const screen of screens) {
     for (const fragment of Object.values(screen.fragments)) {
@@ -80,8 +80,8 @@ test("Review batches dark base fragments through CommittedRepository", async (co
   const compilation = await compileCatalogue(config);
   await writeCompilation(compilation, config);
   await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["config", "user.name", "Mokly Test"]);
+  await git(fixture.root, ["config", "user.email", "mokly@example.invalid"]);
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: dark base catalogue"]);
   const calls: string[][] = [];
@@ -303,7 +303,7 @@ test("Comparison metadata has no per-screen HTML or navigation copies", () => {
 
   const files = renderReviewArtifact({ files: new Map(), result });
   assert.deepEqual([...files.keys()].sort(), [
-    ".mokabook-review-artifact",
+    ".mokly-review-artifact",
     "review.json",
     "summary.md",
   ]);

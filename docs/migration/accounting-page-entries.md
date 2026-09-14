@@ -4,10 +4,10 @@
 
 The isolated rehearsal is complete; durable consumer adoption remains a separate
 follow-up. This note records Accounting's specific inputs and delivery checks for the generic
-[page migration](../protocol/mokabook-page-migration.md). Its IDs, routes, and
-counts belong to Accounting, not to Mokabook's API, defaults, or generic test
+[page migration](../protocol/mokly-page-migration.md). Its IDs, routes, and
+counts belong to Accounting, not to Mokly's API, defaults, or generic test
 fixtures. Dedicated packed-consumer tests may model Accounting explicitly;
-Mokabook must also retain generic and other-consumer coverage.
+Mokly must also retain generic and other-consumer coverage.
 
 ## Verified Inspection
 
@@ -15,7 +15,7 @@ Re-inspected on 2026-09-09 in `accounting/tallinn-v3`, with a clean detached
 checkout. The immutable source revision and exact committed manifest are:
 
 - Accounting commit: `ba5f3fb81b4d534d3b3412dc459945f3c8fcd95e`.
-- Manifest: `docs/mockups/mokabook-manifest.json`.
+- Manifest: `docs/mockups/mokly-manifest.json`.
 - Manifest SHA-256: `b03f94aca80f8c7332570b1ec5e2f5420f2287d06975ca57d2bb2022fb30d72a`.
 - Schema v3, 2400 structured entries, five legacy documents.
 
@@ -29,7 +29,7 @@ To reproduce the manifest digest from an Accounting checkout containing the
 recorded commit:
 
 ```bash
-git show ba5f3fb81b4d534d3b3412dc459945f3c8fcd95e:docs/mockups/mokabook-manifest.json | shasum -a 256
+git show ba5f3fb81b4d534d3b3412dc459945f3c8fcd95e:docs/mockups/mokly-manifest.json | shasum -a 256
 ```
 
 ## Page Mapping
@@ -58,7 +58,7 @@ Each `.source.tsx` suffix still generates its existing `.html` route.
 
 Create ordinary `definePage` entries importing the five existing `source()`
 functions, with their existing generated routes written explicitly. Perform
-the [verified output-ownership migration](../protocol/mokabook-page-migration.md#consumer-migration-and-output-ownership).
+the [verified output-ownership migration](../protocol/mokly-page-migration.md#consumer-migration-and-output-ownership).
 Add their IDs to the owning
 collection modules, not another App or Book collection. Payroll pages then appear beneath the real
 App / Book / Payroll ancestry; header/selection appears within Transactions'

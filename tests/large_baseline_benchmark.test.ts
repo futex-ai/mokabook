@@ -59,9 +59,9 @@ function completion(cacheHit: boolean): ReceivedTiming {
 
 test("benchmark timing records survive chunk splits and use the observer's clock", () => {
   const collector = timingCollector(() => 150);
-  collector.accept("[mokabook:timing] not JSON\n[mokabook:timing] null\n");
+  collector.accept("[mokly:timing] not JSON\n[mokly:timing] null\n");
   const event = completion(true).event;
-  const line = `[mokabook:timing] ${JSON.stringify(event)}\n`;
+  const line = `[mokly:timing] ${JSON.stringify(event)}\n`;
   collector.accept("ordinary output\n" + line.slice(0, 30));
   assert.equal(collector.records.length, 0);
   collector.accept(new Uint8Array(Buffer.from(line.slice(30))));

@@ -11,7 +11,7 @@ import {
   projectRealPath,
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 
 /** Names reserved for authoring, including stale helpers no longer imported. */
 export function isReservedSource(candidate: string): boolean {
@@ -87,7 +87,7 @@ export function normalizeSourceFiles(
     const absolute = path.resolve(repoRoot, file);
     const location = locatePath(absolute, repoRoot);
     if (!location || !fs.statSync(location.physicalPath).isFile())
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `authoring input must be a regular file inside repoRoot: ${file}`,
       );
@@ -96,7 +96,7 @@ export function normalizeSourceFiles(
       location.physicalRelativePath,
     ]) {
       if (!isSafeRepositoryPath(relative))
-        throw new MokabookError(
+        throw new MoklyError(
           "build-invalid",
           `invalid source input: ${relative}`,
         );

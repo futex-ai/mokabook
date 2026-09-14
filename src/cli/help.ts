@@ -1,11 +1,11 @@
-/** Stable CLI usage rendered by `mokabook --help`. */
-export const HELP = `Mokabook — app-independent React mockup catalogues
+/** Stable CLI usage rendered by `mokly --help`. */
+export const HELP = `Mokly — app-independent React mockup catalogues
 
 Usage:
-  mokabook [serve] [--config <path>] [--port <port>] [--base <ref>] [--no-watch]
-  mokabook build [--config <path>]
-  mokabook check [--config <path>]
-  mokabook export --out <path> [--config <path>] [--base <ref>]
+  mokly [serve] [--config <path>] [--port <port>] [--base <ref>] [--no-watch]
+  mokly build [--config <path>]
+  mokly check [--config <path>]
+  mokly export --out <path> [--config <path>] [--base <ref>]
 
 Commands:
   serve    Build and serve the catalogue with on-demand diffs
@@ -14,7 +14,7 @@ Commands:
   export   Build a complete static catalogue to deploy with your own host
 
 Options:
-  --config <path>  Use an explicit mokabook.config file
+  --config <path>  Use an explicit mokly.config file
   --debug-timings  Report phase timings and catalogue counts to stderr
   --port <port>    Starting port; advances if occupied, 0 selects any free port
   --base <ref>     Git base ref used to find the branch point
@@ -29,5 +29,5 @@ Configuration:
                         "derived" checks generated files are untracked
   review.baselineBuild  Derived-only argv arrays run without a shell using
                         trusted historical code. Defaults: npm ci, then
-                        npx --no-install mokabook build --config <config-path>
+                        npx --no-install mokly build --config <config-path>
 `;

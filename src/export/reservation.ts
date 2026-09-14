@@ -6,9 +6,9 @@ import { projectRealPath } from "../config/paths.js";
 import { exportError } from "./error.js";
 
 /** Reserved, persistent namespace for filesystem-native per-output locks. */
-export const RESERVATION_DIRECTORY = ".mokabook-export-reservations";
+export const RESERVATION_DIRECTORY = ".mokly-export-reservations";
 const OWNER = ".owner";
-const OWNER_CONTENT = "mokabook-export-reservations-v1\n";
+const OWNER_CONTENT = "mokly-export-reservations-v1\n";
 
 /** Preserve native filename equivalence instead of hashing caller spelling. */
 export function reservationPath(output: string): string {
@@ -45,7 +45,7 @@ export async function prepareReservation(output: string): Promise<void> {
   const parent = path.dirname(output);
   await fs.promises.mkdir(parent, { recursive: true });
   const old = (await fs.promises.readdir(parent)).find((name) =>
-    /^\.mokabook-export-[a-f0-9]{20}\.lock$/.test(name),
+    /^\.mokly-export-[a-f0-9]{20}\.lock$/.test(name),
   );
   if (old)
     throw exportError(

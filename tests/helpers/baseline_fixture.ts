@@ -19,7 +19,7 @@ import type {
 export const baselineCommit = "a".repeat(40);
 export const baselineManifest = {
   schemaVersion: 5,
-  generatedBy: "mokabook",
+  generatedBy: "mokly",
   entries: [],
   sourceFiles: [],
 };
@@ -89,7 +89,7 @@ export function baselineFixture() {
         };
       await fs.mkdir(path.join(request.cwd, "mockups"));
       await fs.write(
-        path.join(request.cwd, "mockups/mokabook-manifest.json"),
+        path.join(request.cwd, "mockups/mokly-manifest.json"),
         Buffer.from(JSON.stringify(baselineManifest)),
       );
       await fs.write(

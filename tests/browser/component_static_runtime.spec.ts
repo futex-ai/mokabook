@@ -118,9 +118,9 @@ for (const viewport of ["desktop", "mobile"] as const)
     expect(
       requests.filter(
         (route) =>
-          route.startsWith("/__mokabook/components/") ||
-          route === "/__mokabook/events" ||
-          route === "/__mokabook/diffs/review.json",
+          route.startsWith("/__mokly/components/") ||
+          route === "/__mokly/events" ||
+          route === "/__mokly/diffs/review.json",
       ),
     ).toEqual([]);
     expect(errors).toEqual([]);

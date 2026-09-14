@@ -1,4 +1,4 @@
-/** Shared HTTP response and safe-path helpers for served Mokabook routes. */
+/** Shared HTTP response and safe-path helpers for served Mokly routes. */
 
 import type { ServerResponse } from "node:http";
 import path from "node:path";

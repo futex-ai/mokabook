@@ -9,7 +9,7 @@ import {
 } from "../config/paths.js";
 import { isPrivateStaticPath } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { Manifest } from "../registry/types.js";
 import {
   FileSystemReviewAssetReader,
@@ -34,7 +34,7 @@ export class CompiledReviewAssetReader extends FileSystemReviewAssetReader {
       !isInside(this.headConfig.mockupsDir, logicalPath) ||
       isPrivateStaticPath(logicalPath, this.headConfig)
     )
-      throw new MokabookError(
+      throw new MoklyError(
         "review-invalid",
         `Generated comparison resource is not public: ${route}`,
       );
@@ -63,7 +63,7 @@ export async function derivedHeadOutputs(
   if (outputs) return outputs;
   const compilation = await compileCatalogue(config);
   if (!isDeepStrictEqual(compilation.manifest, manifest))
-    throw new MokabookError(
+    throw new MoklyError(
       "review-invalid",
       "Catalogue changed before comparison classification",
     );

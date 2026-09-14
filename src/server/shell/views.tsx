@@ -1,4 +1,4 @@
-// Route-owned main-region rendering for the persistent Mokabook shell: the
+// Route-owned main-region rendering for the persistent Mokly shell: the
 // home, missing-route, and target views, plus the title and
 // active-route helpers the document scaffold and progressive navigation use.
 
@@ -18,7 +18,7 @@ import { EmptyStage, TargetStage } from "./stages.js";
 import type { RouteTarget } from "./target.js";
 import { ComponentWorkspace } from "./workspace.js";
 
-/** One renderable Mokabook shell state. */
+/** One renderable Mokly shell state. */
 export type ShellView =
   | { kind: "home" }
   | { kind: "missing"; requested: string }
@@ -55,7 +55,7 @@ function TargetView(props: {
       ({ entry }) => entry.route === target.entry.route,
     );
   const stage = removed ? (
-    <div className="mbk-empty" data-mokabook-stage="" data-viewport="both">
+    <div className="mbk-empty" data-mokly-stage="" data-viewport="both">
       <h2>
         This {target.entry.kind === "page" ? "page" : "screen"} was removed
       </h2>
@@ -103,7 +103,7 @@ function HomeView(props: { catalogue: Catalogue }) {
   const useCases = entries.filter((entry) => entry.kind === "use-case").length;
   const pages = entries.filter((entry) => entry.kind === "page").length;
   return (
-    <EmptyStage heading="Mokabook">
+    <EmptyStage heading="Mokly">
       <p>
         Browse the mockup catalogue: expand folders and choose an item from the
         navigation.
@@ -131,7 +131,7 @@ function MissingView(props: { requested: string }) {
       </p>
       <p className="mbk-empty-note">
         If this item was just added, rebuild the catalogue with{" "}
-        <code>mokabook build</code>.
+        <code>mokly build</code>.
       </p>
       <a className="mbk-empty-link" href="/">
         Go to the catalogue home
@@ -151,12 +151,12 @@ export function activeRouteForView(view: ShellView): string | undefined {
 /** The browser document title for a shell view. */
 export function viewTitle(catalogue: Catalogue, view: ShellView): string {
   if (view.kind === "home") {
-    return "Mokabook";
+    return "Mokly";
   }
   if (view.kind === "missing") {
-    return "Not found · Mokabook";
+    return "Not found · Mokly";
   }
-  return `${targetHead(catalogue, view.target).title} · Mokabook`;
+  return `${targetHead(catalogue, view.target).title} · Mokly`;
 }
 
 /** Render the only region replaced by client-side Browse navigation. */
@@ -172,8 +172,8 @@ export function ShellMain(props: {
   return (
     <main
       className="mbk-main"
-      data-mokabook-view=""
-      data-mokabook-baseline={
+      data-mokly-view=""
+      data-mokly-baseline={
         baseline
           ? createHash("sha256").update(JSON.stringify(baseline)).digest("hex")
           : undefined

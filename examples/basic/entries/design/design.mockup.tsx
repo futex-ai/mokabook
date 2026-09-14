@@ -1,4 +1,4 @@
-import { collection, defineCollection, defineRoot } from "mokabook";
+import { collection, defineCollection, defineRoot } from "@mokly/mokly";
 
 import { formsFilterScreen } from "./browse/states/tags/forms.js";
 import { onboardingPickerScreen } from "./browse/states/tags/onboarding-picker.js";
@@ -129,27 +129,27 @@ const designMockups = defineRoot({
   collection: {
     dependencies: DESIGN_DEPENDENCIES,
     description:
-      "Neutral design mockups for the Mokabook shell implemented in the UI milestone.",
+      "Neutral design mockups for the Mokly shell implemented in the UI milestone.",
     id: "design",
     rationale:
       "Reviewers approve the complete catalogue and Changes design from synthetic data before any shell UI is implemented.",
     relatedDocs: [
-      "docs/protocol/mokabook-shell-design.md",
+      "docs/protocol/mokly-shell-design.md",
       "examples/basic/notes.md",
     ],
-    title: "Mokabook design",
+    title: "Mokly design",
   },
   path: "design",
 });
 
-/** The neutral Mokabook catalogue and Changes design catalogue. */
+/** The neutral Mokly catalogue and Changes design catalogue. */
 export const mockups = [
   defineCollection({
     childIds: ["design", "design-library"],
     dependencies: DESIGN_DEPENDENCIES,
-    description: "Neutral design references for the Mokabook package.",
+    description: "Neutral design references for the Mokly package.",
     id: "design-root",
-    relatedDocs: ["docs/protocol/mokabook-shell-design.md"],
+    relatedDocs: ["docs/protocol/mokly-shell-design.md"],
     title: "Design",
   }),
   ...designMockups,

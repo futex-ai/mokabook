@@ -2,7 +2,7 @@ import {
   defineComponent,
   type ComponentProps,
   type ComponentRenderContext,
-} from "mokabook";
+} from "@mokly/mokly";
 
 import { libraryTags } from "../controls/tag-picker.js";
 import { libraryMetadata } from "../metadata.js";

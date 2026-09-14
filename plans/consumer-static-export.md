@@ -31,8 +31,8 @@ The supported consumer CLI exports the complete Mokabook catalogue and compariso
 into a directory the consumer can deploy through their own hosting workflow.
 The user approved fixing all four review findings, followed by merging latest main.
 
-Implement the [consumer export protocol](../docs/protocol/mokabook-export.md)
-and [static delivery protocol](../docs/protocol/mokabook-export-delivery.md).
+Implement the [consumer export protocol](../docs/protocol/mokly-export.md)
+and [static delivery protocol](../docs/protocol/mokly-export-delivery.md).
 Those documents describe the implemented contract on this branch, not a new npm release.
 
 Consumer invocation:
@@ -68,7 +68,7 @@ indexes. Subpath hosting and Git-free/optional comparisons are separate work.
 
 Static aliases render existing screen components, and delivery metadata is
 invisible. No new screen, appearance, or user-facing interaction is planned.
-Reuse the approved [shell design](../docs/protocol/mokabook-shell-design.md)
+Reuse the approved [shell design](../docs/protocol/mokly-shell-design.md)
 and its owning mobile/desktop example screens for visual smoke tests. If a
 visible change becomes necessary, add a separate mockup milestone before its
 tagged UI milestone and update the owning mockups before implementation.

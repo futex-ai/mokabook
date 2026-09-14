@@ -30,11 +30,11 @@ for (const mobile of [false, true]) {
       const errors: string[] = [];
       page.on("pageerror", (error) => errors.push(error.message));
       await page.goto(`${server.url}/view/screens/home.html`);
-      if (mobile) await page.locator("[data-mokabook-menu]").click();
+      if (mobile) await page.locator("[data-mokly-menu]").click();
       const all = page.locator('[data-filter="all"]');
       const changes = page.locator('[data-filter="changed"]');
-      const filter = page.locator("[data-mokabook-filter]");
-      const tree = page.locator("[data-mokabook-nav-scroll]");
+      const filter = page.locator("[data-mokly-filter]");
+      const tree = page.locator("[data-mokly-nav-scroll]");
       const status = page.locator("[data-nav-status]");
       await expect(changes.locator(".mbk-nav-spinner")).toHaveAccessibleName(
         "Preparing comparison",
@@ -78,7 +78,7 @@ for (const mobile of [false, true]) {
       await expect(changes.locator(".mbk-nav-filter-count")).toHaveText("1");
       await expect(status).toBeHidden();
 
-      await page.locator("[data-mokabook-search]").fill("details");
+      await page.locator("[data-mokly-search]").fill("details");
       await page
         .locator("html")
         .evaluate((root) => root.setAttribute("data-test-retained", "true"));
@@ -87,10 +87,8 @@ for (const mobile of [false, true]) {
       await expect(status.locator(".mbk-nav-status-title")).toHaveText(
         "Preparing comparison",
       );
-      await expect(page.locator("[data-mokabook-search]")).toBeFocused();
-      await expect(page.locator("[data-mokabook-search]")).toHaveValue(
-        "details",
-      );
+      await expect(page.locator("[data-mokly-search]")).toBeFocused();
+      await expect(page.locator("[data-mokly-search]")).toHaveValue("details");
       await expect(page.locator("html")).toHaveAttribute(
         "data-test-retained",
         "true",

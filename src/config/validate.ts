@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { isBaselineCachePath } from "./cache_paths.js";
 import {
   baselineBuildCommands,
@@ -23,7 +23,7 @@ import {
   validateStylesheets,
   validateWatchRules,
 } from "./rules.js";
-import type { MokabookConfig, ResolvedConfig } from "./types.js";
+import type { MoklyConfig, ResolvedConfig } from "./types.js";
 
 /** Validate an imported config and resolve every filesystem path. */
 export function resolveConfig(
@@ -31,17 +31,17 @@ export function resolveConfig(
   configPath: string,
 ): ResolvedConfig {
   if (!isRecord(value)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `${configPath} must export an object`,
     );
   }
   if (Object.hasOwn(value, "legacy"))
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       "legacy configuration was removed; register whole documents with definePage",
     );
-  const input = value as unknown as MokabookConfig;
+  const input = value as unknown as MoklyConfig;
   const generatedOutput = generatedOutputMode(input.generatedOutput);
   requireString(input.entriesDir, "entriesDir");
   requireString(input.mockupsDir, "mockupsDir");
@@ -70,12 +70,12 @@ export function resolveConfig(
     ["mockupsDir", mockupsDir],
   ])
     if (isBaselineCachePath(root!, repoRoot))
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
-        `${label} must not be inside .mokabook-cache`,
+        `${label} must not be inside .mokly-cache`,
       );
   if (generatedOutput === "derived" && mockupsDir === repoRoot)
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       "derived mockupsDir must be a directory below repoRoot",
     );
@@ -106,7 +106,7 @@ export function resolveConfig(
     input.compatibility?.readManifestV2 !== undefined &&
     typeof input.compatibility.readManifestV2 !== "boolean"
   ) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       "compatibility.readManifestV2 must be boolean",
     );
@@ -114,7 +114,7 @@ export function resolveConfig(
   const reviewOut = resolveInside(
     repoRoot,
     configDir,
-    input.review?.outDir ?? ".context/mokabook-review",
+    input.review?.outDir ?? ".context/mokly-review",
     "review.outDir",
   );
   validateReviewOut(reviewOut, {

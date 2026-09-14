@@ -1,4 +1,4 @@
-import { collection, screen } from "mokabook";
+import { collection, screen } from "@mokly/mokly";
 
 import { controlsDesign } from "./controls/index.js";
 import { inspectionScreens } from "./inspection/screens.js";

@@ -39,7 +39,7 @@ test("migration compatibility transforms documents and legacy id links", async (
   await fs.promises.writeFile(
     path.join(fixture.root, "compatibility.ts"),
     `import path from "node:path";
-import type { CompatibilityTransformInput } from "mokabook";
+import type { CompatibilityTransformInput } from "@mokly/mokly";
 export default function transform(input: CompatibilityTransformInput): string {
   const logicalTarget = input.logicalRoutes["screens/details.html"];
   const relative = logicalTarget
@@ -110,7 +110,7 @@ test("compatibility transforms reuse the logical route index for each view", asy
   context.after(() => removeFixture(fixture));
   await fs.promises.writeFile(
     path.join(fixture.root, "compatibility.ts"),
-    `import type { CompatibilityTransformInput } from "mokabook";
+    `import type { CompatibilityTransformInput } from "@mokly/mokly";
 const indexes = new Map<string, CompatibilityTransformInput["logicalRoutes"]>();
 export default function transform(input: CompatibilityTransformInput): string {
   const key = \`${"${input.viewport}:${input.colorScheme}"}\`;
@@ -169,7 +169,7 @@ test("compatibility output fails closed on unresolved navigation links", async (
   context.after(() => removeFixture(fixture));
   await fs.promises.writeFile(
     path.join(fixture.root, "compatibility.ts"),
-    `import type { CompatibilityTransformInput } from "mokabook";
+    `import type { CompatibilityTransformInput } from "@mokly/mokly";
 export default function transform(input: CompatibilityTransformInput): string {
   return input.content.replace("<body", '<body data-nav-href="mock:missing"');
 }
@@ -191,7 +191,7 @@ test("compatibility routes exclude generated files pending orphan removal", asyn
   context.after(() => removeFixture(fixture));
   await fs.promises.writeFile(
     path.join(fixture.root, "compatibility.ts"),
-    `import type { CompatibilityTransformInput } from "mokabook";
+    `import type { CompatibilityTransformInput } from "@mokly/mokly";
 export default function transform(input: CompatibilityTransformInput): string {
   if (input.availableRoutes.some((route) => route.includes("details."))) {
     throw new Error("pending orphan was exposed");
@@ -216,7 +216,7 @@ export default function transform(input: CompatibilityTransformInput): string {
 });
 
 function oneScreenSource(): string {
-  return `import { defineScreen } from "mokabook";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 export const mockups = [defineScreen({
   dependencies: [],

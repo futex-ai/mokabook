@@ -19,10 +19,7 @@ const IGNORED_DIRECTORY_NAMES = new Set([
   "target",
   "test-results",
 ]);
-const IGNORED_TEMPORARY_PREFIXES = [
-  ".mokabook-review-",
-  ".mokabook-write-",
-] as const;
+const IGNORED_TEMPORARY_PREFIXES = [".mokly-review-", ".mokly-write-"] as const;
 
 /** Internal watch work, including package-owned configuration reloads. */
 export type RuntimeWatchAction = "reconfigure" | "evidence" | WatchAction;

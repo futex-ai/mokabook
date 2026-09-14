@@ -68,9 +68,7 @@ test("isolated comparisons stay lazy, immutable, sandboxed, and responsive", asy
   expect(renewals).toEqual([]);
   expect(new Set(json.map((url) => url.split("?")[0])).size).toBe(1);
   expect(json.some((url) => url.endsWith("?refresh=1"))).toBe(true);
-  expect(requests.some((url) => url.includes("/__mokabook/events"))).toBe(
-    false,
-  );
+  expect(requests.some((url) => url.includes("/__mokly/events"))).toBe(false);
   expect(failures).toEqual([]);
 });
 
@@ -153,7 +151,7 @@ test("malformed static metadata never falls back to a live comparison endpoint",
   await page.goto(`${site.url}/view/screens/home.html`);
   await page
     .locator("html")
-    .evaluate((root) => root.removeAttribute("data-mokabook-delivery"));
+    .evaluate((root) => root.removeAttribute("data-mokly-delivery"));
   await page.getByRole("button", { name: "Overlay", exact: true }).click();
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
   expect(requests.some((url) => url.includes("review.json"))).toBe(false);

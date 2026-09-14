@@ -5,15 +5,15 @@ import path from "node:path";
 import { startCommand, stopCommand, waitForOutput } from "./command.mjs";
 
 export async function smokeExternalWatch(root) {
-  const bin = path.join(root, "node_modules/.bin/mokabook");
+  const bin = path.join(root, "node_modules/.bin/mokly");
   const running = startCommand(bin, ["serve", "--port", "0"], { cwd: root });
   try {
     const match = await waitForOutput(
       running,
-      /Mokabook listening at (http:\/\/[^\s]+)/,
+      /Mokly listening at (http:\/\/[^\s]+)/,
       "Accounting-shaped watched server",
     );
-    const response = await fetch(`${match[1]}/__mokabook/events`);
+    const response = await fetch(`${match[1]}/__mokly/events`);
     assert.ok(response.body);
     const reader = response.body.getReader();
     await readServerEvent(reader, "ready");

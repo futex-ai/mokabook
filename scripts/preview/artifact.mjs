@@ -16,14 +16,14 @@ import {
 
 /** Only this repository adapter can adopt the previous preview marker. */
 export const previewOwnership = {
-  marker: ".mokabook-preview-artifact",
+  marker: ".mokly-preview-artifact",
   contents: "schemaVersion=1\n",
   accepts: (name) =>
     ["index.html", "404.html", "_headers", "_redirects"].includes(name) ||
     (name.startsWith("view/") && name.endsWith(".html")) ||
     (name.startsWith("static/") &&
       isExportPublicName(name.slice(7), { allowBuildDirectories: true })) ||
-    /^__mokabook\/(?:shell\.css|client\/[^/]+\.js|navigation\/[^/]+\.js|fonts\/[^/]+|diffs\/__generations\/[A-Za-z0-9-]+\/.+)$/.test(
+    /^__mokly\/(?:shell\.css|client\/[^/]+\.js|navigation\/[^/]+\.js|fonts\/[^/]+|diffs\/__generations\/[A-Za-z0-9-]+\/.+)$/.test(
       name,
     ),
 };
@@ -78,7 +78,7 @@ export async function stagePreviewArtifact(
   for (const [name, bytes] of files) {
     if (/^(?:view|static)\/.+\.html$/.test(name))
       aliases.set(name.slice(0, -5), name);
-    if (name.endsWith(".html") && !name.startsWith("__mokabook/diffs/"))
+    if (name.endsWith(".html") && !name.startsWith("__mokly/diffs/"))
       files.set(
         name,
         Buffer.from(bytes)

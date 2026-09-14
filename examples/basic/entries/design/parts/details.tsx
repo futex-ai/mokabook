@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import { useDesignInstance } from "../library/composition.js";
 import { inspector } from "../library/inspector/inspector.js";
@@ -101,7 +101,7 @@ export function DetailsPanel({
     );
   return (
     <inspector.Component
-      mokabookInstance={useDesignInstance("inspector")}
+      moklyInstance={useDesignInstance("inspector")}
       tabs={[
         {
           id: "info",

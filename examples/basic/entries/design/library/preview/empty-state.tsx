@@ -1,4 +1,4 @@
-import { defineComponent, type ComponentProps } from "mokabook";
+import { defineComponent, type ComponentProps } from "@mokly/mokly";
 
 import { libraryMetadata } from "../metadata.js";
 import { destination, optionalText, text } from "../schemas.js";
@@ -35,7 +35,7 @@ export const emptyState = defineComponent({
       id: "home",
       title: "Catalogue home",
       props: {
-        title: "Mokabook",
+        title: "Mokly",
         body: "Browse the mockup catalogue generated from this repository.",
         actionLabel: "Open the first screen",
         destination: DESTINATIONS.welcome,

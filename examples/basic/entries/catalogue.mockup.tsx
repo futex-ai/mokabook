@@ -9,7 +9,7 @@ import {
   MockLink,
   ReviewIgnore,
   reviewMaterialKey,
-} from "mokabook";
+} from "@mokly/mokly";
 
 import { action } from "./components/action.js";
 import { toolbar } from "./components/toolbar.js";
@@ -36,7 +36,7 @@ function Welcome({ compact }: { compact: boolean }) {
         <nav>{compact ? "Menu" : "Example navigation"}</nav>
       </ReviewIgnore>
       <header className="example-head">
-        <h1>Welcome to Mokabook</h1>
+        <h1>Welcome to Mokly</h1>
         <Badge tone="primary">Example</Badge>
       </header>
       <Input
@@ -46,7 +46,7 @@ function Welcome({ compact }: { compact: boolean }) {
         value=""
       />
       <action.Component
-        mokabookInstance="details"
+        moklyInstance="details"
         label="View details"
         tone="primary"
         destination="details"
@@ -63,9 +63,7 @@ function Welcome({ compact }: { compact: boolean }) {
         </MockLink>
       </p>
       <p>
-        <MockLink to="design-browse-home">
-          See the Mokabook shell design
-        </MockLink>
+        <MockLink to="design-browse-home">See the Mokly shell design</MockLink>
       </p>
     </main>
   );
@@ -80,7 +78,7 @@ function Details({ compact }: { compact: boolean }) {
       </header>
       <p>This screen is synthetic and belongs only to the package example.</p>
       <action.Component
-        mokabookInstance="welcome"
+        moklyInstance="welcome"
         label="Return to welcome"
         tone="secondary"
         destination="welcome"
@@ -111,7 +109,7 @@ export const mockups = [
       "example-components",
       "example-handbook",
     ],
-    description: "Synthetic examples for the reusable Mokabook package.",
+    description: "Synthetic examples for the reusable Mokly package.",
     id: "example",
     title: "Example",
   }),

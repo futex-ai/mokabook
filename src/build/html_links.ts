@@ -7,7 +7,7 @@ import {
   isPublicStaticFile,
 } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import {
   fragmentViolation,
   htmlResource,
@@ -87,7 +87,7 @@ export function validateHtmlLinks(
     }
   }
   if (violations.length > 0) {
-    throw new MokabookError(
+    throw new MoklyError(
       "build-invalid",
       `document links and resources are invalid:\n${violations
         .sort()

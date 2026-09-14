@@ -12,8 +12,8 @@ export function ComponentStage({
   return (
     <div
       className="mbk-stage mbk-component-stage"
-      data-mokabook-scroll="stage"
-      data-mokabook-stage=""
+      data-mokly-scroll="stage"
+      data-mokly-stage=""
       data-viewport="both"
     >
       {(["mobile", "desktop"] as const).map((viewport) => {
@@ -30,7 +30,7 @@ export function ComponentStage({
             <iframe
               className="mbk-frag"
               data-workspace-frame={viewport}
-              data-mokabook-fragment-frame=""
+              data-mokly-fragment-frame=""
               data-fragment-light={light}
               data-fragment-dark={
                 dark ? `/static/${encodeUrlPath(dark)}` : undefined

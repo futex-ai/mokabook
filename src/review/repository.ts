@@ -8,7 +8,7 @@ import type { BaselineFileSystem } from "../baseline/types.js";
 import { ConfiguredGitCommandRunner } from "../config/git.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { CommittedBaselineReader } from "./committed.js";
 import {
   CommittedRepository,
@@ -33,8 +33,8 @@ export function committedReviewRepository(
   return new CommittedRepository(runner);
 }
 
-export function comparisonNotPrepared(): MokabookError {
-  return new MokabookError("review-invalid", "The comparison is not prepared");
+export function comparisonNotPrepared(): MoklyError {
+  return new MoklyError("review-invalid", "The comparison is not prepared");
 }
 
 /** Open a parent-prepared commit without resolving a ref or running a build. */

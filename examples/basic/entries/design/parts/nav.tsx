@@ -35,7 +35,7 @@ function CatalogueNavigation({
   const navigation = useDesignNavigation();
   return (
     <catalogueNavigation.Component
-      mokabookInstance={useDesignInstance("navigation")}
+      moklyInstance={useDesignInstance("navigation")}
       rows={nodes ?? NAV_TREE}
       changedCount={changedCount ?? 3}
       showChanges={changes}

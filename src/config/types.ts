@@ -82,7 +82,7 @@ export interface ModuleResolutionConfig {
 }
 
 /** Public, serializable host configuration. */
-export interface MokabookConfig {
+export interface MoklyConfig {
   /** Retain generated files in Git or rebuild historical output; defaults to committed. */
   generatedOutput?: "committed" | "derived";
   /** Color schemes rendered for screens; defaults to light only. */

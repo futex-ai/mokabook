@@ -30,7 +30,7 @@ test("the example fixture rebuilds an untracked baseline from its own source and
     .split("\n");
   assert.ok(tracked.length > 0);
   assert.ok(tracked.every((file) => file.endsWith(".css")));
-  const manifestPath = path.join(config.mockupsDir, "mokabook-manifest.json");
+  const manifestPath = path.join(config.mockupsDir, "mokly-manifest.json");
   await assert.rejects(fs.access(manifestPath), { code: "ENOENT" });
   const prepared = await prepareReviewRepository(config, "HEAD");
   assert.ok(prepared.reader instanceof RebuiltBaselineReader);
@@ -38,7 +38,7 @@ test("the example fixture rebuilds an untracked baseline from its own source and
     JSON.parse(
       await prepared.reader.readFile(
         prepared.commit,
-        "examples/basic/generated/mokabook-manifest.json",
+        "examples/basic/generated/mokly-manifest.json",
       ),
     ),
   );

@@ -109,11 +109,11 @@ test("nested roots fail before preparation, pinned reads, classification or deri
   await assert.rejects(() => pinned.evidence.changedPaths(commit), expected);
   const reader = baselineReaderForCommit(config, commit);
   await assert.rejects(
-    () => reader.readFile(commit, "mockups/mokabook-manifest.json"),
+    () => reader.readFile(commit, "mockups/mokly-manifest.json"),
     expected,
   );
   await assert.rejects(
-    () => reader.readFiles!(commit, ["mockups/mokabook-manifest.json"]),
+    () => reader.readFiles!(commit, ["mockups/mokly-manifest.json"]),
     expected,
   );
   await assert.rejects(
@@ -145,7 +145,7 @@ test("nested roots fail before preparation, pinned reads, classification or deri
 test("build in either mode and committed check work outside a Git repository", async (t) => {
   const fixture = await createFixture();
   t.after(() => removeFixture(fixture));
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "mokabook-no-git-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "mokly-no-git-"));
   t.after(() => fs.rm(root, { force: true, recursive: true }));
   await fs.cp(fixture.root, root, { recursive: true });
   await fs.symlink(

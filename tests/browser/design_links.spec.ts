@@ -37,7 +37,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
     );
     await expect(row).toHaveAttribute("aria-current", "page");
     await expect(row).toBeVisible();
-    await expect(page.locator("[data-mokabook-stage]")).toHaveAttribute(
+    await expect(page.locator("[data-mokly-stage]")).toHaveAttribute(
       "data-viewport",
       viewport,
     );
@@ -56,7 +56,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
     expect((await iframe.getAttribute("sandbox"))?.split(/\s+/)).not.toContain(
       "allow-scripts",
     );
-    await expect(page.locator("[data-mokabook-stage]")).toHaveAttribute(
+    await expect(page.locator("[data-mokly-stage]")).toHaveAttribute(
       "data-viewport",
       viewport,
     );

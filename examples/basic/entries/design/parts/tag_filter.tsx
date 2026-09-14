@@ -31,7 +31,7 @@ export function TagChips({
       {designTagRecords(navigation.tags, tags).map((tag) => (
         <tagChip.Component
           key={tag.id}
-          mokabookInstance={name + "-" + tag.id}
+          moklyInstance={name + "-" + tag.id}
           {...tag}
           selected={tag.id === activeTag}
         />
@@ -44,7 +44,7 @@ export function TagPicker({ activeTag }: { activeTag?: string | undefined }) {
   const navigation = useDesignNavigation();
   return (
     <tagPicker.Component
-      mokabookInstance={useDesignInstance("tag-picker")}
+      moklyInstance={useDesignInstance("tag-picker")}
       tags={designTagRecords(navigation.tags)}
       {...optional("activeTag", activeTag)}
     />

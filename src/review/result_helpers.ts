@@ -3,7 +3,7 @@ import { canonicalJson } from "../components/data.js";
 export const compareText = (a: string, b: string): number =>
   a < b ? -1 : a > b ? 1 : 0;
 export function reviewInvalid(message: string): never {
-  throw new Error(`[mokabook/review] ${message}`);
+  throw new Error(`[mokly/review] ${message}`);
 }
 export function reviewObject(
   value: unknown,

@@ -3,7 +3,7 @@ import path from "node:path";
 import { isSafeRepositoryPath } from "../config/paths.js";
 import { BaselineError } from "./errors.js";
 
-export const BASELINE_CACHE_PATH = ".mokabook-cache/baselines";
+export const BASELINE_CACHE_PATH = ".mokly-cache/baselines";
 export const DEFAULT_RETAINED_COUNT = 3;
 export const LOCK_TIMEOUT_MS = 120_000;
 export const LOCK_POLL_MS = 100;
@@ -48,8 +48,8 @@ export function cacheLayout(repoRoot: string, commit: string): CacheLayout {
 export function assertMockupsPath(value: string): void {
   if (
     !isSafeRepositoryPath(value) ||
-    value === ".mokabook-cache" ||
-    value.startsWith(".mokabook-cache/")
+    value === ".mokly-cache" ||
+    value.startsWith(".mokly-cache/")
   )
     throw new BaselineError(
       "baseline-output-invalid",

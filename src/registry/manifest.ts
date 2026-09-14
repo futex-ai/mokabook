@@ -10,14 +10,17 @@ import { canonicalJson } from "../components/data.js";
 import { componentManifestEntry } from "../components/manifest_build.js";
 import type { ComponentViewRecord } from "../components/manifest_types.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import { analyzeHierarchy } from "./hierarchy.js";
 import { validateManifest } from "./manifest_validation.js";
 import type { ManifestV5, HistoricalManifest } from "./types.js";
 import { effectiveColorSchemes } from "./views.js";
 
 /** Canonical generated manifest filename. */
-export const MANIFEST_NAME = "mokabook-manifest.json";
+export const MANIFEST_NAME = "mokly-manifest.json";
+
+/** Former package manifest filename accepted only from Git history. */
+export const FORMER_MANIFEST_NAME = "mokabook-manifest.json";
 
 /** Legacy version 2 manifest filename accepted only during migration. */
 export const LEGACY_MANIFEST_NAME = "mockbook-manifest.json";
@@ -51,7 +54,7 @@ export function createManifest(
           ?.map((ancestor) => ancestor.title) ?? [],
       ),
     ),
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     sourceFiles: [
       ...new Set([
         ...sourceFiles,
@@ -78,11 +81,16 @@ export function readManifest(config: ResolvedConfig): ManifestV5 {
 /** Select the strict canonical input or the explicitly enabled legacy input. */
 export function selectManifestInput(
   canonicalExists: boolean,
+  formerExists: boolean,
   allowLegacyV2: boolean,
 ): { allowV2: boolean; filename: string } {
-  if (canonicalExists || !allowLegacyV2) {
+  if (canonicalExists) {
     return { allowV2: false, filename: MANIFEST_NAME };
   }
+  if (formerExists) {
+    return { allowV2: false, filename: FORMER_MANIFEST_NAME };
+  }
+  if (!allowLegacyV2) return { allowV2: false, filename: MANIFEST_NAME };
   return { allowV2: true, filename: LEGACY_MANIFEST_NAME };
 }
 
@@ -91,7 +99,7 @@ function readManifestFile(candidate: string): ManifestV5 {
   try {
     value = JSON.parse(fs.readFileSync(candidate, "utf8"));
   } catch (error) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `could not read ${candidate}: ${errorMessage(error)}`,
       {

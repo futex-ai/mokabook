@@ -7,10 +7,10 @@ saved pages, attribution, inspection, static export and local controls are
 delivered. Review follow-ups remain for the user's decision in the
 [runtime review record](../docs/reviews/component-explorer-runtime.md).
 
-Implement the approved [component authoring contract](../docs/protocol/mokabook-components.md),
-[change attribution](../docs/protocol/mokabook-component-changes.md),
-[pages and inspection](../docs/protocol/mokabook-component-explorer.md), and
-[local controls](../docs/protocol/mokabook-component-controls.md).
+Implement the approved [component authoring contract](../docs/protocol/mokly-components.md),
+[change attribution](../docs/protocol/mokly-component-changes.md),
+[pages and inspection](../docs/protocol/mokly-component-explorer.md), and
+[local controls](../docs/protocol/mokly-component-controls.md).
 
 The central rule is that a component-only change puts the component in Changes.
 Its consuming screens appear under Affected screens on the component page;
@@ -61,10 +61,10 @@ Record the agreed behavior and its integration boundaries before implementation.
 Apply the four approved findings from the initial review of `6bf3183`.
 This adds a documentation milestone without reopening completed Milestone 1.
 
-- [x] Define exact [manifest v4](../docs/protocol/mokabook-component-manifest.md)
-      and [comparison v3](../docs/protocol/mokabook-component-review.md) interfaces,
+- [x] Define exact [manifest v4](../docs/protocol/mokly-component-manifest.md)
+      and [comparison v3](../docs/protocol/mokly-component-review.md) interfaces,
       references, sorting, optional fields, path rules, and shared fixture checks.
-- [x] Require one [runtime prop schema](../docs/protocol/mokabook-component-props.md)
+- [x] Require one [runtime prop schema](../docs/protocol/mokly-component-props.md)
       for derived types, authoring, variants, controls, recorded props, and hashes.
 - [x] Specify memory-only transient rendering and no-file/watch-feedback tests;
       clarify README links to registration, attribution, inspection, and controls.
@@ -240,7 +240,7 @@ inspector open/close, controls navigation, and read-only saved variants.
 
 Tags: mockup
 
-Apply the [workspace design revision](../docs/protocol/mokabook-component-workspace-design.md)
+Apply the [workspace design revision](../docs/protocol/mokly-component-workspace-design.md)
 without reopening completed mockup milestones or implementing the runtime.
 
 - [x] Inspect the supplied screenshots and specify nested-component tab scope,

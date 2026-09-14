@@ -66,7 +66,7 @@ export class ComponentCollector {
     if (previous && placements.has(scope.placement))
       invalidData(
         this.label,
-        `duplicate component instance ${id}; repeated invocations need distinct mokabookInstance ids`,
+        `duplicate component instance ${id}; repeated invocations need distinct moklyInstance ids`,
       );
     if (previous && canonicalJson(previous) !== canonicalJson(instance))
       invalidData(

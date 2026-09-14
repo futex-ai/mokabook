@@ -1,6 +1,6 @@
 # MockLink Child Controls
 
-Implement the approved [styled link controls contract](../docs/protocol/mokabook-link-controls.md)
+Implement the approved [styled link controls contract](../docs/protocol/mokly-link-controls.md)
 so consumers can use their existing styled controls with Mokabook navigation.
 Scope is the Mokabook package, documentation, and consumer/browser fixtures.
 Accounting adoption and publishing a package release are subsequent work.

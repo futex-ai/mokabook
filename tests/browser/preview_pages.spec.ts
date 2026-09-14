@@ -34,8 +34,8 @@ for (const width of [390, 1280]) {
     await expect(
       page.locator("[data-diff-screen], [data-viewport-option]"),
     ).toHaveCount(0);
-    await page.locator("[data-mokabook-details] summary").click();
-    await expect(page.locator("[data-mokabook-details]")).toContainText(
+    await page.locator("[data-mokly-details] summary").click();
+    await expect(page.locator("[data-mokly-details]")).toContainText(
       "Documents",
     );
     if (width < 700)
@@ -69,7 +69,7 @@ for (const width of [390, 1280]) {
       page.frameLocator(".mbk-stage-embed iframe").locator("#overview"),
     ).toBeVisible();
     expect(
-      requests.filter((url) => /\/__mokabook\/(?:events|diffs)\//.test(url)),
+      requests.filter((url) => /\/__mokly\/(?:events|diffs)\//.test(url)),
     ).toEqual([]);
   });
 }

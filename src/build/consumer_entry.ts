@@ -8,7 +8,7 @@ import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 
 /** Virtual module name for the complete consumer-owned build graph. */
-export const CONSUMER_ENTRY_PATH = "mokabook:consumer-entry";
+export const CONSUMER_ENTRY_PATH = "mokly:consumer-entry";
 
 /** Load every registry entry, renderer, and document transformer. */
 export function consumerEntryPlugin(
@@ -16,13 +16,13 @@ export function consumerEntryPlugin(
   entries: readonly string[],
 ): Plugin {
   return {
-    name: "mokabook-consumer-entry",
+    name: "mokly-consumer-entry",
     setup(pluginBuild: PluginBuild): void {
-      pluginBuild.onResolve({ filter: /^mokabook:consumer-entry$/ }, () => ({
-        namespace: "mokabook-entry",
+      pluginBuild.onResolve({ filter: /^mokly:consumer-entry$/ }, () => ({
+        namespace: "mokly-entry",
         path: CONSUMER_ENTRY_PATH,
       }));
-      pluginBuild.onLoad({ filter: /.*/, namespace: "mokabook-entry" }, () => ({
+      pluginBuild.onLoad({ filter: /.*/, namespace: "mokly-entry" }, () => ({
         contents: virtualEntryContents(config, entries),
         loader: "ts",
         resolveDir: path.dirname(config.configPath),
@@ -40,9 +40,9 @@ export function packageApiPlugin(config: ResolvedConfig): Plugin {
     "../authoring/definitions.ts",
   );
   return {
-    name: "mokabook-package-api",
+    name: "mokly-package-api",
     setup(pluginBuild: PluginBuild): void {
-      pluginBuild.onResolve({ filter: /^mokabook$/ }, (args) => {
+      pluginBuild.onResolve({ filter: /^@mokly\/mokly$/ }, (args) => {
         if (!args.importer) return { path: indexPath };
         let realImporter: string;
         try {
@@ -52,12 +52,12 @@ export function packageApiPlugin(config: ResolvedConfig): Plugin {
         }
         if (!isInside(realEntries, realImporter)) return { path: indexPath };
         return {
-          namespace: "mokabook-attributed-api",
+          namespace: "mokly-attributed-api",
           path: toPosixPath(path.relative(config.repoRoot, args.importer)),
         };
       });
       pluginBuild.onLoad(
-        { filter: /.*/, namespace: "mokabook-attributed-api" },
+        { filter: /.*/, namespace: "mokly-attributed-api" },
         (args) => ({
           contents: attributedApiContents(
             args.path,
@@ -68,7 +68,7 @@ export function packageApiPlugin(config: ResolvedConfig): Plugin {
         }),
       );
       pluginBuild.onResolve(
-        { filter: /.*/, namespace: "mokabook-attributed-api" },
+        { filter: /.*/, namespace: "mokly-attributed-api" },
         (args) => ({ namespace: "file", path: args.path }),
       );
     },

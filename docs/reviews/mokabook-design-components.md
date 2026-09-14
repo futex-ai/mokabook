@@ -63,7 +63,7 @@ share compact comparison sizing across native buttons and links.
    Retaining extra fields can carry non-contract metadata into Review comparison.
 
    This is a hardening suggestion, rather than a confirmed contract violation:
-   [the manifest contract](../protocol/mokabook-component-manifest.md) requires
+   [the manifest contract](../protocol/mokly-component-manifest.md) requires
    strictness for new v4 structures and explicitly preserves inherited v3
    validation. Compatibility should not change accidentally while addressing it.
 

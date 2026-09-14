@@ -1,5 +1,5 @@
 import { validateManifestComponent } from "../components/manifest_validation.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { isCatalogueId } from "../navigation/logical.js";
 import {
   nonEmptyString,
@@ -22,14 +22,14 @@ export function validateEntry(
     kind !== "use-case" &&
     !(components && kind === "component")
   ) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `invalid manifest kind for ${String(entry.id)}`,
     );
   }
   for (const field of ["title", "description", "sourcePath"] as const) {
     if (typeof entry[field] !== "string" || entry[field].length === 0) {
-      throw new MokabookError(
+      throw new MoklyError(
         "manifest-invalid",
         `${String(entry.id)} is missing ${field}`,
       );
@@ -40,14 +40,14 @@ export function validateEntry(
     `${String(entry.id)} sourcePath`,
   );
   if (entry.rationale !== undefined && !nonEmptyString(entry.rationale)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${String(entry.id)} has invalid rationale`,
     );
   }
   for (const field of ["navPath", "relatedDocs", "dependencies"] as const) {
     if (!stringArray(entry[field])) {
-      throw new MokabookError(
+      throw new MoklyError(
         "manifest-invalid",
         `${String(entry.id)} has invalid ${field}`,
       );
@@ -60,7 +60,7 @@ export function validateEntry(
   }
   if (kind === "collection") {
     if (!stringArray(entry.childIds)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "manifest-invalid",
         `${String(entry.id)} has invalid childIds`,
       );
@@ -68,14 +68,14 @@ export function validateEntry(
     return;
   }
   if (typeof entry.route !== "string") {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${String(entry.id)} has no route`,
     );
   }
   validateRoute(entry.route, String(entry.id));
   if (entry.tags !== undefined && !stringArray(entry.tags)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${String(entry.id)} has invalid tags`,
     );
@@ -87,7 +87,7 @@ export function validateEntry(
 
 function validateScreen(entry: Record<string, unknown>): void {
   if (!record(entry.fragments)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${String(entry.id)} has no fragments`,
     );
@@ -95,7 +95,7 @@ function validateScreen(entry: Record<string, unknown>): void {
   for (const viewport of ["mobile", "desktop"] as const) {
     const fragment = entry.fragments[viewport];
     if (typeof fragment !== "string") {
-      throw new MokabookError(
+      throw new MoklyError(
         "manifest-invalid",
         `${String(entry.id)} has no ${viewport} fragment`,
       );
@@ -104,7 +104,7 @@ function validateScreen(entry: Record<string, unknown>): void {
   }
   if (entry.darkFragments !== undefined) {
     if (!record(entry.darkFragments)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "manifest-invalid",
         `${String(entry.id)} has invalid darkFragments`,
       );
@@ -112,7 +112,7 @@ function validateScreen(entry: Record<string, unknown>): void {
     for (const viewport of ["mobile", "desktop"] as const) {
       const fragment = entry.darkFragments[viewport];
       if (typeof fragment !== "string") {
-        throw new MokabookError(
+        throw new MoklyError(
           "manifest-invalid",
           `${String(entry.id)} has no ${viewport} dark fragment`,
         );
@@ -121,7 +121,7 @@ function validateScreen(entry: Record<string, unknown>): void {
     }
   }
   if (!stringArray(entry.useCaseIds)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${String(entry.id)} has invalid useCaseIds`,
     );
@@ -132,13 +132,13 @@ function validateScreen(entry: Record<string, unknown>): void {
     entry.viewports[0] !== "mobile" ||
     entry.viewports[1] !== "desktop"
   ) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${String(entry.id)} has invalid viewports`,
     );
   }
   if (entry.address !== undefined && !nonEmptyString(entry.address)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${String(entry.id)} has invalid address`,
     );
@@ -147,21 +147,21 @@ function validateScreen(entry: Record<string, unknown>): void {
 
 function validateUseCase(entry: Record<string, unknown>): void {
   if (!Array.isArray(entry.steps) || entry.steps.length === 0) {
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${String(entry.id)} has invalid steps`,
     );
   }
   for (const [index, step] of entry.steps.entries()) {
     if (!record(step) || !nonEmptyString(step.screenId)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "manifest-invalid",
         `${String(entry.id)} step #${index + 1} has invalid screenId`,
       );
     }
     for (const field of ["title", "description"] as const) {
       if (step[field] !== undefined && !nonEmptyString(step[field])) {
-        throw new MokabookError(
+        throw new MoklyError(
           "manifest-invalid",
           `${String(entry.id)} step #${index + 1} has invalid ${field}`,
         );
@@ -217,7 +217,7 @@ export function validateCurrentFields(
             : ["route", "tags", "steps"];
   for (const field of Object.keys(entry))
     if (![...common, ...specific].includes(field))
-      throw new MokabookError(
+      throw new MoklyError(
         "manifest-invalid",
         `${String(entry.id)} has unsupported ${field}`,
       );
@@ -227,7 +227,7 @@ export function validateCurrentFields(
       !entry.tags.every(isCatalogueId) ||
       new Set(entry.tags).size !== entry.tags.length)
   )
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       `${String(entry.id)} has invalid tags`,
     );

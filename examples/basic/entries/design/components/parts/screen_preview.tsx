@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import { footerLabelChange } from "./comparison_fixtures.js";
 import { HighlightMask, type InspectionSelection } from "./highlight.js";

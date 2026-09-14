@@ -1,4 +1,4 @@
-import { collection, screen } from "mokabook";
+import { collection, screen } from "@mokly/mokly";
 
 import { ComponentPage } from "../../parts/component_page.js";
 

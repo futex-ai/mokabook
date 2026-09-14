@@ -4,8 +4,8 @@ import test from "node:test";
 import { adaptLinkControls } from "../dist/build/link_controls.js";
 
 const start =
-  '<template data-mokabook-link-child-start="mock:details"></template>';
-const end = '<template data-mokabook-link-child-end=""></template>';
+  '<template data-mokly-link-child-start="mock:details"></template>';
+const end = '<template data-mokly-link-child-end=""></template>';
 const page = (body: string) =>
   `<!doctype html><html><head><title>Control</title></head><body>${body}</body></html>`;
 const wrap = (body: string) => `${start}${body}${end}`;
@@ -25,7 +25,7 @@ test("patches retain unrelated bytes and marked control content exactly", () => 
     output,
     /<a class='row' STYLE='display:flex' data-owner='consumer'/,
   );
-  assert.doesNotMatch(output, /<template|data-mokabook-link-child/);
+  assert.doesNotMatch(output, /<template|data-mokly-link-child/);
 });
 
 test("several sibling controls produce one stylesheet and keep intervening content", () => {
@@ -65,7 +65,7 @@ for (const body of [
     end,
   start.replace(
     '="mock:details"',
-    '="mock:details" data-mokabook-link-child-start="mock:home"',
+    '="mock:details" data-mokly-link-child-start="mock:home"',
   ) +
     "<button>Bad</button>" +
     end,

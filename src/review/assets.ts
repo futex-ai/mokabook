@@ -8,7 +8,7 @@ import {
   publicPathLocation,
 } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import { referencedRoutes } from "./asset_references.js";
 import type { BaselineReader, GitFile } from "./git.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
@@ -76,7 +76,7 @@ export class FileSystemReviewAssetReader implements OptionalReviewAssetReader {
         location,
       };
     } catch (error) {
-      if (error instanceof MokabookError) throw error;
+      if (error instanceof MoklyError) throw error;
       throw assetError(route, errorMessage(error), error);
     }
   }
@@ -138,7 +138,7 @@ export class GitReviewAssetReader implements ReviewAssetReader {
       return files;
     } catch (error) {
       if (
-        error instanceof MokabookError &&
+        error instanceof MoklyError &&
         (error.code === "review-invalid" || error.code === "config-invalid")
       ) {
         throw error;
@@ -242,8 +242,8 @@ function assetError(
   route: string,
   detail: string,
   cause?: unknown,
-): MokabookError {
-  return new MokabookError(
+): MoklyError {
+  return new MoklyError(
     "review-invalid",
     `could not retain Review asset ${route}: ${detail}`,
     cause === undefined ? undefined : { cause },

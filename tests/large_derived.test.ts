@@ -23,14 +23,7 @@ test("the derived large fixture archives install/build inputs and ignores only g
   assert.equal(config.generatedOutput, "derived");
   assert.deepEqual(config.review.baselineBuild, [
     ["npm", "ci"],
-    [
-      "npx",
-      "--no-install",
-      "mokabook",
-      "build",
-      "--config",
-      "mokabook.config.ts",
-    ],
+    ["npx", "--no-install", "mokly", "build", "--config", "mokly.config.ts"],
   ]);
   assert.deepEqual(
     (await fs.readFile(path.join(root, ".gitignore"), "utf8"))
@@ -38,10 +31,10 @@ test("the derived large fixture archives install/build inputs and ignores only g
       .split("\n"),
     [
       ".review/",
-      ".mokabook-cache/",
+      ".mokly-cache/",
       "node_modules/",
       "mockups/**/*.html",
-      "mockups/mokabook-manifest.json",
+      "mockups/mokly-manifest.json",
     ],
   );
   const lock = JSON.parse(
@@ -57,16 +50,16 @@ test("the derived large fixture archives install/build inputs and ignores only g
         assert.equal(options.cwd, repositoryRoot);
         assert.ok(argv.includes("--ignore-scripts"));
         await fs.writeFile(
-          path.join(root, "tooling", "mokabook-test.tgz"),
+          path.join(root, "tooling", "mokly-test.tgz"),
           "archived package bytes",
         );
-        return { stdout: '[{"filename":"mokabook-test.tgz"}]', stderr: "" };
+        return { stdout: '[{"filename":"mokly-test.tgz"}]', stderr: "" };
       }
       assert.equal(options.cwd, root);
       const pkg = JSON.parse(
         await fs.readFile(path.join(root, "package.json"), "utf8"),
       );
-      assert.equal(pkg.dependencies.mokabook, "file:tooling/mokabook.tgz");
+      assert.equal(pkg.dependencies["@mokly/mokly"], "file:tooling/mokly.tgz");
       assert.equal(
         pkg.dependencies["@firna/ui"],
         lock.packages["node_modules/@firna/ui"].version,
@@ -79,7 +72,7 @@ test("the derived large fixture archives install/build inputs and ignores only g
           lock.packages[`node_modules/${peer}`].version,
         );
       assert.equal(
-        await fs.readFile(path.join(root, "tooling/mokabook.tgz"), "utf8"),
+        await fs.readFile(path.join(root, "tooling/mokly.tgz"), "utf8"),
         "archived package bytes",
       );
       if (argv[0] === "install") {

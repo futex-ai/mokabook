@@ -13,7 +13,7 @@ test("maintenance diagnostics identify the entry and preserve the failure messag
     error: new Error("removal denied"),
   });
   assert.deepEqual(lines, [
-    "[mokabook/baseline-cleanup] /cache/commit/source: removal denied\n",
+    "[mokly/baseline-cleanup] /cache/commit/source: removal denied\n",
   ]);
 });
 

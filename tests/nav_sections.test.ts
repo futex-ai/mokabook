@@ -188,7 +188,7 @@ function manifest(entries: readonly ManifestEntry[]): ManifestV5 {
       ...entry,
       declaredDependencies: entry.declaredDependencies ?? [],
     })),
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     schemaVersion: 5,
     sourceFiles: entries.map(({ sourcePath }) => sourcePath).sort(),
   };

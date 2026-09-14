@@ -47,7 +47,7 @@ test("details preference records a completed activation before later tasks", asy
 function fakeDocument(details: HTMLDetailsElement): Document {
   return {
     querySelector(selector: string) {
-      assert.equal(selector, "[data-mokabook-details]");
+      assert.equal(selector, "[data-mokly-details]");
       return details;
     },
   } as unknown as Document;

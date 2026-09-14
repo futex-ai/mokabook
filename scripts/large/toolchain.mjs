@@ -17,14 +17,14 @@ export async function prepareDerivedToolchain(repository, root, run = execute) {
   const [{ filename }] = JSON.parse(packed.stdout);
   await fs.rename(
     path.join(tooling, filename),
-    path.join(tooling, "mokabook.tgz"),
+    path.join(tooling, "mokly.tgz"),
   );
   const lock = JSON.parse(
     await fs.readFile(path.join(repository, "package-lock.json"), "utf8"),
   );
   const firna = lock.packages["node_modules/@firna/ui"];
   const names = ["@firna/ui", ...Object.keys(firna.peerDependencies)];
-  const dependencies = { mokabook: "file:tooling/mokabook.tgz" };
+  const dependencies = { "@mokly/mokly": "file:tooling/mokly.tgz" };
   for (const name of names) {
     const version = lock.packages[`node_modules/${name}`]?.version;
     if (!version)
@@ -35,7 +35,7 @@ export async function prepareDerivedToolchain(repository, root, run = execute) {
     path.join(root, "package.json"),
     JSON.stringify(
       {
-        name: "mokabook-large-fixture",
+        name: "mokly-large-fixture",
         private: true,
         type: "module",
         dependencies,

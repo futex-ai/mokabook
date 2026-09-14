@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { ServerResponse } from "node:http";
 
 import { isSafeCatalogueRoute } from "../config/paths.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type {
   ReviewSelection,
   SelectedReviewProvider,
@@ -12,7 +12,7 @@ import type {
 import { contentType, safeDecodePath, send } from "./respond.js";
 import { redirectReview, sendReviewFailure } from "./review_responses.js";
 
-const PREFIX = "/__mokabook/diffs/__generations/selected-";
+const PREFIX = "/__mokly/diffs/__generations/selected-";
 const RETENTION_MS = 60_000;
 const CAPACITY_BYTES = 128 * 1024 * 1024;
 
@@ -64,7 +64,7 @@ export class SelectedReviewRoutes {
     method: string,
   ): Promise<boolean> {
     const stable =
-      url.pathname === "/__mokabook/diffs/review.json" &&
+      url.pathname === "/__mokly/diffs/review.json" &&
       (url.searchParams.has("route") || url.searchParams.has("variant"));
     if (!stable && !url.pathname.startsWith(PREFIX)) return false;
     try {
@@ -225,6 +225,6 @@ function generationUrl(generation: Generation): string {
   return `${PREFIX}${generation.version}/review.json`;
 }
 
-function unavailable(message: string): MokabookError {
-  return new MokabookError("review-invalid", message);
+function unavailable(message: string): MoklyError {
+  return new MoklyError("review-invalid", message);
 }

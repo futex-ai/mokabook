@@ -1,4 +1,7 @@
-import { stripMarkers } from "../components/comparison_material.js";
+import {
+  stripHistoricalMarkers,
+  stripMarkers,
+} from "../components/comparison_material.js";
 import {
   changedComponentImplementations,
   projectComponentPair,
@@ -41,7 +44,7 @@ export async function compareComponentView(
   const head = after ? await context.afterReader.text(after.path) : undefined;
   const baseRanges =
     base !== undefined && before?.usage
-      ? validateComponentRanges(base, before.usage.ranges)
+      ? validateComponentRanges(base, before.usage.ranges, "historical")
       : undefined;
   const headRanges =
     head !== undefined && after?.usage
@@ -57,11 +60,9 @@ export async function compareComponentView(
   };
   if (base === undefined || head === undefined) {
     normalizeSingleDocument(
-      stripMarkers(
-        (base ?? head)!,
-        (before ?? after)!.usage,
-        baseRanges ?? headRanges,
-      ),
+      base !== undefined
+        ? stripHistoricalMarkers(base)
+        : stripMarkers(head!, after!.usage, headRanges),
       selected.path,
     );
     return {
@@ -120,7 +121,7 @@ export async function compareComponentView(
     else if (byteChanges.has(resource)) reasons.push({ kind: "material" });
   }
   const actual = normalizeReviewPair(
-    stripMarkers(base, before?.usage, baseRanges),
+    stripHistoricalMarkers(base),
     stripMarkers(head, after?.usage, headRanges),
     selected.path,
   );

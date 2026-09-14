@@ -51,7 +51,7 @@ export class RenderStore {
       generation,
       props: value.props,
       view: value.view,
-      previewUrl: `/__mokabook/components/renders/${id}/${value.route.split("/").map(encodeURIComponent).join("/")}`,
+      previewUrl: `/__mokly/components/renders/${id}/${value.route.split("/").map(encodeURIComponent).join("/")}`,
     };
   }
   get(id: string): TransientRender {

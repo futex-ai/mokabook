@@ -30,19 +30,16 @@ export function renderInstance(
     );
   const descriptors = Object.getOwnPropertyDescriptors(rawProps);
   if (descriptors.key && !descriptors.key.enumerable) delete descriptors.key;
-  const instanceDescriptor = descriptors.mokabookInstance;
+  const instanceDescriptor = descriptors.moklyInstance;
   if (instanceDescriptor && !("value" in instanceDescriptor))
     invalidData(scope.collector.label, "instance id cannot be an accessor");
   const id: unknown =
     instanceDescriptor?.value === undefined
       ? definition.id
       : instanceDescriptor.value;
-  delete descriptors.mokabookInstance;
+  delete descriptors.moklyInstance;
   if (!isCatalogueId(id))
-    invalidData(
-      scope.collector.label,
-      "mokabookInstance must be a kebab-case id",
-    );
+    invalidData(scope.collector.label, "moklyInstance must be a kebab-case id");
   const input = Object.defineProperties({}, descriptors) as Record<
     string,
     unknown
@@ -120,9 +117,9 @@ function Boundary({
   const token = scope.collector.boundary(target);
   return (
     <>
-      <template data-mokabook-component-start={token} />
+      <template data-mokly-component-start={token} />
       <ComponentContext value={scope}>{children}</ComponentContext>
-      <template data-mokabook-component-end={token} />
+      <template data-mokly-component-end={token} />
     </>
   );
 }

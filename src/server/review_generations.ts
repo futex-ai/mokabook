@@ -4,10 +4,10 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 
 const GENERATION_RETENTION_MS = 60_000;
-const REVIEW_ARTIFACT_MARKER = ".mokabook-review-artifact";
+const REVIEW_ARTIFACT_MARKER = ".mokly-review-artifact";
 
 /** Filesystem context excluded while generating a served Review artifact. */
 export interface ReviewArtifactGenerationOptions {
@@ -62,7 +62,7 @@ export class ReviewGenerationStore {
         changedPathExclusions: this.archiveRoot ? [this.archiveRoot] : [],
       });
       if (reviewDirectoryState(this.provider.outDir) === "missing") {
-        throw new MokabookError(
+        throw new MoklyError(
           "server-failed",
           `Review provider did not generate an artifact at ${this.provider.outDir}`,
         );
@@ -122,10 +122,7 @@ export class ReviewGenerationStore {
         recursive: true,
       });
       this.archiveRoot = await fs.promises.mkdtemp(
-        path.join(
-          path.dirname(this.provider.outDir),
-          ".mokabook-review-served-",
-        ),
+        path.join(path.dirname(this.provider.outDir), ".mokly-review-served-"),
       );
     }
     return this.archiveRoot;
@@ -150,7 +147,7 @@ export class ReviewGenerationStore {
       this.currentGeneration = restored;
       this.generations.set(restored.version, restored);
     } catch (restoreError) {
-      throw new MokabookError(
+      throw new MoklyError(
         "server-failed",
         `Review generation failed (${errorMessage(generationError)}) and its ` +
           `previous artifact could not be restored: ${errorMessage(restoreError)}`,
@@ -208,8 +205,8 @@ function reviewDirectoryState(directory: string): "missing" | "owned" {
   return "owned";
 }
 
-function unownedReviewDirectory(directory: string): MokabookError {
-  return new MokabookError(
+function unownedReviewDirectory(directory: string): MoklyError {
+  return new MoklyError(
     "review-invalid",
     `refusing to replace unowned Review directory: ${directory}`,
   );

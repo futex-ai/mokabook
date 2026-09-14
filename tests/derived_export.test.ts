@@ -16,7 +16,7 @@ test("derived export rebuilds and pins a baseline, captures compiled head bytes 
   await fs.rm(fixture.mockupsDir, { recursive: true });
   const marker = path.join(
     fixture.root,
-    ".mokabook-cache/baselines",
+    ".mokly-cache/baselines",
     fixture.commit,
     "complete.json",
   );
@@ -83,7 +83,7 @@ test("derived export preserves its previous artifact if the pinned marker disapp
             await fs.rm(
               path.join(
                 fixture.root,
-                ".mokabook-cache/baselines",
+                ".mokly-cache/baselines",
                 fixture.commit,
                 "complete.json",
               ),

@@ -9,7 +9,7 @@ export function componentEntrySource(
   } = {},
 ): string {
   return `import React from "react";
-import { defineComponent, defineCollection, defineScreen, MockLink, ReviewIgnore } from "mokabook";
+import { defineComponent, defineCollection, defineScreen, MockLink, ReviewIgnore } from "@mokly/mokly";
 const metadata = { dependencies: ["notes.md"], relatedDocs: [] };
 const action = defineComponent({ ...metadata,
   id: "action", title: "Action", description: "A shared action", route: "components/action.html",
@@ -28,6 +28,6 @@ ${options.extra ?? ""}
 export const mockups = [
   defineCollection({ ...metadata, id: "components", title: "Components", description: "Shared components", childIds: ["action", "pane"] }),
   ${options.exports ?? "action.entry, pane.entry,"}
-  defineScreen({ ...metadata, id: "home", title: "Home", description: "A consuming screen", route: "screens/home.html", mobile: <main>${options.body ?? '<pane.Component><p>Screen content</p><action.Component label="Slot action" /></pane.Component><action.Component mokabookInstance="footer" label="Finish" /><action.Component mokabookInstance="hidden" label="Hidden" hidden /><MockLink to="action">Open Action</MockLink>'}</main>, desktop: <main>${options.body ?? '<pane.Component><p>Screen content</p><action.Component label="Slot action" /></pane.Component><action.Component mokabookInstance="footer" label="Finish" /><action.Component mokabookInstance="hidden" label="Hidden" hidden /><MockLink to="action">Open Action</MockLink>'}</main> })
+  defineScreen({ ...metadata, id: "home", title: "Home", description: "A consuming screen", route: "screens/home.html", mobile: <main>${options.body ?? '<pane.Component><p>Screen content</p><action.Component label="Slot action" /></pane.Component><action.Component moklyInstance="footer" label="Finish" /><action.Component moklyInstance="hidden" label="Hidden" hidden /><MockLink to="action">Open Action</MockLink>'}</main>, desktop: <main>${options.body ?? '<pane.Component><p>Screen content</p><action.Component label="Slot action" /></pane.Component><action.Component moklyInstance="footer" label="Finish" /><action.Component moklyInstance="hidden" label="Hidden" hidden /><MockLink to="action">Open Action</MockLink>'}</main> })
 ];`;
 }

@@ -6,7 +6,7 @@ supplies a capability, token, or rendering endpoint.
 The public authoring API and ordinary renderer remain the integration boundary.
 
 The parent shell sends controlled overrides to
-`POST /__mokabook/components/render`. Requests must match the bound loopback
+`POST /__mokly/components/render`. Requests must match the bound loopback
 Host, Origin, shell token, current generation, saved variant and view. The body
 is strict JSON capped at 64 KiB. Shared schema/codec validation checks every
 merged prop, including fields that cannot be edited.
@@ -67,6 +67,6 @@ completion precedes final Changes publication and is not a settled watch state;
 `tests/helpers/component_controls_state.ts` captures the authority and version
 from one terminal shell before exact no-update assertions begin.
 
-See the [controls contract](../../../docs/protocol/mokabook-component-controls.md),
+See the [controls contract](../../../docs/protocol/mokly-component-controls.md),
 [component authoring guide](../../components/README.md), and
 [build architecture](../../../docs/architecture/build-pipeline.md).

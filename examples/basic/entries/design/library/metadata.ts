@@ -17,7 +17,7 @@ export function libraryMetadata(
     description,
     dependencies: [view, stylesheet],
     ownedDependencies: [view, stylesheet],
-    relatedDocs: ["docs/protocol/mokabook-design-component-library.md"],
+    relatedDocs: ["docs/protocol/mokly-design-component-library.md"],
     colorSchemes: ["light"] as const,
   };
 }

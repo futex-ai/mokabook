@@ -10,9 +10,9 @@ export function timingCollector(now = () => performance.now()) {
       const lines = (partial + decoded).split("\n");
       partial = lines.pop();
       for (const line of lines) {
-        if (!line.startsWith("[mokabook:timing] ")) continue;
+        if (!line.startsWith("[mokly:timing] ")) continue;
         try {
-          const event = JSON.parse(line.slice("[mokabook:timing] ".length));
+          const event = JSON.parse(line.slice("[mokly:timing] ".length));
           if (event?.schemaVersion === 1 && typeof event.stage === "string")
             records.push({ event, receivedMs: now() });
         } catch {

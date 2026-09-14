@@ -18,7 +18,7 @@ test.afterAll(async () => {
 test.beforeEach(async ({ page }) => {
   await page.route("https://cross-origin.example.test/nested.html", (route) =>
     route.fulfill({
-      body: '<a data-mokabook-link="details#section" href="/details" id="cross-marked" target="_top">Marked</a><a href="#ordinary" id="cross-unmarked" target="_top">Ordinary</a><a href="#popup" id="cross-popup" target="_blank">Popup</a><script>parent.__crossScriptRan=true</script>',
+      body: '<a data-mokly-link="details#section" href="/details" id="cross-marked" target="_top">Marked</a><a href="#ordinary" id="cross-unmarked" target="_top">Ordinary</a><a href="#popup" id="cross-popup" target="_blank">Popup</a><script>parent.__crossScriptRan=true</script>',
       contentType: "text/html",
     }),
   );
@@ -72,11 +72,11 @@ test("modified and explicit targets open only canonical parent-owned contexts", 
     await page.goto(`${navigation.url}/view/screens/home.html`);
     await page.evaluate(() => {
       const shell = window as typeof window & {
-        __mokabookOpenCalls?: unknown[][];
+        __moklyOpenCalls?: unknown[][];
       };
-      shell.__mokabookOpenCalls = [];
+      shell.__moklyOpenCalls = [];
       shell.open = (...args: Parameters<typeof window.open>) => {
-        shell.__mokabookOpenCalls?.push(args);
+        shell.__moklyOpenCalls?.push(args);
         return null;
       };
     });
@@ -88,8 +88,8 @@ test("modified and explicit targets open only canonical parent-owned contexts", 
       .poll(() =>
         page.evaluate(
           () =>
-            (window as typeof window & { __mokabookOpenCalls?: unknown[][] })
-              .__mokabookOpenCalls,
+            (window as typeof window & { __moklyOpenCalls?: unknown[][] })
+              .__moklyOpenCalls,
         ),
       )
       .toEqual([["/id/details?fragment=section", "_blank", "noopener"]]);

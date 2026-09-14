@@ -4,7 +4,7 @@ import type { Viewport } from "../authoring/types.js";
 import type { ComponentViewRecord } from "../components/manifest_types.js";
 import { generatedViews } from "../components/views.js";
 import { encodeUrlPath } from "../config/paths.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { LogicalTarget } from "../navigation/logical.js";
 import type { Catalogue } from "../server/catalogue.js";
 
@@ -87,6 +87,6 @@ export function expectedPortableHref(
   return `${portable}${destination.fragment ? `#${destination.fragment}` : ""}`;
 }
 
-function invalid(route: string, message: string): MokabookError {
-  return new MokabookError("build-invalid", `${route}: ${message}`);
+function invalid(route: string, message: string): MoklyError {
+  return new MoklyError("build-invalid", `${route}: ${message}`);
 }

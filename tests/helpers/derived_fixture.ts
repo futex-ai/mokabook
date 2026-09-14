@@ -20,7 +20,7 @@ export async function derivedFixture(
   t.after(() => removeFixture(fixture));
   await fs.writeFile(
     fixture.configPath,
-    `import { defineConfig } from "mokabook";
+    `import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   generatedOutput: "derived", entriesDir: "entries", mockupsDir: "mockups",
   review: { outDir: ".review", sharedImpact: ["**"], baselineBuild: [["node", "baseline.mjs"]] }
@@ -50,7 +50,7 @@ for (const [route, content] of JSON.parse(await fs.readFile("baseline-output.jso
   );
   await fs.writeFile(
     path.join(fixture.root, ".gitignore"),
-    "mockups/**/*.html\nmockups/mokabook-manifest.json\n.mokabook-cache/\n",
+    "mockups/**/*.html\nmockups/mokly-manifest.json\n.mokly-cache/\n",
   );
   const git = (...args: string[]) =>
     execute("git", args, { cwd: fixture.root });

@@ -96,7 +96,7 @@ test("owned exports and active transactions do not trigger broad watch rules", a
   assert.equal(classifyWatchPath(outputFile, watched), "ignore");
   assert.equal(
     classifyWatchPath(
-      path.join(fixture.root, ".mokabook-export-notes.md"),
+      path.join(fixture.root, ".mokly-export-notes.md"),
       watched,
     ),
     "rebuild",

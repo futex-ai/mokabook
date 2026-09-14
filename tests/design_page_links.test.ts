@@ -20,7 +20,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       assert.equal(
         attribute(
           byClass(document, "ce-inspector-link")[0]!,
-          "data-mokabook-link",
+          "data-mokly-link",
         ),
         target,
       );
@@ -30,7 +30,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
           node.tagName === "a" && textContent(node).trim() === "Open Welcome",
       );
       assert.equal(
-        attribute(welcome[0]!, "data-mokabook-link"),
+        attribute(welcome[0]!, "data-mokly-link"),
         "design-browse-screen",
       );
       assert.equal(byClass(document, "mbk-cmp-toolbar").length, 0);
@@ -43,18 +43,18 @@ for (const viewport of ["mobile", "desktop"] as const) {
       (node) => textContent(node).trim() === "Getting started",
     );
     assert.ok(pageRow);
-    assert.equal(attribute(pageRow, "data-mokabook-link"), "design-page-view");
+    assert.equal(attribute(pageRow, "data-mokly-link"), "design-page-view");
     if (viewport === "mobile") {
       const current = await designDocument("design-page-view", viewport);
       assert.equal(
         attribute(
           byClass(current.document, "mbk-menu-btn")[0]!,
-          "data-mokabook-link",
+          "data-mokly-link",
         ),
         "design-page-navigation",
       );
       assert.equal(
-        attribute(byClass(document, "mbk-menu-btn")[0]!, "data-mokabook-link"),
+        attribute(byClass(document, "mbk-menu-btn")[0]!, "data-mokly-link"),
         "design-page-view",
       );
     }
@@ -81,7 +81,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       (node) => node.tagName === "a" && textContent(node).trim() === "Overlay",
     );
     assert.equal(
-      attribute(overlay[0]!, "data-mokabook-link"),
+      attribute(overlay[0]!, "data-mokly-link"),
       "design-changes-overlay",
     );
   });

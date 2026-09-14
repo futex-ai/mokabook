@@ -1,13 +1,13 @@
-# Mokabook
+# Mokly
 
-Mokabook turns React-authored mobile and desktop mockups into static
+Mokly turns React-authored mobile and desktop mockups into static
 HTML, exports complete catalogues for hosting, serves them during development, and compares screens
 with their Git baseline on demand. It is app-independent: product screens, component libraries,
 themes, styles, and compatibility adapters stay in the consuming repository.
 
-The public [npm package](https://www.npmjs.com/package/mokabook) and executable
-are both named `mokabook`. Releases remain pre-1.0 while the consumer contract
-settles.
+The public [npm package](https://www.npmjs.com/package/@mokly/mokly) is
+`@mokly/mokly`; its executable remains `mokly`. Releases remain pre-1.0 while
+the consumer contract settles.
 
 Shared components can have their own pages, saved variants and editable props in
 local Serve. Screens record their actual component usage for inspection and
@@ -15,18 +15,18 @@ highlighting. Component implementation edits appear once in Changes; consumers
 are listed as affected, while changes to their supplied props remain screen
 changes. See the [component authoring guide](./src/components/README.md).
 
-## Use Mokabook
+## Use Mokly
 
-Install Mokabook and its React peers in the repository that owns the screens:
+Install Mokly and its React peers in the repository that owns the screens:
 
 ```bash
-npm install --save-dev mokabook react react-dom
+npm install --save-dev @mokly/mokly react react-dom
 ```
 
-Create `mokabook.config.ts`:
+Create `mokly.config.ts`:
 
 ```ts
-import { defineConfig } from "mokabook";
+import { defineConfig } from "@mokly/mokly";
 
 export default defineConfig({
   colorSchemes: ["light", "dark"],
@@ -37,7 +37,7 @@ export default defineConfig({
   stylesheets: [{ match: "app/**/*.html", stylesheets: ["app.css"] }],
   review: {
     base: "origin/main",
-    outDir: ".context/mokabook-review",
+    outDir: ".context/mokly-review",
     sharedImpact: ["src/components/**", "src/tokens/**"],
   },
 });
@@ -52,7 +52,7 @@ optional mode for repositories that want to keep generated files out of Git.
 An entry module ends in `.mockup.ts` or `.mockup.tsx` and exports `mockups`:
 
 ```tsx
-import { defineCollection, defineScreen, MockLink } from "mokabook";
+import { defineCollection, defineScreen, MockLink } from "@mokly/mokly";
 
 export const mockups = [
   defineCollection({
@@ -88,7 +88,7 @@ export const mockups = [
 `mobile` and `desktop` accept any React node; real screens usually wrap their
 content in a `<main>` landmark because each fragment is generated as its own
 standalone page. Collection membership is also the navigation hierarchy:
-Mokabook infers the screen's `Account` breadcrumb from `childIds`, so authors
+Mokly infers the screen's `Account` breadcrumb from `childIds`, so authors
 do not maintain a separate breadcrumb path.
 
 `MockLink` accepts a lowercase kebab-case entry id and an optional bare HTML id
@@ -104,7 +104,7 @@ runtime as well: ids and fragments must be strings before their respective
 grammars are applied.
 
 ```tsx
-import { mockLink } from "mokabook";
+import { mockLink } from "@mokly/mokly";
 
 const detailsHref = mockLink("account-detail", "summary");
 // "mock:account-detail#summary"
@@ -118,7 +118,7 @@ To use a styled control as a catalogue link, opt into `MockLink asChild`:
 </MockLink>
 ```
 
-Mokabook adapts that one rendered control into a native link during the build,
+Mokly adapts that one rendered control into a native link during the build,
 preserving its classes, inline styles, label, and icons. Custom components may
 render an HTML `a`, `button`, `div`, or `span`; put attributes on the child,
 which must have no interactive descendants. Disabled or busy controls remain
@@ -127,15 +127,15 @@ default `MockLink` behavior and documents without child links keep their bytes.
 Navigation works in Browse, use-case frames, standalone files, and Review
 snapshots through the existing link mechanism, without a consumer click script.
 
-Keep any props your component requires to render enabled; Mokabook handles the
+Keep any props your component requires to render enabled; Mokly handles the
 destination through the generated link. Native browser button chrome and
 JavaScript-driven hover/pressed effects are not reproduced by static adaptation.
-See the [styled link controls contract](./docs/protocol/mokabook-link-controls.md)
+See the [styled link controls contract](./docs/protocol/mokly-link-controls.md)
 for supported markup, inactive states, and validation rules.
 
 Color-scheme adoption has two steps: enable `colorSchemes: ["light", "dark"]`
 in the config, then select the consumer theme from `input.colorScheme` in the
-configured renderer. Mokabook re-renders the same mobile and desktop nodes for
+configured renderer. Mokly re-renders the same mobile and desktop nodes for
 dark output; authors do not duplicate screen trees. A deliberately light-only
 screen opts out in either `defineScreen` or a nested `screen` marker:
 
@@ -149,35 +149,36 @@ defineScreen({
 Light-only catalogues omit `colorSchemes`, keep their existing renderer, and
 produce the same fragment names and manifest bytes as before.
 
-Run the CLI through a local dependency or directly with npx:
+After installing, run the local CLI with npx:
 
 ```bash
-npx mokabook                         # browse immediately, render on demand, and watch
-npx mokabook serve --no-watch --port 0
-npx mokabook serve --debug-timings
-npx mokabook build
-npx mokabook check
-npx mokabook export --out .context/mokabook-site
+npx mokly                         # browse immediately, render on demand, and watch
+npx mokly serve --no-watch --port 0
+npx mokly serve --debug-timings
+npx mokly build
+npx mokly check
+npx mokly export --out .context/mokly-site
 ```
 
 Options follow the command, so an explicit config is
-`npx mokabook build --config path/to/mokabook.config.ts`. With a local
-development dependency, `npx --no-install mokabook` guarantees npm does not
+`npx mokly build --config path/to/mokly.config.ts`. With a local
+development dependency, `npx --no-install mokly` guarantees npm does not
 fall back to the registry. A clean machine may use
-`npx --package mokabook mokabook` without adding a dependency.
+`npx --package @mokly/mokly mokly` without adding a dependency. The unscoped
+name is not a package alias; imports also use `@mokly/mokly`.
 
-| Command                        | Outcome                                                      |
-| ------------------------------ | ------------------------------------------------------------ |
-| `mokabook`                     | Browse on demand and watch using a stable development URL    |
-| `mokabook serve`               | Serve the catalogue and on-demand diffs; watch by default    |
-| `mokabook build`               | Validate and transactionally write generated output          |
-| `mokabook check`               | Validate committed bytes or require untracked derived output |
-| `mokabook export --out <path>` | Build a complete static catalogue for your host              |
-| `mokabook --help`              | Show commands and their supported options                    |
-| `mokabook --version`           | Print the installed package version                          |
+| Command                     | Outcome                                                      |
+| --------------------------- | ------------------------------------------------------------ |
+| `mokly`                     | Browse on demand and watch using a stable development URL    |
+| `mokly serve`               | Serve the catalogue and on-demand diffs; watch by default    |
+| `mokly build`               | Validate and transactionally write generated output          |
+| `mokly check`               | Validate committed bytes or require untracked derived output |
+| `mokly export --out <path>` | Build a complete static catalogue for your host              |
+| `mokly --help`              | Show commands and their supported options                    |
+| `mokly --version`           | Print the installed package version                          |
 
 Serve starts at port `4173`. If that port, or a concrete `--port` value, is
-already occupied, Mokabook tries each following port in order until one is
+already occupied, Mokly tries each following port in order until one is
 free. `--port 0` instead asks the operating system to choose a free port.
 Watched Serve keeps the first resolved port for later child restarts so its URL
 stays stable.
@@ -187,7 +188,7 @@ phase timings and aggregate catalogue sizes to stderr while leaving normal
 output and generated files unchanged. It separates bundling, rendering,
 validation, file writes, watcher setup, child readiness, and background Changes.
 Parent timings include child phases; overlapping timings must not be added
-together. See the [diagnostic contract](./docs/protocol/mokabook-timings.md).
+together. See the [diagnostic contract](./docs/protocol/mokly-timings.md).
 
 To investigate scale locally, first run `npm run fixture:large`. This explicitly
 prepares a synthetic 1,410-route catalogue with 5,550 documents and an isolated Git
@@ -198,7 +199,7 @@ process and a warm restart, exercises Props, themes, viewports and pages, and
 waits for Changes separately. Use matching `--areas 2 --screens 10 --rows 6`
 options for smaller setup and benchmark runs. Fixtures stay under `.context`.
 Pass `--derived` to fixture setup and benchmark for a separately recorded
-source-only baseline with its own packaged Mokabook and dependency lockfile.
+source-only baseline with its own packaged Mokly and dependency lockfile.
 The benchmark requires a cold rebuild and a warm cache hit, reporting baseline
 preparation separately while keeping the five-second navigation target for both.
 See the [large fixture guide](./tests/fixtures/large/README.md).
@@ -223,21 +224,21 @@ usage and then Changes. Shell requests never repeat that repository work.
 These background updates preserve the mounted page, previews, search, folder
 choices, focus, scroll and temporary props, including when All is selected.
 Authored content changes still reload; reconnects catch up to the latest evidence
-without replaying navigation recovery. See [live evidence updates](./docs/protocol/mokabook-live-evidence.md).
+without replaying navigation recovery. See [live evidence updates](./docs/protocol/mokly-live-evidence.md).
 
 Baseline views are read in batches, not one Git process per view. Watched Serve also observes
 Git ref changes off the request path. `--no-watch` uses the same fast startup but
 does not observe later source, resource or Git edits. Unavailable history omits
-change evidence while current previews remain accessible. See [on-demand Serve](./docs/protocol/mokabook-on-demand.md).
+change evidence while current previews remain accessible. See [on-demand Serve](./docs/protocol/mokly-on-demand.md).
 
 `build` writes one fragment per effective viewport and color-scheme view plus
-`mokabook-manifest.json` under `mockupsDir`. `check` calculates those bytes
+`mokly-manifest.json` under `mockupsDir`. `check` calculates those bytes
 without writing. Committed mode reports missing, stale, or orphan generated
 files; derived mode reports tracked generated or cache paths. The
 manifest stays internal: its source inventory is unavailable through HTTP,
 published assets, and comparison resources. Ordinary public JSON remains
 supported. Browse
-serves the package-owned Mokabook shell — resizable desktop catalogue
+serves the package-owned Mokly shell — resizable desktop catalogue
 navigation with separate collapsible Pages and Components sections, folder and
 entry-kind icons, and an All/Changes filter, search that
 narrows the tree by page ID, title, route, and `tag:` terms that the field's tag
@@ -279,15 +280,15 @@ Changed screens and changed or removed saved component variants offer
 Current / Side by side / Overlay / Difference beneath the heading. The controls
 are available from All and Changes, and start in Current. Known unchanged views
 show Unmodified without a comparison band; unknown evidence has no status badge.
-During development, Mokabook generates comparison snapshots only after a diff
+During development, Mokly generates comparison snapshots only after a diff
 option is selected; browsing, filtering, and watched reloads do not trigger
 generation. Opening a diff reuses completed background evidence and captures only
 the selected screen or saved variant and its referenced assets, without rebuilding
 or snapshotting the entire catalogue. Checked-input fingerprints prevent later
 output edits from silently changing a comparison. See the
-[selected comparison contract](./docs/protocol/mokabook-selected-comparisons.md).
+[selected comparison contract](./docs/protocol/mokly-selected-comparisons.md).
 Changing viewport, theme or comparison mode renews the loaded snapshots before
-using them. After an idle comparison expires, Mokabook automatically reacquires
+using them. After an idle comparison expires, Mokly automatically reacquires
 the same screen or saved variant. Available snapshots reuse their loaded result;
 published catalogues need no renewal requests.
 Published catalogues with Changes enabled prepare snapshots during publishing, then load
@@ -315,7 +316,7 @@ Overlays use 50% opacity; Difference
 uses CSS blending, without inventing pixel measurements. Immutable generations
 keep snapshots coherent during refresh, retain replaced resources briefly, and
 drain generation work before shutdown. The former Review tab, standalone report,
-`mokabook review` command, and its report-output option have been removed.
+`mokly review` command, and its report-output option have been removed.
 `--out` is supported only by the separate `export` command.
 
 Consumer documents run in sandboxed frames. Comparisons keep unmodified base/head
@@ -375,7 +376,7 @@ output and withholds complete evidence; valid on-demand previews remain usable.
 
 ## Configuration
 
-Mokabook discovers `mokabook.config.ts`, `.mts`, `.js`, or `.mjs` by walking
+Mokly discovers `mokly.config.ts`, `.mts`, `.js`, or `.mjs` by walking
 upward from the current directory. Every filesystem path is relative to that
 file and confined to `repoRoot`.
 
@@ -421,14 +422,14 @@ Build still writes transactionally; Check validates the
 compilation and rejects tracked generated files or cache contents, without
 requiring local generated files to exist or match. Authored public CSS and HTML
 remain allowed in Git. Add ignore rules for your generated routes and manifest,
-plus `.mokabook-cache/`, and remove any already tracked generated files from the
+plus `.mokly-cache/`, and remove any already tracked generated files from the
 index with `git rm --cached`.
 
 Derived comparisons rebuild the merge-base commit in an isolated extraction,
-using that commit's dependencies and Mokabook version, then cache its output.
+using that commit's dependencies and Mokly version, then cache its output.
 This executes historical code: use a trusted mainline as the base. The default
 commands are `npm ci` followed by
-`npx --no-install mokabook build --config <repository-relative-config-path>`.
+`npx --no-install mokly build --config <repository-relative-config-path>`.
 Override the exact ordered argv list when your project needs additional steps:
 
 ```ts
@@ -440,14 +441,7 @@ export default defineConfig({
     baselineBuild: [
       ["npm", "ci"],
       ["npm", "run", "build:tooling"],
-      [
-        "npx",
-        "--no-install",
-        "mokabook",
-        "build",
-        "--config",
-        "mokabook.config.ts",
-      ],
+      ["npx", "--no-install", "mokly", "build", "--config", "mokly.config.ts"],
     ],
   },
 });
@@ -455,7 +449,7 @@ export default defineConfig({
 
 Commands run from the historical repository root without a shell; no commands
 are appended to an explicit list. `baselineBuild` is rejected in committed
-mode. See the [derived baseline contract](./docs/protocol/mokabook-derived-baselines.md)
+mode. See the [derived baseline contract](./docs/protocol/mokly-derived-baselines.md)
 for cache limits, failure behavior, and the one-catalogue-per-commit cache boundary.
 
 ## Whole-document pages
@@ -464,7 +458,7 @@ Use a page for an existing complete HTML document without inventing device
 variants. Add its ID to the owning collection's `childIds`:
 
 ```tsx
-import { definePage } from "mokabook";
+import { definePage } from "@mokly/mokly";
 import { source } from "../pages/handbook.source.js";
 
 export const mockups = [
@@ -489,7 +483,7 @@ routes from `defineRoot.path`, collection segments, and their slug.
 
 This is a breaking upgrade: current output requires manifest v5, and legacy
 configuration, discovery, comment expansion, aliases, and lint settings are
-removed. The [migration guide](./docs/protocol/mokabook-page-migration.md)
+removed. The [migration guide](./docs/protocol/mokly-page-migration.md)
 explains source-preserving registration and safe regeneration of old artifacts.
 Source folders and route folders never create additional navigation groups.
 Historical v2/v3 documents pair with registered pages only at exact preserved
@@ -502,7 +496,7 @@ unmatched historical documents never become removed catalogue entries.
 The default renderer produces neutral static HTML. A consumer renderer can wrap
 the React node in its theme/context and return a complete document. Accounting,
 for example, will keep React Native Web style collection in that adapter rather
-than making React Native Web a Mokabook dependency.
+than making React Native Web a Mokly dependency.
 
 Entries, the renderer, and imported document helpers are bundled into one
 build-time graph. React and React DOM resolve from the consumer config location,
@@ -516,7 +510,7 @@ module is evaluated.
 
 Consumer module-resolution overrides are explicit and contain no React Native
 or app defaults. `packageRoots` must identify in-repository directories with a
-`package.json`; Mokabook searches their `node_modules` directories while still
+`package.json`; Mokly searches their `node_modules` directories while still
 forcing React peers to the consumer's one runtime.
 
 ## Troubleshooting
@@ -524,12 +518,12 @@ forcing React peers to the consumer's one runtime.
 - **Node crashes in `cjs_lexer::Parse`:** upgrade to a patched Node LTS release.
   Node 24.14.1 has an [upstream native-loader crash](https://github.com/nodejs/node/issues/63323)
   that can surface during worker startup/shutdown. Node 24.21.0 includes the fix;
-  this is separate from a Mokabook render or validation error.
+  this is separate from a Mokly render or validation error.
 - **No config found:** run from the consumer repository or pass `--config`
   after the command.
-- **A generated file is stale:** run `mokabook build`, inspect the diff, then
-  rerun `mokabook check`.
-- **Mokabook refuses an overwrite:** the existing HTML lacks a valid Mokabook
+- **A generated file is stale:** run `mokly build`, inspect the diff, then
+  rerun `mokly check`.
+- **Mokly refuses an overwrite:** the existing HTML lacks a valid Mokly
   ownership header. Current headers encode their source identity so every valid
   repository filename remains safe inside an HTML comment. Move an unowned file
   or choose a non-colliding route; the tool will not delete authored output.
@@ -590,7 +584,7 @@ Open the printed URL, starting at `http://127.0.0.1:4173`. Edits to example
 entries, the renderer, and configured stylesheets update the catalogue
 automatically; generated HTML is written to `examples/basic/generated/`.
 Use `npm run dev -- --port 0` to let the operating system choose a free port.
-Restart the command after changing Mokabook's own `src/` files; the CLI is rebuilt on every start.
+Restart the command after changing Mokly's own `src/` files; the CLI is rebuilt on every start.
 
 `npm run test:browser` drives the catalogue shell and on-demand screen comparisons
 in Chromium via Playwright. Comparison tests await the real generation response
@@ -598,7 +592,7 @@ before asserting the rendered UI. Static preview fixtures use ephemeral
 inspector ports to isolate concurrent workspaces. The suite uses the installed
 Chrome channel by default and honors `PLAYWRIGHT_CHANNEL` for an alternative
 browser install. Parallel
-workspaces can set `MOKABOOK_PLAYWRIGHT_PORT` to an available port.
+workspaces can set `MOKLY_PLAYWRIGHT_PORT` to an available port.
 After activating an in-frame design link, assert the outer catalogue URL before
 using the destination's controls. Frame-link enhancement updates the outer shell
 asynchronously; the click alone can return while the previous frame is visible.
@@ -655,9 +649,9 @@ prove that an entire replacement or repair has completed.
 From the consumer repository, run:
 
 ```bash
-npx mokabook export --out .context/mokabook-site
+npx mokly export --out .context/mokly-site
 # For a config under tools/, write tools/site/ and select another Git base:
-npx mokabook export --config tools/mokabook.config.ts --out site --base main
+npx mokly export --config tools/mokly.config.ts --out site --base main
 ```
 
 Export builds first, then packages the complete catalogue, real id aliases,
@@ -674,9 +668,9 @@ current assets and comparison snapshots. A package root equal to `mockupsDir`
 is rejected; use a separate public output directory. Local navigation links
 must also target existing document anchors.
 
-Deploy the directory's contents with your own hosting provider. Mokabook does
+Deploy the directory's contents with your own hosting provider. Mokly does
 not upload files or manage hosting credentials. Serve it at the HTTP(S) origin
-root with correct MIME types and directory indexes; no Mokabook process, Git,
+root with correct MIME types and directory indexes; no Mokly process, Git,
 source tree, or rewrite rules are needed there. Subpath hosting and `file://`
 catalogue browsing are unsupported. Configure shell and mutable-asset revalidation and comparison
 `Cache-Control: no-store` / `X-Content-Type-Options: nosniff` headers, and deploy
@@ -689,8 +683,8 @@ replaces only owned output and restores the previous site on pre-install
 failure when recovery is safe. If another process recreates the destination,
 both it and the captured backup are preserved for manual recovery. Generated
 fragments already written by the build step remain updated
-if the later export fails. See the [export contract](./docs/protocol/mokabook-export.md)
-and [hosting contract](./docs/protocol/mokabook-export-delivery.md).
+if the later export fails. See the [export contract](./docs/protocol/mokly-export.md)
+and [hosting contract](./docs/protocol/mokly-export-delivery.md).
 
 Output must retain the directory identity inspected before the build. Even an
 empty or correctly marked directory created later is left untouched. Capture,
@@ -705,7 +699,7 @@ comparison files are unchanged. Within one deployment, navigation remains
 progressive. Hosting must revalidate mutable files so that reload can fetch them.
 
 Concurrent exports to filesystem aliases of the same destination share one
-reservation. The internal `.mokabook-export-reservations` directory retains
+reservation. The internal `.mokly-export-reservations` directory retains
 small ownership metadata after cleanup; keep authored files out of it. Old
 hashed reservations require explicit recovery after confirming no writer is
 active. Unlisted files inside an exported site remain eligible for configured
@@ -715,7 +709,7 @@ Backup cleanup deletes only validated files. Unexpected additions stop cleanup
 and remain available for recovery; the newly installed site stays in place.
 Errors report both the original failure and any cleanup failure, including the
 remaining paths. A partially cleaned backup may no longer contain every old
-generated file. See the [recovery contract](./docs/protocol/mokabook-export-recovery.md).
+generated file. See the [recovery contract](./docs/protocol/mokly-export-recovery.md).
 
 `npm test` runs at most two suites concurrently so Git-heavy watcher and
 publication scenarios remain responsive alongside other development work.
@@ -725,7 +719,7 @@ production child-startup and individual watched-update deadlines stay separate.
 ## Preview Deployments
 
 `npm run preview:build` exports the current `examples/basic` catalogue to
-`.context/mokabook-preview`, including navigation, search, tags, metadata,
+`.context/mokly-preview`, including navigation, search, tags, metadata,
 viewport/color choices, ID redirects, resources, and whole-document pages.
 It works without Git history. Both publication options omit live updates,
 watch-only modules, events endpoints, and stale comparison artifacts.
@@ -755,7 +749,7 @@ impact and comparisons and rejects inputs changing during capture. Visitors
 load immutable packaged comparisons only after selecting a diff; refresh reads
 the same result. Pages participate in Changes but have no visual comparisons.
 Invalid options, unavailable requested history, and capture failures preserve
-the previous owned artifact. See the [publication contract](./docs/protocol/mokabook-publication.md).
+the previous owned artifact. See the [publication contract](./docs/protocol/mokly-publication.md).
 The repository builder and its artifact are not part of the npm package.
 
 The preview adapter's extensionless URLs must not collide with another file,
@@ -766,10 +760,12 @@ A symlinked scratch root is supported within the repository's safe boundaries,
 but an inner symlink cannot redirect output elsewhere. The same checks run before
 generation and before installation, and the resolved destination is pinned.
 
-The Preview workflow deploys `main` to the Cloudflare Pages project `mokabook`
-at `https://mokabook.pages.dev`. Same-repository, non-release pull requests use
+The Preview workflow keeps deploying `main` to the existing Cloudflare Pages
+project `mokabook` at `https://mokabook.pages.dev`. The infrastructure name is
+retained so the package migration does not interrupt previews. Same-repository,
+non-release pull requests use
 the stable `pr-<number>` branch alias at
-`https://pr-<number>.mokabook.pages.dev`; a sticky `<!-- mokabook-preview -->`
+`https://pr-<number>.mokabook.pages.dev`; a sticky `<!-- mokly-preview -->`
 comment reports the deployment status and link. Preview checkouts retain full
 Git history so `origin/main` and route-level changes can be resolved. Closing a
 pull request marks that comment inactive and attempts to remove its
@@ -798,9 +794,18 @@ bounded post-publish check tolerates npm metadata, tarball, dist-tag, and
 signature propagation before proving the registry artifact. A manual
 `publish_ref` retries only an existing tag. See the
 [release protocol](./docs/protocol/npm-release.md) for the current release/retry
-procedure and maintainer settings. Package versions are release-managed;
-bootstrap is completed history, not a step to repeat. Do not add an npm write
-token to GitHub.
+procedure and maintainer settings. Package versions are release-managed.
+
+The one-time [Mokly registry bootstrap](./docs/protocol/npm-bootstrap.md) is
+complete: `@mokly/mokly@0.8.0` is the accepted initial `latest` release and also
+retains the `bootstrap` tag. Do not repeat registration or reset release state.
+Later reviewed releases advance `latest`; `bootstrap` remains on `0.8.0`. The
+bootstrap record retains the isolated-build procedure and reviewed source SHA.
+Before the first automated release, complete and verify the GitHub release
+token's repository access and the
+[GitHub publishing protections](./docs/protocol/npm-github-protections.md)
+with an authorized maintainer account. The interactive bootstrap does not prove
+OIDC publishing works. Do not add an npm write token to GitHub.
 
 The synthetic fixture at [`examples/basic`](./examples/basic/README.md) proves
 custom rendering, stylesheets, id links, collections, use cases, and
@@ -809,13 +814,13 @@ Review-ignore markers without importing an application. Its screens use
 proves the consumer contract against a real cross-platform component stack.
 Its `Design` catalogue holds the approved catalogue and Changes mockups
 recorded by the
-[shell design contract](./docs/protocol/mokabook-shell-design.md).
-The [component design catalogue](./docs/protocol/mokabook-component-design.md)
+[shell design contract](./docs/protocol/mokly-shell-design.md).
+The [component design catalogue](./docs/protocol/mokly-component-design.md)
 provides the canonical mobile and desktop inventory for component pages, screen
 inspection, a collapsible icon inspector, and the complete prop-controls states.
-The [controls designs](./docs/protocol/mokabook-component-controls-design.md) show
+The [controls designs](./docs/protocol/mokly-component-controls-design.md) show
 saved variants and temporary edits, implemented by the local rendering service. The catalogue hierarchy reaches each design without
-adding navigation footers to the artboards. The [workspace designs](./docs/protocol/mokabook-component-workspace-design.md) add working viewport/theme/highlight controls, a fixed shell with a resizable inspector, entry change-status badges, and comparison evidence inside Details. Unmodified examples and ordinary Browse/tag-picker designs omit comparison tabs;
+adding navigation footers to the artboards. The [workspace designs](./docs/protocol/mokly-component-workspace-design.md) add working viewport/theme/highlight controls, a fixed shell with a resizable inspector, entry change-status badges, and comparison evidence inside Details. Unmodified examples and ordinary Browse/tag-picker designs omit comparison tabs;
 eligible comparisons retain an opaque toolbar. The desktop grip sits on its
 divider line.
 
@@ -826,7 +831,7 @@ change attribution. See the [shared design library guide](./examples/basic/entri
 
 The design mockups use `MockLink` for supported navigation and state transitions;
 the two example buttons demonstrate `MockLink asChild`. See the
-[design mockup links contract](./docs/protocol/mokabook-design-links.md) for
+[design mockup links contract](./docs/protocol/mokly-design-links.md) for
 canonical destinations and the controls that remain visual depictions.
 
 ### Key Code
@@ -857,10 +862,10 @@ canonical destinations and the controls that remain visual depictions.
 
 ### Related Docs
 
-The [registered components contract](./docs/protocol/mokabook-components.md)
-links to the [change attribution](./docs/protocol/mokabook-component-changes.md),
-[pages and inspection](./docs/protocol/mokabook-component-explorer.md), and
-[local prop controls](./docs/protocol/mokabook-component-controls.md) contracts.
+The [registered components contract](./docs/protocol/mokly-components.md)
+links to the [change attribution](./docs/protocol/mokly-component-changes.md),
+[pages and inspection](./docs/protocol/mokly-component-explorer.md), and
+[local prop controls](./docs/protocol/mokly-component-controls.md) contracts.
 Registration, saved fragments, validated props, change attribution, inspector
 pages, and local editable controls are implemented. Static exports retain saved
 variants, comparisons and read-only inspection. Development plans are indexed
@@ -872,8 +877,8 @@ in the [plans index](./plans/README.md).
 - [Styled control migration guide](./docs/migration/accounting-link-controls.md)
 - [Implementation review prompt](./docs/implementation-review-prompt.md)
 - [Implementation plans](./plans/README.md)
-- [Unified catalogue pages](./docs/protocol/mokabook-pages.md) and
-  [required breaking upgrade](./docs/protocol/mokabook-page-migration.md)
-- [Authoring source protection](./docs/protocol/mokabook-source-protection.md) and
-  [catalogue change metadata](./docs/protocol/mokabook-catalogue-changes.md)
+- [Unified catalogue pages](./docs/protocol/mokly-pages.md) and
+  [required breaking upgrade](./docs/protocol/mokly-page-migration.md)
+- [Authoring source protection](./docs/protocol/mokly-source-protection.md) and
+  [catalogue change metadata](./docs/protocol/mokly-catalogue-changes.md)
 - [Versioned Accounting page migration](./docs/migration/accounting-page-entries.md)

@@ -39,10 +39,7 @@ test("preview workflow deploys main and same-repository pull requests", async ()
     "pull-requests": "write",
   });
   assert.equal(workflow.env.CLOUDFLARE_PROJECT_NAME, "mokabook");
-  assert.equal(
-    workflow.env.MOKABOOK_COMMENT_MARKER,
-    "<!-- mokabook-preview -->",
-  );
+  assert.equal(workflow.env.MOKLY_COMMENT_MARKER, "<!-- mokly-preview -->");
   assert.deepEqual(Object.keys(workflow.jobs).sort(), [
     "close-pr",
     "deploy-main",
@@ -62,7 +59,7 @@ test("preview workflow deploys main and same-repository pull requests", async ()
   assert.equal((source.match(/npm run preview:build/g) ?? []).length, 2);
   assert.match(source, /--branch main/);
   assert.match(source, /branch="pr-\$\{\{/);
-  assert.match(source, /Mokabook preview/);
+  assert.match(source, /Mokly preview/);
   assert.match(source, /deployment_trigger\.metadata\.branch/);
   assert.equal(
     deployMain.steps.find((step) =>
@@ -92,7 +89,7 @@ test("browser checks support an isolated workspace port", async () => {
       "utf8",
     ),
   ]);
-  assert.match(config, /process\.env\["MOKABOOK_PLAYWRIGHT_PORT"\]/);
+  assert.match(config, /process\.env\["MOKLY_PLAYWRIGHT_PORT"\]/);
   assert.match(config, /globalSetup: "\.\/tests\/browser\/setup\.ts"/);
   assert.match(browseTest, /browser\.newContext\(\{\s+baseURL,/);
   assert.doesNotMatch(browseTest, /127\.0\.0\.1:4517/);

@@ -58,7 +58,7 @@ test("MockLink navigation reveals the destination and preserves shell state", as
   await other.evaluate((element: HTMLDetailsElement) => {
     element.open = true;
   });
-  await page.fill("[data-mokabook-search]", "home");
+  await page.fill("[data-mokly-search]", "home");
   await page.click('[data-filter="changed"]');
   const detailsRow = page.locator(
     'a[data-nav-row][data-route="screens/details.html"]',
@@ -76,7 +76,7 @@ test("MockLink navigation reveals the destination and preserves shell state", as
   await expect(page.locator(".mbk-crumbs")).toContainText("Nested");
   await expect(detailsRow).toHaveAttribute("aria-current", "page");
   await expect(detailsRow).toBeVisible();
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("");
+  await expect(page.locator("[data-mokly-search]")).toHaveValue("");
   await expect(page.locator('[data-filter="all"]')).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -88,12 +88,12 @@ test("MockLink navigation reveals the destination and preserves shell state", as
     await expect(ancestor).toHaveAttribute("open", "");
   }
   await expect(detailsPanel).not.toHaveAttribute("data-open", "true");
-  await expect(page.locator("[data-mokabook-stage]")).toHaveAttribute(
+  await expect(page.locator("[data-mokly-stage]")).toHaveAttribute(
     "data-viewport",
     "mobile",
   );
   await expect(page.locator("body")).toHaveAttribute(
-    "data-mokabook-color-scheme",
+    "data-mokly-color-scheme",
     "dark",
   );
   await expectFrameSource(
@@ -111,7 +111,7 @@ test("keyboard navigation retains constraints that already show the destination"
   page,
 }) => {
   await page.goto(`${navigation.url}/view/screens/home.html`);
-  await page.fill("[data-mokabook-search]", "details");
+  await page.fill("[data-mokly-search]", "details");
   await page
     .frameLocator(".mbk-frame-mobile iframe")
     .locator("#mock-link")
@@ -119,7 +119,7 @@ test("keyboard navigation retains constraints that already show the destination"
   await page.keyboard.press("Enter");
 
   await expectDestination(page);
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("details");
+  await expect(page.locator("[data-mokly-search]")).toHaveValue("details");
   await expect(page.locator('[data-filter="all"]')).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -158,7 +158,7 @@ test("editing an active filter reveals newly matching groups", async ({
   await other.locator("summary").click();
   await expect(other).not.toHaveAttribute("open", "");
 
-  await page.fill("[data-mokabook-search]", "extra");
+  await page.fill("[data-mokly-search]", "extra");
 
   await expect(other).toHaveAttribute("open", "");
   await expect(

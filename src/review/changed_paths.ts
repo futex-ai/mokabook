@@ -9,7 +9,7 @@ import {
   toPosixPath,
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { RepositoryEvidence } from "./git.js";
 
 /** Collect deterministic changes while excluding active and retained output. */
@@ -29,7 +29,7 @@ export async function reviewChangedPaths(
   ].sort();
   const changed = await git.changedPaths(commit, [
     ...excludedPaths,
-    ".mokabook-cache",
+    ".mokly-cache",
   ]);
   return [...new Set(changed)]
     .filter(
@@ -52,7 +52,7 @@ function outputPaths(repoRoot: string, outDir: string): string[] {
   ];
   for (const candidate of paths) {
     if (!isSafeRepositoryPath(candidate)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "review-invalid",
         `Review output is not repository-relative: ${candidate}`,
       );

@@ -103,6 +103,6 @@ test("outside installed dependencies remain excluded from authoring inputs", asy
   assert.equal((graph.definitions[0] as { title: string }).title, "Dependency");
   assert.deepEqual(graph.sourceFiles, [
     "entries/fixture.mockup.tsx",
-    "mokabook.config.ts",
+    "mokly.config.ts",
   ]);
 });

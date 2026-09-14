@@ -21,7 +21,7 @@ test("composition selects committed reads without building and pins repository e
         calls.push(argv[0]!);
         if (argv[0] === "rev-parse") return fixture.root;
         if (argv[0] === "merge-base") return "a".repeat(40);
-        return "notes.md\n.mokabook-cache/private\n";
+        return "notes.md\n.mokly-cache/private\n";
       },
     },
     builder: {
@@ -74,7 +74,7 @@ test("derived composition forwards cancellation and progress to the injected bui
           cacheHit: false,
           outputDir: path.join(
             fixture.root,
-            ".mokabook-cache/baselines",
+            ".mokly-cache/baselines",
             request.commit,
             "output",
           ),

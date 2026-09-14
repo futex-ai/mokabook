@@ -9,7 +9,7 @@ import {
   defineUseCase,
   MockLink,
   ReviewIgnore,
-} from "mokabook";
+} from "@mokly/mokly";
 
 import { renderComponent } from "../legacy/components.js";
 import { accent } from "../../shared/tokens.js";

@@ -18,7 +18,7 @@ for (const watch of [false, true]) {
     const fixture = await createFixture(
       validEntrySource() +
         `
-      import { definePage } from "mokabook";
+      import { definePage } from "@mokly/mokly";
       mockups.push(definePage({ id: "broken", title: "Broken", description: "Broken page",
         route: "broken.html", dependencies: [], relatedDocs: [],
         render: () => { throw new Error("unrequested page rendered"); } }));
@@ -72,7 +72,7 @@ test("demand rendering validates logical anchors without rendering navigation-on
     400,
   );
   await assert.rejects(
-    fs.access(path.join(fixture.mockupsDir, "mokabook-manifest.json")),
+    fs.access(path.join(fixture.mockupsDir, "mokly-manifest.json")),
   );
 });
 
@@ -83,7 +83,7 @@ test(
     const fixture = await createFixture(
       validEntrySource({ body: '<img src="../image.svg" alt="Example" />' }) +
         `
-    import { definePage } from "mokabook";
+    import { definePage } from "@mokly/mokly";
     mockups.push(definePage({ id: "broken", title: "Broken", description: "Broken page",
       route: "broken.html", dependencies: [], relatedDocs: [],
       render: () => { throw new Error("background cannot complete"); } }));
@@ -110,7 +110,7 @@ test(
       200,
     );
     await assert.rejects(
-      fs.access(path.join(fixture.mockupsDir, "mokabook-manifest.json")),
+      fs.access(path.join(fixture.mockupsDir, "mokly-manifest.json")),
     );
   },
 );

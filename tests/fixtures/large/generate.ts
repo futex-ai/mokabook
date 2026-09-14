@@ -61,14 +61,14 @@ export async function generateLargeFixture(
   );
   await fs.writeFile(
     path.join(root, ".gitignore"),
-    ".review/\n.mokabook-cache/\nnode_modules/\n" +
+    ".review/\n.mokly-cache/\nnode_modules/\n" +
       (generatedOutput === "derived"
-        ? "mockups/**/*.html\nmockups/mokabook-manifest.json\n"
+        ? "mockups/**/*.html\nmockups/mokly-manifest.json\n"
         : ""),
   );
   await fs.writeFile(
-    path.join(root, "mokabook.config.ts"),
-    `import { defineConfig } from "mokabook";
+    path.join(root, "mokly.config.ts"),
+    `import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   generatedOutput: ${JSON.stringify(generatedOutput)},
   repoRoot: ".", entriesDir: "entries", mockupsDir: "mockups", renderer: "renderer.tsx",
@@ -77,14 +77,14 @@ export default defineConfig({
   stylesheets: [{ match: "**/*.html", stylesheets: ["assets/catalogue.css"] }],
   review: { base: "main", outDir: ".review"${
     generatedOutput === "derived"
-      ? ', baselineBuild: [["npm", "ci"], ["npx", "--no-install", "mokabook", "build", "--config", "mokabook.config.ts"]]'
+      ? ', baselineBuild: [["npm", "ci"], ["npx", "--no-install", "mokly", "build", "--config", "mokly.config.ts"]]'
       : ""
   } }
 });\n`,
   );
   await fs.writeFile(
     path.join(entries, "catalogue.mockup.tsx"),
-    `import { defineCollection } from "mokabook";
+    `import { defineCollection } from "@mokly/mokly";
 export const mockups = [defineCollection({ id: "large", title: "Large catalogue", description: "Synthetic product areas", dependencies: [], relatedDocs: ["notes.md"], childIds: ${JSON.stringify(areas)} })];\n`,
   );
   for (const id of areas) {
@@ -100,7 +100,7 @@ export const mockups = createArea(${JSON.stringify(id)}, ${size.screens}, ${size
   return {
     root,
     generatedOutput,
-    configPath: path.join(root, "mokabook.config.ts"),
+    configPath: path.join(root, "mokly.config.ts"),
     size,
     routes: size.areas * (size.screens + 2 + flows + 1),
     documents: size.areas * (size.screens * 4 + 2 * 3 * 4 + 1),

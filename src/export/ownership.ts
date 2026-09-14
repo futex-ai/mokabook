@@ -5,7 +5,7 @@ import { isSafeRepositoryPath } from "../config/paths.js";
 import { exportError } from "./error.js";
 
 /** Public-safe proof that a directory was installed by the exporter. */
-export const EXPORT_MARKER = ".mokabook-export-artifact";
+export const EXPORT_MARKER = ".mokly-export-artifact";
 
 /** Versioned list of files the exporter is allowed to replace. */
 export interface ExportOwnership {

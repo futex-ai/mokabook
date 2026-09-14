@@ -61,10 +61,10 @@ test("legacy hashed reservations must be explicitly recovered", async (context) 
     .update(output)
     .digest("hex")
     .slice(0, 20);
-  const reservation = path.join(fixture.root, `.mokabook-export-${id}.lock`);
+  const reservation = path.join(fixture.root, `.mokly-export-${id}.lock`);
   await fs.promises.mkdir(reservation);
   await fs.promises.writeFile(
-    path.join(reservation, ".mokabook-export-transaction"),
+    path.join(reservation, ".mokly-export-transaction"),
     JSON.stringify({ schemaVersion: 1, output: "site" }),
   );
   await assert.rejects(

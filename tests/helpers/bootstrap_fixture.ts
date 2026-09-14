@@ -1,0 +1,97 @@
+import { execFile } from "node:child_process";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { promisify } from "node:util";
+
+import { repositoryRoot } from "./fixture.js";
+import { packageReport, type PackageReport } from "./release_fixture.js";
+
+const execute = promisify(execFile);
+
+export interface BootstrapReport extends PackageReport {
+  filename: string;
+  sourceCommit: string;
+  sourceTree: string;
+}
+
+interface BootstrapModule {
+  createBootstrapArchive(options: {
+    repositoryRoot: string;
+    expectedCommit: string;
+    destination: string;
+  }): Promise<{ archivePath: string; report: BootstrapReport }>;
+}
+
+export async function bootstrapModule(): Promise<BootstrapModule> {
+  return (await import(
+    pathToFileURL(
+      path.join(repositoryRoot, "scripts/release/bootstrap_archive.mjs"),
+    ).href
+  )) as BootstrapModule;
+}
+
+export async function bootstrapFixture(
+  t: { after(fn: () => Promise<void>): void },
+  options: { name?: string; version?: string; afterBuild?: string } = {},
+) {
+  const temporaryRoot = await fs.mkdtemp(
+    path.join(os.tmpdir(), "mokly-bootstrap-test-"),
+  );
+  t.after(() => fs.rm(temporaryRoot, { force: true, recursive: true }));
+  const root = path.join(temporaryRoot, "repository");
+  const destination = path.join(temporaryRoot, "artifact");
+  await fs.mkdir(root);
+  const packageJson = {
+    name: options.name ?? "@mokly/mokly",
+    version: options.version ?? "0.8.0",
+    type: "module",
+    license: "MIT",
+    bin: { mokly: "./dist/cli/bin.js" },
+    files: ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+    scripts: { prepack: "node build.mjs" },
+  };
+  const distFiles = packageReport()
+    .files.map((file) => file.path)
+    .filter((file) => file.startsWith("dist/"));
+  for (const [name, content] of Object.entries({
+    "package.json": JSON.stringify(packageJson),
+    "package-lock.json": JSON.stringify({
+      name: packageJson.name,
+      version: packageJson.version,
+      lockfileVersion: 3,
+      requires: true,
+      packages: { "": packageJson },
+    }),
+    ".gitignore": "dist/\nnode_modules/\n.context/\n",
+    "README.md": "# Bootstrap test fixture\n",
+    LICENSE: "MIT\n",
+    "CHANGELOG.md": "# Test release\n",
+    "source.txt": "reviewed source\n",
+    "build.mjs": `import fs from "node:fs/promises";
+import path from "node:path";
+const source = await fs.readFile("source.txt", "utf8");
+for (const file of ${JSON.stringify(distFiles)}) {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, source);
+}
+${options.afterBuild ?? ""}`,
+  }))
+    await fs.writeFile(path.join(root, name), content);
+  const git = async (...args: string[]) =>
+    (await execute("git", args, { cwd: root })).stdout.trim();
+  await git("init", "--initial-branch=main");
+  await git("config", "user.email", "bootstrap-test@example.com");
+  await git("config", "user.name", "Bootstrap Test");
+  await git("add", "-A");
+  await git(
+    "-c",
+    "core.hooksPath=/dev/null",
+    "commit",
+    "-m",
+    "test: reviewed bootstrap source",
+  );
+  const expectedCommit = await git("rev-parse", "HEAD");
+  return { root, destination, expectedCommit, git };
+}

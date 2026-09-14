@@ -18,7 +18,7 @@ import type { BaselineProcessRunner } from "../dist/baseline/types.js";
 
 /** Exercise the actual host boundaries only here; unit tests use an injected host. */
 test("real Git baseline lifecycle: reuse, interruption, failure and confinement", async (t) => {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "mokabook-baseline-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "mokly-baseline-"));
   t.after(() => fs.rm(root, { recursive: true, force: true }));
   const git = (...args: string[]) =>
     execFileSync("git", args, {
@@ -35,10 +35,10 @@ test("real Git baseline lifecycle: reuse, interruption, failure and confinement"
     'export const title = "Historical page";\n',
   );
   await fs.writeFile(
-    path.join(root, "mokabook.config.ts"),
+    path.join(root, "mokly.config.ts"),
     'export default { entriesDir: "entries", mockupsDir: "generated/catalogue", generatedOutput: "derived" };\n',
   );
-  await fs.writeFile(path.join(root, ".gitignore"), ".mokabook-cache/\n");
+  await fs.writeFile(path.join(root, ".gitignore"), ".mokly-cache/\n");
   await fs.writeFile(path.join(root, "baseline-build.cjs"), buildScript);
   await fs.symlink("baseline-build.cjs", path.join(root, "build-alias"));
   const commit = async (mode: string) => {
@@ -69,7 +69,7 @@ test("real Git baseline lifecycle: reuse, interruption, failure and confinement"
     {
       environment: {
         ...process.env,
-        MOKABOOK_TEST_BASELINE_SECRET: "must-not-cross",
+        MOKLY_TEST_BASELINE_SECRET: "must-not-cross",
       },
     },
   );
@@ -200,7 +200,7 @@ test("real Git baseline lifecycle: reuse, interruption, failure and confinement"
 });
 
 const buildScript = `const fs = require("node:fs");
-if (process.env.MOKABOOK_TEST_BASELINE_SECRET) throw new Error("Leaked environment");
+if (process.env.MOKLY_TEST_BASELINE_SECRET) throw new Error("Leaked environment");
 const mode = JSON.parse(fs.readFileSync("catalogue.json", "utf8")).mode;
 if (mode === "wait") {
   require("node:child_process").spawn(process.execPath, ["-e", 'process.on("SIGTERM", () => {}); require("node:fs").writeFileSync("descendant.pid", String(process.pid)); setInterval(() => {}, 1000);'], { stdio: "inherit" });
@@ -213,8 +213,8 @@ if (mode === "wait") {
   const root = "generated/catalogue";
   fs.mkdirSync(root, { recursive: true });
   const sourcePath = "entries/page.mockup.tsx";
-  fs.writeFileSync(root + "/mokabook-manifest.json", JSON.stringify({
-    schemaVersion: 5, generatedBy: "mokabook", sourceFiles: ["catalogue.json", sourcePath, "mokabook.config.ts"],
+  fs.writeFileSync(root + "/mokly-manifest.json", JSON.stringify({
+    schemaVersion: 5, generatedBy: "mokly", sourceFiles: ["catalogue.json", sourcePath, "mokly.config.ts"],
     entries: [{ id: "page", kind: "page", route: "page.html", title: "Historical page", description: "A tiny consumer catalogue", navPath: [], sourcePath, relatedDocs: [], dependencies: [sourcePath], declaredDependencies: [] }]
   }));
   fs.writeFileSync(root + "/page.html", "<!doctype html><html><body>Historical page</body></html>");

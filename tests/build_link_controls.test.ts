@@ -15,7 +15,7 @@ import {
 function source(body: string): string {
   return validEntrySource({ body }).replace(
     'import React from "react";',
-    'import React from "react"; import { MockLink } from "mokabook";',
+    'import React from "react"; import { MockLink } from "@mokly/mokly";',
   );
 }
 
@@ -40,7 +40,7 @@ test("child controls become styled native links in every generated view", async 
       assert.match(html, /aria-label="Continue preparing"/);
       assert.match(html, /<span>Continue<\/span><svg>/);
       assert.ok(html.includes(`href="./details.${viewport}${scheme}.html"`));
-      assert.match(html, /data-mokabook-link="details"/);
+      assert.match(html, /data-mokly-link="details"/);
       assert.match(html, /:focus-visible/);
       assert.doesNotMatch(
         html,
@@ -86,7 +86,7 @@ for (const body of [
     assert.match(html, /data-nav-href="\.\/details\.mobile\.html"/);
     assert.doesNotMatch(
       html,
-      /data-mokabook-link=|(?<![\w-])href=|link-control-styles/,
+      /data-mokly-link=|(?<![\w-])href=|link-control-styles/,
     );
     if (body.startsWith("<button")) assert.match(html, /type="button"/);
   });
@@ -155,7 +155,7 @@ test("child links retain use-case identity, fragments, and light fallback", asyn
   const dark =
     compilation.outputs.get("screens/details.desktop.dark.html") ?? "";
   assert.match(dark, /href="\.\/home\.desktop\.html#summary"/);
-  assert.match(dark, /data-mokabook-link="tour#summary"/);
+  assert.match(dark, /data-mokly-link="tour#summary"/);
   const content = await fs.promises.readFile(fixture.entryPath, "utf8");
   await fs.promises.writeFile(
     fixture.entryPath,
@@ -186,7 +186,7 @@ export default input => '<!doctype html><html><body data-custom="yes">'+renderTo
   await fs.promises.mkdir(path.join(fixture.root, "legacy"));
   await fs.promises.writeFile(
     path.join(fixture.root, "legacy/old.source.tsx"),
-    `import { renderToStaticMarkup } from "react-dom/server"; import { MockLink } from "mokabook";
+    `import { renderToStaticMarkup } from "react-dom/server"; import { MockLink } from "@mokly/mokly";
 export const source = () => '<html><body>'+renderToStaticMarkup(<MockLink asChild to="details"><button>Legacy</button></MockLink>)+'</body></html>';`,
   );
   const transformer = path.join(fixture.root, "transform.ts");
@@ -207,12 +207,12 @@ return input.content; };`,
   for (const route of ["screens/home.mobile.html", "old.html"]) {
     assert.match(
       compilation.outputs.get(route) ?? "",
-      /data-mokabook-link="details"/,
+      /data-mokly-link="details"/,
     );
   }
   await fs.promises.writeFile(
     transformer,
-    `export default input => input.content.replace('data-mokabook-link="details"', 'data-mokabook-link="home"');`,
+    `export default input => input.content.replace('data-mokly-link="details"', 'data-mokly-link="home"');`,
   );
   await assert.rejects(
     async () => compileCatalogue(config),
@@ -220,7 +220,7 @@ return input.content; };`,
   );
   await fs.promises.writeFile(
     transformer,
-    `export default input => input.content.replace('</body>', '<template data-mokabook-link-child-end=""></template></body>');`,
+    `export default input => input.content.replace('</body>', '<template data-mokly-link-child-end=""></template></body>');`,
   );
   await assert.rejects(
     async () => compileCatalogue(config),

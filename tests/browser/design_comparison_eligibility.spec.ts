@@ -9,7 +9,7 @@ import type { ManifestV5 } from "../../dist/registry/types.js";
 
 const directory = path.join(repositoryRoot, "examples/basic/generated");
 const manifest = JSON.parse(
-  fs.readFileSync(path.join(directory, "mokabook-manifest.json"), "utf8"),
+  fs.readFileSync(path.join(directory, "mokly-manifest.json"), "utf8"),
 ) as ManifestV5;
 const changedDesigns = new Set([
   "design-changes-current",

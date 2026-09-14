@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import { ActionPropValues, actionVariants } from "./action_props.js";
 import { ComparisonDetails } from "./comparison_details.js";

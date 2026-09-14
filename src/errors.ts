@@ -2,7 +2,7 @@ import type { BaselineErrorCode } from "./baseline/errors.js";
 
 /** Stable error codes callers and CLI formatting may branch on. */
 
-export type MokabookErrorCode =
+export type MoklyErrorCode =
   | BaselineErrorCode
   | "build-invalid"
   | "cli-invalid"
@@ -14,17 +14,13 @@ export type MokabookErrorCode =
   | "review-invalid"
   | "server-failed";
 
-/** Typed user-facing failure from a Mokabook boundary. */
-export class MokabookError extends Error {
-  readonly code: MokabookErrorCode;
+/** Typed user-facing failure from a Mokly boundary. */
+export class MoklyError extends Error {
+  readonly code: MoklyErrorCode;
 
-  constructor(
-    code: MokabookErrorCode,
-    message: string,
-    options?: ErrorOptions,
-  ) {
-    super(`[mokabook/${code}] ${message}`, options);
-    this.name = "MokabookError";
+  constructor(code: MoklyErrorCode, message: string, options?: ErrorOptions) {
+    super(`[mokly/${code}] ${message}`, options);
+    this.name = "MoklyError";
     this.code = code;
   }
 }

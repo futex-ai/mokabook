@@ -99,7 +99,7 @@ test("baseline commands receive only bounded environment variables and exact arg
       LC_ALL: "C",
       TMPDIR: "tmp",
       CI: "0",
-      MOKABOOK_BASELINE_COMMIT: "other",
+      MOKLY_BASELINE_COMMIT: "other",
       NODE_OPTIONS: "--require injected",
       npm_config_token: "secret",
       GIT_DIR: "elsewhere",
@@ -114,7 +114,7 @@ test("baseline commands receive only bounded environment variables and exact arg
     LC_ALL: "C",
     TMPDIR: "tmp",
     CI: "1",
-    MOKABOOK_BASELINE_COMMIT: "commit",
+    MOKLY_BASELINE_COMMIT: "commit",
   });
   const { runner } = baselineFixture();
   const received: string[][] = [];

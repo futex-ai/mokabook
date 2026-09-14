@@ -94,7 +94,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       /\.dark(?:\.html)?#details$/,
     );
     const back = frame
-      .locator('a[data-mokabook-link-control="button"]')
+      .locator('a[data-mokly-link-control="button"]')
       .filter({ hasText: "Return to welcome" });
     await focusDesignLink(back);
     await page.keyboard.press("Enter");

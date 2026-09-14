@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { MokabookError, type MokabookErrorCode } from "../errors.js";
-import { MOKABOOK_CACHE } from "./cache_paths.js";
+import { MoklyError, type MoklyErrorCode } from "../errors.js";
+import { MOKLY_CACHE } from "./cache_paths.js";
 import { isInside, projectRealPath, resolveInside } from "./paths.js";
 import { requireString } from "./rules.js";
 
@@ -23,7 +23,7 @@ export function optionalModule(
   requireString(value, label);
   const resolved = resolveInside(repoRoot, configDir, value, label);
   if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `${label} does not name a file: ${value}`,
     );
@@ -35,7 +35,7 @@ export function optionalModule(
 /** Require a configured directory to exist. */
 export function requireDirectory(value: string, label: string): void {
   if (!fs.existsSync(value) || !fs.statSync(value).isDirectory()) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `${label} does not name a directory: ${value}`,
     );
@@ -51,7 +51,7 @@ export function validateSourceRoots(
   const realEntries = requireRealInside(repoRoot, entriesDir, "entriesDir");
   const realMockups = requireRealInside(repoRoot, mockupsDir, "mockupsDir");
   if (entriesDir === mockupsDir || realEntries === realMockups)
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       "authored source directories must not equal mockupsDir",
     );
@@ -62,13 +62,13 @@ export function validateReviewOut(
   reviewOut: string,
   boundary: ReviewOutBoundary,
   label = "review.outDir",
-  code: MokabookErrorCode = "config-invalid",
+  code: MoklyErrorCode = "config-invalid",
 ): void {
   const { entriesDir, mockupsDir, repoRoot } = boundary;
   const protectedRoots = [
     mockupsDir,
     entriesDir,
-    path.join(repoRoot, MOKABOOK_CACHE),
+    path.join(repoRoot, MOKLY_CACHE),
   ];
   const realRepoRoot = fs.realpathSync(repoRoot);
   const realReviewOut = configuredRealPath(reviewOut, label, code);
@@ -93,12 +93,12 @@ export function validateReviewOut(
     )
   ) {
     if (!isInside(realRepoRoot, realReviewOut)) {
-      throw new MokabookError(
+      throw new MoklyError(
         code,
         `${label} resolves outside repoRoot through a symlink`,
       );
     }
-    throw new MokabookError(
+    throw new MoklyError(
       code,
       `${label} must not overlap repository, mockup, source, or cache roots`,
     );
@@ -113,7 +113,7 @@ function requireRealInside(
   const realRepoRoot = fs.realpathSync(repoRoot);
   const realCandidate = configuredRealPath(candidate, label);
   if (!isInside(realRepoRoot, realCandidate)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `${label} resolves outside repoRoot through a symlink`,
     );
@@ -124,12 +124,12 @@ function requireRealInside(
 function configuredRealPath(
   candidate: string,
   label: string,
-  code: MokabookErrorCode = "config-invalid",
+  code: MoklyErrorCode = "config-invalid",
 ): string {
   try {
     return projectRealPath(candidate);
   } catch (cause) {
-    throw new MokabookError(
+    throw new MoklyError(
       code,
       `${label} has an invalid filesystem path: ${candidate}`,
       { cause },

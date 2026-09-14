@@ -27,15 +27,15 @@ test("logical hrefs mark every supported native link owner", async (context) => 
   const compilation = await compileCatalogue(await loadConfig(fixture.root));
   const mobile = compilation.outputs.get("screens/home.mobile.html") ?? "";
 
-  assert.equal((mobile.match(/data-mokabook-link="details"/g) ?? []).length, 4);
+  assert.equal((mobile.match(/data-mokly-link="details"/g) ?? []).length, 4);
   assert.match(
     mobile,
     /<span data-nav-href="\.\/details\.mobile\.html">Metadata<\/span>/,
   );
-  assert.doesNotMatch(mobile, /<span[^>]+data-mokabook-link="details"/);
+  assert.doesNotMatch(mobile, /<span[^>]+data-mokly-link="details"/);
   assert.match(
     mobile,
-    /data-nav-href="\.\/details\.mobile\.html" href="\.\/details\.mobile\.html"[^>]+data-mokabook-link="details"/,
+    /data-nav-href="\.\/details\.mobile\.html" href="\.\/details\.mobile\.html"[^>]+data-mokly-link="details"/,
   );
 });
 
@@ -78,7 +78,7 @@ test("metadata-only logical references stay marker-free on any owner", async (co
     (mobile.match(/data-nav-href="\.\/details\.mobile\.html"/g) ?? []).length,
     4,
   );
-  assert.doesNotMatch(mobile, /data-mokabook-link/);
+  assert.doesNotMatch(mobile, /data-mokly-link/);
 });
 
 test("activatable links reject base URLs but retain base targets", async (context) => {
@@ -103,7 +103,7 @@ test("activatable links reject base URLs but retain base targets", async (contex
   const compilation = await compileCatalogue(await loadConfig(fixture.root));
   const mobile = compilation.outputs.get("screens/home.mobile.html") ?? "";
   assert.match(mobile, /<base target="catalogue"/);
-  assert.match(mobile, /data-mokabook-link="details"/);
+  assert.match(mobile, /data-mokly-link="details"/);
 
   await fs.promises.writeFile(
     fixture.entryPath,
@@ -128,7 +128,7 @@ test("logical fragments require one anchor across every target view", async (con
     "screens/home.desktop.dark.html",
   ]) {
     const output = compilation.outputs.get(route) ?? "";
-    assert.match(output, /data-mokabook-link="details#section"/);
+    assert.match(output, /data-mokly-link="details#section"/);
     assert.match(output, /href="\.\/details\.[^"]+\.html#section"/);
   }
 
@@ -146,14 +146,14 @@ test("logical link syntax and reserved metadata fail closed", async () => {
   for (const body of [
     `<a href="mock:details#1section">Details</a>`,
     `<a href="mock:details#section%20name">Details</a>`,
-    `<a data-mokabook-link="details" href="mock:details">Details</a>`,
+    `<a data-mokly-link="details" href="mock:details">Details</a>`,
     `<a data-nav-href="mock:home" href="mock:details">Conflict</a>`,
   ]) {
     const fixture = await createFixture(validEntrySource({ body }));
     try {
       await assert.rejects(
         async () => compileCatalogue(await loadConfig(fixture.root)),
-        /malformed logical link|reserved data-mokabook-link|conflicting logical destinations/,
+        /malformed logical link|reserved data-mokly-link|conflicting logical destinations/,
       );
     } finally {
       await removeFixture(fixture);
@@ -171,9 +171,9 @@ test("logical destinations include use cases and reject non-routed ids", async (
   const light = compilation.outputs.get("screens/home.mobile.html") ?? "";
   const dark = compilation.outputs.get("screens/home.desktop.dark.html") ?? "";
   assert.match(light, /href="\.\/details\.mobile\.html#section"/);
-  assert.match(light, /data-mokabook-link="tour#section"/);
+  assert.match(light, /data-mokly-link="tour#section"/);
   assert.match(dark, /href="\.\/details\.desktop\.html#section"/);
-  assert.match(dark, /data-mokabook-link="tour#section"/);
+  assert.match(dark, /data-mokly-link="tour#section"/);
 
   for (const destination of ["missing", "fixture"]) {
     await fs.promises.writeFile(
@@ -190,7 +190,7 @@ test("logical destinations include use cases and reject non-routed ids", async (
 });
 
 function fragmentSource(mobileAnchor: string, desktopAnchor: string): string {
-  return `import { defineScreen } from "mokabook";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], navPath: ["Fixture"], relatedDocs: [], useCaseIds: [] };
 export const mockups = [
@@ -201,7 +201,7 @@ export const mockups = [
 }
 
 function useCaseFragmentSource(): string {
-  return `import { defineCollection, defineScreen, defineUseCase } from "mokabook";
+  return `import { defineCollection, defineScreen, defineUseCase } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], navPath: ["Fixture"], relatedDocs: [] };
 export const mockups = [

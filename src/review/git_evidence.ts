@@ -1,4 +1,4 @@
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { RepositoryEvidence } from "./git.js";
 import { GitCommands } from "./git_commands.js";
 import { assertGitPath } from "./git_path.js";
@@ -18,7 +18,7 @@ export class GitRepositoryEvidence
     );
     const commit = output.trim();
     if (!/^[a-f0-9]{40,64}$/.test(commit)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "git-failed",
         `Git returned an invalid merge base for ${baseReference} and ${headReference}`,
       );
@@ -30,7 +30,7 @@ export class GitRepositoryEvidence
     commit: string,
     excludedPaths: readonly string[] = [],
   ): Promise<readonly string[]> {
-    excludedPaths = [...new Set([".mokabook-cache", ...excludedPaths])];
+    excludedPaths = [...new Set([".mokly-cache", ...excludedPaths])];
     for (const excluded of excludedPaths) assertGitPath(excluded);
     const pathspecs = excludedPaths.map(
       (excluded) => `:(exclude,top,literal)${excluded}`,

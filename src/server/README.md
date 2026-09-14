@@ -39,4 +39,4 @@ reader replacement and the transitive child-module boundary; `derived_serve`
 tests exercise both parent compositions.
 
 See [review boundaries](../review/README.md), [baseline building](../baseline/README.md),
-and the [derived baseline protocol](../../docs/protocol/mokabook-derived-baselines.md).
+and the [derived baseline protocol](../../docs/protocol/mokly-derived-baselines.md).

@@ -1,24 +1,24 @@
 {
-  "name": "mokabook",
+  "name": "@mokly/mokly",
   "version": "0.8.0",
   "description": "App-independent static mockup catalogues, development browsing, and on-demand visual comparisons.",
   "type": "module",
   "license": "MIT",
-  "author": "Firna",
-  "homepage": "https://github.com/futex-ai/mokabook#readme",
+  "author": "Mokly",
+  "homepage": "https://github.com/mokly-ai/mokly#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/futex-ai/mokabook.git"
+    "url": "git+https://github.com/mokly-ai/mokly.git"
   },
   "bugs": {
-    "url": "https://github.com/futex-ai/mokabook/issues"
+    "url": "https://github.com/mokly-ai/mokly/issues"
   },
   "packageManager": "npm@11.7.0",
   "engines": {
     "node": ">=22.14.0"
   },
   "bin": {
-    "mokabook": "./dist/cli/bin.js"
+    "mokly": "./dist/cli/bin.js"
   },
   "exports": {
     ".": {
@@ -41,12 +41,12 @@
     "build": "tsc --project tsconfig.build.json && node scripts/copy-assets.mjs",
     "clean": "node scripts/clean.mjs",
     "dependencies:check": "npm audit --audit-level=low --include=prod --include=dev --include=optional --include=peer",
-    "dev": "npm run build && node dist/cli/bin.js serve --config examples/basic/mokabook.config.ts",
+    "dev": "npm run build && node dist/cli/bin.js serve --config examples/basic/mokly.config.ts",
     "dev:large": "node scripts/large/cli.mjs serve",
     "fixture:large": "npm run build && tsx scripts/large/cli.mjs generate",
     "benchmark:large": "node scripts/large/cli.mjs benchmark",
-    "example:build": "node dist/cli/bin.js build --config examples/basic/mokabook.config.ts",
-    "example:check": "node dist/cli/bin.js check --config examples/basic/mokabook.config.ts",
+    "example:build": "node dist/cli/bin.js build --config examples/basic/mokly.config.ts",
+    "example:check": "node dist/cli/bin.js check --config examples/basic/mokly.config.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",

@@ -86,7 +86,7 @@ export interface ManifestLegacyPage {
 /** Canonical generated catalogue schema. */
 export interface ManifestV3 {
   entries: readonly Exclude<ManifestEntry, ManifestComponent | ManifestPage>[];
-  generatedBy: "mokabook";
+  generatedBy: "mokly";
   legacyPages: readonly ManifestLegacyPage[];
   schemaVersion: 3;
 }
@@ -94,7 +94,7 @@ export interface ManifestV3 {
 /** Historical whole-document format from the page migration branch. */
 export interface ManifestPagesV4 {
   entries: readonly Exclude<ManifestEntry, ManifestComponent>[];
-  generatedBy: "mokabook";
+  generatedBy: "mokly";
   schemaVersion: 4;
   sourceFiles: readonly string[];
 }
@@ -106,7 +106,7 @@ export interface ManifestScreenV4 extends ManifestScreen {
 }
 export interface ManifestV4 {
   entries: readonly ManifestEntryV4[];
-  generatedBy: "mokabook";
+  generatedBy: "mokly";
   legacyPages: readonly ManifestLegacyPage[];
   schemaVersion: 4;
 }
@@ -120,7 +120,7 @@ export interface ManifestV5 {
   entries: readonly (ManifestEntry & {
     declaredDependencies: readonly string[];
   })[];
-  generatedBy: "mokabook";
+  generatedBy: "mokly";
   schemaVersion: 5;
   sourceFiles: readonly string[];
 }

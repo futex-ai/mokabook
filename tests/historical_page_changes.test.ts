@@ -27,7 +27,7 @@ for (const version of [2, 3] as const) {
         change === "one-sided-ignore"
           ? {
               document: pageDocument.replace(
-                /<!--mokabook-review-ignore:[^>]*-->/g,
+                /<!--mokly-review-ignore:[^>]*-->/g,
                 "",
               ),
             }

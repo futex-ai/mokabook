@@ -8,7 +8,7 @@ import { createContext, type ReactNode, useContext } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { AppRegistry } from "react-native-web";
 
-import type { RenderInput } from "mokabook";
+import type { RenderInput } from "@mokly/mokly";
 
 import { LibraryHost } from "./entries/design/library/host.js";
 import {
@@ -34,9 +34,9 @@ function RenderBody({ children }: { children: ReactNode }) {
 }
 
 function collectNativeStyles(): string {
-  AppRegistry.registerComponent("__mokabook_styles__", () => NullComponent);
+  AppRegistry.registerComponent("__mokly_styles__", () => NullComponent);
   return renderToStaticMarkup(
-    AppRegistry.getApplication("__mokabook_styles__", {}).getStyleElement(),
+    AppRegistry.getApplication("__mokly_styles__", {}).getStyleElement(),
   );
 }
 

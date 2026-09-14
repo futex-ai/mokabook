@@ -16,7 +16,7 @@ concurrency:
 
 env:
   CLOUDFLARE_PROJECT_NAME: mokabook
-  MOKABOOK_COMMENT_MARKER: "<!-- mokabook-preview -->"
+  MOKLY_COMMENT_MARKER: "<!-- mokly-preview -->"
 
 jobs:
   deploy-main:
@@ -50,10 +50,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
       - name: Install dependencies
         run: npm ci
-      - name: Build Mokabook preview
+      - name: Build Mokly preview
         run: npm run preview:build
       - name: Deploy main preview
-        run: npx --no-install wrangler pages deploy .context/mokabook-preview --project-name "${CLOUDFLARE_PROJECT_NAME}" --branch main
+        run: npx --no-install wrangler pages deploy .context/mokly-preview --project-name "${CLOUDFLARE_PROJECT_NAME}" --branch main
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
@@ -105,13 +105,13 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
       - name: Install dependencies
         run: npm ci
-      - name: Build Mokabook preview
+      - name: Build Mokly preview
         run: npm run preview:build -- --include-changes --base origin/main
-      - name: Deploy Mokabook preview
+      - name: Deploy Mokly preview
         id: deploy
         run: |
           branch="pr-${{ github.event.pull_request.number }}"
-          npx --no-install wrangler pages deploy .context/mokabook-preview \
+          npx --no-install wrangler pages deploy .context/mokly-preview \
             --project-name "${CLOUDFLARE_PROJECT_NAME}" \
             --branch "${branch}"
           echo "branch=${branch}" >> "${GITHUB_OUTPUT}"
@@ -128,10 +128,10 @@ jobs:
           PREVIEW_URL: ${{ steps.deploy.outputs.url }}
         with:
           script: |
-            const marker = process.env.MOKABOOK_COMMENT_MARKER;
+            const marker = process.env.MOKLY_COMMENT_MARKER;
             const lines = [
               marker,
-              "### Mokabook preview",
+              "### Mokly preview",
               "",
               "Status: **" + process.env.DEPLOY_STATUS + "**",
               "- Preview: " + (process.env.PREVIEW_URL || "unavailable"),
@@ -256,10 +256,10 @@ jobs:
           PREVIEW_BRANCH: pr-${{ github.event.pull_request.number }}
         with:
           script: |
-            const marker = process.env.MOKABOOK_COMMENT_MARKER;
+            const marker = process.env.MOKLY_COMMENT_MARKER;
             const lines = [
               marker,
-              "### Mokabook preview",
+              "### Mokly preview",
               "",
               "Status: **inactive**",
               "- Cloudflare branch: " + process.env.PREVIEW_BRANCH,

@@ -1,10 +1,10 @@
 import path from "node:path";
 
-import { MOKABOOK_CACHE } from "../config/cache_paths.js";
+import { MOKLY_CACHE } from "../config/cache_paths.js";
 import { requireGitTopLevel } from "../config/git.js";
 import { projectRealPath, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import type { GitCommandRunner } from "../review/git.js";
 import type { Compilation } from "./compile.js";
 
@@ -37,7 +37,7 @@ export class GitTrackedGeneratedOutput implements TrackedGeneratedOutput {
           "--full-name",
           "-z",
           "--",
-          ...[...prefixes, MOKABOOK_CACHE].map(
+          ...[...prefixes, MOKLY_CACHE].map(
             (prefix) => `:(top,literal)${prefix}`,
           ),
         ])
@@ -55,22 +55,22 @@ export class GitTrackedGeneratedOutput implements TrackedGeneratedOutput {
         .filter(
           (name) =>
             generated.has(name) ||
-            name === MOKABOOK_CACHE ||
-            name.startsWith(`${MOKABOOK_CACHE}/`),
+            name === MOKLY_CACHE ||
+            name.startsWith(`${MOKLY_CACHE}/`),
         )
         .sort();
       if (!invalid.length) return;
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
-        `derived output must not be tracked by Git:\n${invalid.map((name) => `  - ${name}`).join("\n")}\nRemove these paths from the index with git rm --cached and add these rules to .gitignore:\n${invalid.map((name) => `/${name}`).join("\n")}\n/${MOKABOOK_CACHE}/`,
+        `derived output must not be tracked by Git:\n${invalid.map((name) => `  - ${name}`).join("\n")}\nRemove these paths from the index with git rm --cached and add these rules to .gitignore:\n${invalid.map((name) => `/${name}`).join("\n")}\n/${MOKLY_CACHE}/`,
       );
     } catch (error) {
       if (
-        error instanceof MokabookError &&
+        error instanceof MoklyError &&
         (error.code === "build-invalid" || error.code === "config-invalid")
       )
         throw error;
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `could not check tracked generated output: ${errorMessage(error)}`,
         { cause: error },

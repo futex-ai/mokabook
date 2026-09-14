@@ -48,7 +48,7 @@ test("baseline rebuild adopts once and a cache hit executes no commands", async 
     PATH: "/bin",
     HOME: "/home/test",
     CI: "1",
-    MOKABOOK_BASELINE_COMMIT: request.commit,
+    MOKLY_BASELINE_COMMIT: request.commit,
   });
   assert.deepEqual(calls[2]?.argv, request.commands[0]);
 });
@@ -225,7 +225,7 @@ for (const outcome of ["missing", "invalid", "symlink"] as const)
     runner.run = async (command) => {
       const result = await run(command);
       if (command.argv[0] !== "git") {
-        const file = path.join(command.cwd, "mockups/mokabook-manifest.json");
+        const file = path.join(command.cwd, "mockups/mokly-manifest.json");
         await fs.remove(file);
         if (outcome !== "missing")
           fs.put(
@@ -255,7 +255,7 @@ test("history failures and unsafe cache ancestors never run consumer commands", 
   await assert.rejects(fixture.builder.build(fixture.request), {
     code: "baseline-history-unavailable",
   });
-  fixture.fs.put("/repo/.mokabook-cache", "symlink");
+  fixture.fs.put("/repo/.mokly-cache", "symlink");
   await assert.rejects(fixture.builder.build(fixture.request), {
     code: "baseline-output-invalid",
   });

@@ -193,7 +193,7 @@ test("new evidence cancels renewal in place and the next comparison uses fresh s
 }) => {
   const requests: string[] = [];
   page.on("request", (request) => {
-    if (new URL(request.url()).pathname === "/__mokabook/diffs/review.json")
+    if (new URL(request.url()).pathname === "/__mokly/diffs/review.json")
       requests.push(request.url());
   });
   await page.goto(`${server.url}/view/screens/home.html`);
@@ -205,9 +205,7 @@ test("new evidence cancels renewal in place and the next comparison uses fresh s
   );
   const snapshot = await frame.getAttribute("src");
   const root = page.locator("html");
-  const version = Number(
-    await root.getAttribute("data-mokabook-update-version"),
-  );
+  const version = Number(await root.getAttribute("data-mokly-update-version"));
   await root.evaluate((element) =>
     element.setAttribute("data-test-retained", "true"),
   );
@@ -217,7 +215,7 @@ test("new evidence cancels renewal in place and the next comparison uses fresh s
     await pending.arrived;
     server.publishUpdate({ kind: "evidence", version: version + 1 });
     await expect(root).toHaveAttribute(
-      "data-mokabook-update-version",
+      "data-mokly-update-version",
       String(version + 1),
     );
     await expect(root).toHaveAttribute("data-test-retained", "true");

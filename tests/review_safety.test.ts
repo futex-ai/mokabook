@@ -40,7 +40,7 @@ test("Review artifact paths are collision-free for distinct valid routes", async
   const compilation = await compileCatalogue(config);
   const baseManifest = JSON.stringify({
     entries: [],
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     legacyPages: [],
     schemaVersion: 3,
   });
@@ -54,15 +54,15 @@ test("Review artifact paths are collision-free for distinct valid routes", async
       },
       reader: {
         fileExists: async (_commit, repoPath) =>
-          repoPath.endsWith("mokabook-manifest.json"),
+          repoPath.endsWith("mokly-manifest.json"),
         fileKind: async (_commit, repoPath) =>
-          repoPath.endsWith("mokabook-manifest.json") ? "regular" : "missing",
+          repoPath.endsWith("mokly-manifest.json") ? "regular" : "missing",
         readFile: async (_commit, repoPath) => {
-          if (repoPath.endsWith("mokabook-manifest.json")) return baseManifest;
+          if (repoPath.endsWith("mokly-manifest.json")) return baseManifest;
           throw new Error(`unexpected Git path ${repoPath}`);
         },
         readFileBytes: async (_commit, repoPath) => {
-          if (repoPath.endsWith("mokabook-manifest.json")) {
+          if (repoPath.endsWith("mokly-manifest.json")) {
             return Buffer.from(baseManifest);
           }
           throw new Error(`unexpected Git path ${repoPath}`);
@@ -82,7 +82,7 @@ test("Review artifact paths are collision-free for distinct valid routes", async
 test("one-sided material-signal adoption compares real children", () => {
   const key = "a".repeat(64);
   const base = ignored("nav", "<nav>Same</nav>");
-  const head = `${ignored("nav", "<nav>Same</nav>")}<!--mokabook-review-material:nav:${key}-->`;
+  const head = `${ignored("nav", "<nav>Same</nav>")}<!--mokly-review-material:nav:${key}-->`;
 
   const normalized = normalizeReviewPair(base, head, "screens/home.html");
 
@@ -91,8 +91,8 @@ test("one-sided material-signal adoption compares real children", () => {
 });
 
 test("different material keys remain part of Review classification", () => {
-  const base = `${ignored("nav", "<nav>Same</nav>")}<!--mokabook-review-material:nav:${"a".repeat(64)}-->`;
-  const head = `${ignored("nav", "<nav>Same</nav>")}<!--mokabook-review-material:nav:${"b".repeat(64)}-->`;
+  const base = `${ignored("nav", "<nav>Same</nav>")}<!--mokly-review-material:nav:${"a".repeat(64)}-->`;
+  const head = `${ignored("nav", "<nav>Same</nav>")}<!--mokly-review-material:nav:${"b".repeat(64)}-->`;
 
   const normalized = normalizeReviewPair(base, head, "screens/home.html");
 
@@ -150,7 +150,7 @@ test("Review retains marker-bearing pane bytes as portable output", async (conte
   const compilation = await compileCatalogue(config);
   const baseManifest = JSON.stringify({
     entries: [],
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     legacyPages: [],
     schemaVersion: 3,
   });
@@ -164,9 +164,9 @@ test("Review retains marker-bearing pane bytes as portable output", async (conte
       },
       reader: {
         fileExists: async (_commit, repoPath) =>
-          repoPath.endsWith("mokabook-manifest.json"),
+          repoPath.endsWith("mokly-manifest.json"),
         fileKind: async (_commit, repoPath) =>
-          repoPath.endsWith("mokabook-manifest.json") ? "regular" : "missing",
+          repoPath.endsWith("mokly-manifest.json") ? "regular" : "missing",
         readFile: async () => baseManifest,
         readFileBytes: async () => Buffer.from(baseManifest),
       },
@@ -182,12 +182,12 @@ test("Review retains marker-bearing pane bytes as portable output", async (conte
 
   assert.equal(pane, compilation.outputs.get("screens/home.mobile.html"));
   assert.match(pane, /href="\.\/details\.mobile\.html"/);
-  assert.match(pane, /data-mokabook-link="details"/);
-  assert.doesNotMatch(pane, /data-mokabook-target/);
+  assert.match(pane, /data-mokly-link="details"/);
+  assert.doesNotMatch(pane, /data-mokly-target/);
 });
 
 function collidingRouteSource(): string {
-  return `import { defineScreen } from "mokabook";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"], useCaseIds: [] };
 export const mockups = [
@@ -198,5 +198,5 @@ export const mockups = [
 }
 
 function ignored(id: string, content: string): string {
-  return `<!--mokabook-review-ignore:start:${id}-->${content}<!--mokabook-review-ignore:end:${id}-->`;
+  return `<!--mokly-review-ignore:start:${id}-->${content}<!--mokly-review-ignore:end:${id}-->`;
 }

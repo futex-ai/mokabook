@@ -26,7 +26,7 @@ import {
   type NestedPageInput,
   type ModuleLoader,
   type ModuleResolutionConfig,
-  type MokabookConfig,
+  type MoklyConfig,
   type RegistryDefinition,
   type Renderer,
   type RenderInput,
@@ -43,9 +43,9 @@ import {
   type WatchAction,
   type WatchConfig,
   type WatchRule,
-} from "mokabook";
+} from "@mokly/mokly";
 
-const config: MokabookConfig = defineConfig({
+const config: MoklyConfig = defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
 });
@@ -160,7 +160,7 @@ void exhaustive;
 // @ts-expect-error Pages cannot declare screen variants.
 const unsupportedPage: PageInput = { ...documentPage, mobile: node };
 // @ts-expect-error Legacy configuration was removed, including undefined.
-const obsoleteConfig: MokabookConfig = { ...config, legacy: undefined };
+const obsoleteConfig: MoklyConfig = { ...config, legacy: undefined };
 const asynchronousPage: PageInput = {
   ...documentPage,
   // @ts-expect-error Page callbacks must be synchronous complete HTML strings.

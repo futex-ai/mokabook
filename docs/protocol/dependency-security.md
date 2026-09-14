@@ -18,7 +18,7 @@ that every dependency is safe.
 
 The packed ESM-consumer smoke also audits its freshly resolved production,
 optional, and peer dependencies before exercising the installed CLI. This is a
-separate boundary: npm does not apply Mokabook's workspace overrides or lockfile
+separate boundary: npm does not apply Mokly's workspace overrides or lockfile
 to downstream installations. Other consumer fixtures continue to exercise
 their respective integration contracts without duplicating registry requests.
 Consumers must maintain and audit their own lockfiles, including dependencies

@@ -6,7 +6,7 @@ Stop committing generated HTML and the generated manifest for catalogues that
 opt in. Source remains the only authored artifact in Git. Changes, screen
 comparisons, and export obtain the baseline by rebuilding the merge-base commit
 in an isolated extraction of that commit, using that commit's own dependencies
-and Mokabook version, and cache the rebuilt output by commit.
+and Mokly version, and cache the rebuilt output by commit.
 
 Motivation recorded by the user: committed exports cause merge conflicts whose
 only correct resolution is regeneration, and the source already determines the
@@ -24,31 +24,31 @@ Decisions:
 - Interim conflict relief (a Git merge driver) is not pursued; the derived mode
   removes the conflicting files instead.
 
-Protocol owner: `docs/protocol/mokabook-derived-baselines.md` (created in
-Milestone 1). Related contracts: [Changes](../docs/protocol/mokabook-changes.md),
-[export](../docs/protocol/mokabook-export.md),
-[source protection](../docs/protocol/mokabook-source-protection.md),
-[timings](../docs/protocol/mokabook-timings.md),
-[package](../docs/protocol/mokabook-package.md).
+Protocol owner: `docs/protocol/mokly-derived-baselines.md` (created in
+Milestone 1). Related contracts: [Changes](../docs/protocol/mokly-changes.md),
+[export](../docs/protocol/mokly-export.md),
+[source protection](../docs/protocol/mokly-source-protection.md),
+[timings](../docs/protocol/mokly-timings.md),
+[package](../docs/protocol/mokly-package.md).
 
 ## Milestone 1: Define the derived-baseline contract — completed
 
 Documentation only. Every later milestone implements this contract.
 
-- [x] Create `docs/protocol/mokabook-derived-baselines.md` (about 250 lines)
+- [x] Create `docs/protocol/mokly-derived-baselines.md` (about 250 lines)
       covering: the `generatedOutput` option and its default; what `build`,
       `check`, Serve, export, and publication do in each mode; the rebuild
       procedure (resolve merge base, extract the commit with `git archive` into
-      `.mokabook-cache/baselines/<commit>/source`, run the configured typed
+      `.mokly-cache/baselines/<commit>/source`, run the configured typed
       argv commands, adopt `mockupsDir` from the extraction into
-      `.mokabook-cache/baselines/<commit>/output` with a completion marker);
+      `.mokly-cache/baselines/<commit>/output` with a completion marker);
       cache locking, reuse, invalidation when the merge base moves, and bounded
       cleanup of old commits; explicit failure states (missing history, failed
       install or build, interrupted rebuild, invalid rebuilt manifest); and the
       trust statement that rebuilding executes base-commit code.
 - [x] Define the typed rebuild command config: `review.baselineBuild` as an
       ordered list of argv arrays run in the extraction root. The defaults are
-      an npm clean install followed by the Mokabook build command for the
+      an npm clean install followed by the Mokly build command for the
       configured config path, both invoked without a shell. Document that this
       repository's example must also build the package itself at the base
       commit.
@@ -57,10 +57,10 @@ Documentation only. Every later milestone implements this contract.
       report tracked paths as a typed failure with the ignore rule to add.
 - [x] Define the derived-mode Git ignore requirement for `mockupsDir`: HTML
       routes and the manifest ignored, authored public files still tracked.
-- [x] Update `mokabook-changes.md`, `mokabook-export.md`,
-      `mokabook-source-protection.md`, `mokabook-timings.md`,
-      `mokabook-on-demand.md`, `mokabook-live-evidence.md`, and
-      `mokabook-package.md` so "the baseline is read, never rebuilt" becomes
+- [x] Update `mokly-changes.md`, `mokly-export.md`,
+      `mokly-source-protection.md`, `mokly-timings.md`,
+      `mokly-on-demand.md`, `mokly-live-evidence.md`, and
+      `mokly-package.md` so "the baseline is read, never rebuilt" becomes
       "the baseline is committed bytes or a cached rebuild; it is never rendered
       with the current tree's code". Add a `preparing` evidence state alongside
       the existing loading, unavailable, and complete states.
@@ -93,7 +93,7 @@ New `src/baseline/` module family. Unit tests inject the process runner, clock,
 and filesystem; one integration test uses a real temporary Git repository with
 a tiny consumer catalogue.
 
-- [x] Add `src/baseline/cache_layout.ts`: paths under `.mokabook-cache/baselines`,
+- [x] Add `src/baseline/cache_layout.ts`: paths under `.mokly-cache/baselines`,
       completion marker format, and the lock file location.
 - [x] Add `src/baseline/extract.ts`: `git archive <commit>` piped into the
       source directory, refusing to write outside it.
@@ -191,8 +191,8 @@ Tags: ui
       Moved to Milestone 7, which owns the timing spans and their benchmark.
 - [x] Browser tests for preparing and failed states; integration test for a
       merge-base move during watch; export test against a real temporary repo.
-- [x] Update `mokabook-runtime.md`, `mokabook-live-evidence.md`, and
-      `mokabook-timings.md` if implementation revealed gaps.
+- [x] Update `mokly-runtime.md`, `mokly-live-evidence.md`, and
+      `mokly-timings.md` if implementation revealed gaps.
 - [x] Run tests, typecheck, lint, `cargo xtask check`, commit, and push.
 
 ## Milestone 7: Repository tooling for derived mode — completed
@@ -200,7 +200,7 @@ Tags: ui
 - [x] Add a repository-level baseline build for this repo's example:
       `["npm", "ci"]`, `["npm", "run", "build"]`,
       `["npm", "run", "example:build"]`, expressed in
-      `examples/basic/mokabook.config.ts`. Keep it commented until Milestone 8:
+      `examples/basic/mokly.config.ts`. Keep it commented until Milestone 8:
       committed mode continues to reject `baselineBuild`.
 - [x] Add a derived-mode variant to the large fixture setup so the benchmark
       covers cold-cache first Changes and warm-cache restart; record the budget

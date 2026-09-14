@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import { useDesignStyle } from "../style_context.js";
 import type { TagChipProps } from "./tag-chip.js";

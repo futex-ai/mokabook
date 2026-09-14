@@ -16,7 +16,7 @@ export function exportedDelivery(
   const root = document.childNodes.find((node) => node.nodeName === "html") as
     DefaultTreeAdapterTypes.Element | undefined;
   const raw = root?.attrs.find(
-    (attribute) => attribute.name === "data-mokabook-delivery",
+    (attribute) => attribute.name === "data-mokly-delivery",
   )?.value;
   assert.ok(raw, `missing delivery metadata in ${name}`);
   const delivery = parseStaticDelivery(JSON.parse(raw));

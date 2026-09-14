@@ -9,8 +9,8 @@ test("benchmark waits for Changes delivery, not just parent classification", asy
     requests++;
     return new Response(
       requests < 3
-        ? '<div data-mokabook-filter="" data-changes-status="pending">Changes</div>'
-        : '<div data-mokabook-filter="" data-changes-status="ready">Changes</div>',
+        ? '<div data-mokly-filter="" data-changes-status="pending">Changes</div>'
+        : '<div data-mokly-filter="" data-changes-status="ready">Changes</div>',
     );
   });
   await waitForBrowseChanges("http://fixture.invalid", 3000);

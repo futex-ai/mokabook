@@ -10,13 +10,17 @@ export async function copyExampleSources(root: string): Promise<void> {
     await fs.cp(path.join(repositoryRoot, name), path.join(root, name), {
       recursive: true,
       filter: (source) =>
-        ![".context", ".mokabook-cache", "node_modules", ".git"].includes(
+        ![".context", ".mokly-cache", "node_modules", ".git"].includes(
           path.basename(source),
         ) &&
         !(
           source.startsWith(generated + path.sep) &&
           (source.endsWith(".html") ||
-            path.basename(source) === "mokabook-manifest.json")
+            [
+              "mockbook-manifest.json",
+              "mokabook-manifest.json",
+              "mokly-manifest.json",
+            ].includes(path.basename(source)))
         ),
     });
 }

@@ -3,7 +3,7 @@
 ## Overview
 
 ```text
-mokabook.config.ts
+mokly.config.ts
         |
         v
 discover *.mockup.tsx + renderer + optional compatibility modules
@@ -35,7 +35,7 @@ mobile/desktop light and optional dark HTML, saved component variants, whole doc
 
 ## 1. Config Loading
 
-Mokabook searches upward from the process working directory, or loads the path
+Mokly searches upward from the process working directory, or loads the path
 given by `--config`. Config code is bundled to a temporary ESM module so `.ts`,
 `.mts`, `.js`, and `.mjs` work from a local install or npx cache. Every path is
 then resolved from the config file and confined to `repoRoot`.
@@ -59,20 +59,20 @@ then uses the existing transactional writer. Build/Check/Export stay exhaustive.
 Background Git I/O is parent-owned over a private worker channel. Cancellation
 drains the actual subprocesses before worker termination, even if the worker cannot
 yield; CPU-intensive classification stays in the worker.
-See [on-demand Serve](../protocol/mokabook-on-demand.md) and the
+See [on-demand Serve](../protocol/mokly-on-demand.md) and the
 [local rendering service](../../src/server/controls/README.md).
 
 An esbuild resolver uses `createRequire(configPath)` for `react`, React
-subpaths, `react-dom`, and React DOM subpaths. Imports of `mokabook` resolve to
-the executing package. The result is one React runtime even when Mokabook itself
+subpaths, `react-dom`, and React DOM subpaths. Imports of `mokly` resolve to
+the executing package. The result is one React runtime even when Mokly itself
 lives in npm's transient npx directory.
 
 Consumer-owned aliases, export conditions, package fields, loaders, resolution
 extensions, and in-repository package roots pass directly to this graph after
 strict config validation. This supports React Native Web or other workspace
-layouts without putting an app alias or TypeScript-root assumption in Mokabook.
+layouts without putting an app alias or TypeScript-root assumption in Mokly.
 
-Every module beneath `entriesDir` imports a module-bound Mokabook authoring
+Every module beneath `entriesDir` imports a module-bound Mokly authoring
 facade. Each definition or nested marker is therefore attributed at the helper
 call itself, including calls made later through a shared helper factory, without
 sticky process-global state or an absolute checkout path.
@@ -88,7 +88,7 @@ Each page calls its synchronous `render()` exactly once for one complete HTML
 document. It bypasses the screen renderer and variant loop, then uses the same
 ownership, link, resource, and transactional validation.
 
-Each screen owns a mobile and desktop React node. Mokabook selects the first
+Each screen owns a mobile and desktop React node. Mokly selects the first
 stylesheet rule matching the screen's catalogue route, applies it to each
 effective viewport/color-scheme view, and resolves each emitted URL relative to
 that view's generated fragment route. It then calls the configured renderer, or
@@ -109,7 +109,7 @@ type Renderer = (input: RenderInput) => string | RenderResult;
 
 The returned string, or `RenderResult.html`, must be a complete HTML document.
 The optional structured result supplies exact component style/resource ownership;
-see the [component manifest](../protocol/mokabook-component-manifest.md).
+see the [component manifest](../protocol/mokly-component-manifest.md).
 Registered entries render each saved variant in every configured context through
 the same consumer graph. Wrappers record actual invocations, data, caller-owned
 slots, and layout-neutral ranges. The root saved variant is not its own instance.
@@ -118,7 +118,7 @@ components add saved variants and complete per-view invocation/ownership records
 explicit page callbacks still emit exactly one complete document. Both historical
 v4 envelopes remain readable only at the Git boundary. Current readers require v5.
 
-The [child-control adapter](../protocol/mokabook-link-controls.md) uses parsed
+The [child-control adapter](../protocol/mokly-link-controls.md) uses parsed
 source locations to patch only the marked control and its boundary templates.
 It validates one supported root with no independent descendant interactions,
 retains inactive destinations as metadata, and adds default link/focus CSS only
@@ -129,8 +129,8 @@ and its logical owners. One parsed attribute policy enforces case-insensitive
 reserved names at both boundaries, including inert template contents, without
 mistaking ordinary text for metadata. Unmarked document bytes stay unchanged.
 
-The [catalogue navigation contract](../protocol/mokabook-navigation.md) retains
-the stable id and optional fragment in a reserved `data-mokabook-link`
+The [catalogue navigation contract](../protocol/mokly-navigation.md) retains
+the stable id and optional fragment in a reserved `data-mokly-link`
 marker when an HTML `<a>`/`<area>` or SVG `<a>` has a logical `href`. A
 `data-nav-href`-only reference remains validated portable metadata and does not
 gain Browse interaction. The builder rejects logical `href` on every non-link
@@ -166,7 +166,7 @@ cross-view check. This keeps Browse, standalone, and Review navigation aligned.
 React Native Web style collection is not a second conversion stage. If an app
 uses it, its renderer wraps the node in the app provider, registers or renders
 the tree with the app's React Native Web version, obtains that version's style
-element, and inserts the result in the returned document. Mokabook sees only
+element, and inserts the result in the returned document. Mokly sees only
 the completed HTML string.
 
 ## 4. Validation And Commit
@@ -187,7 +187,7 @@ package and example before tests read generated files, so the verification order
 the baseline commit with `npm ci`, `npm run build`, then `npm run example:build`
 inside its extraction and read the validated cached output. Head and baseline
 compilation use their respective source and package versions; see the
-[derived baseline contract](../protocol/mokabook-derived-baselines.md).
+[derived baseline contract](../protocol/mokly-derived-baselines.md).
 
 Declared dependency paths may be files or directories. The manifest preserves
 that declaration, and downstream Browse/Review impact matching treats a
@@ -212,7 +212,7 @@ therefore contain characters such as spaces without corrupting HTML attributes
 or URL query/fragment boundaries.
 
 `build` writes a same-filesystem staging tree, backs up only files identified by
-Mokabook's generated header and a source path beneath this config's authored
+Mokly's generated header and a source path beneath this config's authored
 roots, or by the reserved manifest name. It installs staged files by rename and
 restores backups on error. It refuses to overwrite an unknown or foreign HTML
 file, rejects lexical or symlink-resolved targets beneath authored roots, and

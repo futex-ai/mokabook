@@ -3,7 +3,7 @@ import type { ServerResponse } from "node:http";
 
 import { encodeUrlPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { ReadOnlyReviewRepository } from "../review/repository.js";
 import { runReview } from "../review/run.js";
 import { RepositorySelectedReview } from "../review/selected.js";
@@ -25,10 +25,10 @@ import {
 } from "./review_responses.js";
 import { SelectedReviewRoutes } from "./selected_review_routes.js";
 
-const DIFF_ROUTE = "/__mokabook/diffs/";
+const DIFF_ROUTE = "/__mokly/diffs/";
 const GENERATION_ROUTE = `${DIFF_ROUTE}__generations/`;
 
-/** How Browse obtains the Review artifact it serves under `/__mokabook/diffs/`. */
+/** How Browse obtains the Review artifact it serves under `/__mokly/diffs/`. */
 export interface ServedReview extends ReviewArtifactProvider {
   /** Comparison base ref, shown when the comparison cannot be generated. */
   base: string;
@@ -97,7 +97,7 @@ export class ReviewRoutes {
     return this.closePromise;
   }
 
-  /** Respond to one `/__mokabook/diffs/` or `/__mokabook/diffs/<path>` request. */
+  /** Respond to one `/__mokly/diffs/` or `/__mokly/diffs/<path>` request. */
   async handle(
     url: URL,
     response: ServerResponse,
@@ -282,6 +282,6 @@ function generationUrl(generation: ReviewGeneration, relative: string): string {
   return `${GENERATION_ROUTE}${generation.version}/${encodeUrlPath(relative)}`;
 }
 
-function reviewServerClosing(): MokabookError {
-  return new MokabookError("server-failed", "Comparison server is closing");
+function reviewServerClosing(): MoklyError {
+  return new MoklyError("server-failed", "Comparison server is closing");
 }

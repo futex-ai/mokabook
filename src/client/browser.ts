@@ -32,12 +32,12 @@ export interface BrowserLiveUpdateEnvironment {
   storage: RecoveryStorage;
 }
 
-/** Connect a served document to Mokabook's versioned update stream. */
+/** Connect a served document to Mokly's versioned update stream. */
 export function startBrowserLiveUpdates(
   environment: BrowserLiveUpdateEnvironment,
 ): LiveUpdateController {
   const controller = new LiveUpdateController(
-    new EventSourceStream(environment.createEventSource("/__mokabook/events")),
+    new EventSourceStream(environment.createEventSource("/__mokly/events")),
     environment.storage,
     environment.location,
     environment.captureBrowseState,
@@ -55,7 +55,7 @@ export function startBrowserLiveUpdates(
 /** Read a valid request-snapshot update version from a served document. */
 export function pageUpdateVersion(document: Document): number | undefined {
   const encoded = document.documentElement.getAttribute(
-    "data-mokabook-update-version",
+    "data-mokly-update-version",
   );
   if (!encoded || !/^[1-9]\d*$/.test(encoded)) return undefined;
   const version = Number(encoded);

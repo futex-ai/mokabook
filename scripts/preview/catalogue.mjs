@@ -27,7 +27,7 @@ import {
 import { startCatalogueServer } from "../../dist/server/http.js";
 
 const liveUpdateScript =
-  '<script src="/__mokabook/client/browser.js" type="module"></script>';
+  '<script src="/__mokly/client/browser.js" type="module"></script>';
 
 /** Capture already-built output; the supported npm command builds before this boundary. */
 export async function buildPreview(config, output, options = {}) {
@@ -154,15 +154,15 @@ async function captureAssets(serverUrl, stage) {
 
 function shellAssets() {
   return [
-    "/__mokabook/shell.css",
+    "/__mokly/shell.css",
     ...[...loadBrowserClientModules().keys()]
       .filter((name) => name !== "browser.js" && name !== "live_updates.js")
-      .map((name) => `/__mokabook/client/${name}`),
+      .map((name) => `/__mokly/client/${name}`),
     ...[...loadBrowserNavigationModules().keys()].map(
-      (name) => `/__mokabook/navigation/${name}`,
+      (name) => `/__mokly/navigation/${name}`,
     ),
     ...[...loadShellFontAssets().keys()].map(
-      (name) => `/__mokabook/fonts/${name}`,
+      (name) => `/__mokly/fonts/${name}`,
     ),
   ];
 }

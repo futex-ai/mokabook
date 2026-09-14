@@ -17,7 +17,7 @@ export function CompareToolbar({
   const navigation = useDesignNavigation();
   return (
     <comparisonToolbar.Component
-      mokabookInstance={useDesignInstance("comparison")}
+      moklyInstance={useDesignInstance("comparison")}
       mode={mode}
       eligible
       accessible={accessible}
@@ -83,7 +83,7 @@ export function Pane({
 }) {
   return (
     <comparisonPane.Component
-      mokabookInstance={useDesignInstance(side)}
+      moklyInstance={useDesignInstance(side)}
       side={side}
       label={label}
       state="present"
@@ -104,7 +104,7 @@ export function MissingPane({
 }) {
   return (
     <comparisonPane.Component
-      mokabookInstance={useDesignInstance(side)}
+      moklyInstance={useDesignInstance(side)}
       side={side}
       label={label}
       state="missing"

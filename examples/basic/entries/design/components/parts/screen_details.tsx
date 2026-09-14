@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import { ComparisonDetails } from "./comparison_details.js";
 import { screenComparison } from "./comparison_fixtures.js";

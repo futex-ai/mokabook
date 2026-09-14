@@ -15,11 +15,11 @@ import { derivedFixture } from "./helpers/derived_fixture.js";
 
 test("cache exclusions precede broad globs, resource matching and required source exceptions", async (t) => {
   const fixture = await derivedFixture(t);
-  const cache = path.join(fixture.root, ".mokabook-cache");
+  const cache = path.join(fixture.root, ".mokly-cache");
   await fs.mkdir(cache);
   await fs.writeFile(path.join(cache, "private.txt"), "private");
-  await fs.symlink(".mokabook-cache", path.join(fixture.root, "alias"));
-  const paths = [".mokabook-cache/private.txt", "alias/private.txt"];
+  await fs.symlink(".mokly-cache", path.join(fixture.root, "alias"));
+  const paths = [".mokly-cache/private.txt", "alias/private.txt"];
   const config = {
     ...fixture.config,
     sourceFiles: paths,
@@ -29,7 +29,7 @@ test("cache exclusions precede broad globs, resource matching and required sourc
       rules: [
         {
           action: "rebuild" as const,
-          paths: ["**", ".mokabook-cache/**", "alias/**"],
+          paths: ["**", ".mokly-cache/**", "alias/**"],
         },
       ],
     },
@@ -47,7 +47,7 @@ test("cache exclusions precede broad globs, resource matching and required sourc
     {
       mergeBase: async () => fixture.commit,
       changedPaths: async (_commit, excluded) => {
-        assert.ok(excluded?.includes(".mokabook-cache"));
+        assert.ok(excluded?.includes(".mokly-cache"));
         return [...paths, "notes.md"];
       },
     },
@@ -56,7 +56,7 @@ test("cache exclusions precede broad globs, resource matching and required sourc
     config.review.outDir,
   );
   assert.deepEqual(changed, ["notes.md"]);
-  for (const out of [".mokabook-cache/export", "alias/export"])
+  for (const out of [".mokly-cache/export", "alias/export"])
     assert.throws(() => resolveExportOutput(config, out), {
       code: "export-invalid",
     });

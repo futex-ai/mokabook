@@ -8,7 +8,7 @@ import {
 } from "../config/paths.js";
 import { isInternalCatalogueFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
 import { isAuthoringSource } from "./source_inventory.js";
 
@@ -22,14 +22,14 @@ export function validateGeneratedOutputPaths(
   const realMockupsRoot = projectRealPath(config.mockupsDir);
   const realAuthoredRoots = authoredRoots.map((root) => fs.realpathSync(root));
   if (!isInside(realRepoRoot, realMockupsRoot)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "build-invalid",
       "mockupsDir resolves outside repoRoot through a symlink",
     );
   }
   for (const route of routes) {
     if (route !== MANIFEST_NAME && !isSafeCatalogueRoute(route)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `generated route is unsafe: ${route}`,
       );
@@ -39,14 +39,14 @@ export function validateGeneratedOutputPaths(
     try {
       projectedTarget = projectRealPath(target);
     } catch (error) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `could not validate generated route ${route}: ${errorMessage(error)}`,
         { cause: error },
       );
     }
     if (!isInside(config.mockupsDir, target)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `generated route escapes mockupsDir: ${route}`,
       );
@@ -57,13 +57,13 @@ export function validateGeneratedOutputPaths(
       authoredRoots.some((root) => isInside(root, target)) ||
       realAuthoredRoots.some((root) => isInside(root, projectedTarget))
     ) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `generated route overlaps authored source root: ${route}`,
       );
     }
     if (!isInside(realMockupsRoot, projectedTarget)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `generated route escapes mockupsDir: ${route}`,
       );

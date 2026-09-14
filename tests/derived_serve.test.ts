@@ -36,7 +36,7 @@ for (const watch of [false, true]) {
           throw new Error("HTTP must never rebuild a baseline");
         });
         const unselected = await fetch(
-          `${running.url}/__mokabook/diffs/review.json`,
+          `${running.url}/__mokly/diffs/review.json`,
         );
         assert.equal(unselected.status, 200, await unselected.clone().text());
         assert.equal(
@@ -48,7 +48,7 @@ for (const watch of [false, true]) {
           "wrong local bytes",
         );
         const response = await fetch(
-          `${running.url}/__mokabook/diffs/review.json?route=screens%2Fhome.html`,
+          `${running.url}/__mokly/diffs/review.json?route=screens%2Fhome.html`,
         );
         assert.equal(response.status, 200, await response.clone().text());
         const result = parseReviewResult(await response.json());
@@ -65,7 +65,7 @@ for (const watch of [false, true]) {
           /Derived source edit/,
         );
         assert.equal(
-          (await fetch(`${running.url}/static/.mokabook-cache/private`)).status,
+          (await fetch(`${running.url}/static/.mokly-cache/private`)).status,
           404,
         );
       } finally {
@@ -109,7 +109,7 @@ test(
       assert.equal(processExists(pid), false);
       const entry = path.join(
         fixture.root,
-        ".mokabook-cache/baselines",
+        ".mokly-cache/baselines",
         fixture.commit,
       );
       for (const name of ["lock", "source", "complete.json"])
@@ -145,7 +145,7 @@ test(
       });
       assert.doesNotMatch(
         html,
-        /baseline-command-failed|process\.exit|\.mokabook-cache/,
+        /baseline-command-failed|process\.exit|\.mokly-cache/,
       );
       assert.equal(
         (await fetch(`${running.url}/view/screens/home.html`)).status,

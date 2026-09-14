@@ -1,4 +1,4 @@
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 
 export type BaselineErrorCode =
   | "baseline-history-unavailable"
@@ -9,7 +9,7 @@ export type BaselineErrorCode =
   | "baseline-lock-timeout";
 
 /** Stable failure reasons shared by preparation, CLI, and background evidence. */
-export class BaselineError extends MokabookError {
+export class BaselineError extends MoklyError {
   declare readonly code: BaselineErrorCode;
   constructor(code: BaselineErrorCode, message: string, cause?: unknown) {
     super(code, message, cause === undefined ? undefined : { cause });

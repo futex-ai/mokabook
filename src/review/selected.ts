@@ -6,7 +6,7 @@ import { minimatch } from "minimatch";
 import { ConfiguredGitCommandRunner } from "../config/git.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { ManifestScreen } from "../registry/types.js";
 import { copySnapshotDependencies, GitReviewAssetReader } from "./assets.js";
 import { baselineResourceConfig } from "./base_manifest.js";
@@ -45,7 +45,7 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
     signal: AbortSignal,
   ): Promise<ReviewArtifact> {
     if (this.config.generatedOutput === "derived" && !source.headOutputs)
-      throw new MokabookError(
+      throw new MoklyError(
         "review-invalid",
         "Compiled comparison input is unavailable",
       );
@@ -92,7 +92,7 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
       if (side === "after")
         for (const route of routes)
           if (!Object.hasOwn(source.headDigests, route))
-            throw new MokabookError(
+            throw new MoklyError(
               "review-invalid",
               `Selected document has not been checked: ${route}`,
             );

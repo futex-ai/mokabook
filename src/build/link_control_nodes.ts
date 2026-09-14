@@ -2,13 +2,13 @@
 
 import type { DefaultTreeAdapterMap } from "parse5";
 
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 
 export type ControlNode = DefaultTreeAdapterMap["node"];
 export type ControlElement = DefaultTreeAdapterMap["element"];
 
-export const CHILD_MARKER = "data-mokabook-link-child-";
-export const CONTROL_MARKER = "data-mokabook-link-control";
+export const CHILD_MARKER = "data-mokly-link-child-";
+export const CONTROL_MARKER = "data-mokly-link-control";
 const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
 const INTERACTIVE_TAGS = new Set([
   "a",
@@ -51,8 +51,8 @@ const INTERACTIVE_ROLES = new Set([
   "treeitem",
 ]);
 
-export function controlError(route: string, detail: string): MokabookError {
-  return new MokabookError(
+export function controlError(route: string, detail: string): MoklyError {
+  return new MoklyError(
     "build-invalid",
     `${route}: MockLink child control ${detail}`,
   );

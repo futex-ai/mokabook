@@ -1,8 +1,8 @@
 # Static catalogue export
 
 This internal package module builds complete consumer sites for ordinary static
-hosting. Consumers use `mokabook export --out <path>`, not a JavaScript deep import.
-Deployment and hosting credentials remain outside Mokabook.
+hosting. Consumers use `mokly export --out <path>`, not a JavaScript deep import.
+Deployment and hosting credentials remain outside Mokly.
 
 `run.ts` pins one merge-base commit through `RepositoryEvidence`, retains the
 independent `BaselineReader`, runs the normal build, captures public inputs,
@@ -55,7 +55,7 @@ It also declares its stricter `.context` output root; the same shared path
 validator enforces that scope at preflight and before installation.
 
 `reservation.ts` uses filesystem-native per-output directory names under an
-owned `.mokabook-export-reservations` namespace, retaining only its metadata
+owned `.mokly-export-reservations` namespace, retaining only its metadata
 after cleanup. Case and symlink aliases cannot bypass an active lock. Legacy
 hashed reservations require explicit recovery before another export.
 `resource_policy.ts` applies the same package/source boundary to current and
@@ -67,7 +67,7 @@ unlisted authored files while ignoring the recorded generated files.
 allowlisted, non-recursive cleanup. `operations.ts` is the injectable filesystem
 boundary; recursive removal is reserved for the private generated stage.
 `cleanup.ts` preserves primary and secondary failures through setup, orchestration,
-and CLI output. See the [recovery contract](../../docs/protocol/mokabook-export-recovery.md).
+and CLI output. See the [recovery contract](../../docs/protocol/mokly-export-recovery.md).
 
 Focused verification:
 
@@ -78,8 +78,8 @@ npx playwright test tests/browser/static_export.spec.ts tests/browser/static_com
 npm run package:smoke
 ```
 
-See the [export contract](../../docs/protocol/mokabook-export.md),
-[static delivery contract](../../docs/protocol/mokabook-export-delivery.md), and
+See the [export contract](../../docs/protocol/mokly-export.md),
+[static delivery contract](../../docs/protocol/mokly-export-delivery.md), and
 [plan index](../../plans/README.md).
 
 Registered components export through the same transactional delivery boundary.

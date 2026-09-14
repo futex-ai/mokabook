@@ -20,7 +20,7 @@ let server: RunningServer;
 test.beforeAll(async () => {
   fixture = await createFixture(
     componentEntrySource({
-      body: '<action.Component label="Clipped" mokabookInstance="clip" /><action.Component label="Multiple" mokabookInstance="multiple" disabled /><action.Component label="Invisible" mokabookInstance="invisible" hidden />',
+      body: '<action.Component label="Clipped" moklyInstance="clip" /><action.Component label="Multiple" moklyInstance="multiple" disabled /><action.Component label="Invisible" moklyInstance="invisible" hidden />',
       actionRender:
         '(props) => props.hidden ? null : props.disabled ? <><span>First root</span> Text root <strong>Last root</strong></> : <div id="clip" style={{ width: 180, height: 90, overflow: "hidden" }}><button style={{ marginTop: 60, width: 160, height: 90 }}>{props.label}</button></div>',
     }),
@@ -43,7 +43,7 @@ test("component geometry clips nested overflow and preserves multiple roots and 
   ).toBeEnabled();
   const facts = await page.evaluate(async () => {
     const { authenticateRanges, rangeBounds } = (await import(
-      `${location.origin}/__mokabook/client/component_geometry.js`
+      `${location.origin}/__mokly/client/component_geometry.js`
     )) as typeof Geometry;
     const data = JSON.parse(
       document.querySelector("[data-workspace-data]")!.textContent!,

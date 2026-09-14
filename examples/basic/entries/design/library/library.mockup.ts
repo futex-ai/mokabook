@@ -1,4 +1,4 @@
-import { defineCollection } from "mokabook";
+import { defineCollection } from "@mokly/mokly";
 
 import { catalogueNavigation } from "./chrome/catalogue-navigation.js";
 import { screenHeader } from "./chrome/screen-header.js";
@@ -51,14 +51,14 @@ const groups = [
 ];
 const metadata = {
   dependencies: [],
-  relatedDocs: ["docs/protocol/mokabook-design-component-library.md"],
+  relatedDocs: ["docs/protocol/mokly-design-component-library.md"],
 };
 export const mockups = [
   defineCollection({
     ...metadata,
     id: "design-library",
     title: "Shared components",
-    description: "The components used across Mokabook's design screens.",
+    description: "The components used across Mokly's design screens.",
     childIds: groups.map((group) => `design-library-${group.id}`),
   }),
   ...groups.flatMap((group) => [

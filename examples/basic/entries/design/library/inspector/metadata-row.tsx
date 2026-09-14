@@ -1,4 +1,4 @@
-import { defineComponent, MockLink, type ComponentProps } from "mokabook";
+import { defineComponent, MockLink, type ComponentProps } from "@mokly/mokly";
 
 import { tagChip } from "../controls/tag-chip.js";
 import { libraryMetadata } from "../metadata.js";

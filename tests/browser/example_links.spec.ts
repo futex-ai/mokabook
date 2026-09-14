@@ -21,10 +21,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
         name: "View details",
         exact: true,
       });
-      await expect(next).toHaveAttribute(
-        "data-mokabook-link-control",
-        "button",
-      );
+      await expect(next).toHaveAttribute("data-mokly-link-control", "button");
       await frame.getByRole("textbox", { name: "Workspace name" }).focus();
       await page.keyboard.press("Tab");
       await expect(next).toBeFocused();
@@ -40,7 +37,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
         ),
       );
       await frame
-        .locator('a[data-mokabook-link-control="button"]')
+        .locator('a[data-mokly-link-control="button"]')
         .filter({ hasText: "Return to welcome" })
         .click();
       await expect(page).toHaveURL(/\/view\/screens\/welcome\.html$/);
@@ -63,7 +60,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
         ),
       );
       const back = page
-        .locator('a[data-mokabook-link-control="button"]')
+        .locator('a[data-mokly-link-control="button"]')
         .filter({ hasText: "Return to welcome" });
       await page.waitForLoadState("load");
       await focusDesignLink(back);
@@ -86,7 +83,7 @@ test("the real example tour reuses the styled buttons in both owning screens", a
       await chooseScheme(page, scheme);
       const frame = page.frameLocator(".mbk-flow-screen iframe").nth(step);
       const button = frame
-        .locator('a[data-mokabook-link-control="button"]')
+        .locator('a[data-mokly-link-control="button"]')
         .filter({ hasText: step === 0 ? "View details" : "Return to welcome" });
       if (step === 0) await button.click();
       else {

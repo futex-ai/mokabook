@@ -1,5 +1,5 @@
 import type { ColorScheme } from "../authoring/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { validateRelativeRoute } from "./paths.js";
 import type { StylesheetRule, WatchRule } from "./types.js";
 
@@ -9,7 +9,7 @@ const WATCH_ACTIONS = new Set(["ignore", "rebuild", "reload", "restart"]);
 export function validateColorSchemes(value: unknown): ColorScheme[] {
   if (value === undefined) return ["light"];
   if (!Array.isArray(value) || value.length === 0) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       "colorSchemes must be a non-empty array",
     );
@@ -17,13 +17,13 @@ export function validateColorSchemes(value: unknown): ColorScheme[] {
   const schemes = new Set<ColorScheme>();
   for (const scheme of value) {
     if (scheme !== "light" && scheme !== "dark") {
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
         `colorSchemes contains an unknown value: ${String(scheme)}`,
       );
     }
     if (schemes.has(scheme)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
         `duplicate colorSchemes value: ${scheme}`,
       );
@@ -31,10 +31,7 @@ export function validateColorSchemes(value: unknown): ColorScheme[] {
     schemes.add(scheme);
   }
   if (!schemes.has("light")) {
-    throw new MokabookError(
-      "config-invalid",
-      'colorSchemes must include "light"',
-    );
+    throw new MoklyError("config-invalid", 'colorSchemes must include "light"');
   }
   return schemes.has("dark") ? ["light", "dark"] : ["light"];
 }
@@ -44,12 +41,12 @@ export function validateStylesheets(
   rules: readonly StylesheetRule[],
 ): StylesheetRule[] {
   if (!Array.isArray(rules)) {
-    throw new MokabookError("config-invalid", "stylesheets must be an array");
+    throw new MoklyError("config-invalid", "stylesheets must be an array");
   }
   const seen = new Set<string>();
   return rules.map((rawRule, index) => {
     if (!record(rawRule)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
         `stylesheets[${index}] must be an object`,
       );
@@ -57,14 +54,14 @@ export function validateStylesheets(
     const rule = rawRule as unknown as StylesheetRule;
     requireString(rule.match, `stylesheets[${index}].match`);
     if (seen.has(rule.match)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
         `duplicate stylesheet match: ${rule.match}`,
       );
     }
     seen.add(rule.match);
     if (!Array.isArray(rule.stylesheets)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
         `stylesheets[${index}].stylesheets must be an array`,
       );
@@ -105,7 +102,7 @@ function validateOptionalStylesheetPaths(
   field: "darkStylesheets" | "lightStylesheets",
 ): string[] {
   if (!Array.isArray(value)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `stylesheets[${index}].${field} must be an array`,
     );
@@ -157,7 +154,7 @@ function validateUniqueStylesheetPaths(
   const seen = new Set(linked);
   for (const stylesheet of paths) {
     if (seen.has(stylesheet)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
         `duplicate stylesheet path in stylesheets[${index}].${field}: ${stylesheet}`,
       );
@@ -169,25 +166,25 @@ function validateUniqueStylesheetPaths(
 /** Validate explicit watch classifications and reject ambiguity. */
 export function validateWatchRules(rules: readonly WatchRule[]): WatchRule[] {
   if (!Array.isArray(rules)) {
-    throw new MokabookError("config-invalid", "watch.rules must be an array");
+    throw new MoklyError("config-invalid", "watch.rules must be an array");
   }
   const seen = new Set<string>();
   return rules.map((rawRule, index) => {
     if (!record(rawRule)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
         `watch.rules[${index}] must be an object`,
       );
     }
     const rule = rawRule as unknown as WatchRule;
     if (!WATCH_ACTIONS.has(rule.action)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
         `watch.rules[${index}] has invalid action`,
       );
     }
     if (!Array.isArray(rule.paths) || rule.paths.length === 0) {
-      throw new MokabookError(
+      throw new MoklyError(
         "config-invalid",
         `watch.rules[${index}].paths must not be empty`,
       );
@@ -198,10 +195,7 @@ export function validateWatchRules(rules: readonly WatchRule[]): WatchRule[] {
     });
     for (const glob of paths) {
       if (seen.has(glob)) {
-        throw new MokabookError(
-          "config-invalid",
-          `duplicate watch path: ${glob}`,
-        );
+        throw new MoklyError("config-invalid", `duplicate watch path: ${glob}`);
       }
       seen.add(glob);
     }
@@ -217,7 +211,7 @@ function record(value: unknown): value is Record<string, unknown> {
 export function validateDebounce(value: number | undefined): number {
   const debounce = value ?? 75;
   if (!Number.isInteger(debounce) || debounce < 0 || debounce > 10_000) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       "watch.debounceMs must be an integer from 0 to 10000",
     );
@@ -231,7 +225,7 @@ export function requireString(
   label: string,
 ): asserts value is string {
   if (typeof value !== "string" || value.trim().length === 0) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `${label} must be a non-empty string`,
     );
@@ -247,7 +241,7 @@ export function validateStringArray(
     !Array.isArray(value) ||
     !value.every((item) => typeof item === "string" && item.trim().length > 0)
   ) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `${label} must be an array of non-empty strings`,
     );

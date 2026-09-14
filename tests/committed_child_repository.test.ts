@@ -32,11 +32,11 @@ test("committed child rejects a nested repoRoot on the unselected comparison rou
   try {
     const port = await ready;
     const response = await fetch(
-      `http://127.0.0.1:${port}/__mokabook/diffs/review.json`,
+      `http://127.0.0.1:${port}/__mokly/diffs/review.json`,
     );
     assert.equal(response.status, 500);
     const failure = (await response.json()) as { details: string };
-    assert.match(failure.details, /\[mokabook\/config-invalid\]/);
+    assert.match(failure.details, /\[mokly\/config-invalid\]/);
     assert.match(failure.details, /repoRoot.*Git top level/);
     assert.equal((await fetch(`http://127.0.0.1:${port}/`)).status, 200);
   } finally {

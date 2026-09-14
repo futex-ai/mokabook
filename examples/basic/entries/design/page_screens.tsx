@@ -1,4 +1,4 @@
-import { screen } from "mokabook";
+import { screen } from "@mokly/mokly";
 
 import { ExampleDocument } from "../document.js";
 import { useDesignNavigation } from "./parts/design_navigation.js";

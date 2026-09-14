@@ -18,7 +18,7 @@ test.afterAll(async () => {
   await fixture?.close();
 });
 
-test("published Mokabook exposes lazy comparisons in the actual shell", async ({
+test("published Mokly exposes lazy comparisons in the actual shell", async ({
   page,
 }) => {
   const requests: string[] = [];
@@ -35,9 +35,7 @@ test("published Mokabook exposes lazy comparisons in the actual shell", async ({
   ).toHaveAttribute("aria-pressed", "true");
   await page.locator('[data-filter="changed"]').click();
   await chooseViewport(page, "desktop");
-  expect(requests.filter((url) => url.includes("/__mokabook/diffs/"))).toEqual(
-    [],
-  );
+  expect(requests.filter((url) => url.includes("/__mokly/diffs/"))).toEqual([]);
 
   await modes.getByRole("button", { name: "Overlay", exact: true }).click();
   const frames = page.locator("[data-diff-stage] iframe");
@@ -68,9 +66,7 @@ test("published Mokabook exposes lazy comparisons in the actual shell", async ({
   await modes.getByRole("button", { name: "Current", exact: true }).click();
   await expect(frames).toHaveCount(0);
   await expect(page.locator("[data-current-screen]")).toBeVisible();
-  expect(requests.some((url) => url.includes("/__mokabook/events"))).toBe(
-    false,
-  );
+  expect(requests.some((url) => url.includes("/__mokly/events"))).toBe(false);
   expect(failed).toEqual([]);
 });
 

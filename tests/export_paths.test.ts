@@ -26,7 +26,7 @@ test("export confines output before any write and resolves against config", asyn
     ".review",
     "node_modules/site",
     ".git/site",
-    ".mokabook-export-reservations/site",
+    ".mokly-export-reservations/site",
   ])
     assert.throws(() => resolveExportOutput(config, output));
   assert.equal(fs.existsSync(path.join(fixture.root, "site")), false);
@@ -51,7 +51,7 @@ test("export refuses unowned, malformed, and mixed output", async (context) => {
   await assertExportOwnership(output);
   await fs.promises.writeFile(path.join(output, "keep.txt"), "user-owned");
   await assert.rejects(assertExportOwnership(output), /ownership/);
-  const marker = path.join(output, ".mokabook-export-artifact");
+  const marker = path.join(output, ".mokly-export-artifact");
   for (const content of [
     "{}",
     '{"schemaVersion":2,"files":[]}',

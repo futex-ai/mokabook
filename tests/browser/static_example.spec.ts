@@ -15,7 +15,7 @@ let server: Awaited<ReturnType<typeof serveStaticFiles>>;
 test.beforeAll(async () => {
   test.setTimeout(180_000);
   root = await fs.promises.mkdtemp(
-    path.join(repositoryRoot, ".context/mokabook-example-export-"),
+    path.join(repositoryRoot, ".context/mokly-example-export-"),
   );
   const config = await createExampleBaseline(root);
   output = path.join(root, "site");
@@ -48,7 +48,7 @@ test("the owning example stays usable when HEAD is the unchanged baseline", asyn
     const frames = page.locator("[data-current-screen] iframe");
     for (const frame of await frames.all()) {
       await expect(frame.contentFrame().locator("h1")).toHaveText(
-        "Welcome to Mokabook",
+        "Welcome to Mokly",
       );
       await frame
         .contentFrame()
@@ -60,7 +60,7 @@ test("the owning example stays usable when HEAD is the unchanged baseline", asyn
     await page.screenshot({ path: info.outputPath(`${width}-Current.png`) });
   }
   expect(failures).toEqual([]);
-  expect(
-    server.requests.some((url) => url.includes("/__mokabook/events")),
-  ).toBe(false);
+  expect(server.requests.some((url) => url.includes("/__mokly/events"))).toBe(
+    false,
+  );
 });

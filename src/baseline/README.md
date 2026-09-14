@@ -45,7 +45,7 @@ resolution before the parent `baseline` builder span. The builder emits
 `baseline.extract`, `baseline.command[<index>]` and `baseline.adopt` child spans
 on a miss. Its successful end includes a boolean `cacheHit`; it settles only
 after best-effort cleanup and lock release. Command argv and diagnostics never
-enter timing records. See the [timing contract](../../docs/protocol/mokabook-timings.md).
+enter timing records. See the [timing contract](../../docs/protocol/mokly-timings.md).
 
 Preparation lives in `review/prepare.ts`; read-only factories live separately
 in `review/repository.ts`:
@@ -60,7 +60,7 @@ a cache hit never leaves `pending`. A rejected build reaches the shared error
 path, which logs the typed reason and publishes `unavailable`. Export uses the
 same composition and rechecks the marker.
 
-`cache_layout.ts` owns `.mokabook-cache/baselines/<commit>`. The builder extracts
+`cache_layout.ts` owns `.mokly-cache/baselines/<commit>`. The builder extracts
 to `source`, runs commands, validates the historical manifest and output tree,
 moves the generated directory to `output`, deletes the extraction, and writes
 `complete.json`. Completion of the marker write commits the result immediately.
@@ -89,7 +89,7 @@ Retired entries are moved beneath the active locked entry before removal.
 paths and symlink chains before writing, and rejects hard links, device files,
 cycles and traversal through symlink ancestors. Git archives are uncompressed
 and bounded to 64 MiB. Commands run without a shell and receive only PATH, HOME,
-locale/temp variables, CI=1 and MOKABOOK_BASELINE_COMMIT. Combined diagnostics
+locale/temp variables, CI=1 and MOKLY_BASELINE_COMMIT. Combined diagnostics
 retain at most 64 KiB; command errors expose the last 40 lines and a zero-based
 command index, argv, exit code and signal. Cancellation sends TERM then KILL to
 the process group and waits for the process and pipes to close.
@@ -110,5 +110,5 @@ node --import tsx --test tests/baseline*.test.ts
 Unit tests use an in-memory filesystem, fake process runner and clock. The real
 Git integration fixture exercises extraction, execution, cache sharing, recovery,
 interruption and symlink rejection. See the
-[derived-baseline contract](../../docs/protocol/mokabook-derived-baselines.md)
+[derived-baseline contract](../../docs/protocol/mokly-derived-baselines.md)
 and [review boundaries](../review/README.md).

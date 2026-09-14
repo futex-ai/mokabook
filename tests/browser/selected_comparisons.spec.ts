@@ -22,7 +22,7 @@ test("live Difference requests the active screen and keeps real before/current p
   const requests: URL[] = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
-    if (url.pathname === "/__mokabook/diffs/review.json") requests.push(url);
+    if (url.pathname === "/__mokly/diffs/review.json") requests.push(url);
   });
   await page.goto(`${server.url}/view/screens/home.html`);
   await chooseViewport(page, "desktop");
@@ -58,7 +58,7 @@ test("saved variant selection and refresh keep the selected comparison scope", a
   const requests: URL[] = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
-    if (url.pathname === "/__mokabook/diffs/review.json") requests.push(url);
+    if (url.pathname === "/__mokly/diffs/review.json") requests.push(url);
   });
   await page.goto(`${server.url}/view/components/action.html`);
   await chooseViewport(page, "mobile");

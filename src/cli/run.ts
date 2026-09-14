@@ -5,7 +5,7 @@ import { compileCatalogue } from "../build/compile.js";
 import { FileSystemGeneratedOutputStore } from "../build/output_store.js";
 import { loadConfig } from "../config/load.js";
 import { runWithTimings, timeAsync } from "../diagnostics/timings.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { runServerChild } from "../server/child.js";
 import { receiveComponentRuntimeStartup } from "../server/controls/runtime_ipc.js";
 import { serve, type RunningServe } from "../server/serve.js";
@@ -53,7 +53,7 @@ async function execute(arguments_: CliArguments, cwd: string): Promise<number> {
       }),
     );
     process.stdout.write(
-      `Exported Mokabook to ${result.outDir}.\nDeploy this directory at your site's root with your hosting provider.\n`,
+      `Exported Mokly to ${result.outDir}.\nDeploy this directory at your site's root with your hosting provider.\n`,
     );
     return 0;
   }
@@ -62,7 +62,7 @@ async function execute(arguments_: CliArguments, cwd: string): Promise<number> {
     const compilation = await compileCatalogue(config);
     await outputStore.write(compilation, config);
     process.stdout.write(
-      `Generated ${compilation.outputs.size} Mokabook files.\n`,
+      `Generated ${compilation.outputs.size} Mokly files.\n`,
     );
     return 0;
   }
@@ -73,8 +73,8 @@ async function execute(arguments_: CliArguments, cwd: string): Promise<number> {
     );
     process.stdout.write(
       config.generatedOutput === "derived"
-        ? `Mokabook output is valid and untracked (${compilation.outputs.size} files).\n`
-        : `Mokabook output is current (${compilation.outputs.size} files).\n`,
+        ? `Mokly output is valid and untracked (${compilation.outputs.size} files).\n`
+        : `Mokly output is current (${compilation.outputs.size} files).\n`,
     );
     return 0;
   }
@@ -100,7 +100,7 @@ async function execute(arguments_: CliArguments, cwd: string): Promise<number> {
     }),
   );
   process.stdout.write(
-    `Mokabook listening at ${running.url}${arguments_.watch === false ? "" : " (watching)"}\n`,
+    `Mokly listening at ${running.url}${arguments_.watch === false ? "" : " (watching)"}\n`,
   );
   await waitForShutdown(running);
   return 0;
@@ -132,14 +132,14 @@ function packageVersion(): string {
     version?: unknown;
   };
   if (typeof value.version !== "string")
-    throw new MokabookError("cli-invalid", "package version is missing");
+    throw new MoklyError("cli-invalid", "package version is missing");
   return value.version;
 }
 
 function assertSupportedNode(): void {
   const [major = 0, minor = 0] = process.versions.node.split(".").map(Number);
   if (major < 22 || (major === 22 && minor < 14)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "cli-invalid",
       `Node.js 22.14 or newer is required; found ${process.versions.node}`,
     );

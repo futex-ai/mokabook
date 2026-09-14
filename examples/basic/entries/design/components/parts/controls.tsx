@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import type { ComponentPageState } from "./component_details.js";
 import { COMPONENT_PAGES } from "./destinations.js";

@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import type { ChangeStatus, ComparisonFixture } from "./comparison_fixtures.js";
 import { useDesignInstance } from "../../library/composition.js";
@@ -8,7 +8,7 @@ import { MetaRow } from "../../parts/metadata_row.js";
 export function ChangeStatusBadge({ status }: { status: ChangeStatus }) {
   return (
     <changeStatusBadge.Component
-      mokabookInstance={useDesignInstance("status")}
+      moklyInstance={useDesignInstance("status")}
       status={status}
     />
   );
