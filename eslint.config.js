@@ -21,6 +21,9 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     plugins: { import: importPlugin },
+    settings: {
+      "import-x/internal-regex": "^@mokly/mokly(?:/|$)",
+    },
     rules: {
       "import/first": "error",
       "import/order": [

@@ -570,8 +570,10 @@ files are absent. Example baselines run `npm ci`, `npm run build`, then
 JavaScript and TypeScript imports stay at the top, grouped as Node builtins,
 external packages, then repository modules. Paths are alphabetical within each
 group, with parent directories before siblings and blank lines between groups.
-`npm run lint -- --fix` applies the `import/first` and `import/order` rules,
-provided by the ESLint 10-compatible `eslint-plugin-import-x` package.
+The package's own `@mokly/mokly` public entrypoint is always a repository module,
+including before `dist/` has been built. `npm run lint -- --fix` applies the
+`import/first` and `import/order` rules, provided by the ESLint 10-compatible
+`eslint-plugin-import-x` package.
 
 For local development after installing dependencies, run:
 
