@@ -2,6 +2,7 @@
 
 ## Active
 
+- [Derived Baseline Review Fixes](./derived-baseline-review-fixes.md)
 - [App-Independent Mokabook Npm Library](./app-independent-mokabook-library.md)
 - [Accounting Shell Design Parity](./accounting-shell-design-parity.md)
 

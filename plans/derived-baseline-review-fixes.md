@@ -1,0 +1,93 @@
+# Derived Baseline Review Fixes
+
+## Summary
+
+Address three findings from the
+[derived baselines](./derived-baselines.md) review chosen by the user:
+
+1. A derived rebuild can run inside the HTTP server child through the
+   unselected comparison route, because `runReview` and two sibling entry
+   points construct a build-capable repository when none is injected.
+2. A completed rebuild is deleted by the builder's own error path when
+   cleanup fails or cancellation lands after the completion marker is written.
+3. The README quick start opts consumers into derived mode before the trust
+   statement.
+
+Findings 3 to 11 of that review remain recorded for later decisions and are
+out of scope here. The fixes are backend and documentation only; no mockup or
+UI work is involved.
+
+Protocol owner: [derived baselines](../docs/protocol/mokabook-derived-baselines.md).
+
+## Milestone 1: Build capability as a type
+
+Make "may rebuild a baseline" a capability that HTTP-side code cannot obtain,
+and restore the unselected comparison route in derived watched Serve by
+handing the child a read-only repository from the parent.
+
+- [ ] Split the repository type in `src/review/repository.ts`:
+      `PreparedReviewRepository` carries the pinned commit, evidence, reader
+      and completion marker and is constructible only by the CLI composition
+      root and the Serve parent; `ReadOnlyReviewRepository` carries evidence
+      and a reader only. Every function reachable from the HTTP child accepts
+      the read-only type.
+- [ ] Delete the `??= prepareReviewRepository(...)` fallbacks in
+      `src/review/run.ts`, `src/server/changed.ts` and
+      `src/server/component_changes.ts`; callers inject a repository. Keep
+      committed-mode construction of a Git-blob reader available to the child
+      through a read-only factory.
+- [ ] Parent-to-child handoff: after a rebuild completes and on every merge
+      base move, the parent sends the pinned commit to the child over the
+      existing generation message. The child builds a read-only repository
+      over the cache through `baselineReaderForCommit` and passes it to
+      `configuredServedReview`. Before the first completion the child has none
+      and the unselected route returns a typed `review-invalid` error whose
+      message says the comparison is not prepared; no command is spawned.
+- [ ] Tests: the child serves `/__mokabook/diffs/review.json` without `route`
+      in derived mode with `CachedBaselineBuilder.prototype.build` mocked to
+      throw; the child swaps readers when the merge base moves; the child
+      factory module has no import path to the builder; committed-mode
+      behavior is byte-identical.
+- [ ] Update `docs/protocol/mokabook-derived-baselines.md` (Serve And Watch)
+      and `src/review/README.md` / `src/server/README.md` to describe the
+      typed capability and the IPC handoff.
+- [ ] Run format, lint, typecheck, `npm test`, `npm run example:check`,
+      browser tests, `cargo xtask check`; commit and push.
+
+## Milestone 2: Publish before cleanup
+
+Make adoption a committed step that cleanup and cancellation cannot undo.
+
+- [ ] In `src/baseline/rebuild.ts`, restructure `prepare` so writing the
+      completion marker is the commit point: set the adopted state immediately
+      after the marker write and return the result from that step. Cleanup and
+      lock release become separate post-steps that cannot fail the build.
+- [ ] Make `cleanupBaselines` tolerate per-entry failures: catch errors from
+      stat, lock, rename and remove for each victim, record them, continue,
+      and report them through the progress observer or stderr without
+      throwing.
+- [ ] Move the post-adoption `assertBaselineActive` check: cancellation after
+      the marker is written completes the build with the cached result and
+      skips cleanup.
+- [ ] Tests in `tests/baseline_rebuild.test.ts` using the existing fake
+      filesystem: cleanup rename failure keeps the marker and output; abort
+      signalled between marker write and cleanup returns a completed baseline;
+      concurrent removal of a victim entry during cleanup does not fail the
+      build.
+- [ ] Update the Rebuild Procedure and Cache Layout sections of the protocol
+      to state the commit point and best-effort cleanup.
+- [ ] Run gates, commit and push.
+
+## Milestone 3: README quick start shows the default
+
+- [ ] Remove `generatedOutput: "derived"` from the first `defineConfig`
+      example in `README.md`; keep the derived example only in its dedicated
+      section with the trust statement and ignore rules.
+- [ ] Validate Markdown, commit and push.
+
+## Milestone 4: Review
+
+- [ ] After the final push, review the complete local diff against
+      `origin/main` using `docs/implementation-review-prompt.md`. Report
+      numbered findings with severity, context, impact, lettered options and a
+      recommendation. Do not change the implementation.
