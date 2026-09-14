@@ -64,13 +64,17 @@ Protect the public artifact and argument boundaries with focused regressions.
 - [x] Exercise the installed CLI with a leading-dash token and compare complete uploaded inventories with the documented ownership shape.
 - [x] Update relevant READMEs and record the approved findings as addressed.
 
-## Milestone 7: Follow-up verification and delivery
+## Milestone 7: Follow-up verification and delivery — completed
 
 Deliver the approved fixes and review the complete branch after the push.
 
 - [x] Run focused tests, package/upload smoke tests, Markdown validation and `cargo xtask check`; resolve failures.
-- [ ] After checks pass, `git add -A`, commit with Conventional Commits and push the branch.
-- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md) against `origin/main`; report findings without automatically changing the implementation.
+- [x] After checks pass, `git add -A`, commit with Conventional Commits and push the branch.
+- [x] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md) against `origin/main`; report findings without automatically changing the implementation.
+
+Follow-up commit `5f84921` was pushed before the complete branch review against
+`origin/main` (`5b4c647`). Both approved findings are addressed; the final review
+found no additional actionable findings. All branch milestones are complete.
 
 ## Post-merge follow-up (non-blocking)
 

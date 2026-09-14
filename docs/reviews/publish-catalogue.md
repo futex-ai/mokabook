@@ -118,3 +118,24 @@ The follow-up `cargo xtask check` passed on Node 22.14.0 before commit and push:
 1,084 unit/integration tests, 247 browser tests, three Rust tests, and all
 dependency, example, package, formatting, lint, types and Rust gates. There
 were no failed, retried, skipped or cancelled tests in this complete run.
+
+## Follow-up Post-push Review
+
+No additional actionable findings. Both original P2 findings are addressed.
+The review ran after fix commit `5f84921` was pushed, following
+[the implementation review prompt](../implementation-review-prompt.md).
+It inspected the complete branch against `origin/main` at `5b4c647`, including
+all 63 added/changed files and the earlier publish implementation. There were
+no file deletions, staged changes or untracked files at the review snapshot.
+
+The audit checked shared option parsing and secret redaction, the public
+ownership contract and fixtures, independent package conformance and full tar
+inventories, release packaging, export transaction/consistency behavior, Git
+metadata, bounded archives, HTTP failures, the action and regression coverage.
+The complete committed diff passed whitespace validation. Review inspection
+did not change implementation, tests or generated output; the plan status and
+this result were recorded afterward.
+
+Residual integration risk is unchanged: the full local gate and real local
+uploads passed, but a hosted GitHub Actions workflow and a production receiver
+have not been exercised. Consumers still need a supporting npm release.
