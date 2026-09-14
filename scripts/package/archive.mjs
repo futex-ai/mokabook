@@ -51,6 +51,9 @@ export function validatePackageReport(report) {
     "dist/index.d.ts",
     "dist/cli/bin.js",
     "dist/cli/export.js",
+    "dist/cli/publish.js",
+    "dist/publish/run.js",
+    "docs/protocol/mokly-upload.md",
     "dist/components/definition.js",
     "dist/server/controls/worker.js",
     "dist/browser/component_controls.js",
@@ -64,7 +67,9 @@ export function validatePackageReport(report) {
   }
   for (const file of files) {
     assert.ok(
-      ROOT_FILES.has(file) || file.startsWith("dist/"),
+      ROOT_FILES.has(file) ||
+        file.startsWith("dist/") ||
+        file.startsWith("docs/protocol/"),
       `package contains non-allowlisted path ${file}`,
     );
     assert.equal(file.includes("accounting"), false);

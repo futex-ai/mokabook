@@ -1,0 +1,74 @@
+name: Publish Mokly catalogue
+description: Export and upload a catalogue using a pinned public Mokly npm release
+inputs:
+  version:
+    description: Exact released version of @mokly/mokly supporting publish
+    required: true
+  endpoint:
+    description: Full upload endpoint URL
+    required: true
+  token:
+    description: Bearer token for the upload service
+    required: true
+  config:
+    description: Consumer config path (empty discovers the config)
+    required: false
+    default: ""
+  base:
+    description: Comparison Git ref (empty uses the configured base)
+    required: false
+    default: ""
+  no-changes:
+    description: Publish only the current catalogue without comparisons
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+      with:
+        node-version: 24
+        package-manager-cache: false
+    - name: Install pinned Mokly
+      id: install
+      shell: bash
+      env:
+        MOKLY_VERSION: ${{ inputs.version }}
+      run: |
+        node --input-type=module <<'JS'
+        const value = process.env.MOKLY_VERSION ?? "";
+        const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.exec(value);
+        if (value.length > 255 || !match || match[4]?.split(".").some(part => /^0\d+$/.test(part))) {
+          process.stderr.write("Mokly version must be an exact SemVer release.\n");
+          process.exit(1);
+        }
+        JS
+        MOKLY_INSTALL_DIR="$(mktemp -d "$RUNNER_TEMP/mokly-publish.XXXXXX")"
+        npm install --prefix "$MOKLY_INSTALL_DIR" --no-save --package-lock=false --ignore-scripts --no-audit --no-fund "@mokly/mokly@$MOKLY_VERSION"
+        echo "mokly_bin=$MOKLY_INSTALL_DIR/node_modules/.bin/mokly" >> "$GITHUB_OUTPUT"
+    - name: Publish catalogue
+      id: publish
+      shell: bash
+      env:
+        MOKLY_BIN: ${{ steps.install.outputs.mokly_bin }}
+        MOKLY_ENDPOINT: ${{ inputs.endpoint }}
+        MOKLY_TOKEN: ${{ inputs.token }}
+        MOKLY_CONFIG: ${{ inputs.config }}
+        MOKLY_BASE: ${{ inputs.base }}
+        MOKLY_NO_CHANGES: ${{ inputs.no-changes }}
+      run: |
+        args=(publish)
+        if [[ -n "$MOKLY_CONFIG" ]]; then args+=(--config "$MOKLY_CONFIG"); fi
+        if [[ -n "$MOKLY_BASE" ]]; then args+=(--base "$MOKLY_BASE"); fi
+        case "$MOKLY_NO_CHANGES" in
+          false) ;;
+          true)
+            if [[ -n "$MOKLY_BASE" ]]; then
+              echo "no-changes cannot be combined with base" >&2
+              exit 1
+            fi
+            args+=(--no-changes)
+            ;;
+          *) echo "no-changes must be true or false" >&2; exit 1 ;;
+        esac
+        "$MOKLY_BIN" "${args[@]}"

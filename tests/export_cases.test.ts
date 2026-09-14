@@ -18,6 +18,7 @@ test("a clean HEAD matching origin/main exports only unmodified screens", async 
   ).stdout.trim();
   assert.equal(head, main);
   const result = await exportCatalogue(fixture.config, { outDir: "site" });
+  assert.ok(result.comparisonUrl);
   const review = JSON.parse(
     await fs.promises.readFile(
       path.join(fixture.output, result.comparisonUrl),
@@ -68,6 +69,7 @@ test("ignored-only and shared-impact evidence does not fill exported Changes", a
     "Changed shared guidance\n",
   );
   const result = await exportCatalogue(fixture.config, { outDir: "site" });
+  assert.ok(result.comparisonUrl);
   const review = JSON.parse(
     await fs.promises.readFile(
       path.join(fixture.output, result.comparisonUrl),

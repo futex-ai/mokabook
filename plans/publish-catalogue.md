@@ -1,0 +1,66 @@
+# Publish Catalogue
+
+Implement the public [upload v1 contract](../docs/protocol/mokly-upload.md) in
+the npm CLI and a composite GitHub Action. Receivers use documented artifacts
+only; no private Cloud integration or hosting service is part of this change.
+
+## Milestone 1: Protocol and integration documentation — completed
+
+Define the complete receiver and consumer contract before implementation.
+
+- [x] Draft and share upload v1: manifest, archive, HTTP, limits, errors and Git metadata.
+- [x] Align export protocol, README and action usage with publish and current-only behavior.
+- [x] Add this plan to the active index.
+
+## Milestone 2: Export, upload bundle and CLI — completed
+
+Keep the shared exporter functioning while adding a separately authorized upload.
+
+- [x] Add failing tests for CLI options, metadata, bundles, limits, HTTP failures and token secrecy.
+- [x] Add current-only export through the existing transactional engine; preserve comparisons by default.
+- [x] Build the owned manifest and bounded tarball from finalized export bytes.
+- [x] POST through an injectable HTTP boundary with typed failures and cancellation.
+- [x] Verify installed-package operation, repeated exports and pinned comparisons with integration tests.
+- [x] Align required receiver files with the export's public inventory; retain exclusion of the source catalogue manifest.
+
+## Milestone 3: Public composite action — completed
+
+Install an explicitly pinned npm release and run the supported CLI.
+
+- [x] Add failing action tests for package pinning, argument forwarding and hostile input quoting.
+- [x] Implement the action under `.github/actions/publish` and document consumer setup.
+- [x] Smoke-test action execution and the packed CLI against a local HTTP receiver.
+
+## Milestone 4: Verification and delivery
+
+Complete branch work before review; merge remains the plan completion boundary.
+
+- [x] Run relevant tests, package build and smoke tests; validate Markdown and full diff.
+- [x] Update release-package fixtures to include publish code and the distributed receiver protocol, retaining release integrity checks.
+- [x] Capture raw temporary-storage setup failures in a failing CLI test, then add a typed publish fallback without exposing raw exceptions.
+- [x] Run `cargo xtask check` and resolve any failures.
+- [ ] After checks pass, `git add -A`, commit all work with Conventional Commits and push the branch.
+- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md) to review the complete local diff against `origin/main`; report numbered, severity-rated findings with options/recommendations without changing the implementation.
+
+## Post-merge follow-up (non-blocking)
+
+Release the npm version containing publish before consumers invoke the action.
+Consumers then pin that exact version and an action commit/tag. A separate
+`mokly-ai/publish-action` repository can reuse this composite action later.
+Close this plan in the index when its PR merges.
+
+## Verification evidence
+
+`cargo xtask check` passed on Node 22.14.0: 1,074 unit/integration tests, 247
+browser tests, packed consumers and their dependency audit, example/package
+checks, formatting, lint, types, Rust formatting/Clippy, three Rust tests and
+the Rust file-length audit. The 30 focused publish tests also passed on Node
+24.14.1. The action's actual shell steps were exercised with an injected npm
+installer; real packed CLI uploads were accepted and extracted by a local
+HTTP receiver in both comparison modes, with exact exported-byte checks.
+
+Earlier runs caught release fixture inventories needing the new package files,
+a raw temporary-storage preparation error (covered before fixing), one native
+Node 24 loader crash, and an intermittent existing watched-comparison browser
+test. The last two passed when rerun independently; the complete final Node 22
+gate passed without retries or skipped tests.

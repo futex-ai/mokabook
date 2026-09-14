@@ -29,6 +29,7 @@ when the historical primary file is absent, never when it is invalid.
 
 ## Contracts
 
+- [Catalogue upload v1](./mokly-upload.md) — public CLI and hosted/self-hosted receiver boundary.
 - [Package and authoring contract](./mokly-package.md)
 - [Build and Browse runtime](./mokly-runtime.md)
 - [On-demand Serve](./mokly-on-demand.md)

@@ -154,6 +154,8 @@ test("packed package contains only the declared public surface", async () => {
   assert.ok(files.has("dist/index.js"));
   assert.ok(files.has("dist/index.d.ts"));
   assert.ok(files.has("dist/cli/bin.js"));
+  assert.ok(files.has("dist/cli/publish.js"));
+  assert.ok(files.has("docs/protocol/mokly-upload.md"));
   assert.ok(files.has("README.md"));
   assert.equal(
     [...files].some((file) => file.startsWith("tests/")),

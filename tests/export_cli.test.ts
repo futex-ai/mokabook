@@ -45,7 +45,7 @@ test("export CLI requires an explicit output and rejects misplaced options", () 
     () => parseArguments(["export", "--out", "site", "extra"]),
     /unknown option/,
   );
-  assert.throws(() => parseArguments(["publish"]), /unknown command/);
+  assert.equal(parseArguments(["publish"]).command, "publish");
   assert.equal(parseArguments(["export", "--help"]).help, true);
   assert.match(HELP, /mokly export --out <path>/);
 });

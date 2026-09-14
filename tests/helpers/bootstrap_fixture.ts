@@ -49,7 +49,7 @@ export async function bootstrapFixture(
     type: "module",
     license: "MIT",
     bin: { mokly: "./dist/cli/bin.js" },
-    files: ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+    files: ["dist", "docs/protocol", "README.md", "LICENSE", "CHANGELOG.md"],
     scripts: { prepack: "node build.mjs" },
   };
   const distFiles = packageReport()
@@ -66,6 +66,7 @@ export async function bootstrapFixture(
     }),
     ".gitignore": "dist/\nnode_modules/\n.context/\n",
     "README.md": "# Bootstrap test fixture\n",
+    "docs/protocol/mokly-upload.md": "# Upload protocol test fixture\n",
     LICENSE: "MIT\n",
     "CHANGELOG.md": "# Test release\n",
     "source.txt": "reviewed source\n",
@@ -77,8 +78,10 @@ for (const file of ${JSON.stringify(distFiles)}) {
   await fs.writeFile(file, source);
 }
 ${options.afterBuild ?? ""}`,
-  }))
+  })) {
+    await fs.mkdir(path.dirname(path.join(root, name)), { recursive: true });
     await fs.writeFile(path.join(root, name), content);
+  }
   const git = async (...args: string[]) =>
     (await execute("git", args, { cwd: root })).stdout.trim();
   await git("init", "--initial-branch=main");

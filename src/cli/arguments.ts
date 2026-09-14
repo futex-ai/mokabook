@@ -2,7 +2,7 @@ import { MoklyError } from "../errors.js";
 
 /** Supported user-visible and hidden process commands. */
 export type CliCommand =
-  "__serve-child" | "build" | "check" | "export" | "serve";
+  "__serve-child" | "build" | "check" | "export" | "publish" | "serve";
 
 /** Fully validated CLI arguments. */
 export interface CliArguments {
@@ -10,6 +10,10 @@ export interface CliArguments {
   command: CliCommand;
   config?: string;
   debugTimings?: boolean;
+  endpoint?: string;
+  token?: string;
+  repository?: string;
+  noChanges?: boolean;
   help: boolean;
   out?: string;
   port?: number;
@@ -25,6 +29,7 @@ const COMMANDS = new Set<CliCommand>([
   "build",
   "check",
   "export",
+  "publish",
   "serve",
 ]);
 
@@ -52,6 +57,12 @@ export function parseArguments(argv: readonly string[]): CliArguments {
     else if (option === "--config") parsed.config = takeValue(option, values);
     else if (option === "--base") parsed.base = takeValue(option, values);
     else if (option === "--out") parsed.out = takeValue(option, values);
+    else if (option === "--endpoint")
+      parsed.endpoint = takeValue(option, values);
+    else if (option === "--token") parsed.token = takeValue(option, values);
+    else if (option === "--repository")
+      parsed.repository = takeValue(option, values);
+    else if (option === "--no-changes") parsed.noChanges = true;
     else if (option === "--port")
       parsed.port = parsePort(takeValue(option, values));
     else if (option === "--update-version")
@@ -98,8 +109,28 @@ function validateCommandOptions(arguments_: CliArguments): void {
       "cli-invalid",
       "--retained-runtime is reserved for the watched server child",
     );
-  if (arguments_.out !== undefined && arguments_.command !== "export")
-    throw new MoklyError("cli-invalid", "--out belongs to export");
+  if (
+    arguments_.out !== undefined &&
+    arguments_.command !== "export" &&
+    arguments_.command !== "publish"
+  )
+    throw new MoklyError("cli-invalid", "--out belongs to export or publish");
+  if (
+    arguments_.command !== "publish" &&
+    (arguments_.endpoint !== undefined ||
+      arguments_.token !== undefined ||
+      arguments_.repository !== undefined ||
+      arguments_.noChanges !== undefined)
+  )
+    throw new MoklyError(
+      "cli-invalid",
+      "--endpoint, --token, --repository and --no-changes belong to publish",
+    );
+  if (arguments_.noChanges && arguments_.base !== undefined)
+    throw new MoklyError(
+      "cli-invalid",
+      "--no-changes cannot be combined with --base",
+    );
   if (arguments_.out?.trim() === "")
     throw new MoklyError("cli-invalid", "--out requires a value");
   if (
@@ -140,6 +171,9 @@ function validateCommandOptions(arguments_: CliArguments): void {
   }
   if (arguments_.command === "build" || arguments_.command === "check") {
     if (arguments_.base !== undefined)
-      throw new MoklyError("cli-invalid", "--base belongs to serve or export");
+      throw new MoklyError(
+        "cli-invalid",
+        "--base belongs to serve, export or publish",
+      );
   }
 }

@@ -2,12 +2,18 @@
 
 This internal package module builds complete consumer sites for ordinary static
 hosting. Consumers use `mokly export --out <path>`, not a JavaScript deep import.
-Deployment and hosting credentials remain outside Mokly.
+The separate `mokly publish` command uploads through the
+[public upload boundary](../publish/README.md); export itself performs no upload.
 
 `run.ts` pins one Git baseline, runs the normal build, captures public inputs,
 compares them through the existing review engine, and verifies inputs again
 before installation. `site.ts` uses the existing shell and Browse adapter to
 assemble exact v5 pages, real id aliases, package assets, and immutable comparisons.
+Publish's `--no-changes` uses this same engine with baseline reads, removed
+entries and comparisons omitted. Current-only assembly retains the normal
+input consistency checks and a null delivery comparison URL. A capture callback
+receives finalized, owned bytes before installation, enabling upload packaging
+without reading a mutable output directory later.
 Removed screens and pages use the shared catalogue change snapshots; page
 removal preserves ancestor context without introducing visual comparisons.
 The shared `server/changed_content.ts` calculation receives the same captured
