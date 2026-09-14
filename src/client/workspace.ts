@@ -49,7 +49,7 @@ export function installWorkspace(
   const query = new URLSearchParams(win.location.search);
   let variant = selectedVariant(data, win.location.search);
   root.addEventListener(
-    "mokabook:workspace-evidence",
+    "mokly:workspace-evidence",
     (event) => {
       mergeWorkspaceEvidence(
         data,
@@ -278,7 +278,7 @@ export function installWorkspace(
     },
   });
   doc.addEventListener(
-    "mokabook:comparison",
+    "mokly:comparison",
     () => {
       if (comparison()) highlight = false;
       refresh();

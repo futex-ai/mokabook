@@ -1,5 +1,5 @@
 import { MetaRow } from "../../parts/metadata_row.js";
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import { ComponentInfo } from "./component_info.js";
 import { ComparisonDetails } from "./comparison_details.js";

@@ -17,7 +17,7 @@ for (const viewport of ["desktop", "mobile"] as const) {
     );
     const paths = [
       "entries/design/library/chrome/top-bar.tsx",
-      "generated/mokabook-manifest.json",
+      "generated/mokly-manifest.json",
     ];
     const contents = () =>
       Promise.all(

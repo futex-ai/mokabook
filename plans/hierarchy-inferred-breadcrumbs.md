@@ -84,7 +84,7 @@ the package protocol in the same milestone as the matching behavior.
 - [x] Extend manifest parsing/regression coverage to prove malformed hierarchy
       graphs fail safely while historical v2/v3 `navPath` values neither
       override collection ancestry nor prevent cross-version Review.
-- [x] Update `docs/protocol/mokabook-package.md` alongside the implementation:
+- [x] Update `docs/protocol/mokly-package.md` alongside the implementation:
       remove author-supplied `navPath` from the public API, define
       `RootInput`/root collection semantics and collection-forest invariants,
       document derived schema-v3 `navPath`, and record the real-parent
@@ -122,7 +122,7 @@ contract before any UI component switches to it.
 - [x] Add model tests for duplicate collection titles, stable id-based keys,
       legacy key uniqueness, reparenting, historical manifest `navPath`
       disagreement, and guarded malformed input.
-- [x] Update `docs/protocol/mokabook-runtime.md` alongside the server model so
+- [x] Update `docs/protocol/mokly-runtime.md` alongside the server model so
       registry validation, Browse hierarchy, disclosure-key compatibility, and
       breadcrumb derivation match the implementation.
 - [x] Keep the existing shell functional through this milestone, run Prettier

@@ -58,7 +58,7 @@ export function validateManifestComponent(
   for (const key of [...Object.keys(schema.properties), ...value.slots]) {
     if (
       [
-        "mokabookInstance",
+        "moklyInstance",
         "key",
         "ref",
         "__proto__",

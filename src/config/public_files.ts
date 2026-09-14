@@ -2,7 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { isAuthoringSource } from "../build/source_inventory.js";
-import { LEGACY_MANIFEST_NAME, MANIFEST_NAME } from "../registry/manifest.js";
+import {
+  FORMER_MANIFEST_NAME,
+  LEGACY_MANIFEST_NAME,
+  MANIFEST_NAME,
+} from "../registry/manifest.js";
 import { locatePath, type FileLocation } from "./file_locations.js";
 import { projectRealPath } from "./paths.js";
 import type { ResolvedConfig } from "./types.js";
@@ -12,9 +16,11 @@ export function isInternalCatalogueFile(
   candidate: string,
   config: ResolvedConfig,
 ): boolean {
-  const internal = [MANIFEST_NAME, LEGACY_MANIFEST_NAME].map((name) =>
-    path.join(config.mockupsDir, name),
-  );
+  const internal = [
+    MANIFEST_NAME,
+    FORMER_MANIFEST_NAME,
+    LEGACY_MANIFEST_NAME,
+  ].map((name) => path.join(config.mockupsDir, name));
   if (internal.includes(candidate)) return true;
   const realCandidate = projectRealPath(candidate);
   return internal.some(

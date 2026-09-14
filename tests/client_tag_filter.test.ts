@@ -222,7 +222,7 @@ interface TagShell {
 }
 
 function tagShell(): TagShell {
-  const search = new FakeNode("input", { "data-mokabook-search": "" });
+  const search = new FakeNode("input", { "data-mokly-search": "" });
   const formsGlyph = new FakeNode("svg", { "aria-hidden": "true" });
   const forms = tagChip("forms").append(formsGlyph);
   const onboarding = tagChip("onboarding");
@@ -236,7 +236,7 @@ function tagShell(): TagShell {
   const toggle = new FakeNode("button", {
     "aria-controls": "mb-tag-picker",
     "aria-expanded": "false",
-    "data-mokabook-tag-toggle": "",
+    "data-mokly-tag-toggle": "",
   });
   const welcomeRow = navRow(
     "screens/welcome.html",
@@ -247,15 +247,17 @@ function tagShell(): TagShell {
   const glossaryRow = navRow("docs/glossary.html", "Glossary");
   const root = new FakeNode("div").append(
     new FakeNode("div", { "data-search": "" }).append(search, toggle, panel),
-    new FakeNode("details", { "data-mokabook-details": "" }).append(
+    new FakeNode("details", { "data-mokly-details": "" }).append(
       forms,
       onboarding,
     ),
     new FakeNode("details", {
       "data-nav-collection": "collection:screens",
+      "data-nav-disclosure": "collection:pages:screens",
     }).append(welcomeRow, detailsRow),
     new FakeNode("details", {
       "data-nav-collection": "collection:docs",
+      "data-nav-disclosure": "collection:pages:docs",
     }).append(glossaryRow),
   );
   const doc = asDocument(root);
@@ -304,7 +306,7 @@ function tabIndexes(shell: TagShell): (string | null)[] {
 function tagChip(tag: string): FakeNode {
   return new FakeNode(
     "button",
-    { "aria-pressed": "false", "data-mokabook-tag": tag },
+    { "aria-pressed": "false", "data-mokly-tag": tag },
     tag,
   );
 }

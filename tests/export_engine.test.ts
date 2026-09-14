@@ -43,7 +43,7 @@ test("export builds a complete consumer catalogue with an isolated comparison", 
   assert.equal(review.baseRef, "origin/main");
   assert.ok(
     ![...files.keys()].some((name) =>
-      /summary\.md|\.mokabook-review-artifact|\.tsx$/.test(name),
+      /summary\.md|\.mokly-review-artifact|\.tsx$/.test(name),
     ),
   );
   assert.equal(

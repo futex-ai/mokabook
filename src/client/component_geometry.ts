@@ -32,7 +32,7 @@ export function authenticateRanges(
     )
       return;
     const actual = decodeURIComponent(location.pathname).replace(/\.html$/, "");
-    const expected = path.startsWith("/__mokabook/components/renders/")
+    const expected = path.startsWith("/__mokly/components/renders/")
       ? path
       : `/static/${path}`;
     if (actual !== expected.replace(/\.html$/, "")) return;
@@ -43,8 +43,8 @@ export function authenticateRanges(
     let node: Node | null;
     while ((node = walker.nextNode())) {
       const text = node.textContent ?? "";
-      if (!text.startsWith("mokabook-component:")) continue;
-      const match = /^mokabook-component:(start|end):(r-[0-9]+)$/.exec(text);
+      if (!text.startsWith("mokly-component:")) continue;
+      const match = /^mokly-component:(start|end):(r-[0-9]+)$/.exec(text);
       if (!match) return;
       const record = usage.ranges.find((item) => item.id === match[2]);
       if (!record) return;

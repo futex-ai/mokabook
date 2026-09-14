@@ -11,7 +11,7 @@ export function settledRenderCapability(
   if (!/data-changes-status="(?:ready|unavailable)"/.test(html))
     return undefined;
   const workspace = html.match(/data-workspace-data="">(.*?)<\/script>/s)?.[1];
-  const version = html.match(/data-mokabook-update-version="(\d+)"/)?.[1];
+  const version = html.match(/data-mokly-update-version="(\d+)"/)?.[1];
   if (!workspace || !version) return undefined;
   const data = JSON.parse(workspace) as {
     renderCapability?: RenderCapability;

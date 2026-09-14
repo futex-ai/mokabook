@@ -1,4 +1,4 @@
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { ReviewArtifactContent } from "./types.js";
 
 /** Preserve a source route beneath one isolated Review snapshot. */
@@ -13,7 +13,7 @@ export function addArtifactFile(
   content: ReviewArtifactContent,
 ): void {
   if (files.has(relative)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "review-invalid",
       `Review artifact path collision: ${relative}`,
     );

@@ -22,7 +22,7 @@ markup progressively enhanced by one new client module.
 import from `../dist`), React 19 static rendering, Playwright Chromium against
 `examples/basic`, Rust `xtask` gate.
 
-**Spec:** [`docs/protocol/mokabook-shell-design.md`](../docs/protocol/mokabook-shell-design.md)
+**Spec:** [`docs/protocol/mokly-shell-design.md`](../docs/protocol/mokly-shell-design.md)
 (Top bar, Tag picker, Details inspector bullets, and Delivery Status pending
 list), with the approved mockups under `examples/basic/generated/design/`.
 
@@ -182,7 +182,7 @@ tags?: readonly string[];
 **Files:**
 
 - Modify: `examples/basic/entries/catalogue.mockup.tsx`,
-  `docs/protocol/mokabook-package.md`, `examples/basic/notes.md`
+  `docs/protocol/mokly-package.md`, `examples/basic/notes.md`
 - Regenerate: `examples/basic/generated/mokabook-manifest.json`
 
 **Steps:**
@@ -316,7 +316,7 @@ export function clearTagTerm(raw: string, tag: string): string;
       (computed `z-index === "11"` and `position === "relative"`). Run;
       expect failures.
 - [x] Implement server markup, CSS, and the client module.
-- [x] Update `docs/protocol/mokabook-runtime.md` (search term semantics,
+- [x] Update `docs/protocol/mokly-runtime.md` (search term semantics,
       chip behavior) and move the details-chips and `tag:` term items from
       the shell-design Delivery Status pending list to implemented; the
       stacking fix item too.
@@ -393,8 +393,8 @@ picker; the plan moves to completed.
 
 **Files:**
 
-- Modify: `docs/protocol/mokabook-runtime.md`,
-  `docs/protocol/mokabook-shell-design.md` (Delivery Status: picker
+- Modify: `docs/protocol/mokly-runtime.md`,
+  `docs/protocol/mokly-shell-design.md` (Delivery Status: picker
   implemented; pending list emptied), `examples/basic/notes.md` (drawer and
   picker bullets now match the served shell), `README.md` (one feature
   sentence), `plans/README.md` (move this plan to Completed)
@@ -448,7 +448,7 @@ screen and the Delivery Status paragraph is gone.
 - Modify: `src/server/shell/document.tsx` (wrap the product name in a
   `span.mbk-name` inside `.mbk-brand`), `src/server/shell/css_nav.ts`
   (narrow media block hides `.mbk-name` when the bar carries the search
-  field — Browse only), `docs/protocol/mokabook-shell-design.md` (remove
+  field — Browse only), `docs/protocol/mokly-shell-design.md` (remove
   the Delivery Status gap paragraph), `examples/basic/notes.md` (drop the
   gap note)
 - Test: `tests/shell.test.ts` (brand span markup), narrow browser assertion

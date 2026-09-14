@@ -24,22 +24,22 @@ export async function installConsumer(root, archivePath, packageJson) {
   );
   const installed = JSON.parse(
     await fs.promises.readFile(
-      path.join(root, "node_modules/mokabook/package.json"),
+      path.join(root, "node_modules/@mokly/mokly/package.json"),
       "utf8",
     ),
   );
-  if (installed.name !== "mokabook") {
+  if (installed.name !== "@mokly/mokly") {
     throw new Error(`consumer did not install ${archivePath}`);
   }
 }
 
 export async function runBin(root, args, options = {}) {
-  const bin = path.join(root, "node_modules/.bin/mokabook");
+  const bin = path.join(root, "node_modules/.bin/mokly");
   return await runCommand(bin, args, { cwd: options.cwd ?? root });
 }
 
 export async function smokeServer(root, args = [], inspect) {
-  const bin = path.join(root, "node_modules/.bin/mokabook");
+  const bin = path.join(root, "node_modules/.bin/mokly");
   const running = startCommand(
     bin,
     ["serve", "--port", "0", "--no-watch", ...args],
@@ -49,14 +49,14 @@ export async function smokeServer(root, args = [], inspect) {
   try {
     const match = await waitForOutput(
       running,
-      /Mokabook listening at (http:\/\/[^\s]+)/,
-      "packed Mokabook server",
+      /Mokly listening at (http:\/\/[^\s]+)/,
+      "packed Mokly server",
     );
     const response = await fetch(match[1]);
     if (!response.ok) throw new Error(`server returned ${response.status}`);
     const html = await response.text();
     if (inspect) await inspect(match[1]);
-    if (!html.includes("data-mokabook-shell")) {
+    if (!html.includes("data-mokly-shell")) {
       throw new Error("server response did not contain the Browse shell");
     }
   } catch (error) {
@@ -69,12 +69,12 @@ export async function smokeServer(root, args = [], inspect) {
 
 export async function initializeGit(root) {
   await runCommand("git", ["init", "-q"], { cwd: root });
-  await runCommand("git", ["config", "user.name", "Mokabook Package Smoke"], {
+  await runCommand("git", ["config", "user.name", "Mokly Package Smoke"], {
     cwd: root,
   });
   await runCommand(
     "git",
-    ["config", "user.email", "mokabook-package-smoke@example.invalid"],
+    ["config", "user.email", "mokly-package-smoke@example.invalid"],
     { cwd: root },
   );
   await runCommand("git", ["add", "."], { cwd: root });

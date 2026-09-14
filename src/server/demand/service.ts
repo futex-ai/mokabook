@@ -6,7 +6,7 @@ import { compactRuntime } from "../../build/compact_runtime.js";
 import { DocumentCache } from "../../build/document_cache.js";
 import type { CompiledDocument } from "../../build/document_compiler.js";
 import { generatedViews } from "../../components/views.js";
-import { MokabookError } from "../../errors.js";
+import { MoklyError } from "../../errors.js";
 import { timeAsync } from "../../diagnostics/timings.js";
 
 interface Job {
@@ -172,7 +172,7 @@ export class DocumentService {
       if (settled) return;
       if (!value.ok || !value.document)
         return failed(
-          new MokabookError(
+          new MoklyError(
             "build-invalid",
             value.error ?? "Could not render preview",
           ),

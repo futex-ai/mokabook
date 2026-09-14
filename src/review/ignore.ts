@@ -2,14 +2,15 @@ import { generatedSource } from "../build/ownership.js";
 
 const ID = "[a-z0-9]+(?:-[a-z0-9]+)*";
 const KEY = "[a-f0-9]{64}";
-const MARKER_SCAN = /<!--mokabook-review-ignore:[\s\S]*?-->/g;
-const MARKER = new RegExp(
-  `^<!--mokabook-review-ignore:(start|end):(${ID})-->$`,
-);
-const MATERIAL_SCAN = /<!--mokabook-review-material:[\s\S]*?-->/g;
-const MATERIAL = new RegExp(
-  `^<!--mokabook-review-material:(${ID}):(${KEY})-->$`,
-);
+const MARKER_SCAN = /<!--mokly-review-ignore:[\s\S]*?-->/g;
+const MARKER = new RegExp(`^<!--mokly-review-ignore:(start|end):(${ID})-->$`);
+const MATERIAL_SCAN = /<!--mokly-review-material:[\s\S]*?-->/g;
+const MATERIAL = new RegExp(`^<!--mokly-review-material:(${ID}):(${KEY})-->$`);
+const FORMER_MARKERS = [
+  ["<!--mokabook-component:", "<!--mokly-component:"],
+  ["<!--mokabook-review-ignore:", "<!--mokly-review-ignore:"],
+  ["<!--mokabook-review-material:", "<!--mokly-review-material:"],
+] as const;
 
 interface TextSegment {
   content: string;
@@ -35,6 +36,13 @@ export interface NormalizedReviewPair {
   base: string;
   head: string;
   ignoredIds: readonly string[];
+}
+
+/** Normalize historical comparison material, never HTML with unconsumed offsets. */
+export function normalizeHistoricalDocument(content: string): string {
+  for (const [former, current] of FORMER_MARKERS)
+    content = content.replaceAll(former, current);
+  return content;
 }
 
 /** Normalize only well-formed ignored regions present on both sides. */
@@ -88,9 +96,7 @@ function parseDocument(content: string, route: string): ParsedDocument {
     content = content.slice(content.indexOf("\n") + 1);
   const materials = parseMaterials(content, route);
   const matches = [...content.matchAll(MARKER_SCAN)];
-  if (
-    content.replace(MARKER_SCAN, "").includes("<!--mokabook-review-ignore:")
-  ) {
+  if (content.replace(MARKER_SCAN, "").includes("<!--mokly-review-ignore:")) {
     throw ignoreError(route, "malformed or unterminated marker");
   }
   const segments: Segment[] = [];
@@ -139,7 +145,7 @@ function parseDocument(content: string, route: string): ParsedDocument {
       throw ignoreError(route, `material signal for ${id} has no region`);
   }
   for (const region of regions.values()) {
-    if (region.content.includes("<!--mokabook-review-material:")) {
+    if (region.content.includes("<!--mokly-review-material:")) {
       throw ignoreError(
         route,
         "material signals must be outside ignored regions",
@@ -155,7 +161,7 @@ function parseMaterials(
 ): ReadonlyMap<string, string> {
   const matches = [...content.matchAll(MATERIAL_SCAN)];
   if (
-    content.replace(MATERIAL_SCAN, "").includes("<!--mokabook-review-material:")
+    content.replace(MATERIAL_SCAN, "").includes("<!--mokly-review-material:")
   ) {
     throw ignoreError(route, "malformed or unterminated material signal");
   }
@@ -181,7 +187,7 @@ function render(
   const rendered = document.segments
     .map((segment) =>
       segment.kind === "region" && ignored.has(segment.id)
-        ? `<!--mokabook-review-ignore:${segment.id}-->`
+        ? `<!--mokly-review-ignore:${segment.id}-->`
         : segment.content,
     )
     .join("");
@@ -192,9 +198,9 @@ function render(
 }
 
 function contractToken(ids: readonly string[]): string {
-  return `<!--mokabook-review-ignore-contract:${ids.join(",")}-->`;
+  return `<!--mokly-review-ignore-contract:${ids.join(",")}-->`;
 }
 
 function ignoreError(route: string, detail: string): Error {
-  return new Error(`[mokabook/review-ignore] ${route}: ${detail}`);
+  return new Error(`[mokly/review-ignore] ${route}: ${detail}`);
 }

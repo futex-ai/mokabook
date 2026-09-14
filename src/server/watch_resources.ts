@@ -5,7 +5,7 @@ import path from "node:path";
 import type { Compilation } from "../build/compile.js";
 import { isOwned } from "../build/ownership.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { referencedRoutes } from "../review/asset_references.js";
 import { FileSystemReviewAssetReader } from "../review/assets.js";
 import { ResourceGraph } from "../review/resource_graph.js";
@@ -51,7 +51,7 @@ export async function discoverWatchResources(
             ...new Set([logical, asset.location.physicalPath]),
           ]);
           if (asset.content === undefined) {
-            throw new MokabookError(
+            throw new MoklyError(
               "review-invalid",
               `referenced resource is missing: ${route}`,
             );

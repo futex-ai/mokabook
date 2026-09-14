@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 
 const PORTABLE_URL_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._~-]*$/;
 const WINDOWS_DEVICE = /^(?:aux|con|nul|prn|com[1-9]|lpt[1-9])$/i;
@@ -19,7 +19,7 @@ export function resolveInside(
   label: string,
 ): string {
   if (value.trim().length === 0) {
-    throw new MokabookError("config-invalid", `${label} must not be empty`);
+    throw new MoklyError("config-invalid", `${label} must not be empty`);
   }
   const resolved = path.resolve(fromDir, value);
   const relative = path.relative(repoRoot, resolved);
@@ -28,7 +28,7 @@ export function resolveInside(
     relative.startsWith(`..${path.sep}`) ||
     path.isAbsolute(relative)
   ) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `${label} resolves outside repoRoot: ${toPosixPath(relative)}`,
     );
@@ -45,7 +45,7 @@ export function validateRelativeRoute(value: string, label: string): string {
     normalized.split("/").includes("..") ||
     normalized.includes("\0")
   ) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `${label} must be a safe relative path`,
     );
@@ -57,7 +57,7 @@ export function validateRelativeRoute(value: string, label: string): string {
 export function validateCatalogueRoute(value: string, label: string): string {
   const normalized = validateRelativeRoute(value, label);
   if (!isSafeCatalogueRoute(normalized)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "config-invalid",
       `${label} must use portable URL-safe path segments and end in .html`,
     );

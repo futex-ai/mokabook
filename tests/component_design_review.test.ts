@@ -23,7 +23,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
           node.tagName === "a" && attribute(node, "aria-current") === "page",
       );
       for (const link of current)
-        assert.equal(attribute(link, "data-mokabook-link"), entry.id, entry.id);
+        assert.equal(attribute(link, "data-mokly-link"), entry.id, entry.id);
     }
   });
 

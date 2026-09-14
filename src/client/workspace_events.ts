@@ -47,9 +47,9 @@ export function installWorkspaceEvents(
   const mutations = new MutationObserver(actions.refresh);
   mutations.observe(doc.body, {
     attributes: true,
-    attributeFilter: ["data-mokabook-color-scheme"],
+    attributeFilter: ["data-mokly-color-scheme"],
   });
-  const stage = root.querySelector("[data-mokabook-stage]");
+  const stage = root.querySelector("[data-mokly-stage]");
   if (stage)
     mutations.observe(stage, {
       attributes: true,

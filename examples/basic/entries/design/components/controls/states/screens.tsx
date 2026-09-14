@@ -1,4 +1,4 @@
-import { screen } from "mokabook";
+import { screen } from "@mokly/mokly";
 
 import { ControlsPage } from "../parts/page.js";
 

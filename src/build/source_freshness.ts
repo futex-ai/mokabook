@@ -2,7 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 
 import { loadConfig } from "../config/load.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { ComponentRuntime } from "./component_runtime.js";
 import { loadConsumerGraph } from "./load_graph.js";
 import { normalizeSourceFiles } from "./source_inventory.js";
@@ -22,9 +22,9 @@ export async function assertFreshSourceInventory(
       manifest.sourceFiles,
     )
   )
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
-      "source inventory is stale; run mokabook build before serving or publishing",
+      "source inventory is stale; run mokly build before serving or publishing",
     );
   config.sourceFiles = graph.sourceFiles;
   config.configSourceFiles = current.configSourceFiles ?? [];

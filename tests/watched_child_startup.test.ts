@@ -77,7 +77,7 @@ test(
       version: 2,
     });
     const html = await waitForRuntime(`http://127.0.0.1:${String(port)}`);
-    assert.match(html, /data-mokabook-update-version="2"/);
+    assert.match(html, /data-mokly-update-version="2"/);
     assert.match(html, /"renderCapability"/);
   },
 );
@@ -98,7 +98,7 @@ async function waitForRuntime(url: string): Promise<string> {
     const html = await (
       await fetch(`${url}/view/components/action.html`)
     ).text();
-    if (html.includes('data-mokabook-update-version="2"')) return html;
+    if (html.includes('data-mokly-update-version="2"')) return html;
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
   throw new Error("child did not publish its retained runtime");

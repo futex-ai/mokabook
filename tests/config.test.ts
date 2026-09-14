@@ -30,6 +30,23 @@ test("route-like config values normalize to platform-independent POSIX paths", (
   );
 });
 
+test("config resolves the scoped API without changing its filename", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  const source = `import { defineConfig } from "@mokly/mokly";
+export default defineConfig({ repoRoot: ".", entriesDir: "entries", mockupsDir: "mockups" });
+`;
+  await fs.promises.writeFile(fixture.configPath, source);
+  const config = await loadConfig(fixture.root);
+  assert.equal(config.configPath, fixture.configPath);
+  assert.equal(path.basename(config.configPath), "mokly.config.ts");
+  await fs.promises.writeFile(
+    fixture.configPath,
+    source.replace("@mokly/mokly", "mokly"),
+  );
+  await assert.rejects(loadConfig(fixture.root), /Could not resolve "mokly"/);
+});
+
 test("explicit config loading is independent of the executing package directory", async (context) => {
   const fixture = await createFixture();
   context.after(() => removeFixture(fixture));
@@ -189,8 +206,24 @@ test("stylesheet rules reject paths linked twice in one fragment", async (contex
 });
 
 test("missing config reports every attempted filename", () => {
-  const root = path.join("/", "definitely-missing-mokabook-config");
-  assert.throws(() => discoverConfig(root), /mokabook\.config\.ts/);
+  const root = path.join("/", "definitely-missing-mokly-config");
+  assert.throws(() => discoverConfig(root), /mokly\.config\.ts/);
+});
+
+test("config discovery does not accept the former package filename", async (context) => {
+  const fixture = await createFixture();
+  context.after(() => removeFixture(fixture));
+  await fs.promises.rename(
+    fixture.configPath,
+    path.join(fixture.root, "mokabook.config.ts"),
+  );
+
+  assert.throws(
+    () => discoverConfig(fixture.root),
+    (error: Error) =>
+      error.message.includes("no Mokly config found") &&
+      !error.message.includes("mokabook.config.ts"),
+  );
 });
 
 test("config rejects traversal and overlapping roots", async (context) => {

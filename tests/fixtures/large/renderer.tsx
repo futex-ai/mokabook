@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { createSharedUiTheme, SharedUiThemeProvider } from "@firna/ui/theme";
 import { AppRegistry } from "react-native-web";
-import type { RenderInput } from "mokabook";
+import type { RenderInput } from "@mokly/mokly";
 import { tokens, darkTokens } from "../../../examples/basic/theme.js";
 
 const themes = {

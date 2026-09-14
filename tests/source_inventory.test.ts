@@ -123,10 +123,10 @@ test("freshness resolves new imports without executing or rendering the graph", 
   );
   assert.equal(
     await fs.promises.readFile(
-      path.join(fixture.mockupsDir, "mokabook-manifest.json"),
+      path.join(fixture.mockupsDir, "mokly-manifest.json"),
       "utf8",
     ),
-    compilation.outputs.get("mokabook-manifest.json"),
+    compilation.outputs.get("mokly-manifest.json"),
   );
 });
 
@@ -146,7 +146,7 @@ test("failed page builds and source collisions preserve the previous inventory a
   );
   await fs.promises.writeFile(
     fixture.entryPath,
-    'import { definePage } from "mokabook"; import html from "../mockups/document.html"; export const mockups = [definePage({ id: "page", title: "Page", description: "Page", dependencies: [], relatedDocs: [], route: "document.html", render: () => html })];',
+    'import { definePage } from "@mokly/mokly"; import html from "../mockups/document.html"; export const mockups = [definePage({ id: "page", title: "Page", description: "Page", dependencies: [], relatedDocs: [], route: "document.html", render: () => html })];',
   );
   const next = await loadConfig(fixture.root);
   await assert.rejects(compileCatalogue(next), /authoring|source/);

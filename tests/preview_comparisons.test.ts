@@ -20,7 +20,7 @@ test("published comparisons retain real baseline bytes, removed routes, and isol
     fs.promises.readFile(path.join(fixture.output, relative), "utf8");
   const redirects = await read("_redirects");
   const jsonPath = redirects.match(
-    /^\/__mokabook\/diffs\/review.json \/(\S+) 302$/m,
+    /^\/__mokly\/diffs\/review.json \/(\S+) 302$/m,
   )?.[1];
   assert.ok(jsonPath);
   const result: ReviewResult = JSON.parse(await read(jsonPath));
@@ -96,9 +96,7 @@ test("published comparisons retain real baseline bytes, removed routes, and isol
   ])
     assert.doesNotMatch(await read(file), /client\/browser\.js|EventSource/);
   assert.equal(
-    fs.existsSync(
-      path.join(fixture.output, "__mokabook/client/live_updates.js"),
-    ),
+    fs.existsSync(path.join(fixture.output, "__mokly/client/live_updates.js")),
     false,
   );
   assert.equal(
@@ -118,14 +116,14 @@ test("published comparisons retain real baseline bytes, removed routes, and isol
   await assert.rejects(fixture.build, /find merge base/);
   assert.equal(await read("_redirects"), redirects);
   assert.deepEqual(await fs.promises.readdir(path.dirname(fixture.output)), [
-    ".mokabook-export-reservations",
+    ".mokly-export-reservations",
     "published",
   ]);
   assert.deepEqual(
     await fs.promises.readdir(
       path.join(
         path.dirname(fixture.output),
-        ".mokabook-export-reservations/locks",
+        ".mokly-export-reservations/locks",
       ),
     ),
     [],
@@ -163,7 +161,7 @@ test("capture mutation aborts atomically and default replacement removes old rev
   const stale = path.join(fixture.mockupsDir, "archived-review");
   await fs.promises.mkdir(stale);
   await fs.promises.writeFile(
-    path.join(stale, ".mokabook-review-artifact"),
+    path.join(stale, ".mokly-review-artifact"),
     "owned",
   );
   await fs.promises.writeFile(
@@ -184,7 +182,7 @@ test("capture mutation aborts atomically and default replacement removes old rev
   for (const file of [
     "view/removed-document.html",
     "view/screens/removed.html",
-    "__mokabook/diffs",
+    "__mokly/diffs",
     "static/archived-review/private-snapshot.html",
     "_headers",
   ])

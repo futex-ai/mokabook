@@ -6,23 +6,23 @@ import { adaptLinkControls } from "../dist/build/link_controls.js";
 const page = (body: string) =>
   `<!doctype html><html><head></head><body>${body}</body></html>`;
 const wrap = (body: string) =>
-  `<template data-mokabook-link-child-start="mock:details"></template>${body}<template data-mokabook-link-child-end=""></template>`;
+  `<template data-mokly-link-child-start="mock:details"></template>${body}<template data-mokly-link-child-end=""></template>`;
 const adapt = (body: string) => adaptLinkControls(page(body), "home.html");
 
 test("mixed-case child markers are consumed using HTML attribute semantics", () => {
   const html = wrap("<button>Continue</button>").replaceAll(
-    "data-mokabook-link-child-",
-    "DATA-Mokabook-LINK-CHILD-",
+    "data-mokly-link-child-",
+    "DATA-Mokly-LINK-CHILD-",
   );
   const output = adapt(html);
   assert.match(output, /<a href="mock:details"/);
-  assert.doesNotMatch(output, /data-mokabook-link-child-/i);
+  assert.doesNotMatch(output, /data-mokly-link-child-/i);
 });
 
 for (const html of [
-  '<template DATA-MOKABOOK-LINK-CHILD-END=""></template>',
-  '<span DATA-MOKABOOK-LINK-CHILD-START="mock:details">Bad</span>',
-  '<template><template DATA-MOKABOOK-LINK-CHILD-END=""></template></template>',
+  '<template DATA-MOKLY-LINK-CHILD-END=""></template>',
+  '<span DATA-MOKLY-LINK-CHILD-START="mock:details">Bad</span>',
+  '<template><template DATA-MOKLY-LINK-CHILD-END=""></template></template>',
 ]) {
   test(`mixed-case malformed markers fail: ${html}`, () => {
     assert.throws(() => adapt(html), /MockLink child control/);
@@ -30,12 +30,12 @@ for (const html of [
 }
 
 for (const metadata of [
-  '<a data-mokabook-link-control="button">Unrelated</a>',
-  '<a DATA-MOKABOOK-LINK-CONTROL="div">Unrelated</a>',
-  '<style data-mokabook-link-control-styles="">a{color:red}</style>',
-  '<div data-mokabook-link-control-future="">Reserved namespace</div>',
-  '<template><a data-mokabook-link-control="span">Inert</a></template>',
-  '<svg><a DATA-MOKABOOK-LINK-CONTROL="a">Foreign</a></svg>',
+  '<a data-mokly-link-control="button">Unrelated</a>',
+  '<a DATA-MOKLY-LINK-CONTROL="div">Unrelated</a>',
+  '<style data-mokly-link-control-styles="">a{color:red}</style>',
+  '<div data-mokly-link-control-future="">Reserved namespace</div>',
+  '<template><a data-mokly-link-control="span">Inert</a></template>',
+  '<svg><a DATA-MOKLY-LINK-CONTROL="a">Foreign</a></svg>',
 ]) {
   for (const child of ["", wrap("<button>Continue</button>")]) {
     test(`authored metadata is reserved globally ${child ? "with" : "without"} child links: ${metadata}`, () => {
@@ -60,10 +60,10 @@ for (const tabindex of ["0", "3", "-1"]) {
 }
 
 const literal = [
-  '<p data-example="data-mokabook-link-child-start">DATA-MOKABOOK-LINK-CONTROL</p>',
-  '<!-- <template data-mokabook-link-child-end=""></template> -->',
-  "<script>const sample = '<a DATA-MOKABOOK-LINK-CONTROL=\"a\">';</script>",
-  '<style>.example::after{content:"data-mokabook-link-child-start"}</style>',
+  '<p data-example="data-mokly-link-child-start">DATA-MOKLY-LINK-CONTROL</p>',
+  '<!-- <template data-mokly-link-child-end=""></template> -->',
+  "<script>const sample = '<a DATA-MOKLY-LINK-CONTROL=\"a\">';</script>",
+  '<style>.example::after{content:"data-mokly-link-child-start"}</style>',
 ].join("\n");
 
 test("literal metadata names remain ordinary bytes in unmarked documents", () => {

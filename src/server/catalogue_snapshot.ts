@@ -2,7 +2,7 @@ import { timeAsync, timeSync } from "../diagnostics/timings.js";
 import type { ComponentChangeSnapshot } from "./component_changes.js";
 import { assertFreshSourceInventory } from "../build/source_freshness.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { CatalogueChangeSnapshot } from "../registry/changes.js";
 import { parseManifest, readManifest } from "../registry/manifest.js";
 import {
@@ -83,7 +83,7 @@ export function loadServedCatalogueSnapshot(
             );
           } catch (error) {
             if (
-              error instanceof MokabookError &&
+              error instanceof MoklyError &&
               error.code === "manifest-invalid"
             )
               throw error;
@@ -100,7 +100,7 @@ export function catalogueSnapshotForConfig(
   config: ResolvedConfig,
 ): CatalogueSnapshot {
   if (snapshot[configIdentity] !== config)
-    throw new MokabookError(
+    throw new MoklyError(
       "manifest-invalid",
       "catalogue snapshot does not belong to this configuration",
     );

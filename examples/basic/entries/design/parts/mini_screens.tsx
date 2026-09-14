@@ -15,9 +15,7 @@ export function MiniWelcome({ compact, revised }: MiniScreenProps) {
         <div className="mbk-shot-nav">
           {compact ? "Menu" : "Example navigation"}
         </div>
-        <h2>
-          {revised ? "Welcome to the Mokabook example" : "Welcome to Mokabook"}
-        </h2>
+        <h2>{revised ? "Welcome to the Mokly example" : "Welcome to Mokly"}</h2>
         {revised ? <p>A short introduction now welcomes new readers.</p> : null}
         <DesignLink
           to={

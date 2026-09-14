@@ -26,27 +26,27 @@ test("served Browse adapts current HTML without mutating portable files", async 
   const served = await response.text();
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("cache-control"), "no-store");
-  assert.match(served, /data-mokabook-link="details#section"/);
+  assert.match(served, /data-mokly-link="details#section"/);
   assert.match(served, /href="\.\/details\.mobile\.html#section"/);
-  assert.doesNotMatch(served, /data-mokabook-target="spoof"/);
+  assert.doesNotMatch(served, /data-mokly-target="spoof"/);
   assert.equal(await fs.promises.readFile(diskPath, "utf8"), disk);
 
   await fs.promises.writeFile(
     path.join(fixture.mockupsDir, "unowned.html"),
-    '<a data-mokabook-link="details" data-mokabook-target="_top" href="./screens/details.mobile.html">Details</a>',
+    '<a data-mokly-link="details" data-mokly-target="_top" href="./screens/details.mobile.html">Details</a>',
   );
   const unowned = await (
     await fetch(`${server.url}/static/unowned.html`)
   ).text();
-  assert.doesNotMatch(unowned, /data-mokabook-(?:link|target)/);
+  assert.doesNotMatch(unowned, /data-mokly-(?:link|target)/);
 
   await fs.promises.writeFile(
     path.join(fixture.mockupsDir, "unowned.htm"),
-    '<a data-mokabook-link="details" href="./screens/details.mobile.html">Details</a>',
+    '<a data-mokly-link="details" href="./screens/details.mobile.html">Details</a>',
   );
   const htm = await fetch(`${server.url}/static/unowned.htm`);
   assert.match(htm.headers.get("content-type") ?? "", /text\/html/);
-  assert.doesNotMatch(await htm.text(), /data-mokabook-link/);
+  assert.doesNotMatch(await htm.text(), /data-mokly-link/);
 
   const head = await fetch(`${server.url}/static/screens/home.mobile.html`, {
     method: "HEAD",
@@ -92,19 +92,13 @@ test("served fragment queries validate once and reach every applicable frame", a
     screen,
     /src="\/static\/screens\/details\.desktop\.html#section"/,
   );
-  assert.equal(
-    (screen.match(/data-mokabook-fragment-frame=""/g) ?? []).length,
-    2,
-  );
+  assert.equal((screen.match(/data-mokly-fragment-frame=""/g) ?? []).length, 2);
 
   const flow = await (
     await fetch(`${server.url}/view/user-flows/tour.html?fragment=section`)
   ).text();
   assert.equal((flow.match(/#section/g) ?? []).length, 3);
-  assert.equal(
-    (flow.match(/data-mokabook-fragment-frame=""/g) ?? []).length,
-    1,
-  );
+  assert.equal((flow.match(/data-mokly-fragment-frame=""/g) ?? []).length, 1);
 
   for (const query of [
     "fragment=section&fragment=section",
@@ -138,7 +132,7 @@ test("HEAD id errors omit bodies on a reused connection", async (context) => {
 
   const home = await nodeRequest(`${server.url}/`, "GET", agent);
   assert.equal(home.status, 200);
-  assert.match(home.body, /data-mokabook-shell/);
+  assert.match(home.body, /data-mokly-shell/);
 });
 
 test("safe URL paths reject decoded path separators", () => {
@@ -218,11 +212,11 @@ function nodeRequest(
 }
 
 function navigationSource(): string {
-  return `import { defineScreen, defineUseCase } from "mokabook";
+  return `import { defineScreen, defineUseCase } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], navPath: ["Fixture"], relatedDocs: [] };
 export const mockups = [
-  defineScreen({ ...metadata, description: "Home", desktop: <main><a data-mokabook-target="spoof" href="mock:details#section">Details</a></main>, id: "home", mobile: <main><a data-mokabook-target="spoof" href="mock:details#section">Details</a></main>, route: "screens/home.html", title: "Home", useCaseIds: ["tour"] }),
+  defineScreen({ ...metadata, description: "Home", desktop: <main><a data-mokly-target="spoof" href="mock:details#section">Details</a></main>, id: "home", mobile: <main><a data-mokly-target="spoof" href="mock:details#section">Details</a></main>, route: "screens/home.html", title: "Home", useCaseIds: ["tour"] }),
   defineScreen({ ...metadata, description: "Details", desktop: <main id="section">Details</main>, id: "details", mobile: <main id="section">Details</main>, route: "screens/details.html", title: "Details", useCaseIds: ["tour"] }),
   defineUseCase({ ...metadata, description: "Tour", id: "tour", route: "user-flows/tour.html", steps: [{ screenId: "details" }, { screenId: "home" }], title: "Tour" })
 ];

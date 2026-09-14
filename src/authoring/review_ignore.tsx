@@ -33,12 +33,12 @@ export function ReviewIgnore(props: ReviewIgnoreProps) {
     return <Fragment>{props.children}</Fragment>;
   return (
     <Fragment>
-      <template data-mokabook-review-ignore-start={props.id} />
+      <template data-mokly-review-ignore-start={props.id} />
       {props.children}
-      <template data-mokabook-review-ignore-end={props.id} />
+      <template data-mokly-review-ignore-end={props.id} />
       {props.materialKey ? (
         <template
-          data-mokabook-review-material={`${props.id}:${props.materialKey}`}
+          data-mokly-review-material={`${props.id}:${props.materialKey}`}
         />
       ) : null}
     </Fragment>
@@ -49,12 +49,12 @@ export function ReviewIgnore(props: ReviewIgnoreProps) {
 export function assertReviewIgnoreId(id: string, materialKey?: string): void {
   if (!ID_PATTERN.test(id)) {
     throw new Error(
-      `[mokabook/review-ignore] invalid id "${id}"; expected kebab-case`,
+      `[mokly/review-ignore] invalid id "${id}"; expected kebab-case`,
     );
   }
   if (materialKey !== undefined && !MATERIAL_PATTERN.test(materialKey)) {
     throw new Error(
-      `[mokabook/review-ignore] invalid material key for "${id}"; expected a sha256 key`,
+      `[mokly/review-ignore] invalid material key for "${id}"; expected a sha256 key`,
     );
   }
 }

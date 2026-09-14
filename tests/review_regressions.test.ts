@@ -26,7 +26,7 @@ test("compilation rejects malformed Review-ignore output", async (context) => {
   await fs.promises.writeFile(
     path.join(fixture.root, "renderer.ts"),
     `export default function render() {
-  return '<!doctype html><html><body><!--mokabook-review-ignore:start:nav--><nav>Menu</nav></body></html>';
+  return '<!doctype html><html><body><!--mokly-review-ignore:start:nav--><nav>Menu</nav></body></html>';
 }
 `,
   );
@@ -49,7 +49,7 @@ test("Review validates malformed markers on added and removed panes", async (con
   const config = await loadConfig(fixture.root);
   const compilation = await compileCatalogue(config);
   const malformed =
-    "<html><body><!--mokabook-review-ignore:start:nav--><nav>Menu</nav></body></html>";
+    "<html><body><!--mokly-review-ignore:start:nav--><nav>Menu</nav></body></html>";
   const emptyBase = manifest([]);
   const addedOutputs = new Map(compilation.outputs);
   addedOutputs.set("screens/home.mobile.html", malformed);
@@ -60,9 +60,7 @@ test("Review validates malformed markers on added and removed panes", async (con
         { ...compilation, outputs: addedOutputs },
         config,
         fakeGit(
-          new Map([
-            ["mockups/mokabook-manifest.json", JSON.stringify(emptyBase)],
-          ]),
+          new Map([["mockups/mokly-manifest.json", JSON.stringify(emptyBase)]]),
         ),
         "HEAD",
       ),
@@ -84,7 +82,7 @@ test("Review validates malformed markers on added and removed panes", async (con
     useCaseIds: [],
   };
   const removedFiles = new Map([
-    ["mockups/mokabook-manifest.json", JSON.stringify(manifest([removed]))],
+    ["mockups/mokly-manifest.json", JSON.stringify(manifest([removed]))],
     ["mockups/screens/removed.mobile.html", malformed],
     ["mockups/screens/removed.desktop.html", "<html><body>Old</body></html>"],
   ]);
@@ -101,8 +99,8 @@ test("Review excludes its active artifact directory from changed paths", async (
   const config = await loadConfig(fixture.root);
   await writeCompilation(await compileCatalogue(config), config);
   await git(fixture.root, ["init", "-q"]);
-  await git(fixture.root, ["config", "user.name", "Mokabook Test"]);
-  await git(fixture.root, ["config", "user.email", "mokabook@example.invalid"]);
+  await git(fixture.root, ["config", "user.name", "Mokly Test"]);
+  await git(fixture.root, ["config", "user.email", "mokly@example.invalid"]);
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: base"]);
   await fs.promises.writeFile(
@@ -189,7 +187,7 @@ test("Review does not hide an invalid v3 manifest behind v2 fallback", async (co
   const config = await loadConfig(fixture.root);
   const compilation = await compileCatalogue(config);
   const files = new Map([
-    ["mockups/mokabook-manifest.json", "{"],
+    ["mockups/mokly-manifest.json", "{"],
     [
       "mockups/mockbook-manifest.json",
       JSON.stringify({
@@ -265,7 +263,7 @@ function fakeGit(files: ReadonlyMap<string, string>): GitClient {
 function manifest(entries: readonly ManifestScreen[]): ManifestV3 {
   return {
     entries,
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     legacyPages: [],
     schemaVersion: 3,
   };

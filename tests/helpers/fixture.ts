@@ -20,9 +20,7 @@ export async function createFixture(
 ): Promise<TestFixture> {
   const contextRoot = path.join(repositoryRoot, ".context");
   await fs.promises.mkdir(contextRoot, { recursive: true });
-  const root = await fs.promises.mkdtemp(
-    path.join(contextRoot, "mokabook-test-"),
-  );
+  const root = await fs.promises.mkdtemp(path.join(contextRoot, "mokly-test-"));
   const entriesDir = path.join(root, "entries");
   const mockupsDir = path.join(root, "mockups");
   await fs.promises.mkdir(entriesDir, { recursive: true });
@@ -30,10 +28,10 @@ export async function createFixture(
   await fs.promises.writeFile(path.join(root, "notes.md"), "# Fixture notes\n");
   const entryPath = path.join(entriesDir, "fixture.mockup.tsx");
   await fs.promises.writeFile(entryPath, entrySource);
-  const configPath = path.join(root, "mokabook.config.ts");
+  const configPath = path.join(root, "mokly.config.ts");
   await fs.promises.writeFile(
     configPath,
-    `import { defineConfig } from "mokabook";
+    `import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   entriesDir: "entries",
   mockupsDir: "mockups",
@@ -65,7 +63,7 @@ export async function registerFixturePage(
     .join("/");
   await fs.promises.appendFile(
     fixture.entryPath,
-    `\nimport { definePage as definePage_${suffix} } from "mokabook";\nimport { ${exportName} as render_${suffix} } from ${JSON.stringify(imported.startsWith(".") ? imported : `./${imported}`)};\nmockups.push(definePage_${suffix}({ id: ${JSON.stringify(id)}, route: ${JSON.stringify(route)}, title: ${JSON.stringify(id)}, description: "Complete fixture document", dependencies: [], relatedDocs: [], render: render_${suffix} }));\n`,
+    `\nimport { definePage as definePage_${suffix} } from "@mokly/mokly";\nimport { ${exportName} as render_${suffix} } from ${JSON.stringify(imported.startsWith(".") ? imported : `./${imported}`)};\nmockups.push(definePage_${suffix}({ id: ${JSON.stringify(id)}, route: ${JSON.stringify(route)}, title: ${JSON.stringify(id)}, description: "Complete fixture document", dependencies: [], relatedDocs: [], render: render_${suffix} }));\n`,
   );
 }
 
@@ -109,7 +107,7 @@ function fixtureEntrySource(
 ): string {
   const body = options.body ?? `<a href="mock:details">Details</a>`;
   const firstTitle = options.firstTitle ?? "Home";
-  return `import { defineCollection, defineScreen, defineUseCase } from "mokabook";
+  return `import { defineCollection, defineScreen, defineUseCase } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"] };
 export const mockups = [

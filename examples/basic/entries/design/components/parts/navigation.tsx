@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 import type { ReactNode } from "react";
 
 import { NavTree, type NavNode } from "../../parts/nav.js";

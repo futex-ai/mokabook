@@ -39,8 +39,8 @@ for (const mode of ["rollback", "backup", "cancellation", "cleanup"] as const) {
           cwd: fixture.root,
           env: {
             ...process.env,
-            MOKABOOK_TEST_EXPORT_FAILURE: mode,
-            MOKABOOK_DIAGNOSTIC: "0",
+            MOKLY_TEST_EXPORT_FAILURE: mode,
+            MOKLY_DIAGNOSTIC: "0",
           },
           timeout: 60_000,
         },
@@ -70,7 +70,7 @@ for (const mode of ["rollback", "backup", "cancellation", "cleanup"] as const) {
       assert.match(result.stderr, /Export installed, but cleanup failed/);
       assert.ok(fs.existsSync(path.join(fixture.output, "index.html")));
     }
-    assert.match(result.stderr, /\.mokabook-export-reservations/);
+    assert.match(result.stderr, /\.mokly-export-reservations/);
     assert.doesNotMatch(result.stderr, /\n\s+at /);
   });
 }

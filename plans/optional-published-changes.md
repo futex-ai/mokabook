@@ -11,7 +11,7 @@ Publish the current catalogue by default. Authors can explicitly include
 Changes and comparisons against a baseline fixed during publication. PR
 previews enable that option; the main reference catalogue uses the default.
 
-[Optional Changes In Published Catalogues](../docs/protocol/mokabook-publication.md)
+[Optional Changes In Published Catalogues](../docs/protocol/mokly-publication.md)
 owns the complete target, commands, failure behavior, and acceptance criteria.
 The package and runtime protocols now describe the implemented behavior.
 This applies to all entry kinds and can ship independently of

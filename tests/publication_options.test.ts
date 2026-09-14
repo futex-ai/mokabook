@@ -69,14 +69,14 @@ test("ordinary publication needs no Git and omits review and watch artifacts", a
     const html = await fs.promises.readFile(path.join(output, file), "utf8");
     assert.doesNotMatch(
       html,
-      /data-mokabook-filter|data-diff-screen|client\/browser\.js/,
+      /data-mokly-filter|data-diff-screen|client\/browser\.js/,
     );
   }
   for (const file of [
-    "__mokabook/diffs",
-    "__mokabook/events",
-    "__mokabook/client/browser.js",
-    "__mokabook/client/live_updates.js",
+    "__mokly/diffs",
+    "__mokly/events",
+    "__mokly/client/browser.js",
+    "__mokly/client/live_updates.js",
   ])
     assert.equal(fs.existsSync(path.join(output, file)), false, file);
   assert.doesNotMatch(

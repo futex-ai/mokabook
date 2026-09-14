@@ -11,7 +11,7 @@ export function applyPreviewFragmentQuery(
   const fragment = values.length === 1 ? values[0] : undefined;
   if (!fragment || !isLogicalFragment(fragment)) return false;
   for (const frame of doc.querySelectorAll<HTMLIFrameElement>(
-    "iframe[data-mokabook-fragment-frame]",
+    "iframe[data-mokly-fragment-frame]",
   )) {
     for (const name of ["src", "data-fragment-light", "data-fragment-dark"]) {
       const source = frame.getAttribute(name);

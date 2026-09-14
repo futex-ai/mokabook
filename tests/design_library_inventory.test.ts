@@ -2,8 +2,18 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import test from "node:test";
 
+import { catalogueNavigation } from "../examples/basic/entries/design/library/chrome/catalogue-navigation.js";
+import { NAV_TREE } from "../examples/basic/entries/design/parts/nav_data.js";
 import { designCatalogue } from "./helpers/design_catalogue.js";
 import { designLibrary } from "./helpers/design_library.js";
+
+test("catalogue navigation's All example matches its in-screen navigation", () => {
+  const all = catalogueNavigation.entry.variants.find(
+    (variant) => variant.id === "all",
+  );
+  assert.ok(all);
+  assert.deepEqual(all.props.rows, NAV_TREE);
+});
 
 test("the shared library preserves every existing design screen and viewport route", async () => {
   const baseline: {

@@ -1,4 +1,4 @@
-/** Raw HTML scanning for Mokabook-owned navigation metadata. */
+/** Raw HTML scanning for Mokly-owned navigation metadata. */
 
 /** A byte range within an HTML source string. */
 export interface HtmlSourceLocation {
@@ -11,13 +11,12 @@ export interface ReservedAttributeOccurrence extends HtmlSourceLocation {
   readonly name: ReservedAttributeName;
 }
 
-/** Attribute names whose values are owned by Mokabook. */
-export type ReservedAttributeName =
-  "data-mokabook-link" | "data-mokabook-target";
+/** Attribute names whose values are owned by Mokly. */
+export type ReservedAttributeName = "data-mokly-link" | "data-mokly-target";
 
 const RESERVED_ATTRIBUTES = new Set<ReservedAttributeName>([
-  "data-mokabook-link",
-  "data-mokabook-target",
+  "data-mokly-link",
+  "data-mokly-target",
 ]);
 
 /** Find every reserved attribute, including duplicates hidden by HTML parsing. */

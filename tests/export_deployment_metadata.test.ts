@@ -8,14 +8,10 @@ import {
 } from "./helpers/export_fixture.js";
 
 const alterations: Record<string, (html: string) => string> = {
-  missing: (html) => html.replace(/ data-mokabook-delivery="[^"]+"/, ""),
-  duplicate: (html) =>
-    html.replace(/( data-mokabook-delivery="[^"]+")/, "$1$1"),
+  missing: (html) => html.replace(/ data-mokly-delivery="[^"]+"/, ""),
+  duplicate: (html) => html.replace(/( data-mokly-delivery="[^"]+")/, "$1$1"),
   malformed: (html) =>
-    html.replace(
-      /data-mokabook-delivery="[^"]+"/,
-      'data-mokabook-delivery="{}"',
-    ),
+    html.replace(/data-mokly-delivery="[^"]+"/, 'data-mokly-delivery="{}"'),
   canonical: (html) =>
     html.replace(
       "&quot;canonicalPath&quot;:&quot;/&quot;",

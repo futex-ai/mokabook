@@ -32,15 +32,15 @@ test("package-owned watch rules precede broad consumer rules", async (context) =
   };
   for (const candidate of [
     "node_modules/package/index.js",
-    ".context/mokabook-review/index.html",
+    ".context/mokly-review/index.html",
     ".review/index.html",
     "coverage/lcov.info",
     "dist/cli/bin.js",
     "playwright-report/index.html",
-    "target/debug/mokabook",
+    "target/debug/mokly",
     "test-results/results.json",
-    ".mokabook-review-123/stage/index.html",
-    ".mokabook-write-123/stage/screen.html",
+    ".mokly-review-123/stage/index.html",
+    ".mokly-write-123/stage/screen.html",
   ]) {
     assert.equal(
       classifyWatchPath(path.join(fixture.root, candidate), broad),

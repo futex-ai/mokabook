@@ -81,7 +81,7 @@ test("metadata and complete catalogue adoption require the current generation", 
     componentRuntime: runtime,
   });
   t.after(() => server.close());
-  const metadata = `${server.url}/__mokabook/views/screens/home.desktop.html`;
+  const metadata = `${server.url}/__mokly/views/screens/home.desktop.html`;
   assert.equal((await fetch(`${metadata}?generation=stale`)).status, 409);
   const response = await fetch(`${metadata}?generation=${runtime.generation}`);
   const data = await response.json();

@@ -57,10 +57,7 @@ const cases: readonly [
   [
     "screen-owned instance structure",
     (s) =>
-      s.replaceAll(
-        'mokabookInstance="hidden"',
-        'mokabookInstance="other-hidden"',
-      ),
+      s.replaceAll('moklyInstance="hidden"', 'moklyInstance="other-hidden"'),
     ["screens/home.html"],
   ],
   [

@@ -7,7 +7,7 @@ import {
   defineUseCase,
   MockLink,
   ReviewIgnore,
-} from "mokabook";
+} from "@mokly/mokly";
 
 const metadata = {
   dependencies: ["notes.md"],

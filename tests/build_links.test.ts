@@ -55,8 +55,8 @@ test("id-link rewriting uses parsed encoded href values", async (context) => {
 
 test("renderer output cannot duplicate reserved Browse metadata", async () => {
   for (const markup of [
-    '<a data-mokabook-link="details" DATA-MOKABOOK-LINK="home" href="mock:details">Details</a>',
-    '<a data-mokabook-target="_self" DATA-MOKABOOK-TARGET="_blank" href="mock:details">Details</a>',
+    '<a data-mokly-link="details" DATA-MOKLY-LINK="home" href="mock:details">Details</a>',
+    '<a data-mokly-target="_self" DATA-MOKLY-TARGET="_blank" href="mock:details">Details</a>',
   ]) {
     const fixture = await createFixture();
     try {
@@ -72,7 +72,7 @@ test("renderer output cannot duplicate reserved Browse metadata", async () => {
 
       await assert.rejects(
         () => compileCatalogue(config),
-        /duplicate reserved data-mokabook-(?:link|target)/,
+        /duplicate reserved data-mokly-(?:link|target)/,
       );
     } finally {
       await removeFixture(fixture);
@@ -235,7 +235,7 @@ test("dark fragments link within dark and fall back to light-only", async (conte
 });
 
 function routeSource(route: string): string {
-  return `import { defineScreen } from "mokabook";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: ["notes.md"], relatedDocs: ["notes.md"], useCaseIds: [] };
 export const mockups = [
@@ -250,7 +250,7 @@ function orphanLinkSource(includeTarget: boolean): string {
   const target = includeTarget
     ? `defineScreen({ ...metadata, description: "Details", desktop: <main>Details</main>, id: "details", mobile: <main>Details</main>, route: "screens/details.html", title: "Details" })`
     : "";
-  return `import { defineScreen } from "mokabook";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], relatedDocs: [] };
 export const mockups = [
@@ -261,7 +261,7 @@ export const mockups = [
 }
 
 function darkLinkSource(): string {
-  return `import { defineScreen } from "mokabook";
+  return `import { defineScreen } from "@mokly/mokly";
 import React from "react";
 const metadata = { dependencies: [], relatedDocs: [], useCaseIds: [] };
 export const mockups = [

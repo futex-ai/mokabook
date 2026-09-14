@@ -24,7 +24,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
     for (const id of destinations) {
       const { document } = await designDocument(id, viewport);
       assert.equal(
-        attribute(byClass(document, "mbk-brand")[0]!, "data-mokabook-link"),
+        attribute(byClass(document, "mbk-brand")[0]!, "data-mokly-link"),
         "design-browse-home",
         id,
       );
@@ -69,10 +69,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       );
       if (viewport === "mobile") {
         assert.equal(
-          attribute(
-            byClass(document, "mbk-menu-btn")[0]!,
-            "data-mokabook-link",
-          ),
+          attribute(byClass(document, "mbk-menu-btn")[0]!, "data-mokly-link"),
           "design-browse-navigation",
           id,
         );

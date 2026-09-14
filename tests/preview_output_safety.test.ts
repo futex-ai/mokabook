@@ -28,7 +28,7 @@ for (const includeChanges of [false, true]) {
       const output =
         link === "output" ? linked : path.join(linked, "new/output");
       await fs.promises.writeFile(
-        path.join(outside.root, ".mokabook-preview-artifact"),
+        path.join(outside.root, ".mokly-preview-artifact"),
         "schemaVersion=1\n",
       );
       const before = await fs.promises.readdir(outside.root, {
@@ -90,7 +90,7 @@ for (const includeChanges of [false, true]) {
         path.join(artifacts, "nested/published/index.html"),
         "utf8",
       ),
-      /<title>Mokabook<\/title>/,
+      /<title>Mokly<\/title>/,
     );
     await buildPreview(config, output, options);
     assert.equal(fs.existsSync(path.join(output, "index.html")), true);

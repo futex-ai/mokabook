@@ -240,7 +240,7 @@ function manifest(
       ...entry,
       declaredDependencies: entry.declaredDependencies ?? [],
     })),
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     sourceFiles: [
       ...new Set([...entries, ...pages].map((entry) => entry.sourcePath)),
     ].sort(),

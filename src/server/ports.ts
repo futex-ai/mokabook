@@ -1,6 +1,6 @@
 import type http from "node:http";
 
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 
 const MAX_PORT = 65_535;
 
@@ -20,7 +20,7 @@ export async function listenOnAvailablePort(
         port += 1;
         continue;
       }
-      throw new MokabookError(
+      throw new MoklyError(
         "server-failed",
         `could not bind port ${port}: ${errorMessage(error)}`,
         { cause: error },

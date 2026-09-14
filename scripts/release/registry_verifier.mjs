@@ -157,7 +157,7 @@ async function verifySignatures(
 ) {
   await fs.promises.writeFile(
     path.join(temporaryRoot, "package.json"),
-    `${JSON.stringify({ name: "mokabook-registry-verification", private: true })}\n`,
+    `${JSON.stringify({ name: "mokly-registry-verification", private: true })}\n`,
   );
   await runRegistryCommand(
     [

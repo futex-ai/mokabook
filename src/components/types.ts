@@ -71,6 +71,6 @@ export interface RegisteredComponent<
 > {
   entry: ComponentDefinition;
   Component: ComponentType<
-    ComponentProps<S, Slots> & { mokabookInstance?: string }
+    ComponentProps<S, Slots> & { moklyInstance?: string }
   >;
 }

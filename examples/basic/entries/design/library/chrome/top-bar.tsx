@@ -2,7 +2,7 @@ import {
   defineComponent,
   type ComponentProps,
   type ComponentRenderContext,
-} from "mokabook";
+} from "@mokly/mokly";
 import { DESTINATIONS } from "../../parts/destinations.js";
 import { libraryMetadata } from "../metadata.js";
 import {

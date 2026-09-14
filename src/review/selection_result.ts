@@ -1,5 +1,5 @@
 /** Project completed ownership evidence onto the one comparison being displayed. */
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { ReviewResultV3 } from "./component_types.js";
 import { aggregateIgnored } from "./screen_views.js";
 import type { ReviewSelection } from "./selection_types.js";
@@ -37,8 +37,8 @@ export function selectedComponentResult(
   };
 }
 
-export function missingSelection(): MokabookError {
-  return new MokabookError(
+export function missingSelection(): MoklyError {
+  return new MoklyError(
     "review-invalid",
     "The selected view has no comparison",
   );

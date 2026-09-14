@@ -1,6 +1,9 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
-import { isNavDisclosureKey } from "./browse_navigation.js";
+import {
+  isNavDisclosureClosed,
+  isNavDisclosureKey,
+} from "./browse_navigation.js";
 import {
   applyNavVisibility,
   selectAndRevealRoute,
@@ -18,11 +21,12 @@ export type BrowseViewport = "both" | "desktop" | "mobile";
 export interface BrowseRecoveryState {
   changesStatus?: ChangesStatus;
   changedOnly: boolean;
+  /** Closed section or projected-collection disclosure identities. */
   closedCollectionIds: readonly string[];
   colorScheme: BrowseColorScheme;
   detailsOpen: boolean;
   drawerOpen: boolean;
-  /** Closed collection ids from before filtering, or null without a filter. */
+  /** Closed disclosure ids from before filtering, or null without a filter. */
   filterBaselineClosedCollectionIds: readonly string[] | null;
   navScroll: number;
   query: string;
@@ -34,9 +38,9 @@ export interface BrowseRecoveryState {
 export function captureRegionScrolls(doc: Document): Record<string, number> {
   const scrolls: Record<string, number> = {};
   for (const region of doc.querySelectorAll<HTMLElement>(
-    "[data-mokabook-scroll]",
+    "[data-mokly-scroll]",
   )) {
-    const key = region.getAttribute("data-mokabook-scroll");
+    const key = region.getAttribute("data-mokly-scroll");
     if (key) scrolls[key] = region.scrollTop;
   }
   return scrolls;
@@ -48,9 +52,9 @@ export function restoreRegionScrolls(
   scrolls: Readonly<Record<string, number>>,
 ): void {
   for (const region of doc.querySelectorAll<HTMLElement>(
-    "[data-mokabook-scroll]",
+    "[data-mokly-scroll]",
   )) {
-    const key = region.getAttribute("data-mokabook-scroll");
+    const key = region.getAttribute("data-mokly-scroll");
     if (key && typeof scrolls[key] === "number")
       region.scrollTop = scrolls[key];
   }
@@ -61,21 +65,21 @@ export function captureBrowseState(
   doc: Document,
   _win: Window & typeof globalThis,
 ): BrowseRecoveryState | undefined {
-  const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
+  const shell = doc.querySelector<HTMLElement>("[data-mokly-shell]");
   if (!shell) return undefined;
-  const collections = [
-    ...doc.querySelectorAll<HTMLDetailsElement>("[data-nav-collection]"),
+  const disclosures = [
+    ...doc.querySelectorAll<HTMLDetailsElement>("[data-nav-disclosure]"),
   ];
-  const closedCollectionIds = collections.flatMap((collection) => {
-    const id = collection.getAttribute("data-nav-collection");
-    return !collection.open && id ? [id] : [];
+  const closedCollectionIds = disclosures.flatMap((disclosure) => {
+    const id = disclosure.getAttribute("data-nav-disclosure");
+    return !disclosure.open && id ? [id] : [];
   });
-  const filterBaselineClosedCollectionIds = collections.some(
-    (collection) => collection.dataset["filterOpen"] !== undefined,
+  const filterBaselineClosedCollectionIds = disclosures.some(
+    (disclosure) => disclosure.dataset["filterOpen"] !== undefined,
   )
-    ? collections.flatMap((collection) => {
-        const id = collection.getAttribute("data-nav-collection");
-        return collection.dataset["filterOpen"] === "0" && id ? [id] : [];
+    ? disclosures.flatMap((disclosure) => {
+        const id = disclosure.getAttribute("data-nav-disclosure");
+        return disclosure.dataset["filterOpen"] === "0" && id ? [id] : [];
       })
     : null;
   const changesStatus = doc.querySelector<HTMLElement>("[data-changes-status]")
@@ -94,16 +98,14 @@ export function captureBrowseState(
             "open"
           ] === "true"
         : undefined) ??
-      doc.querySelector<HTMLDetailsElement>("[data-mokabook-details]")?.open ??
+      doc.querySelector<HTMLDetailsElement>("[data-mokly-details]")?.open ??
       false,
     drawerOpen: shell.dataset["drawer"] === "open",
     filterBaselineClosedCollectionIds,
     navScroll:
-      doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]")?.scrollTop ??
-      0,
+      doc.querySelector<HTMLElement>("[data-mokly-nav-scroll]")?.scrollTop ?? 0,
     query:
-      doc.querySelector<HTMLInputElement>("[data-mokabook-search]")?.value ??
-      "",
+      doc.querySelector<HTMLInputElement>("[data-mokly-search]")?.value ?? "",
     regionScrolls: captureRegionScrolls(doc),
     viewport: currentViewport(doc),
   };
@@ -115,9 +117,9 @@ export function restoreBrowseState(
   win: Window & typeof globalThis,
   state: BrowseRecoveryState,
 ): void {
-  const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
+  const shell = doc.querySelector<HTMLElement>("[data-mokly-shell]");
   if (!shell) return;
-  const search = doc.querySelector<HTMLInputElement>("[data-mokabook-search]");
+  const search = doc.querySelector<HTMLInputElement>("[data-mokly-search]");
   if (search) search.value = state.query;
   for (const option of doc.querySelectorAll("[data-filter]")) {
     const changed = option.getAttribute("data-filter") === "changed";
@@ -133,28 +135,26 @@ export function restoreBrowseState(
       : new Set(
           state.filterBaselineClosedCollectionIds.filter(isNavDisclosureKey),
         );
-  for (const collection of doc.querySelectorAll<HTMLDetailsElement>(
-    "[data-nav-collection]",
+  for (const disclosure of doc.querySelectorAll<HTMLDetailsElement>(
+    "[data-nav-disclosure]",
   )) {
-    const id = collection.getAttribute("data-nav-collection");
-    collection.open = !id || !closed.has(id);
+    const id = disclosure.getAttribute("data-nav-disclosure");
+    disclosure.open = !id || !isNavDisclosureClosed(closed, id);
     if (filterBaselineClosed) {
-      collection.dataset["filterOpen"] =
-        id && filterBaselineClosed.has(id) ? "0" : "1";
+      disclosure.dataset["filterOpen"] =
+        id && isNavDisclosureClosed(filterBaselineClosed, id) ? "0" : "1";
     } else {
-      delete collection.dataset["filterOpen"];
+      delete disclosure.dataset["filterOpen"];
     }
   }
-  const details = doc.querySelector<HTMLDetailsElement>(
-    "[data-mokabook-details]",
-  );
+  const details = doc.querySelector<HTMLDetailsElement>("[data-mokly-details]");
   if (details) details.open = state.detailsOpen;
   const inspector = doc.querySelector<HTMLElement>(
     "[data-workspace-inspector]",
   );
   if (inspector) {
     inspector.dataset["open"] = String(state.detailsOpen);
-    doc.dispatchEvent(new win.Event("mokabook:inspector-restore"));
+    doc.dispatchEvent(new win.Event("mokly:inspector-restore"));
   }
   setDrawer(shell, state.drawerOpen);
   setViewport(doc, state.viewport);
@@ -174,7 +174,7 @@ export function restoreBrowseState(
       "recovery",
     );
   syncTagChips(doc);
-  const nav = doc.querySelector<HTMLElement>("[data-mokabook-nav-scroll]");
+  const nav = doc.querySelector<HTMLElement>("[data-mokly-nav-scroll]");
   if (nav) nav.scrollTop = state.navScroll;
   restoreRegionScrolls(doc, state.regionScrolls);
 }
@@ -182,13 +182,13 @@ export function restoreBrowseState(
 /** Apply the responsive navigation drawer state. */
 export function setDrawer(shell: HTMLElement, open: boolean): void {
   shell.dataset["drawer"] = open ? "open" : "closed";
-  const button = shell.querySelector("[data-mokabook-menu]");
+  const button = shell.querySelector("[data-mokly-menu]");
   button?.setAttribute("aria-expanded", open ? "true" : "false");
 }
 
 /** Apply one viewport selection to every stage and control. */
 export function setViewport(doc: Document, value: string): void {
-  for (const stage of doc.querySelectorAll("[data-mokabook-stage]"))
+  for (const stage of doc.querySelectorAll("[data-mokly-stage]"))
     stage.setAttribute("data-viewport", value);
   for (const option of doc.querySelectorAll("[data-viewport-option]"))
     option.setAttribute(
@@ -200,7 +200,7 @@ export function setViewport(doc: Document, value: string): void {
 /** Read the viewport selection the current stage shows. */
 export function currentViewport(doc: Document): BrowseViewport {
   const value = doc
-    .querySelector("[data-mokabook-stage]")
+    .querySelector("[data-mokly-stage]")
     ?.getAttribute("data-viewport");
   return value === "desktop" || value === "mobile" ? value : "both";
 }
@@ -220,7 +220,7 @@ export function setColorScheme(doc: Document, value: BrowseColorScheme): void {
   const scheme = doc.querySelector("[data-color-scheme-option]")
     ? value
     : "light";
-  doc.body.setAttribute("data-mokabook-color-scheme", scheme);
+  doc.body.setAttribute("data-mokly-color-scheme", scheme);
   for (const option of doc.querySelectorAll("[data-color-scheme-option]"))
     option.setAttribute(
       "aria-pressed",
@@ -246,7 +246,7 @@ export function setColorScheme(doc: Document, value: BrowseColorScheme): void {
 
 /** Read the color scheme the document currently shows, defaulting to light. */
 export function currentColorScheme(doc: Document): BrowseColorScheme {
-  return doc.body.getAttribute("data-mokabook-color-scheme") === "dark"
+  return doc.body.getAttribute("data-mokly-color-scheme") === "dark"
     ? "dark"
     : "light";
 }

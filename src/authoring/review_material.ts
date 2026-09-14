@@ -63,10 +63,8 @@ function stableValue(
   }
 }
 
-function materialError(at: string, detail: string): MokabookMaterialError {
-  return new MokabookMaterialError(
-    `[mokabook/review-material] ${at}: ${detail}`,
-  );
+function materialError(at: string, detail: string): MoklyMaterialError {
+  return new MoklyMaterialError(`[mokly/review-material] ${at}: ${detail}`);
 }
 
-class MokabookMaterialError extends Error {}
+class MoklyMaterialError extends Error {}

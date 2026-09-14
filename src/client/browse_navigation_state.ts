@@ -46,7 +46,7 @@ export function applyNavVisibility(
   disclosure: NavigationDisclosurePolicy,
 ): void {
   const query = parseSearchQuery(
-    doc.querySelector<HTMLInputElement>("[data-mokabook-search]")?.value ?? "",
+    doc.querySelector<HTMLInputElement>("[data-mokly-search]")?.value ?? "",
   );
   const changedOnly =
     doc
@@ -74,7 +74,7 @@ export function applyNavVisibility(
         : "No changes found.";
   }
   doc
-    .querySelector("[data-mokabook-nav-scroll]")
+    .querySelector("[data-mokly-nav-scroll]")
     ?.setAttribute("aria-busy", String(waiting && status === "pending"));
   applyGroupVisibility(doc, queryConstrains(query) || changedOnly, disclosure);
 }
@@ -100,7 +100,7 @@ export function selectAndRevealRoute(
     }
   }
   if (!active) return undefined;
-  const search = doc.querySelector<HTMLInputElement>("[data-mokabook-search]");
+  const search = doc.querySelector<HTMLInputElement>("[data-mokly-search]");
   const changedOnly =
     doc
       .querySelector('[data-filter="changed"]')
@@ -122,7 +122,7 @@ export function selectAndRevealRoute(
   }
   applyNavVisibility(doc, "preserve");
   let ancestor = active.closest<HTMLDetailsElement>(
-    "details[data-nav-collection]",
+    "details[data-nav-disclosure]",
   );
   while (ancestor) {
     const wasOpen = ancestor.open;
@@ -135,7 +135,7 @@ export function selectAndRevealRoute(
     }
     ancestor =
       ancestor.parentElement?.closest<HTMLDetailsElement>(
-        "details[data-nav-collection]",
+        "details[data-nav-disclosure]",
       ) ?? null;
   }
   active.scrollIntoView({ block: "nearest" });
@@ -165,7 +165,7 @@ function applyGroupVisibility(
   disclosure: NavigationDisclosurePolicy,
 ): void {
   const groups = [
-    ...doc.querySelectorAll<HTMLDetailsElement>("details[data-nav-collection]"),
+    ...doc.querySelectorAll<HTMLDetailsElement>("details[data-nav-disclosure]"),
   ];
   if (filtering) {
     for (const group of groups) {

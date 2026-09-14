@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "@mokly/mokly";
 
 import type { ArtboardViewport } from "../../../parts/shell.js";
 import { ComponentInfo } from "../../parts/component_info.js";

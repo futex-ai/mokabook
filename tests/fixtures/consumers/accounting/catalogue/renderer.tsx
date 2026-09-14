@@ -2,7 +2,7 @@ import React, { type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { collectFirnaStyles, FirnaThemeProvider } from "@firna/ui";
-import type { RenderInput } from "mokabook";
+import type { RenderInput } from "@mokly/mokly";
 
 function Document({ input }: { input: RenderInput }) {
   return (

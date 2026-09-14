@@ -1,5 +1,5 @@
 import React, { type ReactNode } from "react";
-import { defineComponent, defineScreen } from "mokabook";
+import { defineComponent, defineScreen } from "@mokly/mokly";
 
 const metadata = { dependencies: [], relatedDocs: [] };
 function Body({ children }: { children: ReactNode }) {

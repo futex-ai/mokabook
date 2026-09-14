@@ -4,7 +4,7 @@ import path from "node:path";
 import type { Plugin, PluginBuild } from "esbuild";
 
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 
 /** Resolve React peers from consumer package roots before the executing package. */
 export function consumerReactPlugin(config: ResolvedConfig): Plugin {
@@ -15,7 +15,7 @@ export function consumerReactPlugin(config: ResolvedConfig): Plugin {
     ),
   ];
   return {
-    name: "mokabook-single-react",
+    name: "mokly-single-react",
     setup(pluginBuild: PluginBuild): void {
       pluginBuild.onResolve(
         { filter: /^(react|react-dom)(\/.*)?$/ },
@@ -27,7 +27,7 @@ export function consumerReactPlugin(config: ResolvedConfig): Plugin {
               continue;
             }
           }
-          throw new MokabookError(
+          throw new MoklyError(
             "build-invalid",
             `consumer must install peer dependency ${arguments_.path}`,
           );

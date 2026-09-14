@@ -1,7 +1,7 @@
 import { fileExportOperations } from "../../dist/export/operations.js";
 
 /** Process-isolated fault injection for exercising the real CLI error output. */
-const mode = process.env["MOKABOOK_TEST_EXPORT_FAILURE"];
+const mode = process.env["MOKLY_TEST_EXPORT_FAILURE"];
 const originalRename = fileExportOperations.rename;
 const originalRmdir = fileExportOperations.rmdir;
 

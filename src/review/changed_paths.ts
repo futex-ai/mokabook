@@ -8,7 +8,7 @@ import {
   toPosixPath,
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import type { GitClient } from "./git.js";
 
 /** Collect deterministic changes while excluding active and retained output. */
@@ -44,7 +44,7 @@ function outputPaths(repoRoot: string, outDir: string): string[] {
   ];
   for (const candidate of paths) {
     if (!isSafeRepositoryPath(candidate)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "review-invalid",
         `Review output is not repository-relative: ${candidate}`,
       );

@@ -37,12 +37,12 @@ export const SHELL_NAV_RESIZE_CSS = `
 .mbk-nav-resize:hover::after,
 .mbk-nav-resize:focus-visible::after,
 body.mbk-nav-resizing .mbk-nav-resize::after {
-  background: var(--mokabook-accent);
-  box-shadow: 0 0 0 3px var(--mokabook-accent-soft);
+  background: var(--mokly-accent);
+  box-shadow: 0 0 0 3px var(--mokly-accent-soft);
 }
 
 .mbk-nav-resize:focus-visible {
-  box-shadow: inset -2px 0 0 var(--mokabook-accent);
+  box-shadow: inset -2px 0 0 var(--mokly-accent);
 }
 
 body.mbk-nav-resizing {

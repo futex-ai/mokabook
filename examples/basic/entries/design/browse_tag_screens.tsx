@@ -1,4 +1,4 @@
-import { screen } from "mokabook";
+import { screen } from "@mokly/mokly";
 
 import { DESTINATIONS } from "./parts/destinations.js";
 import { TagScreen } from "./parts/tag_screen.js";

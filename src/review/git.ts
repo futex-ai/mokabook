@@ -1,4 +1,4 @@
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import { readGitFiles } from "./git_batch.js";
 import { executeGit } from "./git_process.js";
 
@@ -74,7 +74,7 @@ export class RepositoryGitClient implements GitClient {
     );
     const commit = output.trim();
     if (!/^[a-f0-9]{40,64}$/.test(commit)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "git-failed",
         `Git returned an invalid merge base for ${baseReference} and ${headReference}`,
       );
@@ -115,7 +115,7 @@ export class RepositoryGitClient implements GitClient {
       .filter(Boolean);
     if (modes.length === 0) return "missing";
     if (modes.length !== 1) {
-      throw new MokabookError(
+      throw new MoklyError(
         "git-failed",
         `Git returned multiple entries for ${repoRelativePath}`,
       );
@@ -200,11 +200,9 @@ export class RepositoryGitClient implements GitClient {
     try {
       return await this.runner.run(arguments_);
     } catch (error) {
-      throw new MokabookError(
-        "git-failed",
-        `${context}: ${errorMessage(error)}`,
-        { cause: error },
-      );
+      throw new MoklyError("git-failed", `${context}: ${errorMessage(error)}`, {
+        cause: error,
+      });
     }
   }
 
@@ -216,11 +214,9 @@ export class RepositoryGitClient implements GitClient {
       if (this.runner.runBytes) return await this.runner.runBytes(arguments_);
       return Buffer.from(await this.runner.run(arguments_), "utf8");
     } catch (error) {
-      throw new MokabookError(
-        "git-failed",
-        `${context}: ${errorMessage(error)}`,
-        { cause: error },
-      );
+      throw new MoklyError("git-failed", `${context}: ${errorMessage(error)}`, {
+        cause: error,
+      });
     }
   }
 }
@@ -239,6 +235,6 @@ function assertGitPath(value: string): void {
       .some((part) => part === "" || part === "." || part === "..") ||
     value.includes(":")
   ) {
-    throw new MokabookError("git-failed", `unsafe Git path: ${value}`);
+    throw new MoklyError("git-failed", `unsafe Git path: ${value}`);
   }
 }

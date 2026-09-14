@@ -1,0 +1,409 @@
+# Mokly Shell Design Contract
+
+## Scope
+
+This document records the approved design for the package-owned Browse shell
+and the optional in-place screen comparisons. The design is
+the refined Mockbook shell originally shipped inside the Accounting repository,
+ported here without any Accounting or Bookfolio content. The visual source of
+truth is the design catalogue in the basic example under the `design/` routes;
+this contract fixes the tokens, dimensions, and responsive behavior that
+implementation and tests must preserve. Runtime behavior stays in
+[mokly-runtime.md](./mokly-runtime.md).
+
+## Delivery Status
+
+This document describes the implemented shell design, including active-row
+ancestor disclosure, conditional filter clearing, nearest-row scrolling, the
+`tag:` search term, the details inspector's tag chips, the search field's tag
+control with its picker panel, the mark-only narrow brand, and the top bar's
+stacking above the navigation drawer scrim. Every state recorded here is
+implemented. The separate [component explorer designs](./mokly-component-design.md)
+are target mockups delivered before their runtime implementation.
+
+The page and publication designs are now recorded in the example catalogue.
+Their runtime implementation is tracked in the linked plans. Whole documents
+use a plain bordered pane and omit device/comparison controls. Removed pages
+are flat Changes rows; baseline breadcrumbs are text even after their parents
+are deleted. Ordinary publications omit the Changes filter and comparison band
+while preserving the same navigation, search, tags, and screen variants.
+
+## Design Mockups
+
+The approved screens are authored in `examples/basic/entries/design/` and
+generated under `examples/basic/generated/design/`. This Browse/Changes table
+and the [component design inventory](./mokly-component-design.md#owning-catalogue)
+together define the complete set of design-screen ids and routes, matching the
+[committed manifest](../../examples/basic/generated/mokly-manifest.json).
+Update the owning inventory when design entries change and verify exact id/route
+agreement with the manifest. Planned destinations stay in their feature
+contract until their standalone screens are implemented.
+
+| Entry id                              | Route                                              | State                                                     |
+| ------------------------------------- | -------------------------------------------------- | --------------------------------------------------------- |
+| `design-browse-home`                  | `design/browse/views/home.html`                    | Catalogue home with navigation tree                       |
+| `design-browse-screen`                | `design/browse/views/screen.html`                  | Selected screen with framed fragments                     |
+| `design-browse-details-screen`        | `design/browse/views/details-screen.html`          | Normal Details screen, light selected                     |
+| `design-browse-use-case`              | `design/browse/views/use-case.html`                | Selected use case with ordered steps                      |
+| `design-browse-details`               | `design/browse/states/details.html`                | Expanded details inspector                                |
+| `design-browse-missing-route`         | `design/browse/states/missing-route.html`          | Not-found view with navigation                            |
+| `design-browse-navigation`            | `design/browse/states/navigation.html`             | Collapsed navigation drawer                               |
+| `design-browse-tag-filter`            | `design/browse/states/tag-filter.html`             | Tag picker over a filtered tree                           |
+| `design-browse-tag-picker`            | `design/browse/states/tags/picker.html`            | Empty query, tag picker open                              |
+| `design-browse-tag-forms`             | `design/browse/states/tags/forms.html`             | Forms filter, picker closed                               |
+| `design-browse-tag-onboarding`        | `design/browse/states/tags/onboarding.html`        | Onboarding filter, picker closed                          |
+| `design-browse-tag-onboarding-picker` | `design/browse/states/tags/onboarding-picker.html` | Onboarding filter, picker open                            |
+| `design-browse-dark-scheme`           | `design/browse/states/dark-scheme.html`            | Dark selected, dark device screens                        |
+| `design-browse-light-only`            | `design/browse/states/light-only.html`             | Light-only screen under dark                              |
+| `design-changes-current`              | `design/review/controls/current.html`              | Current screen in Changes                                 |
+| `design-changes-overlay`              | `design/review/controls/overlay.html`              | On-demand overlay comparison                              |
+| `design-review-changed`               | `design/review/outcomes/changed.html`              | Changed screen, side-by-side compare                      |
+| `design-review-added`                 | `design/review/outcomes/added.html`                | Added screen current preview without comparison controls  |
+| `design-review-removed`               | `design/review/outcomes/removed.html`              | Removed badge and current empty state without comparisons |
+| `design-review-difference`            | `design/review/outcomes/difference.html`           | Blend-mode difference comparison                          |
+| `design-review-dark-scheme`           | `design/review/outcomes/dark-scheme.html`          | Dark view compared side by side                           |
+| `design-review-shared-impact`         | `design/review/impact/shared-impact.html`          | Unchanged screen from All with evidence                   |
+| `design-review-ignored-only`          | `design/review/impact/ignored-only.html`           | Ignored-only Current view with evidence                   |
+| `design-review-empty`                 | `design/review/impact/empty.html`                  | Empty Changes filter retaining Current                    |
+| `design-review-style-matched`         | `design/review/impact/stylesheets/matched.html`    | Changed styles that apply to the screen                   |
+| `design-review-style-unresolved`      | `design/review/impact/stylesheets/unresolved.html` | A style change that can reach anything on the screen      |
+| `design-review-style-excluded`        | `design/review/impact/stylesheets/excluded.html`   | Changed stylesheet examined and excluded                  |
+| `design-page-view`                    | `design/browse/pages/view.html`                    | Complete document in its declared collection              |
+| `design-page-details`                 | `design/browse/pages/details.html`                 | Document metadata and close action                        |
+| `design-page-navigation`              | `design/browse/pages/navigation.html`              | Document with its narrow drawer open                      |
+| `design-page-removed`                 | `design/browse/pages/removed.html`                 | Removed document with baseline ancestry                   |
+| `design-publication-catalogue`        | `design/browse/publication/catalogue.html`         | Current catalogue with review omitted                     |
+| `design-publication-changes`          | `design/browse/publication/changes.html`           | Catalogue with optional comparisons                       |
+
+Additional owning groups keep each new page at no more than five screens:
+
+- `design/browse/pages/view.html`, `details.html`, `navigation.html`, and
+  `removed.html` specify full documents, metadata, the drawer, and deleted-parent
+  behavior.
+- `design/browse/publication/catalogue.html` and `changes.html` specify review
+  omitted and included, using the existing Welcome stage.
+- `design/review/impact/stylesheets/matched.html`, `unresolved.html`, and
+  `excluded.html` specify rule-aware stylesheet evidence beneath the impact
+  states, so the impact page itself keeps its three screens. Matched and
+  unresolved stay in Changes; excluded is viewed from All and stays out. Their
+  evidence contract is
+  [CSS change attribution](./mokly-css-attribution.md).
+
+Every screen ships one mobile and one desktop variant. Mockup implementation
+notes live in entry descriptions, rationale, and related docs — never inside
+the rendered screen area.
+
+The component explorer extends this catalogue under `design/components/` with
+component pages, comparisons, affected screens, inspection, controls, and edge
+states. The manifest-backed browser inventory covers every owning screen. Its route index and target visual rules live in
+the [component design contract](./mokly-component-design.md).
+
+Navigation inside these design artboards uses native `MockLink` anchors. The
+[design mockup links contract](./mokly-design-links.md) defines canonical
+destinations and the
+boundary between linked states and local runtime controls. Its delivery status
+is separate from the implemented outer shell described here.
+
+## Consumer-Tunable Custom Properties
+
+Consumers may set exactly these CSS custom properties to tune the shell accent.
+The shell reads them with the defaults below; every other shell style is
+package-owned and not a compatibility surface.
+
+| Property                  | Default                   | Used for                          |
+| ------------------------- | ------------------------- | --------------------------------- |
+| `--mokly-accent`          | `#4f7864`                 | Brand mark, active pills and rows |
+| `--mokly-accent-contrast` | `#ffffff`                 | Text and glyphs on the accent     |
+| `--mokly-accent-soft`     | `rgba(79, 120, 100, 0.1)` | Hover and highlight surfaces      |
+
+A consumer accent pair must keep at least WCAG AA contrast between
+`--mokly-accent` and `--mokly-accent-contrast`; the shell does not
+recompute contrast at runtime.
+
+## Package-Owned Tokens
+
+The shell chrome is light-only (`color-scheme: light`); only the inside of a
+device screen follows the selected color scheme (see Color Scheme below). The
+chrome family is neutral and sage-tinted:
+
+| Token                    | Value                            | Role                     |
+| ------------------------ | -------------------------------- | ------------------------ |
+| `--chrome-bg`            | `#f4f4f1`                        | Application background   |
+| `--chrome-surface`       | `#ffffff`                        | Cards, bars, panes       |
+| `--chrome-ink`           | `#1a1d1c`                        | Primary text             |
+| `--chrome-ink-2`         | `#4a4f4d`                        | Secondary text           |
+| `--chrome-muted`         | `#7d8480`                        | Tertiary and labels      |
+| `--chrome-border`        | `#e3e5e0`                        | Hairline borders         |
+| `--chrome-border-strong` | `#c8ccc4`                        | Frame and strong borders |
+| `--chrome-accent`        | `#2a4733`                        | Deep-accent prose links  |
+| `--chrome-shadow`        | `0 30px 90px rgba(20,28,22,.14)` | Overlay elevation        |
+
+Typography is **Inter** (a variable font packaged with the shell and served at
+`/__mokly/fonts/InterVariable.woff2` under its SIL OFL license) via
+`--sans: "Inter", ui-sans-serif, system-ui, …` at a 13px shell base, with
+`--mono: "SFMono-Regular", Consolas, …` for routes, ids, addresses, and paths.
+The nav indent guides use the faint `--mbk-guide: #dbded8` tint. The shell
+ships no consumer product fonts beyond Inter, and no Accounting or Bookfolio
+color, name, or route family may appear in shell styles or copy.
+
+## Layout
+
+The shell fills the viewport (`100vh`, document scrolling disabled); every
+scrollable region scrolls internally:
+
+- **Top bar** — 48px, surface background, hairline bottom border: brand mark
+  (a non-shrinking 24px accent square with 6px corners and a 17px inline SVG
+  of overlapping mobile and desktop screen outlines), the product name in
+  its own `mbk-name` span, a centred search field (max-width 440px, led by a
+  15px stroked magnifier icon that holds its size while the field flexes)
+  that flexes down to whatever room the bar leaves it. Below the breakpoint a menu button opens the
+  catalogue drawer. The product name hides in the narrow header so the search
+  retains space; the brand link keeps its accessible name. Search uses
+  `Search catalogue` as its accessible name and `Search catalogue…` as its
+  placeholder in both viewport sizes, covering screens, pages, and flows.
+  The decorative mark
+  inherits the accent-contrast color and uses two-unit strokes on a 24-unit
+  viewBox, with the mobile outline in front and a gap in the desktop outline
+  at the overlap. There is no mode
+  switch. A query splits into terms: every `tag:<tag>`
+  term matches only rows whose entry declares that tag, and the remaining words
+  rejoin into one phrase that must appear in a row's authored ID, title, or
+  route. A row stays visible only when it matches every tag term and that phrase;
+  tag terms hide the groups they empty and open the groups they keep, and they
+  compose with the All/Changes filter.
+- **Tag picker** — a tag-icon control at the trailing edge of the search
+  field, muted like the leading search icon and filling to a soft rounded square
+  on hover. It opens a panel anchored under the field and aligned to its width
+  (max-width 440px): a `--chrome-surface` card with a hairline border, 10px
+  radius, and `--chrome-shadow` elevation, holding an uppercase 11px muted
+  `Tags` head above a wrapping row of the details inspector's tag chips. The
+  panel lists every tag the catalogue declares, in alphabetical order, and
+  scrolls internally once that set outgrows it. Selecting a chip enters
+  `tag:<tag>` in the search field, replacing any tag term already entered, and
+  closes the panel; selecting the chip whose tag is the entered term clears that
+  term. The chip matching the entered query carries the accent active state with
+  contrast text and glyph. A tag chip is a button on both surfaces: it reports
+  whether its tag is entered through `aria-pressed`, fills with the soft accent
+  on hover, and moves down 1px with an inset shadow while pressed. Opening the
+  panel moves focus to the chip for the entered tag, or to the first chip when
+  no tag is entered; the chip row then keeps a single tab stop that ArrowLeft
+  and ArrowRight rove and wrap at both ends, Home and End send to its ends, and
+  Enter or Space activates. That chip row is a labelled toolbar carrying the
+  single tab stop, while the details inspector's chips stay independent tab
+  stops. Escape closes the panel and returns focus to the control without
+  changing the query, and a click outside closes it, returning focus to the
+  control only when the closing panel still holds it. A catalogue that declares
+  no tags renders neither the control nor the panel.
+- **Navigation** — 248px initial column, `#fbfbfa` background, hairline right
+  border. On desktop, an 8px-wide split separator with a centred 2×32px grip
+  resizes the column from 192px to 480px without exceeding half the viewport.
+  Dragging resizes continuously; Left/Right change it by 16px, Home/End choose
+  its bounds, and double-click restores 248px. Served pages remember the last
+  chosen width. The separator is absent from the mobile drawer and without
+  JavaScript. The head row is `CATALOGUE` (uppercase, 11px) with a text button
+  labelled `Collapse all`; an All/Changes segmented filter (with a monospace
+  changed count) is always present in live Serve, followed by the scrollable tree.
+  While detection is pending, an 11px spinner replaces the count in its fixed
+  four-character-wide slot. Selected Changes shows “Checking for changes…” and a
+  spinner in place of rows. A failed check shows an unavailable message and a dash;
+  a completed empty result shows `0` and “No changes found.” The filter and tree
+  origin keep their positions throughout. Reduced-motion settings disable rotation.
+  The drawer below the breakpoint shows the same body. Static exports without
+  Changes retain their filter-free layout. The catalogue-navigation component's
+  `loading` variant is the mobile/desktop owning mockup.
+  - The tree begins with separate `Pages` and `Components` native disclosures,
+    both open by default and both closed by `Collapse all`. Pages contains
+    screens, whole-document pages, and use cases; Components contains component
+    entries. A section is omitted when it has no matching current or retained
+    removed entries. Search and Changes hide a section when they hide every row
+    in it.
+  - Each section projects the authored collection hierarchy rather than
+    inventing route folders. A mixed collection appears in both projections
+    with only its matching descendants and a projected child count. Empty
+    authored collections remain in Pages. Collection groups are native
+    `<details>` whose summary row shows a closed/open folder SVG pair (swapped
+    via the `[open]` state), a bold label, and a monospace child count. Leaves
+    show a screen, page, flow, or component SVG; flow icons read in the accent.
+  - Rows indent 16px per depth from an 8px root inset and paint one faint
+    1px vertical guide per ancestor depth. The hover/active highlight is an
+    inset pill starting at the row's indent (`--mbk-indent`), so guides stay
+    visible; the active row uses the accent with contrast text.
+  - Catalogue-link navigation opens the active section and every collection on the active
+    row's path and scrolls that row into view. Search and Changes filtering may
+    stay selected only while the active row remains visible. Reapplying an
+    active filter during navigation preserves collapsed groups outside the
+    destination path, while editing the search or filter opens groups to reveal
+    current matches. Clearing filtering restores earlier disclosures except
+    for a destination path opened by navigation.
+    Background loading/recovery retains a selected Changes filter while results
+    are pending and when they arrive, even if the active preview is not in Changes.
+- **Screen head** — surface band with the breadcrumb trail (11.5px, `›`
+  separators; ancestor crumbs that resolve to a viewable route are links) and
+  a title row: 19px heading plus a monospace ID button labelled `#<id>`. The
+  button uses the standard pointer cursor, moves down 1px with an inset shadow
+  while pressed, and copies the unprefixed ID without navigating.
+  Selected screen routes place one right-aligned group of icon controls here:
+  Mobile/Desktop/Both dropdown, theme toggle, and component highlighting when
+  applicable. Tooltips name each action; the top bar has no theme selector.
+- **Stage** — dotted-grid background (22px radial dots), centred frames with
+  40px gap, internal `overflow: auto`, `MOBILE` / `DESKTOP` uppercase frame
+  labels, and no separate toolbar above the grid.
+- **Details inspector** — the shared icon footer opens the chosen tab in place;
+  closing it leaves no icon selected. Desktop uses a centered grip on the divider
+  and mobile uses a rounded bottom sheet with an iOS-style grabber. Only panel
+  content scrolls within the bounded workspace. Details contains a two-column
+  body (`1.35fr / 1fr`) with description and
+  `Why this screen —` rationale on the left and uppercase-labelled metadata
+  rows (Source, Generated, Schemes, Tags, Related docs, Dependencies, Used by)
+  on the right. Paths render as monospace chips; use cases render as pill chips
+  with the flow icon; the Schemes row is plain text naming the schemes the
+  screen renders in (`light, dark`). The Tags row lists the tags the entry
+  declares as pill chips with the tag icon: selecting one enters `tag:<tag>` in
+  the search field, so the filter stays visible and clearable there, and the
+  chip whose tag is in the entered query carries the accent active state with
+  contrast text and glyph. An entry that declares no tags omits the row.
+
+Shared home guidance asks visitors to choose an item from the navigation.
+Unknown routes use `Item not found` and offer another catalogue item or the
+catalogue home. Kind-specific wording is reserved for a known screen, page,
+or flow; shared controls and missing-route messages cover the whole catalogue.
+
+## Device Chrome
+
+- **Phone frame** — 390×844, 12px bezel padding, `#171a18` body,
+  46px radius, floating notch (108×30 at top 22px), a 36px-radius screen that
+  is white unless the dark scheme is selected, and a bottom home pill (128×4).
+  The screen is a column: a reserved status band followed by the embedded
+  mobile fragment, which takes the remaining height and rounds only its bottom
+  corners. The notch and home pill are decorative, hidden from accessibility
+  semantics, and use `pointer-events: none` in both the design library and
+  runtime shell. Preview links remain clickable where the home pill overlaps
+  the embedded document; do not disable pointer events on the screen itself.
+- **Phone status band** — the top 44px of the screen, padded `14px 28px 0` so
+  its content clears the notch: a `9:41` clock on the left and cellular, Wi-Fi,
+  and battery glyphs on the right. Text is 13.5px/600 in the screen ink
+  (`--chrome-ink`, or `--mbk-dark-screen-ink` when the screen is dark) with
+  tabular numerals; glyphs are 16×11 except the 22×11 battery, drawn with
+  `currentColor` on their own viewBoxes. The band is device chrome, so it
+  reserves space above the fragment rather than covering screen content.
+- **Browser frame** — width 100%, max-width 1180px, height 760px, strong
+  hairline border, 8px radius. Its 40px bar holds three traffic lights
+  (`#d9655b`, `#dba43d`, `#50a86d`), a monospace address pill (copies the
+  address on click, showing a `URL copied` toast), and the expand toggle.
+- **Address pill** — the address truncates with an ellipsis and the pill ends
+  with a 13px stroked copy icon that holds its size, muted until the pill is
+  hovered and drawn in the accent then.
+- **Expand toggle** — a 26px bordered button holding a 13px stroked
+  outward-arrow icon, sized with the address pill's copy icon so neither
+  control outweighs the other. Expanding fixes the frame to `inset: 2.5vh 2.5vw` at
+  overlay z-index over a scrim (`rgba(20, 28, 22, 0.55)`), locks body scroll,
+  and swaps the icon for its inward-arrow collapse counterpart; Escape or
+  clicking outside collapses it. Only one frame expands at a time.
+- **Use-case flow** — vertical numbered steps (32px accent number tiles)
+  joined by a 2px connector line, each with title, description, a
+  `This screen in the catalogue: <title> →` link, and one browser frame
+  (height 640px) indented under the step head.
+- **Document pane** — a bordered, 12px-radius iframe pane on the dotted stage.
+
+## Color Scheme
+
+A catalogue may render dark fragments beside its light ones. The selection
+changes only what a device screen shows; every shell surface around the frames
+keeps the light chrome palette in both schemes.
+
+| Token                   | Value     | Role                             |
+| ----------------------- | --------- | -------------------------------- |
+| `--mbk-dark-screen-bg`  | `#121514` | Dark device-screen surface       |
+| `--mbk-dark-screen-ink` | `#eef1ef` | Text and glyphs on a dark screen |
+
+There is no third dark token: the secondary dark tones (status-band ink, home
+pill, screen hairline, and the depicted screen content) are `color-mix` blends
+of those two.
+
+- **Containment** — dark paints the phone screen surface, including its
+  status-band ink, its home pill, and the fragment it holds, and the browser
+  viewport surface. The phone body and notch, the browser bar with its traffic
+  lights and address pill, and every shell surface outside a device screen stay
+  light.
+- **Screen edge** — a dark screen inside the near-black phone body would lose
+  its edge, so the phone screen carries a 1px inset `box-shadow` hairline mixed
+  from the two dark tokens, painted on an overlay above the fragment so the
+  embedded document cannot occlude it:
+  `color-mix(in srgb, var(--mbk-dark-screen-ink) 12%, var(--mbk-dark-screen-bg))`.
+  The browser viewport needs none; its light bar already draws that edge.
+- **Control** — a theme icon beside the viewport dropdown in the screen header
+  at every width. Authored design pairs navigate through their canonical scheme
+  links. Component designs toggle their local preview; unavailable choices are
+  disabled with an explanation.
+- **Light-only screens** — a screen with no dark render keeps its light frames
+  under a dark selection and states the fallback in its frame label, which
+  gains an `mbk-frame-scheme-note` span so the caption reads
+  `MOBILE — LIGHT ONLY` or `DESKTOP — LIGHT ONLY`. The note is the
+  lighter-weight tail of the same uppercase label, not a separate badge.
+  A use-case step frame carries the same fallback state but has no label, so it
+  shows no scheme caption.
+- **Diff views** — keep the normal viewport and color-scheme controls in the
+  screen heading. The compact diff band changes only how the
+  selected screen is displayed. Light-only comparisons name their fallback;
+  dark styling remains contained within device screens.
+
+## Responsive Behavior
+
+The shell has one breakpoint at **56.25rem (900px)**:
+
+- At or above it, the navigation column is persistent and the layout is the
+  fixed two-column split above.
+- Below it, the navigation becomes a scrimmed overlay drawer (82% width, max
+  20rem) opened by the top-bar menu button throughout the catalogue. The
+  drawer opens under the 48px bar and the bar stacks above the scrim, so the
+  menu button that opened it, the brand and the query stay
+  at full strength while only the shell below the bar dims. The tag picker
+  stops anchoring to the narrow field and drops as a sheet spanning the shell,
+  flush under the bar's bottom border with only its lower corners rounded. The
+  phone frame scales via `aspect-ratio: 390 / 844` within available width, the
+  browser frame drops to 560px height, flow connector lines hide, the details
+  body stacks to one column inside its bottom sheet. The grouped view controls
+  stay together in the screen head band and wrap beneath the title when needed.
+
+`prefers-reduced-motion: reduce` disables shell transitions.
+
+## In-place Comparisons
+
+The catalogue remains the only shell. An eligible screen has a compact Current /
+Side by side / Overlay / Difference band below its heading. Current is the initial
+state in both All and Changes. Diff selections load snapshots on demand in the
+same main region; controls, navigation, and details stay in place. Refresh and
+retry controls are available after an explicit comparison request. The target
+component shell makes the band conditional on changed screens, Changed or
+Removed component variants, or verified affected-consumer evidence. The updated mockups omit it on
+every Browse, Added screen/variant, Removed screen, shared-impact-only,
+ignored-only, and empty state. Removed screens show a status badge and current
+empty state instead. Comparison bands always retain
+an opaque surface and their border. Static catalogues without comparison data
+omit the band.
+The Added outcome still exposes factual branch evidence in Details. Comparison
+eligibility, evidence availability, and initial inspector disclosure are modeled
+independently in the mockups, matching the runtime rather than using the presence
+of a mode band to decide whether Details exists or starts open.
+
+Both viewports reuse the existing device-frame components. Stylesheet evidence
+uses the same secondary details: a changed stylesheet that reaches the screen
+names the changed styles that apply, and a changed stylesheet that reaches
+nothing is listed as examined and excluded without producing a Changes row.
+Before and current
+snapshots remain in script-disabled iframes. Overlay composites the current
+pane at 50% opacity; Difference uses CSS difference blending. Missing panes for
+eligible Removed component variants remain side by side for readability in every mode. No pixel percentages are
+shown. Baseline, affected files, and excluded content belong in secondary
+comparison details. Loading and failure states keep the catalogue available.
+
+The canonical Current and Overlay designs live at
+`design/review/controls/current.html` and `design/review/controls/overlay.html`;
+their mobile and desktop components share the catalogue shell. Existing design
+routes keep their identifiers, while outcome and impact screens depict Changes.
+See [the complete behavior](./mokly-changes.md).
+
+## Related Docs
+
+- [Build and Browse runtime](./mokly-runtime.md)
+- [Package and authoring contract](./mokly-package.md)

@@ -490,7 +490,7 @@ if (candidate.darkFragments) {
 
 **Files:**
 
-- Modify: `docs/protocol/mokabook-package.md`, `README.md` (config/authoring
+- Modify: `docs/protocol/mokly-package.md`, `README.md` (config/authoring
   usage), `plans/native-color-scheme-support.md` (tick boxes)
 
 - [x] Update `mokabook-package.md`: config shape (`colorSchemes`,
@@ -574,7 +574,7 @@ implementation. No `src/` changes in this milestone.
 
 **Files:**
 
-- Modify: `docs/protocol/mokabook-shell-design.md`
+- Modify: `docs/protocol/mokly-shell-design.md`
 
 - [x] Extend the mockup table with the three new routes. Document: the
       top-bar scheme control (placement, `mbk-seg`, appears only when the
@@ -726,7 +726,7 @@ test("artifact emits one compare page per view", () => {
 
 #### Task 3.3: Runtime protocol doc + gate
 
-- [x] Update `docs/protocol/mokabook-runtime.md`: Review Comparison section
+- [x] Update `docs/protocol/mokly-runtime.md`: Review Comparison section
       (view enumeration, union semantics, `.dark` page segment), the
       normative `review.json` schema (replace the v1 block with v2 exactly as
       in the spec), Check section (new failure classes from Milestone 1),
@@ -906,7 +906,7 @@ test("recovery state restores color scheme strictly", ...);
 **Files:**
 
 - Modify: `tests/browser/browse.spec.ts`, `tests/browser/review.spec.ts`,
-  `docs/protocol/mokabook-runtime.md` (Browse Shell + watched development
+  `docs/protocol/mokly-runtime.md` (Browse Shell + watched development
   state list)
 
 - [x] Browser-verify the dark phone screen's 1px inset hairline is actually
@@ -977,7 +977,7 @@ plan is filed complete.
       fixture review artifacts cannot fail `npm run lint` (found during
       Task 4.5).
 - [x] Re-read the spec end to end and verify each requirement has landed;
-      re-read `README.md`, `docs/protocol/mokabook-package.md`,
+      re-read `README.md`, `docs/protocol/mokly-package.md`,
       `mokabook-runtime.md`, `mokabook-shell-design.md`,
       `examples/basic/README.md`, `examples/basic/notes.md` for consistency
       (no conflicting statements; consumer story reads: config + renderer +

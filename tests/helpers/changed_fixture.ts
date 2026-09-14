@@ -28,8 +28,8 @@ export async function changedFixture(
     execFileSync("git", args, { cwd: fixture.root, stdio: "pipe" });
   await build();
   git("init", "-q", "-b", "main");
-  git("config", "user.name", "Mokabook Test");
-  git("config", "user.email", "mokabook@example.invalid");
+  git("config", "user.name", "Mokly Test");
+  git("config", "user.email", "mokly@example.invalid");
   git("add", ".");
   git("commit", "-qm", "test: catalogue baseline");
   return { ...fixture, build, config, git };

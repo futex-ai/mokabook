@@ -28,7 +28,7 @@ export function workspaceEvidence(
       return;
     return () =>
       root.dispatchEvent(
-        new doc.defaultView!.CustomEvent("mokabook:workspace-evidence", {
+        new doc.defaultView!.CustomEvent("mokly:workspace-evidence", {
           detail: data,
         }),
       );

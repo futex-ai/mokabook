@@ -7,14 +7,14 @@ export function handleBrowseControl(
   target: Element,
   updateDiffs: () => void,
 ): boolean {
-  if (target.closest("[data-mokabook-menu]")) {
-    const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
+  if (target.closest("[data-mokly-menu]")) {
+    const shell = doc.querySelector<HTMLElement>("[data-mokly-shell]");
     if (shell) setDrawer(shell, shell.dataset["drawer"] !== "open");
     return true;
   }
-  if (target.closest("[data-mokabook-collapse]")) {
+  if (target.closest("[data-mokly-collapse]")) {
     for (const group of doc.querySelectorAll<HTMLDetailsElement>(
-      "details[data-nav-collection]",
+      "details[data-nav-disclosure]",
     ))
       group.open = false;
     return true;

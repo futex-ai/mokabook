@@ -61,6 +61,42 @@ interface RegistryContractModule {
   }): boolean;
 }
 
+test("scoped npm identity preserves the Mokly executable", async () => {
+  const packageJson = JSON.parse(
+    await fs.promises.readFile(
+      path.join(repositoryRoot, "package.json"),
+      "utf8",
+    ),
+  );
+  assert.equal(packageJson.name, "@mokly/mokly");
+  assert.equal(packageJson.author, "Mokly");
+  assert.deepEqual(packageJson.bin, { mokly: "./dist/cli/bin.js" });
+  assert.equal(
+    packageJson.homepage,
+    "https://github.com/mokly-ai/mokly#readme",
+  );
+  assert.deepEqual(packageJson.repository, {
+    type: "git",
+    url: "git+https://github.com/mokly-ai/mokly.git",
+  });
+  assert.deepEqual(packageJson.bugs, {
+    url: "https://github.com/mokly-ai/mokly/issues",
+  });
+  assert.deepEqual(packageJson.publishConfig, {
+    access: "public",
+    registry: "https://registry.npmjs.org/",
+  });
+  const lock = JSON.parse(
+    await fs.promises.readFile(
+      path.join(repositoryRoot, "package-lock.json"),
+      "utf8",
+    ),
+  );
+  assert.equal(lock.name, packageJson.name);
+  assert.equal(lock.packages[""].name, packageJson.name);
+  assert.deepEqual(lock.packages[""].bin, { mokly: "dist/cli/bin.js" });
+});
+
 test("CI pins actions and gates both supported Node runtimes", async () => {
   const source = await workflowSource("ci.yml");
   const workflow = parse(source) as Workflow;
@@ -185,6 +221,16 @@ test("published-version guard compares bytes, inventory, and commit", async () =
     { gitHead: "c".repeat(40) },
     "c".repeat(40),
   );
+  for (const name of ["mokly", "mokabook", "@other/mokly"]) {
+    assert.throws(() =>
+      registry.comparePublishedPackage(
+        report,
+        { ...report, name },
+        {},
+        "c".repeat(40),
+      ),
+    );
+  }
   const mismatched = structuredClone(report);
   mismatched.integrity = `sha512-${"d".repeat(12)}`;
   assert.throws(

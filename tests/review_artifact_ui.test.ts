@@ -80,7 +80,7 @@ test("comparison artifacts contain data and snapshots without a separate UI", ()
     snapshots.get("snapshots/base/home.html"),
   );
   assert.deepEqual([...files.keys()].sort(), [
-    ".mokabook-review-artifact",
+    ".mokly-review-artifact",
     "review.json",
     "snapshots/base/home.html",
     "snapshots/head/home.html",

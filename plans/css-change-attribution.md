@@ -9,7 +9,7 @@ A single edit to a shared stylesheet currently marks every screen that links
 that stylesheet as a dependency change, and a broad `review.sharedImpact` glob
 marks every entry in the catalogue. The accounting consumer showed 1,382
 Changes for a branch whose real diff was 98 files and three moved guide routes.
-The Mokabook side of that count came from two sources: a blanket
+The Mokly side of that count came from two sources: a blanket
 `docs/mockups/*.css` shared-impact glob in the consumer configuration, and
 file-level attribution of the guide additions in `docs/mockups/home.css` to
 every screen that loads it.
@@ -28,10 +28,10 @@ already native. Milestone 3 records timings so that decision rests on evidence.
 
 Related contracts:
 
-- [Changes and screen comparisons](../docs/protocol/mokabook-changes.md)
-- [Component change attribution](../docs/protocol/mokabook-component-changes.md)
-- [Component comparison v3 schema](../docs/protocol/mokabook-component-review.md)
-- [Startup diagnostics and scale fixtures](../docs/protocol/mokabook-timings.md)
+- [Changes and screen comparisons](../docs/protocol/mokly-changes.md)
+- [Component change attribution](../docs/protocol/mokly-component-changes.md)
+- [Component comparison v3 schema](../docs/protocol/mokly-component-review.md)
+- [Startup diagnostics and scale fixtures](../docs/protocol/mokly-timings.md)
 
 ## Scope
 
@@ -120,10 +120,10 @@ excludedResources: readonly { path: string; reason: "no-matching-rule" }[];
 Documentation-only milestone. The protocol must be complete and approved by
 the user before mockups or code land.
 
-Completed. Added `docs/protocol/mokabook-css-attribution.md` and updated the
+Completed. Added `docs/protocol/mokly-css-attribution.md` and updated the
 changes, component-changes, component-review, and index docs.
 
-- [x] Add `docs/protocol/mokabook-css-attribution.md` covering: the three
+- [x] Add `docs/protocol/mokly-css-attribution.md` covering: the three
       stages in the Design Summary, the exact keep-list of unresolvable constructs, the rule
       that conditions are not evaluated, the invariant that the analysis only
       narrows existing dependency evidence and never adds files, and the
@@ -133,12 +133,12 @@ changes, component-changes, component-review, and index docs.
       above, in both the v2 `ReviewResult` and v3 `ReviewResultV3` contracts.
       Absent fields mean the analysis did not run, so historical results
       without them remain valid.
-- [x] Update `docs/protocol/mokabook-changes.md` and
-      `docs/protocol/mokabook-component-changes.md` so the dependency and
+- [x] Update `docs/protocol/mokly-changes.md` and
+      `docs/protocol/mokly-component-changes.md` so the dependency and
       shared-impact paragraphs reference the new contract and state that a
       CSS dependency edit keeps a view in Changes only when analysis matched
       or was unresolved.
-- [x] Update `docs/protocol/mokabook-component-review.md` with the schema
+- [x] Update `docs/protocol/mokly-component-review.md` with the schema
       change and the validation rule that `analysis.selectors` is sorted and
       duplicate-free, and that an `excludedResources` path must be in
       `changedPaths`.
@@ -160,7 +160,7 @@ Design the inspector evidence before any implementation so the user can
 approve the visible outcome. Show examined-and-excluded resources and matched selectors in the inspector so
 a reviewer can see why a screen stayed out of Changes.
 
-- [x] Read `docs/protocol/mokabook-shell-design.md` and the existing evidence
+- [x] Read `docs/protocol/mokly-shell-design.md` and the existing evidence
       designs under `examples/basic/entries/design/`.
 - [x] Add mobile and desktop screens to the design catalogue showing a screen
       with a dependency reason carrying matched selectors, and a screen with
@@ -184,7 +184,7 @@ language decision and later performance claims rest on data.
       contract for base-commit resolution, changed-path discovery, base
       manifest read, base document batch read, per-screen comparison loop,
       resource graph traversal, and artifact write. Follow the span rules in
-      `docs/protocol/mokabook-timings.md`.
+      `docs/protocol/mokly-timings.md`.
 - [ ] Extend the large fixture generator under `tests/fixtures/large` with a
       configurable number of shared stylesheets linked by a configurable share
       of screens, and record a baseline in which one shared stylesheet gains
@@ -192,7 +192,7 @@ language decision and later performance claims rest on data.
 - [ ] Run `benchmark:large` against that fixture and record per-span timings
       in this plan under a "Baseline timings" heading, with fixture sizes.
 - [ ] Add tests for the new spans in the existing timings test file, and
-      update `docs/protocol/mokabook-timings.md` with the new stage names.
+      update `docs/protocol/mokly-timings.md` with the new stage names.
 - [ ] Run `npm run test`, `npm run typecheck`, `npm run lint`, and
       `npm run format:check`.
 
@@ -287,7 +287,7 @@ Tags: ui
 ## Milestone 8: Documentation, examples, and timings
 
 - [ ] Update `README.md`, `examples/basic/README.md`, and
-      `docs/protocol/mokabook-package.md` so guidance on `review.sharedImpact`
+      `docs/protocol/mokly-package.md` so guidance on `review.sharedImpact`
       describes it as a fallback for files the resource graph cannot see, and
       states that linked stylesheets are attributed by rule.
 - [ ] Update `src/review/README.md` (create it if absent) with the CSS module

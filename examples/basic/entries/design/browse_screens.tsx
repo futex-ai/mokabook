@@ -1,4 +1,4 @@
-import { screen } from "mokabook";
+import { screen } from "@mokly/mokly";
 
 import { useCaseScreen } from "./browse/views/use-case.js";
 import { DesignNavigation } from "./parts/design_navigation.js";
@@ -14,7 +14,7 @@ function HomeBody() {
   return (
     <EmptyState
       to={DESTINATIONS.welcome}
-      title="Mokabook"
+      title="Mokly"
       body="Browse the mockup catalogue: expand folders and choose an item from the navigation."
       linkLabel="Open the first screen"
     />

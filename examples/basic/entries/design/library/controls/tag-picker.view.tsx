@@ -12,7 +12,7 @@ export function TagPickerView({ tags, activeTag }: TagPickerProps) {
         {tags.map((tag) => (
           <tagChip.Component
             key={tag.id}
-            mokabookInstance={tag.id}
+            moklyInstance={tag.id}
             {...tag}
             selected={tag.id === activeTag}
           />
