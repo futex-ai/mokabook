@@ -651,6 +651,10 @@ Watcher tests use `tests/helpers/watched_catalogue.ts` to await a newer version
 and the expected Changes state within the existing deadline. Multi-operation
 edits can publish intermediate states; the first newer version alone does not
 prove that an entire replacement or repair has completed.
+Process-lifecycle tests use `tests/helpers/process_state.ts` for inspection and
+cleanup. A helper disappearing before `ps` runs is a successful exit, not a test
+failure. Only the defined empty no-match result and `ESRCH` during cleanup are
+accepted; running helpers and other command or permission failures still fail.
 
 ## Export And Publish A Consumer Build
 

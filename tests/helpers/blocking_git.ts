@@ -6,6 +6,8 @@ import path from "node:path";
 import type { TestContext } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
+import { killProcessIfPresent, readProcessField } from "./process_state.js";
+
 export async function blockingGit(
   t: TestContext,
   root: string,
@@ -44,8 +46,7 @@ exec ${quote(executable)} "$@"
   process.env.PATH = `${bin}${path.delimiter}${originalPath ?? ""}`;
   t.after(async () => {
     restore();
-    for (const pid of observed)
-      if (processExists(pid)) process.kill(pid, "SIGKILL");
+    for (const pid of observed) killProcessIfPresent(pid);
   });
   return {
     restore,
@@ -59,10 +60,8 @@ exec ${quote(executable)} "$@"
         for (const pid of pids) observed.add(pid);
         const pid = pids[count - 1] ?? 0;
         if (pid > 0 && processExists(pid)) {
-          const name = execFileSync("ps", ["-o", "comm=", "-p", String(pid)], {
-            encoding: "utf8",
-          }).trim();
-          if (path.basename(name) === "git") return pid;
+          const name = readProcessField(pid, "comm");
+          if (name && path.basename(name) === "git") return pid;
         }
         await setTimeout(10);
       }
