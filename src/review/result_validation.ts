@@ -18,7 +18,7 @@ import {
   validateReviewScreen,
 } from "./result_records.js";
 
-/** Decode both published result versions; malformed new records never grant suppression. */
+/** Shared browser/server decoder preserves material flags and validates each view's evidence. */
 export function parseReviewResult(value: unknown): ReviewResult {
   try {
     return validateResult(value);

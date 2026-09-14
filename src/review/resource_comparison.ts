@@ -6,7 +6,7 @@ import {
   type ChangedResource,
   type ResourceEvidence,
 } from "./css/resource_analysis.js";
-import { isStylesheetPath } from "./css/paths.js";
+import { isStylesheetPath } from "./css/stylesheet_path.js";
 import type { CssDocumentPair } from "./css/document.js";
 
 /** A view side after the comparison's paired normalization. */

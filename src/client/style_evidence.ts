@@ -74,6 +74,7 @@ export function excludedStylesheets(
 export function isStyleOnlyView(view: ViewReview): boolean {
   return (
     view.state === "changed" &&
+    view.material === undefined &&
     view.reasons !== undefined &&
     view.reasons.length > 0 &&
     view.reasons.every((reason) => reason.analysis !== undefined)

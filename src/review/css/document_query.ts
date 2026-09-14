@@ -1,10 +1,11 @@
+/** Compile and traverse selectors behind one contained error boundary. */
 import { compile, selectOne } from "css-select";
 import { SelectorType, stringify } from "css-what";
 import type { Selector } from "css-what";
 import { html } from "parse5";
 
 import { cssDocumentOptions } from "./document.js";
-import type { CssDocument, CssElement, CssNode } from "./document.js";
+import type { CssDocument, CssElement } from "./document.js";
 import { CssSelectorError } from "./match_types.js";
 import { nthSelectors, staticSelectors } from "./pseudos.js";
 
@@ -13,9 +14,8 @@ export function matchesDocument(
   query: Selector[][],
   document: CssDocument,
 ): boolean {
-  const options = cssDocumentOptions(document);
-  let predicate: (node: CssNode) => boolean;
   try {
+    const options = cssDocumentOptions(document);
     const pseudos: Record<string, (element: CssElement) => boolean> = {};
     let nextPredicate = 0;
     const rewrite = (selectors: Selector[][]): Selector[][] =>
@@ -50,9 +50,9 @@ export function matchesDocument(
         }),
       );
     const selectors = rewrite(staticSelectors(query));
-    predicate = compile(selectors, { ...options, pseudos });
+    const predicate = compile(selectors, { ...options, pseudos });
+    return selectOne(predicate, document, options) !== null;
   } catch (cause) {
     throw new CssSelectorError("selector-parse-failed", cause);
   }
-  return selectOne(predicate, document, options) !== null;
 }

@@ -18,7 +18,7 @@ import {
   type ChangedResource,
   type ResourceEvidence,
 } from "../review/css/resource_analysis.js";
-import { isStylesheetPath } from "../review/css/paths.js";
+import { isStylesheetPath } from "../review/css/stylesheet_path.js";
 import type { CssDocumentPair } from "../review/css/document.js";
 
 /** Cache shared resource edges for one immutable changed-route calculation. */
@@ -26,6 +26,10 @@ export class ChangedResourceGraph {
   readonly #physicalRoutes = new Map<string, string>();
   readonly #contents = new Map<string, string>();
   readonly #rawContents = new Map<string, string>();
+  readonly #viewResources = new Map<
+    string,
+    { document: string; resources: ReadonlySet<string> }
+  >();
   readonly #base: ComponentMaterialReader;
   readonly #head: ComponentMaterialReader;
   readonly #baseGraph: ResourceGraph;
@@ -68,22 +72,52 @@ export class ChangedResourceGraph {
   }
 
   /** Inspect transitive local references, terminating even for cyclic imports. */
+  async hasChangedStylesheet(
+    source: string,
+    document: string,
+  ): Promise<boolean> {
+    return [...(await this.resources(source, document))].some(
+      (route) => isStylesheetPath(route) && this.isChanged(route),
+    );
+  }
+
+  private async resources(
+    source: string,
+    document: string,
+  ): Promise<ReadonlySet<string>> {
+    const cached = this.#viewResources.get(source);
+    if (cached?.document === document) return cached.resources;
+    const resources = await timeAsync("review.resource-graph", () =>
+      this.#graph.collect(
+        referencedRoutes(source, document, { resourceHints: false }),
+      ),
+    );
+    this.#viewResources.set(source, { document, resources });
+    return resources;
+  }
+
+  /** Analyse CSS only after current resource discovery establishes eligibility. */
   async compare(
     source: string,
     document: string,
     before?: { path: string; html: string },
   ): Promise<ResourceEvidence> {
-    const resources = await timeAsync("review.resource-graph", () => {
-      const seeds = referencedRoutes(source, document, {
-        resourceHints: false,
-      });
-      return this.#graph.collect(seeds);
-    });
-    const bases = before
-      ? await this.#baseGraph.collect(
-          referencedRoutes(before.path, before.html, { resourceHints: false }),
-        )
-      : new Set<string>();
+    const resources = await this.resources(source, document);
+    const changedStylesheet = [...resources].some(
+      (route) => isStylesheetPath(route) && this.isChanged(route),
+    );
+    const changedDocument =
+      before && (before.path !== source || before.html !== document);
+    const bases =
+      before &&
+      (changedStylesheet ||
+        (changedDocument && [...this.changed].some(isStylesheetPath)))
+        ? await this.#baseGraph.collect(
+            referencedRoutes(before.path, before.html, {
+              resourceHints: false,
+            }),
+          )
+        : new Set<string>();
     const all = [...new Set([...bases, ...resources])];
     const eligible = all.filter((route) => this.isChanged(route));
     const cssPaths = eligible.filter(isStylesheetPath);

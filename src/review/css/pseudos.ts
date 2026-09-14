@@ -1,3 +1,4 @@
+/** Broaden browser-state selectors while preserving static and shadow constraints. */
 import { parse, SelectorType, stringify } from "css-what";
 import type { Selector } from "css-what";
 

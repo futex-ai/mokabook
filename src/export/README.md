@@ -17,6 +17,9 @@ For screen-only catalogues, `site.ts` projects per-view resource evidence from
 the existing v2 comparison into shell workspace data. Details can show matched,
 unresolved, and excluded stylesheets in Current without fetching comparison
 JSON, and no extra classification pass is needed for this projection.
+The projection omits views without retained or excluded resources and drops
+screens whose evidence slice is empty. Comparison JSON separately retains all
+view states and the material-change flag.
 
 `stage.ts` shares ownership assembly, alias/reference validation, and staged
 file writes between consumer export and repository preview capture.

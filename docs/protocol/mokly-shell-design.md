@@ -67,6 +67,7 @@ contract until their standalone screens are implemented.
 | `design-review-empty`                 | `design/review/impact/empty.html`                  | Empty Changes filter retaining Current                    |
 | `design-review-style-matched`         | `design/review/impact/stylesheets/matched.html`    | Changed styles that apply to the screen                   |
 | `design-review-style-unresolved`      | `design/review/impact/stylesheets/unresolved.html` | A style change that can reach anything on the screen      |
+| `design-review-style-unnamed`         | `design/review/impact/stylesheets/unnamed.html`    | The same reach with no style name to list                 |
 | `design-review-style-excluded`        | `design/review/impact/stylesheets/excluded.html`   | Changed stylesheet examined and excluded                  |
 | `design-page-view`                    | `design/browse/pages/view.html`                    | Complete document in its declared collection              |
 | `design-page-details`                 | `design/browse/pages/details.html`                 | Document metadata and close action                        |
@@ -82,11 +83,15 @@ Additional owning groups keep each new page at no more than five screens:
   behavior.
 - `design/browse/publication/catalogue.html` and `changes.html` specify review
   omitted and included, using the existing Welcome stage.
-- `design/review/impact/stylesheets/matched.html`, `unresolved.html`, and
-  `excluded.html` specify rule-aware stylesheet evidence beneath the impact
-  states, so the impact page itself keeps its three screens. Matched and
-  unresolved stay in Changes; excluded is viewed from All and stays out. Their
-  evidence contract is
+- `design/review/impact/stylesheets/matched.html`, `unresolved.html`,
+  `unnamed.html`, and `excluded.html` specify rule-aware stylesheet evidence
+  beneath the impact states, so the impact page itself keeps its three screens.
+  Matched, unresolved, and unnamed stay in Changes and open the loaded
+  side-by-side comparison with the "Styles this screen uses changed" stage
+  heading; `unnamed.html` is the same reach with no style name, so its lead
+  sentence ends with a full stop and no list. Excluded is viewed from All, stays
+  out, and shows the plain current preview with no comparison band, no stage
+  heading, and the terminal status line. Their evidence contract is
   [CSS change attribution](./mokly-css-attribution.md).
 
 Every screen ships one mobile and one desktop variant. Mockup implementation
@@ -377,7 +382,7 @@ retry controls are available after an explicit comparison request. The target
 component shell makes the band conditional on changed screens, Changed or
 Removed component variants, or verified affected-consumer evidence. The updated mockups omit it on
 every Browse, Added screen/variant, Removed screen, shared-impact-only,
-ignored-only, and empty state. Removed screens show a status badge and current
+ignored-only, excluded-stylesheet-only, and empty state. Removed screens show a status badge and current
 empty state instead. Comparison bands always retain
 an opaque surface and their border. Static catalogues without comparison data
 omit the band.
@@ -390,6 +395,11 @@ Both viewports reuse the existing device-frame components. Stylesheet evidence
 uses the same secondary details: a changed stylesheet that reaches the screen
 names the changed styles that apply, and a changed stylesheet that reaches
 nothing is listed as examined and excluded without producing a Changes row.
+The shell's evidence container adopts the approved mockup card's paragraph and
+list spacing — 8px above each paragraph or list, and 14px between a list and the
+paragraph that follows it — while keeping its own separator treatment, a top
+rule above the evidence, rather than the mockup's bordered card. The mockup card
+keeps the appearance it already has; only the shell adopts its spacing.
 Before and current
 snapshots remain in script-disabled iframes. Overlay composites the current
 pane at 50% opacity; Difference uses CSS difference blending. Missing panes for

@@ -1,3 +1,4 @@
+/** Apply the conservative keep rules before testing selectors against paired documents. */
 import { compile } from "css-select";
 import { parse } from "css-what";
 import type { Selector } from "css-what";

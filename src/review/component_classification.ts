@@ -4,8 +4,7 @@ import { minimatch } from "minimatch";
 
 import { canonicalJson } from "../components/data.js";
 import { generatedViews } from "../components/views.js";
-import { isInside, toPosixPath } from "../config/paths.js";
-import { isPrivateStaticPath } from "../config/public_files.js";
+import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
 import { analyzeHierarchy } from "../registry/hierarchy.js";
@@ -41,7 +40,7 @@ import {
 import { aggregateIgnored, aggregateState } from "./screen_views.js";
 import { ResourceComparison } from "./resource_comparison.js";
 import { CssResourceAnalysis } from "./css/resource_analysis.js";
-import { isStylesheetPath } from "./css/paths.js";
+import { analysisOwnsStylesheet } from "./css/paths.js";
 import type { CssRuleParser } from "./css/types.js";
 import {
   exactScreenCssReasons,
@@ -144,15 +143,11 @@ export async function classifyComponents(
       reasons.push(
         ...dependencies
           .reasons(pair.before, pair.after, changedPaths)
-          .filter((reason) => {
-            if (reason.kind !== "dependency" || !isStylesheetPath(reason.path))
-              return true;
-            const candidate = path.resolve(config.repoRoot, reason.path);
-            return (
-              !isInside(config.mockupsDir, candidate) ||
-              isPrivateStaticPath(candidate, config)
-            );
-          }),
+          .filter(
+            (reason) =>
+              reason.kind !== "dependency" ||
+              !analysisOwnsStylesheet(reason.path, config),
+          ),
       );
       const common = {
         ...address(entry),

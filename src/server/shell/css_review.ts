@@ -81,16 +81,6 @@ export const SHELL_REVIEW_CSS = `
 .mb-panes:not([data-compare-mode="side"]) .mb-pane-label { visibility: hidden; }
 .mb-panes[data-compare-mode="overlay"] .mb-pane--after { opacity: .5; }
 .mb-panes[data-compare-mode="difference"] .mb-pane--after .mb-pane-doc { mix-blend-mode: difference; }
-.mb-impact-card {
-  border: 1px solid var(--chrome-border);
-  border-radius: 8px;
-  background: var(--chrome-surface);
-  padding: 12px;
-  color: var(--chrome-ink-2);
-  overflow-wrap: anywhere;
-}
-.mb-impact-card summary { cursor: pointer; font-weight: 600; }
-.mb-impact-card p, .mb-impact-card ul { margin: 8px 0 0; }
 @media (max-width: 56.25rem) {
   .mbk-diff-toolbar { padding: 8px 12px; }
   .mbk-diff-toolbar .mbk-seg { flex: 1; }

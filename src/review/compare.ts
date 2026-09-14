@@ -115,6 +115,7 @@ export async function compareReview(
           baseSeeds,
           headSeeds,
           resources,
+          config,
         ),
       );
     }

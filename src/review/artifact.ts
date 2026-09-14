@@ -20,7 +20,10 @@ export function renderReviewArtifact(
   if (
     artifact.result.schemaVersion === 3 ||
     artifact.result.screens.some((screen) =>
-      screen.views.some((view) => view.reasons || view.excludedResources),
+      screen.views.some(
+        (view) =>
+          view.material !== undefined || view.reasons || view.excludedResources,
+      ),
     )
   )
     parseReviewResult(artifact.result);

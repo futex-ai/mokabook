@@ -1,3 +1,4 @@
+/** Compose rule diffing, matching, and conservative reduction for one stylesheet. */
 import { timeSync } from "../../diagnostics/timings.js";
 import { diffCssRules } from "./diff.js";
 import type { CssDocumentPair } from "./document.js";
@@ -12,12 +13,10 @@ export function analyzeStylesheetChange(
   after: string,
   documents: CssDocumentPair,
   parser: CssRuleParser = new LightningCssRuleParser(),
+  matcher: typeof matchCssRules = matchCssRules,
 ): CssAnalysisOutcome {
   return timeSync("review.css-analysis", () => {
-    const matched = matchCssRules(
-      diffCssRules(before, after, parser),
-      documents,
-    );
+    const matched = matcher(diffCssRules(before, after, parser), documents);
     if (matched.status === "unresolved")
       return { kind: "kept", status: "unresolved", selectors: [] };
     const kept = matched.rules.flatMap(({ outcome }) =>

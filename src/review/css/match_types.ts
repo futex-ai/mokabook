@@ -1,3 +1,4 @@
+/** Typed rule decisions and contained selector failures for CSS attribution. */
 import type { CssRule, CssRuleDiffResult } from "./types.js";
 
 /** Reduced potential impact of one stylesheet, or one diffed rule, on a view. */

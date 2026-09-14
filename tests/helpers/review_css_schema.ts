@@ -9,7 +9,7 @@ export function cssSchemaFiles(): Map<string, string> {
           [`snapshots/${side}/shared.css`, ".auth { color: red; }"],
           [
             `snapshots/${side}/mobile.html`,
-            '<!doctype html><link rel="stylesheet" href="shared.css"><button class="auth">Sign in</button>',
+            `<!doctype html><link rel="stylesheet" href="shared.css"><button class="auth">${side === "before" ? "Sign in" : "Continue"}</button>`,
           ],
           [
             `snapshots/${side}/desktop.html`,
@@ -28,6 +28,7 @@ export function cssSchemaFixture(version: 2 | 3): ReviewResult {
       viewport: "mobile",
       colorScheme: "light",
       state: "changed",
+      material: true,
       ignoredIds: [],
       beforePath: "snapshots/before/mobile.html",
       afterPath: "snapshots/after/mobile.html",

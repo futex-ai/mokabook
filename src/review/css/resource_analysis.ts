@@ -1,7 +1,11 @@
+/** Cache parsing and contain per-resource failures during evidence reduction. */
 import { analyzeStylesheetChange } from "./analyze.js";
+import { diffCssRules } from "./diff.js";
+import { matchCssRules } from "./match.js";
+import type { CssAnalysisOutcome } from "./match_types.js";
 import type { CssDocumentPair } from "./document.js";
 import { LightningCssRuleParser } from "./rules.js";
-import { isStylesheetPath } from "./paths.js";
+import { isStylesheetPath } from "./stylesheet_path.js";
 import {
   CssRuleParseError,
   type CssRuleParser,
@@ -27,7 +31,10 @@ export class CssResourceAnalysis {
   private readonly parsed = new Map<string, CssRuleParseResult>();
   private readonly cached: CssRuleParser;
 
-  constructor(parser: CssRuleParser = new LightningCssRuleParser()) {
+  constructor(
+    parser: CssRuleParser = new LightningCssRuleParser(),
+    private readonly matcher: typeof matchCssRules = matchCssRules,
+  ) {
     this.cached = {
       parse: (source) => {
         let result = this.parsed.get(source);
@@ -61,14 +68,26 @@ export class CssResourceAnalysis {
         reasons.push({ kind: "dependency", path: resource.path });
         continue;
       }
-      const outcomes = (documents.length ? documents : [{}]).map((pair) =>
-        analyzeStylesheetChange(
-          resource.before ?? "",
-          resource.after ?? "",
-          pair,
-          this.cached,
-        ),
-      );
+      let outcomes: CssAnalysisOutcome[];
+      try {
+        outcomes = (documents.length ? documents : [{}]).map((pair) =>
+          analyzeStylesheetChange(
+            resource.before ?? "",
+            resource.after ?? "",
+            pair,
+            this.cached,
+            this.matcher,
+          ),
+        );
+      } catch {
+        outcomes = [
+          {
+            kind: "kept",
+            status: "unresolved",
+            selectors: this.changedSelectors(resource),
+          },
+        ];
+      }
       const kept = outcomes.filter((outcome) => outcome.kind === "kept");
       if (kept.length)
         reasons.push({
@@ -93,5 +112,28 @@ export class CssResourceAnalysis {
       ...(reasons.length ? { reasons } : {}),
       ...(excludedResources.length ? { excludedResources } : {}),
     };
+  }
+
+  /** Recover serialized changed selectors without allowing a second failure to escape. */
+  private changedSelectors(resource: ChangedResource): readonly string[] {
+    try {
+      const diff = diffCssRules(
+        resource.before ?? "",
+        resource.after ?? "",
+        this.cached,
+      );
+      if (diff.status === "unresolved") return [];
+      return [
+        ...new Set(
+          [
+            ...diff.added,
+            ...diff.removed,
+            ...diff.changed.flatMap(({ before, after }) => [before, after]),
+          ].flatMap((rule) => rule.selectors),
+        ),
+      ].sort();
+    } catch {
+      return [];
+    }
   }
 }

@@ -65,9 +65,7 @@ export class SelectedAssetReader implements ReviewAssetReader {
     const loaded = missing.length
       ? this.reader.readManyIfExists
         ? await this.reader.readManyIfExists(missing)
-        : this.reader.readMany
-          ? await this.reader.readMany(missing)
-          : undefined
+        : undefined
       : undefined;
     for (const route of missing) {
       this.signal.throwIfAborted();

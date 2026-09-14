@@ -74,6 +74,20 @@
   font-weight: 600;
 }
 
+.mbk-shot--restyled .mbk-shot-nav {
+  border-bottom-color: var(--mbk-sage);
+  color: var(--chrome-ink);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mbk-shot--restyled .mbk-shot-link {
+  color: var(--mbk-sage-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .mbk-screen-dark .mbk-shot {
   background: transparent;
 }

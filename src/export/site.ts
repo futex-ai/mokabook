@@ -127,19 +127,29 @@ export function assembleExport(
       ...(comparison.result.schemaVersion === 3
         ? { result: comparison.result }
         : {
-            screenEvidence: comparison.result.screens.map(
-              ({ route, views }) => ({
+            screenEvidence: comparison.result.screens
+              .map(({ route, views }) => ({
                 route,
-                views: views.map(
-                  ({ viewport, colorScheme, reasons, excludedResources }) => ({
-                    viewport,
-                    colorScheme,
-                    ...(reasons ? { reasons } : {}),
-                    ...(excludedResources ? { excludedResources } : {}),
-                  }),
-                ),
-              }),
-            ),
+                views: views
+                  .filter(
+                    (view) =>
+                      view.reasons?.length || view.excludedResources?.length,
+                  )
+                  .map(
+                    ({
+                      viewport,
+                      colorScheme,
+                      reasons,
+                      excludedResources,
+                    }) => ({
+                      viewport,
+                      colorScheme,
+                      ...(reasons ? { reasons } : {}),
+                      ...(excludedResources ? { excludedResources } : {}),
+                    }),
+                  ),
+              }))
+              .filter((screen) => screen.views.length > 0),
           }),
     },
     updateVersion: 0,

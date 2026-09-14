@@ -1,3 +1,4 @@
+/** Normalize rule material without joining tokens across source boundaries. */
 import { transform } from "lightningcss";
 import type { Rule, Selector, StyleRule } from "lightningcss";
 

@@ -318,8 +318,9 @@ resources never produce Changes rows.
 The approved design is the stylesheet-evidence group of the design catalogue,
 recorded in the
 [shell design inventory](./mokly-shell-design.md#design-mockups) as
-`design-review-style-matched`, `design-review-style-unresolved`, and
-`design-review-style-excluded`. It fixes three presentation rules:
+`design-review-style-matched`, `design-review-style-unresolved`,
+`design-review-style-unnamed`, and `design-review-style-excluded`. It fixes
+these presentation rules:
 
 - A `matched` or `unresolved` reason reads as one outcome in the comparison
   stage heading, "Styles this screen uses changed". That heading is rendered

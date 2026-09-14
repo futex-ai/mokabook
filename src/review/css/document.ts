@@ -1,3 +1,4 @@
+/** Adapt parse5 documents for selector matching with HTML and foreign-name semantics. */
 import type { Options } from "css-select";
 import { defaultTreeAdapter, html } from "parse5";
 import type { DefaultTreeAdapterMap } from "parse5";

@@ -1,3 +1,4 @@
+/** Diff ordered CSS rules as multisets while preserving both changed sides. */
 import { CssRuleParseError } from "./types.js";
 import type {
   CssRule,

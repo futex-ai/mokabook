@@ -12,6 +12,8 @@ Both result versions, live membership, watched updates and publishing use it to
 exclude changed stylesheets whose changed rules cannot match a view. Public
 resource globs cannot bypass the graph or restore excluded stylesheets. These
 review interfaces are internal; the package authoring API is unchanged.
+`analysisOwnsStylesheet` owns the shared public-output boundary. Source/token
+stylesheets outside that boundary retain file-level shared impact in both schemas.
 
 ```ts
 import { diffCssRules } from "./css/diff.js";
@@ -68,6 +70,8 @@ absent for added/removed views. An absent stylesheet is passed as an empty strin
 `matchCssRules(diff, documents)` retains a decision for each diffed rule;
 `analyzeStylesheetChange` composes the parser, diff, and match, returning one
 `CssAnalysisOutcome`. The optional fourth argument injects a `CssRuleParser`.
+The optional fifth argument injects `matchCssRules` for boundary tests;
+`CssResourceAnalysis` accepts the same matcher as its second constructor argument.
 Selectors are the kept rules' original serialized selectors, sorted and unique;
 an unresolved rule takes precedence over matched rules in the reduction.
 
@@ -97,7 +101,9 @@ preserves inert template boundaries, document quirks, and foreign-element name
 case. `css-what`, also used by `css-select`, is a direct dependency so selector
 rewrites use its typed syntax tree rather than string or regular-expression
 substitution of pseudo-selectors. No direct domhandler/domutils dependency is
-needed and HTML reference discovery is unchanged.
+needed. HTML resource discovery uses the same source tokenizer for CSS URLs and
+imports, preserving comment markers inside URL values. Discovery retains valid
+references before incomplete syntax; strict rule parsing still reports it unresolved.
 
 `ResourceComparison.compare(before?, after?, excluded?, matching?)` reads and
 validates resource closures before passing changed resources to
@@ -108,9 +114,20 @@ depth; optional counterpart CSS reads distinguish missing files from invalid
 ones. Per-side readers cache bytes, and the injected parser caches identical CSS
 text for the run. Live resource validation additionally retains its alias and
 verified-deletion behavior.
+Live classification batches base documents only for material changes and views
+with changed stylesheet resources. Unchanged views without changed CSS skip base
+view reads and base graph traversal. Current resource validation still checks Git
+counterparts for verified deletions and pairs embedded documents' ignored regions.
+Changed documents retain discovery of resources removed from their before side.
+Unexpected parser or matcher failures keep only the failing resource
+unresolved, with any recoverable changed selectors, and classification continues.
 
-Both result versions retain optional view `reasons` (with stylesheet `analysis`)
-and `excludedResources`. Entry reasons merge by path and union selectors, with
+Both result versions retain `material: true` exactly when the actual paired,
+ignore-normalized documents differ, including added and removed views. Ownership
+projections do not define this flag. A material change keeps the ordinary screen
+heading even when stylesheet evidence is also present. Both versions retain
+optional view `reasons` (with stylesheet `analysis`) and `excludedResources`.
+Entry reasons merge by path and union selectors, with
 unresolved evidence taking precedence. The shared browser/server decoder rejects
 invalid or contradictory evidence; canonical artifact serialization preserves it.
 Owned CSS retained at an actual invocation also keeps its component in Changes
@@ -120,7 +137,8 @@ The screen-only live classifier retains a `ScreenResourceEvidence` slice from
 the same traversal that determines membership. The shell receives its selected
 `ViewResourceEvidence` records without requesting snapshots or component
 classification. Export projects the same slice from its existing v2 result;
-the inspector merges it with loaded comparison details. Result schemas and
+both producers omit empty views and screens left without evidence. The inspector
+merges it with loaded comparison details. Result schemas and
 classification policy stay unchanged.
 
 With `--debug-timings`, `review.css-analysis` measures each stylesheet/view's
@@ -156,7 +174,8 @@ Key code:
   that retain HTML/SVG/MathML name semantics.
 - `css/nesting.ts`, `css/pseudos.ts`: parent substitution and static match bounds.
 - `css/material.ts`: changed custom-property and URL-reference detection.
-- `css/paths.ts`: case-insensitive stylesheet path eligibility.
+- `css/paths.ts`: shared public stylesheet analysis scope.
+- `css/stylesheet_path.ts`: browser-safe, case-insensitive stylesheet identity.
 - `resource_comparison.ts`, `css/resource_analysis.ts`: shared resource evidence
   and the classification-scoped parser cache.
 - `result_resources.ts`: browser-safe validation of retained/excluded evidence.

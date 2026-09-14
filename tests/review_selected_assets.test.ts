@@ -36,3 +36,39 @@ test("a cancelled snapshot never accepts a completed resource read", async () =>
   );
   await assert.rejects(reader.read("image.svg"), { name: "AbortError" });
 });
+
+test("optional counterpart reads bypass a strict-only bulk reader", async () => {
+  const reads: string[] = [];
+  const reader = new SelectedAssetReader(
+    {
+      async read() {
+        throw new Error("Strict single read must not run");
+      },
+      async readMany() {
+        throw new Error("Strict batch rejects a missing CSS counterpart");
+      },
+      async readIfExists(route) {
+        reads.push(route);
+        return route === "present.css" ? Buffer.from(".auth {}") : undefined;
+      },
+    },
+    new AbortController().signal,
+  );
+  const expected = new Map([
+    ["present.css", Buffer.from(".auth {}")],
+    ["missing.css", undefined],
+  ]);
+  assert.deepEqual(
+    await reader.readManyIfExists([...expected.keys()]),
+    expected,
+  );
+  assert.deepEqual(
+    await reader.readManyIfExists([...expected.keys()]),
+    expected,
+  );
+  assert.deepEqual(reads, [...expected.keys()]);
+  await assert.rejects(
+    reader.readMany(["missing.css"]),
+    /Snapshot file is missing/,
+  );
+});

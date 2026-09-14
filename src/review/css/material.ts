@@ -1,3 +1,4 @@
+/** Detect changes to custom properties and URL references in rule material. */
 import { CssSource, decodeCssIdentifier } from "./source.js";
 import type { CssRule } from "./types.js";
 

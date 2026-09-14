@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 
 import type { ColorScheme, Viewport } from "../authoring/types.js";
 import type { Compilation } from "../build/compile.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
 import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
 import type { ManifestScreen } from "../registry/types.js";
@@ -14,7 +15,7 @@ import {
 } from "./ignore.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type { ResourceComparison } from "./resource_comparison.js";
-import { isStylesheetPath } from "./css/paths.js";
+import { analysisOwnsStylesheet } from "./css/paths.js";
 import {
   aggregateState,
   fragmentForView,
@@ -38,6 +39,7 @@ export async function compareScreen(
   baseSeeds: Set<string>,
   headSeeds: Set<string>,
   resources: ResourceComparison,
+  config: ResolvedConfig,
 ): Promise<ScreenReview> {
   const entry = head ?? base;
   if (!entry)
@@ -150,7 +152,7 @@ export async function compareScreen(
     sharedImpact: [
       ...new Set([
         ...[...sharedImpact, ...dependencyImpact].filter(
-          (path) => !isStylesheetPath(path),
+          (path) => !analysisOwnsStylesheet(path, config),
         ),
         ...views.flatMap(
           (view) => view.reasons?.map((reason) => reason.path) ?? [],
@@ -186,6 +188,7 @@ function compareView(
       ...(afterPath ? { afterPath } : {}),
       colorScheme,
       ignoredIds: [],
+      material: true,
       state: "added",
       viewport,
     };
@@ -194,6 +197,7 @@ function compareView(
       ...(beforePath ? { beforePath } : {}),
       colorScheme,
       ignoredIds: [],
+      material: true,
       state: "removed",
       viewport,
     };
@@ -210,6 +214,7 @@ function compareView(
     ...(beforePath ? { beforePath } : {}),
     colorScheme,
     ignoredIds: normalized.ignoredIds,
+    ...(!normalizedEqual ? { material: true as const } : {}),
     state: rawEqual
       ? "unchanged"
       : normalizedEqual

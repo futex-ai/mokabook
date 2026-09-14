@@ -156,6 +156,7 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
           path.relative(this.config.repoRoot, this.config.mockupsDir),
         ),
       ),
+      this.config,
     );
     return {
       baseCommit: source.baseCommit,

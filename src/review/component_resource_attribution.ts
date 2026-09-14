@@ -10,7 +10,7 @@ import type {
   ComponentReview,
   EntryChangeReason,
 } from "./component_types.js";
-import { isStylesheetPath } from "./css/paths.js";
+import { isStylesheetPath } from "./css/stylesheet_path.js";
 import type { DependencyReason, ViewReview } from "./types.js";
 
 /** Retained actual-invocation evidence can affect an owner without a saved variant. */

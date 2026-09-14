@@ -1,3 +1,4 @@
+/** Tokenize CSS boundaries and recover ordered rule bodies from the original source. */
 import type { Location2 } from "lightningcss";
 
 import { CssRuleParseError } from "./types.js";
@@ -98,56 +99,67 @@ export class CssSource {
   }
 }
 
-/** Tokenize trivia, strings, escaped words, and delimiters without rewriting values. */
-export function tokenizeCss(text: string): CssSourceToken[] {
+/** Tokenize CSS boundaries; resource discovery may retain a valid prefix of incomplete source. */
+export function tokenizeCss(
+  text: string,
+  options: { allowIncomplete?: boolean } = {},
+): CssSourceToken[] {
   const tokens: CssSourceToken[] = [];
   let offset = 0;
   let spaceBefore = false;
   let commentBefore = false;
-  while (offset < text.length) {
-    if (/[\t\n\f\r ]/.test(text[offset]!)) {
-      spaceBefore = true;
-      offset += 1;
-      continue;
-    }
-    if (text.startsWith("/*", offset)) {
-      const end = text.indexOf("*/", offset + 2);
-      if (end < 0)
-        throw new CssRuleParseError({ kind: "unclosed-comment", offset });
-      offset = end + 2;
-      commentBefore = true;
-      continue;
-    }
-    const start = offset;
-    const character = text[offset]!;
-    const word = isWord(character);
-    let value: string | undefined;
-    if (character === '"' || character === "'") {
-      offset += 1;
-      while (offset < text.length && text[offset] !== character)
-        offset = text[offset] === "\\" ? escapeEnd(text, offset) : offset + 1;
-      if (offset === text.length)
-        throw new CssRuleParseError({ kind: "unclosed-string", offset: start });
-      offset += 1;
-    } else if (word) {
-      while (offset < text.length && isWord(text[offset]!))
-        offset = text[offset] === "\\" ? escapeEnd(text, offset) : offset + 1;
-      const url = unquotedUrl(text, start, offset);
-      if (url) {
-        offset = url.end;
-        value = url.value;
+  try {
+    while (offset < text.length) {
+      if (/[\t\n\f\r ]/.test(text[offset]!)) {
+        spaceBefore = true;
+        offset += 1;
+        continue;
       }
-    } else offset += 1;
-    tokens.push({
-      value: value ?? text.slice(start, offset),
-      start,
-      end: offset,
-      spaceBefore,
-      commentBefore,
-      word: word && value === undefined,
-    });
-    spaceBefore = false;
-    commentBefore = false;
+      if (text.startsWith("/*", offset)) {
+        const end = text.indexOf("*/", offset + 2);
+        if (end < 0)
+          throw new CssRuleParseError({ kind: "unclosed-comment", offset });
+        offset = end + 2;
+        commentBefore = true;
+        continue;
+      }
+      const start = offset;
+      const character = text[offset]!;
+      const word = isWord(character);
+      let value: string | undefined;
+      if (character === '"' || character === "'") {
+        offset += 1;
+        while (offset < text.length && text[offset] !== character)
+          offset = text[offset] === "\\" ? escapeEnd(text, offset) : offset + 1;
+        if (offset === text.length)
+          throw new CssRuleParseError({
+            kind: "unclosed-string",
+            offset: start,
+          });
+        offset += 1;
+      } else if (word) {
+        while (offset < text.length && isWord(text[offset]!))
+          offset = text[offset] === "\\" ? escapeEnd(text, offset) : offset + 1;
+        const url = unquotedUrl(text, start, offset);
+        if (url) {
+          offset = url.end;
+          value = url.value;
+        }
+      } else offset += 1;
+      tokens.push({
+        value: value ?? text.slice(start, offset),
+        start,
+        end: offset,
+        spaceBefore,
+        commentBefore,
+        word: word && value === undefined,
+      });
+      spaceBefore = false;
+      commentBefore = false;
+    }
+  } catch (error) {
+    if (!options.allowIncomplete || !(error instanceof CssRuleParseError))
+      throw error;
   }
   return tokens;
 }

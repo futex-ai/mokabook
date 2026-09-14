@@ -1,4 +1,4 @@
-import { isStylesheetPath } from "./css/paths.js";
+import { isStylesheetPath } from "./css/stylesheet_path.js";
 import {
   requireOrdered,
   reviewArray,
@@ -35,6 +35,14 @@ export function validateResourceEvidence(
   view: Record<string, unknown>,
   changedPaths: readonly string[],
 ): void {
+  if (
+    view.material !== undefined &&
+    (view.material !== true ||
+      !["changed", "added", "removed"].includes(String(view.state)))
+  )
+    reviewInvalid(
+      "material requires true and a changed, added, or removed view",
+    );
   const kept: string[] = [];
   if (view.reasons !== undefined) {
     const reasons = reviewArray(view.reasons);

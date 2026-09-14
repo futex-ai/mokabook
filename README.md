@@ -601,7 +601,7 @@ consumers, Chromium tests, and all Rust checks. It also audits the freshly
 resolved packed consumer's production dependencies. Registry access is required;
 known advisories or registry errors fail verification. See the
 [dependency security contract](./docs/protocol/dependency-security.md).
-`npm test` limits test-file parallelism to four workers to keep subprocess-heavy
+`npm test` limits test-file parallelism to two workers to keep subprocess-heavy
 fixtures within their existing startup deadlines on shared developer machines.
 All tests still run, including their explicit concurrent-writer and race cases.
 Watcher tests use `tests/helpers/watched_catalogue.ts` to await a newer version

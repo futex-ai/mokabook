@@ -9,6 +9,24 @@ import {
 } from "./helpers/review_css_schema.js";
 
 for (const version of [2, 3] as const) {
+  test(`v${version} validates material even without resource evidence`, () => {
+    const result = cssSchemaFixture(version);
+    for (const view of result.screens[0]!.views) {
+      delete view.reasons;
+      delete view.excludedResources;
+    }
+    assert.deepEqual(parseReviewResult(result), result);
+    const files = renderReviewArtifact({ result, files: cssSchemaFiles() });
+    assert.deepEqual(
+      parseReviewResult(JSON.parse(String(files.get("review.json")))),
+      result,
+    );
+    Object.assign(result.screens[0]!.views[0]!, { material: false });
+    assert.throws(
+      () => renderReviewArtifact({ result, files: cssSchemaFiles() }),
+      /material/,
+    );
+  });
   test(`v${version} artifact validation rejects unreachable exclusion evidence`, () => {
     const result = cssSchemaFixture(version);
     Object.assign(result, {
@@ -40,6 +58,7 @@ for (const version of [2, 3] as const) {
     for (const view of historical.screens[0]!.views) {
       delete view.reasons;
       delete view.excludedResources;
+      delete view.material;
     }
     assert.deepEqual(parseReviewResult(historical), historical);
   });
@@ -73,6 +92,10 @@ for (const version of [2, 3] as const) {
     });
 
   for (const [name, patch] of [
+    ["false material", { material: false }],
+    ["string material", { material: "true" }],
+    ["unchanged material", { material: true, state: "unchanged" }],
+    ["ignored-only material", { material: true, state: "ignored-only" }],
     [
       "unchanged exclusion",
       {

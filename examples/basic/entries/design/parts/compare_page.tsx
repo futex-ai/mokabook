@@ -11,10 +11,21 @@ import type { ScreenSubject } from "./subjects.js";
 
 export type CompareViewport = "desktop" | "mobile";
 
+const COMPARED_STATES: readonly ReviewState[] = [
+  "added",
+  "changed",
+  "removed",
+  "styles-changed",
+];
+
 interface ComparePageProps {
   design: DesignDestination;
   subject: ScreenSubject;
-  activeTitle: string;
+  activeTitle?: string | undefined;
+  /** Secondary comparison evidence; the branch-point line alone when omitted. */
+  evidence?: ReactNode;
+  /** Desktop navigation column; the Changes catalogue when omitted. */
+  nav?: ReactNode;
   render: (viewport: CompareViewport) => ReactNode;
   idChip: string;
   mode?: "difference" | "overlay" | "side-by-side";
@@ -26,6 +37,8 @@ interface ComparePageProps {
 export function ComparePage({
   design,
   activeTitle,
+  evidence,
+  nav,
   subject,
   render,
   idChip,
@@ -39,13 +52,13 @@ export function ComparePage({
       design={design}
       viewport={viewport}
       nav={
-        viewport === "desktop" ? <ReviewNav activeTitle={activeTitle} /> : null
+        viewport === "desktop"
+          ? (nav ?? <ReviewNav activeTitle={activeTitle} />)
+          : null
       }
     >
       <ScreenHead
-        comparisons={
-          state === "added" || state === "changed" || state === "removed"
-        }
+        comparisons={COMPARED_STATES.includes(state)}
         action={<ViewSwitch active={viewport} />}
         comparisonMode={mode ?? "side-by-side"}
         crumbs={["Example", "Screens"]}
@@ -54,7 +67,13 @@ export function ComparePage({
       />
       <PreviewWorkspace
         stage={false}
-        inspector={<DetailsPanel subject={subject} comparisonEvidence open />}
+        inspector={
+          <DetailsPanel
+            subject={subject}
+            comparisonEvidence={evidence ?? true}
+            open
+          />
+        }
         render={(previewViewport) => (
           <ComparisonStage state={state} viewport={previewViewport}>
             {render(previewViewport)}

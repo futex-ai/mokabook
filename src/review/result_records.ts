@@ -113,7 +113,7 @@ export function validateReviewViews(
     const view = reviewObject(
       item,
       ["viewport", "colorScheme", "ignoredIds", "state"],
-      ["beforePath", "afterPath", "reasons", "excludedResources"],
+      ["beforePath", "afterPath", "material", "reasons", "excludedResources"],
     );
     validateResourceEvidence(view, changedPaths);
     if (

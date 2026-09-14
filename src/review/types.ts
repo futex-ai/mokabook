@@ -33,6 +33,8 @@ export interface ViewReview {
   beforePath?: string;
   colorScheme: ColorScheme;
   ignoredIds: readonly string[];
+  /** Present exactly when the paired ignore-normalized documents differ. */
+  material?: true;
   reasons?: readonly DependencyReason[];
   excludedResources?: readonly ExcludedResource[];
   state: ReviewState;

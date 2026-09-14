@@ -184,6 +184,22 @@ export function UnresolvedStyleCard() {
   );
 }
 
+/** A changed stylesheet whose change has no style name to show. */
+export function UnnamedStyleCard() {
+  return (
+    <>
+      <p>Changes to these files may affect this screen:</p>
+      <ul>
+        <li>generated/styles.css</li>
+      </ul>
+      <p>
+        This change can apply anywhere on the screen, so the screen stays in
+        Changes.
+      </p>
+    </>
+  );
+}
+
 /** A changed stylesheet examined for this screen and set aside. */
 export function ExcludedStyleCard() {
   return (
@@ -196,6 +212,7 @@ export function ExcludedStyleCard() {
       <ul>
         <li>generated/styles.css</li>
       </ul>
+      <p>No changes to this screen.</p>
     </>
   );
 }

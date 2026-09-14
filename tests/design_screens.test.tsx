@@ -140,13 +140,24 @@ const stylesheetEvidence = [
   [
     "design-review-style-unresolved",
     "design/review/impact/stylesheets/unresolved.html",
-    "This change can apply anywhere on the screen",
+    "This change can apply anywhere on the screen, so the screen stays in Changes:",
+  ],
+  [
+    "design-review-style-unnamed",
+    "design/review/impact/stylesheets/unnamed.html",
+    "This change can apply anywhere on the screen, so the screen stays in Changes.",
   ],
   [
     "design-review-style-excluded",
     "design/review/impact/stylesheets/excluded.html",
     "This stylesheet changed, but none of the changed styles apply to this screen",
   ],
+] as const;
+
+const comparedStyleScreens = [
+  "design-review-style-matched",
+  "design-review-style-unresolved",
+  "design-review-style-unnamed",
 ] as const;
 
 for (const viewport of ["mobile", "desktop"] as const) {
@@ -160,21 +171,40 @@ for (const viewport of ["mobile", "desktop"] as const) {
       const text = textContent(evidence);
       assert.ok(text.includes(copy), `${id}: ${text}`);
       assert.match(text, /generated\/styles\.css/, id);
+      const compared = comparedStyleScreens.includes(
+        id as (typeof comparedStyleScreens)[number],
+      );
       const outcome = byClass(document, "mbk-comparison-stage").map((stage) =>
         textContent(elements(stage, (node) => node.tagName === "h3")[0]!),
       );
       assert.deepEqual(
         outcome,
-        ["Mobile", "Desktop"].map(
-          (name) =>
-            `${name} · ${
-              id === "design-review-style-excluded"
-                ? "No changes to this screen"
-                : "Styles this screen uses changed"
-            }`,
-        ),
+        compared
+          ? ["Mobile", "Desktop"].map(
+              (name) => `${name} · Styles this screen uses changed`,
+            )
+          : [],
         id,
       );
+      assert.equal(
+        byClass(document, "mbk-compare").length,
+        compared ? 2 : 0,
+        id,
+      );
+      assert.deepEqual(
+        byClass(document, "mbk-compare-label").map((node) =>
+          textContent(node).trim(),
+        ),
+        compared ? ["Before", "Current", "Before", "Current"] : [],
+        id,
+      );
+      assert.equal(
+        byClass(document, "mbk-cmp-toolbar").length,
+        compared ? 1 : 0,
+        id,
+      );
+      if (!compared)
+        assert.ok(text.trimEnd().endsWith("No changes to this screen."), id);
       for (const heading of elements(document, (node) =>
         ["h1", "h2", "h3"].includes(node.tagName),
       ))
@@ -197,6 +227,7 @@ test("stylesheet evidence states are entered and left through the filter", async
     ],
     ["design-review-style-matched", "All", "design-review-style-excluded"],
     ["design-review-style-unresolved", "All", "design-browse-screen"],
+    ["design-review-style-unnamed", "All", "design-browse-screen"],
     ["design-review-style-excluded", "Changes0", "design-review-empty"],
   ] as const) {
     const { document } = await designDocument(source, "desktop");

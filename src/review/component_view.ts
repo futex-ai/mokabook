@@ -80,7 +80,7 @@ export async function compareComponentView(
       after ? { path: after.path, html: normalized } : undefined,
     );
     return {
-      view: { ...view, ...evidence },
+      view: { ...view, ...evidence, material: true },
       reasons: [{ kind: "material" }, ...(evidence.reasons ?? [])],
       changedImplementations: new Set(),
       ownedResources: ownedCssReasons(
@@ -156,6 +156,7 @@ export async function compareComponentView(
       ...view,
       ...actualEvidence,
       ignoredIds: actual.ignoredIds,
+      ...(actual.base !== actual.head ? { material: true as const } : {}),
       state:
         actual.base !== actual.head || actualResourceChange
           ? "changed"

@@ -224,6 +224,62 @@ The CSS pass did not exceed ten percent of full-size review time: it used
 2.66% cold and 2.61% warm of the background worker's `changes.classify` span,
 so this measurement does not trigger the blob-id rule-cache follow-up plan.
 
+### Review-fix timings (Milestone 12)
+
+Measured on 2026-09-14 in the same Amazon Linux 2023 x86_64 sandbox
+(8 CPUs, approximately 16 GiB RAM), using Node v24.21.0 with other heavy
+checks idle. The baseline used Node v24.14.1; Milestone 10 used v24.21.0.
+These remain single diagnostic cold/warm runs, not statistical estimates.
+
+Regenerated the full default fixture with `npm run fixture:large`
+(69,293 ms setup), then reused its immutable baseline for
+`npm run benchmark:large` on the final implementation. The benchmark enables
+`--debug-timings`. Dimensions remain 30 areas, 40 screens per area, 12 rows,
+four shared stylesheets and a 0.5 share: 1,410 routes and 5,550 documents.
+Cold/warm usable startup was 3,597 / 3,556 ms;
+complete Changes reached Browse at 116,548 /
+115,542 ms. Both runs passed the five-second startup limit
+and reported zero changed routes. No Export measurement was repeated.
+
+The cause addressed by Finding 6 was unnecessary base-side fragment reads,
+paired normalization, and base resource-graph traversal for views without
+changed stylesheet resources. That work is outside `review.css-analysis`.
+Base documents are now batched only for material changes and CSS consumers;
+verified resource deletions and before-only resources of changed/moved documents
+retain their existing discovery. Finding 12 also puts reference discovery through
+the shared tokenizer, with a cheap candidate check that preserves escaped spellings.
+
+The table uses per-session interval unions, matching the earlier measurements.
+Each run has three comparison loops, 22,110 resource traversals and 4,800
+CSS-analysis passes; every background span completed successfully.
+
+| Span                     | Full Serve cold (ms) | Full Serve warm (ms) |
+| ------------------------ | -------------------: | -------------------: |
+| `review.base-commit`     |                 9.22 |                 9.15 |
+| `review.changed-paths`   |             1,127.48 |             1,158.70 |
+| `review.base-manifest`   |               872.57 |               871.74 |
+| `review.base-documents`  |             1,556.75 |             1,549.33 |
+| `review.compare-screens` |            39,461.52 |            39,571.78 |
+| `review.resource-graph`  |            16,443.83 |            16,517.14 |
+| `review.css-analysis`    |             1,224.90 |             1,218.65 |
+| `review.write-artifact`  |                    — |                    — |
+| `changes.classify`       |            43,312.35 |            43,430.34 |
+
+The corrected end-to-end deltas, including work outside the CSS-analysis span:
+
+| Span                     |      Cold vs baseline |       Warm vs baseline |    Cold vs Milestone 10 |    Warm vs Milestone 10 |
+| ------------------------ | --------------------: | ---------------------: | ----------------------: | ----------------------: |
+| `changes.classify`       | -4,663.28 ms (-9.72%) | -4,924.63 ms (-10.18%) | -14,883.48 ms (-25.57%) | -15,168.98 ms (-25.89%) |
+| `review.compare-screens` | -3,950.06 ms (-9.10%) |  -4,007.58 ms (-9.20%) | -14,118.17 ms (-26.35%) | -14,548.47 ms (-26.88%) |
+
+The CSS pass is 2.83% cold and
+2.81% warm of background `changes.classify`.
+That does not measure the total attribution overhead: document preparation,
+resource discovery, base-side work and the other review stages are included only
+in the end-to-end rows. The ten-percent CSS-pass trigger for a parsed-rule-cache
+follow-up is not reached. The deltas include all Milestone 12 changes and run
+variance; they are not an isolated estimate of the base-read optimization.
+
 ## Milestone 1: Define the rule-aware attribution contract
 
 Documentation-only milestone. The protocol must be complete and approved by
@@ -524,69 +580,80 @@ need before code lands.
 
 ## Milestone 12: Backend review fixes
 
+Completed. Delivered by a Codex session and verified by the coordinator on
+the combined tree with Milestone 13. Classification is now about ten percent
+faster than the original baseline because base-side reads and traversal are
+deferred to views with changed stylesheets.
+
 Fix the classification, analysis, payload, and documentation findings.
 
-- [ ] Finding 1. Add `analysisOwnsStylesheet(path, config)` to
+- [x] Finding 1. Add `analysisOwnsStylesheet(path, config)` to
       `src/review/css/paths.ts` and use it in both `screen_compare.ts` and
       `component_classification.ts` so only public stylesheets under
       `mockupsDir` are stripped from `sharedImpact`. Add a failing test first:
       a screen-only catalogue with a `src/styles/**` glob keeps a token
       stylesheet in `sharedImpact` in v2 and v3.
-- [ ] Finding 2. Emit `material: true` on a view when its normalized documents
+- [x] Finding 2. Emit `material: true` on a view when its normalized documents
       differ, in `screen_compare.ts` and `component_view.ts`; validate and
       round-trip it in `result_records.ts`, `result_validation.ts`, and the
       client decoder; require its absence in `isStyleOnlyView`. Test: a view
       with both a material change and a matched stylesheet reads "Screen
       changed".
-- [ ] Finding 6. Defer base-side work in `src/server/changed_content.ts` and
+- [x] Finding 6. Defer base-side work in `src/server/changed_content.ts` and
       `src/server/changed_resources.ts`: read and normalize the base fragment
       and traverse the base resource graph only when the view has at least one
       changed stylesheet resource. Re-run `benchmark:large` on the Milestone 3
       fixture and record the corrected end-to-end delta beside the CSS share
       in the timings section, naming the cause.
-- [ ] Finding 7. Skip per-view evidence records with no reasons and no
+- [x] Finding 7. Skip per-view evidence records with no reasons and no
       excluded resources, and screens left with no views, in
       `classifyChangedContent` and `assembleExport`. Add tests.
-- [ ] Finding 8. Wrap the per-resource analysis in
+- [x] Finding 8. Wrap the per-resource analysis in
       `CssResourceAnalysis.analyze` so any escaping error becomes an
       `unresolved` reason for that resource; move `selectOne` inside the
       guarded region in `document_query.ts`. Add a test with an injected
       throwing matcher.
-- [ ] Finding 9. Remove the strict `readMany` fallback from
+- [x] Finding 9. Remove the strict `readMany` fallback from
       `SelectedAssetReader.readManyIfExists`; fall through to per-route
       optional reads. Add a test with a reader that has `readMany` only.
-- [ ] Finding 10. Delete the `.mb-impact-card` rules from
+- [x] Finding 10. Delete the `.mb-impact-card` rules from
       `src/server/shell/css_review.ts`.
-- [ ] Finding 12. Make `extractCssReferences` in `src/html_references.ts` use
+- [x] Finding 12. Make `extractCssReferences` in `src/html_references.ts` use
       the CSS tokenizer in `src/review/css/source.ts` for `url()` and
       `@import` extraction so one tokenizer defines URL boundaries. Add tests
       for `url(a/*/b.svg)`, a quoted URL containing `/*`, and a comment
       before `url(`.
-- [ ] Finding 13. Correct `README.md` to say two test workers.
-- [ ] Finding 14. Add a file-level doc comment to each module under
+- [x] Finding 13. Correct `README.md` to say two test workers.
+- [x] Finding 14. Add a file-level doc comment to each module under
       `src/review/css/` that lacks one.
-- [ ] Run tests, typecheck, lint, format check, and `cargo xtask check`.
+- [x] Run tests, typecheck, lint, format check, and `cargo xtask check`.
 
 ## Milestone 13: Correct the stylesheet evidence mockups
 
 Tags: mockup
 
-- [ ] Finding 3. Change the matched and unresolved design screens to depict a
+Completed. Delivered by an Opus 5 agent and verified by the coordinator.
+The matched, unresolved, and new unnamed screens depict a loaded side-by-side
+comparison; the excluded screen shows the plain preview and ends with
+"No changes to this screen." The browser eligibility allowlist gained the
+three comparison-bearing style screens.
+
+- [x] Finding 3. Change the matched and unresolved design screens to depict a
       loaded comparison stage (side by side, as `design-review-changed` does)
       with the "Styles this screen uses changed" heading inside that stage.
       Remove the stage heading from the excluded screen so it shows the plain
       current preview.
-- [ ] Finding 4. Add the terminal "No changes to this screen." line to the
+- [x] Finding 4. Add the terminal "No changes to this screen." line to the
       excluded mockup card, after the examined-and-excluded list.
-- [ ] Finding 5. Add an unresolved example without selectors, using the lead
+- [x] Finding 5. Add an unresolved example without selectors, using the lead
       "This change can apply anywhere on the screen, so the screen stays in
       Changes." with no list, inside the existing unresolved screen or as a
       variant of it within the five-screen limit.
-- [ ] Finding 11. Record in `docs/protocol/mokly-shell-design.md` that the
+- [x] Finding 11. Record in `docs/protocol/mokly-shell-design.md` that the
       shell evidence container adopts the mockup's paragraph and list spacing
       while keeping its separator treatment; adjust the mockup card only if
       that decision changes its appearance.
-- [ ] Build and check the example, run the design tests, and open each changed
+- [x] Build and check the example, run the design tests, and open each changed
       page from disk in both variants.
 
 ## Milestone 14: Shell review fixes

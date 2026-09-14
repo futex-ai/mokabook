@@ -34,6 +34,7 @@ export const DESTINATIONS = {
   empty: "design-review-empty",
   styleMatched: "design-review-style-matched",
   styleUnresolved: "design-review-style-unresolved",
+  styleUnnamed: "design-review-style-unnamed",
   styleExcluded: "design-review-style-excluded",
 } as const;
 

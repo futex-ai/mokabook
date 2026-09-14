@@ -1,5 +1,7 @@
 import { parse } from "parse5";
 
+import { decodeCssIdentifier, tokenizeCss } from "./review/css/source.js";
+
 interface HtmlAttribute {
   name: string;
   value: string;
@@ -89,17 +91,44 @@ export function extractHtmlReferences(
 
 /** Extract `url()` and string-form `@import` references from CSS. */
 export function extractCssReferences(content: string): string[] {
-  const withoutComments = content.replace(/\/\*[\s\S]*?\*\//g, "");
-  const references = [
-    ...withoutComments.matchAll(
-      /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)'"\s][^)]*?))\s*\)/gi,
-    ),
-  ].flatMap((match) => match[1] ?? match[2] ?? match[3] ?? []);
-  for (const match of withoutComments.matchAll(
-    /@import\s+(?:"([^"]*)"|'([^']*)')/gi,
-  )) {
-    const value = match[1] ?? match[2];
-    if (value) references.push(value);
+  if (!/url\(|@import|\\/i.test(content)) return [];
+  const tokens = tokenizeCss(content, { allowIncomplete: true });
+  const references: string[] = [];
+  for (let index = 0; index < tokens.length; index++) {
+    const token = tokens[index]!;
+    const next = tokens[index + 1];
+    if (!token.word && token.value.endsWith(")")) {
+      const opening = token.value.indexOf("(");
+      if (
+        opening >= 0 &&
+        decodeCssIdentifier(token.value.slice(0, opening)).toLowerCase() ===
+          "url"
+      )
+        references.push(
+          decodeCssIdentifier(token.value.slice(opening + 1, -1)),
+        );
+    } else if (
+      token.word &&
+      decodeCssIdentifier(token.value).toLowerCase() === "url" &&
+      next?.value === "(" &&
+      next.start === token.end
+    ) {
+      const value = tokens[index + 2]?.value;
+      if (value && /^["']/.test(value) && tokens[index + 3]?.value === ")") {
+        references.push(decodeCssIdentifier(value.slice(1, -1)));
+        index += 3;
+      }
+    } else if (
+      token.value === "@" &&
+      next?.start === token.end &&
+      decodeCssIdentifier(next.value).toLowerCase() === "import"
+    ) {
+      const value = tokens[index + 2]?.value;
+      if (value && /^["']/.test(value)) {
+        references.push(decodeCssIdentifier(value.slice(1, -1)));
+        index += 2;
+      }
+    }
   }
   return references;
 }

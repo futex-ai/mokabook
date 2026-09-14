@@ -1,3 +1,4 @@
+/** Resolve nested selectors without weakening uncertain parent constraints. */
 import { CssSelectorError } from "./match_types.js";
 import { CssSource } from "./source.js";
 import type { CssRule } from "./types.js";
