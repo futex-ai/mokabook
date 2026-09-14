@@ -783,8 +783,8 @@ canonical destinations and the controls that remain visual depictions.
   live updates served to the browser.
 - [`src/navigation`](./src/navigation) and [`src/browse`](./src/browse) — shared
   logical-target grammar and ownership-aware HTML adaptation.
-- [`src/review`](./src/review) — Git extraction, comparison, ignore normalization,
-  and isolated comparison snapshots.
+- [`src/review`](./src/review/README.md) — Git extraction, comparison, ignore
+  normalization, isolated snapshots, and the standalone CSS rule parser/diff.
 - [`src/build/source_inventory.ts`](./src/build/source_inventory.ts) — resolved
   authoring inputs; [`src/config/public_files.ts`](./src/config/public_files.ts)
   applies the shared source and internal-metadata policy to public resources.

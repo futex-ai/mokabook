@@ -262,23 +262,28 @@ were delivered by a Codex session and verified by the coordinator.
 
 Add the CSS parsing and diff layer with no change to classification yet.
 
-- [ ] Add `lightningcss` with `npm install` (no pinned version) and confirm the
+Completed. `src/review/css/` (types, rules, diff, source, serialization) and
+its tests were delivered by a Codex session and verified by the coordinator.
+Lightning CSS ships native binaries without a WASM fallback, so CI gained a
+cross-platform parse check.
+
+- [x] Add `lightningcss` with `npm install` (no pinned version) and confirm the
       package installs on the CI platform matrix used by
       `docs/protocol/npm-release.md`.
-- [ ] Create `src/review/css/` with `rules.ts` (parse a stylesheet into the
+- [x] Create `src/review/css/` with `rules.ts` (parse a stylesheet into the
       ordered rule list with enclosing conditions), `diff.ts` (changed, added,
       removed rules), and `types.ts`. Keep each file under 300 lines.
-- [ ] Put the parser behind a small interface so tests can inject fixtures
+- [x] Put the parser behind a small interface so tests can inject fixtures
       without a real parse, consistent with the existing reader interfaces in
       `src/review`.
-- [ ] Tests under `tests/review_css_rules.test.ts` and
+- [x] Tests under `tests/review_css_rules.test.ts` and
       `tests/review_css_diff.test.ts`: whitespace-only edits yield no rules;
       comment-only edits yield no rules; added rule; removed rule; changed
       declaration; rule moved without change yields no rules; nested rules;
       `@media`, `@container`, `@supports`, and `@layer` preserved as
       conditions; parse failure surfaces as an unresolved result rather than a
       thrown error.
-- [ ] Run tests, typecheck, lint, format check.
+- [x] Run tests, typecheck, lint, format check.
 
 ## Milestone 5: Selector matchability
 

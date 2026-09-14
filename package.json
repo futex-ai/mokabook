@@ -62,6 +62,7 @@
     "chokidar": "^5.0.0",
     "esbuild": "^0.28.1",
     "koffi": "^3.2.1",
+    "lightningcss": "^1.33.0",
     "minimatch": "^10.2.6",
     "parse5": "^8.0.1"
   },

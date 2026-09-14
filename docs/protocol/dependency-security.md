@@ -58,6 +58,13 @@ The current maintenance choices are:
   unrelated dependency parents.
 - Compatible Browserslist, browser-baseline data, and Nano ID patches remain
   lockfile-only updates; they do not add direct runtime dependencies.
+- Lightning CSS is a production dependency for stylesheet rule parsing. Its
+  MPL-2.0 native packages and Apache-2.0 `detect-libc` dependency participate in
+  the workspace and packed-consumer audits. Retain every platform's optional
+  lockfile entry when updating it; Ubuntu Node 22.14/24 and the minimum-Node
+  macOS/Windows jobs exercise its parser. Native binaries must remain installed;
+  the Node package does not automatically fall back to WASM. See the
+  [release platform contract](./npm-release.md#continuous-integration).
 
 ## Required Evidence
 

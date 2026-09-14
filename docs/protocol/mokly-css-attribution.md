@@ -2,7 +2,8 @@
 
 ## Delivery Status
 
-Approved target, not yet implemented. Tracked by
+The standalone rule parser and diff layer are implemented; matching and
+classification remain approved targets tracked by
 [CSS Change Attribution](../../plans/css-change-attribution.md). Until that
 plan's classification milestone lands, a changed linked stylesheet remains
 file-level dependency evidence as described in
@@ -55,6 +56,47 @@ documents, keep their existing file-level attribution unchanged.
    reason for that view and the reason records the kept selectors. If no rule
    is kept, the resource is recorded on the view as examined and excluded, and
    it does not contribute to Changes membership for that view.
+
+## Rule Diff Representation
+
+`CssRuleParser.parse(stylesheet: string): CssRuleParseResult` is the synchronous
+injection boundary. `LightningCssRuleParser` captures Lightning CSS's stylesheet
+visitor before optimization. Rules receive zero-based depth-first ordinals,
+one serialized string per selector in source order, a normalized declaration
+block, ordered `{ kind, prelude }` conditions, and `hasCustomProperties`.
+The condition kinds are `media`, `container`, `supports`, `layer`, and
+`nesting-parent`; preludes omit the at-keyword. Anonymous layers have an empty
+prelude. A nesting parent's prelude joins its selectors with `, `; implicit
+nested selectors retain `&`. Declaration runs after nested rules or directly
+inside nested conditions are separate `&` rules under the enclosing context.
+
+Declaration serialization removes comments and insignificant whitespace, retaining
+token separation, string and URL contents, duplicates, shorthand/longhand distinctions,
+and source order, including interleaved `!important` declarations. It does not
+use optimized stylesheet output as diff material. Native serialization normalizes
+selectors and known condition preludes. Selector-less at-rules have `selectors: []`,
+an explicit `atRule` name without `@`, a serialized `prelude`, and their complete
+normalized body in `declarations`. This includes encoding/import/namespace and
+layer statements, empty grouping rules, and opaque unsupported at-rules. Opaque
+bodies remain one record, so their inner selectors cannot grant an exclusion.
+
+`diffCssRules(before: string, after: string, parser: CssRuleParser)` returns a
+`CssRuleDiffResult`. Rule identity consists of conditions, selectors, and
+declarations; selector-less identity additionally includes `atRule` and `prelude`
+so differently named animations, imports, or rule kinds cannot cancel each other.
+Ordinals are excluded from identity. Treat rule lists as multisets: cancel exact
+matches first, consuming duplicate occurrences in source order, then pair remaining
+rules with the same conditions/selectors (and at-rule name/prelude) in source order
+as changed declarations. Excess occurrences are added or removed.
+
+A resolved diff has three lists: `added` sorts by after ordinal, `removed` by
+before ordinal, and `changed: { before, after }[]` by after ordinal. Both changed
+sides are retained so custom-property removal and before-only material remain
+available to matching. An unresolved diff contains side-tagged `failures` and no
+partial lists. Syntax, unclosed blocks/comments/strings, and serialization failures
+return a `CssRuleParseError` with code `css-parse-failed` and its original cause;
+they never escape as thrown parse errors. Both sides are examined for failures.
+This boundary does not attempt browser error recovery for incomplete source.
 
 ## Kept Constructs
 
