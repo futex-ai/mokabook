@@ -144,20 +144,19 @@
 - Mockup screens must not contain implementation hints, engineering notes, or
   explanatory annotations inside the rendered screen area. Put implementation
   hints below the screen or in a separate non-screen section.
-- Migrated mockup HTML files under `docs/mockups/**/*.html` are generated from
-  React-backed `.source.tsx` page modules in `docs/mockups/src/pages/` and
-  shared components under `docs/mockups/src/components/`. Page modules should
-  compose TSX components, not large raw HTML strings or generated static-tree
-  data; `mockups:check` enforces this for migrated pages. When changing
-  reusable mockup source under `docs/mockups/src`, run
-  `npm run mockups:build`, commit the matching generated HTML, run
-  `npm run mockups:check`, `npm run mockups:test`, and
-  `npm run mockups:typecheck`, and visually smoke-test every changed page by
-  opening it directly from disk.
-- Do not hand-edit generated mockup HTML as the source of truth. Update the
-  source module or shared component first, then let the generator update the
-  static HTML. Hand edits to generated HTML are only acceptable while migrating
-  a page that has not yet moved under `docs/mockups/src/pages/`.
+- Mokly's example catalogue under `examples/basic/generated/` is generated from
+  the structured definitions under `examples/basic/entries/` using
+  `examples/basic/mokly.config.ts`. Canonical entry modules end in `.mockup.ts`
+  or `.mockup.tsx`; shared TSX components and page-render helpers live alongside
+  them in the example source tree. Definitions and helpers should compose TSX
+  components, not large raw HTML strings or generated static-tree data. When
+  changing example entries, the renderer, configuration, or configured styles,
+  run `npm run build`, run `npm run example:build`, commit the matching generated
+  output, run `npm run example:check`, and visually smoke-test the changed pages
+  through `npm run dev`.
+- Do not hand-edit Mokly-owned generated HTML or `mokly-manifest.json` as source
+  of truth. Update the entry, imported helper, renderer, or shared component
+  first, then regenerate the example catalogue.
 - Each app screen must be its own component: one screen = one component, for
   both the mobile and web/desktop variants. Screen components are the reusable
   building blocks that user flows compose, so do not inline a screen's markup
