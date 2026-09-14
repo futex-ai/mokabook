@@ -1,5 +1,6 @@
 import type { StaticDelivery } from "../navigation/delivery.js";
 import type { ReviewArtifactContent } from "../review/types.js";
+
 import type { LegacyExportOwnership } from "./ownership.js";
 
 /** Immutable route information available before an adapter finishes staging. */

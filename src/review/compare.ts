@@ -7,6 +7,7 @@ import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
 import type { ManifestScreen, Manifest } from "../registry/types.js";
+
 import {
   copySnapshotDependencies,
   FileSystemReviewAssetReader,

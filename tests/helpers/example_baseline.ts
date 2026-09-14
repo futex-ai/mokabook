@@ -4,9 +4,10 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 
+import { loadConfig } from "../../dist/config/load.js";
+
 import { copyExampleSources } from "./example_sources.js";
 import { repositoryRoot } from "./fixture.js";
-import { loadConfig } from "../../dist/config/load.js";
 
 const execute = promisify(execFile);
 

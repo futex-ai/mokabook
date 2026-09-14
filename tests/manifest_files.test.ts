@@ -17,6 +17,7 @@ import {
   readManifest,
   serializeManifest,
 } from "../dist/registry/manifest.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("current filesystem reads reject legacy-only output even with historical compatibility", async (context) => {

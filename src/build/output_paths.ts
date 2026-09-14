@@ -10,6 +10,7 @@ import { isInternalCatalogueFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError, errorMessage } from "../errors.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
+
 import { isAuthoringSource } from "./source_inventory.js";
 
 /** Reject generated routes that escape output or target authored source trees. */

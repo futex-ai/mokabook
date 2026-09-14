@@ -1,9 +1,10 @@
 import { useId } from "react";
 
-import { useDesignStyle } from "../style_context.js";
-import type { ViewControlsProps } from "./view-controls.js";
 import { ViewIcon } from "../../components/parts/view_icons.js";
 import { DesignLink } from "../../parts/design_navigation.js";
+import { useDesignStyle } from "../style_context.js";
+
+import type { ViewControlsProps } from "./view-controls.js";
 
 const reasons = {
   empty: "No registered components in this view",

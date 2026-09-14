@@ -5,6 +5,7 @@ import type {
   RoutedEntryInput,
   Viewport,
 } from "../authoring/types.js";
+
 import type { ComponentControl, ControlFor } from "./control_types.js";
 import type { InferProp, ObjectPropSchema } from "./prop_types.js";
 

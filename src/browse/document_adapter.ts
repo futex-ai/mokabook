@@ -16,6 +16,7 @@ import {
   serializeBrowsingTarget,
 } from "../navigation/target.js";
 import type { Catalogue } from "../server/catalogue.js";
+
 import { expectedPortableHref, trustedDocument } from "./trusted_document.js";
 
 interface HtmlAttribute {

@@ -1,11 +1,12 @@
 import type { Viewport } from "@mokly/mokly";
 
-import { tagPicker } from "../controls/tag-picker.js";
-import { useDesignStyle } from "../style_context.js";
-import type { TopBarProps } from "./top-bar.js";
 import { ViewIcon } from "../../components/parts/view_icons.js";
 import { DesignLink } from "../../parts/design_navigation.js";
 import { BrandIcon, SearchIcon, TagIcon } from "../../parts/icons.js";
+import { tagPicker } from "../controls/tag-picker.js";
+import { useDesignStyle } from "../style_context.js";
+
+import type { TopBarProps } from "./top-bar.js";
 
 export function TopBarView({
   query,

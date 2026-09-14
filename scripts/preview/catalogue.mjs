@@ -1,13 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { previewOwnership, stagePreviewArtifact } from "./artifact.mjs";
-import {
-  captureComparison,
-  previewComparisonProvider,
-  publishComparison,
-} from "./comparisons.mjs";
-import { capturePublicationInputs } from "./inputs.mjs";
 import { isInside, projectRealPath } from "../../dist/config/paths.js";
 import { errorMessage } from "../../dist/errors.js";
 import { withExportCleanup } from "../../dist/export/cleanup.js";
@@ -25,6 +18,14 @@ import {
   loadShellFontAssets,
 } from "../../dist/server/client_modules.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
+
+import { previewOwnership, stagePreviewArtifact } from "./artifact.mjs";
+import {
+  captureComparison,
+  previewComparisonProvider,
+  publishComparison,
+} from "./comparisons.mjs";
+import { capturePublicationInputs } from "./inputs.mjs";
 
 const liveUpdateScript =
   '<script src="/__mokly/client/browser.js" type="module"></script>';

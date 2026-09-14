@@ -1,4 +1,5 @@
 import { canonicalJson } from "../components/data.js";
+
 import type { ReviewResultV3 } from "./component_types.js";
 import {
   requireEqual,

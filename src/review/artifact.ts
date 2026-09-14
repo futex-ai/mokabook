@@ -1,6 +1,7 @@
 /** Retain comparison JSON, snapshots, and a diagnostic summary. */
 
 import { canonicalJson } from "../components/data.js";
+
 import { markdownCode, markdownText } from "./markdown.js";
 import { hasOutputChange, isImpactOnly } from "./materiality.js";
 import { addArtifactFile } from "./paths.js";

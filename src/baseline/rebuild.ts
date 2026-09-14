@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { timeAsync } from "../diagnostics/timings.js";
 import { errorMessage } from "../errors.js";
+
 import { completedBaseline, removePartialBaseline } from "./cache.js";
 import {
   assertMockupsPath,
@@ -13,6 +14,7 @@ import {
 import { cleanupBaselines } from "./cleanup.js";
 import { baselineEnvironment, runBaselineCommands } from "./commands.js";
 import { ensureBaselineDirectory, validateOutputTree } from "./confinement.js";
+import { removeBaselineDebris } from "./debris.js";
 import { assertBaselineActive, BaselineError } from "./errors.js";
 import { extractBaseline } from "./extract.js";
 import { acquireBaselineLock } from "./lock.js";
@@ -74,24 +76,6 @@ export class CachedBaselineBuilder implements BaselineBuilder {
         layout.entry,
         request.signal,
       );
-      if (!(await this.fs.stat(layout.lock))) {
-        const marker = await completedBaseline(this.fs, layout, request);
-        if (marker) {
-          assertBaselineActive(request.signal);
-          request.onProgress?.({
-            type: "complete",
-            commit: request.commit,
-            cacheHit: true,
-          });
-          return {
-            commit: request.commit,
-            outputDir: layout.output,
-            marker,
-            cacheHit: true,
-          };
-        }
-      }
-      request.onProgress?.({ type: "start", commit: request.commit });
       const lock = await acquireBaselineLock(
         this.fs,
         this.runner,
@@ -104,6 +88,12 @@ export class CachedBaselineBuilder implements BaselineBuilder {
       let rebuilding = false;
       try {
         assertBaselineActive(request.signal);
+        for (const failure of await removeBaselineDebris(
+          this.fs,
+          this.runner,
+          layout,
+        ))
+          this.maintenance.report(failure);
         const cached = await completedBaseline(this.fs, layout, request);
         if (cached) {
           adopted = true;
@@ -119,6 +109,7 @@ export class CachedBaselineBuilder implements BaselineBuilder {
             cacheHit: true,
           };
         }
+        request.onProgress?.({ type: "start", commit: request.commit });
         rebuilding = true;
         await removePartialBaseline(this.fs, layout);
         const env = baselineEnvironment(

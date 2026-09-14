@@ -5,6 +5,7 @@ import {
 } from "../build/output_store.js";
 import { validateReviewOut } from "../config/path_validation.js";
 import type { ResolvedConfig } from "../config/types.js";
+
 import { renderReviewArtifact } from "./artifact.js";
 import { compareReview } from "./compare.js";
 import type { ReadOnlyReviewRepository } from "./repository.js";

@@ -1,5 +1,6 @@
 import type { ComponentInstanceRecord } from "../components/manifest_types.js";
 import type { WorkspaceData } from "../server/shell/workspace_data.js";
+
 import { collapseFrame, expandedFrame } from "./browse_frames.js";
 /** One disposable controller for the package's component and screen inspector. */
 import {

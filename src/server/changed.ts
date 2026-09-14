@@ -9,6 +9,7 @@ import {
 import { readManifest } from "../registry/manifest.js";
 import type { ManifestV5 } from "../registry/types.js";
 import type { ReadOnlyReviewRepository } from "../review/repository.js";
+
 import {
   readCatalogueChanges,
   type ComponentChangeSnapshot,

@@ -8,6 +8,7 @@ import {
   runBaselineCommands,
 } from "../dist/baseline/commands.js";
 import { BaselineCommandError } from "../dist/baseline/errors.js";
+
 import {
   archive,
   baselineFixture,
@@ -90,6 +91,28 @@ test("archive rejects corrupt, truncated, duplicate, and compressed input", asyn
   );
 });
 
+test("archive entry limit accepts the boundary and identifies oversized catalogues", async () => {
+  const entries = Array.from({ length: 65_536 }, (_, index) => ({
+    path: `file-${index}`,
+  }));
+  assert.equal(
+    (await parseBaselineArchive(archive(entries))).length,
+    entries.length,
+  );
+  await assert.rejects(
+    parseBaselineArchive(archive([...entries, { path: "one-too-many" }])),
+    /exceeds 65536 entries/,
+  );
+});
+
+test("archive parsing respects a Uint8Array slice with a nonzero offset", async () => {
+  const original = archive([{ path: "file", content: "historical bytes" }]);
+  const padded = new Uint8Array(original.length + 64);
+  padded.set(original, 32);
+  const entries = await parseBaselineArchive(padded.subarray(32, -32));
+  assert.equal(Buffer.from(entries[0]!.bytes).toString(), "historical bytes");
+});
+
 test("baseline commands receive only bounded environment variables and exact argv", async () => {
   const env = baselineEnvironment(
     {
@@ -145,6 +168,33 @@ test("baseline commands receive only bounded environment variables and exact arg
       assert.equal(error.exitCode, null);
       assert.deepEqual(error.argv, ["missing"]);
       return true;
+    },
+  );
+});
+
+test("baseline environment preserves network configuration and Windows lookup without execution hooks", () => {
+  const allowed = {
+    Path: "C:\\Program Files\\nodejs",
+    SystemRoot: "C:\\Windows",
+    ComSpec: "C:\\Windows\\System32\\cmd.exe",
+    PATHEXT: ".COM;.EXE;.BAT;.CMD",
+    USERPROFILE: "C:\\Users\\Builder",
+    APPDATA: "C:\\Users\\Builder\\AppData\\Roaming",
+    LOCALAPPDATA: "C:\\Users\\Builder\\AppData\\Local",
+    HTTPS_PROXY: "http://proxy.example:8080",
+    no_proxy: "localhost",
+    NODE_EXTRA_CA_CERTS: "cert.pem",
+    npm_config_cafile: "npm.pem",
+  };
+  assert.deepEqual(
+    baselineEnvironment(
+      { ...allowed, NODE_OPTIONS: "--require bad", npm_config_token: "secret" },
+      "commit",
+    ),
+    {
+      ...allowed,
+      CI: "1",
+      MOKLY_BASELINE_COMMIT: "commit",
     },
   );
 });

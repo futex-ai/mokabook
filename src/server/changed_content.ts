@@ -27,6 +27,7 @@ import {
 } from "../review/ignore.js";
 import { pageBaselines } from "../review/page_baselines.js";
 import { fragmentForView, unionColorSchemes } from "../review/screen_views.js";
+
 import { ChangedResourceGraph } from "./changed_resources.js";
 
 interface DocumentPair {

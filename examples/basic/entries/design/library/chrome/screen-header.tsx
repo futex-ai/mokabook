@@ -10,6 +10,7 @@ import {
   optionalText,
   text,
 } from "../schemas.js";
+
 import { ScreenHeaderView } from "./screen-header.view.js";
 
 const propSchema = {

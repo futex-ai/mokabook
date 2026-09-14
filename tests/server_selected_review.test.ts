@@ -8,6 +8,7 @@ import { parseReviewResult } from "../dist/review/result_validation.js";
 import { readCatalogueChanges } from "../dist/server/component_changes.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { configuredServedReview } from "../dist/server/review_routes.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 import { repositoryRoot } from "./helpers/fixture.js";

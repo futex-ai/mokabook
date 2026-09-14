@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { exportCatalogue } from "../dist/export/run.js";
+
 import { derivedFixture } from "./helpers/derived_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 

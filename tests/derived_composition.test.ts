@@ -7,6 +7,7 @@ import type { BaselineBuildRequest } from "../dist/baseline/types.js";
 import { loadConfig } from "../dist/config/load.js";
 import { CommittedBaselineReader } from "../dist/review/committed.js";
 import { prepareReviewRepository } from "../dist/review/prepare.js";
+
 import { MemoryBaselineFileSystem } from "./helpers/baseline_memory.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 

@@ -20,6 +20,7 @@ import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
+
 import type { GitCommandRunner } from "./git.js";
 import { GitRepositoryEvidence } from "./git_evidence.js";
 import {

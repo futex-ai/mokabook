@@ -1,5 +1,6 @@
 /** Parent-owned masks and selection listeners; consumer DOM remains unchanged. */
 import type { ComponentViewRecord } from "../components/manifest_types.js";
+
 import {
   authenticateRanges,
   rangeBounds,

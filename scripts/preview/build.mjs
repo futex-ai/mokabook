@@ -1,8 +1,9 @@
 import path from "node:path";
 
-import { buildPreview } from "./catalogue.mjs";
 import { loadConfig } from "../../dist/config/load.js";
 import { publicationArguments } from "../../dist/publication/options.js";
+
+import { buildPreview } from "./catalogue.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const configPath = path.join(repositoryRoot, "examples/basic/mokly.config.ts");

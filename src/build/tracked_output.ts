@@ -6,7 +6,9 @@ import { projectRealPath, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError, errorMessage } from "../errors.js";
 import type { GitCommandRunner } from "../review/git.js";
+
 import type { Compilation } from "./compile.js";
+import { trackedOwnedOutput } from "./tracked_ownership.js";
 
 /** Git index boundary for derived output validation; it never writes generated files. */
 export interface TrackedGeneratedOutput {
@@ -51,6 +53,12 @@ export class GitTrackedGeneratedOutput implements TrackedGeneratedOutput {
           ),
         ),
       );
+      for (const name of await trackedOwnedOutput(
+        this.runner,
+        config,
+        prefixes,
+      ))
+        generated.add(name);
       const invalid = [...new Set(tracked)]
         .filter(
           (name) =>

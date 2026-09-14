@@ -1,6 +1,7 @@
 import { isSafeCatalogueRoute } from "../config/paths.js";
 import { isCatalogueId } from "../navigation/logical.js";
 import type { Manifest } from "../registry/types.js";
+
 import { decodeProps } from "./codec.js";
 import { validateControlledValues, validateControls } from "./controls.js";
 import { canonicalJson, exactKeys, invalidData } from "./data.js";

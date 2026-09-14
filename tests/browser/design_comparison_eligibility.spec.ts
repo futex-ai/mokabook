@@ -4,8 +4,8 @@ import { pathToFileURL } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
-import { repositoryRoot } from "../helpers/fixture.js";
 import type { ManifestV5 } from "../../dist/registry/types.js";
+import { repositoryRoot } from "../helpers/fixture.js";
 
 const directory = path.join(repositoryRoot, "examples/basic/generated");
 const manifest = JSON.parse(

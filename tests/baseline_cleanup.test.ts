@@ -4,6 +4,7 @@ import test from "node:test";
 
 import { cacheLayout } from "../dist/baseline/cache_layout.js";
 import { CachedBaselineBuilder } from "../dist/baseline/rebuild.js";
+
 import { baselineFixture, success } from "./helpers/baseline_fixture.js";
 
 for (const failure of [

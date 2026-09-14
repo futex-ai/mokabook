@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
 import test from "node:test";
 import { setTimeout } from "node:timers/promises";
 
@@ -16,11 +17,13 @@ import { serve, type ServeDependencies } from "../dist/server/serve.js";
 import { NodeProcessSupervisorFactory } from "../dist/server/supervisor.js";
 import type { ChangesStatus } from "../dist/server/update_messages.js";
 import { ChokidarWatcherFactory } from "../dist/server/watcher.js";
+
 import {
   GatedBaselineBuilder,
   nodeBaselineBuilder,
 } from "./helpers/baseline_builders.js";
 import { derivedFixture } from "./helpers/derived_fixture.js";
+import { validEntrySource } from "./helpers/fixture.js";
 
 /** Record every status the parent publishes, including the opening one. */
 class RecordingServerFactory implements CatalogueServerFactory {
@@ -226,6 +229,47 @@ async function waitForStatus(url: string, status: string): Promise<string> {
     return page.includes(`data-changes-status="${status}"`) ? page : undefined;
   });
 }
+
+test(
+  "watched content edits preserve preparing and reuse the running baseline",
+  { timeout: 30000 },
+  async (t) => {
+    const fixture = await derivedFixture(t);
+    const builder = new GatedBaselineBuilder();
+    const running = await serve(
+      fixture.config,
+      { port: 0, watch: true },
+      serveDependencies(new NodeCatalogueServerFactory(), builder),
+    );
+    try {
+      await waitForStatus(running.url, "preparing");
+      const original = builder.builds[0]!;
+      await fs.writeFile(
+        fixture.entryPath,
+        validEntrySource({ body: "Freshly edited preview" }),
+      );
+      await waitFor(async () => {
+        const document = await (
+          await fetch(`${running.url}/static/screens/home.mobile.html`)
+        ).text();
+        return document.includes("Freshly edited preview")
+          ? document
+          : undefined;
+      });
+      assert.equal(original.signal?.aborted, false);
+      assert.match(
+        await (await fetch(running.url)).text(),
+        /data-changes-status="preparing"/,
+      );
+      builder.releaseAll();
+      await waitForStatus(running.url, "ready");
+      assert.equal(builder.builds.length, 1);
+    } finally {
+      builder.releaseAll();
+      await running.close();
+    }
+  },
+);
 
 async function waitFor<T>(read: () => Promise<T | undefined> | T | undefined) {
   for (let attempt = 0; attempt < 400; attempt++) {

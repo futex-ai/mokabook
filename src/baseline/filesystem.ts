@@ -87,7 +87,10 @@ export class NodeBaselineFileSystem implements BaselineFileSystem {
   }
 
   async acquireLock(file: string, bytes: Uint8Array): Promise<boolean> {
-    const temporary = path.join(path.dirname(file), `.lock-${randomUUID()}`);
+    const temporary = path.join(
+      path.dirname(file),
+      `.lock-${process.pid}-${randomUUID()}`,
+    );
     await this.write(temporary, bytes);
     try {
       await fs.link(temporary, file);

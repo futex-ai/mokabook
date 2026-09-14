@@ -1,11 +1,12 @@
 /** Bound background lifetime to one accepted source generation. */
 import { MessageChannel, Worker } from "node:worker_threads";
 
-import type { ComponentChangeSnapshot } from "../component_changes.js";
-import { BackgroundGitHost } from "./git_host.js";
 import type { Compilation } from "../../build/compile.js";
 import type { ComponentRuntime } from "../../build/component_runtime.js";
 import { timingArguments } from "../../diagnostics/timings.js";
+import type { ComponentChangeSnapshot } from "../component_changes.js";
+
+import { BackgroundGitHost } from "./git_host.js";
 
 export class BackgroundCompilation {
   private readonly worker: Worker;

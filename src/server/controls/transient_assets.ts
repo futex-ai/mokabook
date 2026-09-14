@@ -2,9 +2,6 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { createCatalogue } from "../catalogue.js";
-import { contentType } from "../respond.js";
-import { rebaseTransientNavigation } from "./transient_links.js";
 import { adaptBrowseDocument } from "../../browse/document_adapter.js";
 import type { ComponentViewRecord } from "../../components/manifest_types.js";
 import type { ComponentWireProps } from "../../components/prop_types.js";
@@ -17,6 +14,10 @@ import {
   extractHtmlReferences,
 } from "../../html_references.js";
 import type { CatalogueMetadata } from "../../registry/catalogue_index.js";
+import { createCatalogue } from "../catalogue.js";
+import { contentType } from "../respond.js";
+
+import { rebaseTransientNavigation } from "./transient_links.js";
 
 export const RENDER_BYTES = 32 * 1024 * 1024;
 export interface RenderFile {

@@ -1,6 +1,7 @@
 import type { ComponentRuntime } from "../build/component_runtime.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { bindTimings, timeSync } from "../diagnostics/timings.js";
+
 import {
   parseRuntimeMessage,
   requestComponentRuntime,

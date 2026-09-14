@@ -7,6 +7,7 @@ import {
   MAX_BATCH_OUTPUT_BYTES,
   MAX_BLOBS_PER_BATCH,
 } from "../review/git_batch.js";
+
 import { confinedBaselineStat } from "./confinement.js";
 import { assertBaselineActive, BaselineError } from "./errors.js";
 import type { BaselineFileSystem, BaselineStat } from "./types.js";

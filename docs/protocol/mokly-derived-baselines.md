@@ -82,12 +82,18 @@ any validation; it only changes the baseline source and the `check` comparison.
 
 `check` compiles and validates exactly as in committed mode, then lists the
 files Git tracks under `mockupsDir`, intersects them with the compiled routes
-plus the manifest, and fails with a typed `build-invalid` error naming each
+plus the manifest and indexed ownership headers for retired generated HTML,
+and fails with a typed `build-invalid` error naming each
 tracked path when the intersection is non-empty. The message suggests ignore
 rules for the listed paths. Consumer-authored public files below `mockupsDir`,
 including hand-written HTML without an ownership header, stay tracked and are
 never reported. Derived `check` does not require the on-disk generated files to
 exist or to match; the working tree copy is a local artifact.
+Retired output is recognized only by an exact ownership header on the first
+line naming a source below this catalogue's entries root. Header-like text
+inside authored documents does not establish ownership. Git grep scans the
+index without requiring working-tree files; only its no-match exit status is
+accepted as empty evidence. Other Git failures remain `build-invalid`.
 Tracking is read from the Git index with NUL-delimited names, including both
 logical and physical output-root paths. Cache paths fail independently of the
 compiled route set. Diagnostics include `git rm --cached` and ignore rules.
@@ -106,99 +112,11 @@ are not exposed in shell metadata.
 Component resource-byte differences without a changed Git path use a `material`
 reason; `changedPaths` and `dependency` reasons retain actual Git evidence.
 
-## Rebuild Procedure
+## Preparation And Storage
 
-The builder runs the following steps for one merge-base commit.
-
-The [package `repoRoot` rule](./mokly-package.md#configuration-discovery) applies at
-every Git boundary in both output modes. A root mismatch remains `config-invalid`
-and is not converted to a baseline history error.
-
-1. Resolve the merge base of `HEAD` and the configured base ref with Git. A
-   missing ref, shallow history, or unrelated histories fail as
-   `baseline-history-unavailable`.
-2. Reuse the cache entry when its completion marker is valid for that commit.
-   No command runs in that case.
-3. Acquire the entry lock. Extract the commit with Git's archive format into
-   the entry's `source` directory. Entries that escape the directory, symlinks
-   that resolve outside it, hard links, and special files fail
-   as `baseline-extraction-failed`. Archive input is uncompressed and bounded
-   to 64 MiB; malformed archives and larger input fail explicitly. All entry
-   paths and symlink chains are validated before extraction writes begin.
-   Confined source symlinks are preserved; output symlinks are rejected.
-4. Run each `baselineBuild` command in the `source` directory with a bounded
-   environment: `PATH`, `HOME`, locale and temp variables, `CI=1`, and
-   `MOKLY_BASELINE_COMMIT=<commit>`. Standard output and error are captured
-   and bounded to a combined 64 KiB tail. A non-zero exit fails as
-   `baseline-command-failed` with the
-   zero-based command index, argv, exit code or signal, and the last 40 output
-   lines.
-5. Locate `<source>/<mockupsDir>` using the current config's repository-relative
-   `mockupsDir`. Parse its manifest with the historical-manifest reader; the
-   same version rules apply as for committed baselines. A missing directory,
-   missing manifest, or invalid manifest fails as
-   `baseline-output-invalid`. Moving `mockupsDir` between the base and head
-   commits is therefore unsupported in derived mode until the move is merged.
-6. Move `<source>/<mockupsDir>` to the entry's `output` directory, delete the
-   remaining `source` extraction including installed dependencies, write the
-   completion marker. Successful completion of that write is the commit point:
-   the result is adopted immediately and cannot be removed by this build's
-   failure path. Retention cleanup and lock release are separate best-effort
-   post-steps; their failures are reported on stderr and do not fail the build.
-
-Before the marker commit point, cancellation terminates the running command's
-process group, waits for exit, removes the partial entry, and reports
-`baseline-interrupted`. Cancellation after the marker write returns the completed
-cached result, skips remaining retention cleanup and still attempts lock release.
-If partial-entry removal or lock release fails while a build is already failing,
-report that maintenance failure separately and retain the original typed build
-error and its diagnostics. A partial entry can be retried under the next lock.
-Serve's shutdown drain includes rebuild processes using the same rules as its
-Git processes.
-
-## Cache Layout
-
-The cache lives at `<repoRoot>/.mokly-cache/baselines/`. It is package
-owned: never served, never watched, never a comparison resource, excluded from
-changed-path evidence and shared-impact globs before those globs are evaluated,
-and never a valid `mockupsDir`, `entriesDir`, `review.outDir`, or export
-destination. Consumers add `.mokly-cache/` to their ignore file; derived
-`check` also fails when Git tracks anything under it.
-
-```text
-.mokly-cache/baselines/<commit>/
-  lock            # holder pid and start time, created exclusively
-  source/         # extraction, removed after adoption
-  output/         # the rebuilt mockupsDir tree
-  complete.json   # completion marker
-  inputs.json     # JSON string containing repository-relative mockupsDir
-```
-
-`complete.json` is `{ schemaVersion: 1, commit, finishedAt, commands,
-manifestVersion }`. An entry is complete only when the marker parses, its
-`commit` matches the directory name, and `output/<manifest>` exists. Anything
-else is a partial entry and is removed under the lock before the next attempt.
-The historical manifest is validated again on reuse. A complete entry with a
-different `inputs.json` output path or command list fails as
-`baseline-output-invalid` and remains intact. The commit-only cache holds one
-catalogue/build configuration; remove that entry before changing those settings.
-
-Lock contents are published atomically. Dead-holder reclamation retains an
-identity-specific tombstone until entry cleanup, preventing stale concurrent
-observers from unlinking a replacement lock. Lock holders whose process no
-longer exists are reclaimed. Other waiters poll every 100 ms
-until the holder finishes, then reuse the completed entry. Waiting longer than
-the default two-minute lock timeout fails as `baseline-lock-timeout`.
-
-After a successful rebuild the builder removes complete entries beyond the
-retained count, newest markers first, defaulting to three. It never removes the
-entry it just built, an entry another process holds locked, or partial entries
-belonging to a live lock holder. Cleanup records each entry's stat, lock,
-rename, remove and release failures, continues with other eligible entries,
-and reports those failures on stderr. A concurrent entry removal is tolerated.
-Root listing failures skip cleanup. Failure or cancellation of these post-steps
-never removes the active completion marker or output and never rejects a
-successful rebuild; a failed retirement may leave files for later maintenance.
+The [baseline storage and execution contract](./mokly-baseline-storage.md)
+defines extraction limits, command environments, Windows npm/npx execution,
+cache locking, adoption, retention and safe crash cleanup.
 
 ## Baseline Reads
 
@@ -248,6 +166,10 @@ and starts a new rebuild. Ref changes that leave the merge base unchanged do
 not rebuild; they reclassify as today. `--no-watch` resolves the baseline once.
 Content updates during `preparing` keep the state; the rebuild is independent
 of the current generation. Late results for a superseded commit are ignored.
+The parent retains one preparation per resolved commit and build settings;
+content invalidation cancels classification and its wait, not the shared build.
+Changed build settings, missing history and shutdown revoke the reader and
+drain preparation. A failed build may be retried by a later generation.
 
 The evidence state machine is `preparing → pending → ready | unavailable`, with
 `preparing` omitted on a cache hit or in committed mode. Returning to `pending`
@@ -255,6 +177,8 @@ when the rebuild settles is part of that sequence, so classification always runs
 under `pending`. Live evidence updates, retained navigation state, and reconnect
 rules apply to `preparing` exactly as they apply to `pending`. The owning
 mockups are recorded in the [shell design](./mokly-shell-design.md).
+Lock waiters that reuse another builder's result receive only `complete`,
+without a `start` event or a spurious preparing state.
 
 ## Export And Publication
 

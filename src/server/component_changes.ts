@@ -24,6 +24,7 @@ import {
 } from "../review/repository.js";
 import type { ReadOnlyReviewRepository } from "../review/repository.js";
 import type { ReviewEvidence } from "../review/selection_types.js";
+
 import { changedContentPaths } from "./changed_content.js";
 
 export interface ComponentChangeSnapshot {

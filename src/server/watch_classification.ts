@@ -3,6 +3,7 @@
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync, timingCounts } from "../diagnostics/timings.js";
 import type { Manifest } from "../registry/types.js";
+
 import type {
   CatalogueChangeClassifier,
   ComponentChangeSnapshot,

@@ -4,6 +4,7 @@ import { MockLink } from "@mokly/mokly";
 
 import { useDesignInstance } from "../library/composition.js";
 import { inspector } from "../library/inspector/inspector.js";
+
 import { DESTINATIONS, type DesignDestination } from "./destinations.js";
 import { FlowIcon } from "./icons.js";
 import { MetaRow } from "./metadata_row.js";

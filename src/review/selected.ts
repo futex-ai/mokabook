@@ -8,6 +8,7 @@ import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
 import type { ManifestScreen } from "../registry/types.js";
+
 import { copySnapshotDependencies, GitReviewAssetReader } from "./assets.js";
 import { baselineResourceConfig } from "./base_manifest.js";
 import { SelectedAssetReader } from "./evidence_assets.js";

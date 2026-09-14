@@ -5,6 +5,7 @@ import test from "node:test";
 
 import { loadConfig } from "../dist/config/load.js";
 import { resolveConfig } from "../dist/config/validate.js";
+
 import {
   createFixture,
   removeFixture,

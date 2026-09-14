@@ -2,6 +2,7 @@ import type { ServerResponse } from "node:http";
 
 import { encodeUrlPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+
 import type { Catalogue } from "./catalogue.js";
 import type { DocumentService } from "./demand/service.js";
 import { requestedFragment, withFragmentQuery } from "./fragments.js";

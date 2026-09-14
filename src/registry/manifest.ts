@@ -11,6 +11,7 @@ import { componentManifestEntry } from "../components/manifest_build.js";
 import type { ComponentViewRecord } from "../components/manifest_types.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError, errorMessage } from "../errors.js";
+
 import { analyzeHierarchy } from "./hierarchy.js";
 import { validateManifest } from "./manifest_validation.js";
 import type { ManifestV5, HistoricalManifest } from "./types.js";

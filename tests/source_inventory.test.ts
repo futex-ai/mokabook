@@ -10,6 +10,7 @@ import { loadConfig } from "../dist/config/load.js";
 import { isPublicStaticFile } from "../dist/config/public_files.js";
 import { FileSystemReviewAssetReader } from "../dist/review/assets.js";
 import { startCatalogueServer } from "../dist/server/http.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("both graphs retain raw and tree-shaken inputs while public resources stay public", async (context) => {

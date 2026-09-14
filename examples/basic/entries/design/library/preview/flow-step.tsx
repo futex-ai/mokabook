@@ -1,11 +1,12 @@
 import { defineComponent, type ComponentProps } from "@mokly/mokly";
 
-import { libraryMetadata } from "../metadata.js";
-import { destination, text } from "../schemas.js";
-import { deviceFrame } from "./device-frame.js";
-import { FlowStepView } from "./flow-step.view.js";
 import { DESTINATIONS } from "../../parts/destinations.js";
 import { MiniDetails, MiniWelcome } from "../../parts/mini_screens.js";
+import { libraryMetadata } from "../metadata.js";
+import { destination, text } from "../schemas.js";
+
+import { deviceFrame } from "./device-frame.js";
+import { FlowStepView } from "./flow-step.view.js";
 
 const propSchema = {
   kind: "object",

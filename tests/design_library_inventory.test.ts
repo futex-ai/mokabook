@@ -4,6 +4,7 @@ import test from "node:test";
 
 import { catalogueNavigation } from "../examples/basic/entries/design/library/chrome/catalogue-navigation.js";
 import { NAV_TREE } from "../examples/basic/entries/design/parts/nav_data.js";
+
 import { designCatalogue } from "./helpers/design_catalogue.js";
 import { designLibrary } from "./helpers/design_library.js";
 

@@ -1,11 +1,12 @@
 /** Generated views are rendered in memory; ordinary public files retain the static policy. */
 import type { ServerResponse } from "node:http";
 
-import type { Catalogue } from "../catalogue.js";
-import { safeDecodePath, send } from "../respond.js";
-import type { DocumentService } from "./service.js";
 import { adaptBrowseDocument } from "../../browse/document_adapter.js";
 import { errorMessage } from "../../errors.js";
+import type { Catalogue } from "../catalogue.js";
+import { safeDecodePath, send } from "../respond.js";
+
+import type { DocumentService } from "./service.js";
 
 export async function handleDemandRequest(
   url: URL,

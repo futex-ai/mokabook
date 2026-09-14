@@ -1,4 +1,5 @@
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
+
 import { problem } from "./entry_validation.js";
 import { analyzeHierarchy } from "./hierarchy.js";
 import type { RegistryViolation } from "./types.js";

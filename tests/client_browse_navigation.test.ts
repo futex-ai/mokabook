@@ -10,6 +10,7 @@ import {
   applyNavVisibility,
   selectAndRevealRoute,
 } from "../dist/client/browse_navigation_state.js";
+
 import { asAnchor, asDocument, FakeNode } from "./helpers/fake_dom.js";
 
 const BASE = "http://127.0.0.1:4173/view/screens/welcome.html";

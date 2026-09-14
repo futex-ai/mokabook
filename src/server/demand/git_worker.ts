@@ -1,8 +1,9 @@
 /** Classification stays in the worker; its parent owns and cancels Git execution. */
 import type { MessagePort } from "node:worker_threads";
 
-import type { GitCommandReply, GitCommandRequest } from "./git_messages.js";
 import type { GitCommandRunner } from "../../review/git.js";
+
+import type { GitCommandReply, GitCommandRequest } from "./git_messages.js";
 
 export class WorkerGitCommandRunner implements GitCommandRunner {
   private sequence = 0;

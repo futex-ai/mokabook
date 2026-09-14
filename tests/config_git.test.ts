@@ -15,6 +15,7 @@ import {
   readOnlyRepositoryForCommit,
 } from "../dist/review/repository.js";
 import { RepositoryComponentChanges } from "../dist/server/component_changes.js";
+
 import {
   createFixture,
   removeFixture,
@@ -163,5 +164,9 @@ test("build in either mode and committed check work outside a Git repository", a
     const compilation = await compileCatalogue(mode);
     await store.write(compilation, mode);
     if (generatedOutput === "committed") await store.check(compilation, mode);
+    else
+      await assert.rejects(async () => store.check(compilation, mode), {
+        code: "build-invalid",
+      });
   }
 });

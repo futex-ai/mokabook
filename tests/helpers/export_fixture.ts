@@ -3,10 +3,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import { createFixture, removeFixture } from "./fixture.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
+
+import { createFixture, removeFixture } from "./fixture.js";
 
 const execute = promisify(execFile);
 

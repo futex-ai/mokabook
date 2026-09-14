@@ -11,8 +11,8 @@ import {
   ReviewIgnore,
 } from "@mokly/mokly";
 
-import { renderComponent } from "../legacy/components.js";
 import { accent } from "../../shared/tokens.js";
+import { renderComponent } from "../legacy/components.js";
 
 const common = {
   dependencies: ["packages/firna-ui/index.tsx", "shared/tokens.ts"],

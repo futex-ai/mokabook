@@ -3,6 +3,7 @@ import { defineComponent, MockLink, type ComponentProps } from "@mokly/mokly";
 import { tagChip } from "../controls/tag-chip.js";
 import { libraryMetadata } from "../metadata.js";
 import { text } from "../schemas.js";
+
 import { MetadataRowView } from "./metadata-row.view.js";
 
 const propSchema = {

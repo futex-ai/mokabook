@@ -16,6 +16,7 @@ import type { ArtifactView } from "../registry/views.js";
 import { effectiveColorSchemes, VIEWPORTS } from "../registry/views.js";
 import { serializeReviewSentinels } from "../renderer/sentinels.js";
 import type { Renderer } from "../renderer/types.js";
+
 import { generatedHeader } from "./ownership.js";
 import { renderPage } from "./render_page.js";
 

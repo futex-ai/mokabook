@@ -25,6 +25,7 @@ import type {
   ConsumerWatcher,
   ConsumerWatcherFactory,
 } from "../dist/server/watcher.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("notification gate preserves startup events", () => {

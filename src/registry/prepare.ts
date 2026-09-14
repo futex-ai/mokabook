@@ -9,6 +9,7 @@ import { validateComponentDefinition } from "../components/definition.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
+
 import { problem, validateEntry } from "./entry_validation.js";
 import {
   crossReferenceViolations,

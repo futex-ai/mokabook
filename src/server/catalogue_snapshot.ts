@@ -10,6 +10,7 @@ import type { CatalogueChangeSnapshot } from "../registry/changes.js";
 import { parseManifest, readManifest } from "../registry/manifest.js";
 import type { ManifestV5 } from "../registry/types.js";
 import type { ReadOnlyReviewRepository } from "../review/repository.js";
+
 import { createCatalogue, type Catalogue } from "./catalogue.js";
 import {
   computeCatalogueChanges,

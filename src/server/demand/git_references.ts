@@ -10,8 +10,20 @@ export interface GitReferenceSource {
 }
 
 export class RepositoryGitReferences implements GitReferenceSource {
+  private readonly sessions = new WeakMap<
+    AbortSignal,
+    { root: string; git: ConfiguredGitCommandRunner }
+  >();
   async read(root: string, base: string, signal: AbortSignal): Promise<string> {
-    const git = new ConfiguredGitCommandRunner({ repoRoot: root }, signal);
+    let session = this.sessions.get(signal);
+    if (session?.root !== root) {
+      session = {
+        root,
+        git: new ConfiguredGitCommandRunner({ repoRoot: root }, signal),
+      };
+      this.sessions.set(signal, session);
+    }
+    const { git } = session;
     const refs = await Promise.all(
       ["HEAD", base].map(async (ref) => {
         try {

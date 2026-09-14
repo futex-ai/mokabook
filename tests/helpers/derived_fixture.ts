@@ -4,9 +4,10 @@ import path from "node:path";
 import type { TestContext } from "node:test";
 import { promisify } from "node:util";
 
-import { createFixture, removeFixture, validEntrySource } from "./fixture.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { loadConfig } from "../../dist/config/load.js";
+
+import { createFixture, removeFixture, validEntrySource } from "./fixture.js";
 
 const execute = promisify(execFile);
 

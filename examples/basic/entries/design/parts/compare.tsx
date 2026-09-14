@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useDesignInstance } from "../library/composition.js";
 import { comparisonToolbar } from "../library/controls/comparison-toolbar.js";
 import { comparisonPane } from "../library/preview/comparison-pane.js";
+
 import { useDesignNavigation } from "./design_navigation.js";
 import type { ComparisonMode } from "./destinations.js";
 import type { ReviewState } from "./review.js";

@@ -13,6 +13,7 @@ import {
   isEligibleBrowseLink,
   NavigationSequencer,
 } from "../dist/client/navigation.js";
+
 import { FakeClassList } from "./helpers/fake_dom.js";
 
 const base = {

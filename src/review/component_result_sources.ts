@@ -1,5 +1,6 @@
 import { generatedViews } from "../components/views.js";
 import type { Manifest } from "../registry/types.js";
+
 import { affectedConsumers } from "./component_affected.js";
 import { address, entryPairs, metadata } from "./component_metadata.js";
 import { variantAddress } from "./component_pairing.js";

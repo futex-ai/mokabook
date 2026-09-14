@@ -35,8 +35,8 @@ const prepared = await builder.build({
 ```
 
 The observer is synchronous and must not throw. A cache hit emits only
-`complete` with `cacheHit: true`; a miss or lock wait emits `start`, followed by
-`complete` or `fail`. Waiters can complete with `cacheHit: true` after sharing
+`complete` with `cacheHit: true`; only a confirmed miss emits `start`, followed by
+`complete` or `fail`. Waiters emit only `complete` with `cacheHit: true` after sharing
 another caller's rebuild. Await `build()` to include lock release and cleanup.
 Callers should keep their own sequence/commit guard to ignore superseded events.
 Abort the request and await settlement before terminating a worker or shutting
@@ -51,14 +51,17 @@ Preparation lives in `review/prepare.ts`; read-only factories live separately
 in `review/repository.ts`:
 `prepareReviewRepository(config, base, { signal, onProgress })` creates the Node
 builder or committed reader and returns a pinned repository. Serve's
-`BackgroundGeneration` calls it in the parent after output adoption and before
+`BackgroundGeneration` uses a retained `BackgroundBaseline` in the parent after output adoption and before
 `BackgroundCompilation.classify(base, commit)`. The classification worker reads
 the cache and its accepted compiled head output; it cannot start a rebuild.
-`BackgroundGeneration` passes an observer at that parent call that publishes the
+`BackgroundBaseline` passes an observer at that parent call that publishes the
 `preparing` evidence state on `start` and returns to `pending` on `complete`, so
 a cache hit never leaves `pending`. A rejected build reaches the shared error
 path, which logs the typed reason and publishes `unavailable`. Export uses the
 same composition and rechecks the marker.
+Content invalidation cancels the classification wait without cancelling the
+commit's build. Ref changes reuse preparation when the merge base is unchanged;
+a changed commit or build settings and shutdown cancel and drain it.
 
 `cache_layout.ts` owns `.mokly-cache/baselines/<commit>`. The builder extracts
 to `source`, runs commands, validates the historical manifest and output tree,
@@ -84,12 +87,20 @@ simultaneous stale observers cannot unlink a replacement lock. Waiters poll ever
 100 ms for at most two minutes by default. Cleanup retains three completed
 commits by default, always keeping the active entry and skipping locked entries.
 Retired entries are moved beneath the active locked entry before removal.
+All builder calls acquire the lock before reuse. They sweep discarded output
+and dead-owner temporary lock files, including on cache hits. Tombstones and
+legacy temporaries without owner identity remain until entry retirement.
 
 `archive.ts` uses the tar parser without its filesystem extractor, validates all
 paths and symlink chains before writing, and rejects hard links, device files,
 cycles and traversal through symlink ancestors. Git archives are uncompressed
-and bounded to 64 MiB. Commands run without a shell and receive only PATH, HOME,
-locale/temp variables, CI=1 and MOKLY_BASELINE_COMMIT. Combined diagnostics
+and bounded to 64 MiB and 65,536 entries. The parser reuses input and
+single-chunk entry buffers. The runtime `tar` dependency supplies its mature
+parser; implementing a second archive parser would duplicate security-sensitive code.
+Commands run without a shell and receive only the documented directory,
+locale, network and executable-lookup variables, CI=1 and MOKLY_BASELINE_COMMIT.
+`executable.ts` invokes Windows npm/npx through the selected installation's
+JavaScript entry point, preserving literal arguments. Combined diagnostics
 retain at most 64 KiB; command errors expose the last 40 lines and a zero-based
 command index, argv, exit code and signal. Cancellation sends TERM then KILL to
 the process group and waits for the process and pipes to close.
@@ -111,4 +122,5 @@ Unit tests use an in-memory filesystem, fake process runner and clock. The real
 Git integration fixture exercises extraction, execution, cache sharing, recovery,
 interruption and symlink rejection. See the
 [derived-baseline contract](../../docs/protocol/mokly-derived-baselines.md)
+and [storage and execution rules](../../docs/protocol/mokly-baseline-storage.md)
 and [review boundaries](../review/README.md).

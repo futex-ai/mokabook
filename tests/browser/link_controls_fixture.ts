@@ -3,17 +3,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
 
-import {
-  createFixture,
-  removeFixture,
-  validEntrySource,
-} from "../helpers/fixture.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { committedReviewRepository } from "../../dist/review/repository.js";
 import { runReview } from "../../dist/review/run.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
+import {
+  createFixture,
+  removeFixture,
+  validEntrySource,
+} from "../helpers/fixture.js";
 
 /** Build real Firna controls through the same renderer boundary as Accounting. */
 export async function startLinkControlFixture() {

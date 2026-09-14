@@ -15,6 +15,7 @@ import { extractHtmlReferences } from "../html_references.js";
 import { prepareRegistry } from "../registry/prepare.js";
 import type { ArtifactView } from "../registry/views.js";
 import { normalizeSingleDocument } from "../review/ignore.js";
+
 import type { ComponentRuntime } from "./component_runtime.js";
 import { DocumentCache } from "./document_cache.js";
 import { validateHtmlLinks, type HtmlValidationContext } from "./html_links.js";

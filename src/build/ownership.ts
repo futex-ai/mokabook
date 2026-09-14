@@ -9,6 +9,7 @@ import {
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
+
 import { walkFiles } from "./discovery.js";
 import { isAuthoringSource } from "./source_inventory.js";
 

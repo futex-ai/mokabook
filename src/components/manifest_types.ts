@@ -1,5 +1,6 @@
 import type { ColorScheme, Viewport } from "../authoring/types.js";
 import type { ManifestEntryBase } from "../registry/types.js";
+
 import type { ComponentControl } from "./control_types.js";
 import type { ComponentWireProps, ObjectPropSchema } from "./prop_types.js";
 

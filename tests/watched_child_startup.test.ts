@@ -9,6 +9,7 @@ import { componentRuntime } from "../dist/build/component_runtime.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { MANIFEST_NAME } from "../dist/registry/manifest.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import {
   createFixture,

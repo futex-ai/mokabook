@@ -1,5 +1,6 @@
 /** Shared tabbed inspector, kept outside the scrolling preview. */
 import type { Catalogue } from "../catalogue.js";
+
 import { EntryDetailsBody } from "./details.js";
 import type { WorkspaceData } from "./workspace_data.js";
 import { WorkspaceIcon, type WorkspaceIconName } from "./workspace_icons.js";

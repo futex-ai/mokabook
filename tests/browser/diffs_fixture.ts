@@ -1,13 +1,13 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 
-import { comparisonEntrySource } from "../helpers/comparison_source.js";
-import { createFixture, removeFixture } from "../helpers/fixture.js";
-import { waitForClassifiedCount } from "../helpers/watched_catalogue.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { serve } from "../../dist/server/serve.js";
+import { comparisonEntrySource } from "../helpers/comparison_source.js";
+import { createFixture, removeFixture } from "../helpers/fixture.js";
+import { waitForClassifiedCount } from "../helpers/watched_catalogue.js";
 
 /** Real Git-backed comparison server with changed, added, removed, and light-only screens. */
 export async function comparisonFixture() {

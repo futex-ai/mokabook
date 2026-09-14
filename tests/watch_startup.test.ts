@@ -17,6 +17,7 @@ import type {
   ConsumerWatcher,
   ConsumerWatcherFactory,
 } from "../dist/server/watcher.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("watched startup attaches the watcher before the initial output write", async (context) => {

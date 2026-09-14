@@ -1,5 +1,6 @@
 import { isSafeCatalogueRoute } from "../config/paths.js";
 import type { ManifestV5 } from "../registry/types.js";
+
 import type { ComponentChangeSnapshot } from "./component_changes.js";
 import type {
   RuntimeMessage,

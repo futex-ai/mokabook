@@ -1,6 +1,7 @@
 import path from "node:path";
 
 import { errorMessage } from "../errors.js";
+
 import { parseBaselineArchive } from "./archive.js";
 import { ensureBaselineDirectory } from "./confinement.js";
 import { assertBaselineActive, BaselineError } from "./errors.js";

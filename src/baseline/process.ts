@@ -1,5 +1,9 @@
 import { spawn, type ChildProcess } from "node:child_process";
 
+import {
+  NodeBaselineExecutableResolver,
+  type BaselineExecutableResolver,
+} from "./executable.js";
 import type {
   BaselineProcessRequest,
   BaselineProcessResult,
@@ -11,6 +15,9 @@ export const MAX_ARCHIVE_BYTES = 64 * 1024 * 1024;
 
 /** Bounded subprocess capture; cancellation drains the process group before settling. */
 export class NodeBaselineProcessRunner implements BaselineProcessRunner {
+  constructor(
+    private readonly executable: BaselineExecutableResolver = new NodeBaselineExecutableResolver(),
+  ) {}
   readonly pid = process.pid;
   isAlive(pid: number): boolean {
     try {
@@ -23,7 +30,8 @@ export class NodeBaselineProcessRunner implements BaselineProcessRunner {
 
   async run(request: BaselineProcessRequest): Promise<BaselineProcessResult> {
     request.signal?.throwIfAborted();
-    const [executable, ...args] = request.argv;
+    const [executable, ...args] = await this.executable.resolve(request);
+    request.signal?.throwIfAborted();
     if (!executable) throw new Error("Baseline command has no executable");
     return new Promise((resolve, reject) => {
       const grouped = process.platform !== "win32";

@@ -3,8 +3,10 @@ import path from "node:path";
 import { Header, Parser, type ReadEntry } from "tar";
 
 import { isSafeRepositoryPath } from "../config/paths.js";
+
 import { MAX_ARCHIVE_BYTES } from "./process.js";
 
+export const MAX_ARCHIVE_ENTRIES = 65_536;
 export interface ArchiveEntry {
   readonly path: string;
   readonly kind: "file" | "directory" | "symlink";
@@ -24,7 +26,8 @@ export async function parseBaselineArchive(
     bytes.subarray(-1024).some((byte) => byte !== 0)
   )
     throw new Error("Invalid or oversized Git archive");
-  const header = new Header(Buffer.from(bytes.subarray(0, 512)));
+  const buffer = Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const header = new Header(buffer.subarray(0, 512));
   if (!header.cksumValid && !header.nullBlock)
     throw new Error("Invalid uncompressed Git archive header");
   const entries = await new Promise<ArchiveEntry[]>((resolve, reject) => {
@@ -43,7 +46,13 @@ export async function parseBaselineArchive(
             : entry.type === "SymbolicLink"
               ? "symlink"
               : undefined;
-      if (!kind || entries.length >= 65_536) {
+      if (entries.length >= MAX_ARCHIVE_ENTRIES) {
+        parser.abort(
+          new Error(`Git archive exceeds ${MAX_ARCHIVE_ENTRIES} entries`),
+        );
+        return;
+      }
+      if (!kind) {
         parser.abort(new Error(`Unsupported Git archive entry: ${entry.path}`));
         return;
       }
@@ -56,13 +65,13 @@ export async function parseBaselineArchive(
             kind === "directory" ? entry.path.replace(/\/$/, "") : entry.path,
           kind,
           mode: (entry.mode ?? 0o644) & 0o777,
-          bytes: Buffer.concat(chunks),
+          bytes: chunks.length === 1 ? chunks[0]! : Buffer.concat(chunks),
           ...(kind === "symlink" ? { target: entry.linkpath ?? "" } : {}),
         }),
       );
     });
     parser.on("end", () => resolve(entries));
-    parser.end(Buffer.from(bytes));
+    parser.end(buffer);
   });
   validateTree(entries);
   return entries;

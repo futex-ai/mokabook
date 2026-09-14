@@ -7,6 +7,7 @@ import {
   LEGACY_MANIFEST_NAME,
   MANIFEST_NAME,
 } from "../registry/manifest.js";
+
 import { isBaselineCachePath } from "./cache_paths.js";
 import { locatePath, type FileLocation } from "./file_locations.js";
 import { projectRealPath } from "./paths.js";

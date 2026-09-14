@@ -8,13 +8,14 @@
 
 import type { ReactNode } from "react";
 
-import type { Catalogue } from "../catalogue.js";
-import { ChevronIcon, FlowIcon } from "./icons.js";
-import { TagChip } from "./tags.js";
-import type { RoutedEntry, RouteTarget } from "./target.js";
 import type { ColorScheme } from "../../authoring/types.js";
 import { catalogueViewHref } from "../../navigation/delivery.js";
 import type { ManifestScreen, ManifestUseCase } from "../../registry/types.js";
+import type { Catalogue } from "../catalogue.js";
+
+import { ChevronIcon, FlowIcon } from "./icons.js";
+import { TagChip } from "./tags.js";
+import type { RoutedEntry, RouteTarget } from "./target.js";
 
 function MetaRow(props: { children: ReactNode; label: string }) {
   return (

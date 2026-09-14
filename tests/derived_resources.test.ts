@@ -6,6 +6,7 @@ import test from "node:test";
 import { prepareReviewRepository } from "../dist/review/prepare.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
 import { readCatalogueChanges } from "../dist/server/component_changes.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { derivedFixture } from "./helpers/derived_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";

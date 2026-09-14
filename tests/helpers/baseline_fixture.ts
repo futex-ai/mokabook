@@ -2,7 +2,6 @@ import path from "node:path";
 
 import { Header } from "tar";
 
-import { MemoryBaselineFileSystem } from "./baseline_memory.js";
 import type {
   BaselineMaintenanceFailure,
   BaselineMaintenanceReporter,
@@ -15,6 +14,8 @@ import type {
   BaselineProcessResult,
   BaselineProcessRunner,
 } from "../../dist/baseline/types.js";
+
+import { MemoryBaselineFileSystem } from "./baseline_memory.js";
 
 export const baselineCommit = "a".repeat(40);
 export const baselineManifest = {

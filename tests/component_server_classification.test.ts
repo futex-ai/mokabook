@@ -5,6 +5,7 @@ import { test } from "node:test";
 
 import { compareReview } from "../dist/review/compare.js";
 import { startCatalogueServer } from "../dist/server/http.js";
+
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 
 test("Browse responds before separately computed component evidence arrives", async (t) => {

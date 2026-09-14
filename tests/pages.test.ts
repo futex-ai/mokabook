@@ -7,6 +7,7 @@ import { checkCompilation } from "../src/build/check.js";
 import { compileCatalogue } from "../src/build/compile.js";
 import { writeCompilation } from "../src/build/transaction.js";
 import { loadConfig } from "../src/config/load.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 const metadata =

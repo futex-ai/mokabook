@@ -6,6 +6,7 @@ import type { Compilation } from "../build/compile.js";
 import { isInside } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
+
 import { watcherReadyBeforeShutdown } from "./serve_lifecycle.js";
 import { NotificationGate } from "./watch_events.js";
 import {

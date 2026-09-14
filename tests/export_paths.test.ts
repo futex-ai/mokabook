@@ -7,6 +7,7 @@ import { loadConfig } from "../dist/config/load.js";
 import { ExportInventory } from "../dist/export/inventory.js";
 import { assertExportOwnership } from "../dist/export/ownership.js";
 import { resolveExportOutput } from "../dist/export/paths.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("export confines output before any write and resolves against config", async (context) => {

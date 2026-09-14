@@ -1,6 +1,7 @@
-import { useDesignStyle } from "../style_context.js";
-import type { ComparisonToolbarProps } from "./comparison-toolbar.js";
 import { SelectionControl } from "../../parts/selection_control.js";
+import { useDesignStyle } from "../style_context.js";
+
+import type { ComparisonToolbarProps } from "./comparison-toolbar.js";
 
 const modes = [
   ["current", "Current"],

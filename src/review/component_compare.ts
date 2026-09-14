@@ -2,6 +2,7 @@ import type { Compilation } from "../build/compile.js";
 import { generatedViews } from "../components/views.js";
 import type { ResolvedConfig } from "../config/types.js";
 import type { Manifest } from "../registry/types.js";
+
 import {
   copySnapshotDependencies,
   type GitReviewAssetReader,

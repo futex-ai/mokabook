@@ -6,6 +6,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 
 import type { Catalogue } from "../catalogue.js";
+
 import type { ShellContext } from "./context.js";
 import { SchemeSwitch } from "./head.js";
 import { BrandIcon, IconSvg, SearchIcon } from "./icons.js";

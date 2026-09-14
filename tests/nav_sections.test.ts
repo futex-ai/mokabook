@@ -21,6 +21,7 @@ import {
   type NavLeafNode,
   type NavNode,
 } from "../dist/server/shell/nav_tree.js";
+
 import { asDocument, FakeNode } from "./helpers/fake_dom.js";
 
 test("page and component sections preserve only their relevant hierarchy", () => {

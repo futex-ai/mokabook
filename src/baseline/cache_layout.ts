@@ -1,6 +1,7 @@
 import path from "node:path";
 
 import { isSafeRepositoryPath } from "../config/paths.js";
+
 import { BaselineError } from "./errors.js";
 
 export const BASELINE_CACHE_PATH = ".mokly-cache/baselines";

@@ -9,6 +9,7 @@ import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync, timeSync, timingCounts } from "../diagnostics/timings.js";
 import { MoklyError, errorMessage } from "../errors.js";
 import type { Renderer } from "../renderer/types.js";
+
 import { evaluateBundle, rememberBundle } from "./consumer_bundle.js";
 import {
   CONSUMER_ENTRY_PATH,

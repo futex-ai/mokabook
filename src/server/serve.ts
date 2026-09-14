@@ -6,6 +6,7 @@ import {
 } from "../build/output_store.js";
 import { FileSystemConfigLoader, type ConfigLoader } from "../config/load.js";
 import type { ResolvedConfig } from "../config/types.js";
+
 import {
   RepositoryCatalogueChangeClassifier,
   type CatalogueChangeClassifier,

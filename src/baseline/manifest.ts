@@ -7,6 +7,7 @@ import {
   selectManifestInput,
 } from "../registry/manifest.js";
 import { MAX_BATCH_OUTPUT_BYTES } from "../review/git_batch.js";
+
 import { confinedBaselineStat } from "./confinement.js";
 import type { BaselineFileSystem } from "./types.js";
 

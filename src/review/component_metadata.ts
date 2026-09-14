@@ -8,6 +8,7 @@ import {
   type CatalogueHierarchy,
 } from "../registry/hierarchy.js";
 import type { Manifest, ManifestEntry } from "../registry/types.js";
+
 import type {
   EntryChangeReason,
   ReviewEntryAddress,

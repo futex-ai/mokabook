@@ -5,8 +5,11 @@ import test from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
 import { FileSystemGeneratedOutputStore } from "../dist/build/output_store.js";
+import { GitTrackedGeneratedOutput } from "../dist/build/tracked_output.js";
 import { loadConfig } from "../dist/config/load.js";
 import { MANIFEST_NAME } from "../dist/registry/manifest.js";
+import { GitProcessError } from "../dist/review/git_process.js";
+
 import { derivedFixture } from "./helpers/derived_fixture.js";
 
 test("derived check accepts missing or stale local output and tracked authored public files", async (t) => {
@@ -60,6 +63,55 @@ test("derived check lists every tracked generated or cache path with ignore guid
       return true;
     },
   );
+});
+
+test("derived check rejects retired generated routes from the index even when their local files are absent", async (t) => {
+  const fixture = await derivedFixture(t);
+  const store = new FileSystemGeneratedOutputStore();
+  await store.write(fixture.baseline, fixture.config);
+  const retired = "mockups/screens/retired.mobile.html";
+  await fs.rename(
+    path.join(fixture.root, "mockups/screens/home.mobile.html"),
+    path.join(fixture.root, retired),
+  );
+  await fixture.git("add", "-f", "--", retired);
+  await fs.rm(path.join(fixture.root, retired));
+  await assert.rejects(
+    async () => store.check(fixture.baseline, fixture.config),
+    (error: Error & { code?: string }) => {
+      assert.equal(error.code, "build-invalid");
+      assert.ok(error.message.includes(retired));
+      return true;
+    },
+  );
+  await fixture.git("rm", "--cached", "--", retired);
+  const guide = "mockups/guide.html";
+  await fs.writeFile(
+    path.join(fixture.root, guide),
+    `<!doctype html>\n${fixture.baseline.outputs.get("screens/home.mobile.html")}`,
+  );
+  await fixture.git("add", "-f", "--", guide);
+  await fs.rm(path.join(fixture.root, guide));
+  await store.check(fixture.baseline, fixture.config);
+});
+
+test("indexed ownership checking accepts only Git's defined no-match status", async (t) => {
+  const fixture = await derivedFixture(t);
+  for (const exitCode of [1, 128]) {
+    const tracking = new GitTrackedGeneratedOutput({
+      async run(argv) {
+        if (argv[0] === "rev-parse") return fixture.root;
+        if (argv[0] === "ls-files") return "";
+        throw new GitProcessError(exitCode, null, "index read failed");
+      },
+    });
+    if (exitCode === 1) await tracking.check(fixture.baseline, fixture.config);
+    else
+      await assert.rejects(
+        () => tracking.check(fixture.baseline, fixture.config),
+        { code: "build-invalid" },
+      );
+  }
 });
 
 test("derived build creates an absent nested directory transactionally and preserves prior output on failure", async (t) => {

@@ -8,6 +8,7 @@ import {
   parseHistoricalManifest,
   parseManifest,
 } from "../dist/registry/manifest.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 

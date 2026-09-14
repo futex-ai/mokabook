@@ -10,6 +10,7 @@ import {
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
+
 import type { RepositoryEvidence } from "./git.js";
 
 /** Collect deterministic changes while excluding active and retained output. */

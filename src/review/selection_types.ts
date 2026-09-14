@@ -1,5 +1,6 @@
 /** Inputs for a comparison of one screen or one saved component variant. */
 import type { Manifest } from "../registry/types.js";
+
 import type { ReviewResultV3 } from "./component_types.js";
 import type { ReviewArtifact } from "./types.js";
 

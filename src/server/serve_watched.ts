@@ -8,6 +8,7 @@ import { loadConsumerGraph } from "../build/load_graph.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { bindTimings, timeAsync } from "../diagnostics/timings.js";
 import { errorMessage } from "../errors.js";
+
 import { RepositoryCatalogueChangeClassifier } from "./component_changes.js";
 import { BackgroundGeneration } from "./demand/generation.js";
 import {
@@ -150,6 +151,12 @@ export async function serveWatched(
   const restart = async () => {
     try {
       await restartWithRecovery(running);
+      running.notifyUpdate(
+        undefined,
+        undefined,
+        background.changesStatus,
+        "evidence",
+      );
     } finally {
       if (!closed) schedule(activeCompilation);
     }
@@ -173,7 +180,7 @@ export async function serveWatched(
         return;
       const next = await prepareLiveRuntime(nextConfig);
       if (closed) return;
-      await background.invalidate();
+      await background.invalidate(next.config);
       if (closed) return;
       const previous = watcher;
       activeConfig = next.config;
@@ -209,7 +216,12 @@ export async function serveWatched(
       if (activeCompilation) {
         await background.invalidate();
         if (!closed) {
-          running.notifyUpdate(undefined, undefined, "pending", "evidence");
+          running.notifyUpdate(
+            undefined,
+            undefined,
+            background.changesStatus,
+            "evidence",
+          );
           schedule(activeCompilation);
         }
       }
@@ -237,7 +249,7 @@ export async function serveWatched(
         signature = nextSignature;
         await restart();
       } else {
-        running.notifyUpdate(undefined);
+        running.notifyUpdate(undefined, undefined, background.changesStatus);
         schedule();
       }
       return;
@@ -250,7 +262,7 @@ export async function serveWatched(
       action === "reload" ? "live" : "stage",
     );
     if (action === "reload") {
-      running.notifyUpdate(undefined);
+      running.notifyUpdate(undefined, undefined, background.changesStatus);
       schedule(activeCompilation);
     } else await restart();
   };

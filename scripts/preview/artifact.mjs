@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { comparisonMetadata } from "./comparisons.mjs";
 import { ownedEntries } from "../../dist/export/ownership.js";
 import { isExportPublicName } from "../../dist/export/resource_policy.js";
 import {
@@ -13,6 +12,8 @@ import {
   catalogueViewHref,
   parseStaticDelivery,
 } from "../../dist/navigation/delivery.js";
+
+import { comparisonMetadata } from "./comparisons.mjs";
 
 /** Only this repository adapter can adopt the previous preview marker. */
 export const previewOwnership = {

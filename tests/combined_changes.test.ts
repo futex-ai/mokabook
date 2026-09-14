@@ -7,6 +7,7 @@ import { compareReview } from "../dist/review/compare.js";
 import { changedContentPaths } from "../dist/server/changed_content.js";
 import { readCatalogueChanges } from "../dist/server/component_changes.js";
 import { startCatalogueServer } from "../dist/server/http.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 

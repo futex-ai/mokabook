@@ -6,6 +6,7 @@ import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
 import { createCatalogueIndex } from "../registry/catalogue_index.js";
 import { prepareRegistry } from "../registry/prepare.js";
+
 import type { ComponentRuntime } from "./component_runtime.js";
 import { consumerBundle } from "./consumer_bundle.js";
 import { loadConsumerGraph } from "./load_graph.js";

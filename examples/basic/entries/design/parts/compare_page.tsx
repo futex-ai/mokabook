@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { PreviewWorkspace } from "../components/parts/workspace.js";
+
 import { ComparisonStage } from "./compare.js";
 import type { DesignDestination } from "./destinations.js";
 import { DetailsPanel } from "./details.js";

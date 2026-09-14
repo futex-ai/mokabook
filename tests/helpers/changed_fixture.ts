@@ -1,15 +1,16 @@
 import { execFileSync } from "node:child_process";
 import type { TestContext } from "node:test";
 
+import { compileCatalogue } from "../../dist/build/compile.js";
+import { writeCompilation } from "../../dist/build/transaction.js";
+import { loadConfig } from "../../dist/config/load.js";
+
 import {
   createFixture,
   removeFixture,
   type TestFixture,
   validEntrySource,
 } from "./fixture.js";
-import { compileCatalogue } from "../../dist/build/compile.js";
-import { writeCompilation } from "../../dist/build/transaction.js";
-import { loadConfig } from "../../dist/config/load.js";
 
 /** Build a consumer and commit its actual generated baseline before an edit. */
 export async function changedFixture(

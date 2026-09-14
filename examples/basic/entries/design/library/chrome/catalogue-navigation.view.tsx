@@ -3,12 +3,6 @@ import type { CSSProperties } from "react";
 import type { Viewport } from "@mokly/mokly";
 import { MockLink } from "@mokly/mokly";
 
-import { useDesignStyle } from "../style_context.js";
-import {
-  navigationSections,
-  type NavigationRow,
-} from "./catalogue-navigation-sections.js";
-import type { CatalogueNavigationProps } from "./catalogue-navigation.js";
 import { DesignLink } from "../../parts/design_navigation.js";
 import type { DesignDestination } from "../../parts/destinations.js";
 import {
@@ -20,6 +14,13 @@ import {
   PageIcon,
 } from "../../parts/icons.js";
 import { NavResizeHandle } from "../../parts/nav_resize.js";
+import { useDesignStyle } from "../style_context.js";
+
+import {
+  navigationSections,
+  type NavigationRow,
+} from "./catalogue-navigation-sections.js";
+import type { CatalogueNavigationProps } from "./catalogue-navigation.js";
 
 /** Left padding applied to a top-level (depth 0) row, in pixels. */
 const ROOT_INSET = 8;

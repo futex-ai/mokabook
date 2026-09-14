@@ -3,11 +3,12 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
+import { exportCatalogue } from "../../dist/export/run.js";
 import { createExampleBaseline } from "../helpers/example_baseline.js";
 import { repositoryRoot } from "../helpers/fixture.js";
 import { serveStaticFiles } from "../helpers/static_server.js";
+
 import { chooseViewport } from "./workspace_actions.js";
-import { exportCatalogue } from "../../dist/export/run.js";
 
 let output: string;
 let root: string;

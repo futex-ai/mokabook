@@ -2,8 +2,6 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
-import { componentReviewFixture } from "../helpers/component_review_fixture.js";
-import { loadComparison } from "./comparison_actions.js";
 import { renderReviewArtifact } from "../../dist/review/artifact.js";
 import { compareReview } from "../../dist/review/compare.js";
 import { writeReviewArtifact } from "../../dist/review/write.js";
@@ -11,6 +9,9 @@ import {
   startCatalogueServer,
   type RunningServer,
 } from "../../dist/server/http.js";
+import { componentReviewFixture } from "../helpers/component_review_fixture.js";
+
+import { loadComparison } from "./comparison_actions.js";
 
 let server: RunningServer;
 const cleanup: (() => Promise<void>)[] = [];

@@ -1,4 +1,5 @@
 import type { ManifestComponent } from "../components/manifest_types.js";
+
 import type { CatalogueMetadata } from "./catalogue_index.js";
 import { analyzeHierarchy } from "./hierarchy.js";
 import type {

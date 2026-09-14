@@ -1,5 +1,3 @@
-import type { Catalogue } from "../catalogue.js";
-import type { ShellContext } from "./context.js";
 import type {
   ManifestComponent,
   ManifestComponentVariant,
@@ -18,6 +16,9 @@ import type {
   ComponentReview,
   ScreenReviewV3,
 } from "../../review/component_types.js";
+import type { Catalogue } from "../catalogue.js";
+
+import type { ShellContext } from "./context.js";
 
 export type EntryStatus = "Added" | "Changed" | "Removed" | "Unmodified";
 export interface WorkspaceVariant {

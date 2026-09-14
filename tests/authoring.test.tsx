@@ -27,6 +27,7 @@ import {
 import { validateEntry } from "../dist/registry/entry_validation.js";
 import type { RegistryViolation } from "../dist/registry/types.js";
 import { serializeReviewSentinels } from "../dist/renderer/sentinels.js";
+
 import { repositoryRoot } from "./helpers/fixture.js";
 
 const sourceRelativePath = "tests/authoring.test.tsx";

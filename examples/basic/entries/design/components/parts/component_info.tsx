@@ -1,5 +1,6 @@
-import { COMPONENTS, type ComponentId } from "./metadata.js";
 import { MetaRow } from "../../parts/metadata_row.js";
+
+import { COMPONENTS, type ComponentId } from "./metadata.js";
 
 export function ComponentInfo({ identity }: { identity: ComponentId }) {
   const component = COMPONENTS[identity];

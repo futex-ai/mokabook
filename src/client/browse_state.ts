@@ -1,6 +1,7 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
 import type { ChangesStatus } from "../server/update_messages.js";
+
 import {
   isNavDisclosureClosed,
   isNavDisclosureKey,

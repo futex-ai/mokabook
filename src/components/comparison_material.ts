@@ -1,4 +1,5 @@
 import { normalizeHistoricalDocument } from "../review/ignore.js";
+
 import { canonicalJson } from "./data.js";
 import type {
   ComponentInputOwner,

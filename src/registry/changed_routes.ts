@@ -4,6 +4,7 @@ import { isDeepStrictEqual } from "node:util";
 
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+
 import { analyzeHierarchy, type CatalogueHierarchy } from "./hierarchy.js";
 import type { Manifest, ManifestEntry } from "./types.js";
 

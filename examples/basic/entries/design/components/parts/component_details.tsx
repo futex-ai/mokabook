@@ -1,5 +1,7 @@
 import { MockLink } from "@mokly/mokly";
 
+import { MetaRow } from "../../parts/metadata_row.js";
+
 import { ActionPropValues, actionVariants } from "./action_props.js";
 import { ComparisonDetails } from "./comparison_details.js";
 import { componentComparison } from "./comparison_fixtures.js";
@@ -9,7 +11,6 @@ import { CONTROLS_PAGES } from "./destinations.js";
 import { toolbarPrompt } from "./fixtures.js";
 import { Inspector } from "./inspector.js";
 import { COMPONENT_BY_STATE } from "./metadata.js";
-import { MetaRow } from "../../parts/metadata_row.js";
 
 export type ComponentPageState =
   | "default"

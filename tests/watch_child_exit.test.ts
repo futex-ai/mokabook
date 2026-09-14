@@ -26,6 +26,7 @@ import type {
   ConsumerWatcher,
   ConsumerWatcherFactory,
 } from "../dist/server/watcher.js";
+
 import {
   createFixture,
   removeFixture,

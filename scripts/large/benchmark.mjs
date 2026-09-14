@@ -3,11 +3,12 @@ import path from "node:path";
 
 import { chromium, expect } from "@playwright/test";
 
+import { loadConfig } from "../../dist/config/load.js";
+
 import { resetFixtureBaseline } from "./baseline.mjs";
 import { waitForBrowseChanges } from "./browse.mjs";
 import { start, stop, waitFor } from "./process.mjs";
 import { baselineMeasurement } from "./timings.mjs";
-import { loadConfig } from "../../dist/config/load.js";
 
 export async function benchmark(repository, fixture) {
   const config = await loadConfig(fixture.root, fixture.configPath);

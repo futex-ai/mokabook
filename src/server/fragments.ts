@@ -10,6 +10,7 @@ import type { ResolvedConfig } from "../config/types.js";
 import { extractHtmlReferences } from "../html_references.js";
 import { isLogicalFragment } from "../navigation/logical.js";
 import type { ManifestEntry, ManifestScreen } from "../registry/types.js";
+
 import type { Catalogue } from "./catalogue.js";
 import type { DocumentService } from "./demand/service.js";
 

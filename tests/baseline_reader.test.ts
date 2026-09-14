@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { RebuiltBaselineReader } from "../dist/baseline/reader.js";
 import { MAX_BATCH_OUTPUT_BYTES } from "../dist/review/git_batch.js";
+
 import { baselineCommit } from "./helpers/baseline_fixture.js";
 import { MemoryBaselineFileSystem } from "./helpers/baseline_memory.js";
 

@@ -3,6 +3,7 @@
 import type { ColorScheme, Viewport } from "../authoring/types.js";
 import type { ManifestScreen } from "../registry/types.js";
 import { VIEWPORTS } from "../registry/views.js";
+
 import type { ReviewResult, ReviewState, ScreenReview } from "./types.js";
 
 const COLOR_SCHEMES: readonly ColorScheme[] = ["light", "dark"];

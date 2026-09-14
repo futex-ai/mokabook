@@ -8,6 +8,7 @@ import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { analyzeHierarchy } from "../registry/hierarchy.js";
 import type { Manifest, ManifestEntry } from "../registry/types.js";
+
 import type { ReviewAssetReader } from "./assets.js";
 import { affectedConsumers } from "./component_affected.js";
 import {

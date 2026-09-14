@@ -3,11 +3,6 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
-import {
-  createFixture,
-  removeFixture,
-  type TestFixture,
-} from "../helpers/fixture.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
@@ -17,6 +12,11 @@ import {
   type RunningServer,
 } from "../../dist/server/http.js";
 import type { ServedReview } from "../../dist/server/review_routes.js";
+import {
+  createFixture,
+  removeFixture,
+  type TestFixture,
+} from "../helpers/fixture.js";
 
 let fixture: TestFixture;
 let server: RunningServer;

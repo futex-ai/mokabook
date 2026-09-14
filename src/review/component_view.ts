@@ -8,6 +8,7 @@ import {
 } from "../components/comparison_projection.js";
 import { validateComponentRanges } from "../components/ranges.js";
 import type { GeneratedComponentView } from "../components/views.js";
+
 import type { ComponentDependencyPolicy } from "./component_metadata.js";
 import { changedResourceBytes } from "./component_resource_changes.js";
 import type { ComponentMaterialReader } from "./component_resources.js";

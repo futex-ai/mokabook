@@ -11,6 +11,7 @@ import { compareReview } from "../dist/review/compare.js";
 import { CommittedRepository } from "../dist/review/git.js";
 import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import type { ReviewResult } from "../dist/review/types.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 const execFileAsync = promisify(execFile);

@@ -8,6 +8,7 @@ import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { NodeGitCommandRunner } from "../dist/review/git.js";
 import { buildPreview } from "../scripts/preview/catalogue.mjs";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 for (const includeChanges of [false, true]) {

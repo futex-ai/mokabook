@@ -1,9 +1,10 @@
 import { defineComponent, type ComponentProps } from "@mokly/mokly";
 
+import { DESTINATIONS } from "../../parts/destinations.js";
 import { libraryMetadata } from "../metadata.js";
 import { optionalText, tagRecords } from "../schemas.js";
+
 import { TagPickerView } from "./tag-picker.view.js";
-import { DESTINATIONS } from "../../parts/destinations.js";
 
 const propSchema = {
   kind: "object",

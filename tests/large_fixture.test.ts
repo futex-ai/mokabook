@@ -11,6 +11,7 @@ import {
   type TimingEvent,
 } from "../dist/diagnostics/timings.js";
 import { prepareRegistry } from "../dist/registry/prepare.js";
+
 import { generateLargeFixture, largeSize } from "./fixtures/large/generate.js";
 import { repositoryRoot } from "./helpers/fixture.js";
 

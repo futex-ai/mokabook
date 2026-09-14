@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { repositoryRoot } from "../helpers/fixture.js";
+
 import { loadComparison } from "./comparison_actions.js";
 import { comparisonFixture } from "./diffs_fixture.js";
 import { chooseScheme, chooseViewport } from "./workspace_actions.js";

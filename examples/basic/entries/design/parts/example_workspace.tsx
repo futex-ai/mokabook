@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { PreviewWorkspace } from "../components/parts/workspace.js";
+
 import { DetailsPanel } from "./details.js";
 import { MiniDetails, MiniWelcome } from "./mini_screens.js";
 import type { ArtboardViewport } from "./shell.js";

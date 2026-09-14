@@ -1,5 +1,6 @@
 import { reviewMaterialKey } from "../authoring/review_material.js";
 import { isCatalogueId } from "../navigation/logical.js";
+
 import { decodeProps, encodeProps } from "./codec.js";
 import { canonicalJson, exactKeys, invalidData } from "./data.js";
 import { instanceKey, isComponentKey, slotKey } from "./keys.js";

@@ -1,6 +1,7 @@
 import { screen } from "@mokly/mokly";
 
 import { ExampleDocument } from "../document.js";
+
 import { useDesignNavigation } from "./parts/design_navigation.js";
 import { DESTINATIONS } from "./parts/destinations.js";
 import { DetailsPanel } from "./parts/details.js";

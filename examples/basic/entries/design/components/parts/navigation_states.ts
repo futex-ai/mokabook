@@ -1,10 +1,11 @@
+import type { NavigationState } from "../../parts/navigation_states.js";
+
 import {
   COMPONENT_PAGES,
   CONTROLS_PAGES,
   INSPECTION_PAGES,
   type ComponentDesignDestination,
 } from "./destinations.js";
-import type { NavigationState } from "../../parts/navigation_states.js";
 
 /** Shared shell controls do not inherit unrelated Browse transitions. */
 export const COMPONENT_NAVIGATION_STATES = {

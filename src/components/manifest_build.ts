@@ -1,6 +1,7 @@
 import type { ColorScheme, ResolvedRegistryEntry } from "../authoring/types.js";
 import type { ManifestEntryBase } from "../registry/types.js";
 import { effectiveColorSchemes, VIEWPORTS } from "../registry/views.js";
+
 import { encodeProps } from "./codec.js";
 import { componentInputs } from "./inputs.js";
 import type {

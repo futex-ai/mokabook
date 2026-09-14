@@ -9,6 +9,7 @@ import { ConfiguredGitCommandRunner } from "../config/git.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
+
 import { CommittedBaselineReader } from "./committed.js";
 import {
   CommittedRepository,

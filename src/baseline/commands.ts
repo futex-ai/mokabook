@@ -1,4 +1,5 @@
 import { timeAsync } from "../diagnostics/timings.js";
+
 import { validCommands } from "./cache_layout.js";
 import {
   assertBaselineActive,
@@ -7,7 +8,7 @@ import {
 } from "./errors.js";
 import type { BaselineProcessRunner } from "./types.js";
 
-/** Only documented locale, executable lookup, home and temporary-directory variables cross. */
+/** Only documented executable lookup, user directories, locale and network configuration cross. */
 export function baselineEnvironment(
   environment: Readonly<Record<string, string | undefined>>,
   commit: string,
@@ -16,7 +17,9 @@ export function baselineEnvironment(
   for (const [key, value] of Object.entries(environment))
     if (
       value !== undefined &&
-      /^(?:PATH|HOME|LANG|LANGUAGE|LC_[A-Z_]+|TMPDIR|TMP|TEMP)$/.test(key)
+      /^(?:PATH|PATHEXT|HOME|USERPROFILE|HOMEDRIVE|HOMEPATH|APPDATA|LOCALAPPDATA|SYSTEMROOT|WINDIR|COMSPEC|LANG|LANGUAGE|LC_[A-Z_]+|TMPDIR|TMP|TEMP|(?:HTTP|HTTPS|ALL|NO)_PROXY|NODE_EXTRA_CA_CERTS|SSL_CERT_FILE|SSL_CERT_DIR|NPM_CONFIG_(?:PROXY|HTTPS_PROXY|NOPROXY|CAFILE|REGISTRY))$/i.test(
+        key,
+      )
     )
       result[key] = value;
   return { ...result, CI: "1", MOKLY_BASELINE_COMMIT: commit };

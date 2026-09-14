@@ -1,11 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-import { componentEntrySource } from "../helpers/component_fixture.js";
-import {
-  createFixture,
-  removeFixture,
-  type TestFixture,
-} from "../helpers/fixture.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import type * as Geometry from "../../dist/client/component_geometry.js";
@@ -14,6 +8,12 @@ import {
   startCatalogueServer,
   type RunningServer,
 } from "../../dist/server/http.js";
+import { componentEntrySource } from "../helpers/component_fixture.js";
+import {
+  createFixture,
+  removeFixture,
+  type TestFixture,
+} from "../helpers/fixture.js";
 
 let fixture: TestFixture;
 let server: RunningServer;

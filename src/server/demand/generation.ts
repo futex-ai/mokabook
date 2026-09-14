@@ -1,24 +1,23 @@
 /** Background output/evidence can be adopted only by its still-current source generation. */
+import type { BaselineBuilder } from "../../baseline/types.js";
+import type { Compilation } from "../../build/compile.js";
+import type { ComponentRuntime } from "../../build/component_runtime.js";
+import type { GeneratedOutputStore } from "../../build/output_store.js";
+import type { ResolvedConfig } from "../../config/types.js";
+import { timeAsync, timingCounts } from "../../diagnostics/timings.js";
+import { errorMessage } from "../../errors.js";
+import { RepositoryCatalogueChangeClassifier } from "../component_changes.js";
 import type {
   CatalogueChangeClassifier,
   ComponentChangeSnapshot,
 } from "../component_changes.js";
-import { RepositoryCatalogueChangeClassifier } from "../component_changes.js";
 import type {
   PreparedResourceWatch,
   ResourceWatcher,
 } from "../resource_watcher.js";
+
 import { BackgroundCompilation } from "./background.js";
-import type {
-  BaselineBuilder,
-  BaselineProgress,
-} from "../../baseline/types.js";
-import type { Compilation } from "../../build/compile.js";
-import type { ComponentRuntime } from "../../build/component_runtime.js";
-import type { GeneratedOutputStore } from "../../build/output_store.js";
-import { timeAsync, timingCounts } from "../../diagnostics/timings.js";
-import { errorMessage } from "../../errors.js";
-import { prepareReviewRepository } from "../../review/prepare.js";
+import { BackgroundBaseline } from "./baseline.js";
 
 /** Collaborators and observers supplied by the Serve composition root. */
 export interface BackgroundGenerationOptions {
@@ -42,7 +41,7 @@ export class BackgroundGeneration {
   private sequence = 0;
   private closed = false;
   private busy = false;
-  private derived = false;
+  private readonly baseline: BackgroundBaseline;
   private controller: AbortController | undefined;
   private readonly shutdown: Promise<void>;
   constructor(
@@ -58,11 +57,15 @@ export class BackgroundGeneration {
     private readonly options: BackgroundGenerationOptions = {},
   ) {
     this.shutdown = options.shutdown ?? new Promise(() => {});
+    this.baseline = new BackgroundBaseline(
+      options.baselineStatus,
+      options.baselinePrepared,
+      options.builder,
+    );
   }
 
   start(runtime: ComponentRuntime, base: string, existing?: Compilation): void {
     if (this.closed) return;
-    this.derived = runtime.config.generatedOutput === "derived";
     const sequence = ++this.sequence;
     const controller = (this.controller = new AbortController());
     const worker = (this.worker = new BackgroundCompilation(runtime, existing));
@@ -87,13 +90,11 @@ export class BackgroundGeneration {
         const baseline =
           runtime.config.generatedOutput === "derived" &&
           this.classifier instanceof RepositoryCatalogueChangeClassifier
-            ? await prepareReviewRepository(runtime.config, base, {
-                signal: controller.signal,
-                onProgress: this.preparationObserver(current),
-                ...(this.options.builder
-                  ? { builder: this.options.builder }
-                  : {}),
-              })
+            ? await this.baseline.prepare(
+                runtime.config,
+                base,
+                controller.signal,
+              )
             : undefined;
         if (!current()) return;
         if (baseline) this.options.baselinePrepared?.(baseline.commit);
@@ -135,34 +136,19 @@ export class BackgroundGeneration {
     })();
   }
 
-  /**
-   * Announce `preparing` only for a rebuild this generation started, and return
-   * to `pending` when it settles. A failed rebuild rejects `build()`, so the
-   * shared error path publishes `unavailable` with its reason on stderr alone.
-   */
-  private preparationObserver(
-    current: () => boolean,
-  ): (event: BaselineProgress) => void {
-    let announced = false;
-    return (event) => {
-      if (event.type === "fail" || !current()) return;
-      if (event.type === "start") announced = true;
-      else if (!announced) return;
-      this.options.baselineStatus?.(
-        event.type === "start" ? "preparing" : "pending",
-      );
-    };
+  get changesStatus(): "preparing" | "pending" {
+    return this.baseline.status;
   }
 
   foreground(active: boolean): void {
     this.busy = active;
     this.worker?.foreground(active);
   }
-  async invalidate(): Promise<void> {
+  async invalidate(config?: ResolvedConfig): Promise<void> {
     this.sequence++;
-    if (this.derived) this.options.baselinePrepared?.(null);
     this.controller?.abort();
     this.controller = undefined;
+    if (config) await this.baseline.reconfigure(config);
     const worker = this.worker;
     this.worker = undefined;
     await worker?.close();
@@ -170,6 +156,8 @@ export class BackgroundGeneration {
   }
   async close(): Promise<void> {
     this.closed = true;
+    this.controller?.abort();
+    await this.baseline.close();
     await this.invalidate();
   }
 }

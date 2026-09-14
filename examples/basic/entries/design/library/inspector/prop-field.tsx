@@ -2,6 +2,7 @@ import { defineComponent, type ComponentProps } from "@mokly/mokly";
 
 import { libraryMetadata } from "../metadata.js";
 import { flag, optionalText, text } from "../schemas.js";
+
 import { PropFieldView } from "./prop-field.view.js";
 
 const propSchema = {

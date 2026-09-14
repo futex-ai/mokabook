@@ -4,7 +4,9 @@
 // Collection summaries carry folder icons, leaves carry their entry-kind icon,
 // and every row paints faint vertical guides (see `navRowStyle`).
 
+import { catalogueViewHref } from "../../navigation/delivery.js";
 import type { Catalogue } from "../catalogue.js";
+
 import type { ShellContext } from "./context.js";
 import {
   ChevronIcon,
@@ -25,7 +27,6 @@ import type {
   NavSectionNode,
 } from "./nav_tree.js";
 import { WorkspaceIcon } from "./workspace_icons.js";
-import { catalogueViewHref } from "../../navigation/delivery.js";
 
 function containsRoute(node: NavNode, route: string | undefined): boolean {
   if (route === undefined) {

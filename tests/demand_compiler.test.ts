@@ -12,6 +12,7 @@ import { generatedHeader } from "../dist/build/ownership.js";
 import { loadConfig } from "../dist/config/load.js";
 import { parseCatalogueIndex } from "../dist/registry/catalogue_index.js";
 import { parseManifest, MANIFEST_NAME } from "../dist/registry/manifest.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import {
   createFixture,

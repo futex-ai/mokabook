@@ -5,6 +5,7 @@ import test from "node:test";
 import { cacheLayout } from "../dist/baseline/cache_layout.js";
 import { BaselineCommandError } from "../dist/baseline/errors.js";
 import type { BaselineProgress } from "../dist/baseline/types.js";
+
 import { baselineFixture, success } from "./helpers/baseline_fixture.js";
 
 function code(value: unknown, expected: string): boolean {
@@ -98,9 +99,16 @@ test("concurrent baseline builders wait for the same completed output", async ()
     return run(request);
   };
   clock.onSleep = release;
+  const progress: BaselineProgress[][] = [[], []];
   const results = await Promise.all([
-    builder.build(request),
-    builder.build(request),
+    builder.build({
+      ...request,
+      onProgress: (event) => progress[0]!.push(event),
+    }),
+    builder.build({
+      ...request,
+      onProgress: (event) => progress[1]!.push(event),
+    }),
   ]);
   assert.deepEqual(results.map((result) => result.cacheHit).sort(), [
     false,
@@ -109,6 +117,11 @@ test("concurrent baseline builders wait for the same completed output", async ()
   assert.equal(
     calls.filter((call) => call.argv[0] === "fixture-build").length,
     1,
+  );
+  const waiter = results.findIndex((result) => result.cacheHit);
+  assert.deepEqual(
+    progress[waiter]!.map((event) => event.type),
+    ["complete"],
   );
 });
 

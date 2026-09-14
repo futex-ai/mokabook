@@ -9,6 +9,7 @@ import { componentRuntime } from "../dist/build/component_runtime.js";
 import { MANIFEST_NAME } from "../dist/registry/manifest.js";
 import { ComponentRenderService } from "../dist/server/controls/service.js";
 import { startCatalogueServer } from "../dist/server/http.js";
+
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 
 test("private controls rerender actual consumer code, keep immutable bundles and never change output", async (t) => {

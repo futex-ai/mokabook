@@ -1,5 +1,6 @@
 import type { ManifestComponentVariant } from "../components/manifest_types.js";
 import type { GeneratedComponentView } from "../components/views.js";
+
 import type { ReviewVariantAddress } from "./component_types.js";
 
 export function variantAddress(

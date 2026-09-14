@@ -6,6 +6,7 @@ import test from "node:test";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { generatedHeader, generatedSource } from "../dist/build/ownership.js";
 import { loadConfig } from "../dist/config/load.js";
+
 import {
   createFixture,
   removeFixture,

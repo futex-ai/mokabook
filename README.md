@@ -424,6 +424,8 @@ requiring local generated files to exist or match. Authored public CSS and HTML
 remain allowed in Git. Add ignore rules for your generated routes and manifest,
 plus `.mokly-cache/`, and remove any already tracked generated files from the
 index with `git rm --cached`.
+The index check also recognizes ownership headers on generated pages that were
+renamed or removed from the current catalogue, even without local copies.
 
 Derived comparisons rebuild the merge-base commit in an isolated extraction,
 using that commit's dependencies and Mokly version, then cache its output.
@@ -450,7 +452,10 @@ export default defineConfig({
 Commands run from the historical repository root without a shell; no commands
 are appended to an explicit list. `baselineBuild` is rejected in committed
 mode. See the [derived baseline contract](./docs/protocol/mokly-derived-baselines.md)
-for cache limits, failure behavior, and the one-catalogue-per-commit cache boundary.
+and [storage rules](./docs/protocol/mokly-baseline-storage.md) for cache limits,
+network configuration, Windows npm/npx launching, and the one-catalogue-per-commit
+cache boundary. Ordinary edits keep an active baseline rebuild running; changing
+the branch point or build settings replaces it.
 
 ## Whole-document pages
 
@@ -568,8 +573,9 @@ files are absent. Example baselines run `npm ci`, `npm run build`, then
 `npm run example:build` in the historical extraction.
 
 JavaScript and TypeScript imports stay at the top, grouped as Node builtins,
-external packages, then repository modules. Paths are alphabetical within each
-group, with parent directories before siblings and blank lines between groups.
+external packages, package self-imports, parent imports, then sibling/index imports.
+Paths are alphabetical within each group, with every parent depth before siblings
+and blank lines between groups.
 The package's own `@mokly/mokly` public entrypoint is always a repository module,
 including before `dist/` has been built. `npm run lint -- --fix` applies the
 `import/first` and `import/order` rules, provided by the ESLint 10-compatible

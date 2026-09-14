@@ -12,6 +12,7 @@ import {
   parseManifest,
   parseHistoricalManifest,
 } from "../dist/registry/manifest.js";
+
 import {
   registerFixturePage,
   createFixture,

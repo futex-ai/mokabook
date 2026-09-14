@@ -3,11 +3,37 @@ import path from "node:path";
 import test from "node:test";
 import { setImmediate } from "node:timers/promises";
 
+import { NodeGitCommandRunner } from "../dist/review/git.js";
 import {
   GitReferenceObserver,
   RepositoryGitReferences,
 } from "../dist/server/demand/git_references.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
+
+test("reference polling validates once per repository and cancellation session", async (t) => {
+  let validations = 0;
+  const root = process.cwd();
+  t.mock.method(
+    NodeGitCommandRunner.prototype,
+    "run",
+    async (argv: readonly string[]) => {
+      if (argv.includes("--show-toplevel")) {
+        validations++;
+        return root;
+      }
+      return "a".repeat(40);
+    },
+  );
+  const source = new RepositoryGitReferences();
+  const first = new AbortController();
+  await source.read(root, "main", first.signal);
+  await source.read(root, "main", first.signal);
+  assert.equal(validations, 1);
+  first.abort();
+  await source.read(root, "main", new AbortController().signal);
+  assert.equal(validations, 2);
+});
 
 test("reference observation detects availability and ref changes without requests", async () => {
   let reference: string | undefined;

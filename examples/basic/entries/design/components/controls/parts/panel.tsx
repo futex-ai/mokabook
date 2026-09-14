@@ -1,12 +1,13 @@
 import { MockLink } from "@mokly/mokly";
 
+import { ActionPropValues, actionVariants } from "../../parts/action_props.js";
+
 import { ControlFields } from "./fields.js";
 import {
   controlsFixtures,
   isPublished,
   type ControlsState,
 } from "./fixtures.js";
-import { ActionPropValues, actionVariants } from "../../parts/action_props.js";
 
 export function ControlsPanel({ state }: { state: ControlsState }) {
   const fixture = controlsFixtures[state];

@@ -1,11 +1,5 @@
 import { MockLink } from "@mokly/mokly";
 
-import {
-  controlsFixtures,
-  isPublished,
-  type ControlsState,
-} from "./fixtures.js";
-import { ControlsPanel } from "./panel.js";
 import type { ArtboardViewport } from "../../../parts/shell.js";
 import { ComparisonDetails } from "../../parts/comparison_details.js";
 import { actionComparison } from "../../parts/comparison_fixtures.js";
@@ -19,6 +13,13 @@ import {
   ComponentCanvas,
   ComponentComparison,
 } from "../../parts/preview.js";
+
+import {
+  controlsFixtures,
+  isPublished,
+  type ControlsState,
+} from "./fixtures.js";
+import { ControlsPanel } from "./panel.js";
 
 function ControlsVariants({ state }: { state: ControlsState }) {
   const fixture = controlsFixtures[state];

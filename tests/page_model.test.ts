@@ -9,6 +9,7 @@ import { removedManifestEntries } from "../src/registry/changes.js";
 import { createCatalogue } from "../src/server/catalogue.js";
 import { viewPage, homePage } from "../src/server/pages.js";
 import { buildNavTree } from "../src/server/shell/nav_tree.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 function source(

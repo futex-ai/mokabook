@@ -3,6 +3,7 @@ import {
   type CatalogueNavigationProps,
 } from "../library/chrome/catalogue-navigation.js";
 import { optional, useDesignInstance } from "../library/composition.js";
+
 import { useDesignNavigation } from "./design_navigation.js";
 import type { DesignDestination } from "./destinations.js";
 import { NAV_TREE } from "./nav_data.js";

@@ -10,6 +10,7 @@ import type {
   UsageLink,
   WorkspaceData,
 } from "../server/shell/workspace_data.js";
+
 import { propText } from "./prop_display.js";
 
 export interface InspectorSelection {

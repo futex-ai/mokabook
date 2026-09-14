@@ -6,6 +6,7 @@ import { timeAsync, timeSync } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
 import { parseManifest } from "../registry/manifest.js";
 import type { ManifestV5 } from "../registry/types.js";
+
 import { catalogueAtBaseline, createCatalogue } from "./catalogue.js";
 import {
   catalogueSnapshotForConfig,

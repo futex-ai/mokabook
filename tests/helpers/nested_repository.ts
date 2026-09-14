@@ -4,10 +4,11 @@ import path from "node:path";
 import type { TestContext } from "node:test";
 import { promisify } from "node:util";
 
-import { createFixture, removeFixture } from "./fixture.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
+
+import { createFixture, removeFixture } from "./fixture.js";
 
 /** Valid committed output inside a Git repo whose config incorrectly roots a subdirectory. */
 export async function nestedRepository(t: TestContext) {

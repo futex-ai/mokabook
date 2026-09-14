@@ -10,6 +10,7 @@ import { NodeCatalogueServerFactory } from "../dist/server/factory.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { configuredServedReview } from "../dist/server/review_routes.js";
 import { serve } from "../dist/server/serve.js";
+
 import { observeBackgroundClassification } from "./helpers/background_classification.js";
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";

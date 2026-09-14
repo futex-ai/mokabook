@@ -2,13 +2,14 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { TestContext } from "node:test";
 
-import { changedFixture } from "./changed_fixture.js";
 import { readManifest } from "../../dist/registry/manifest.js";
 import { readBaseManifest } from "../../dist/review/base_manifest.js";
 import {
   NodeGitCommandRunner,
   CommittedRepository,
 } from "../../dist/review/git.js";
+
+import { changedFixture } from "./changed_fixture.js";
 
 export const pageDocument =
   '<!doctype html><html><head><link rel="stylesheet" href="document.css"></head><body><!--mokly-review-ignore:start:nav--><nav>Old navigation</nav><!--mokly-review-ignore:end:nav--><main>Document content</main></body></html>';
