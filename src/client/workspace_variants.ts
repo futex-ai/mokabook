@@ -103,7 +103,7 @@ export function applyVariant(
   empty.textContent = error
     ? "Choose a saved variant to see its preview."
     : "This variant was removed. Select a comparison to see its previous version.";
-  const stage = preview.querySelector<HTMLElement>("[data-mokabook-stage]");
+  const stage = preview.querySelector<HTMLElement>("[data-mokly-stage]");
   if (stage) stage.hidden = Boolean(error || variant?.removed);
   if (variant && !variant.removed && !options.preservePreview) {
     for (const frame of root.querySelectorAll<HTMLIFrameElement>(

@@ -263,7 +263,7 @@ Doing nothing allows an export to pass validation with an alias such as
 directory at that URL prefix. Clean-URL hosts can interpret those routes
 ambiguously or serve unintended content. Alias/alias and case-folded alias/file
 collisions also escape the documented
-[single collision-checked inventory](../protocol/mokabook-export-delivery.md).
+[single collision-checked inventory](../protocol/mokly-export-delivery.md).
 
 Options:
 

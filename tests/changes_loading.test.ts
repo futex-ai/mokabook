@@ -54,9 +54,9 @@ test("static capture omits live Changes states but retains supplied evidence", a
   });
   t.after(() => server.close());
   const read = async () => (await fetch(server.url)).text();
-  assert.doesNotMatch(await read(), /data-mokabook-filter|data-nav-status/);
+  assert.doesNotMatch(await read(), /data-mokly-filter|data-nav-status/);
   server.publishUpdate({ changesStatus: "pending" });
-  assert.doesNotMatch(await read(), /data-mokabook-filter|data-nav-status/);
+  assert.doesNotMatch(await read(), /data-mokly-filter|data-nav-status/);
   server.publishUpdate({ changedRoutes: [] });
   const classified = await read();
   assert.match(classified, /data-changes-status="ready"/);

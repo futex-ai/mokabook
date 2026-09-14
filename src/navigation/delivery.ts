@@ -51,7 +51,7 @@ export function parseStaticDelivery(
   if (
     value.comparisonUrl !== null &&
     (typeof value.comparisonUrl !== "string" ||
-      !/^\/__mokabook\/diffs\/__generations\/[a-f0-9]{64}\/review\.json$/.test(
+      !/^\/__mokly\/diffs\/__generations\/[a-f0-9]{64}\/review\.json$/.test(
         value.comparisonUrl,
       ))
   )

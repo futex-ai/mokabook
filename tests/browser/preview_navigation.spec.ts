@@ -29,7 +29,7 @@ for (const width of [390, 1280]) {
         }
       } as unknown as typeof EventSource;
       sessionStorage.setItem(
-        "mokabook:recovery",
+        "mokly:recovery",
         JSON.stringify({ changedOnly: true, mode: "overlay" }),
       );
     });
@@ -58,7 +58,7 @@ for (const width of [390, 1280]) {
     await page.goBack();
     await expect(page.locator("#mb-main h2")).toHaveText("Getting started");
     expect(
-      requests.filter((url) => /__mokabook\/(?:diffs|events)/.test(url)),
+      requests.filter((url) => /__mokly\/(?:diffs|events)/.test(url)),
     ).toEqual([]);
   });
 }
@@ -168,7 +168,7 @@ test("JavaScript-disabled static preview stays at its portable top", async ({
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto(`${preview.url}/view/screens/details?fragment=details`);
-  await expect(page.locator("[data-mokabook-nav-resize]")).toBeHidden();
+  await expect(page.locator("[data-mokly-nav-resize]")).toBeHidden();
   for (const source of await frameSources(page)) {
     expect(source.src).not.toContain("#");
     expect(source.light).not.toContain("#");
@@ -212,7 +212,7 @@ async function expectFrameAtTop(page: Page): Promise<void> {
 
 function frameSources(
   page: Page,
-  selector = "iframe[data-mokabook-fragment-frame]",
+  selector = "iframe[data-mokly-fragment-frame]",
 ): Promise<Array<{ dark: string; light: string; src: string }>> {
   return page.locator(selector).evaluateAll((frames) =>
     frames.map((frame) => ({

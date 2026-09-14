@@ -8,7 +8,7 @@ try {
 } catch (error) {
   process.stderr.write(`${errorMessage(error)}\n`);
   if (
-    process.env.MOKABOOK_DIAGNOSTIC === "1" &&
+    process.env.MOKLY_DIAGNOSTIC === "1" &&
     error instanceof Error &&
     error.stack
   ) {

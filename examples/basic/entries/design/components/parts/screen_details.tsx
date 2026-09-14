@@ -1,4 +1,4 @@
-import { MockLink } from "mokabook";
+import { MockLink } from "mokly";
 
 import { welcomeInstances } from "./fixtures.js";
 import { Inspector, type InspectorPanel } from "./inspector.js";

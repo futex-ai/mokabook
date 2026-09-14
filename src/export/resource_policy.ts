@@ -7,7 +7,11 @@ import {
   projectRealPath,
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { LEGACY_MANIFEST_NAME, MANIFEST_NAME } from "../registry/manifest.js";
+import {
+  FORMER_MANIFEST_NAME,
+  LEGACY_MANIFEST_NAME,
+  MANIFEST_NAME,
+} from "../registry/manifest.js";
 import { exportError } from "./error.js";
 
 const PRIVATE_DIRECTORIES = new Set([
@@ -28,6 +32,7 @@ export function isExportPublicName(
     isSafeRepositoryPath(name) &&
     !isReservedSource(name) &&
     name !== MANIFEST_NAME &&
+    name !== FORMER_MANIFEST_NAME &&
     name !== LEGACY_MANIFEST_NAME &&
     !name
       .split("/")

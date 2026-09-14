@@ -18,13 +18,13 @@ test("Changes keeps resized navigation across diff modes and screen navigation",
   await page.setViewportSize({ height: 900, width: 1_280 });
   const comparisonRequests: string[] = [];
   page.on("request", (request) => {
-    if (request.url().includes("/__mokabook/diffs/"))
+    if (request.url().includes("/__mokly/diffs/"))
       comparisonRequests.push(request.url());
   });
   await page.goto(`${fixture.url}/view/screens/home.html`);
   await page.locator('[data-filter="changed"]').click();
   await chooseViewport(page, "desktop");
-  const nav = page.locator("[data-mokabook-nav]");
+  const nav = page.locator("[data-mokly-nav]");
   const handle = page.getByRole("separator", {
     name: "Resize navigation panel",
   });

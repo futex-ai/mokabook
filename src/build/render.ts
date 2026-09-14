@@ -6,7 +6,7 @@ import type { ColorScheme, ResolvedRegistryEntry } from "../authoring/types.js";
 import { encodeUrlPath, toPosixPath } from "../config/paths.js";
 import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import type { Renderer } from "../renderer/types.js";
 import { serializeReviewSentinels } from "../renderer/sentinels.js";
 import { fragmentRoute } from "../registry/manifest.js";
@@ -113,14 +113,14 @@ export function renderFragments(
                 );
             }
           } catch (error) {
-            throw new MokabookError(
+            throw new MoklyError(
               "build-invalid",
               `renderer failed for ${entry.id} (${viewport}, ${colorScheme}): ${errorMessage(error)}`,
               { cause: error },
             );
           }
           if (typeof rendered !== "string" || !/<html[\s>]/i.test(rendered)) {
-            throw new MokabookError(
+            throw new MoklyError(
               "build-invalid",
               `renderer must return a complete HTML document for ${entry.id} (${viewport}, ${colorScheme})`,
             );
@@ -145,7 +145,7 @@ export function addOutput(
   content: string,
 ): void {
   if (outputs.has(route)) {
-    throw new MokabookError(
+    throw new MoklyError(
       "build-invalid",
       `generated route collision: ${route}`,
     );
@@ -173,7 +173,7 @@ export function stylesheetsFor(
     if (/^https?:\/\//.test(stylesheet)) return stylesheet;
     const absolute = path.resolve(config.mockupsDir, stylesheet);
     if (!isPublicStaticFile(absolute, config)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `stylesheet does not exist: ${stylesheet}`,
       );

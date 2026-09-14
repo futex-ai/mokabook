@@ -176,7 +176,7 @@ test("expired previews can be rendered again and navigation discards temporary e
   await page.getByLabel("Viewport", { exact: true }).selectOption("desktop");
   await page.getByRole("tab", { name: "Props", exact: true }).click();
   let expire = true;
-  await page.route("**/__mokabook/components/renders/**", async (route) => {
+  await page.route("**/__mokly/components/renders/**", async (route) => {
     if (route.request().method() === "HEAD" && expire) {
       expire = false;
       await route.fulfill({ status: 410 });
@@ -205,7 +205,7 @@ test("changing context while the first edit is pending cannot apply an obsolete 
   await page.goto(`${server.url}/view/components/action.html`);
   await page.getByLabel("Viewport", { exact: true }).selectOption("desktop");
   await page.getByRole("tab", { name: "Props", exact: true }).click();
-  await page.route("**/__mokabook/components/render", async (route) => {
+  await page.route("**/__mokly/components/render", async (route) => {
     const response = await route.fetch();
     if (route.request().postDataJSON().colorScheme === "light")
       await delay(250);

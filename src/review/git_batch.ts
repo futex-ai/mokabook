@@ -1,4 +1,4 @@
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import type { GitCommandRunner, GitFile, GitFileKind } from "./git.js";
 
 const MAX_BATCH_OUTPUT_BYTES = 48 * 1024 * 1024;
@@ -44,7 +44,7 @@ export async function readGitFiles(
     }
     const bytes = record.objectId ? contents.get(record.objectId) : undefined;
     if (!bytes) {
-      throw new MokabookError(
+      throw new MoklyError(
         "git-failed",
         `Git omitted regular file content for ${repoPath}`,
       );
@@ -79,7 +79,7 @@ async function readTree(
       if (rawRecord === "") continue;
       const separator = rawRecord.indexOf("\t");
       if (separator < 0) {
-        throw new MokabookError(
+        throw new MoklyError(
           "git-failed",
           `Git returned invalid tree metadata at ${commit}`,
         );
@@ -87,7 +87,7 @@ async function readTree(
       const repoPath = rawRecord.slice(separator + 1);
       if (!requested.has(repoPath)) continue;
       if (records.has(repoPath)) {
-        throw new MokabookError(
+        throw new MoklyError(
           "git-failed",
           `Git returned multiple entries for ${repoPath}`,
         );
@@ -111,7 +111,7 @@ function parseTreeRecord(metadata: string): TreeRecord {
     !Number.isSafeInteger(size) ||
     size < 0
   ) {
-    throw new MokabookError(
+    throw new MoklyError(
       "git-failed",
       "Git returned invalid regular-file metadata",
     );
@@ -146,7 +146,7 @@ function contentBatches(blobs: readonly BlobRecord[]): BlobRecord[][] {
   for (const blob of blobs) {
     const outputBytes = blobOutputBytes(blob);
     if (outputBytes > MAX_BATCH_OUTPUT_BYTES) {
-      throw new MokabookError(
+      throw new MoklyError(
         "git-failed",
         `Git file ${blob.repoPath} is too large for a bounded Git batch ` +
           `(${blob.size} bytes)`,
@@ -181,7 +181,7 @@ async function readBlobBatch(
   blobs: readonly BlobRecord[],
 ): Promise<ReadonlyMap<string, Uint8Array>> {
   if (!runner.runBytesWithInput) {
-    throw new MokabookError("git-failed", "Git batch input is unavailable");
+    throw new MoklyError("git-failed", "Git batch input is unavailable");
   }
   let output: Uint8Array;
   try {
@@ -258,15 +258,15 @@ function fileKind(mode: string): GitFileKind {
   return "other";
 }
 
-function invalidBatchOutput(): MokabookError {
-  return new MokabookError(
+function invalidBatchOutput(): MoklyError {
+  return new MoklyError(
     "git-failed",
     "Git returned invalid base snapshot batch output",
   );
 }
 
-function gitBatchError(context: string, error: unknown): MokabookError {
-  return new MokabookError("git-failed", `${context}: ${errorMessage(error)}`, {
+function gitBatchError(context: string, error: unknown): MoklyError {
+  return new MoklyError("git-failed", `${context}: ${errorMessage(error)}`, {
     cause: error,
   });
 }

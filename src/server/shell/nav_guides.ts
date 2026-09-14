@@ -1,4 +1,4 @@
-// Computes the indentation and faint vertical guide lines for one Mokabook
+// Computes the indentation and faint vertical guide lines for one Mokly
 // navigation row. Every row is padded left by its depth and paints a 1px guide
 // line for each ancestor level, so the guides run continuously down a subtree
 // and make it easy to see which rows sit at the same depth — folders and files

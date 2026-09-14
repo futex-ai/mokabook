@@ -10,7 +10,7 @@ import { startCatalogueServer } from "../dist/server/http.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 
-const page = `import { definePage } from "mokabook";
+const page = `import { definePage } from "mokly";
 mockups.push(definePage({ id: "handbook", title: "Handbook", description: "Document", dependencies: [], relatedDocs: [], route: "handbook.html", render: () => "<html><body>Original handbook</body></html>" }));`;
 
 for (const editComponent of [false, true]) {

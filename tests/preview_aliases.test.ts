@@ -57,7 +57,7 @@ for (const source of ["routed pages", "public documents"]) {
     assert.deepEqual(await directoryFiles(output), previous);
     assert.deepEqual(
       await fs.promises.readdir(
-        path.join(fixture.root, ".context/.mokabook-export-reservations/locks"),
+        path.join(fixture.root, ".context/.mokly-export-reservations/locks"),
       ),
       [],
     );
@@ -73,7 +73,7 @@ test("adapter aliases cannot claim the final export ownership marker", async (co
     exportCatalogue(fixture.config, {
       outDir: "site",
       adapter: {
-        transform: () => new Map([[".mokabook-export-artifact", "index.html"]]),
+        transform: () => new Map([[".mokly-export-artifact", "index.html"]]),
       },
     }),
     /collision|Invalid hosting alias/,

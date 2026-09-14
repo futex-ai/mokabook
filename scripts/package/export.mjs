@@ -12,15 +12,15 @@ export async function inspectConsumerExport(
 ) {
   const output = path.join(root, relative);
   const read = (name) => fs.promises.readFile(path.join(output, name), "utf8");
-  const marker = JSON.parse(await read(".mokabook-export-artifact"));
+  const marker = JSON.parse(await read(".mokly-export-artifact"));
   assert.equal(marker.schemaVersion, 1);
   for (const name of [
     "index.html",
     "404.html",
-    "__mokabook/client/browse.js",
-    "__mokabook/client/static_delivery.js",
-    "__mokabook/navigation/delivery.js",
-    "__mokabook/fonts/InterVariable.woff2",
+    "__mokly/client/browse.js",
+    "__mokly/client/static_delivery.js",
+    "__mokly/navigation/delivery.js",
+    "__mokly/fonts/InterVariable.woff2",
     ...expected,
   ])
     assert.ok(marker.files.includes(name), `export missing ${name}`);
@@ -34,10 +34,10 @@ export async function inspectConsumerExport(
     assert.ok((await fs.promises.stat(path.join(output, name))).isFile());
   }
   const home = await read("index.html");
-  assert.match(home, /data-mokabook-static=""/);
+  assert.match(home, /data-mokly-static=""/);
   assert.doesNotMatch(home, /client\/browser\.js/);
   const comparison = marker.files.find((name) =>
-    /^__mokabook\/diffs\/__generations\/[a-f0-9]{64}\/review\.json$/.test(name),
+    /^__mokly\/diffs\/__generations\/[a-f0-9]{64}\/review\.json$/.test(name),
   );
   assert.ok(comparison);
   const review = JSON.parse(await read(comparison));

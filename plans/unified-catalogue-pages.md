@@ -15,16 +15,16 @@ publication consume one hierarchy. Do not merge collections by display name.
 
 ## Contracts And Scope
 
-- [Pages in the catalogue](../docs/protocol/mokabook-pages.md) owns the API,
+- [Pages in the catalogue](../docs/protocol/mokly-pages.md) owns the API,
   schema-v4 entry model, output, Browse, links, impact, and publication contract.
-- [Breaking page migration](../docs/protocol/mokabook-page-migration.md)
+- [Breaking page migration](../docs/protocol/mokly-page-migration.md)
   owns generic consumer updates, safe regeneration, and historical readers.
-- [Source protection](../docs/protocol/mokabook-source-protection.md) and
-  [catalogue changes](../docs/protocol/mokabook-catalogue-changes.md) own shared
+- [Source protection](../docs/protocol/mokly-source-protection.md) and
+  [catalogue changes](../docs/protocol/mokly-catalogue-changes.md) own shared
   source classification, change metadata, and removed-page presentation.
 - [Accounting migration](../docs/migration/accounting-page-entries.md) owns the
   verified consumer revision, five mappings, and its separate delivery checks.
-- [Shell design](../docs/protocol/mokabook-shell-design.md) owns reusable design
+- [Shell design](../docs/protocol/mokly-shell-design.md) owns reusable design
   components and responsive presentation. Its example catalogue is the
   established Mokabook mockup source of truth.
 
@@ -40,7 +40,7 @@ whole-document comparisons and page-valued use-case steps stay outside scope.
 
 [Optional Published Changes](./optional-published-changes.md) independently owns
 the publication opt-in and workflow defaults. Integrate pages with that
-[contract](../docs/protocol/mokabook-publication.md): ordinary publication shows
+[contract](../docs/protocol/mokly-publication.md): ordinary publication shows
 current entries; review publication additionally includes Changes and removals.
 Complete that option before page publication acceptance; page authoring/compiler
 work can proceed independently.

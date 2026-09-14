@@ -8,7 +8,7 @@ import { repositoryRoot } from "../helpers/fixture.js";
 
 const generated = path.join(repositoryRoot, "examples/basic/generated");
 const manifest = JSON.parse(
-  fs.readFileSync(path.join(generated, "mokabook-manifest.json"), "utf8"),
+  fs.readFileSync(path.join(generated, "mokly-manifest.json"), "utf8"),
 ) as ManifestV5;
 
 export const componentDesignRoutes = manifest.entries.flatMap((entry) =>

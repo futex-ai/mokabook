@@ -11,7 +11,7 @@ import {
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
-const pageSource = `import { definePage } from "mokabook";
+const pageSource = `import { definePage } from "mokly";
 export const mockups = [definePage({ id: "handbook", title: "Handbook", description: "Document", dependencies: [], relatedDocs: [], route: "handbook.html", render: () => "<html><body>Handbook</body></html>" })];`;
 
 test("the current manifest combines pages and complete component usage without legacy roots", async (context) => {
@@ -42,7 +42,7 @@ test("both disjoint historical v4 formats remain readable only at the Git bounda
     .manifest;
   const componentV4 = {
     schemaVersion: 4,
-    generatedBy: "mokabook",
+    generatedBy: "mokly",
     legacyPages: [],
     entries: components.entries,
   };

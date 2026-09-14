@@ -61,7 +61,7 @@ export function validateExportReferences(
           checkFragment: false,
         })),
       );
-    else if (extension === ".js" && name.startsWith("__mokabook/")) {
+    else if (extension === ".js" && name.startsWith("__mokly/")) {
       for (const match of content.matchAll(
         /\b(?:from|import)\s*["']([^"']+)["']/g,
       ))

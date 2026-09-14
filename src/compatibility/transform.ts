@@ -8,7 +8,7 @@ import { logicalArtifactRoutes } from "../build/logical_routes.js";
 import { isPublicStaticFile } from "../config/public_files.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
 import type { LoadedGraph } from "../build/load_graph.js";
 import { pendingGeneratedOrphanRoutes } from "../build/ownership.js";
@@ -86,14 +86,14 @@ export function transformCompatibilityDocuments(
         viewport,
       });
     } catch (error) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `compatibility transformer failed for ${route}: ${errorMessage(error)}`,
         { cause: error },
       );
     }
     if (typeof transformed !== "string" || !/<html[\s>]/i.test(transformed)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `compatibility transformer must return a complete HTML document for ${route}`,
       );

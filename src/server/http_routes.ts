@@ -42,7 +42,7 @@ export async function handleCatalogueRequest(
 ): Promise<void> {
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed", method);
-  const url = new URL(rawUrl, "http://mokabook.invalid");
+  const url = new URL(rawUrl, "http://mokly.invalid");
   if (
     documents &&
     (await handleDemandRequest(url, method, response, catalogue, documents))
@@ -83,34 +83,34 @@ export async function handleCatalogueRequest(
       homePage(catalogue, context),
       method,
     );
-  if (reviewRoutes && url.pathname.startsWith("/__mokabook/diffs/")) {
+  if (reviewRoutes && url.pathname.startsWith("/__mokly/diffs/")) {
     void reviewRoutes.handle(url, response, method);
     return;
   }
-  if (url.pathname === "/__mokabook/shell.css")
+  if (url.pathname === "/__mokly/shell.css")
     return send(response, 200, "text/css", SHELL_CSS, method);
-  if (url.pathname === "/__mokabook/events")
+  if (url.pathname === "/__mokly/events")
     return openEventStream(response, streams, requestVersion, method);
-  if (url.pathname.startsWith("/__mokabook/client/")) {
+  if (url.pathname.startsWith("/__mokly/client/")) {
     return serveClientModule(
       response,
-      url.pathname.slice("/__mokabook/client/".length),
+      url.pathname.slice("/__mokly/client/".length),
       assets.clientModules,
       method,
     );
   }
-  if (url.pathname.startsWith("/__mokabook/navigation/")) {
+  if (url.pathname.startsWith("/__mokly/navigation/")) {
     return serveClientModule(
       response,
-      url.pathname.slice("/__mokabook/navigation/".length),
+      url.pathname.slice("/__mokly/navigation/".length),
       assets.navigationModules,
       method,
     );
   }
-  if (url.pathname.startsWith("/__mokabook/fonts/")) {
+  if (url.pathname.startsWith("/__mokly/fonts/")) {
     return serveFontAsset(
       response,
-      url.pathname.slice("/__mokabook/fonts/".length),
+      url.pathname.slice("/__mokly/fonts/".length),
       assets.fontAssets,
       method,
     );

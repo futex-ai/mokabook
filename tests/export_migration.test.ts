@@ -28,7 +28,7 @@ test("only the repository adapter migrates a valid legacy preview", async (conte
   assert.ok(fs.existsSync(path.join(fixture.output, "id/home/index.html")));
   await fs.promises.rm(path.join(fixture.output, EXPORT_MARKER));
   await fs.promises.writeFile(
-    path.join(fixture.output, ".mokabook-preview-artifact"),
+    path.join(fixture.output, ".mokly-preview-artifact"),
     "invalid\n",
   );
   const invalid = await directoryFiles(fixture.output);

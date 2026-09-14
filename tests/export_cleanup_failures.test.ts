@@ -4,7 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { runExport } from "../dist/cli/export.js";
-import { errorMessage, MokabookError } from "../dist/errors.js";
+import { errorMessage, MoklyError } from "../dist/errors.js";
 import { exportCatalogue } from "../dist/export/run.js";
 import { fileExportOperations } from "../dist/export/operations.js";
 import { createExportFixture } from "./helpers/export_fixture.js";
@@ -12,7 +12,7 @@ import { createExportFixture } from "./helpers/export_fixture.js";
 test("export preserves the primary failure when reservation cleanup also fails", async (context) => {
   const fixture = await createExportFixture();
   context.after(() => fixture.close());
-  const primary = new MokabookError(
+  const primary = new MoklyError(
     "export-invalid",
     "Primary generation failure",
   );
@@ -75,10 +75,7 @@ test("the CLI export boundary retains rollback failure and recovery diagnostics"
   assert.equal(process.listenerCount("SIGTERM"), listeners);
   assert.ok(
     fs.existsSync(
-      path.join(
-        fixture.root,
-        ".mokabook-export-reservations/locks/site/backup",
-      ),
+      path.join(fixture.root, ".mokly-export-reservations/locks/site/backup"),
     ),
   );
 });

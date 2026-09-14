@@ -32,8 +32,8 @@ not Accounting-specific.
 
 The target contracts are:
 
-- [Package and authoring contract](../docs/protocol/mokabook-package.md)
-- [Build, Browse, and Review runtime](../docs/protocol/mokabook-runtime.md)
+- [Package and authoring contract](../docs/protocol/mokly-package.md)
+- [Build, Browse, and Review runtime](../docs/protocol/mokly-runtime.md)
 - [CI and npm release contract](../docs/protocol/npm-release.md)
 
 ## Investigation Baseline

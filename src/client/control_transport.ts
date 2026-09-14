@@ -12,13 +12,13 @@ export async function requestComponentPreview(
   view: GeneratedComponentView,
   signal: AbortSignal,
 ): Promise<ComponentRenderSuccess> {
-  const response = await fetch("/__mokabook/components/render", {
+  const response = await fetch("/__mokly/components/render", {
     method: "POST",
     credentials: "same-origin",
     signal,
     headers: {
       "content-type": "application/json",
-      "x-mokabook-render-token": capability.token,
+      "x-mokly-render-token": capability.token,
     },
     body: JSON.stringify(request),
   });
@@ -43,7 +43,7 @@ export async function requestComponentPreview(
     !/^[a-f0-9]{48}\.[a-f0-9]{64}$/.test(result.renderId) ||
     result.generation !== capability.generation ||
     result.previewUrl !==
-      `/__mokabook/components/renders/${result.renderId}/${view.path.split("/").map(encodeURIComponent).join("/")}` ||
+      `/__mokly/components/renders/${result.renderId}/${view.path.split("/").map(encodeURIComponent).join("/")}` ||
     result.view?.viewport !== view.viewport ||
     result.view.colorScheme !== view.colorScheme ||
     !Array.isArray(result.view.instances) ||

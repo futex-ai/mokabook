@@ -8,7 +8,7 @@ keeping that destination selected, expanded, and visible in the catalogue
 tree.
 
 **Protocol:** Implement the approved
-[`docs/protocol/mokabook-navigation.md`](../docs/protocol/mokabook-navigation.md)
+[`docs/protocol/mokly-navigation.md`](../docs/protocol/mokly-navigation.md)
 contract. The package and runtime protocols remain authoritative for portable
 output, sandboxing, and progressive navigation.
 
@@ -242,7 +242,7 @@ including each explicitly approved removal and its cleanup or an explicit
 Summary: establish a complete behavioral contract and an indexed implementation
 plan before changing generated output or runtime behavior.
 
-- [x] Add `docs/protocol/mokabook-navigation.md` covering logical-link
+- [x] Add `docs/protocol/mokly-navigation.md` covering logical-link
       classification, portable output, Browse adaptation, safe degradation,
       sandbox limits, fragments, active-tree visibility, and verification.
 - [x] Align the package, runtime, shell-design, build-pipeline, and package

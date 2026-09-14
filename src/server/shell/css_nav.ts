@@ -88,8 +88,8 @@ export const SHELL_NAV_CSS = `
   height: 24px;
   flex-shrink: 0;
   border-radius: 6px;
-  background: var(--mokabook-accent);
-  color: var(--mokabook-accent-contrast);
+  background: var(--mokly-accent);
+  color: var(--mokly-accent-contrast);
 }
 
 .mbk-search {
@@ -337,18 +337,18 @@ export const SHELL_NAV_CSS = `
 }
 
 .mbk-nav-row:hover::before {
-  background: var(--mokabook-accent-soft);
+  background: var(--mokly-accent-soft);
 }
 
 .mbk-nav-row.active,
 .mbk-nav-row[aria-current="page"] {
-  color: var(--mokabook-accent-contrast);
+  color: var(--mokly-accent-contrast);
   font-weight: 600;
 }
 
 .mbk-nav-row.active::before,
 .mbk-nav-row[aria-current="page"]::before {
-  background: var(--mokabook-accent);
+  background: var(--mokly-accent);
 }
 
 .mbk-nav-label {
@@ -366,7 +366,7 @@ export const SHELL_NAV_CSS = `
 }
 
 .mbk-nav-ico.flow {
-  color: var(--mokabook-accent);
+  color: var(--mokly-accent);
 }
 
 .mbk-nav-ico.folder {
@@ -396,7 +396,7 @@ details.mbk-nav-group[open] > summary .mbk-nav-ico.folder > svg:nth-child(2) {
 
 .mbk-nav-row.active .mbk-nav-label,
 .mbk-nav-row[aria-current="page"] .mbk-nav-label {
-  color: var(--mokabook-accent-contrast);
+  color: var(--mokly-accent-contrast);
 }
 
 .mbk-nav-count {

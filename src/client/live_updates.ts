@@ -28,7 +28,7 @@ export interface RecoveryState {
   version: number;
 }
 
-const RECOVERY_KEY = "mokabook:live-update-recovery";
+const RECOVERY_KEY = "mokly:live-update-recovery";
 
 /** Coordinate latest-wins refreshes and one-shot reload recovery. */
 export class LiveUpdateController {

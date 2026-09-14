@@ -1,4 +1,4 @@
-import { screen } from "mokabook";
+import { screen } from "mokly";
 import { PreviewWorkspace } from "./components/parts/workspace.js";
 
 import { ComparisonStage } from "./parts/compare.js";

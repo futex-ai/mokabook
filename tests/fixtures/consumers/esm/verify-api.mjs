@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import * as api from "mokabook";
+import * as api from "mokly";
 
 const expected = [
   "MockLink",

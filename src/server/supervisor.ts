@@ -3,7 +3,7 @@
 import type { ComponentRuntime } from "../build/component_runtime.js";
 import type { ManifestV5 } from "../registry/types.js";
 
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { bindTimings, timeSync } from "../diagnostics/timings.js";
 import { ManagedChild, type ChildShutdownTimings } from "./child_lifecycle.js";
 import { NodeChildFactory, type ChildFactory } from "./child_process.js";
@@ -87,10 +87,7 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
 
   async start(): Promise<number> {
     if (this.#child)
-      throw new MokabookError(
-        "server-failed",
-        "server child is already running",
-      );
+      throw new MoklyError("server-failed", "server child is already running");
     const resolvedPort = this.#resolvedPort;
     this.#updateVersion++;
     const runtime = this.#runtime;
@@ -171,7 +168,7 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
       const readyPort = await child.ready;
       if (child.failure) throw child.failure;
       if (child.stopping || child.exited)
-        throw new MokabookError(
+        throw new MoklyError(
           "server-failed",
           "server child stopped during startup",
         );

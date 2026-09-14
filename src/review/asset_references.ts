@@ -1,7 +1,7 @@
 import path from "node:path";
 
 import { isSafeRepositoryPath } from "../config/paths.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import {
   extractCssReferences,
   extractHtmlReferences,
@@ -86,8 +86,8 @@ function assetError(
   route: string,
   detail: string,
   cause?: unknown,
-): MokabookError {
-  return new MokabookError(
+): MoklyError {
+  return new MoklyError(
     "review-invalid",
     `could not retain Review asset ${route}: ${detail}`,
     cause === undefined ? undefined : { cause },

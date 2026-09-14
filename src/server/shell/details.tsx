@@ -178,7 +178,7 @@ export function DetailsPanel(props: {
   target: RouteTarget;
 }) {
   return (
-    <details className="mbk-details" data-mokabook-details="">
+    <details className="mbk-details" data-mokly-details="">
       <summary className="mbk-details-bar">
         <span className="chev">
           <ChevronIcon size={12} />

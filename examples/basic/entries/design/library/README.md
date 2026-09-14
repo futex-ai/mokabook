@@ -1,9 +1,9 @@
 # Shared Design Components
 
-These fifteen registered components render both Mokabook's design artboards and
+These fifteen registered components render both Mokly's design artboards and
 the independent pages under **Components → Design → Shared components**. The
 footer tabs panel is `inspector/inspector`. This is the consumer's mockup
-library; the actual Mokabook browser shell remains in the package source.
+library; the actual Mokly browser shell remains in the package source.
 
 Catalogue navigation has a fifth saved example, **Checking for changes**, in both
 viewports. All and Changes retain their positions while the count shows a spinner;
@@ -30,7 +30,7 @@ links and tag chips so they can live inside native `details` panels.
 `parts/nav_data.ts` is the canonical catalogue-navigation fixture for both the
 saved All example and in-screen artboards, so those two views stay aligned.
 
-Use explicit semantic `mokabookInstance` names for repeated siblings. The
+Use explicit semantic `moklyInstance` names for repeated siblings. The
 `DesignInstances` context supplies a stable prefix for simultaneous viewport
 regions. Flow-step names must be independent of destinations or ordering.
 Input ids, label associations and description/error ids belong to the form caller;
@@ -105,8 +105,8 @@ the baseline, export all 246 views and verify input stability.
 Individual browser interactions retain the default one-minute limit; this setup
 allowance does not change any server readiness deadline.
 
-See the [adoption contract](../../../../../docs/protocol/mokabook-design-components.md)
-and [inventory](../../../../../docs/protocol/mokabook-design-component-library.md).
+See the [adoption contract](../../../../../docs/protocol/mokly-design-components.md)
+and [inventory](../../../../../docs/protocol/mokly-design-component-library.md).
 
 Page artboards compose the shared inspector and metadata rows. An inspector tab
 may name an authored destination when a static scenario has separate open and

@@ -30,7 +30,7 @@ export function TopBar({
   const open = navigation.drawer?.open ?? drawerOpen;
   return (
     <topBar.Component
-      mokabookInstance={useDesignInstance("top-bar")}
+      moklyInstance={useDesignInstance("top-bar")}
       viewport={viewport}
       placeholder={searchPlaceholder ?? "Search catalogue…"}
       menu={open ? "close" : "open"}

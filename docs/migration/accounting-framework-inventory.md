@@ -5,7 +5,7 @@
 This ledger covers the reusable candidate at Accounting commit
 `50e422e442a6819f1aae0fbd038d99b519b72a72`. It is the deletion guard for the
 later Accounting cutover; nothing in Accounting should be deleted merely
-because a similarly named Mokabook module now exists.
+because a similarly named Mokly module now exists.
 
 The implementation re-audit compared that commit with Accounting `origin/main`
 at `fdd0049a6fb195d4ac59250c0df797302565e58f`. Only product entry/page/test/CSS
@@ -18,7 +18,7 @@ and generated artifact paths changed; no candidate in this ledger changed.
 
 ## Root Build And Authoring Files
 
-| Accounting path under `docs/mockups/src/` | Disposition     | Mokabook owner or rationale                                                    |
+| Accounting path under `docs/mockups/src/` | Disposition     | Mokly owner or rationale                                                       |
 | ----------------------------------------- | --------------- | ------------------------------------------------------------------------------ |
 | `build.cjs`                               | Ported          | `src/cli`, `src/build/compile.ts`, and transactional writer                    |
 | `bundle_registry_entries.cjs`             | Obsolete        | Async esbuild graph loads directly; no blocking helper child                   |
@@ -30,14 +30,14 @@ and generated artifact paths changed; no candidate in this ledger changed.
 | `page_bundler.cjs`                        | Ported/Config   | Single graph plus typed aliases/conditions/loaders/roots; no RNW defaults      |
 | `register.cjs`                            | Obsolete        | esbuild handles TypeScript/TSX; no global require hook                         |
 | `registry.tsx`                            | Ported          | Public helpers under `src/authoring`                                           |
-| `review.cjs`                              | Ported          | `mokabook review` CLI dispatch                                                 |
+| `review.cjs`                              | Ported          | `mokly review` CLI dispatch                                                    |
 | `review_summary.cjs`                      | Ported          | Deterministic `summary.md` in `src/review/artifact.ts`                         |
 | `screen_cap_lint.ts`                      | Ported/Config   | Legacy maximum is explicit; structured screens are one definition each         |
-| `serve.cjs`                               | Ported          | `mokabook serve` and default CLI command                                       |
+| `serve.cjs`                               | Ported          | `mokly serve` and default CLI command                                          |
 | `serve_child.cjs`                         | Ported          | Typed hidden child in `src/server/child.ts`                                    |
 | `serve_runtime.cjs`                       | Ported          | Server and supervisor module families                                          |
 | `source_lint.ts`                          | Ported/Retained | Generic structure is package-validated; product source rules stay consumer CI  |
-| `stage_id_lint.ts`                        | Ported/Config   | `legacy.lint.requireStageIds` with `data-mokabook-stage`                       |
+| `stage_id_lint.ts`                        | Ported/Config   | `legacy.lint.requireStageIds` with `data-mokly-stage`                          |
 | `stylesheet_link_lint.ts`                 | Ported/Config   | Declarative rules plus existence and link checks                               |
 | `component_utils.ts`                      | Config          | Generic expansion is package-owned; React render helper runs in consumer graph |
 | `components.tsx`                          | Retained        | Accounting's comment-component names and output are its legacy adapter         |
@@ -53,7 +53,7 @@ only if their props add real application policy.
 
 ## Registry Directory
 
-| Accounting file                | Disposition   | Mokabook owner                                  |
+| Accounting file                | Disposition   | Mokly owner                                     |
 | ------------------------------ | ------------- | ----------------------------------------------- |
 | `registry/discovery.ts`        | Ported        | build discovery and single-graph loader         |
 | `registry/entry_validation.ts` | Ported        | `registry/prepare.ts`                           |
@@ -67,41 +67,41 @@ only if their props add real application policy.
 
 ## Browse Runtime Directory
 
-| Accounting file under `mockbook/` | Disposition   | Mokabook owner or rationale                                        |
-| --------------------------------- | ------------- | ------------------------------------------------------------------ |
-| `catalogue.ts`                    | Ported        | manifest indexes in `server/catalogue.ts`                          |
-| `server.ts`                       | Ported        | confined HTTP runtime in `server/http.ts`                          |
-| `server_cli.ts`                   | Ported        | typed CLI arguments and dispatch                                   |
-| `server_options.ts`               | Ported        | validated CLI/config options                                       |
-| `server_updates.ts`               | Ported        | monotonic child update messages, readiness, and SSE endpoint       |
-| `dev/child_process.ts`            | Ported        | injected `ChildHandle`/`ChildFactory` boundary                     |
-| `dev/process_supervisor.ts`       | Ported        | serialized, readiness-aware stable-port/version supervisor         |
-| `dev/rebuild.ts`                  | Ported        | compile then transactional write before restart                    |
-| `dev/rebuild_worker.cjs`          | Obsolete      | rebuild runs through typed async APIs; no worker shim              |
-| `dev/run.ts`                      | Ported        | `server/serve.ts` orchestration                                    |
-| `dev/watch_notification_gate.ts`  | Ported        | generic `NotificationGate`                                         |
-| `dev/watch_paths.ts`              | Ported/Config | derived entries/legacy/renderer/styles plus explicit rules         |
-| `nav_tree.ts`                     | Ported        | manifest tree rendered by `src/server/shell/nav.ts`                |
-| `nav_guides.ts`                   | Ported        | neutral structural navigation and breadcrumbs                      |
-| `client_bundle.ts`                | Ported        | package client modules served by `server/client_modules.ts`        |
-| `client/browser_navigation.ts`    | Ported        | eligible interception/fallback in `src/client/browser.ts`          |
-| `client/directory_state.ts`       | Ported        | tolerant directory-state restoration in `src/client/browse.ts`     |
-| `client/entry.ts`                 | Ported        | package-owned browser and Browse entry modules                     |
-| `client/live_updates.ts`          | Ported        | latest-wins reload and one-shot recovery are package-owned         |
-| `client/navigation.ts`            | Ported        | progressive navigation in the neutral browser client               |
-| `client/route_dom.ts`             | Ported        | persistent-shell main-view replacement                             |
-| `icons.tsx`                       | Retained      | Accounting icons stay reference-only; Mokabook owns neutral glyphs |
-| `shell.tsx`                       | Ported        | responsive neutral shell under `src/server/shell`                  |
-| `shell_details.tsx`               | Ported        | accessible native details panel                                    |
-| `shell_head.tsx`                  | Ported        | package head, fonts, and self-contained shell assets               |
-| `shell_nav.tsx`                   | Ported        | responsive navigation tree and drawer                              |
-| `shell_scripts.ts`                | Ported        | package-owned progressive client modules                           |
-| `shell_stages.tsx`                | Ported        | sandboxed viewport/use-case stages                                 |
-| `shell_view.tsx`                  | Ported        | screen, collection, use-case, legacy, and missing views            |
+| Accounting file under `mockbook/` | Disposition   | Mokly owner or rationale                                        |
+| --------------------------------- | ------------- | --------------------------------------------------------------- |
+| `catalogue.ts`                    | Ported        | manifest indexes in `server/catalogue.ts`                       |
+| `server.ts`                       | Ported        | confined HTTP runtime in `server/http.ts`                       |
+| `server_cli.ts`                   | Ported        | typed CLI arguments and dispatch                                |
+| `server_options.ts`               | Ported        | validated CLI/config options                                    |
+| `server_updates.ts`               | Ported        | monotonic child update messages, readiness, and SSE endpoint    |
+| `dev/child_process.ts`            | Ported        | injected `ChildHandle`/`ChildFactory` boundary                  |
+| `dev/process_supervisor.ts`       | Ported        | serialized, readiness-aware stable-port/version supervisor      |
+| `dev/rebuild.ts`                  | Ported        | compile then transactional write before restart                 |
+| `dev/rebuild_worker.cjs`          | Obsolete      | rebuild runs through typed async APIs; no worker shim           |
+| `dev/run.ts`                      | Ported        | `server/serve.ts` orchestration                                 |
+| `dev/watch_notification_gate.ts`  | Ported        | generic `NotificationGate`                                      |
+| `dev/watch_paths.ts`              | Ported/Config | derived entries/legacy/renderer/styles plus explicit rules      |
+| `nav_tree.ts`                     | Ported        | manifest tree rendered by `src/server/shell/nav.ts`             |
+| `nav_guides.ts`                   | Ported        | neutral structural navigation and breadcrumbs                   |
+| `client_bundle.ts`                | Ported        | package client modules served by `server/client_modules.ts`     |
+| `client/browser_navigation.ts`    | Ported        | eligible interception/fallback in `src/client/browser.ts`       |
+| `client/directory_state.ts`       | Ported        | tolerant directory-state restoration in `src/client/browse.ts`  |
+| `client/entry.ts`                 | Ported        | package-owned browser and Browse entry modules                  |
+| `client/live_updates.ts`          | Ported        | latest-wins reload and one-shot recovery are package-owned      |
+| `client/navigation.ts`            | Ported        | progressive navigation in the neutral browser client            |
+| `client/route_dom.ts`             | Ported        | persistent-shell main-view replacement                          |
+| `icons.tsx`                       | Retained      | Accounting icons stay reference-only; Mokly owns neutral glyphs |
+| `shell.tsx`                       | Ported        | responsive neutral shell under `src/server/shell`               |
+| `shell_details.tsx`               | Ported        | accessible native details panel                                 |
+| `shell_head.tsx`                  | Ported        | package head, fonts, and self-contained shell assets            |
+| `shell_nav.tsx`                   | Ported        | responsive navigation tree and drawer                           |
+| `shell_scripts.ts`                | Ported        | package-owned progressive client modules                        |
+| `shell_stages.tsx`                | Ported        | sandboxed viewport/use-case stages                              |
+| `shell_view.tsx`                  | Ported        | screen, collection, use-case, legacy, and missing views         |
 
 ## Review Directory
 
-| Accounting file under `mockbook/review/` | Disposition | Mokabook owner                                                                    |
+| Accounting file under `mockbook/review/` | Disposition | Mokly owner                                                                       |
 | ---------------------------------------- | ----------- | --------------------------------------------------------------------------------- |
 | `compare.ts`                             | Ported      | per-route/per-viewport comparison in `review/compare.ts`                          |
 | `git_base.ts`                            | Ported      | injected Git object reader; no checkout                                           |
@@ -115,12 +115,12 @@ only if their props add real application policy.
 
 ## Styles, Fonts, And Generated State
 
-| Accounting path                                    | Disposition          | Rationale                                                                 |
-| -------------------------------------------------- | -------------------- | ------------------------------------------------------------------------- |
-| `docs/mockups/mockbook.css`                        | Retained/Ported      | Accounting CSS stays reference-only; package owns neutral shell CSS       |
-| `docs/mockups/fonts/InterVariable.woff2`           | Retained             | Accounting fragment asset; the package shell uses a system font stack     |
-| `docs/mockups/mockbook-manifest.json`              | Regenerated          | v2 is read only during cutover; package emits `mokabook-manifest.json` v3 |
-| `docs/mockups/**/*.mobile.html` / `*.desktop.html` | Retained/regenerated | real Accounting fragments never move to this repository                   |
+| Accounting path                                    | Disposition          | Rationale                                                              |
+| -------------------------------------------------- | -------------------- | ---------------------------------------------------------------------- |
+| `docs/mockups/mockbook.css`                        | Retained/Ported      | Accounting CSS stays reference-only; package owns neutral shell CSS    |
+| `docs/mockups/fonts/InterVariable.woff2`           | Retained             | Accounting fragment asset; the package shell uses a system font stack  |
+| `docs/mockups/mockbook-manifest.json`              | Regenerated          | v2 is read only during cutover; package emits `mokly-manifest.json` v3 |
+| `docs/mockups/**/*.mobile.html` / `*.desktop.html` | Retained/regenerated | real Accounting fragments never move to this repository                |
 
 ## Focused Test Disposition
 
@@ -141,7 +141,7 @@ Accounting rather than carrying Bookfolio screens into this package.
 
 ## Packed Accounting Acceptance
 
-Milestone 8 used a real `mokabook-0.0.0.tgz` in an isolated Accounting
+Milestone 8 used a real `mokly-0.0.0.tgz` in an isolated Accounting
 worktree at `fdd0049a6fb195d4ac59250c0df797302565e58f`. Only a draft consumer
 config, renderer, temporary link transformer, import rewrites, and generated
 output changed there; no Accounting change was committed.

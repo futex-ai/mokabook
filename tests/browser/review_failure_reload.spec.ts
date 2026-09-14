@@ -45,7 +45,7 @@ test.beforeAll(async () => {
         } satisfies ReviewResultV2),
       );
       await fs.promises.writeFile(
-        path.join(outDir, ".mokabook-review-artifact"),
+        path.join(outDir, ".mokly-review-artifact"),
         "schemaVersion=1\n",
       );
     },
@@ -71,7 +71,7 @@ test("a watched update resets failed diffs to Current without generating", async
 }) => {
   const eventStream = page.waitForResponse(
     (response) =>
-      new URL(response.url()).pathname === "/__mokabook/events" &&
+      new URL(response.url()).pathname === "/__mokly/events" &&
       response.status() === 200,
   );
   await page.goto(`${server.url}/view/screens/home.html`);
@@ -84,7 +84,7 @@ test("a watched update resets failed diffs to Current without generating", async
   shouldFail = false;
   server.publishUpdate({ version: 2, changedRoutes: ["screens/home.html"] });
   await expect(page.locator("html")).toHaveAttribute(
-    "data-mokabook-update-version",
+    "data-mokly-update-version",
     "2",
   );
   await expect(

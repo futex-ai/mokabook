@@ -9,7 +9,7 @@ import { repositoryRoot } from "../helpers/fixture.js";
 
 const generated = path.join(repositoryRoot, "examples/basic/generated");
 const manifest = JSON.parse(
-  await fs.readFile(path.join(generated, "mokabook-manifest.json"), "utf8"),
+  await fs.readFile(path.join(generated, "mokly-manifest.json"), "utf8"),
 ) as ManifestV5;
 const fileUrl = (route: string) =>
   pathToFileURL(path.join(generated, route)).href;

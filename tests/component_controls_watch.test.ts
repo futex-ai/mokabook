@@ -38,12 +38,12 @@ test(
     };
     const first = await capabilities();
     const render = async (capability: typeof first, label: string) =>
-      fetch(`${server.url}/__mokabook/components/render`, {
+      fetch(`${server.url}/__mokly/components/render`, {
         method: "POST",
         headers: {
           origin: server.url,
           "content-type": "application/json",
-          "x-mokabook-render-token": capability.token,
+          "x-mokly-render-token": capability.token,
         },
         body: JSON.stringify({
           componentId: "action",
@@ -56,14 +56,14 @@ test(
         }),
       });
     const generated = await fs.readFile(
-      `${fixture.mockupsDir}/mokabook-manifest.json`,
+      `${fixture.mockupsDir}/mokly-manifest.json`,
       "utf8",
     );
     assert.equal((await render(first, "Edited")).status, 200);
     await delay(150);
     assert.deepEqual(await capabilities(), first);
     assert.equal(
-      await fs.readFile(`${fixture.mockupsDir}/mokabook-manifest.json`, "utf8"),
+      await fs.readFile(`${fixture.mockupsDir}/mokly-manifest.json`, "utf8"),
       generated,
     );
     await fs.writeFile(fixture.entryPath, "syntax error candidate");

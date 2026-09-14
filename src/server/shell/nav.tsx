@@ -1,4 +1,4 @@
-// Renders the served Mokabook left navigation as native disclosure elements.
+// Renders the served Mokly left navigation as native disclosure elements.
 // Pages and Components are independent top-level disclosures; each projects
 // the same authored collection hierarchy down to its relevant entry kinds.
 // Collection summaries carry folder icons, leaves carry their entry-kind icon,
@@ -214,21 +214,21 @@ export function CatalogueNav(props: {
     <nav
       aria-label="Catalogue"
       className="mbk-nav"
-      data-mokabook-nav=""
+      data-mokly-nav=""
       id="mb-nav"
     >
       <div className="mbk-nav-head">
         Catalogue
         <button
           className="mbk-nav-collapse"
-          data-mokabook-collapse=""
+          data-mokly-collapse=""
           type="button"
         >
           Collapse all
         </button>
       </div>
       <NavFilter context={props.context} />
-      <div className="mbk-nav-scroll" data-mokabook-nav-scroll="">
+      <div className="mbk-nav-scroll" data-mokly-nav-scroll="">
         <NavStatus context={props.context} />
         {sections.map((section) => (
           <SectionRows

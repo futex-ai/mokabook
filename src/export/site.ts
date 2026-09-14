@@ -69,7 +69,7 @@ export function assembleExport(
     `${comparison.result.schemaVersion === 3 ? canonicalJson(comparison.result, 2) : JSON.stringify(comparison.result, null, 2)}\n`,
   );
   const generation = comparisonContentId(comparisonFiles);
-  const prefix = `__mokabook/diffs/__generations/${generation}`;
+  const prefix = `__mokly/diffs/__generations/${generation}`;
   const delivery = parseStaticDelivery({
     schemaVersion: 2,
     deploymentId: STAGED_DEPLOYMENT_ID,
@@ -164,14 +164,14 @@ export function assembleExport(
       : bytes;
     inventory.add(`static/${name}`, adapted);
   }
-  inventory.add("__mokabook/shell.css", SHELL_CSS);
+  inventory.add("__mokly/shell.css", SHELL_CSS);
   for (const [name, bytes] of loadBrowserClientModules()) {
     if (name !== "browser.js" && name !== "live_updates.js")
-      inventory.add(`__mokabook/client/${name}`, bytes);
+      inventory.add(`__mokly/client/${name}`, bytes);
   }
   for (const [name, bytes] of loadBrowserNavigationModules())
-    inventory.add(`__mokabook/navigation/${name}`, bytes);
+    inventory.add(`__mokly/navigation/${name}`, bytes);
   for (const [name, bytes] of loadShellFontAssets())
-    inventory.add(`__mokabook/fonts/${name}`, bytes);
+    inventory.add(`__mokly/fonts/${name}`, bytes);
   return { inventory, delivery, shells };
 }

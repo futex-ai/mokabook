@@ -1,4 +1,4 @@
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import { referencedRoutes } from "./asset_references.js";
 import type { ReviewAssetReader } from "./assets.js";
 import { ResourceGraph } from "./resource_graph.js";
@@ -26,7 +26,7 @@ export class ComponentMaterialReader {
     for (const route of missing) {
       const content = loaded.get(route);
       if (content === undefined)
-        throw new MokabookError(
+        throw new MoklyError(
           "review-invalid",
           `could not retain Review asset ${route}: batch reader omitted the file`,
         );

@@ -1,6 +1,6 @@
 # Protocol
 
-These documents define Mokabook's implementation contract. They describe
+These documents define Mokly's implementation contract. They describe
 implemented pre-release behavior unless a document's Delivery Status explicitly
 labels an approved target that is still tracked by an active plan. Package,
 authoring, static build/check, responsive Browse, watched development, on-demand comparisons,
@@ -29,43 +29,45 @@ when the historical primary file is absent, never when it is invalid.
 
 ## Contracts
 
-- [Package and authoring contract](./mokabook-package.md)
-- [Build and Browse runtime](./mokabook-runtime.md)
-- [On-demand Serve](./mokabook-on-demand.md)
-- [Selected live comparisons](./mokabook-selected-comparisons.md)
-- [Live catalogue evidence updates](./mokabook-live-evidence.md)
-- [Startup diagnostics and scale fixtures](./mokabook-timings.md)
-- [Pages in the catalogue](./mokabook-pages.md)
-- [Source protection](./mokabook-source-protection.md)
-- [Catalogue change metadata](./mokabook-catalogue-changes.md)
-- [Breaking page migration](./mokabook-page-migration.md)
-- [Optional changes in publication](./mokabook-publication.md)
-- [Changes and screen comparisons](./mokabook-changes.md)
-- [Registered components](./mokabook-components.md)
-- [Component runtime prop schema](./mokabook-component-props.md)
-- [Current manifest v5 schema](./mokabook-component-manifest.md)
-- [Component comparison v3 schema](./mokabook-component-review.md)
-- [Component change attribution](./mokabook-component-changes.md)
-- [Component pages and screen inspection](./mokabook-component-explorer.md)
-- [Component explorer design catalogue](./mokabook-component-design.md)
-- [Component icon inspector design](./mokabook-component-inspector-design.md)
-- [Component controls design catalogue](./mokabook-component-controls-design.md)
-- [Component workspace design](./mokabook-component-workspace-design.md) (view controls, resizing, and comparison eligibility)
-- [Component controls](./mokabook-component-controls.md)
-- [Consumer static export](./mokabook-export.md) — consumer CLI and
+- [Package and authoring contract](./mokly-package.md)
+- [Build and Browse runtime](./mokly-runtime.md)
+- [On-demand Serve](./mokly-on-demand.md)
+- [Selected live comparisons](./mokly-selected-comparisons.md)
+- [Live catalogue evidence updates](./mokly-live-evidence.md)
+- [Startup diagnostics and scale fixtures](./mokly-timings.md)
+- [Pages in the catalogue](./mokly-pages.md)
+- [Source protection](./mokly-source-protection.md)
+- [Catalogue change metadata](./mokly-catalogue-changes.md)
+- [Breaking page migration](./mokly-page-migration.md)
+- [Optional changes in publication](./mokly-publication.md)
+- [Changes and screen comparisons](./mokly-changes.md)
+- [Registered components](./mokly-components.md)
+- [Component runtime prop schema](./mokly-component-props.md)
+- [Current manifest v5 schema](./mokly-component-manifest.md)
+- [Component comparison v3 schema](./mokly-component-review.md)
+- [Component change attribution](./mokly-component-changes.md)
+- [Component pages and screen inspection](./mokly-component-explorer.md)
+- [Component explorer design catalogue](./mokly-component-design.md)
+- [Component icon inspector design](./mokly-component-inspector-design.md)
+- [Component controls design catalogue](./mokly-component-controls-design.md)
+- [Component workspace design](./mokly-component-workspace-design.md) (view controls, resizing, and comparison eligibility)
+- [Component controls](./mokly-component-controls.md)
+- [Consumer static export](./mokly-export.md) — consumer CLI and
   transactional artifact-generation contract.
-- [Static export delivery](./mokabook-export-delivery.md) — portable
+- [Static export delivery](./mokly-export-delivery.md) — portable
   hosting, navigation, and comparison behavior.
-- [Export recovery](./mokabook-export-recovery.md) — backup ownership,
+- [Export recovery](./mokly-export-recovery.md) — backup ownership,
   concurrent destination changes, bounded cleanup, and failure reporting.
-- [Watched development](./mokabook-watch.md)
-- [Catalogue navigation contract](./mokabook-navigation.md)
-- [Styled catalogue link controls](./mokabook-link-controls.md)
-- [Shell design contract](./mokabook-shell-design.md)
-- [Design mockup links](./mokabook-design-links.md)
-- [Registered components in Mokabook's design catalogue](./mokabook-design-components.md)
+- [Watched development](./mokly-watch.md)
+- [Catalogue navigation contract](./mokly-navigation.md)
+- [Styled catalogue link controls](./mokly-link-controls.md)
+- [Shell design contract](./mokly-shell-design.md)
+- [Design mockup links](./mokly-design-links.md)
+- [Registered components in Mokly's design catalogue](./mokly-design-components.md)
   — implemented shared design components and ownership rules, with the
-  [component library inventory](./mokabook-design-component-library.md).
+  [component library inventory](./mokly-design-component-library.md).
 - [CI and npm release contract](./npm-release.md)
+  - [One-time registry bootstrap](./npm-bootstrap.md)
+  - [GitHub publishing protections](./npm-github-protections.md)
 - [Dependency security](./dependency-security.md) — advisory gates, targeted
   updates, temporary overrides, and packed-consumer audit coverage.

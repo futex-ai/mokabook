@@ -3,7 +3,7 @@ import path from "node:path";
 import { timeAsync, timeSync } from "../diagnostics/timings.js";
 
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError, errorMessage } from "../errors.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import type { Compilation } from "./compile.js";
 import { isOwned, pendingGeneratedOrphanRoutes } from "./ownership.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";
@@ -26,7 +26,7 @@ async function writeMeasured(
     rejectUnsafeTargets(compilation, config),
   );
   const temporaryRoot = await fs.promises.mkdtemp(
-    path.join(path.dirname(config.mockupsDir), ".mokabook-write-"),
+    path.join(path.dirname(config.mockupsDir), ".mokly-write-"),
   );
   const stageRoot = path.join(temporaryRoot, "stage");
   const backupRoot = path.join(temporaryRoot, "backup");
@@ -71,7 +71,7 @@ async function writeMeasured(
     await timeAsync("output.rollback", () =>
       rollback(config, backupRoot, installed, backedUp),
     );
-    throw new MokabookError(
+    throw new MoklyError(
       "build-invalid",
       `could not commit generated output: ${errorMessage(error)}`,
       {
@@ -94,7 +94,7 @@ function rejectUnsafeTargets(
   for (const route of compilation.outputs.keys()) {
     const target = path.join(config.mockupsDir, route);
     if (fs.existsSync(target) && !isOwned(target, config)) {
-      throw new MokabookError(
+      throw new MoklyError(
         "build-invalid",
         `refusing to overwrite unowned file: ${route}`,
       );

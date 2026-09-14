@@ -1,4 +1,4 @@
-import { defineComponent, type ComponentProps } from "mokabook";
+import { defineComponent, type ComponentProps } from "mokly";
 import { libraryMetadata } from "../metadata.js";
 import { flag, optionalText, text } from "../schemas.js";
 import { PropFieldView } from "./prop-field.view.js";

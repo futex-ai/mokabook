@@ -32,7 +32,7 @@ export function ViewportSwitch() {
     <span
       aria-label="Viewport"
       className="mbk-seg"
-      data-mokabook-viewswitch=""
+      data-mokly-viewswitch=""
       role="group"
     >
       {options.map(([value, label]) => (
@@ -63,7 +63,7 @@ export function SchemeSwitch() {
     <span
       aria-label="Color scheme"
       className="mbk-seg"
-      data-mokabook-schemeswitch=""
+      data-mokly-schemeswitch=""
       role="group"
     >
       {options.map(([value, label]) => (

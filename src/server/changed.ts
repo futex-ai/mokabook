@@ -1,7 +1,7 @@
 /** Optional changed-route detection powering the Browse changed/all filter. */
 import { projectRealPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { MoklyError } from "../errors.js";
 import {
   removedManifestEntries,
   type CatalogueChangeSnapshot,
@@ -47,7 +47,7 @@ export async function computeCatalogueChanges(
       await runner.run(["rev-parse", "--show-toplevel"])
     ).trim();
     if (projectRealPath(toplevel) !== projectRealPath(config.repoRoot))
-      throw new MokabookError(
+      throw new MoklyError(
         "git-failed",
         "catalogue is not the root of a Git repository",
       );

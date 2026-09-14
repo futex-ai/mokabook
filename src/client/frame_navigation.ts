@@ -98,7 +98,7 @@ function attachDocument(
     const source = event.target;
     if (!(source instanceof view.Element) || source.ownerDocument !== doc)
       return;
-    const link = source.closest<HTMLElement>("[data-mokabook-link]");
+    const link = source.closest<HTMLElement>("[data-mokly-link]");
     if (!link || link.ownerDocument !== doc || !isNativeLink(link)) return;
     const action = classifyFrameActivation({
       altKey: event.altKey,
@@ -106,10 +106,10 @@ function attachDocument(
       ctrlKey: event.ctrlKey,
       download: link.hasAttribute("download"),
       eventType: event.type === "auxclick" ? "auxclick" : "click",
-      marker: link.getAttribute("data-mokabook-link") ?? "",
+      marker: link.getAttribute("data-mokly-link") ?? "",
       metaKey: event.metaKey,
       shiftKey: event.shiftKey,
-      target: link.getAttribute("data-mokabook-target"),
+      target: link.getAttribute("data-mokly-target"),
     });
     if (!action) return;
     event.preventDefault();

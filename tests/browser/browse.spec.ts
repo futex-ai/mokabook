@@ -7,24 +7,23 @@ const detailsRow = 'a[data-nav-row][data-route="screens/details.html"]';
 const designHomeRow =
   'a[data-nav-row][data-route="design/browse/views/home.html"]';
 const tourRow = 'a[data-nav-row][data-route="user-flows/example-tour.html"]';
-const topBarScheme = ".mbk-topbar [data-mokabook-schemeswitch]";
+const topBarScheme = ".mbk-topbar [data-mokly-schemeswitch]";
 const headScheme = ".mbk-screen-head [data-workspace-scheme]";
 const mobileFrame = ".mbk-frame-mobile iframe";
 const desktopFrame = ".mbk-frame-desktop iframe";
 const darkSurface = "rgb(18, 21, 20)";
-const formsChip =
-  '[data-inspector-panel="details"] [data-mokabook-tag="forms"]';
+const formsChip = '[data-inspector-panel="details"] [data-mokly-tag="forms"]';
 const accentFill = "rgb(79, 120, 100)";
 
 async function markPage(page: Page): Promise<void> {
   await page.evaluate(() => {
-    (window as { __mokabookMarker?: boolean }).__mokabookMarker = true;
+    (window as { __moklyMarker?: boolean }).__moklyMarker = true;
   });
 }
 
 function hasMarker(page: Page): Promise<boolean> {
   return page.evaluate(
-    () => (window as { __mokabookMarker?: boolean }).__mokabookMarker === true,
+    () => (window as { __moklyMarker?: boolean }).__moklyMarker === true,
   );
 }
 
@@ -183,7 +182,7 @@ test("Back and Forward restore each route's stage scroll", async ({ page }) => {
   await expect(page.locator("#mb-main h2")).toHaveText("Details");
   const destinationScroll = await page.evaluate(() => {
     const stage = document.querySelector<HTMLElement>(
-      '[data-mokabook-scroll="stage"]',
+      '[data-mokly-scroll="stage"]',
     );
     if (!stage) return -1;
     stage.scrollTop = 500;
@@ -209,7 +208,7 @@ test("Back and Forward restore each route's stage scroll", async ({ page }) => {
     .poll(() =>
       page.evaluate(
         () =>
-          document.querySelector<HTMLElement>('[data-mokabook-scroll="stage"]')
+          document.querySelector<HTMLElement>('[data-mokly-scroll="stage"]')
             ?.scrollTop,
       ),
     )
@@ -221,18 +220,18 @@ test("search state is retained across in-shell navigation", async ({
 }) => {
   await page.goto("/");
   await markPage(page);
-  await page.fill("[data-mokabook-search]", "welcome");
+  await page.fill("[data-mokly-search]", "welcome");
   await expect(page.locator(detailsRow)).toBeHidden();
   await page.click(welcomeRow);
   await expect(page.locator("#mb-main h2")).toHaveText("Welcome");
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("welcome");
+  await expect(page.locator("[data-mokly-search]")).toHaveValue("welcome");
   await expect(page.locator(detailsRow)).toBeHidden();
   expect(await hasMarker(page)).toBe(true);
 });
 
 test("search matches authored page ids", async ({ page }) => {
   await page.goto("/");
-  await page.fill("[data-mokabook-search]", "example-details");
+  await page.fill("[data-mokly-search]", "example-details");
 
   await expect(page.locator(detailsRow)).toBeVisible();
   await expect(page.locator(welcomeRow)).toBeHidden();
@@ -271,7 +270,7 @@ test("searching opens groups and clearing restores their disclosure", async ({
   await page.evaluate((selector) => {
     document.querySelector<HTMLDetailsElement>(selector)!.open = false;
   }, screensGroup);
-  await page.fill("[data-mokabook-search]", "welcome");
+  await page.fill("[data-mokly-search]", "welcome");
   await expect(page.locator(welcomeRow)).toBeVisible();
   expect(
     await page.evaluate(
@@ -279,7 +278,7 @@ test("searching opens groups and clearing restores their disclosure", async ({
       screensGroup,
     ),
   ).toBe(true);
-  await page.fill("[data-mokabook-search]", "");
+  await page.fill("[data-mokly-search]", "");
   await expect
     .poll(() =>
       page.evaluate(
@@ -300,7 +299,7 @@ test("details tag chips enter, keep, and clear their term", async ({
 
   await page.locator('[data-inspector-tab="details"]').click();
   await page.click(formsChip);
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("tag:forms");
+  await expect(page.locator("[data-mokly-search]")).toHaveValue("tag:forms");
   await expect(page.locator(formsChip)).toHaveClass(/active/);
   expect(await computedStyle(page, formsChip, "backgroundColor")).toBe(
     accentFill,
@@ -311,11 +310,11 @@ test("details tag chips enter, keep, and clear their term", async ({
 
   await page.click(detailsRow);
   await expect(page.locator("#mb-main h2")).toHaveText("Details");
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("tag:forms");
+  await expect(page.locator("[data-mokly-search]")).toHaveValue("tag:forms");
   await expect(page.locator(formsChip)).toHaveClass(/active/);
 
   await page.click(formsChip);
-  await expect(page.locator("[data-mokabook-search]")).toHaveValue("");
+  await expect(page.locator("[data-mokly-search]")).toHaveValue("");
   await expect(page.locator(formsChip)).not.toHaveClass(/active/);
   await expect(page.locator(tourRow)).toBeVisible();
   expect(await hasMarker(page)).toBe(true);
@@ -379,7 +378,7 @@ test("color scheme switch swaps device frames", async ({ page }) => {
 
   await chooseScheme(page, "dark");
   await expect(page.locator("body")).toHaveAttribute(
-    "data-mokabook-color-scheme",
+    "data-mokly-color-scheme",
     "dark",
   );
   await expectFrameSource(
@@ -394,7 +393,7 @@ test("color scheme switch swaps device frames", async ({ page }) => {
 
   await chooseScheme(page, "light");
   await expect(page.locator("body")).toHaveAttribute(
-    "data-mokabook-color-scheme",
+    "data-mokly-color-scheme",
     "light",
   );
   await expectFrameSource(
@@ -432,7 +431,7 @@ test("dark device screens keep their surface and edge", async ({ page }) => {
 test("a light-only screen keeps light frames and says so", async ({ page }) => {
   await page.goto("/view/screens/welcome.html");
   await chooseScheme(page, "dark");
-  await page.fill("[data-mokabook-search]", "home");
+  await page.fill("[data-mokly-search]", "home");
   await page.click(designHomeRow);
   await expect(page.locator("#mb-main h2")).toHaveText("Home");
 
@@ -474,7 +473,7 @@ test("use-case steps follow the selected scheme without a caption", async ({
 }) => {
   await page.goto("/view/screens/welcome.html");
   await chooseScheme(page, "dark");
-  await page.fill("[data-mokabook-search]", "tour");
+  await page.fill("[data-mokly-search]", "tour");
   await page.click(tourRow);
   await expect(page.locator("#mb-main h2")).toHaveText("Example tour");
 
@@ -553,9 +552,9 @@ test("the catalogue home carries no scheme control when narrow", async ({
   await expect(page.locator(".mbk-screen-head")).toHaveCount(0);
   await expect(page.locator(headScheme)).toHaveCount(0);
   await expect(page.locator(topBarScheme)).toBeHidden();
-  await expect(
-    page.locator("[data-mokabook-schemeswitch]:visible"),
-  ).toHaveCount(0);
+  await expect(page.locator("[data-mokly-schemeswitch]:visible")).toHaveCount(
+    0,
+  );
 });
 
 test("ID chips copy their ID without navigating", async ({ page }) => {
@@ -688,8 +687,8 @@ test("desktop catalogue navigation resizes and remembers its width", async ({
 }) => {
   await page.setViewportSize({ height: 900, width: 1_280 });
   await page.goto("/");
-  const nav = page.locator("[data-mokabook-nav]");
-  const handle = page.locator("[data-mokabook-nav-resize]");
+  const nav = page.locator("[data-mokly-nav]");
+  const handle = page.locator("[data-mokly-nav-resize]");
   await expect(handle).toBeVisible();
   await expect(handle).toHaveAttribute("role", "separator");
 
@@ -731,11 +730,11 @@ test("desktop catalogue navigation resizes and remembers its width", async ({
 test("narrow viewports collapse navigation into a drawer", async ({ page }) => {
   await page.setViewportSize({ height: 900, width: 420 });
   await page.goto("/");
-  await expect(page.locator("[data-mokabook-nav]")).toBeHidden();
-  await expect(page.locator("[data-mokabook-nav-resize]")).toBeHidden();
-  await page.click("[data-mokabook-menu]");
-  await expect(page.locator("[data-mokabook-nav]")).toBeVisible();
-  await expect(page.locator("[data-mokabook-menu]")).toHaveAttribute(
+  await expect(page.locator("[data-mokly-nav]")).toBeHidden();
+  await expect(page.locator("[data-mokly-nav-resize]")).toBeHidden();
+  await page.click("[data-mokly-menu]");
+  await expect(page.locator("[data-mokly-nav]")).toBeVisible();
+  await expect(page.locator("[data-mokly-menu]")).toHaveAttribute(
     "aria-expanded",
     "true",
   );
@@ -744,7 +743,7 @@ test("narrow viewports collapse navigation into a drawer", async ({ page }) => {
   await openScreensGroup(page);
   await page.click(welcomeRow);
   await expect(page.locator("#mb-main h2")).toHaveText("Welcome");
-  await expect(page.locator("[data-mokabook-nav]")).toBeHidden();
+  await expect(page.locator("[data-mokly-nav]")).toBeHidden();
 });
 
 test("the narrow search bar drops the name and fits its controls", async ({
@@ -766,9 +765,9 @@ test("the narrow search bar drops the name and fits its controls", async ({
     "17px",
   );
   await expect(page.locator(".mbk-brand .mbk-name")).toBeHidden();
-  await expect(page.getByRole("link", { name: "Mokabook" })).toBeVisible();
-  await expect(page.locator("[data-mokabook-menu]")).toBeVisible();
-  await expect(page.locator("[data-mokabook-search]")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Mokly" })).toBeVisible();
+  await expect(page.locator("[data-mokly-menu]")).toBeVisible();
+  await expect(page.locator("[data-mokly-search]")).toBeVisible();
 
   const modes = await page.locator(".mbk-search").boundingBox();
   if (!modes) throw new Error("the search must be laid out");
@@ -785,14 +784,14 @@ test("the removed Review route keeps a usable not-found shell", async ({
   await page.setViewportSize({ height: 844, width: 390 });
   const response = await page.goto("/review");
   expect(response?.status()).toBe(404);
-  await expect(page.locator("[data-mokabook-search]")).toBeVisible();
+  await expect(page.locator("[data-mokly-search]")).toBeVisible();
   await expect(page.locator("#mb-main h2")).toHaveText("Item not found");
 });
 
 test("missing routes keep the catalogue available", async ({ page }) => {
   await page.goto("/view/unknown.html");
   await expect(page.locator("#mb-main h2")).toHaveText("Item not found");
-  await expect(page.locator("[data-mokabook-nav]")).toBeVisible();
+  await expect(page.locator("[data-mokly-nav]")).toBeVisible();
   await openScreensGroup(page);
   await page.click(welcomeRow);
   await expect(page.locator("#mb-main h2")).toHaveText("Welcome");

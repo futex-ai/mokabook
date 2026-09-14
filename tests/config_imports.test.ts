@@ -13,14 +13,14 @@ test("config imports resolve consumer packages from the config location", async 
     fixture.root,
     "node_modules",
     "@fixture",
-    "mokabook-paths",
+    "mokly-paths",
   );
   await fs.promises.mkdir(packageDir, { recursive: true });
   await fs.promises.writeFile(
     path.join(packageDir, "package.json"),
     `${JSON.stringify({
       exports: "./index.js",
-      name: "@fixture/mokabook-paths",
+      name: "@fixture/mokly-paths",
       type: "module",
       version: "1.0.0",
     })}\n`,
@@ -31,8 +31,8 @@ test("config imports resolve consumer packages from the config location", async 
   );
   await fs.promises.writeFile(
     fixture.configPath,
-    `import { defineConfig } from "mokabook";
-import { paths } from "@fixture/mokabook-paths";
+    `import { defineConfig } from "mokly";
+import { paths } from "@fixture/mokly-paths";
 export default defineConfig({ ...paths, repoRoot: "." });
 `,
   );
