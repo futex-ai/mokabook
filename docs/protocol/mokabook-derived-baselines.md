@@ -150,6 +150,9 @@ Before the marker commit point, cancellation terminates the running command's
 process group, waits for exit, removes the partial entry, and reports
 `baseline-interrupted`. Cancellation after the marker write returns the completed
 cached result, skips remaining retention cleanup and still attempts lock release.
+If partial-entry removal or lock release fails while a build is already failing,
+report that maintenance failure separately and retain the original typed build
+error and its diagnostics. A partial entry can be retried under the next lock.
 Serve's shutdown drain includes rebuild processes using the same rules as its
 Git processes.
 

@@ -208,6 +208,8 @@ export class CachedBaselineBuilder implements BaselineBuilder {
         try {
           if (rebuilding && !adopted)
             await removePartialBaseline(this.fs, layout);
+        } catch (error) {
+          reportBaselineMaintenance({ entry: layout.entry, error });
         } finally {
           try {
             await lock.release();

@@ -30,12 +30,12 @@ for the rebuild post-steps.
       selected readers, classification and reference polling; retain All when
       optional history is unavailable and test standalone build/check without Git.
 
-## Milestone 2: Preserve the original error in every rebuild post-step
+## Milestone 2: Preserve the original error in every rebuild post-step — completed
 
-- [ ] In `src/baseline/rebuild.ts`, wrap the `removePartialBaseline` call in
+- [x] In `src/baseline/rebuild.ts`, wrap the `removePartialBaseline` call in
       the `finally` with the same catch-and-report pattern as lock release, so
       a failed removal never replaces the in-flight typed error.
-- [ ] Add a parameterised case to `tests/baseline_cleanup.test.ts` that fails
+- [x] Add a parameterised case to `tests/baseline_cleanup.test.ts` that fails
       `remove` during a failed build and asserts `baseline-command-failed`
       survives with its diagnostics.
 

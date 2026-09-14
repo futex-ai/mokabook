@@ -63,7 +63,10 @@ moves the generated directory to `output`, deletes the extraction, and writes
 `complete.json`. Completion of the marker write commits the result immediately.
 Cancellation before that point removes partial output; cancellation afterward
 returns the completed result and skips remaining retention work. Cleanup and
-lock release cannot reject or erase a completed build. `cleanup.ts` returns
+lock release cannot reject or erase a completed build. No cleanup failure may
+replace an existing typed build error or its command
+diagnostics; partial-entry removal still attempts lock release if it fails.
+`cleanup.ts` returns
 per-entry maintenance failures and continues with other eligible entries;
 `maintenance.ts` reports diagnostics on stderr without adding failure events to
 the successful build. `inputs.json` records the repository-relative output path;

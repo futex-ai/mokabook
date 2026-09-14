@@ -134,28 +134,52 @@ test("retention protects the active entry and every locked entry", async () => {
   );
 });
 
-test("lock release diagnostics preserve the original failed command", async (t) => {
-  const { fs, request, runner, builder } = baselineFixture();
-  const layout = cacheLayout(request.repoRoot, request.commit);
-  const run = runner.run;
-  runner.run = (command) =>
-    command.argv[0] === "git"
-      ? run(command)
-      : Promise.resolve({ ...success, exitCode: 17 });
-  const remove = fs.remove.bind(fs);
-  t.mock.method(fs, "remove", async (file: string) => {
-    if (file === layout.lock) throw new Error("release failed");
-    await remove(file);
+for (const failure of ["release", "partial-remove", "both"] as const) {
+  test(`cleanup ${failure} diagnostics preserve the original failed command`, async (t) => {
+    const { fs, request, runner, builder } = baselineFixture();
+    const layout = cacheLayout(request.repoRoot, request.commit);
+    const run = runner.run;
+    let commandFailed = false;
+    runner.run = async (command) => {
+      if (command.argv[0] === "git") return run(command);
+      commandFailed = true;
+      return {
+        ...success,
+        exitCode: 17,
+        output: "Build failed\nMissing dependency\n",
+      };
+    };
+    const remove = fs.remove.bind(fs);
+    let releaseAttempted = false;
+    t.mock.method(fs, "remove", async (file: string) => {
+      if (file === layout.lock) {
+        releaseAttempted = true;
+        if (failure !== "partial-remove") throw new Error("release failed");
+      }
+      if (commandFailed && file === layout.source && failure !== "release")
+        throw new Error("partial removal failed");
+      await remove(file);
+    });
+    const logs: string[] = [];
+    t.mock.method(process.stderr, "write", (line: string) => {
+      logs.push(String(line));
+      return true;
+    });
+    await assert.rejects(builder.build(request), {
+      code: "baseline-command-failed",
+      commandIndex: 0,
+      argv: request.commands[0],
+      exitCode: 17,
+      signal: null,
+      outputLines: ["Build failed", "Missing dependency"],
+    });
+    if (failure !== "partial-remove")
+      assert.ok(logs.some((line) => line.includes("release failed")));
+    if (failure !== "release")
+      assert.ok(logs.some((line) => line.includes("partial removal failed")));
+    assert.equal(releaseAttempted, true);
+    assert.equal(await fs.stat(layout.marker), undefined);
+    if (failure === "partial-remove")
+      assert.equal(await fs.stat(layout.lock), undefined);
   });
-  const logs: string[] = [];
-  t.mock.method(process.stderr, "write", (line: string) => {
-    logs.push(String(line));
-    return true;
-  });
-  await assert.rejects(builder.build(request), {
-    code: "baseline-command-failed",
-    exitCode: 17,
-  });
-  assert.ok(logs.some((line) => line.includes("release failed")));
-  assert.equal(await fs.stat(layout.marker), undefined);
-});
+}
