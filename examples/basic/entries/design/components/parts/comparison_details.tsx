@@ -1,9 +1,9 @@
-import { MetaRow } from "../../parts/metadata_row.js";
-import { changeStatusBadge } from "../../library/controls/change-status.js";
-import { useDesignInstance } from "../../library/composition.js";
 import { MockLink } from "mokabook";
 
 import type { ChangeStatus, ComparisonFixture } from "./comparison_fixtures.js";
+import { useDesignInstance } from "../../library/composition.js";
+import { changeStatusBadge } from "../../library/controls/change-status.js";
+import { MetaRow } from "../../parts/metadata_row.js";
 
 export function ChangeStatusBadge({ status }: { status: ChangeStatus }) {
   return (

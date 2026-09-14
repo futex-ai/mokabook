@@ -1,4 +1,5 @@
 import { defineComponent } from "mokabook";
+
 import { action } from "./action.js";
 
 const dependency = "examples/basic/generated/example-components.css";

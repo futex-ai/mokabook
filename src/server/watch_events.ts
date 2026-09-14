@@ -3,11 +3,11 @@ import path from "node:path";
 import { minimatch } from "minimatch";
 
 import { isOwned } from "../build/ownership.js";
+import { isBaselineCachePath } from "../config/cache_paths.js";
 import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig, WatchAction } from "../config/types.js";
 import { isExportIgnoredPath } from "../export/ignored.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
-import { isBaselineCachePath } from "../config/cache_paths.js";
 
 const IGNORED_DIRECTORY_NAMES = new Set([
   ".context",

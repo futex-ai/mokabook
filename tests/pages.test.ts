@@ -3,9 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
+import { checkCompilation } from "../src/build/check.js";
 import { compileCatalogue } from "../src/build/compile.js";
 import { writeCompilation } from "../src/build/transaction.js";
-import { checkCompilation } from "../src/build/check.js";
 import { loadConfig } from "../src/config/load.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 

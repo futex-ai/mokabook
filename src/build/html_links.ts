@@ -1,23 +1,23 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { isSafeRepositoryPath } from "../config/paths.js";
 import {
   isPrivateStaticPath,
   isPublicStaticFile,
 } from "../config/public_files.js";
-import { isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
-import {
-  extractCssReferences,
-  extractHtmlReferences,
-} from "../html_references.js";
 import {
   fragmentViolation,
   htmlResource,
   type ParsedResource,
   type ResourceReference,
 } from "../html_link_validation.js";
+import {
+  extractCssReferences,
+  extractHtmlReferences,
+} from "../html_references.js";
 import { isOwned, pendingGeneratedOrphanRoutes } from "./ownership.js";
 
 interface ReferenceResult {

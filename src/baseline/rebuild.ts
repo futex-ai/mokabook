@@ -1,8 +1,7 @@
 import path from "node:path";
 
-import { errorMessage } from "../errors.js";
 import { timeAsync } from "../diagnostics/timings.js";
-import { baselineEnvironment, runBaselineCommands } from "./commands.js";
+import { errorMessage } from "../errors.js";
 import { completedBaseline, removePartialBaseline } from "./cache.js";
 import {
   assertMockupsPath,
@@ -12,12 +11,13 @@ import {
   type CompletionMarker,
 } from "./cache_layout.js";
 import { cleanupBaselines } from "./cleanup.js";
+import { baselineEnvironment, runBaselineCommands } from "./commands.js";
 import { ensureBaselineDirectory, validateOutputTree } from "./confinement.js";
 import { assertBaselineActive, BaselineError } from "./errors.js";
 import { extractBaseline } from "./extract.js";
 import { acquireBaselineLock } from "./lock.js";
-import { baselineManifestVersion } from "./manifest.js";
 import type { BaselineMaintenanceReporter } from "./maintenance.js";
+import { baselineManifestVersion } from "./manifest.js";
 import type {
   BaselineBuilder,
   BaselineBuildRequest,

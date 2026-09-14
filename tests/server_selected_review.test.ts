@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { randomUUID } from "node:crypto";
 import test from "node:test";
 
 import { parseReviewResult } from "../dist/review/result_validation.js";
 import { readCatalogueChanges } from "../dist/server/component_changes.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { configuredServedReview } from "../dist/server/review_routes.js";
-import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";
+import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 import { repositoryRoot } from "./helpers/fixture.js";
 
 test("a selected comparison reuses classification and reads only its snapshot closure", async (t) => {

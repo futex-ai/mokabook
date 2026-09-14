@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
-import path from "node:path";
 import http from "node:http";
+import path from "node:path";
 import test from "node:test";
+
 import { compileCatalogue } from "../dist/build/compile.js";
 import { componentRuntime } from "../dist/build/component_runtime.js";
 import { MANIFEST_NAME } from "../dist/registry/manifest.js";

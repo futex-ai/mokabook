@@ -2,20 +2,20 @@ import path from "node:path";
 
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
 import { walkFiles } from "../build/discovery.js";
+import { validateControlMetadata } from "../build/link_control_metadata.js";
+import { adaptLinkControls } from "../build/link_controls.js";
+import type { LoadedGraph } from "../build/load_graph.js";
 import type { LogicalReferenceRecord } from "../build/logical_record_types.js";
 import { validateCompatibilityRecords } from "../build/logical_records.js";
 import { logicalArtifactRoutes } from "../build/logical_routes.js";
-import { isPublicStaticFile } from "../config/public_files.js";
+import { rewriteMockLinks } from "../build/mock_links.js";
+import { pendingGeneratedOrphanRoutes } from "../build/ownership.js";
 import { toPosixPath } from "../config/paths.js";
+import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
-import type { LoadedGraph } from "../build/load_graph.js";
-import { pendingGeneratedOrphanRoutes } from "../build/ownership.js";
 import type { ArtifactView } from "../registry/views.js";
-import { rewriteMockLinks } from "../build/mock_links.js";
-import { adaptLinkControls } from "../build/link_controls.js";
-import { validateControlMetadata } from "../build/link_control_metadata.js";
 
 /** Resolve catalogue id links and apply an explicitly configured migration bridge. */
 export function transformCompatibilityDocuments(

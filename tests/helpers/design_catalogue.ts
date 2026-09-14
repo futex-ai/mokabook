@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 
 import { parse, type DefaultTreeAdapterMap } from "parse5";
 
+import { repositoryRoot } from "./fixture.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { loadConfig } from "../../dist/config/load.js";
 import type { ManifestScreen } from "../../dist/registry/types.js";
-import { repositoryRoot } from "./fixture.js";
 
 type Node = DefaultTreeAdapterMap["node"];
 export type Element = DefaultTreeAdapterMap["element"];

@@ -1,7 +1,7 @@
 import { parse } from "parse5";
 
-import { validateComponentRanges } from "../components/ranges.js";
 import { hasGeneratedOwnershipHeader } from "../build/ownership.js";
+import { validateComponentRanges } from "../components/ranges.js";
 import { MokabookError } from "../errors.js";
 import { logicalMarker, parseLogicalMarker } from "../navigation/logical.js";
 import {

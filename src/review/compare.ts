@@ -1,5 +1,3 @@
-import { compareScreen } from "./screen_compare.js";
-import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
 import path from "node:path";
 
 import { minimatch } from "minimatch";
@@ -7,6 +5,7 @@ import { minimatch } from "minimatch";
 import type { Compilation } from "../build/compile.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
 import type { ManifestScreen, Manifest } from "../registry/types.js";
 import {
   copySnapshotDependencies,
@@ -15,9 +14,10 @@ import {
   type ReviewAssetReader,
 } from "./assets.js";
 import { baselineResourceConfig, readBaseManifest } from "./base_manifest.js";
-import { compareComponentCatalogue } from "./component_compare.js";
 import { reviewChangedPaths } from "./changed_paths.js";
+import { compareComponentCatalogue } from "./component_compare.js";
 import type { ReadOnlyReviewRepository } from "./repository.js";
+import { compareScreen } from "./screen_compare.js";
 import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
 import type {
   ReviewArtifact,

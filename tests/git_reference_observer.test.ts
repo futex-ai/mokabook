@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
-import { setImmediate } from "node:timers/promises";
-import test from "node:test";
 import path from "node:path";
+import test from "node:test";
+import { setImmediate } from "node:timers/promises";
+
 import {
   GitReferenceObserver,
   RepositoryGitReferences,

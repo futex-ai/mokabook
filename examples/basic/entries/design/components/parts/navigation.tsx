@@ -1,15 +1,15 @@
-import { MockLink } from "mokabook";
 import type { ReactNode } from "react";
 
-import { NavTree, type NavNode } from "../../parts/nav.js";
-import { Shell, type ArtboardViewport } from "../../parts/shell.js";
+import { MockLink } from "mokabook";
+
 import {
   COMPONENT_PAGES,
   INSPECTION_PAGES,
   type ComponentDesignDestination,
 } from "./destinations.js";
-
 import type { CatalogueIdentity } from "./metadata.js";
+import { NavTree, type NavNode } from "../../parts/nav.js";
+import { Shell, type ArtboardViewport } from "../../parts/shell.js";
 
 export type ChangeScenario =
   "all" | "component" | "screen" | "removed" | "added";

@@ -1,12 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
-import { timeAsync, timeSync } from "../diagnostics/timings.js";
 
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync, timeSync } from "../diagnostics/timings.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import type { Compilation } from "./compile.js";
-import { isOwned, pendingGeneratedOrphanRoutes } from "./ownership.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";
+import { isOwned, pendingGeneratedOrphanRoutes } from "./ownership.js";
 
 /** Atomically replace owned generated files with rollback on any failure. */
 export async function writeCompilation(

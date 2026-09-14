@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
+
 import { compileCatalogue } from "../dist/build/compile.js";
 import { compileRuntime } from "../dist/build/compile_runtime.js";
 import { evaluateBundle } from "../dist/build/consumer_bundle.js";
@@ -9,8 +10,8 @@ import { DocumentCompiler } from "../dist/build/document_compiler.js";
 import { prepareLiveRuntime } from "../dist/build/live_runtime.js";
 import { generatedHeader } from "../dist/build/ownership.js";
 import { loadConfig } from "../dist/config/load.js";
-import { parseManifest, MANIFEST_NAME } from "../dist/registry/manifest.js";
 import { parseCatalogueIndex } from "../dist/registry/catalogue_index.js";
+import { parseManifest, MANIFEST_NAME } from "../dist/registry/manifest.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import {
   createFixture,

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { inspector } from "../../library/inspector/inspector.js";
-import { useDesignInstance } from "../../library/composition.js";
+
 import type { InspectorTab } from "./inspector_icons.js";
+import { useDesignInstance } from "../../library/composition.js";
+import { inspector } from "../../library/inspector/inspector.js";
 
 export interface InspectorPanel {
   id: InspectorTab;

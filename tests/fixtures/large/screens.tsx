@@ -1,6 +1,8 @@
 import { Badge } from "@firna/ui/badge";
 import { Input } from "@firna/ui/input";
+
 import { MockLink } from "mokabook";
+
 import type { AreaComponents } from "./components.js";
 
 interface ScreenProps {

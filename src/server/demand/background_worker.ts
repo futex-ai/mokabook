@@ -1,13 +1,14 @@
 /** A single lower-priority background compilation; foreground requests can pause it. */
-import { parentPort, workerData, type MessagePort } from "node:worker_threads";
 import { setImmediate, setTimeout } from "node:timers/promises";
-import type { ComponentRuntime } from "../../build/component_runtime.js";
-import { compileRuntime } from "../../build/compile_runtime.js";
-import { errorMessage } from "../../errors.js";
-import { runWithTimings } from "../../diagnostics/timings.js";
+import { parentPort, workerData, type MessagePort } from "node:worker_threads";
+
 import { RepositoryCatalogueChangeClassifier } from "../component_changes.js";
-import type { ManifestV5 } from "../../registry/types.js";
 import { WorkerGitCommandRunner } from "./git_worker.js";
+import { compileRuntime } from "../../build/compile_runtime.js";
+import type { ComponentRuntime } from "../../build/component_runtime.js";
+import { runWithTimings } from "../../diagnostics/timings.js";
+import { errorMessage } from "../../errors.js";
+import type { ManifestV5 } from "../../registry/types.js";
 
 const { runtime, pause, debug, existingManifest, existingOutputs, gitPort } =
   workerData as {

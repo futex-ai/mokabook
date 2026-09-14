@@ -1,17 +1,17 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { compileCatalogue } from "../../dist/build/compile.js";
-import { writeCompilation } from "../../dist/build/transaction.js";
-import { loadConfig } from "../../dist/config/load.js";
-import { loadCatalogueSnapshot } from "../../dist/server/catalogue_snapshot.js";
-import { startCatalogueServer } from "../../dist/server/http.js";
 import {
   registerFixturePage,
   createFixture,
   removeFixture,
   type TestFixture,
 } from "../helpers/fixture.js";
+import { compileCatalogue } from "../../dist/build/compile.js";
+import { writeCompilation } from "../../dist/build/transaction.js";
+import { loadConfig } from "../../dist/config/load.js";
+import { loadCatalogueSnapshot } from "../../dist/server/catalogue_snapshot.js";
+import { startCatalogueServer } from "../../dist/server/http.js";
 
 /** One isolated catalogue used by the in-frame navigation browser suite. */
 export interface NavigationFixture {

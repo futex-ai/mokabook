@@ -2,11 +2,12 @@ import path from "node:path";
 
 import { Header } from "tar";
 
-import { CachedBaselineBuilder } from "../../dist/baseline/rebuild.js";
+import { MemoryBaselineFileSystem } from "./baseline_memory.js";
 import type {
   BaselineMaintenanceFailure,
   BaselineMaintenanceReporter,
 } from "../../dist/baseline/maintenance.js";
+import { CachedBaselineBuilder } from "../../dist/baseline/rebuild.js";
 import type {
   BaselineBuildRequest,
   BaselineClock,
@@ -14,7 +15,6 @@ import type {
   BaselineProcessResult,
   BaselineProcessRunner,
 } from "../../dist/baseline/types.js";
-import { MemoryBaselineFileSystem } from "./baseline_memory.js";
 
 export const baselineCommit = "a".repeat(40);
 export const baselineManifest = {

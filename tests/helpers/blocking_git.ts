@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { setTimeout } from "node:timers/promises";
 import type { TestContext } from "node:test";
+import { setTimeout } from "node:timers/promises";
 
 export async function blockingGit(
   t: TestContext,

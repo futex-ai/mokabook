@@ -1,7 +1,7 @@
 import { compileCatalogue } from "../build/compile.js";
 import { writeCompilation } from "../build/transaction.js";
-import type { ResolvedConfig } from "../config/types.js";
 import { projectRealPath } from "../config/paths.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import { readBaseManifest } from "../review/base_manifest.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";

@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 
-import { screenHeader } from "../library/chrome/screen-header.js";
-import { viewControls } from "../library/controls/view-controls.js";
-import { optional, useDesignInstance } from "../library/composition.js";
 import type { ChangeStatus } from "../components/parts/comparison_fixtures.js";
+import { screenHeader } from "../library/chrome/screen-header.js";
+import { optional, useDesignInstance } from "../library/composition.js";
+import { viewControls } from "../library/controls/view-controls.js";
 import { DesignNavigation, useDesignNavigation } from "./design_navigation.js";
 import { DESTINATIONS, type DesignDestination } from "./destinations.js";
 import { TopBar } from "./top_bar.js";

@@ -1,13 +1,15 @@
 import fs from "node:fs/promises";
+
 import { expect, test } from "@playwright/test";
-import { compileCatalogue } from "../../dist/build/compile.js";
-import { loadConfig } from "../../dist/config/load.js";
+
 import { startEvidenceFixture } from "../helpers/evidence_fixture.js";
 import {
   createFixture,
   removeFixture,
   reparentedEntrySource,
 } from "../helpers/fixture.js";
+import { compileCatalogue } from "../../dist/build/compile.js";
+import { loadConfig } from "../../dist/config/load.js";
 
 test("background baselines reconcile removed rows and invalidate changed historical views", async ({
   page,

@@ -1,11 +1,12 @@
 /** Private same-origin admission and immutable sandboxed memory responses. */
 import type { IncomingMessage, ServerResponse } from "node:http";
+
+import { safeDecodePath } from "../respond.js";
+import type { ComponentRenderService } from "./service.js";
 import {
   ComponentRenderError,
   renderStatus,
 } from "../../components/render_types.js";
-import { safeDecodePath } from "../respond.js";
-import type { ComponentRenderService } from "./service.js";
 
 export function localHost(request: IncomingMessage): string | undefined {
   const port = request.socket.localPort;

@@ -3,11 +3,11 @@ import path from "node:path";
 
 import { expect, test } from "@playwright/test";
 
-import { exportCatalogue } from "../../dist/export/run.js";
 import { componentEntrySource } from "../helpers/component_fixture.js";
 import { createExportFixture } from "../helpers/export_fixture.js";
 import { repositoryRoot } from "../helpers/fixture.js";
 import { serveStaticFiles } from "../helpers/static_server.js";
+import { exportCatalogue } from "../../dist/export/run.js";
 
 let site: Awaited<ReturnType<typeof serveStaticFiles>>;
 let directory: string;

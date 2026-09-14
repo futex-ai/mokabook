@@ -2,9 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { MokabookError, type MokabookErrorCode } from "../errors.js";
+import { MOKABOOK_CACHE } from "./cache_paths.js";
 import { isInside, projectRealPath, resolveInside } from "./paths.js";
 import { requireString } from "./rules.js";
-import { MOKABOOK_CACHE } from "./cache_paths.js";
 
 interface ReviewOutBoundary {
   entriesDir: string;

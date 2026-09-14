@@ -1,11 +1,12 @@
 /** Read capabilities for comparisons; this module cannot construct a builder. */
 import path from "node:path";
+
 import { cacheLayout } from "../baseline/cache_layout.js";
 import { NodeBaselineFileSystem } from "../baseline/filesystem.js";
 import { RebuiltBaselineReader } from "../baseline/reader.js";
 import type { BaselineFileSystem } from "../baseline/types.js";
-import { toPosixPath } from "../config/paths.js";
 import { ConfiguredGitCommandRunner } from "../config/git.js";
+import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import { CommittedBaselineReader } from "./committed.js";

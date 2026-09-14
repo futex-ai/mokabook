@@ -1,11 +1,10 @@
-import { smokeRegisteredComponents } from "./components.mjs";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { inspectConsumerExport } from "./export.mjs";
 
 import { runCommand } from "./command.mjs";
-import { smokeExternalWatch } from "./watch.mjs";
+import { smokeRegisteredComponents } from "./components.mjs";
+import { inspectConsumerExport } from "./export.mjs";
 import {
   copyFixture,
   initializeGit,
@@ -13,6 +12,7 @@ import {
   runBin,
   smokeServer,
 } from "./fixture.mjs";
+import { smokeExternalWatch } from "./watch.mjs";
 
 export async function smokeEsmConsumer(context) {
   const root = path.join(context.workingRoot, "esm-consumer");

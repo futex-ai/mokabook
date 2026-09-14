@@ -1,5 +1,5 @@
-import { propField } from "../../../library/inspector/prop-field.js";
 import { optional, useDesignInstance } from "../../../library/composition.js";
+import { propField } from "../../../library/inspector/prop-field.js";
 import type { ActionProps } from "../../parts/action_props.js";
 
 /** The screen supplies actual inputs and values; the component owns field framing. */

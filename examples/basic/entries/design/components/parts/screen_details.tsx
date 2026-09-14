@@ -1,9 +1,9 @@
 import { MockLink } from "mokabook";
 
-import { welcomeInstances } from "./fixtures.js";
-import { Inspector, type InspectorPanel } from "./inspector.js";
 import { ComparisonDetails } from "./comparison_details.js";
 import { screenComparison } from "./comparison_fixtures.js";
+import { welcomeInstances } from "./fixtures.js";
+import { Inspector, type InspectorPanel } from "./inspector.js";
 import { InstanceDetails } from "./instance_details.js";
 import { InstanceTree } from "./instance_tree.js";
 import { SCREENS, screenIdentity } from "./metadata.js";

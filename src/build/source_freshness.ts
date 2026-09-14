@@ -5,8 +5,8 @@ import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import type { ComponentRuntime } from "./component_runtime.js";
 import { loadConsumerGraph } from "./load_graph.js";
-import { normalizeSourceFiles } from "./source_inventory.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";
+import { normalizeSourceFiles } from "./source_inventory.js";
 
 /** Re-resolve both graphs without rendering or writing consumer output. */
 export async function assertFreshSourceInventory(

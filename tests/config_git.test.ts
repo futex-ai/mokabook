@@ -8,12 +8,12 @@ import { compileCatalogue } from "../dist/build/compile.js";
 import { FileSystemGeneratedOutputStore } from "../dist/build/output_store.js";
 import { ConfiguredGitCommandRunner } from "../dist/config/git.js";
 import { loadConfig } from "../dist/config/load.js";
+import { GitReviewAssetReader } from "../dist/review/assets.js";
+import { prepareReviewRepository } from "../dist/review/prepare.js";
 import {
   baselineReaderForCommit,
   readOnlyRepositoryForCommit,
 } from "../dist/review/repository.js";
-import { prepareReviewRepository } from "../dist/review/prepare.js";
-import { GitReviewAssetReader } from "../dist/review/assets.js";
 import { RepositoryComponentChanges } from "../dist/server/component_changes.js";
 import {
   createFixture,

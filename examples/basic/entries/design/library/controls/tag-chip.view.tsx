@@ -1,7 +1,8 @@
-import { useDesignStyle } from "../style_context.js";
 import { MockLink } from "mokabook";
-import { TagIcon } from "../../parts/icons.js";
+
+import { useDesignStyle } from "../style_context.js";
 import type { TagChipProps } from "./tag-chip.js";
+import { TagIcon } from "../../parts/icons.js";
 
 export function TagChipView({ label, selected, destination }: TagChipProps) {
   useDesignStyle("tag-chip");

@@ -4,13 +4,13 @@ import path from "node:path";
 import test from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
-import { loadConfig } from "../dist/config/load.js";
 import { loadConsumerGraph } from "../dist/build/load_graph.js";
-import { prepareRegistry } from "../dist/registry/prepare.js";
+import { loadConfig } from "../dist/config/load.js";
 import {
   runWithTimings,
   type TimingEvent,
 } from "../dist/diagnostics/timings.js";
+import { prepareRegistry } from "../dist/registry/prepare.js";
 import { generateLargeFixture, largeSize } from "./fixtures/large/generate.js";
 import { repositoryRoot } from "./helpers/fixture.js";
 

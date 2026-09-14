@@ -1,5 +1,5 @@
-import { MokabookError } from "../errors.js";
 import { validateManifestComponent } from "../components/manifest_validation.js";
+import { MokabookError } from "../errors.js";
 import { isCatalogueId } from "../navigation/logical.js";
 import {
   nonEmptyString,

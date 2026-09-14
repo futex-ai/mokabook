@@ -1,20 +1,20 @@
-import { pathToFileURL } from "node:url";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
-import {
-  compileCatalogue,
-  type Compilation,
-} from "../../dist/build/compile.js";
-import { writeCompilation } from "../../dist/build/transaction.js";
-import { loadConfig } from "../../dist/config/load.js";
 import { componentEntrySource } from "../helpers/component_fixture.js";
 import {
   createFixture,
   removeFixture,
   type TestFixture,
 } from "../helpers/fixture.js";
+import {
+  compileCatalogue,
+  type Compilation,
+} from "../../dist/build/compile.js";
+import { writeCompilation } from "../../dist/build/transaction.js";
+import { loadConfig } from "../../dist/config/load.js";
 
 let fixture: TestFixture;
 let compilation: Compilation;

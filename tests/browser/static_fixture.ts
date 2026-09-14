@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { exportCatalogue } from "../../dist/export/run.js";
 import { comparisonEntrySource } from "../helpers/comparison_source.js";
 import {
   createExportFixture,
@@ -9,6 +8,7 @@ import {
 } from "../helpers/export_fixture.js";
 import { repositoryRoot, validEntrySource } from "../helpers/fixture.js";
 import { serveStaticFiles } from "../helpers/static_server.js";
+import { exportCatalogue } from "../../dist/export/run.js";
 
 /** Export an independent consumer, then remove its entire source/Git repository. */
 export async function startStaticFixture(comparisons = false) {

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
+
 import ts from "typescript";
 
 import { CachedBaselineBuilder } from "../dist/baseline/rebuild.js";

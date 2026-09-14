@@ -5,11 +5,11 @@ import { promisify } from "node:util";
 
 import { expect, test } from "@playwright/test";
 
-import { exportCatalogue } from "../../dist/export/run.js";
 import { createExampleBaseline } from "../helpers/example_baseline.js";
 import { repositoryRoot } from "../helpers/fixture.js";
 import { serveStaticFiles } from "../helpers/static_server.js";
 import { chooseViewport } from "./workspace_actions.js";
+import { exportCatalogue } from "../../dist/export/run.js";
 
 let site: Awaited<ReturnType<typeof serveStaticFiles>>;
 let root: string;

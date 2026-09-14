@@ -1,6 +1,5 @@
-import React from "react";
-
 import { FirnaCard } from "@firna/ui";
+import React from "react";
 
 export function renderComponent(
   name: string,

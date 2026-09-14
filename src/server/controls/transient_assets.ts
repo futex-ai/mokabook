@@ -1,21 +1,22 @@
 /** Immutable resource closure for an edited document; all bytes remain in memory. */
 import fs from "node:fs";
 import path from "node:path";
+
+import { createCatalogue } from "../catalogue.js";
+import { contentType } from "../respond.js";
+import { rebaseTransientNavigation } from "./transient_links.js";
 import { adaptBrowseDocument } from "../../browse/document_adapter.js";
-import { isSafeRepositoryPath } from "../../config/paths.js";
-import { isPublicStaticFile } from "../../config/public_files.js";
-import type { ResolvedConfig } from "../../config/types.js";
 import type { ComponentViewRecord } from "../../components/manifest_types.js";
 import type { ComponentWireProps } from "../../components/prop_types.js";
 import { ComponentRenderError } from "../../components/render_types.js";
+import { isSafeRepositoryPath } from "../../config/paths.js";
+import { isPublicStaticFile } from "../../config/public_files.js";
+import type { ResolvedConfig } from "../../config/types.js";
 import {
   extractCssReferences,
   extractHtmlReferences,
 } from "../../html_references.js";
-import { rebaseTransientNavigation } from "./transient_links.js";
 import type { CatalogueMetadata } from "../../registry/catalogue_index.js";
-import { createCatalogue } from "../catalogue.js";
-import { contentType } from "../respond.js";
 
 export const RENDER_BYTES = 32 * 1024 * 1024;
 export interface RenderFile {

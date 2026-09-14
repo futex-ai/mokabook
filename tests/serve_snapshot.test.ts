@@ -1,5 +1,3 @@
-import { committedReviewRepository } from "../dist/review/repository.js";
-import { componentEntrySource } from "./helpers/component_fixture.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -7,13 +5,15 @@ import test from "node:test";
 
 import { MokabookError } from "../dist/errors.js";
 import { GitRepositoryEvidence } from "../dist/review/git_evidence.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { NodeCatalogueServerFactory } from "../dist/server/factory.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { configuredServedReview } from "../dist/server/review_routes.js";
 import { serve } from "../dist/server/serve.js";
-import { changedFixture } from "./helpers/changed_fixture.js";
-import { validEntrySource } from "./helpers/fixture.js";
 import { observeBackgroundClassification } from "./helpers/background_classification.js";
+import { changedFixture } from "./helpers/changed_fixture.js";
+import { componentEntrySource } from "./helpers/component_fixture.js";
+import { validEntrySource } from "./helpers/fixture.js";
 
 const page = `
 import { definePage } from "mokabook";

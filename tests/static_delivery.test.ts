@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  adoptStaticDelivery,
+  readStaticDelivery,
+} from "../dist/client/static_delivery.js";
+import {
   parseStaticDelivery,
   resolveDeliveryHref,
   validFragmentQuery,
 } from "../dist/navigation/delivery.js";
-import {
-  adoptStaticDelivery,
-  readStaticDelivery,
-} from "../dist/client/static_delivery.js";
 
 const descriptor = {
   schemaVersion: 2,

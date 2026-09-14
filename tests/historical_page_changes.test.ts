@@ -1,12 +1,12 @@
-import { committedReviewRepository } from "../dist/review/repository.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { committedReviewRepository } from "../dist/review/repository.js";
+import { createCatalogue } from "../dist/server/catalogue.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
 import { changedContentPaths } from "../dist/server/changed_content.js";
-import { createCatalogue } from "../dist/server/catalogue.js";
 import {
   historicalPageFixture,
   pageDocument,

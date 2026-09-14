@@ -1,6 +1,7 @@
 import path from "node:path";
-import { prepareFixture, preparedFixture } from "./setup.mjs";
+
 import { start, stop } from "./process.mjs";
+import { prepareFixture, preparedFixture } from "./setup.mjs";
 
 const repository = path.resolve(import.meta.dirname, "../..");
 async function main() {

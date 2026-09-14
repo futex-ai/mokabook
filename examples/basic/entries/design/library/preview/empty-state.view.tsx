@@ -1,6 +1,6 @@
 import { useDesignStyle } from "../style_context.js";
-import { DesignLink } from "../../parts/design_navigation.js";
 import type { EmptyStateProps } from "./empty-state.js";
+import { DesignLink } from "../../parts/design_navigation.js";
 
 export function EmptyStateView({
   title,

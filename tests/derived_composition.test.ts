@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
 
-import { CommittedBaselineReader } from "../dist/review/committed.js";
 import { RebuiltBaselineReader } from "../dist/baseline/reader.js";
 import type { BaselineBuildRequest } from "../dist/baseline/types.js";
-import { prepareReviewRepository } from "../dist/review/prepare.js";
 import { loadConfig } from "../dist/config/load.js";
-import { createFixture, removeFixture } from "./helpers/fixture.js";
+import { CommittedBaselineReader } from "../dist/review/committed.js";
+import { prepareReviewRepository } from "../dist/review/prepare.js";
 import { MemoryBaselineFileSystem } from "./helpers/baseline_memory.js";
+import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("composition selects committed reads without building and pins repository evidence", async (t) => {
   const fixture = await createFixture();

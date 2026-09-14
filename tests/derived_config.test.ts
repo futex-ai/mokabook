@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
-import { resolveConfig } from "../dist/config/validate.js";
 import { loadConfig } from "../dist/config/load.js";
+import { resolveConfig } from "../dist/config/validate.js";
 import {
   createFixture,
   removeFixture,

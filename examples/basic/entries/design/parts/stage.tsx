@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { deviceFrame } from "../library/preview/device-frame.js";
+
 import { optional, useDesignInstance } from "../library/composition.js";
+import { deviceFrame } from "../library/preview/device-frame.js";
 
 export function Stage({ children }: { children: ReactNode }) {
   return <div className="mbk-stage">{children}</div>;

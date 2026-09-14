@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+
 import { ForegroundActivity } from "../dist/server/demand/activity.js";
 
 test("overlapping Props and preview work stays busy until all current channels finish", () => {

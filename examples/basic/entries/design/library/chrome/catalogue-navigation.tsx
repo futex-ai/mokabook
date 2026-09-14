@@ -1,8 +1,9 @@
 import { defineComponent, type ComponentProps } from "mokabook";
+
 import { libraryMetadata } from "../metadata.js";
 import { destination, flag, optionalText, text } from "../schemas.js";
-import { NAV_TREE } from "../../parts/nav_data.js";
 import { CatalogueNavigationView } from "./catalogue-navigation.view.js";
+import { NAV_TREE } from "../../parts/nav_data.js";
 
 const propSchema = {
   kind: "object",

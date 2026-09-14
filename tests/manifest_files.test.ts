@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
+import type { ResolvedRegistryEntry } from "../dist/authoring/types.js";
 import { checkCompilation } from "../dist/build/check.js";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { pendingGeneratedOrphanRoutes } from "../dist/build/ownership.js";
@@ -16,7 +17,6 @@ import {
   readManifest,
   serializeManifest,
 } from "../dist/registry/manifest.js";
-import type { ResolvedRegistryEntry } from "../dist/authoring/types.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("current filesystem reads reject legacy-only output even with historical compatibility", async (context) => {

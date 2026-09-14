@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-import type { RunningServer } from "../../dist/server/http.js";
 import { loadComparison } from "./comparison_actions.js";
 import { selectedComparisonFixture } from "./selected_comparison_fixture.js";
 import { chooseScheme, chooseViewport } from "./workspace_actions.js";
+import type { RunningServer } from "../../dist/server/http.js";
 
 let server: RunningServer;
 const cleanup: (() => Promise<void>)[] = [];

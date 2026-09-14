@@ -1,11 +1,13 @@
-import { MockLink } from "mokabook";
-import { useDesignStyle } from "../style_context.js";
 import { useId, type CSSProperties } from "react";
+
+import { MockLink } from "mokabook";
+
+import { useDesignStyle } from "../style_context.js";
+import type { InspectorProps } from "./inspector.js";
 import {
   CloseInspectorIcon,
   InspectorIcon,
 } from "../../components/parts/inspector_icons.js";
-import type { InspectorProps } from "./inspector.js";
 
 export function InspectorView({
   tabs,

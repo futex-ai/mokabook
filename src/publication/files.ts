@@ -1,10 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { isBaselineCachePath } from "../config/cache_paths.js";
 import { locatePath, type FileLocation } from "../config/file_locations.js";
 import { isInside, projectRealPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { isBaselineCachePath } from "../config/cache_paths.js";
 
 /** A confined file, or link metadata whose target must not be read. */
 export type PublicationFile =

@@ -3,7 +3,8 @@ import {
   type ComponentProps,
   type ComponentRenderContext,
 } from "mokabook";
-import { DESTINATIONS } from "../../parts/destinations.js";
+
+import { libraryTags } from "../controls/tag-picker.js";
 import { libraryMetadata } from "../metadata.js";
 import {
   destination,
@@ -12,8 +13,8 @@ import {
   tagRecords,
   text,
 } from "../schemas.js";
-import { libraryTags } from "../controls/tag-picker.js";
 import { TopBarView } from "./top-bar.view.js";
+import { DESTINATIONS } from "../../parts/destinations.js";
 
 const propSchema = {
   kind: "object",

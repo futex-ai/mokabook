@@ -1,4 +1,3 @@
-import { ServedReviewRepository } from "./review_repository.js";
 import type { BaselineBuilder } from "../baseline/types.js";
 import { prepareLiveRuntime } from "../build/live_runtime.js";
 import {
@@ -8,14 +7,17 @@ import {
 import { FileSystemConfigLoader, type ConfigLoader } from "../config/load.js";
 import type { ResolvedConfig } from "../config/types.js";
 import {
-  NodeCatalogueServerFactory,
-  type CatalogueServerFactory,
-} from "./factory.js";
-import { configuredServedReview } from "./review_routes.js";
-import {
   RepositoryCatalogueChangeClassifier,
   type CatalogueChangeClassifier,
 } from "./component_changes.js";
+import { BackgroundGeneration } from "./demand/generation.js";
+import {
+  NodeCatalogueServerFactory,
+  type CatalogueServerFactory,
+} from "./factory.js";
+import { ServedReviewRepository } from "./review_repository.js";
+import { configuredServedReview } from "./review_routes.js";
+import { serveWatched } from "./serve_watched.js";
 import {
   NodeProcessSupervisorFactory,
   type ProcessSupervisorFactory,
@@ -24,8 +26,6 @@ import {
   ChokidarWatcherFactory,
   type ConsumerWatcherFactory,
 } from "./watcher.js";
-import { BackgroundGeneration } from "./demand/generation.js";
-import { serveWatched } from "./serve_watched.js";
 
 /** Public Serve options after CLI validation. */
 export interface ServeOptions {

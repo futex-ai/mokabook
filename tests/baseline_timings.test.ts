@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { loadConfig } from "../dist/config/load.js";
-import { prepareReviewRepository } from "../dist/review/prepare.js";
-import { createFixture, removeFixture } from "./helpers/fixture.js";
 
+import { loadConfig } from "../dist/config/load.js";
 import {
   runWithTimings,
   type TimingEvent,
 } from "../dist/diagnostics/timings.js";
+import { prepareReviewRepository } from "../dist/review/prepare.js";
 import { baselineFixture, success } from "./helpers/baseline_fixture.js";
+import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("baseline timings separate cold preparation and cache reuse without consumer data", async () => {
   const { builder, request, calls } = baselineFixture();

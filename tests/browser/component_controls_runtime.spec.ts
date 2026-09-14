@@ -1,16 +1,18 @@
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
+
 import { expect, test } from "@playwright/test";
+
+import { controlsEntrySource } from "../helpers/component_controls_fixture.js";
+import { componentReviewFixture } from "../helpers/component_review_fixture.js";
 import { componentRuntime } from "../../dist/build/component_runtime.js";
+import { renderReviewArtifact } from "../../dist/review/artifact.js";
+import { compareReview } from "../../dist/review/compare.js";
+import { writeReviewArtifact } from "../../dist/review/write.js";
 import {
   startCatalogueServer,
   type RunningServer,
 } from "../../dist/server/http.js";
-import { compareReview } from "../../dist/review/compare.js";
-import { renderReviewArtifact } from "../../dist/review/artifact.js";
-import { writeReviewArtifact } from "../../dist/review/write.js";
-import { controlsEntrySource } from "../helpers/component_controls_fixture.js";
-import { componentReviewFixture } from "../helpers/component_review_fixture.js";
 
 let server: RunningServer;
 const cleanup: (() => Promise<void>)[] = [];

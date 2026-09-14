@@ -9,13 +9,13 @@ import type { GeneratedOutputStore } from "../dist/build/output_store.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { FileSystemConfigLoader, loadConfig } from "../dist/config/load.js";
 import type { ResolvedConfig } from "../dist/config/types.js";
-import type { CatalogueServerFactory } from "../dist/server/factory.js";
-import type { RunningServer, ServerOptions } from "../dist/server/http.js";
-import { serve } from "../dist/server/serve.js";
 import type {
   ChildFactory,
   ChildHandle,
 } from "../dist/server/child_process.js";
+import type { CatalogueServerFactory } from "../dist/server/factory.js";
+import type { RunningServer, ServerOptions } from "../dist/server/http.js";
+import { serve } from "../dist/server/serve.js";
 import {
   ReadyProcessSupervisor,
   type ProcessSupervisor,

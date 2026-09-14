@@ -1,11 +1,11 @@
-import { prepareReviewRepository } from "../dist/review/prepare.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
-import { computeCatalogueChanges } from "../dist/server/changed.js";
+import { prepareReviewRepository } from "../dist/review/prepare.js";
 import { RepositorySelectedReview } from "../dist/review/selected.js";
+import { computeCatalogueChanges } from "../dist/server/changed.js";
 import { derivedFixture } from "./helpers/derived_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 

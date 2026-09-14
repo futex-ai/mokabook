@@ -1,8 +1,6 @@
-import type { RenderCapability } from "../components/render_types.js";
-import type { ComponentChangeSnapshot } from "./component_changes.js";
-import { redirectId, renderView } from "./view_routes.js";
 import type { ServerResponse } from "node:http";
 
+import type { RenderCapability } from "../components/render_types.js";
 import type { ResolvedConfig } from "../config/types.js";
 import {
   openEventStream,
@@ -11,15 +9,17 @@ import {
   type ServedAssets,
 } from "./browser_assets.js";
 import type { Catalogue } from "./catalogue.js";
+import type { ComponentChangeSnapshot } from "./component_changes.js";
+import { handleDemandRequest } from "./demand/http.js";
+import type { DocumentService } from "./demand/service.js";
 import { homePage, notFoundPage } from "./pages.js";
 import { send } from "./respond.js";
 import type { ReviewRoutes } from "./review_routes.js";
 import { shellContext } from "./shell/context.js";
 import { SHELL_CSS } from "./shell/css.js";
 import { serveStatic } from "./static_routes.js";
-import { handleDemandRequest } from "./demand/http.js";
-import type { DocumentService } from "./demand/service.js";
 import type { ChangesStatus } from "./update_messages.js";
+import { redirectId, renderView } from "./view_routes.js";
 
 /** Dispatch a request against one validated catalogue generation. */
 export async function handleCatalogueRequest(

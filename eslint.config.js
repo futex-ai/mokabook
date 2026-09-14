@@ -1,4 +1,5 @@
 import eslint from "@eslint/js";
+import importPlugin from "eslint-plugin-import-x";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 
@@ -18,6 +19,30 @@ export default tseslint.config(
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
+  {
+    plugins: { import: importPlugin },
+    rules: {
+      "import/first": "error",
+      "import/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            ["parent", "sibling", "index"],
+          ],
+          alphabetize: { order: "asc", caseInsensitive: true },
+          pathGroups: [
+            { pattern: "../**", group: "parent", position: "before" },
+          ],
+          pathGroupsExcludedImportTypes: ["builtin", "external"],
+          distinctGroup: false,
+          "newlines-between": "always",
+        },
+      ],
+    },
+  },
   {
     files: ["**/*.ts", "**/*.tsx"],
     rules: {

@@ -5,14 +5,14 @@
 
 import type { ReactNode } from "react";
 
+import type { Catalogue } from "../catalogue.js";
+import { ComponentStage } from "./component_stage.js";
+import { BrowserFrame, PhoneFrame } from "./frames.js";
+import type { RouteTarget } from "./target.js";
 import type { Viewport } from "../../authoring/types.js";
 import { encodeUrlPath } from "../../config/paths.js";
 import { catalogueViewHref } from "../../navigation/delivery.js";
 import type { ManifestScreen, ManifestUseCase } from "../../registry/types.js";
-import type { Catalogue } from "../catalogue.js";
-import { BrowserFrame, PhoneFrame } from "./frames.js";
-import { ComponentStage } from "./component_stage.js";
-import type { RouteTarget } from "./target.js";
 
 /** Served URLs a frame swaps between; both absent in a light-only catalogue. */
 interface FragmentSources {

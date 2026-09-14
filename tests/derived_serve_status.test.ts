@@ -3,6 +3,7 @@ import test from "node:test";
 import { setTimeout } from "node:timers/promises";
 
 import { BaselineError } from "../dist/baseline/errors.js";
+import type { BaselineBuilder } from "../dist/baseline/types.js";
 import { FileSystemGeneratedOutputStore } from "../dist/build/output_store.js";
 import { FileSystemConfigLoader } from "../dist/config/load.js";
 import type { ResolvedConfig } from "../dist/config/types.js";
@@ -15,7 +16,6 @@ import { serve, type ServeDependencies } from "../dist/server/serve.js";
 import { NodeProcessSupervisorFactory } from "../dist/server/supervisor.js";
 import type { ChangesStatus } from "../dist/server/update_messages.js";
 import { ChokidarWatcherFactory } from "../dist/server/watcher.js";
-import type { BaselineBuilder } from "../dist/baseline/types.js";
 import {
   GatedBaselineBuilder,
   nodeBaselineBuilder,

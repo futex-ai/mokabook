@@ -1,5 +1,5 @@
-import { variantAddress, viewPairs } from "./component_pairing.js";
 import path from "node:path";
+
 import { minimatch } from "minimatch";
 
 import { canonicalJson } from "../components/data.js";
@@ -10,7 +10,6 @@ import { analyzeHierarchy } from "../registry/hierarchy.js";
 import type { Manifest, ManifestEntry } from "../registry/types.js";
 import type { ReviewAssetReader } from "./assets.js";
 import { affectedConsumers } from "./component_affected.js";
-import { validateComponentReviewSources } from "./component_result_sources.js";
 import {
   address,
   ComponentDependencyPolicy,
@@ -19,7 +18,9 @@ import {
   metadata,
   uniqueReasons,
 } from "./component_metadata.js";
+import { variantAddress, viewPairs } from "./component_pairing.js";
 import { ComponentMaterialReader } from "./component_resources.js";
+import { validateComponentReviewSources } from "./component_result_sources.js";
 import type {
   ChangedEntry,
   ComponentReview,

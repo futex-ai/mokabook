@@ -1,13 +1,12 @@
+import http, { type ServerResponse } from "node:http";
+
 import type { ComponentRuntime } from "../build/component_runtime.js";
+import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync, timeSync } from "../diagnostics/timings.js";
+import { MokabookError } from "../errors.js";
 import { parseManifest } from "../registry/manifest.js";
 import type { ManifestV5 } from "../registry/types.js";
-import { ComponentRenderService } from "./controls/service.js";
-import { handleControls, localHost } from "./controls/http.js";
-import http, { type ServerResponse } from "node:http";
-import { timeAsync, timeSync } from "../diagnostics/timings.js";
-
-import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
+import { catalogueAtBaseline, createCatalogue } from "./catalogue.js";
 import {
   catalogueSnapshotForConfig,
   loadServedCatalogueSnapshot,
@@ -15,23 +14,24 @@ import {
   type CatalogueSnapshot,
 } from "./catalogue_snapshot.js";
 import {
-  ComponentChangeCache,
-  type ComponentChangeSource,
-  type ComponentChangeSnapshot,
-} from "./component_changes.js";
-import { catalogueAtBaseline, createCatalogue } from "./catalogue.js";
-import {
   loadBrowserClientModules,
   loadBrowserNavigationModules,
   loadShellFontAssets,
 } from "./client_modules.js";
-import { handleCatalogueRequest } from "./http_routes.js";
-import { DocumentService } from "./demand/service.js";
+import {
+  ComponentChangeCache,
+  type ComponentChangeSource,
+  type ComponentChangeSnapshot,
+} from "./component_changes.js";
+import { handleControls, localHost } from "./controls/http.js";
+import { ComponentRenderService } from "./controls/service.js";
 import { ForegroundActivity } from "./demand/activity.js";
 import type { PreviewObservation } from "./demand/observation.js";
+import { DocumentService } from "./demand/service.js";
+import { handleCatalogueRequest } from "./http_routes.js";
 import { listenOnAvailablePort } from "./ports.js";
-import { ReviewRoutes, type ServedReview } from "./review_routes.js";
 import { send } from "./respond.js";
+import { ReviewRoutes, type ServedReview } from "./review_routes.js";
 import type { CatalogueUpdate, ChangesStatus } from "./update_messages.js";
 
 /** Options for one deterministic server child. */

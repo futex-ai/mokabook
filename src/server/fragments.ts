@@ -3,12 +3,12 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import type { ManifestComponent } from "../components/manifest_types.js";
+import { generatedViews } from "../components/views.js";
 import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { extractHtmlReferences } from "../html_references.js";
 import { isLogicalFragment } from "../navigation/logical.js";
-import type { ManifestComponent } from "../components/manifest_types.js";
-import { generatedViews } from "../components/views.js";
 import type { ManifestEntry, ManifestScreen } from "../registry/types.js";
 import type { Catalogue } from "./catalogue.js";
 import type { DocumentService } from "./demand/service.js";

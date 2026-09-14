@@ -2,13 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { MokabookError } from "../errors.js";
+import { requireDirectory } from "./path_validation.js";
+import { resolveInside } from "./paths.js";
 import type {
   ModuleLoader,
   ModuleResolutionConfig,
   ResolvedModuleResolutionConfig,
 } from "./types.js";
-import { resolveInside } from "./paths.js";
-import { requireDirectory } from "./path_validation.js";
 
 const LOADERS = new Set<ModuleLoader>([
   "base64",

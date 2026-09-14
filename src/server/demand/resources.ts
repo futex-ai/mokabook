@@ -1,9 +1,9 @@
 /** Observe visited resource closures without waiting for all catalogue documents. */
-import type { ComponentRuntime } from "../../build/component_runtime.js";
-import { errorMessage } from "../../errors.js";
 import { ResourceWatcher } from "../resource_watcher.js";
 import type { ConsumerWatcherFactory } from "../watcher.js";
 import type { PreviewObservation } from "./observation.js";
+import type { ComponentRuntime } from "../../build/component_runtime.js";
+import { errorMessage } from "../../errors.js";
 
 export class PreviewResources {
   private readonly resources: ResourceWatcher;

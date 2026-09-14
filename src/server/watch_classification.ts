@@ -1,7 +1,7 @@
 /** Latest-wins repository classification for a watched catalogue. */
 
-import { timeAsync, timingCounts } from "../diagnostics/timings.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync, timingCounts } from "../diagnostics/timings.js";
 import type { Manifest } from "../registry/types.js";
 import type {
   CatalogueChangeClassifier,

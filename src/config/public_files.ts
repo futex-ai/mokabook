@@ -3,10 +3,10 @@ import path from "node:path";
 
 import { isAuthoringSource } from "../build/source_inventory.js";
 import { LEGACY_MANIFEST_NAME, MANIFEST_NAME } from "../registry/manifest.js";
+import { isBaselineCachePath } from "./cache_paths.js";
 import { locatePath, type FileLocation } from "./file_locations.js";
 import { projectRealPath } from "./paths.js";
 import type { ResolvedConfig } from "./types.js";
-import { isBaselineCachePath } from "./cache_paths.js";
 
 /** Catalogue manifests are internal even when requested through another path. */
 export function isInternalCatalogueFile(

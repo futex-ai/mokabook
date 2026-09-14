@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
-import { MockLink } from "mokabook";
-import { inspector } from "../library/inspector/inspector.js";
-import { useDesignInstance } from "../library/composition.js";
-import { MetaRow } from "./metadata_row.js";
 
+import { MockLink } from "mokabook";
+
+import { useDesignInstance } from "../library/composition.js";
+import { inspector } from "../library/inspector/inspector.js";
 import { DESTINATIONS, type DesignDestination } from "./destinations.js";
 import { FlowIcon } from "./icons.js";
+import { MetaRow } from "./metadata_row.js";
 import { SUBJECTS, type ScreenSubject } from "./subjects.js";
 import { TagChips } from "./tag_filter.js";
 

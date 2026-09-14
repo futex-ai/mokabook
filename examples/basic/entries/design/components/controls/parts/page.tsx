@@ -1,9 +1,15 @@
 import { MockLink } from "mokabook";
 
+import {
+  controlsFixtures,
+  isPublished,
+  type ControlsState,
+} from "./fixtures.js";
+import { ControlsPanel } from "./panel.js";
 import type { ArtboardViewport } from "../../../parts/shell.js";
-import { ComponentInfo } from "../../parts/component_info.js";
 import { ComparisonDetails } from "../../parts/comparison_details.js";
 import { actionComparison } from "../../parts/comparison_fixtures.js";
+import { ComponentInfo } from "../../parts/component_info.js";
 import { ComponentLayout } from "../../parts/component_layout.js";
 import { UsedBy } from "../../parts/component_usage.js";
 import { CONTROLS_PAGES } from "../../parts/destinations.js";
@@ -13,12 +19,6 @@ import {
   ComponentCanvas,
   ComponentComparison,
 } from "../../parts/preview.js";
-import {
-  controlsFixtures,
-  isPublished,
-  type ControlsState,
-} from "./fixtures.js";
-import { ControlsPanel } from "./panel.js";
 
 function ControlsVariants({ state }: { state: ControlsState }) {
   const fixture = controlsFixtures[state];

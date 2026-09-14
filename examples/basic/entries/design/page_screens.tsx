@@ -1,14 +1,14 @@
-import { DetailsPanel } from "./parts/details.js";
-import { MetaRow } from "./parts/metadata_row.js";
 import { screen } from "mokabook";
 
 import { ExampleDocument } from "../document.js";
+import { useDesignNavigation } from "./parts/design_navigation.js";
+import { DESTINATIONS } from "./parts/destinations.js";
+import { DetailsPanel } from "./parts/details.js";
+import { MetaRow } from "./parts/metadata_row.js";
 import { NavDrawer, NavTree, type NavNode } from "./parts/nav.js";
 import { ScreenHead, Shell, type ArtboardViewport } from "./parts/shell.js";
 import { Stage } from "./parts/stage.js";
 import { EmptyState } from "./parts/stage_content.js";
-import { useDesignNavigation } from "./parts/design_navigation.js";
-import { DESTINATIONS } from "./parts/destinations.js";
 
 const nodes: readonly NavNode[] = [
   {

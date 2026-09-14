@@ -3,8 +3,8 @@ import type { GeneratedComponentView } from "../components/views.js";
 import type { WorkspaceData } from "../server/shell/workspace_data.js";
 import { currentColorScheme, currentViewport } from "./browse_state.js";
 import { authenticateRanges } from "./component_geometry.js";
-import { element } from "./inspector_panels.js";
 import type { HighlightFrame } from "./component_highlight.js";
+import { element } from "./inspector_panels.js";
 
 export function workspaceViews(
   doc: Document,

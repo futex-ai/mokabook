@@ -1,5 +1,5 @@
-import type { BaselineError } from "./errors.js";
 import type { CompletionMarker } from "./cache_layout.js";
+import type { BaselineError } from "./errors.js";
 
 /** File metadata without following symbolic links. */
 export interface BaselineStat {

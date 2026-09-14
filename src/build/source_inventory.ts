@@ -5,12 +5,12 @@ import { fileURLToPath } from "node:url";
 import type { Metafile } from "esbuild";
 
 import { locatePath } from "../config/file_locations.js";
-import type { ResolvedConfig } from "../config/types.js";
 import {
   isInside,
   isSafeRepositoryPath,
   projectRealPath,
 } from "../config/paths.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 
 /** Names reserved for authoring, including stale helpers no longer imported. */

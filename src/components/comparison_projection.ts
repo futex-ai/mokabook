@@ -1,4 +1,8 @@
 import {
+  normalizeReviewPair,
+  normalizeSingleDocument,
+} from "../review/ignore.js";
+import {
   projectOwnedMaterial,
   sameOwner,
   stripMarkers,
@@ -10,10 +14,6 @@ import type {
   ComponentViewRecord,
 } from "./manifest_types.js";
 import { validateComponentRanges, type RenderedRange } from "./ranges.js";
-import {
-  normalizeReviewPair,
-  normalizeSingleDocument,
-} from "../review/ignore.js";
 
 export interface ComponentProjection {
   before: string;

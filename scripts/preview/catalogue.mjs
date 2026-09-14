@@ -1,17 +1,22 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { previewOwnership, stagePreviewArtifact } from "./artifact.mjs";
+import {
+  captureComparison,
+  previewComparisonProvider,
+  publishComparison,
+} from "./comparisons.mjs";
+import { capturePublicationInputs } from "./inputs.mjs";
+import { isInside, projectRealPath } from "../../dist/config/paths.js";
+import { errorMessage } from "../../dist/errors.js";
 import { withExportCleanup } from "../../dist/export/cleanup.js";
 import { assertExportOwnership } from "../../dist/export/ownership.js";
 import { resolveExportOutput } from "../../dist/export/paths.js";
 import { ExportTransaction } from "../../dist/export/transaction.js";
-import { errorMessage } from "../../dist/errors.js";
 import { publicationOptions } from "../../dist/publication/options.js";
-import { prepareReviewRepository } from "../../dist/review/prepare.js";
-import { capturePublicationInputs } from "./inputs.mjs";
-import { previewOwnership, stagePreviewArtifact } from "./artifact.mjs";
 import { copyPublicFiles } from "../../dist/publication/resources.js";
-import { isInside, projectRealPath } from "../../dist/config/paths.js";
+import { prepareReviewRepository } from "../../dist/review/prepare.js";
 import { loadCatalogueSnapshot } from "../../dist/server/catalogue_snapshot.js";
 import { computeCatalogueChanges } from "../../dist/server/changed.js";
 import {
@@ -20,11 +25,6 @@ import {
   loadShellFontAssets,
 } from "../../dist/server/client_modules.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
-import {
-  captureComparison,
-  previewComparisonProvider,
-  publishComparison,
-} from "./comparisons.mjs";
 
 const liveUpdateScript =
   '<script src="/__mokabook/client/browser.js" type="module"></script>';

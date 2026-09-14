@@ -1,19 +1,20 @@
 /** Watched Serve adopts lightweight generations; exhaustive work follows in the background. */
 import { randomBytes } from "node:crypto";
-import { bindTimings, timeAsync } from "../diagnostics/timings.js";
-import { loadConsumerGraph } from "../build/load_graph.js";
-import { prepareLiveRuntime } from "../build/live_runtime.js";
+
 import type { Compilation } from "../build/compile.js";
 import type { ComponentRuntime } from "../build/component_runtime.js";
+import { prepareLiveRuntime } from "../build/live_runtime.js";
+import { loadConsumerGraph } from "../build/load_graph.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { bindTimings, timeAsync } from "../diagnostics/timings.js";
 import { errorMessage } from "../errors.js";
 import { RepositoryCatalogueChangeClassifier } from "./component_changes.js";
 import { BackgroundGeneration } from "./demand/generation.js";
-import { PreviewResources } from "./demand/resources.js";
 import {
   GitReferenceObserver,
   RepositoryGitReferences,
 } from "./demand/git_references.js";
+import { PreviewResources } from "./demand/resources.js";
 import { ResourceWatcher } from "./resource_watcher.js";
 import type { RunningServe, ServeDependencies, ServeOptions } from "./serve.js";
 import {
@@ -23,7 +24,6 @@ import {
   watcherReadyBeforeShutdown,
 } from "./serve_lifecycle.js";
 import type { ProcessSupervisor } from "./supervisor.js";
-import { createSourceWatcher } from "./watcher.js";
 import {
   classifyWatchPath,
   NotificationGate,
@@ -32,6 +32,7 @@ import {
   WatchDebouncer,
   watchTargets,
 } from "./watch_events.js";
+import { createSourceWatcher } from "./watcher.js";
 
 export async function serveWatched(
   config: ResolvedConfig,

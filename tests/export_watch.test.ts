@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { setTimeout as delay } from "node:timers/promises";
 import test from "node:test";
+import { setTimeout as delay } from "node:timers/promises";
 
-import { exportCatalogue } from "../dist/export/run.js";
 import { EXPORT_MARKER } from "../dist/export/ownership.js";
+import { exportCatalogue } from "../dist/export/run.js";
 import {
   classifyWatchPath,
   isPackageOwnedIgnoredWatchPath,

@@ -1,5 +1,6 @@
-import type { CSSProperties } from "react";
 import { Button } from "@firna/ui/button";
+import type { CSSProperties } from "react";
+
 import { defineComponent, MockLink } from "mokabook";
 
 const dependency = "examples/basic/generated/example-components.css";

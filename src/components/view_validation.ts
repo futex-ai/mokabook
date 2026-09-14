@@ -9,8 +9,8 @@ import type {
   ComponentViewRecord,
   ManifestComponent,
 } from "./manifest_types.js";
-import { sortedStrings, validateResourcePath } from "./validation_helpers.js";
 import { validateProps } from "./props.js";
+import { sortedStrings, validateResourcePath } from "./validation_helpers.js";
 import { validateViewReferences } from "./view_references.js";
 
 export function validateComponentViews(

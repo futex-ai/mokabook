@@ -1,6 +1,7 @@
-import React from "react";
-
 import { FirnaButton, FirnaCard } from "@firna/ui";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
 import {
   definePage,
   defineCollection,
@@ -10,7 +11,6 @@ import {
   ReviewIgnore,
 } from "mokabook";
 
-import { renderToStaticMarkup } from "react-dom/server";
 import { renderComponent } from "../legacy/components.js";
 import { accent } from "../../shared/tokens.js";
 

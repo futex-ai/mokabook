@@ -1,21 +1,21 @@
-import type { ReadOnlyReviewRepository } from "../review/repository.js";
-import { timeAsync, timeSync } from "../diagnostics/timings.js";
-import type { ComponentChangeSnapshot } from "./component_changes.js";
 import { assertFreshSourceInventory } from "../build/source_freshness.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync, timeSync } from "../diagnostics/timings.js";
 import { MokabookError } from "../errors.js";
-import type { CatalogueChangeSnapshot } from "../registry/changes.js";
-import { parseManifest, readManifest } from "../registry/manifest.js";
 import {
   parseCatalogueIndex,
   type CatalogueIndex,
 } from "../registry/catalogue_index.js";
+import type { CatalogueChangeSnapshot } from "../registry/changes.js";
+import { parseManifest, readManifest } from "../registry/manifest.js";
 import type { ManifestV5 } from "../registry/types.js";
+import type { ReadOnlyReviewRepository } from "../review/repository.js";
 import { createCatalogue, type Catalogue } from "./catalogue.js";
 import {
   computeCatalogueChanges,
   type ResolvedCatalogueChanges,
 } from "./changed.js";
+import type { ComponentChangeSnapshot } from "./component_changes.js";
 
 const configIdentity = Symbol("validated catalogue config");
 

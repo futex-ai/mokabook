@@ -1,6 +1,6 @@
-import { DESTINATIONS } from "./destinations.js";
 import { COMPONENT_PAGES } from "../components/parts/destinations.js";
 import type { CatalogueNavigationProps } from "../library/chrome/catalogue-navigation.js";
+import { DESTINATIONS } from "./destinations.js";
 
 export const NAV_TREE = [
   {

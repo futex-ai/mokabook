@@ -1,7 +1,7 @@
-import type { ReadOnlyReviewRepository } from "./repository.js";
 import { CommittedBaselineReader } from "./committed.js";
 import { GitRepositoryEvidence } from "./git_evidence.js";
 import { executeGit } from "./git_process.js";
+import type { ReadOnlyReviewRepository } from "./repository.js";
 
 /** Repository object classification used before reading Review dependencies. */
 export type GitFileKind = "missing" | "other" | "regular" | "symlink";

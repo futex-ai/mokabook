@@ -2,13 +2,13 @@ import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 
 import { compileCatalogue, type Compilation } from "../build/compile.js";
-import { publicPathLocation } from "../config/public_files.js";
-import { isSafeRepositoryPath } from "../config/paths.js";
 import { loadConfig } from "../config/load.js";
+import { isSafeRepositoryPath } from "../config/paths.js";
+import { publicPathLocation } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import type { OptionalReviewAssetReader } from "../review/assets.js";
-import type { RepositoryEvidence } from "../review/git.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
+import type { RepositoryEvidence } from "../review/git.js";
 import { exportError } from "./error.js";
 import { capturePublicFiles } from "./public_files.js";
 

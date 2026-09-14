@@ -1,10 +1,10 @@
 /** Request cancellation and response/context validation for temporary previews. */
-import type { GeneratedComponentView } from "../components/views.js";
 import type {
   ComponentRenderRequest,
   ComponentRenderSuccess,
   RenderCapability,
 } from "../components/render_types.js";
+import type { GeneratedComponentView } from "../components/views.js";
 
 export async function requestComponentPreview(
   request: ComponentRenderRequest,

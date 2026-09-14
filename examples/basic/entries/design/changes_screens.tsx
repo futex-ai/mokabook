@@ -1,4 +1,5 @@
 import { screen } from "mokabook";
+
 import { PreviewWorkspace } from "./components/parts/workspace.js";
 import { ComparisonStage } from "./parts/compare.js";
 import { DESTINATIONS } from "./parts/destinations.js";

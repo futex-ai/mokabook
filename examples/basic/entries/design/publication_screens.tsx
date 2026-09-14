@@ -1,6 +1,8 @@
 import { screen } from "mokabook";
 
+import { DESTINATIONS } from "./parts/destinations.js";
 import { DetailsPanel } from "./parts/details.js";
+import { MiniWelcome } from "./parts/mini_screens.js";
 import { NavTree } from "./parts/nav.js";
 import {
   ScreenHead,
@@ -9,8 +11,6 @@ import {
   type ArtboardViewport,
 } from "./parts/shell.js";
 import { BrowserFrame, PhoneFrame, Stage } from "./parts/stage.js";
-import { MiniWelcome } from "./parts/mini_screens.js";
-import { DESTINATIONS } from "./parts/destinations.js";
 
 function CatalogueView({
   viewport,

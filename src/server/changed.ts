@@ -41,18 +41,17 @@ export async function computeCatalogueChanges(
   git: ReadOnlyReviewRepository,
   manifest?: ManifestV5,
 ): Promise<ResolvedCatalogueChanges> {
-  const client = git;
   const compilation =
     config.generatedOutput === "derived" && !manifest
       ? await compileCatalogue(config)
       : undefined;
   manifest ??= compilation?.manifest ?? readManifest(config);
-  const commit = await client.evidence.mergeBase(base, "HEAD");
+  const commit = await git.evidence.mergeBase(base, "HEAD");
   const componentChanges = await readCatalogueChanges(
     config,
     manifest,
     base,
-    client,
+    git,
     commit,
     compilation?.outputs,
   );

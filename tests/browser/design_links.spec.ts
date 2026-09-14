@@ -1,7 +1,8 @@
-import { chooseViewport } from "./workspace_actions.js";
 import { setTimeout } from "node:timers/promises";
 
 import { expect, test, type Locator, type Page } from "@playwright/test";
+
+import { chooseViewport } from "./workspace_actions.js";
 
 async function tabTo(page: Page, link: Locator): Promise<void> {
   for (let step = 0; step < 35; step += 1) {

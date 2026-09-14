@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
+
 import { compileCatalogue } from "../dist/build/compile.js";
 import { evaluateBundle } from "../dist/build/consumer_bundle.js";
 import { DocumentCompiler } from "../dist/build/document_compiler.js";
 import { prepareLiveRuntime } from "../dist/build/live_runtime.js";
 import { loadConfig } from "../dist/config/load.js";
-import { startCatalogueServer } from "../dist/server/http.js";
 import { DocumentService } from "../dist/server/demand/service.js";
+import { startCatalogueServer } from "../dist/server/http.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import {
   createFixture,

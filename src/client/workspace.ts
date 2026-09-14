@@ -1,16 +1,14 @@
-import { installWorkspaceEvents } from "./workspace_events.js";
-import { workspaceLoader } from "./workspace_loading.js";
-import { collapseFrame, expandedFrame } from "./browse_frames.js";
-import { ComponentControls } from "./component_controls.js";
-/** One disposable controller for the package's component and screen inspector. */
 import type { ComponentInstanceRecord } from "../components/manifest_types.js";
 import type { WorkspaceData } from "../server/shell/workspace_data.js";
+import { collapseFrame, expandedFrame } from "./browse_frames.js";
+/** One disposable controller for the package's component and screen inspector. */
 import {
   currentColorScheme,
   currentViewport,
   setColorScheme,
   setViewport,
 } from "./browse_state.js";
+import { ComponentControls } from "./component_controls.js";
 import { authenticateRanges, rangeBounds } from "./component_geometry.js";
 import { installComponentHighlight } from "./component_highlight.js";
 import {
@@ -20,12 +18,9 @@ import {
   renderUsage,
 } from "./inspector_panels.js";
 import { installInspectorTabs } from "./inspector_tabs.js";
+import { installWorkspaceEvents } from "./workspace_events.js";
 import { renderWorkspaceEvidence } from "./workspace_evidence.js";
-import { applyVariant, selectedVariant } from "./workspace_variants.js";
-import {
-  mergeWorkspaceEvidence,
-  updateWorkspaceEvidence,
-} from "./workspace_updates.js";
+import { workspaceLoader } from "./workspace_loading.js";
 import {
   workspaceViews,
   workspaceFrames,
@@ -33,6 +28,11 @@ import {
   renderViewContexts,
   revealWorkspaceInstance,
 } from "./workspace_preview.js";
+import {
+  mergeWorkspaceEvidence,
+  updateWorkspaceEvidence,
+} from "./workspace_updates.js";
+import { applyVariant, selectedVariant } from "./workspace_variants.js";
 
 export function installWorkspace(
   doc: Document,

@@ -1,23 +1,22 @@
 /** Restart supervision retains ownership until each child's cleanup completes. */
 
 import type { ComponentRuntime } from "../build/component_runtime.js";
-import type { ManifestV5 } from "../registry/types.js";
-
-import { MokabookError } from "../errors.js";
 import { bindTimings, timeSync } from "../diagnostics/timings.js";
+import { MokabookError } from "../errors.js";
+import type { ManifestV5 } from "../registry/types.js";
 import { ManagedChild, type ChildShutdownTimings } from "./child_lifecycle.js";
 import { NodeChildFactory, type ChildFactory } from "./child_process.js";
 import type { ComponentChangeSnapshot } from "./component_changes.js";
 import { componentRuntimeMessage } from "./controls/runtime_ipc.js";
 import {
+  parsePreviewObservation,
+  type PreviewObservation,
+} from "./demand/observation.js";
+import {
   childUpdateMessage,
   type ChangesStatus,
   type CatalogueUpdateKind,
 } from "./update_messages.js";
-import {
-  parsePreviewObservation,
-  type PreviewObservation,
-} from "./demand/observation.js";
 
 /** Restartable child interface used by watched Serve. */
 export interface ProcessSupervisor {

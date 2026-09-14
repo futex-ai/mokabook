@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { ManifestComponent } from "../dist/components/manifest_types.js";
 import {
   isNavDisclosureClosed,
   isNavDisclosureKey,
   NavDisclosurePreference,
   type NavPreferenceStorage,
 } from "../dist/client/browse_navigation.js";
+import type { ManifestComponent } from "../dist/components/manifest_types.js";
 import type {
   ManifestCollection,
   ManifestEntry,

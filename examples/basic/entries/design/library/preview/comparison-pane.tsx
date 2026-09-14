@@ -1,9 +1,10 @@
 import { defineComponent, type ComponentProps } from "mokabook";
-import { MiniWelcome } from "../../parts/mini_screens.js";
-import { deviceFrame } from "./device-frame.js";
+
 import { libraryMetadata } from "../metadata.js";
 import { optionalText, text } from "../schemas.js";
 import { ComparisonPaneView } from "./comparison-pane.view.js";
+import { deviceFrame } from "./device-frame.js";
+import { MiniWelcome } from "../../parts/mini_screens.js";
 
 const propSchema = {
   kind: "object",

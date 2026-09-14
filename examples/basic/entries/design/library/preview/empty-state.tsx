@@ -1,8 +1,9 @@
 import { defineComponent, type ComponentProps } from "mokabook";
-import { DESTINATIONS } from "../../parts/destinations.js";
+
 import { libraryMetadata } from "../metadata.js";
 import { destination, optionalText, text } from "../schemas.js";
 import { EmptyStateView } from "./empty-state.view.js";
+import { DESTINATIONS } from "../../parts/destinations.js";
 
 const propSchema = {
   kind: "object",

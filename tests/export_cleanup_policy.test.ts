@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { withExportCleanup } from "../dist/export/cleanup.js";
 import { errorMessage } from "../dist/errors.js";
+import { withExportCleanup } from "../dist/export/cleanup.js";
 
 test("cleanup runs once after successful work and returns the original result", async () => {
   const events: string[] = [];

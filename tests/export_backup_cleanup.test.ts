@@ -3,12 +3,12 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
+import { fileExportOperations } from "../dist/export/operations.js";
+import { EXPORT_MARKER } from "../dist/export/ownership.js";
 import {
   ExportTransaction,
   TRANSACTION_MARKER,
 } from "../dist/export/transaction.js";
-import { fileExportOperations } from "../dist/export/operations.js";
-import { EXPORT_MARKER } from "../dist/export/ownership.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("late unlisted files during deletion stop backup cleanup without being deleted", async (context) => {

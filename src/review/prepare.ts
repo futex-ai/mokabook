@@ -3,6 +3,7 @@ import { isDeepStrictEqual } from "node:util";
 
 import { completedBaseline } from "../baseline/cache.js";
 import { cacheLayout } from "../baseline/cache_layout.js";
+import type { CompletionMarker } from "../baseline/cache_layout.js";
 import { SystemBaselineClock } from "../baseline/clock.js";
 import { assertBaselineActive, BaselineError } from "../baseline/errors.js";
 import { NodeBaselineFileSystem } from "../baseline/filesystem.js";
@@ -14,14 +15,13 @@ import type {
   BaselineFileSystem,
   BaselineProgress,
 } from "../baseline/types.js";
-import { toPosixPath } from "../config/paths.js";
 import { ConfiguredGitCommandRunner } from "../config/git.js";
+import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { MokabookError } from "../errors.js";
 import { timeAsync } from "../diagnostics/timings.js";
+import { MokabookError } from "../errors.js";
 import type { GitCommandRunner } from "./git.js";
 import { GitRepositoryEvidence } from "./git_evidence.js";
-import type { CompletionMarker } from "../baseline/cache_layout.js";
 import {
   readOnlyRepositoryForCommit,
   type ReadOnlyReviewRepository,

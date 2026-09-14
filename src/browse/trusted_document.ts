@@ -1,11 +1,11 @@
 import path from "node:path";
 
 import type { Viewport } from "../authoring/types.js";
+import type { ComponentViewRecord } from "../components/manifest_types.js";
+import { generatedViews } from "../components/views.js";
 import { encodeUrlPath } from "../config/paths.js";
 import { MokabookError } from "../errors.js";
 import type { LogicalTarget } from "../navigation/logical.js";
-import type { ComponentViewRecord } from "../components/manifest_types.js";
-import { generatedViews } from "../components/views.js";
 import type { Catalogue } from "../server/catalogue.js";
 
 /** Manifest-derived identity for one generated Browse document. */

@@ -1,8 +1,9 @@
 /** Keep Git-call assertions observable while production classification stays in its worker. */
 import type { TestContext } from "node:test";
+
 import type { ResolvedConfig } from "../../dist/config/types.js";
-import { BackgroundCompilation } from "../../dist/server/demand/background.js";
 import { RepositoryCatalogueChangeClassifier } from "../../dist/server/component_changes.js";
+import { BackgroundCompilation } from "../../dist/server/demand/background.js";
 
 export function observeBackgroundClassification(
   context: TestContext,

@@ -1,3 +1,4 @@
+import { libraryStyleFiles, type LibraryStyle } from "./style_files.js";
 export type LibraryGroup = "chrome" | "controls" | "inspector" | "preview";
 
 /** Registration metadata is separate from implementation impact dependencies. */
@@ -20,4 +21,3 @@ export function libraryMetadata(
     colorSchemes: ["light"] as const,
   };
 }
-import { libraryStyleFiles, type LibraryStyle } from "./style_files.js";

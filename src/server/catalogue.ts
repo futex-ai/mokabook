@@ -1,18 +1,18 @@
+import type { ManifestComponent } from "../components/manifest_types.js";
+import type { CatalogueMetadata } from "../registry/catalogue_index.js";
 import {
   removedManifestEntries,
   type RemovedEntrySnapshot,
 } from "../registry/changes.js";
-import type { ManifestComponent } from "../components/manifest_types.js";
-import type { CatalogueMetadata } from "../registry/catalogue_index.js";
+import {
+  analyzeHierarchy,
+  type CatalogueHierarchy,
+} from "../registry/hierarchy.js";
 import type {
   ManifestEntry,
   ManifestScreen,
   Manifest,
 } from "../registry/types.js";
-import {
-  analyzeHierarchy,
-  type CatalogueHierarchy,
-} from "../registry/hierarchy.js";
 
 /** Validated lookup model used by server routes. */
 export interface Catalogue {

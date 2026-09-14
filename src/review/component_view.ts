@@ -1,17 +1,17 @@
 import { stripMarkers } from "../components/comparison_material.js";
-import type { GeneratedComponentView } from "../components/views.js";
-import { validateComponentRanges } from "../components/ranges.js";
 import {
   changedComponentImplementations,
   projectComponentPair,
 } from "../components/comparison_projection.js";
+import { validateComponentRanges } from "../components/ranges.js";
+import type { GeneratedComponentView } from "../components/views.js";
+import type { ComponentDependencyPolicy } from "./component_metadata.js";
+import { changedResourceBytes } from "./component_resource_changes.js";
+import type { ComponentMaterialReader } from "./component_resources.js";
 import type { EntryChangeReason } from "./component_types.js";
-import type { ViewReview } from "./types.js";
 import { normalizeReviewPair, normalizeSingleDocument } from "./ignore.js";
 import { snapshotPath } from "./paths.js";
-import type { ComponentDependencyPolicy } from "./component_metadata.js";
-import type { ComponentMaterialReader } from "./component_resources.js";
-import { changedResourceBytes } from "./component_resource_changes.js";
+import type { ViewReview } from "./types.js";
 
 export interface ComparedComponentView {
   view: ViewReview;

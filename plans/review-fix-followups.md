@@ -49,13 +49,16 @@ for the rebuild post-steps.
       `tests/baseline_cleanup.test.ts` with an injected fake reporter.
 - [x] Update `src/baseline/README.md`.
 
-## Milestone 4: Cleanup and import ordering
+## Milestone 4: Cleanup and import ordering — completed
 
-- [ ] Delete the `const client = git` alias in `src/server/changed.ts`.
-- [ ] Add an ESLint import-order rule to `eslint.config.js` matching the
+- [x] Delete the `const client = git` alias in `src/server/changed.ts`.
+- [x] Add an ESLint import-order rule to `eslint.config.js` matching the
       existing convention (Node builtins, external packages, then relative
       imports, alphabetised within groups) and fix every file it reports.
-- [ ] Run format, lint, typecheck, `npm test`, `npm run example:check`,
+- [x] Use the ESLint 10-compatible `eslint-plugin-import-x` implementation of
+      `import/order`; upstream `eslint-plugin-import` only declares support
+      through ESLint 9. Verify that the bulk fix preserves code outside imports.
+- [x] Run format, lint, typecheck, `npm test`, `npm run example:check`,
       browser tests, `cargo xtask check`; commit and push.
 
 ## Milestone 5: Review

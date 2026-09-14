@@ -1,11 +1,10 @@
-import type { ArtboardViewport } from "../../parts/shell.js";
 import { actionVariants } from "./action_props.js";
+import { componentComparison } from "./comparison_fixtures.js";
 import {
   ComponentDetails,
   type ComponentPageState,
 } from "./component_details.js";
 import { ComponentLayout } from "./component_layout.js";
-import { componentComparison } from "./comparison_fixtures.js";
 import { VariantPicker } from "./controls.js";
 import { COMPONENT_PAGES } from "./destinations.js";
 import { COMPONENT_BY_STATE } from "./metadata.js";
@@ -15,6 +14,7 @@ import {
   ComponentComparison,
   ToolbarExample,
 } from "./preview.js";
+import type { ArtboardViewport } from "../../parts/shell.js";
 
 /** Shared component-page composition; each owning screen exports both artboards. */
 export function ComponentPage({

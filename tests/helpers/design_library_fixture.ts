@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 
+import { copyExampleSources } from "./example_sources.js";
+import { repositoryRoot } from "./fixture.js";
 import {
   compileCatalogue,
   type Compilation,
@@ -10,8 +12,6 @@ import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { classifyComponents } from "../../dist/review/component_classification.js";
 import type { ReadOnlyReviewRepository } from "../../dist/review/repository.js";
-import { copyExampleSources } from "./example_sources.js";
-import { repositoryRoot } from "./fixture.js";
 
 /** Copy the actual consumer so source-edit tests never mutate the working catalogue. */
 export async function designLibraryFixture(

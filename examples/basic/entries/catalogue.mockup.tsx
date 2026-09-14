@@ -1,7 +1,6 @@
-import { action } from "./components/action.js";
-import { toolbar } from "./components/toolbar.js";
 import { Badge } from "@firna/ui/badge";
 import { Input } from "@firna/ui/input";
+
 import {
   defineCollection,
   defineScreen,
@@ -12,6 +11,8 @@ import {
   reviewMaterialKey,
 } from "mokabook";
 
+import { action } from "./components/action.js";
+import { toolbar } from "./components/toolbar.js";
 import { renderExampleDocument } from "./document.js";
 
 const metadata = {

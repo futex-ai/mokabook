@@ -1,5 +1,7 @@
 import fs from "node:fs/promises";
 
+import { componentEntrySource } from "./component_fixture.js";
+import { createFixture, removeFixture } from "./fixture.js";
 import {
   compileCatalogue,
   type Compilation,
@@ -7,8 +9,6 @@ import {
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
 import type { ReadOnlyReviewRepository } from "../../dist/review/repository.js";
-import { createFixture, removeFixture } from "./fixture.js";
-import { componentEntrySource } from "./component_fixture.js";
 
 export async function componentReviewFixture(
   t: { after: (fn: () => Promise<void>) => void },

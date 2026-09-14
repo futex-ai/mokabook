@@ -1,6 +1,6 @@
 import { screen } from "mokabook";
-import { PreviewWorkspace } from "./components/parts/workspace.js";
 
+import { PreviewWorkspace } from "./components/parts/workspace.js";
 import { ComparisonStage } from "./parts/compare.js";
 import { DESTINATIONS } from "./parts/destinations.js";
 import { DetailsPanel } from "./parts/details.js";

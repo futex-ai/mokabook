@@ -1,16 +1,16 @@
 import { parse } from "parse5";
 
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
+import { componentFragmentRoute } from "../components/paths.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import { extractHtmlReferences } from "../html_references.js";
 import {
   duplicateReservedAttributeName,
   type HtmlSourceLocation,
 } from "../navigation/reserved_attributes.js";
-import { componentFragmentRoute } from "../components/paths.js";
 import { fragmentRoute } from "../registry/manifest.js";
 import { effectiveColorSchemes, VIEWPORTS } from "../registry/views.js";
-import type { ResolvedConfig } from "../config/types.js";
 import {
   logicalNamespace,
   nativeLinkClass,

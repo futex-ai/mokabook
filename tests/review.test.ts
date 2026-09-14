@@ -6,24 +6,24 @@ import test from "node:test";
 import { promisify } from "node:util";
 
 import { compileCatalogue } from "../dist/build/compile.js";
+import type { Compilation } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
-import { compareReview } from "../dist/review/compare.js";
+import type { ManifestScreen, ManifestV5 } from "../dist/registry/types.js";
 import { renderReviewArtifact } from "../dist/review/artifact.js";
+import { compareReview } from "../dist/review/compare.js";
 import {
   NodeGitCommandRunner,
   CommittedRepository,
 } from "../dist/review/git.js";
-import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import {
   normalizeReviewPair,
   normalizeSingleDocument,
 } from "../dist/review/ignore.js";
+import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import { runReview } from "../dist/review/run.js";
-import { writeReviewArtifact } from "../dist/review/write.js";
 import type { ReviewResult } from "../dist/review/types.js";
-import type { Compilation } from "../dist/build/compile.js";
-import type { ManifestScreen, ManifestV5 } from "../dist/registry/types.js";
+import { writeReviewArtifact } from "../dist/review/write.js";
 import {
   createFixture,
   removeFixture,

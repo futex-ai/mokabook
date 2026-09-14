@@ -1,4 +1,5 @@
 import type { ManifestComponent } from "../components/manifest_types.js";
+import type { CatalogueMetadata } from "./catalogue_index.js";
 import { analyzeHierarchy } from "./hierarchy.js";
 import type {
   ManifestEntry,
@@ -56,4 +57,3 @@ export function removedManifestEntries(
         a.entry.id.localeCompare(b.entry.id),
     );
 }
-import type { CatalogueMetadata } from "./catalogue_index.js";

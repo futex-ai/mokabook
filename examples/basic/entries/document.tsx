@@ -1,5 +1,6 @@
-import { mockLink } from "mokabook";
 import { renderToStaticMarkup } from "react-dom/server";
+
+import { mockLink } from "mokabook";
 
 /** Complete example document shared by the page and its shell designs. */
 export function ExampleDocument({

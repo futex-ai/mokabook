@@ -1,6 +1,6 @@
-import fs from "node:fs/promises";
-import { constants } from "node:fs";
 import { createHash, randomUUID } from "node:crypto";
+import { constants } from "node:fs";
+import fs from "node:fs/promises";
 import path from "node:path";
 
 import type { BaselineFileSystem, BaselineStat } from "./types.js";

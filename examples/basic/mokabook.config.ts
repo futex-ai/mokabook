@@ -1,14 +1,14 @@
 import { defineConfig } from "mokabook";
-import {
-  libraryStyleCandidates,
-  withLibraryStyles,
-} from "./entries/design/library/style_files.js";
 
 import {
   designBaseStyles,
   componentLayoutStyles,
   workspaceLayoutStyles,
 } from "./entries/design/components/parts/styles.js";
+import {
+  libraryStyleCandidates,
+  withLibraryStyles,
+} from "./entries/design/library/style_files.js";
 
 export default defineConfig({
   generatedOutput: "derived",

@@ -1,11 +1,11 @@
 import { MockLink } from "mokabook";
 
-import { BrowserFrame, PhoneFrame } from "../../parts/stage.js";
-import type { ArtboardViewport } from "../../parts/shell.js";
-import { ActionExample, ToolbarExample } from "./preview.js";
-import { HighlightMask, type InspectionSelection } from "./highlight.js";
-import { PreviewScheme } from "./view_controls.js";
 import { footerLabelChange } from "./comparison_fixtures.js";
+import { HighlightMask, type InspectionSelection } from "./highlight.js";
+import { ActionExample, ToolbarExample } from "./preview.js";
+import { PreviewScheme } from "./view_controls.js";
+import type { ArtboardViewport } from "../../parts/shell.js";
+import { BrowserFrame, PhoneFrame } from "../../parts/stage.js";
 
 export type ScreenPageState =
   | "closed"

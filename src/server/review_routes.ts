@@ -1,6 +1,4 @@
 /** Lazy comparison snapshots used by the catalogue diff controls. */
-import type { ReviewRepositorySource } from "./review_repository.js";
-
 import type { ServerResponse } from "node:http";
 
 import { encodeUrlPath } from "../config/paths.js";
@@ -13,18 +11,19 @@ import type {
   SelectedReviewProvider,
   SelectedReviewSource,
 } from "../review/selection_types.js";
-import { SelectedReviewRoutes } from "./selected_review_routes.js";
+import { safeDecodePath, send } from "./respond.js";
 import {
   ReviewGenerationStore,
   type ReviewArtifactProvider,
   type ReviewGeneration,
 } from "./review_generations.js";
+import type { ReviewRepositorySource } from "./review_repository.js";
 import {
   redirectReview,
   sendReviewFailure,
   serveReviewArtifactFile,
 } from "./review_responses.js";
-import { safeDecodePath, send } from "./respond.js";
+import { SelectedReviewRoutes } from "./selected_review_routes.js";
 
 const DIFF_ROUTE = "/__mokabook/diffs/";
 const GENERATION_ROUTE = `${DIFF_ROUTE}__generations/`;

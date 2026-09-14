@@ -1,5 +1,6 @@
-import { MockLink } from "mokabook";
 import { useId } from "react";
+
+import { MockLink } from "mokabook";
 
 export type InspectionSelection = "off" | "outer" | "nested";
 

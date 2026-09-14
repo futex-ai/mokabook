@@ -1,10 +1,10 @@
 /** One active job, eight queued pages, latest request per page, bounded termination. */
+import type { TransientRender } from "./transient_assets.js";
+import type { RenderWorker, RenderWorkerFactory } from "./worker_client.js";
 import {
   ComponentRenderError,
   type ComponentRenderRequest,
 } from "../../components/render_types.js";
-import type { TransientRender } from "./transient_assets.js";
-import type { RenderWorker, RenderWorkerFactory } from "./worker_client.js";
 
 interface Job {
   request: ComponentRenderRequest;

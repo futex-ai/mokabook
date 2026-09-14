@@ -1,4 +1,3 @@
-import { committedReviewRepository } from "../dist/review/repository.js";
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
@@ -8,20 +7,21 @@ import { promisify } from "node:util";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
+import { changedManifestRoutes } from "../dist/registry/changed_routes.js";
 import { compareReview } from "../dist/review/compare.js";
 import {
   NodeGitCommandRunner,
   CommittedRepository,
 } from "../dist/review/git.js";
 import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
-import { changedManifestRoutes } from "../dist/registry/changed_routes.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
-import { nestedRepository } from "./helpers/nested_repository.js";
 import {
   createFixture,
   removeFixture,
   validEntrySource,
 } from "./helpers/fixture.js";
+import { nestedRepository } from "./helpers/nested_repository.js";
 
 const execFileAsync = promisify(execFile);
 

@@ -1,12 +1,12 @@
 import type { ResolvedConfig } from "../config/types.js";
+import { NodeGitCommandRunner } from "../review/git.js";
 import { checkCompilation } from "./check.js";
 import type { Compilation } from "./compile.js";
-import { writeCompilation } from "./transaction.js";
-import { NodeGitCommandRunner } from "../review/git.js";
 import {
   GitTrackedGeneratedOutput,
   type TrackedGeneratedOutput,
 } from "./tracked_output.js";
+import { writeCompilation } from "./transaction.js";
 
 /** Filesystem boundary for generated catalogue snapshots. */
 export interface GeneratedOutputStore {

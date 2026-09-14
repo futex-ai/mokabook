@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import { setTimeout } from "node:timers/promises";
+
 import { timingCollector } from "./timings.mjs";
 
 /** Stream diagnostics live while retaining the small CLI log for readiness checks. */

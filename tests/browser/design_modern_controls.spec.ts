@@ -3,6 +3,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { expect, test } from "@playwright/test";
+
 import { repositoryRoot } from "../helpers/fixture.js";
 
 const screens = JSON.parse(

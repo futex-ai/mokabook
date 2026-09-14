@@ -4,10 +4,10 @@ import path from "node:path";
 import test from "node:test";
 
 import { prepareReviewRepository } from "../dist/review/prepare.js";
-import { readCatalogueChanges } from "../dist/server/component_changes.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
-import { derivedFixture } from "./helpers/derived_fixture.js";
+import { readCatalogueChanges } from "../dist/server/component_changes.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";
+import { derivedFixture } from "./helpers/derived_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 
 for (const components of [false, true]) {

@@ -4,7 +4,6 @@
 // Collection summaries carry folder icons, leaves carry their entry-kind icon,
 // and every row paints faint vertical guides (see `navRowStyle`).
 
-import { catalogueViewHref } from "../../navigation/delivery.js";
 import type { Catalogue } from "../catalogue.js";
 import type { ShellContext } from "./context.js";
 import {
@@ -15,6 +14,7 @@ import {
   PageIcon,
   ScreenIcon,
 } from "./icons.js";
+import { NavFilter, NavStatus } from "./nav_filter.js";
 import { navRowStyle } from "./nav_guides.js";
 import { NavigationResizeHandle } from "./nav_resize.js";
 import { buildNavSections } from "./nav_tree.js";
@@ -25,7 +25,7 @@ import type {
   NavSectionNode,
 } from "./nav_tree.js";
 import { WorkspaceIcon } from "./workspace_icons.js";
-import { NavFilter, NavStatus } from "./nav_filter.js";
+import { catalogueViewHref } from "../../navigation/delivery.js";
 
 function containsRoute(node: NavNode, route: string | undefined): boolean {
   if (route === undefined) {

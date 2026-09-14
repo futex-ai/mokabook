@@ -1,15 +1,15 @@
-import { committedReviewRepository } from "../dist/review/repository.js";
 import assert from "node:assert/strict";
+import path from "node:path";
 import test from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
-import path from "node:path";
-import { runReview } from "../dist/review/run.js";
 import { loadConfig } from "../dist/config/load.js";
 import { renderReviewArtifact } from "../dist/review/artifact.js";
 import { compareReview } from "../dist/review/compare.js";
 import { normalizeReviewPair } from "../dist/review/ignore.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
+import { runReview } from "../dist/review/run.js";
 import type { ReviewArtifact } from "../dist/review/types.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 

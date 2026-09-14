@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { TestContext } from "node:test";
 
+import { createFixture, removeFixture } from "./fixture.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { loadConfig } from "../../dist/config/load.js";
 import type {
@@ -10,7 +11,6 @@ import type {
   ConsumerWatchOptions,
   WatchIgnorePredicate,
 } from "../../dist/server/watcher.js";
-import { createFixture, removeFixture } from "./fixture.js";
 
 /** Resource graph whose imported stylesheet can swap between existing leaves. */
 export async function resourceFixture(context: TestContext) {

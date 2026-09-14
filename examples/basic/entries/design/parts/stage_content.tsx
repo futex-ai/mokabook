@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
+
+import { optional, useDesignInstance } from "../library/composition.js";
 import { emptyState } from "../library/preview/empty-state.js";
 import { flowStep } from "../library/preview/flow-step.js";
-import { optional, useDesignInstance } from "../library/composition.js";
 import type { DesignDestination } from "./destinations.js";
 
 export function FlowStep({

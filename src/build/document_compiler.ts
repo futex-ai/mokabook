@@ -4,11 +4,11 @@ import {
   transformCompatibilityDocuments,
   type CompatibilityContext,
 } from "../compatibility/transform.js";
+import type { ComponentViewRecord } from "../components/manifest_types.js";
 import { validateComponentResources } from "../components/output_validation.js";
 import { validateComponentRanges } from "../components/ranges.js";
 import { rebaseStyleOwnership } from "../components/style_ownership.js";
 import { validateComponentViewRecord } from "../components/view_validation.js";
-import type { ComponentViewRecord } from "../components/manifest_types.js";
 import { generatedViews } from "../components/views.js";
 import { MokabookError } from "../errors.js";
 import { extractHtmlReferences } from "../html_references.js";
@@ -21,8 +21,8 @@ import { validateHtmlLinks, type HtmlValidationContext } from "./html_links.js";
 import type { LoadedGraph } from "./load_graph.js";
 import type { LogicalReferenceRecord } from "./logical_record_types.js";
 import { validateLogicalFragments } from "./logical_records.js";
-import { validateGeneratedOwnershipHeaders } from "./ownership.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";
+import { validateGeneratedOwnershipHeaders } from "./ownership.js";
 import { renderFragments } from "./render.js";
 
 export interface CompiledDocument {

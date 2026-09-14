@@ -1,7 +1,7 @@
 import { MockLink } from "mokabook";
 
-import { COMPONENT_PAGES } from "./destinations.js";
 import type { ComponentPageState } from "./component_details.js";
+import { COMPONENT_PAGES } from "./destinations.js";
 
 /** Saved variants are links between canonical mockup states, with one selected. */
 export function VariantPicker({ state }: { state: ComponentPageState }) {

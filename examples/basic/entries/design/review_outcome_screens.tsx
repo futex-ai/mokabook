@@ -1,7 +1,7 @@
 import { screen } from "mokabook";
 
-import { CompareGrid, Pane } from "./parts/compare.js";
 import { PreviewWorkspace } from "./components/parts/workspace.js";
+import { CompareGrid, Pane } from "./parts/compare.js";
 import {
   ComparePage,
   FramedShot,

@@ -1,9 +1,8 @@
+import type { ResolvedRegistryEntry, Viewport } from "../authoring/types.js";
 import type {
   ManifestComponent,
   ComponentViewRecord,
 } from "../components/manifest_types.js";
-
-import type { ResolvedRegistryEntry, Viewport } from "../authoring/types.js";
 
 /** One actionable catalogue validation failure. */
 export interface RegistryViolation {

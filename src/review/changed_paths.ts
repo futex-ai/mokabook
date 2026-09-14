@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { isBaselineCachePath } from "../config/cache_paths.js";
 import {
   isInside,
   isSafeRepositoryPath,
@@ -10,7 +11,6 @@ import {
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import type { RepositoryEvidence } from "./git.js";
-import { isBaselineCachePath } from "../config/cache_paths.js";
 
 /** Collect deterministic changes while excluding active and retained output. */
 export async function reviewChangedPaths(

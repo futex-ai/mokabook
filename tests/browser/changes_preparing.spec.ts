@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+import { createFixture, removeFixture } from "../helpers/fixture.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
 import type { CatalogueUpdate } from "../../dist/server/update_messages.js";
-import { createFixture, removeFixture } from "../helpers/fixture.js";
 
 for (const mobile of [false, true]) {
   test(`Preparing a comparison keeps All usable and the layout fixed (${mobile ? "mobile" : "desktop"})`, async ({

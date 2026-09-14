@@ -1,16 +1,16 @@
-import { committedReviewRepository } from "../dist/review/repository.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
-import { exportCatalogue } from "../dist/export/run.js";
 import { capturedAssetReader } from "../dist/export/inputs.js";
+import { exportCatalogue } from "../dist/export/run.js";
 import { readManifest } from "../dist/registry/manifest.js";
 import {
   NodeGitCommandRunner,
   CommittedRepository,
 } from "../dist/review/git.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
 import { changedContentPaths } from "../dist/server/changed_content.js";
 import { changedFixture } from "./helpers/changed_fixture.js";

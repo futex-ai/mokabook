@@ -1,12 +1,13 @@
 /** Main-thread interface to the supervised consumer renderer. */
 import { Worker } from "node:worker_threads";
-import type { ComponentRuntime } from "../../build/component_runtime.js";
+
+import type { TransientRender } from "./transient_assets.js";
 import { compactRuntime } from "../../build/compact_runtime.js";
+import type { ComponentRuntime } from "../../build/component_runtime.js";
 import {
   ComponentRenderError,
   type ComponentRenderRequest,
 } from "../../components/render_types.js";
-import type { TransientRender } from "./transient_assets.js";
 
 export interface RenderWorker {
   render(request: ComponentRenderRequest): Promise<TransientRender>;

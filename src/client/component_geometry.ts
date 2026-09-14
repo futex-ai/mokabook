@@ -1,7 +1,7 @@
 /** Read-only DOM range authentication and clipped geometry in immediate frames. */
 import type { ComponentViewRecord } from "../components/manifest_types.js";
-import { componentNodeRects } from "./component_range_nodes.js";
 import { uncoveredBoxes } from "./component_occlusion.js";
+import { componentNodeRects } from "./component_range_nodes.js";
 
 export interface ComponentBounds {
   key: string;

@@ -1,7 +1,7 @@
 import path from "node:path";
 
-import { errorMessage } from "../errors.js";
 import { isSafeRepositoryPath } from "../config/paths.js";
+import { errorMessage } from "../errors.js";
 import type { BaselineReader, GitFile, GitFileKind } from "../review/git.js";
 import {
   MAX_BATCH_OUTPUT_BYTES,

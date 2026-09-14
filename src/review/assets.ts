@@ -2,11 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { FileLocation } from "../config/file_locations.js";
+import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import {
   isPrivateStaticPath,
   publicPathLocation,
 } from "../config/public_files.js";
-import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import { referencedRoutes } from "./asset_references.js";

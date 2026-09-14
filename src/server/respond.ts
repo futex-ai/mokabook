@@ -1,7 +1,7 @@
 /** Shared HTTP response and safe-path helpers for served Mokabook routes. */
 
-import path from "node:path";
 import type { ServerResponse } from "node:http";
+import path from "node:path";
 
 /** Write one complete text response, omitting the body for HEAD. */
 export function send(

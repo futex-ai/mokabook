@@ -1,14 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { compileCatalogue } from "../../dist/build/compile.js";
-import { writeCompilation } from "../../dist/build/transaction.js";
-import { loadConfig } from "../../dist/config/load.js";
-import { startCatalogueServer } from "../../dist/server/http.js";
 import {
   createFixture,
   removeFixture,
   reparentedEntrySource,
 } from "../helpers/fixture.js";
+import { compileCatalogue } from "../../dist/build/compile.js";
+import { writeCompilation } from "../../dist/build/transaction.js";
+import { loadConfig } from "../../dist/config/load.js";
+import { startCatalogueServer } from "../../dist/server/http.js";
 
 for (const mobile of [false, true]) {
   test(`background evidence preserves All without replacing documents (${mobile ? "mobile" : "desktop"})`, async ({

@@ -6,8 +6,8 @@ import { createHash } from "node:crypto";
 
 import type { Catalogue } from "../catalogue.js";
 import type { ShellContext } from "./context.js";
-import { DiffScreen } from "./diffs.js";
 import { DetailsPanel } from "./details.js";
+import { DiffScreen } from "./diffs.js";
 import {
   SchemeSwitch,
   ScreenHead,

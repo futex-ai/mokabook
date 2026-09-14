@@ -1,9 +1,4 @@
 /** Background output/evidence can be adopted only by its still-current source generation. */
-import type { ComponentRuntime } from "../../build/component_runtime.js";
-import type { Compilation } from "../../build/compile.js";
-import type { GeneratedOutputStore } from "../../build/output_store.js";
-import { errorMessage } from "../../errors.js";
-import { timeAsync, timingCounts } from "../../diagnostics/timings.js";
 import type {
   CatalogueChangeClassifier,
   ComponentChangeSnapshot,
@@ -14,11 +9,16 @@ import type {
   ResourceWatcher,
 } from "../resource_watcher.js";
 import { BackgroundCompilation } from "./background.js";
-import { prepareReviewRepository } from "../../review/prepare.js";
 import type {
   BaselineBuilder,
   BaselineProgress,
 } from "../../baseline/types.js";
+import type { Compilation } from "../../build/compile.js";
+import type { ComponentRuntime } from "../../build/component_runtime.js";
+import type { GeneratedOutputStore } from "../../build/output_store.js";
+import { timeAsync, timingCounts } from "../../diagnostics/timings.js";
+import { errorMessage } from "../../errors.js";
+import { prepareReviewRepository } from "../../review/prepare.js";
 
 /** Collaborators and observers supplied by the Serve composition root. */
 export interface BackgroundGenerationOptions {

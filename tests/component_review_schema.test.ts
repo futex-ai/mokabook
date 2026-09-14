@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { compareReview } from "../dist/review/compare.js";
-import { parseReviewResult } from "../dist/review/result_validation.js";
 import { validateComponentReviewSources } from "../dist/review/component_result_sources.js";
+import { parseReviewResult } from "../dist/review/result_validation.js";
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 
 test("component comparison schemas reject invalid membership, sides, references and unknown fields", async (t) => {

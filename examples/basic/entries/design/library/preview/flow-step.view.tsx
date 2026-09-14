@@ -1,6 +1,6 @@
 import { useDesignStyle } from "../style_context.js";
-import { DesignLink } from "../../parts/design_navigation.js";
 import type { FlowStepProps } from "./flow-step.js";
+import { DesignLink } from "../../parts/design_navigation.js";
 
 export function FlowStepView({
   children,

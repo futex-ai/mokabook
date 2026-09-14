@@ -1,20 +1,20 @@
-import path from "node:path";
 import fs from "node:fs";
+import path from "node:path";
 
 import { MokabookError } from "../errors.js";
+import { isBaselineCachePath } from "./cache_paths.js";
 import {
   baselineBuildCommands,
   generatedOutputMode,
 } from "./generated_output.js";
-import { isBaselineCachePath } from "./cache_paths.js";
-import { resolveInside, validateRelativeRoute } from "./paths.js";
+import { resolveModuleResolution } from "./module_resolution.js";
 import {
   optionalModule,
   requireDirectory,
   validateReviewOut,
   validateSourceRoots,
 } from "./path_validation.js";
-import { resolveModuleResolution } from "./module_resolution.js";
+import { resolveInside, validateRelativeRoute } from "./paths.js";
 import {
   requireString,
   validateColorSchemes,
