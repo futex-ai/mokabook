@@ -250,9 +250,15 @@ Requires explicit user approval before deleting tracked files on `origin/main`.
       `npm test`, `npm run example:check`, `npm run test:browser`, and
       `cargo xtask check`; commit and push.
 
-## Milestone 9: Review
+## Milestone 9: Review — completed
 
-- [ ] After the final push, review the complete local diff against
+- [x] After the final push, review the complete local diff against
       `origin/main` using `docs/implementation-review-prompt.md`. Report
       numbered findings with severity, context, impact, lettered options, and a
       recommendation. Do not change the implementation.
+
+Review outcome: twelve findings were reported to the user without changes
+(two high, four medium, six low). The high findings are a derived rebuild
+reachable from the HTTP child through the unselected comparison route, and a
+completed cache entry discarded when cleanup fails or cancellation lands after
+the marker is written. Each finding is awaiting the user's decision.

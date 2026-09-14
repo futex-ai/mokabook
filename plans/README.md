@@ -2,12 +2,13 @@
 
 ## Active
 
-- [Derived Baselines](./derived-baselines.md)
 - [App-Independent Mokabook Npm Library](./app-independent-mokabook-library.md)
 - [Accounting Shell Design Parity](./accounting-shell-design-parity.md)
 
 ## Completed
 
+- [Derived Baselines](./derived-baselines.md) — delivered and verified;
+  review findings are recorded for the user's decision.
 - [Optional Published Changes](./optional-published-changes.md)
 - [Unified Catalogue Pages](./unified-catalogue-pages.md)
 - [Reuse Registered Components In Mokabook's Design Catalogue](./mokabook-design-components.md)
