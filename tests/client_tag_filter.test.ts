@@ -253,9 +253,11 @@ function tagShell(): TagShell {
     ),
     new FakeNode("details", {
       "data-nav-collection": "collection:screens",
+      "data-nav-disclosure": "collection:pages:screens",
     }).append(welcomeRow, detailsRow),
     new FakeNode("details", {
       "data-nav-collection": "collection:docs",
+      "data-nav-disclosure": "collection:pages:docs",
     }).append(glossaryRow),
   );
   const doc = asDocument(root);

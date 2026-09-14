@@ -125,7 +125,7 @@ export function selectAndRevealRoute(
   }
   applyNavVisibility(doc, "preserve");
   let ancestor = active.closest<HTMLDetailsElement>(
-    "details[data-nav-collection]",
+    "details[data-nav-disclosure]",
   );
   while (ancestor) {
     const wasOpen = ancestor.open;
@@ -138,7 +138,7 @@ export function selectAndRevealRoute(
     }
     ancestor =
       ancestor.parentElement?.closest<HTMLDetailsElement>(
-        "details[data-nav-collection]",
+        "details[data-nav-disclosure]",
       ) ?? null;
   }
   active.scrollIntoView({ block: "nearest" });
@@ -168,7 +168,7 @@ function applyGroupVisibility(
   disclosure: NavigationDisclosurePolicy,
 ): void {
   const groups = [
-    ...doc.querySelectorAll<HTMLDetailsElement>("details[data-nav-collection]"),
+    ...doc.querySelectorAll<HTMLDetailsElement>("details[data-nav-disclosure]"),
   ];
   if (filtering) {
     for (const group of groups) {

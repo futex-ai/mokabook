@@ -8,9 +8,27 @@ export interface NavPreferenceStorage {
 
 const NAV_DISCLOSURE_KEY = "mokabook:nav-disclosure:v2";
 
-/** Whether a value identifies a current collection nav group. */
+/** Whether a value identifies a current or legacy navigation disclosure. */
 export function isNavDisclosureKey(value: string): boolean {
-  return value.startsWith("collection:");
+  return (
+    value.startsWith("collection:") ||
+    value === "section:pages" ||
+    value === "section:components"
+  );
+}
+
+/** Match a current disclosure key, including an old unsectioned collection key. */
+export function isNavDisclosureClosed(
+  closed: ReadonlySet<string>,
+  key: string,
+): boolean {
+  if (closed.has(key)) return true;
+  for (const prefix of ["collection:pages:", "collection:components:"]) {
+    if (key.startsWith(prefix)) {
+      return closed.has(`collection:${key.slice(prefix.length)}`);
+    }
+  }
+  return false;
 }
 
 /** Remember closed groups by stable collection id. */
@@ -27,15 +45,16 @@ export class NavDisclosurePreference {
   apply(doc: Document): void {
     if (!this.#closed) return;
     for (const group of navigationGroups(doc)) {
-      const key = group.getAttribute("data-nav-collection");
-      if (key && isNavDisclosureKey(key)) group.open = !this.#closed.has(key);
+      const key = group.getAttribute("data-nav-disclosure");
+      if (key && isNavDisclosureKey(key))
+        group.open = !isNavDisclosureClosed(this.#closed, key);
     }
   }
 
   /** Capture and persist the current closed-group set. */
   remember(doc: Document): void {
     const closed = navigationGroups(doc).flatMap((group) => {
-      const key = group.getAttribute("data-nav-collection");
+      const key = group.getAttribute("data-nav-disclosure");
       return !group.open && key && isNavDisclosureKey(key) ? [key] : [];
     });
     this.#closed = new Set(closed);
@@ -77,6 +96,6 @@ export function createBrowserNavPreference(
 
 function navigationGroups(doc: Document): HTMLDetailsElement[] {
   return [
-    ...doc.querySelectorAll<HTMLDetailsElement>("details[data-nav-collection]"),
+    ...doc.querySelectorAll<HTMLDetailsElement>("details[data-nav-disclosure]"),
   ];
 }

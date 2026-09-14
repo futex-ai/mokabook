@@ -4,7 +4,7 @@
 
 Implemented in the basic consumer. All 56 existing design screens retain their
 112 mobile/desktop fragments and now record shared component instances. Fifteen
-registered components and 56 saved variants live under Design → Shared components,
+registered components and 56 saved variants live under Components → Design → Shared components,
 alongside the separate Example Action and Toolbar.
 
 This contract and the [library inventory](./mokabook-design-component-library.md)
@@ -39,8 +39,9 @@ samples contain no implementation notes, environment badges or extra footers.
 
 ## Catalogue And Source Ownership
 
-Add `Design → Shared components` beside `Design → Mokabook design`. Keep the
-existing Component explorer design section and Example → Components group.
+Add `Components → Design → Shared components` from the same authored root that
+places `Pages → Design → Mokabook design` in the Pages projection. Keep the
+existing Component explorer design section and Components → Example → Components group.
 The new pure gallery collections are `design-library` and
 `design-library-{chrome,controls,inspector,preview}`. They contain the 15 routed
 components in the inventory, with no duplicate screen entries for variants.

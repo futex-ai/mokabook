@@ -56,7 +56,9 @@ for (const width of [390, 1280]) {
         .getByRole("button", { name: "Open catalogue navigation" })
         .click();
     await expect(
-      page.locator('[data-nav-collection="collection:example"]'),
+      page.locator(
+        '[data-nav-section="pages"] [data-nav-collection="collection:example"]',
+      ),
     ).toHaveCount(1);
     await expect(
       page.locator('[data-entry-id="example-handbook"]'),

@@ -251,7 +251,7 @@ test("duplicate titles retain independent disclosure across reloads", async ({
     .poll(() =>
       page.evaluate(() => localStorage.getItem("mokabook:nav-disclosure:v2")),
     )
-    .toContain("collection:screens");
+    .toContain("collection:pages:screens");
 
   await page.reload();
   await expect(screens).not.toHaveAttribute("open", "");

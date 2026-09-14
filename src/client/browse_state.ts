@@ -1,6 +1,9 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
-import { isNavDisclosureKey } from "./browse_navigation.js";
+import {
+  isNavDisclosureClosed,
+  isNavDisclosureKey,
+} from "./browse_navigation.js";
 import {
   applyNavVisibility,
   selectAndRevealRoute,
@@ -18,11 +21,12 @@ export type BrowseViewport = "both" | "desktop" | "mobile";
 export interface BrowseRecoveryState {
   changesStatus?: ChangesStatus;
   changedOnly: boolean;
+  /** Closed section or projected-collection disclosure identities. */
   closedCollectionIds: readonly string[];
   colorScheme: BrowseColorScheme;
   detailsOpen: boolean;
   drawerOpen: boolean;
-  /** Closed collection ids from before filtering, or null without a filter. */
+  /** Closed disclosure ids from before filtering, or null without a filter. */
   filterBaselineClosedCollectionIds: readonly string[] | null;
   navScroll: number;
   query: string;
@@ -63,19 +67,19 @@ export function captureBrowseState(
 ): BrowseRecoveryState | undefined {
   const shell = doc.querySelector<HTMLElement>("[data-mokabook-shell]");
   if (!shell) return undefined;
-  const collections = [
-    ...doc.querySelectorAll<HTMLDetailsElement>("[data-nav-collection]"),
+  const disclosures = [
+    ...doc.querySelectorAll<HTMLDetailsElement>("[data-nav-disclosure]"),
   ];
-  const closedCollectionIds = collections.flatMap((collection) => {
-    const id = collection.getAttribute("data-nav-collection");
-    return !collection.open && id ? [id] : [];
+  const closedCollectionIds = disclosures.flatMap((disclosure) => {
+    const id = disclosure.getAttribute("data-nav-disclosure");
+    return !disclosure.open && id ? [id] : [];
   });
-  const filterBaselineClosedCollectionIds = collections.some(
-    (collection) => collection.dataset["filterOpen"] !== undefined,
+  const filterBaselineClosedCollectionIds = disclosures.some(
+    (disclosure) => disclosure.dataset["filterOpen"] !== undefined,
   )
-    ? collections.flatMap((collection) => {
-        const id = collection.getAttribute("data-nav-collection");
-        return collection.dataset["filterOpen"] === "0" && id ? [id] : [];
+    ? disclosures.flatMap((disclosure) => {
+        const id = disclosure.getAttribute("data-nav-disclosure");
+        return disclosure.dataset["filterOpen"] === "0" && id ? [id] : [];
       })
     : null;
   const changesStatus = doc.querySelector<HTMLElement>("[data-changes-status]")
@@ -133,16 +137,16 @@ export function restoreBrowseState(
       : new Set(
           state.filterBaselineClosedCollectionIds.filter(isNavDisclosureKey),
         );
-  for (const collection of doc.querySelectorAll<HTMLDetailsElement>(
-    "[data-nav-collection]",
+  for (const disclosure of doc.querySelectorAll<HTMLDetailsElement>(
+    "[data-nav-disclosure]",
   )) {
-    const id = collection.getAttribute("data-nav-collection");
-    collection.open = !id || !closed.has(id);
+    const id = disclosure.getAttribute("data-nav-disclosure");
+    disclosure.open = !id || !isNavDisclosureClosed(closed, id);
     if (filterBaselineClosed) {
-      collection.dataset["filterOpen"] =
-        id && filterBaselineClosed.has(id) ? "0" : "1";
+      disclosure.dataset["filterOpen"] =
+        id && isNavDisclosureClosed(filterBaselineClosed, id) ? "0" : "1";
     } else {
-      delete collection.dataset["filterOpen"];
+      delete disclosure.dataset["filterOpen"];
     }
   }
   const details = doc.querySelector<HTMLDetailsElement>(

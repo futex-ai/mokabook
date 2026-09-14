@@ -64,6 +64,44 @@ for (const viewport of ["desktop", "mobile"] as const) {
       expect(failed).toEqual([]);
     });
 
+    test("catalogue section headings keep the in-screen typography in isolation", async ({
+      page,
+    }) => {
+      const typography = () =>
+        page
+          .locator(".mbk-nav-section-head")
+          .first()
+          .evaluate((node) => {
+            const style = getComputedStyle(node);
+            return {
+              fontFamily: style.fontFamily,
+              fontSize: style.fontSize,
+              fontWeight: style.fontWeight,
+              letterSpacing: style.letterSpacing,
+              lineHeight: style.lineHeight,
+            };
+          });
+      await page.goto(
+        fileUrl(
+          `design/library/chrome/catalogue-navigation.variants/all.${viewport}.html`,
+        ),
+      );
+      const isolated = await typography();
+      await page.goto(
+        fileUrl(
+          viewport === "mobile"
+            ? "design/browse/states/navigation.mobile.html"
+            : "design/browse/views/details-screen.desktop.html",
+        ),
+      );
+      const inScreen = await typography();
+      expect(inScreen).toMatchObject({
+        fontSize: "10.5px",
+        fontWeight: "700",
+      });
+      expect(isolated).toEqual(inScreen);
+    });
+
     test("the last flow step has no trailing connector after registered boundaries", async ({
       page,
     }) => {

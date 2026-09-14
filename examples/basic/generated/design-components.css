@@ -14,7 +14,7 @@
   outline: 2px solid var(--mbk-sage-deep);
   outline-offset: 3px;
 }
-.ce-design summary {
+:where(.ce-design summary) {
   font: inherit;
 }
 .ce-button,

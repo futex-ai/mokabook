@@ -197,9 +197,11 @@ test("recovery matches stable keys and ignores old label paths", () => {
   const shell = new FakeElement("div", { "data-mokabook-shell": "" });
   const alpha = new FakeElement("details", {
     "data-nav-collection": "collection:alpha",
+    "data-nav-disclosure": "collection:pages:alpha",
   });
   const beta = new FakeElement("details", {
     "data-nav-collection": "collection:beta",
+    "data-nav-disclosure": "collection:pages:beta",
   });
   const fake = new FakeDocument([shell, alpha, beta]);
   const doc = asDocument(fake);
@@ -213,7 +215,7 @@ test("recovery matches stable keys and ignores old label paths", () => {
   assert.equal(alpha.open, false);
   assert.equal(beta.open, true);
   assert.deepEqual(captureBrowseState(doc, fakeWindow())?.closedCollectionIds, [
-    "collection:alpha",
+    "collection:pages:alpha",
   ]);
 });
 

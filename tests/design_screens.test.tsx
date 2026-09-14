@@ -21,6 +21,27 @@ const additions = [
 ] as const;
 
 for (const viewport of ["mobile", "desktop"] as const) {
+  test(`${viewport}: catalogue navigation separates pages and components`, async () => {
+    const { document } = await designDocument(
+      viewport === "mobile" ? "design-browse-navigation" : "design-browse-home",
+      viewport,
+    );
+    const sections = byClass(document, "mbk-nav-section");
+    assert.deepEqual(
+      sections.map((section) => attribute(section, "data-nav-section")),
+      ["pages", "components"],
+    );
+    assert.ok(sections.every((section) => attribute(section, "open") === ""));
+    const pages = textContent(sections[0] ?? document);
+    const components = textContent(sections[1] ?? document);
+    assert.match(pages, /Welcome/);
+    assert.match(pages, /Example tour/);
+    assert.doesNotMatch(pages, /Action|Toolbar/);
+    assert.match(components, /Action/);
+    assert.match(components, /Toolbar/);
+    assert.doesNotMatch(components, /Welcome|Example tour/);
+  });
+
   test(`${viewport}: all five owning destinations render as light-only designs`, async () => {
     for (const [id, route] of additions) {
       const { entry, document } = await designDocument(id, viewport);
