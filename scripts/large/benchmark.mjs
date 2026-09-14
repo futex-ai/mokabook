@@ -114,7 +114,7 @@ export async function benchmark(repository, fixture) {
         );
         await waitForBrowseChanges(url);
         const classified = await (await fetch(url)).text();
-        const changedRoutes = expectedStylesheetChanges(fixture.size);
+        const changedRoutes = expectedStylesheetChanges;
         expect(classified).toContain(
           `class="mbk-nav-filter-count">${changedRoutes}<`,
         );

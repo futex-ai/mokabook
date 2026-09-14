@@ -1,29 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  expectedStylesheetChanges,
-  waitForBrowseChanges,
-} from "../scripts/large/browse.mjs";
-import { largeSize } from "./fixtures/large/generate.js";
-
-test("benchmark counts linked screens and their flows, including the single-screen tail", () => {
-  assert.equal(expectedStylesheetChanges(largeSize({})), 660);
-  assert.equal(expectedStylesheetChanges(largeSize({ stylesheets: 0 })), 0);
-  assert.equal(expectedStylesheetChanges(largeSize({ stylesheetShare: 0 })), 0);
-  assert.equal(
-    expectedStylesheetChanges(
-      largeSize({ areas: 1, screens: 11, stylesheetShare: 0.5 }),
-    ),
-    8,
-  );
-  assert.equal(
-    expectedStylesheetChanges(
-      largeSize({ areas: 1, screens: 11, stylesheetShare: 1 }),
-    ),
-    13,
-  );
-});
+import { waitForBrowseChanges } from "../scripts/large/browse.mjs";
 
 test("benchmark waits for Changes delivery, not just parent classification", async (t) => {
   let requests = 0;

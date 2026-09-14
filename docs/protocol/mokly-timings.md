@@ -60,6 +60,13 @@ Review phases use the same session, role and parent context as their caller:
   for each material view or live document, and each before/after snapshot-copy
   closure. It includes resource reads and copying into the in-memory artifact.
   Cached traversals are still measured; watcher inventory keeps its own stages.
+- `review.css-analysis` measures the synchronous parse/diff/match/reduce pass
+  for one changed, reachable stylesheet and one before/after document pair.
+  It includes parser-cache lookups or parsing, and runs for cache hits and empty
+  diffs. Resource reads, input document-tree preparation and aggregation across
+  embedded documents remain outside this span. A contained parse or selector
+  failure returns unresolved evidence with span status `ok`; an escaping error
+  ends the span with `error`. It logs no paths, selectors, CSS or document text.
 - `review.write-artifact` surrounds the owned Review directory transaction,
   including validation and cleanup. Export uses it for the complete artifact's
   staged file-write loop, including comparison files; export validation and
@@ -73,6 +80,13 @@ inside comparison loops are children of those loops. Repeated names identify
 separate invocations, and concurrent viewport traversals can overlap. Build and
 Check do not run review, so they emit no `review.*` stages. Instrumentation never
 adds review work to a command or writes artifacts during background classification.
+
+For aggregate stage time, take the union of each stage's
+`[elapsedMs - durationMs, elapsedMs]` end-record intervals within one session.
+For the scale fixture's CSS share of total review time, divide the union of
+`review.css-analysis` intervals by the enclosing background worker's
+`changes.classify` duration, separately for cold and warm runs. Do not use the
+supervisor's wait span, whole startup time, or sums across sessions.
 
 ## Representative local fixture
 
@@ -92,8 +106,9 @@ or timings. It must provide a Git baseline so Changes performs real comparison.
 Additional shared stylesheets have configurable count and per-area screen share
 (defaults: four and 0.5, rounded up). After the baseline commit, setup adds an
 unrelated rule to the first sheet. Background Changes therefore exercises actual
-stylesheet dependency evidence; the benchmark checks the linked screens and
-their flows under the current file-level policy. The fixture guide documents
+stylesheet dependency evidence; rule attribution excludes the unrelated rule
+from every linked screen, so the benchmark expects zero Changes, including
+flows. The fixture guide documents
 zero-count/share cases and the separate complete-export measurement.
 
 `fixture:large` explicitly prepares and records an isolated baseline under

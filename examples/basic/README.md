@@ -153,9 +153,14 @@ appear in Changes. This is tested against fully registered baseline snapshots.
 The shared inspector/workspace sheets cover all 65 design screens and standalone
 library hosts. Other mixed component-design sheets remain scoped to the 32
 component-design routes and hosts; the controls sheet additionally remains
-scoped to its eleven owning screen routes. Global `review.sharedImpact` policy is
-unchanged. Actual rendered resource references and generated usage determine the
-scope; regression tests cover each exclusive sheet and the mixed/global sheets.
+scoped to its eleven owning screen routes. `review.sharedImpact` is fallback
+impact evidence for files the rendered resource graph cannot see, such as source
+or token modules. Linked stylesheets, including imported sheets, are attributed
+by rule: a changed rule must potentially match a view or be unresolved to keep
+that dependency. A broad stylesheet glob cannot restore an excluded stylesheet
+or add an unreferenced public file to Changes. Actual rendered references,
+generated usage and component ownership determine the scope; regression tests
+cover each exclusive sheet and the mixed/global sheets.
 
 The recorded tokens and responsive rules live in the
 [shell design contract](../../docs/protocol/mokly-shell-design.md); component
@@ -179,7 +184,7 @@ The nested `design/review/impact/stylesheets/` group adds the rule-aware
 stylesheet states: a changed stylesheet whose changed styles apply to the
 screen, one whose change can apply anywhere, and one examined and excluded so
 the screen stays out of Changes. Their contract is
-[CSS change attribution](../../docs/protocol/mokabook-css-attribution.md).
+[CSS change attribution](../../docs/protocol/mokly-css-attribution.md).
 
 From the repository root:
 

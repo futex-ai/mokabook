@@ -84,7 +84,10 @@ for (const components of [false, true]) {
         before,
       );
       const events = timingEvents(timed.stderr);
-      assertReviewTimings(events, "export", "export");
+      assertReviewTimings(events, "export", "export", [
+        ...reviewStages,
+        "review.css-analysis",
+      ]);
       assert.doesNotMatch(
         timed.stderr,
         /shared\.css|unrelated-private-rule|Screen content|screens\/home/,
@@ -169,7 +172,9 @@ for (const [components, watch] of [
         events,
         "background",
         "changes.classify",
-        reviewStages.filter((stage) => stage !== "review.write-artifact"),
+        [...reviewStages, "review.css-analysis"].filter(
+          (stage) => stage !== "review.write-artifact",
+        ),
       );
       assert.ok(
         !events.some((event) => event.stage === "review.write-artifact"),

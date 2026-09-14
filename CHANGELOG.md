@@ -149,6 +149,11 @@ and releases use [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- Rule-level attribution for linked stylesheet changes, with matched styles and
+  examined-and-excluded evidence in Details for screen and component catalogues.
+  Unrelated or formatting-only rules no longer add consumers to Changes;
+  unresolved rules retain conservative impact evidence. Opt-in diagnostics
+  include CSS analysis timings.
 - Initial app-independent Mokabook package foundation.
 - Typed config discovery and public registry/Review authoring helpers.
 - Deterministic React-to-static-HTML build and non-mutating output checks.

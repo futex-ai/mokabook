@@ -21,8 +21,8 @@ repository. It reports setup time separately and saves a size-keyed record for r
 The record key includes the stylesheet count and share. After committing, setup
 appends one unrelated `.scale-unrelated-rule` rule to `assets/shared-1.css`.
 That is the only worktree edit; the generated documents stay current. The
-selector occurs in no screen, but today's file-level attribution still marks
-every screen that links the edited sheet, plus flows that reuse those screens.
+selector occurs in no screen, so rule attribution examines and excludes the
+edited sheet from each linked view. It adds no screens or flows to Changes.
 Ordinary `dev:large` and `benchmark:large` startup never repeats the baseline build
 or package compilation. Run `npm run build` explicitly after changing Mokly's
 source. Missing setup fails with the matching preparation command; `--config`
@@ -31,10 +31,9 @@ can select an existing fixture. `dev:large` serves until Ctrl-C.
 `benchmark:large` launches Chrome, starts a fresh server and measures command start
 to searchable navigation with a real selected preview visible. It verifies record
 count, both viewports/themes, a successful Action label Props edit and a whole page.
-Then it waits for complete Changes and checks the stylesheet consumers and their
-flows (660 routes at the default size). It repeats with a new server and browser
-context for a warm restart. With no shared stylesheets or a zero share, the
-expected Changes count is zero.
+Then it waits for complete Changes and verifies zero changed routes for the
+unrelated stylesheet rule. It repeats with a new server and browser context for
+a warm restart. Zero stylesheets or a zero share also yield zero Changes.
 JSON records separate listening, usable startup, Props, cached delivery and Changes
 times. Either usable startup at five seconds or above fails the command.
 Chrome is launched before timing; “cold” means application-cold, not a flushed
@@ -71,7 +70,9 @@ the CSS edit; a zero share still edits the first sheet when present, but links
 no screens to it. Small CI instances use the same inexpensive defaults. Pass
 matching size options to setup and benchmark, including with `--config`.
 
-`benchmark:large` emits `review.*` spans for background classification to stderr.
+`benchmark:large` enables `--debug-timings` automatically and emits `review.*`
+spans for background classification to stderr, including `review.css-analysis`
+for rule parsing, diffing, matching and reduction.
 It does not write comparison artifacts. To measure the complete artifact path
 on the same prepared fixture, run
 `node dist/cli/bin.js export --config <printed-config> --base main --out .context/site --debug-timings`.

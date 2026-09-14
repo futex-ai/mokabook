@@ -5,6 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
+import { expectedStylesheetChanges } from "../scripts/large/browse.mjs";
 import { loadConfig } from "../dist/config/load.js";
 import { generatedViews } from "../dist/components/views.js";
 import { readManifest } from "../dist/registry/manifest.js";
@@ -119,6 +120,7 @@ test(
     }
     const snapshot = await computeCatalogueChanges(config, "main");
     assert.deepEqual(snapshot.changedRoutes, []);
+    assert.equal(snapshot.changedRoutes?.length, expectedStylesheetChanges);
     const result = snapshot.componentChanges?.result;
     assert.ok(result);
     assert.deepEqual(result.changedPaths, [changedPath]);

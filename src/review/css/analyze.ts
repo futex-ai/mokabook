@@ -1,3 +1,4 @@
+import { timeSync } from "../../diagnostics/timings.js";
 import { diffCssRules } from "./diff.js";
 import type { CssDocumentPair } from "./document.js";
 import { matchCssRules } from "./match.js";
@@ -12,20 +13,25 @@ export function analyzeStylesheetChange(
   documents: CssDocumentPair,
   parser: CssRuleParser = new LightningCssRuleParser(),
 ): CssAnalysisOutcome {
-  const matched = matchCssRules(diffCssRules(before, after, parser), documents);
-  if (matched.status === "unresolved")
-    return { kind: "kept", status: "unresolved", selectors: [] };
-  const kept = matched.rules.flatMap(({ outcome }) =>
-    outcome.kind === "kept" ? [outcome] : [],
-  );
-  if (!kept.length) return { kind: "excluded" };
-  return {
-    kind: "kept",
-    status: kept.some((outcome) => outcome.status === "unresolved")
-      ? "unresolved"
-      : "matched",
-    selectors: [
-      ...new Set(kept.flatMap((outcome) => outcome.selectors)),
-    ].sort(),
-  };
+  return timeSync("review.css-analysis", () => {
+    const matched = matchCssRules(
+      diffCssRules(before, after, parser),
+      documents,
+    );
+    if (matched.status === "unresolved")
+      return { kind: "kept", status: "unresolved", selectors: [] };
+    const kept = matched.rules.flatMap(({ outcome }) =>
+      outcome.kind === "kept" ? [outcome] : [],
+    );
+    if (!kept.length) return { kind: "excluded" };
+    return {
+      kind: "kept",
+      status: kept.some((outcome) => outcome.status === "unresolved")
+        ? "unresolved"
+        : "matched",
+      selectors: [
+        ...new Set(kept.flatMap((outcome) => outcome.selectors)),
+      ].sort(),
+    };
+  });
 }

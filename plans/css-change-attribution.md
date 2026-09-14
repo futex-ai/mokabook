@@ -2,8 +2,9 @@
 
 ## Status And Outcome
 
-Milestones 1 and 2 (protocol and mockups) are complete and awaiting user
-approval before implementation milestones begin.
+Milestones 1 through 10 are complete, committed, and pushed. The final review
+item below is run after the push and its findings are reported without
+changing the implementation.
 
 A single edit to a shared stylesheet currently marks every screen that links
 that stylesheet as a dependency change, and a broad `review.sharedImpact` glob
@@ -173,6 +174,55 @@ did not run in that command.
 | `review.write-artifact`  |                    — |                    — |             97.99 |
 | `changes.classify`       |            47,975.63 |            48,354.97 |                 — |
 | `export`                 |                    — |                    — |          6,895.22 |
+
+### Post-change timings (Milestone 10)
+
+Measured on 2026-09-14 in the same Amazon Linux 2023 x86_64 sandbox with
+8 CPUs and approximately 16 GiB RAM, with other heavy checks idle. These runs
+use Node v24.21.0 rather than the baseline's v24.14.1; both tables are single
+diagnostic runs, not statistical estimates of the attribution change's cost.
+
+Regenerated the same full fixture with `npm run fixture:large` (81,596 ms
+setup), then ran `npm run benchmark:large`, which enables `--debug-timings`.
+The dimensions remain 30 areas, 40 screens per area, 12 records per screen,
+four shared stylesheets and a 0.5 screen share: 1,410 routes and 5,550 documents.
+Cold/warm usable startup was 4,150 / 4,210 ms, both below five seconds.
+Complete Changes reached Browse at 158,136 / 158,362 ms and reported zero
+changed routes in both runs: the unrelated rule is now excluded from all
+600 linked screens and their flows.
+
+Regenerated the same small control with
+`npm run fixture:large -- --areas 2 --screens 10 --rows 6` (2,460 ms setup;
+four shared stylesheets, 0.5 share, 28 routes and 130 documents), then ran
+`node dist/cli/bin.js export --config <small-config> --base main --out .context/site --debug-timings`
+with the default Node heap. Small Export completed in 7,098.35 ms, including
+102.56 ms of artifact writes. The baseline's failed full-size Export was not
+repeated; the small run remains an artifact-write control only.
+
+The table uses the same per-session interval unions as the baseline. Each full
+Serve run has three comparison loops, 22,110 resource traversals and 4,800
+CSS-analysis passes; Small Export has three comparison loops, 516 resource
+traversals and 80 CSS-analysis passes. The new `review.css-analysis` span covers
+CSS parse-cache lookup or parsing, diffing, matching and reduction, excluding
+resource reads and input document-tree preparation as defined in the
+[timing contract](../docs/protocol/mokly-timings.md).
+
+| Span                     | Full Serve cold (ms) | Full Serve warm (ms) | Small Export (ms) |
+| ------------------------ | -------------------: | -------------------: | ----------------: |
+| `review.base-commit`     |                12.06 |                10.95 |              7.54 |
+| `review.changed-paths`   |             1,352.91 |             1,296.36 |             69.96 |
+| `review.base-manifest`   |             1,012.47 |               989.67 |            107.26 |
+| `review.base-documents`  |             1,907.63 |             1,882.01 |             57.83 |
+| `review.compare-screens` |            53,579.69 |            54,120.25 |            954.99 |
+| `review.resource-graph`  |            23,236.04 |            23,484.21 |            899.15 |
+| `review.css-analysis`    |             1,549.84 |             1,528.28 |             35.84 |
+| `review.write-artifact`  |                    — |                    — |            102.56 |
+| `changes.classify`       |            58,195.83 |            58,599.32 |                 — |
+| `export`                 |                    — |                    — |          7,098.35 |
+
+The CSS pass did not exceed ten percent of full-size review time: it used
+2.66% cold and 2.61% warm of the background worker's `changes.classify` span,
+so this measurement does not trigger the blob-id rule-cache follow-up plan.
 
 ## Milestone 1: Define the rule-aware attribution contract
 
@@ -423,18 +473,18 @@ inside a loaded comparison; that is carried into the final review.
 
 ## Milestone 10: Documentation, examples, and timings
 
-- [ ] Update `README.md`, `examples/basic/README.md`, and
+- [x] Update `README.md`, `examples/basic/README.md`, and
       `docs/protocol/mokly-package.md` so guidance on `review.sharedImpact`
       describes it as a fallback for files the resource graph cannot see, and
       states that linked stylesheets are attributed by rule.
-- [ ] Update `src/review/README.md` (create it if absent) with the CSS module
+- [x] Update `src/review/README.md` (create it if absent) with the CSS module
       layout and the keep-list.
-- [ ] Re-run `benchmark:large` on the Milestone 3 fixture and record the new
+- [x] Re-run `benchmark:large` on the Milestone 3 fixture and record the new
       timings beside the baseline. If the CSS pass exceeds ten percent of
       total review time on the full-size fixture, open a follow-up plan for
       caching parsed rules per blob id before considering a native module.
-- [ ] Add `CHANGELOG.md` entry under the unreleased heading.
-- [ ] Run `git add -A`, commit using Conventional Commits, and push the branch.
+- [x] Add `CHANGELOG.md` entry under the unreleased heading.
+- [x] Run `git add -A`, commit using Conventional Commits, and push the branch.
 - [ ] Review the complete local diff against `origin/main` using
       `docs/implementation-review-prompt.md` after the push. Report findings
       with severity, context, impact, lettered options, and a recommendation;

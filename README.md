@@ -48,6 +48,13 @@ export default defineConfig({
 });
 ```
 
+Use `review.sharedImpact` as fallback impact evidence for files the rendered
+resource graph cannot see, such as source components or token modules. Linked
+stylesheets and their imports are attributed by rule automatically: a view keeps
+the dependency only when a changed rule could match or cannot be resolved.
+Unmatched rules are examined and excluded; a broad stylesheet glob cannot
+override that exclusion or add unreferenced public files to Changes.
+
 An entry module ends in `.mockup.ts` or `.mockup.tsx` and exports `mockups`:
 
 ```tsx
@@ -187,7 +194,7 @@ phase timings and aggregate catalogue sizes to stderr while leaving normal
 output and generated files unchanged. It separates bundling, rendering,
 validation, file writes, watcher setup, child readiness, and background Changes.
 Review timings distinguish Git baseline and document reads, comparison loops,
-resource traversal, and artifact writes. Build and Check do not run review.
+resource traversal, CSS rule analysis, and artifact writes. Build and Check do not run review.
 Parent timings include child phases; overlapping timings must not be added
 together. See the [diagnostic contract](./docs/protocol/mokly-timings.md).
 
@@ -413,7 +420,8 @@ Assets referenced only by public HTML/CSS URLs remain public resources.
   ignores, configured stylesheets, and referenced resources; this includes
   unrelated authored static HTML under `mockupsDir`. `review` selects the Git
   base ref used to find the branch point,
-  internal snapshot directory, and shared-impact globs.
+  internal snapshot directory, and `review.sharedImpact` fallback globs for files
+  the resource graph cannot see. Linked stylesheets are attributed by rule.
 - `compatibility.readManifestV2` permits a historical v2 Git baseline only when
   its canonical manifest is absent. Current output always requires v5. A temporary `compatibility.transformer` may deterministically
   repair already-authored documents during a consumer cutover; final links,

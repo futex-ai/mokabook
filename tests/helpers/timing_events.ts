@@ -34,7 +34,10 @@ export function assertReviewTimings(
       stage,
     );
   for (const event of review) {
-    assert.ok(reviewStages.includes(event.stage), event.stage);
+    assert.ok(
+      [...reviewStages, "review.css-analysis"].includes(event.stage),
+      event.stage,
+    );
     assert.equal(event.schemaVersion, 1);
     assert.equal(event.role, role);
     assert.ok(Number.isInteger(event.pid) && event.pid > 0);

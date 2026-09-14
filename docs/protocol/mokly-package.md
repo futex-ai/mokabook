@@ -200,6 +200,16 @@ to configured comparison output and the transactional writer boundary. The
 required `--out` has the additional source/runtime/ownership confinement rules
 in the [export contract](./mokly-export.md).
 
+`review.sharedImpact` is fallback impact evidence for files the rendered resource
+graph cannot see, such as renderer, component-source, or token modules. Linked
+stylesheets, including transitive imports, are attributed by rule under
+[CSS change attribution](./mokly-css-attribution.md). A changed stylesheet keeps
+a view's dependency evidence only when a changed rule could match its before or
+after document, or analysis is unresolved. Otherwise it is examined and excluded.
+Shared-impact globs cannot override this exclusion or add unreferenced public
+files to Changes; they retain the existing ownership and membership rules in
+[Changes](./mokly-changes.md) and [component attribution](./mokly-component-changes.md).
+
 `moduleResolution` has no defaults beyond esbuild's platform behavior. Package
 roots must be in-repository directories containing `package.json`; their
 `node_modules` directories supplement consumer lookup. Aliases accept bare

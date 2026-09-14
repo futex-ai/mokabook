@@ -71,12 +71,24 @@ absent for added/removed views. An absent stylesheet is passed as an empty strin
 Selectors are the kept rules' original serialized selectors, sorted and unique;
 an unresolved rule takes precedence over matched rules in the reduction.
 
-The closed keep-list, in contract order, is: unparseable selectors; shadow
-selectors; universal/root/html/body selectors; unresolvable nesting; changed
-custom properties; selector-less at-rules; changed imports/URLs; stylesheet
-parse failures. These yield `unresolved`. Ordinary rules are `matched` when
-either document matches and `excluded` otherwise. An unchanged custom property
-or URL within an edited rule does not itself trigger unresolved evidence.
+The closed keep-list, in contract order, marks these constructs `unresolved`:
+
+- Selectors the matcher cannot parse.
+- Shadow selectors: `:host`, `:host()`, `:host-context()`, `::part()` and `::slotted()`.
+- Universal, `:root`, `html` and `body` selectors, including selector arguments
+  and nesting parents, but excluding literal attribute values and synthetic
+  universals introduced by state stripping.
+- Nesting parents whose combined selectors cannot be resolved.
+- Changed custom-property declarations (`--*`), including removals.
+- Selector-less at-rules, including `@font-face`, `@keyframes`, `@property`,
+  `@counter-style` and `@page`.
+- Changed `@import` or `url()` references, including URLs in condition preludes.
+- A stylesheet parse failure on either side; no partial selectors are retained.
+
+Ordinary rules are `matched` when either document matches and `excluded`
+otherwise. An unchanged custom property or URL within an edited rule does not
+itself trigger unresolved evidence. Matching is potential impact, never proof
+of a visible change. A formatting-only diff has no changed rules and is excluded.
 
 Nested parents are combined through `:is()` for matching. Interactive states and
 pseudo-elements use the base compound, with negation handled conservatively;
@@ -111,6 +123,13 @@ classification. Export projects the same slice from its existing v2 result;
 the inspector merges it with loaded comparison details. Result schemas and
 classification policy stay unchanged.
 
+With `--debug-timings`, `review.css-analysis` measures each stylesheet/view's
+parse-cache lookup or parse, rule diff, selector matching and reduction. It
+excludes resource reads and preparation of the input document trees. Cache hits
+still run diffing and matching. Compare its interval union with the enclosing
+background `changes.classify` duration in the same session; do not sum parent
+and child spans. See the [timing contract](../../docs/protocol/mokly-timings.md).
+
 ## Development
 
 ```bash
@@ -137,6 +156,7 @@ Key code:
   that retain HTML/SVG/MathML name semantics.
 - `css/nesting.ts`, `css/pseudos.ts`: parent substitution and static match bounds.
 - `css/material.ts`: changed custom-property and URL-reference detection.
+- `css/paths.ts`: case-insensitive stylesheet path eligibility.
 - `resource_comparison.ts`, `css/resource_analysis.ts`: shared resource evidence
   and the classification-scoped parser cache.
 - `result_resources.ts`: browser-safe validation of retained/excluded evidence.
