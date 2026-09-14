@@ -8,6 +8,7 @@ import {
 } from "../config/public_files.js";
 import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError, errorMessage } from "../errors.js";
 import { referencedRoutes } from "./asset_references.js";
 import type { GitClient, GitFile } from "./git.js";
@@ -148,38 +149,40 @@ export async function copySnapshotDependencies(
     routes: readonly string[],
   ) => Promise<ReadonlyMap<string, ReviewArtifactContent>>,
 ): Promise<void> {
-  let queued = [...seedRoutes].sort();
-  const seen = new Set<string>();
-  while (queued.length > 0) {
-    const batch = queued.filter((route) => !seen.has(route));
-    for (const route of batch) seen.add(route);
-    const missing = batch.filter(
-      (route) => files.get(snapshotPath(side, route)) === undefined,
-    );
-    if (missing.length > 0) {
-      const loaded = readMany
-        ? await readMany(missing)
-        : await readIndividually(missing, read);
-      for (const route of missing) {
-        const content = loaded.get(route);
-        if (content === undefined) {
-          throw assetError(route, "batch reader omitted the file");
+  return timeAsync("review.resource-graph", async () => {
+    let queued = [...seedRoutes].sort();
+    const seen = new Set<string>();
+    while (queued.length > 0) {
+      const batch = queued.filter((route) => !seen.has(route));
+      for (const route of batch) seen.add(route);
+      const missing = batch.filter(
+        (route) => files.get(snapshotPath(side, route)) === undefined,
+      );
+      if (missing.length > 0) {
+        const loaded = readMany
+          ? await readMany(missing)
+          : await readIndividually(missing, read);
+        for (const route of missing) {
+          const content = loaded.get(route);
+          if (content === undefined) {
+            throw assetError(route, "batch reader omitted the file");
+          }
+          addArtifactFile(files, snapshotPath(side, route), content);
         }
-        addArtifactFile(files, snapshotPath(side, route), content);
       }
+      const discovered = new Set<string>();
+      for (const route of batch) {
+        const content = files.get(snapshotPath(side, route));
+        if (content === undefined) {
+          throw assetError(route, "snapshot dependency is unavailable");
+        }
+        for (const dependency of referencedRoutes(route, content)) {
+          if (!seen.has(dependency)) discovered.add(dependency);
+        }
+      }
+      queued = [...discovered].sort();
     }
-    const discovered = new Set<string>();
-    for (const route of batch) {
-      const content = files.get(snapshotPath(side, route));
-      if (content === undefined) {
-        throw assetError(route, "snapshot dependency is unavailable");
-      }
-      for (const dependency of referencedRoutes(route, content)) {
-        if (!seen.has(dependency)) discovered.add(dependency);
-      }
-    }
-    queued = [...discovered].sort();
-  }
+  });
 }
 
 async function readIndividually(

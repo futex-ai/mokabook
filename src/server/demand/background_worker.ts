@@ -4,7 +4,7 @@ import { setImmediate, setTimeout } from "node:timers/promises";
 import type { ComponentRuntime } from "../../build/component_runtime.js";
 import { compileRuntime } from "../../build/compile_runtime.js";
 import { errorMessage } from "../../errors.js";
-import { runWithTimings } from "../../diagnostics/timings.js";
+import { runWithTimings, timeAsync } from "../../diagnostics/timings.js";
 import { RepositoryCatalogueChangeClassifier } from "../component_changes.js";
 import type { ManifestV5 } from "../../registry/types.js";
 import { WorkerGitCommandRunner } from "./git_worker.js";
@@ -39,10 +39,8 @@ parentPort?.on("message", (message: { type: string; base: string }) => {
   if (message.type !== "classify" || !manifest) return;
   void runWithTimings(debug, "background", async () => {
     await checkpoint();
-    const snapshot = await classifier.read(
-      runtime.config,
-      manifest!,
-      message.base,
+    const snapshot = await timeAsync("changes.classify", () =>
+      classifier.read(runtime.config, manifest!, message.base),
     );
     parentPort?.postMessage({ type: "classified", snapshot });
   });

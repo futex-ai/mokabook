@@ -1,4 +1,5 @@
 import { MoklyError } from "../errors.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { referencedRoutes } from "./asset_references.js";
 import type { ReviewAssetReader } from "./assets.js";
 import { ResourceGraph } from "./resource_graph.js";
@@ -49,9 +50,11 @@ export class ComponentMaterialReader {
     html: string,
     excluded: (route: string) => boolean,
   ): Promise<ReadonlySet<string>> {
-    const seeds = referencedRoutes(route, html, {
-      resourceHints: false,
-    }).filter((path) => !excluded(path));
-    return this.graph.collect(seeds);
+    return timeAsync("review.resource-graph", () => {
+      const seeds = referencedRoutes(route, html, {
+        resourceHints: false,
+      }).filter((path) => !excluded(path));
+      return this.graph.collect(seeds);
+    });
   }
 }

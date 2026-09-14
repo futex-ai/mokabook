@@ -7,6 +7,7 @@ import { minimatch } from "minimatch";
 import type { Compilation } from "../build/compile.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import type { ManifestScreen, Manifest } from "../registry/types.js";
 import {
   copySnapshotDependencies,
@@ -73,8 +74,10 @@ export async function compareReview(
   const headSeeds = new Set<string>();
   const baseByRoute = screenMap(baseManifest);
   const headByRoute = screenMap(compilation.manifest);
-  const baseDocuments = await baseAssetReader.readMany(
-    [...baseByRoute.values()].flatMap((screen) => fragmentRoutes(screen)),
+  const baseDocuments = await timeAsync("review.base-documents", () =>
+    baseAssetReader.readMany(
+      [...baseByRoute.values()].flatMap((screen) => fragmentRoutes(screen)),
+    ),
   );
   const routes = [
     ...new Set([...baseByRoute.keys(), ...headByRoute.keys()]),
@@ -85,23 +88,25 @@ export async function compareReview(
     ),
   );
   const screens: ScreenReview[] = [];
-  for (const route of routes) {
-    const base = baseByRoute.get(route);
-    const head = headByRoute.get(route);
-    screens.push(
-      await compareScreen(
-        base,
-        head,
-        baseDocuments,
-        compilation,
-        changedPaths,
-        sharedImpact,
-        files,
-        baseSeeds,
-        headSeeds,
-      ),
-    );
-  }
+  await timeAsync("review.compare-screens", async () => {
+    for (const route of routes) {
+      const base = baseByRoute.get(route);
+      const head = headByRoute.get(route);
+      screens.push(
+        await compareScreen(
+          base,
+          head,
+          baseDocuments,
+          compilation,
+          changedPaths,
+          sharedImpact,
+          files,
+          baseSeeds,
+          headSeeds,
+        ),
+      );
+    }
+  });
   await copySnapshotDependencies(
     files,
     "before",

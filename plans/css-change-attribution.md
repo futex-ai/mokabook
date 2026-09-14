@@ -115,6 +115,65 @@ Excluded resources are recorded on the view, not as reasons:
 excludedResources: readonly { path: string; reason: "no-matching-rule" }[];
 ```
 
+## Baseline timings
+
+Measured on 2026-09-14 in the Amazon Linux 2023 x86_64 cloud sandbox
+(8 CPUs, approximately 16 GiB RAM, Node v24.14.1), with other heavy checks idle.
+These are single diagnostic runs before rule-aware attribution, not performance
+thresholds or statistical estimates.
+
+`npm run fixture:large` prepared the full default fixture in 80,329 ms:
+30 areas, 40 screens per area (1,200 screens), 60 registered components with
+three saved variants each, 12 records per screen, 1,410 routed entries and
+5,550 documents. Four shared stylesheets are each linked by the first 20
+screens per area: 600 screens, or 50%, in all viewport/scheme documents.
+The existing catalogue stylesheet and its imported tokens sheet are additional
+(two more CSS files). Setup commits the unedited stylesheets, then adds an
+unrelated rule only to `assets/shared-1.css`.
+
+`npm run benchmark:large` completed at full size. Cold/warm usable startup was
+4,139 / 4,100 ms, both below five seconds. Complete Changes reached Browse at
+147,173 / 146,663 ms, with 660 changed routes in both runs: 600 linked screens
+and 60 flows. No smaller benchmark fallback was needed. Cold means a fresh
+application process, without flushing OS caches.
+
+Serve classification does not write artifacts. A supplementary full-size
+`node --max-old-space-size=12288 dist/cli/bin.js export --config <full-config> --base main --out .context/site --debug-timings`
+failed with JavaScript heap exhaustion after approximately 481 seconds, before
+the artifact-write span began. Review comparison had completed; complete-site
+assembly/validation remains outside those review spans. No export optimization
+is part of this milestone.
+
+The separately labelled small Export used
+`npm run fixture:large -- --areas 2 --screens 10 --rows 6`, then
+`node dist/cli/bin.js export --config <small-config> --base main --out .context/site --debug-timings`.
+It has 20 screens, four components with three variants each, six records per
+screen, 28 routed entries and 130 documents; each of four shared stylesheets
+is linked by ten screens (50%). It uses the default Node heap allowance.
+This is a control measurement for the artifact-write stage, not a claim of the
+largest export that fits or an estimate for the full-size export.
+
+Durations below are milliseconds. For repeated stage names, each cell is the
+union of `[end.elapsedMs - end.durationMs, end.elapsedMs]` intervals within one
+session, so overlapping viewport traversals count once. Parent rows include children; do not sum rows
+or compare elapsed clocks across sessions. Each full Serve run has three
+comparison-loop spans and 22,110 resource traversals. Small Export has three
+changed-path spans, two manifest reads, three comparison loops, and 516 resource
+traversals (including the two snapshot-copy closures). A dash means that stage
+did not run in that command.
+
+| Span                     | Full Serve cold (ms) | Full Serve warm (ms) | Small Export (ms) |
+| ------------------------ | -------------------: | -------------------: | ----------------: |
+| `review.base-commit`     |                10.13 |                 9.56 |              7.41 |
+| `review.changed-paths`   |             1,293.63 |             1,344.31 |             79.90 |
+| `review.base-manifest`   |               971.23 |               983.36 |            102.94 |
+| `review.base-documents`  |             1,760.44 |             1,920.90 |             39.19 |
+| `review.compare-screens` |            43,411.58 |            43,579.36 |            808.19 |
+| `review.resource-graph`  |            23,825.88 |            23,860.31 |            934.41 |
+| `review.write-artifact`  |                    — |                    — |             97.99 |
+| `changes.classify`       |            47,975.63 |            48,354.97 |                 — |
+| `export`                 |                    — |                    — |          6,895.22 |
+
 ## Milestone 1: Define the rule-aware attribution contract
 
 Documentation-only milestone. The protocol must be complete and approved by
@@ -180,20 +239,23 @@ a reviewer can see why a screen stayed out of Changes.
 Establish where review time goes before changing attribution, so the
 language decision and later performance claims rest on data.
 
-- [ ] Add `review.*` timing spans under the existing `--debug-timings`
+Completed. Spans, fixture options, tests, and the recorded baseline above
+were delivered by a Codex session and verified by the coordinator.
+
+- [x] Add `review.*` timing spans under the existing `--debug-timings`
       contract for base-commit resolution, changed-path discovery, base
       manifest read, base document batch read, per-screen comparison loop,
       resource graph traversal, and artifact write. Follow the span rules in
       `docs/protocol/mokly-timings.md`.
-- [ ] Extend the large fixture generator under `tests/fixtures/large` with a
+- [x] Extend the large fixture generator under `tests/fixtures/large` with a
       configurable number of shared stylesheets linked by a configurable share
       of screens, and record a baseline in which one shared stylesheet gains
       an unrelated rule.
-- [ ] Run `benchmark:large` against that fixture and record per-span timings
+- [x] Run `benchmark:large` against that fixture and record per-span timings
       in this plan under a "Baseline timings" heading, with fixture sizes.
-- [ ] Add tests for the new spans in the existing timings test file, and
+- [x] Add tests for the new spans in the existing timings test file, and
       update `docs/protocol/mokly-timings.md` with the new stage names.
-- [ ] Run `npm run test`, `npm run typecheck`, `npm run lint`, and
+- [x] Run `npm run test`, `npm run typecheck`, `npm run lint`, and
       `npm run format:check`.
 
 ## Milestone 4: Rule diffing

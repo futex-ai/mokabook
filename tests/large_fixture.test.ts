@@ -15,10 +15,29 @@ import { generateLargeFixture, largeSize } from "./fixtures/large/generate.js";
 import { repositoryRoot } from "./helpers/fixture.js";
 
 test("large fixture validates dimensions and defaults to Accounting-scale routes", () => {
-  assert.deepEqual(largeSize({}), { areas: 30, screens: 40, rows: 12 });
+  assert.deepEqual(largeSize({}), {
+    areas: 30,
+    screens: 40,
+    rows: 12,
+    stylesheets: 4,
+    stylesheetShare: 0.5,
+  });
   for (const value of [0, -1, 1.5, NaN, Infinity])
     assert.throws(() => largeSize({ areas: value }), /positive integer/);
   assert.throws(() => largeSize({ screens: 1 }), /at least two/);
+  for (const value of [-1, 1.5, NaN, Infinity])
+    assert.throws(
+      () => largeSize({ stylesheets: value }),
+      /non-negative integer/,
+    );
+  for (const value of [-0.1, 1.1, NaN, Infinity])
+    assert.throws(
+      () => largeSize({ stylesheetShare: value }),
+      /between 0 and 1/,
+    );
+  assert.equal(largeSize({ stylesheets: 0 }).stylesheets, 0);
+  assert.equal(largeSize({ stylesheetShare: 0 }).stylesheetShare, 0);
+  assert.equal(largeSize({ stylesheetShare: 1 }).stylesheetShare, 1);
 });
 
 for (const screens of [10, 11, 20, 21]) {

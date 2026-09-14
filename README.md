@@ -181,6 +181,8 @@ For slow startup, add `--debug-timings` to any command. It writes structured
 phase timings and aggregate catalogue sizes to stderr while leaving normal
 output and generated files unchanged. It separates bundling, rendering,
 validation, file writes, watcher setup, child readiness, and background Changes.
+Review timings distinguish Git baseline and document reads, comparison loops,
+resource traversal, and artifact writes. Build and Check do not run review.
 Parent timings include child phases; overlapping timings must not be added
 together. See the [diagnostic contract](./docs/protocol/mokly-timings.md).
 
@@ -192,6 +194,10 @@ searchable navigation and a real preview within five seconds for both a fresh
 process and a warm restart, exercises Props, themes, viewports and pages, and
 waits for Changes separately. Use matching `--areas 2 --screens 10 --rows 6`
 options for smaller setup and benchmark runs. Fixtures stay under `.context`.
+The default fixture also has four shared stylesheets linked by half its screens
+and an unrelated stylesheet-rule edit after the Git baseline. Configure that
+workload with matching `--stylesheets` and `--stylesheet-share` options on setup
+and benchmark commands.
 See the [large fixture guide](./tests/fixtures/large/README.md).
 
 Serve validates a lightweight catalogue index and makes navigation and local Props

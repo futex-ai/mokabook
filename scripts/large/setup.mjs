@@ -10,7 +10,7 @@ export function fixtureRecord(repository, size) {
   return path.join(
     repository,
     ".context",
-    `large-${size.areas}-${size.screens}-${size.rows}.json`,
+    `large-${size.areas}-${size.screens}-${size.rows}-${size.stylesheets}-${size.stylesheetShare}.json`,
   );
 }
 
@@ -60,6 +60,11 @@ export async function prepareFixture(repository, size, debug) {
     "-qm",
     "test: large catalogue baseline",
   );
+  if (size.stylesheets > 0)
+    await fs.appendFile(
+      path.join(root, "mockups/assets/shared-1.css"),
+      ".scale-unrelated-rule { outline: 1px solid rebeccapurple; }\n",
+    );
   const record = {
     ...fixture,
     setupMs: Math.round(performance.now() - beginning),
@@ -82,7 +87,7 @@ export async function preparedFixture(repository, size) {
     return fixture;
   } catch {
     throw new Error(
-      `Prepare this fixture first: npm run fixture:large -- --areas ${size.areas} --screens ${size.screens} --rows ${size.rows}`,
+      `Prepare this fixture first: npm run fixture:large -- --areas ${size.areas} --screens ${size.screens} --rows ${size.rows} --stylesheets ${size.stylesheets} --stylesheet-share ${size.stylesheetShare}`,
     );
   }
 }

@@ -16,6 +16,9 @@ membership without reading a different current-file snapshot.
 
 `stage.ts` shares ownership assembly, alias/reference validation, and staged
 file writes between consumer export and repository preview capture.
+With `--debug-timings`, `review.write-artifact` measures its complete staged
+file-write loop, including comparison files. Validation and installation remain
+outside that span; the caller's `export` span includes all phases.
 `deployment.ts` finalizes a separate complete-artifact identity after provider
 transformation and ownership assembly. `content_id.ts` uses deterministic file
 hashes and alias edges; `shell_metadata.ts` normalizes and stamps only known

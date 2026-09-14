@@ -5,6 +5,7 @@ import path from "node:path";
 import { isReservedSource } from "../build/source_inventory.js";
 import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
 import {
   FORMER_MANIFEST_NAME,
@@ -86,32 +87,36 @@ export async function changedContentPaths(
     (pair): pair is DocumentPair & { base: string } =>
       pair.changed && pair.base !== undefined,
   );
-  for (let offset = 0; offset < changedPairs.length; offset += 32) {
-    const batch = changedPairs.slice(offset, offset + 32);
-    const bases = await baseReader.readMany(batch.map((pair) => pair.base));
-    for (const pair of batch) {
-      const base = bases.get(pair.base);
-      if (!base) {
-        throw new MoklyError(
-          "review-invalid",
-          `base fragment is missing: ${pair.base}`,
+  await timeAsync("review.compare-screens", async () => {
+    for (let offset = 0; offset < changedPairs.length; offset += 32) {
+      const batch = changedPairs.slice(offset, offset + 32);
+      const bases = await timeAsync("review.base-documents", () =>
+        baseReader.readMany(batch.map((pair) => pair.base)),
+      );
+      for (const pair of batch) {
+        const base = bases.get(pair.base);
+        if (!base) {
+          throw new MoklyError(
+            "review-invalid",
+            `base fragment is missing: ${pair.base}`,
+          );
+        }
+        const before = normalizeHistoricalDocument(
+          Buffer.from(base).toString("utf8"),
         );
-      }
-      const before = normalizeHistoricalDocument(
-        Buffer.from(base).toString("utf8"),
-      );
-      const after = Buffer.from(await headReader.read(pair.head)).toString(
-        "utf8",
-      );
-      const normalized = normalizeReviewPair(before, after, pair.context);
-      normalizedDocuments.set(pair.head, normalized.head);
-      if (normalized.base !== normalized.head) {
-        result.add(repoPath(pair.head));
-      } else if (pair.base === pair.head) {
-        publicChanges.delete(pair.head);
+        const after = Buffer.from(await headReader.read(pair.head)).toString(
+          "utf8",
+        );
+        const normalized = normalizeReviewPair(before, after, pair.context);
+        normalizedDocuments.set(pair.head, normalized.head);
+        if (normalized.base !== normalized.head) {
+          result.add(repoPath(pair.head));
+        } else if (pair.base === pair.head) {
+          publicChanges.delete(pair.head);
+        }
       }
     }
-  }
+  });
   if (publicChanges.size === 0) return [...result].sort();
   const resources = new ChangedResourceGraph(
     headReader,
@@ -119,19 +124,21 @@ export async function changedContentPaths(
     publicChanges,
     normalizedDocuments,
   );
-  for (const pair of pairs) {
-    let document = normalizedDocuments.get(pair.head);
-    if (document === undefined) {
-      const after = Buffer.from(await headReader.read(pair.head)).toString(
-        "utf8",
-      );
-      document = pair.base
-        ? normalizeReviewPair(after, after, pair.context).head
-        : normalizeSingleDocument(after, pair.context);
+  await timeAsync("review.compare-screens", async () => {
+    for (const pair of pairs) {
+      let document = normalizedDocuments.get(pair.head);
+      if (document === undefined) {
+        const after = Buffer.from(await headReader.read(pair.head)).toString(
+          "utf8",
+        );
+        document = pair.base
+          ? normalizeReviewPair(after, after, pair.context).head
+          : normalizeSingleDocument(after, pair.context);
+      }
+      if (await resources.affects(pair.head, document))
+        result.add(repoPath(pair.head));
     }
-    if (await resources.affects(pair.head, document))
-      result.add(repoPath(pair.head));
-  }
+  });
   return [...result].sort();
 }
 

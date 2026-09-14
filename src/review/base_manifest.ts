@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import {
   FORMER_MANIFEST_NAME,
   MANIFEST_NAME,
@@ -13,6 +14,16 @@ import type { GitClient } from "./git.js";
 
 /** Read the canonical base manifest, falling back only when it is absent. */
 export async function readBaseManifest(
+  git: GitClient,
+  commit: string,
+  config: ResolvedConfig,
+): Promise<HistoricalManifest> {
+  return timeAsync("review.base-manifest", () =>
+    readMeasured(git, commit, config),
+  );
+}
+
+async function readMeasured(
   git: GitClient,
   commit: string,
   config: ResolvedConfig,

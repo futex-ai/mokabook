@@ -1,5 +1,16 @@
 import { setTimeout } from "node:timers/promises";
 
+/** Current file-level attribution includes linked screens and flows that reuse them. */
+export function expectedStylesheetChanges(size) {
+  const linked = size.stylesheets
+    ? Math.ceil(size.screens * size.stylesheetShare)
+    : 0;
+  const flows =
+    Math.ceil(linked / 10) +
+    Number(linked > 0 && linked < size.screens && size.screens % 10 === 1);
+  return size.areas * (linked + flows);
+}
+
 /** Classification publication precedes asynchronous IPC delivery and child adoption. */
 export async function waitForBrowseChanges(url, timeoutMs = 300000) {
   const deadline = Date.now() + timeoutMs;

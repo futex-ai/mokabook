@@ -1,6 +1,7 @@
 import type { Compilation } from "../build/compile.js";
 import { generatedViews } from "../components/views.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import type { Manifest } from "../registry/types.js";
 import {
   copySnapshotDependencies,
@@ -28,7 +29,9 @@ export async function compareComponentCatalogue(
   const headPaths = compilation.manifest.entries.flatMap((entry) =>
     generatedViews(entry).map((view) => view.path),
   );
-  const baseFiles = await baseReader.readMany(basePaths);
+  const baseFiles = await timeAsync("review.base-documents", () =>
+    baseReader.readMany(basePaths),
+  );
   const beforeReader: ReviewAssetReader = {
     read: async (route) => baseFiles.get(route) ?? baseReader.read(route),
   };

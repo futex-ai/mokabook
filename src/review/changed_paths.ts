@@ -8,6 +8,7 @@ import {
   toPosixPath,
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
 import type { GitClient } from "./git.js";
 
@@ -19,20 +20,22 @@ export async function reviewChangedPaths(
   outDir: string,
   additionalOutputDirectories: readonly string[] = [],
 ): Promise<readonly string[]> {
-  const excludedPaths = [
-    ...new Set(
-      [outDir, ...additionalOutputDirectories].flatMap((directory) =>
-        outputPaths(config.repoRoot, directory),
+  return timeAsync("review.changed-paths", async () => {
+    const excludedPaths = [
+      ...new Set(
+        [outDir, ...additionalOutputDirectories].flatMap((directory) =>
+          outputPaths(config.repoRoot, directory),
+        ),
       ),
-    ),
-  ].sort();
-  const changed = await git.changedPaths(commit, excludedPaths);
-  return [...new Set(changed)]
-    .filter(
-      (candidate) =>
-        !excludedPaths.some((excluded) => pathBelongsTo(candidate, excluded)),
-    )
-    .sort();
+    ].sort();
+    const changed = await git.changedPaths(commit, excludedPaths);
+    return [...new Set(changed)]
+      .filter(
+        (candidate) =>
+          !excludedPaths.some((excluded) => pathBelongsTo(candidate, excluded)),
+      )
+      .sort();
+  });
 }
 
 function outputPaths(repoRoot: string, outDir: string): string[] {

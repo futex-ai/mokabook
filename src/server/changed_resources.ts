@@ -2,6 +2,7 @@
 
 import path from "node:path";
 
+import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
 import { referencedRoutes } from "../review/asset_references.js";
 import type {
@@ -27,10 +28,12 @@ export class ChangedResourceGraph {
 
   /** Inspect transitive local references, terminating even for cyclic imports. */
   async affects(source: string, document: string): Promise<boolean> {
-    const seeds = referencedRoutes(source, document, {
-      resourceHints: false,
+    const resources = await timeAsync("review.resource-graph", () => {
+      const seeds = referencedRoutes(source, document, {
+        resourceHints: false,
+      });
+      return this.#graph.collect(seeds);
     });
-    const resources = await this.#graph.collect(seeds);
     return [...resources].some((route) => this.isChanged(route));
   }
 

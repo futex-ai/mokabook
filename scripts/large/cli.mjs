@@ -8,7 +8,13 @@ async function main() {
   const mode = args.shift();
   if (!["generate", "serve", "benchmark"].includes(mode))
     throw new Error("Use generate, serve or benchmark");
-  const size = { areas: 30, screens: 40, rows: 12 };
+  const size = {
+    areas: 30,
+    screens: 40,
+    rows: 12,
+    stylesheets: 4,
+    stylesheetShare: 0.5,
+  };
   let debug = mode === "benchmark";
   let config;
   while (args.length) {
@@ -19,6 +25,16 @@ async function main() {
       if (!value || value.startsWith("--"))
         throw new Error("--config needs a path");
       config = path.resolve(value);
+    } else if (flag === "--stylesheet-share") {
+      const value = Number(args.shift());
+      if (!Number.isFinite(value) || value < 0 || value > 1)
+        throw new Error("--stylesheet-share needs a number between 0 and 1");
+      size.stylesheetShare = value;
+    } else if (flag === "--stylesheets") {
+      const value = Number(args.shift());
+      if (!Number.isSafeInteger(value) || value < 0)
+        throw new Error("--stylesheets needs a non-negative integer");
+      size.stylesheets = value;
     } else if (["--areas", "--screens", "--rows"].includes(flag)) {
       const value = Number(args.shift());
       if (!Number.isSafeInteger(value) || value <= 0)

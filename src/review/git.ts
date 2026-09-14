@@ -1,4 +1,5 @@
 import { MoklyError, errorMessage } from "../errors.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { readGitFiles } from "./git_batch.js";
 import { executeGit } from "./git_process.js";
 
@@ -68,18 +69,20 @@ export class RepositoryGitClient implements GitClient {
     baseReference: string,
     headReference: string,
   ): Promise<string> {
-    const output = await this.run(
-      ["merge-base", "--", baseReference, headReference],
-      `find merge base of ${baseReference} and ${headReference}`,
-    );
-    const commit = output.trim();
-    if (!/^[a-f0-9]{40,64}$/.test(commit)) {
-      throw new MoklyError(
-        "git-failed",
-        `Git returned an invalid merge base for ${baseReference} and ${headReference}`,
+    return timeAsync("review.base-commit", async () => {
+      const output = await this.run(
+        ["merge-base", "--", baseReference, headReference],
+        `find merge base of ${baseReference} and ${headReference}`,
       );
-    }
-    return commit;
+      const commit = output.trim();
+      if (!/^[a-f0-9]{40,64}$/.test(commit)) {
+        throw new MoklyError(
+          "git-failed",
+          `Git returned an invalid merge base for ${baseReference} and ${headReference}`,
+        );
+      }
+      return commit;
+    });
   }
 
   async readFile(commit: string, repoRelativePath: string): Promise<string> {
