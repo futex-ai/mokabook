@@ -1,6 +1,7 @@
 import { SystemBaselineClock } from "../../dist/baseline/clock.js";
 import type { BaselineError } from "../../dist/baseline/errors.js";
 import { NodeBaselineFileSystem } from "../../dist/baseline/filesystem.js";
+import { StderrBaselineMaintenanceReporter } from "../../dist/baseline/maintenance.js";
 import { NodeBaselineProcessRunner } from "../../dist/baseline/process.js";
 import { CachedBaselineBuilder } from "../../dist/baseline/rebuild.js";
 import type {
@@ -21,6 +22,7 @@ export function nodeBaselineBuilder(): BaselineBuilder {
     new NodeBaselineFileSystem(),
     new NodeBaselineProcessRunner(),
     new SystemBaselineClock(),
+    new StderrBaselineMaintenanceReporter(),
     { environment: process.env },
   );
 }

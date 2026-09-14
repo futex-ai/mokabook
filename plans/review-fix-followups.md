@@ -39,15 +39,15 @@ for the rebuild post-steps.
       `remove` during a failed build and asserts `baseline-command-failed`
       survives with its diagnostics.
 
-## Milestone 3: Inject the maintenance reporter
+## Milestone 3: Inject the maintenance reporter — completed
 
-- [ ] Add a `BaselineMaintenanceReporter` interface in
+- [x] Add a `BaselineMaintenanceReporter` interface in
       `src/baseline/maintenance.ts` with a stderr implementation, inject it
       into `CachedBaselineBuilder` as a fourth collaborator, and default it at
       the composition root in `src/review/prepare.ts`.
-- [ ] Replace the `process.stderr.write` monkey-patching in
+- [x] Replace the `process.stderr.write` monkey-patching in
       `tests/baseline_cleanup.test.ts` with an injected fake reporter.
-- [ ] Update `src/baseline/README.md`.
+- [x] Update `src/baseline/README.md`.
 
 ## Milestone 4: Cleanup and import ordering
 

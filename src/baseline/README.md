@@ -8,9 +8,12 @@ this directory adds no supported JavaScript package exports.
 `BaselineBuilder` in `types.ts` accepts `build(request)`, where the request names
 one resolved commit, repository root, repository-relative `mockupsPath`, exact
 argv commands, optional historical-v2 compatibility, and an `AbortSignal`.
-`CachedBaselineBuilder` implements it with injected filesystem, process runner,
-and clock interfaces. The Node implementations live in `filesystem.ts`,
-`process.ts`, and `clock.ts`.
+`CachedBaselineBuilder(fs, runner, clock, maintenance, options)` implements it
+with four injected collaborators: filesystem, process runner, clock and
+`BaselineMaintenanceReporter`. The Node implementations live in `filesystem.ts`,
+`process.ts`, `clock.ts` and `maintenance.ts`. `review/prepare.ts` supplies
+`StderrBaselineMaintenanceReporter` at the production composition root; unit
+tests record structured maintenance failures through an injected fake.
 
 ```ts
 const prepared = await builder.build({
@@ -64,12 +67,13 @@ moves the generated directory to `output`, deletes the extraction, and writes
 Cancellation before that point removes partial output; cancellation afterward
 returns the completed result and skips remaining retention work. Cleanup and
 lock release cannot reject or erase a completed build. No cleanup failure may
-replace an existing typed build error or its command
-diagnostics; partial-entry removal still attempts lock release if it fails.
-`cleanup.ts` returns
-per-entry maintenance failures and continues with other eligible entries;
-`maintenance.ts` reports diagnostics on stderr without adding failure events to
-the successful build. `inputs.json` records the repository-relative output path;
+replace an existing typed build error or its command diagnostics; partial-entry
+removal still attempts lock release if it fails. `cleanup.ts` returns per-entry
+maintenance failures and continues with other eligible entries. The maintenance
+reporter receives each entry and original error without adding failure events
+to a successful build. Its `report(failure)` method must not
+throw; the stderr implementation tolerates a closed diagnostic stream.
+`inputs.json` records the repository-relative output path;
 the marker records the commands. A complete entry for different settings fails
 explicitly and remains intact. Remove that commit's cache entry before changing
 its catalogue/build settings. Partial entries are rebuilt under the entry lock.

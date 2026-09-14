@@ -6,6 +6,7 @@ import { cacheLayout } from "../baseline/cache_layout.js";
 import { SystemBaselineClock } from "../baseline/clock.js";
 import { assertBaselineActive, BaselineError } from "../baseline/errors.js";
 import { NodeBaselineFileSystem } from "../baseline/filesystem.js";
+import { StderrBaselineMaintenanceReporter } from "../baseline/maintenance.js";
 import { NodeBaselineProcessRunner } from "../baseline/process.js";
 import { CachedBaselineBuilder } from "../baseline/rebuild.js";
 import type {
@@ -96,6 +97,7 @@ export async function prepareReviewRepository(
             filesystem,
             new NodeBaselineProcessRunner(),
             new SystemBaselineClock(),
+            new StderrBaselineMaintenanceReporter(),
             { environment: process.env },
           )
         ).build(request)

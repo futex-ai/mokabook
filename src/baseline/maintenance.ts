@@ -1,4 +1,4 @@
-/** Post-adoption diagnostics never turn a completed baseline into a failed build. */
+/** Maintenance diagnostics cannot change a successful or failed build outcome. */
 import { errorMessage } from "../errors.js";
 
 export interface BaselineMaintenanceFailure {
@@ -6,14 +6,25 @@ export interface BaselineMaintenanceFailure {
   readonly error: unknown;
 }
 
-export function reportBaselineMaintenance(
-  failure: BaselineMaintenanceFailure,
-): void {
-  try {
-    process.stderr.write(
-      `[mokabook/baseline-cleanup] ${failure.entry}: ${errorMessage(failure.error)}\n`,
-    );
-  } catch {
-    // A closed diagnostic stream cannot revoke published output.
+/** Report a post-step failure without throwing or replacing the build's outcome. */
+export interface BaselineMaintenanceReporter {
+  report(failure: BaselineMaintenanceFailure): void;
+}
+
+export class StderrBaselineMaintenanceReporter implements BaselineMaintenanceReporter {
+  constructor(
+    private readonly write: (line: string) => void = (line) => {
+      process.stderr.write(line);
+    },
+  ) {}
+
+  report(failure: BaselineMaintenanceFailure): void {
+    try {
+      this.write(
+        `[mokabook/baseline-cleanup] ${failure.entry}: ${errorMessage(failure.error)}\n`,
+      );
+    } catch {
+      // A closed diagnostic stream cannot replace the build's outcome.
+    }
   }
 }

@@ -17,7 +17,8 @@ for (const failure of [
 ] as const) {
   test(`completed output survives cleanup ${failure} failure`, async (t) => {
     const fixture = baselineFixture();
-    const { fs, request, runner, clock, options } = fixture;
+    const { fs, request, runner, clock, options, reporter, maintenance } =
+      fixture;
     const victim = cacheLayout(request.repoRoot, "b".repeat(40));
     const another = cacheLayout(request.repoRoot, "c".repeat(40));
     const active = cacheLayout(request.repoRoot, request.commit);
@@ -29,11 +30,6 @@ for (const failure of [
       clock.time++;
     }
     const diagnostic = `injected ${failure} failure`;
-    const logs: string[] = [];
-    t.mock.method(process.stderr, "write", (message: string) => {
-      logs.push(String(message));
-      return true;
-    });
     const stat = fs.stat.bind(fs);
     const acquire = fs.acquireLock.bind(fs);
     const remove = fs.remove.bind(fs);
@@ -80,7 +76,7 @@ for (const failure of [
       if (failure === "list" && directory === active.root) fail();
       return list(directory);
     });
-    const builder = new CachedBaselineBuilder(fs, runner, clock, {
+    const builder = new CachedBaselineBuilder(fs, runner, clock, reporter, {
       ...options,
       retainedCount: 1,
     });
@@ -94,7 +90,9 @@ for (const failure of [
     assert.ok(await fs.stat(active.marker));
     assert.ok(await fs.stat(active.output));
     assert.ok(
-      logs.some((line) => line.includes(diagnostic)),
+      maintenance.some(
+        ({ error }) => error instanceof Error && error.message === diagnostic,
+      ),
       "maintenance failure must be reported",
     );
     if (failure !== "list")
@@ -123,6 +121,7 @@ test("retention protects the active entry and every locked entry", async () => {
     fixture.fs,
     fixture.runner,
     fixture.clock,
+    fixture.reporter,
     { ...fixture.options, retainedCount: 1 },
   );
   await builder.build({ ...fixture.request, commit: commits[4]! });
@@ -136,7 +135,7 @@ test("retention protects the active entry and every locked entry", async () => {
 
 for (const failure of ["release", "partial-remove", "both"] as const) {
   test(`cleanup ${failure} diagnostics preserve the original failed command`, async (t) => {
-    const { fs, request, runner, builder } = baselineFixture();
+    const { fs, request, runner, builder, maintenance } = baselineFixture();
     const layout = cacheLayout(request.repoRoot, request.commit);
     const run = runner.run;
     let commandFailed = false;
@@ -160,11 +159,6 @@ for (const failure of ["release", "partial-remove", "both"] as const) {
         throw new Error("partial removal failed");
       await remove(file);
     });
-    const logs: string[] = [];
-    t.mock.method(process.stderr, "write", (line: string) => {
-      logs.push(String(line));
-      return true;
-    });
     await assert.rejects(builder.build(request), {
       code: "baseline-command-failed",
       commandIndex: 0,
@@ -174,9 +168,23 @@ for (const failure of ["release", "partial-remove", "both"] as const) {
       outputLines: ["Build failed", "Missing dependency"],
     });
     if (failure !== "partial-remove")
-      assert.ok(logs.some((line) => line.includes("release failed")));
+      assert.ok(
+        maintenance.some(
+          ({ entry, error }) =>
+            entry === layout.lock &&
+            error instanceof Error &&
+            error.message === "release failed",
+        ),
+      );
     if (failure !== "release")
-      assert.ok(logs.some((line) => line.includes("partial removal failed")));
+      assert.ok(
+        maintenance.some(
+          ({ entry, error }) =>
+            entry === layout.entry &&
+            error instanceof Error &&
+            error.message === "partial removal failed",
+        ),
+      );
     assert.equal(releaseAttempted, true);
     assert.equal(await fs.stat(layout.marker), undefined);
     if (failure === "partial-remove")

@@ -10,6 +10,7 @@ import { cacheLayout } from "../dist/baseline/cache_layout.js";
 import { SystemBaselineClock } from "../dist/baseline/clock.js";
 import { BaselineCommandError } from "../dist/baseline/errors.js";
 import { NodeBaselineFileSystem } from "../dist/baseline/filesystem.js";
+import { StderrBaselineMaintenanceReporter } from "../dist/baseline/maintenance.js";
 import { NodeBaselineProcessRunner } from "../dist/baseline/process.js";
 import { RebuiltBaselineReader } from "../dist/baseline/reader.js";
 import { CachedBaselineBuilder } from "../dist/baseline/rebuild.js";
@@ -64,6 +65,7 @@ test("real Git baseline lifecycle: reuse, interruption, failure and confinement"
     filesystem,
     runner,
     new SystemBaselineClock(),
+    new StderrBaselineMaintenanceReporter(),
     {
       environment: {
         ...process.env,

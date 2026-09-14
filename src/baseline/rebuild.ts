@@ -17,7 +17,7 @@ import { assertBaselineActive, BaselineError } from "./errors.js";
 import { extractBaseline } from "./extract.js";
 import { acquireBaselineLock } from "./lock.js";
 import { baselineManifestVersion } from "./manifest.js";
-import { reportBaselineMaintenance } from "./maintenance.js";
+import type { BaselineMaintenanceReporter } from "./maintenance.js";
 import type {
   BaselineBuilder,
   BaselineBuildRequest,
@@ -39,6 +39,7 @@ export class CachedBaselineBuilder implements BaselineBuilder {
     private readonly fs: BaselineFileSystem,
     private readonly runner: BaselineProcessRunner,
     private readonly clock: BaselineClock,
+    private readonly maintenance: BaselineMaintenanceReporter,
     private readonly options: BaselineBuilderOptions,
   ) {}
 
@@ -193,9 +194,9 @@ export class CachedBaselineBuilder implements BaselineBuilder {
               request,
               retained,
             ))
-              reportBaselineMaintenance(failure);
+              this.maintenance.report(failure);
           } catch (error) {
-            reportBaselineMaintenance({ entry: layout.root, error });
+            this.maintenance.report({ entry: layout.root, error });
           }
         }
         request.onProgress?.({
@@ -209,12 +210,12 @@ export class CachedBaselineBuilder implements BaselineBuilder {
           if (rebuilding && !adopted)
             await removePartialBaseline(this.fs, layout);
         } catch (error) {
-          reportBaselineMaintenance({ entry: layout.entry, error });
+          this.maintenance.report({ entry: layout.entry, error });
         } finally {
           try {
             await lock.release();
           } catch (error) {
-            reportBaselineMaintenance({ entry: layout.lock, error });
+            this.maintenance.report({ entry: layout.lock, error });
           }
         }
       }

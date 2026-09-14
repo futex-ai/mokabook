@@ -4,6 +4,10 @@ import { Header } from "tar";
 
 import { CachedBaselineBuilder } from "../../dist/baseline/rebuild.js";
 import type {
+  BaselineMaintenanceFailure,
+  BaselineMaintenanceReporter,
+} from "../../dist/baseline/maintenance.js";
+import type {
   BaselineBuildRequest,
   BaselineClock,
   BaselineProcessRequest,
@@ -99,12 +103,34 @@ export function baselineFixture() {
     environment: { PATH: "/bin", HOME: "/home/test", SECRET: "hidden" },
     lockTimeoutMs: 10_000,
   };
-  const builder = new CachedBaselineBuilder(fs, runner, clock, options);
+  const maintenance: BaselineMaintenanceFailure[] = [];
+  const reporter: BaselineMaintenanceReporter = {
+    report(failure) {
+      maintenance.push(failure);
+    },
+  };
+  const builder = new CachedBaselineBuilder(
+    fs,
+    runner,
+    clock,
+    reporter,
+    options,
+  );
   const request: BaselineBuildRequest = {
     repoRoot: "/repo",
     commit: baselineCommit,
     mockupsPath: "mockups",
     commands: [["fixture-build", "$HOME; touch escaped"]],
   };
-  return { fs, clock, runner, builder, request, calls, options };
+  return {
+    fs,
+    clock,
+    runner,
+    builder,
+    request,
+    calls,
+    options,
+    reporter,
+    maintenance,
+  };
 }
