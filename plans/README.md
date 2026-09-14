@@ -2,12 +2,14 @@
 
 ## Active
 
-- [Mokly Package Migration](./mokly-package-migration.md)
 - [App-Independent Mokabook Npm Library](./app-independent-mokabook-library.md)
 - [Accounting Shell Design Parity](./accounting-shell-design-parity.md)
 
 ## Completed
 
+- [Mokly Package Migration](./mokly-package-migration.md) — repository fixes
+  delivered and reviewed; authenticated GitHub publishing-protection setup
+  remains an external prerequisite.
 - [Optional Published Changes](./optional-published-changes.md)
 - [Unified Catalogue Pages](./unified-catalogue-pages.md)
 - [Reuse Registered Components In Mokabook's Design Catalogue](./mokabook-design-components.md)

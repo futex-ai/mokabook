@@ -167,13 +167,13 @@ Summary: preserve the already-approved navigation feature in the served shell.
 - [x] Run the navigation and browser regression tests, including the upstream
       section tests and Changes continuity tests.
 
-## Milestone 11: Combined Verification
+## Milestone 11: Combined Verification (Completed)
 
 Summary: verify the fixes together with current main before delivery.
 
 - [x] Run focused regressions, packaging smoke checks, and `cargo xtask check`
       with every check passing.
-- [ ] Smoke the dedicated bootstrap CLI against the clean committed result
+- [x] Smoke the dedicated bootstrap CLI against the clean committed result
       before pushing; never publish the smoke artifact.
 - [x] Capture and fix partial-clone packing: a full clone attempts to transfer
       unavailable historical blobs even when the reviewed tree is complete.
@@ -190,20 +190,52 @@ revised packer also built the real 1,312-file package from an isolated source
 checkout before this final gate, recording its exact source commit/tree and
 verified archive hashes.
 
-## Milestone 12: Follow-Up Commit And Push
+The dedicated CLI then passed against clean commit
+`aeb9a26c510621dbc37b1a8a84552ec42bfa2736`, producing `mokly@0.8.0` with 1,312
+files and source tree `e439048cc833005c848dde196ba9094ecf091cb9`. The tarball and
+matching source/hash report are retained under
+`.context/bootstrap-smoke-aeb9a26/`; nothing was published.
+
+## Milestone 12: Follow-Up Commit And Push (Completed)
 
 Summary: publish the checked follow-up on the existing branch.
 
-- [ ] Inspect the complete diff and newly created files, run `git add -A`,
+- [x] Inspect the complete diff and newly created files, run `git add -A`,
       commit with a Conventional Commit, and push the current branch.
 
-## Milestone 13: Follow-Up Post-Push Review
+Commits `681db1a` and `aeb9a26` deliver the fixes and mainline preservation on
+`calummoore/minnetonka-v4`. The remote branch was read back and matched
+`aeb9a26c510621dbc37b1a8a84552ec42bfa2736` before review.
+
+## Milestone 13: Follow-Up Post-Push Review (Completed)
 
 Summary: review the complete delivered migration and follow-up without applying
 new findings. Record the outcome and move this plan to the completed index in a
 documentation-only closeout commit, then push and review that final diff too.
 
-- [ ] After the push, use
+- [x] After the push, use
       [`docs/implementation-review-prompt.md`](../docs/implementation-review-prompt.md)
       to review the complete local diff against `origin/main`; report every
       finding and recommendation without applying fixes.
+
+Reviewed the complete 808-file diff against `origin/main` at `83b377a` after the
+push. The review included an identity/formatting audit of 542 non-generated
+text files, focused inspection of behavioral changes and new regressions,
+generated-output and source-preservation evidence, and local-link validation in
+all 78 changed Markdown files. No new implementation findings were identified.
+
+1. **P1 — External publishing protections remain unconfigured.** The release
+   workflow depends on environment approval and immutable tags; the current
+   workspace credential cannot apply them. Enabling npm trusted publishing
+   without completing this setup would leave releases without the documented
+   approval/ref protections. A: an authorized maintainer applies and verifies
+   the [protection runbook](../docs/protocol/npm-github-protections.md)
+   (**recommended**). B: defer publishing until such a credential is available.
+   The durable fix is repository-level protection plus retained read-back
+   evidence, not an npm token or a workflow-only approximation of approval.
+
+Repository work is delivered; the external setup blocker remains explicit.
+Residual verification limits: no live npm publication was attempted, and the
+bootstrap's macOS-style path handling was exercised through an isolated alias
+fixture on Linux rather than on a Mac. This documentation-only closeout is
+committed/pushed separately and receives a final read-only diff review.
