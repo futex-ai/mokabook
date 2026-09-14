@@ -1,0 +1,153 @@
+import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import path from "node:path";
+import test from "node:test";
+
+import { resolveConfig } from "../dist/config/validate.js";
+import { createFixture, removeFixture } from "./helpers/fixture.js";
+
+const input = { entriesDir: "entries", mockupsDir: "mockups" };
+
+test("generated output defaults to committed and derives exact default argv", async (t) => {
+  const fixture = await createFixture();
+  t.after(() => removeFixture(fixture));
+  const committed = resolveConfig(input, fixture.configPath);
+  assert.equal(committed.generatedOutput, "committed");
+  assert.equal(committed.review.baselineBuild, undefined);
+  const configPath = path.join(fixture.root, "config", "catalogue.ts");
+  const derived = resolveConfig(
+    {
+      entriesDir: "../entries",
+      mockupsDir: "../mockups",
+      repoRoot: "..",
+      generatedOutput: "derived",
+    },
+    configPath,
+  );
+  assert.deepEqual(derived.review.baselineBuild, [
+    ["npm", "ci"],
+    [
+      "npx",
+      "--no-install",
+      "mokabook",
+      "build",
+      "--config",
+      "config/catalogue.ts",
+    ],
+  ]);
+  for (const commands of [[], [["node", "build.mjs", ""]]]) {
+    assert.deepEqual(
+      resolveConfig(
+        {
+          ...input,
+          generatedOutput: "derived",
+          review: { baselineBuild: commands },
+        },
+        fixture.configPath,
+      ).review.baselineBuild,
+      commands,
+    );
+  }
+});
+
+test("generated output rejects unknown modes and malformed or committed commands", async (t) => {
+  const fixture = await createFixture();
+  t.after(() => removeFixture(fixture));
+  for (const generatedOutput of ["rebuilt", "", null, false, 1])
+    assert.throws(
+      () => resolveConfig({ ...input, generatedOutput }, fixture.configPath),
+      { code: "config-invalid" },
+    );
+  for (const baselineBuild of [
+    null,
+    "npm ci",
+    [[]],
+    [[""]],
+    [[" "]],
+    [["node", 1]],
+    [["node", "\0"]],
+    ["npm", "ci"],
+  ])
+    assert.throws(
+      () =>
+        resolveConfig(
+          { ...input, generatedOutput: "derived", review: { baselineBuild } },
+          fixture.configPath,
+        ),
+      { code: "config-invalid" },
+    );
+  for (const generatedOutput of [undefined, "committed"])
+    assert.throws(
+      () =>
+        resolveConfig(
+          { ...input, generatedOutput, review: { baselineBuild: [] } },
+          fixture.configPath,
+        ),
+      { code: "config-invalid" },
+    );
+});
+
+test("only derived output may be absent and its projected root stays confined", async (t) => {
+  const fixture = await createFixture();
+  t.after(() => removeFixture(fixture));
+  const missing = { ...input, mockupsDir: "new/nested/output" };
+  assert.throws(() => resolveConfig(missing, fixture.configPath), {
+    code: "config-invalid",
+  });
+  assert.equal(
+    resolveConfig(
+      { ...missing, generatedOutput: "derived" },
+      fixture.configPath,
+    ).mockupsDir,
+    path.join(fixture.root, missing.mockupsDir),
+  );
+  await fs.symlink(
+    path.dirname(fixture.root),
+    path.join(fixture.root, "outside"),
+  );
+  assert.throws(
+    () =>
+      resolveConfig(
+        { ...input, mockupsDir: "outside/missing", generatedOutput: "derived" },
+        fixture.configPath,
+      ),
+    { code: "config-invalid" },
+  );
+});
+
+test("cache paths and physical aliases cannot be configured as catalogue roots", async (t) => {
+  const fixture = await createFixture();
+  t.after(() => removeFixture(fixture));
+  await fs.mkdir(path.join(fixture.root, ".mokabook-cache"));
+  await fs.symlink(".mokabook-cache", path.join(fixture.root, "cache-alias"));
+  for (const root of [".mokabook-cache", "cache-alias"])
+    for (const field of ["entriesDir", "mockupsDir", "outDir"])
+      assert.throws(
+        () =>
+          resolveConfig(
+            {
+              ...input,
+              ...(field === "outDir"
+                ? { review: { outDir: root } }
+                : { [field]: root }),
+            },
+            fixture.configPath,
+          ),
+        { code: "config-invalid" },
+      );
+});
+
+test("derived missing roots still report dangling links and file ancestors as config errors", async (t) => {
+  const fixture = await createFixture();
+  t.after(() => removeFixture(fixture));
+  await fs.symlink("absent", path.join(fixture.root, "dangling"));
+  for (const mockupsDir of ["dangling/output", "notes.md/output"])
+    assert.throws(
+      () =>
+        resolveConfig(
+          { ...input, mockupsDir, generatedOutput: "derived" },
+          fixture.configPath,
+        ),
+      { code: "config-invalid" },
+    );
+});

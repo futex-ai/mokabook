@@ -9,8 +9,8 @@ Usage:
 
 Commands:
   serve    Build and serve the catalogue with on-demand diffs
-  build    Generate static HTML documents and the version 4 manifest
-  check    Validate source and committed generated output without writing
+  build    Transactionally generate static HTML documents and the manifest
+  check    Validate source and generated output for the configured mode
   export   Build a complete static catalogue to deploy with your own host
 
 Options:
@@ -23,4 +23,11 @@ Options:
   --no-watch       Serve one deterministic snapshot
   -h, --help       Show help
   -v, --version    Show installed version
+
+Configuration:
+  generatedOutput       "committed" (default) checks files match source;
+                        "derived" checks generated files are untracked
+  review.baselineBuild  Derived-only argv arrays run without a shell using
+                        trusted historical code. Defaults: npm ci, then
+                        npx --no-install mokabook build --config <config-path>
 `;

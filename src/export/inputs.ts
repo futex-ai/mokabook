@@ -57,11 +57,15 @@ export async function assertInputsUnchanged(
   commit: string,
   changed: readonly string[],
   exclusions: readonly string[],
+  assertBaselineUnchanged?: () => Promise<void>,
 ): Promise<void> {
   const freshConfig = await loadConfig(config.repoRoot, config.configPath);
   const fresh = await compileCatalogue(freshConfig);
   freshConfig.sourceFiles = fresh.manifest.sourceFiles;
-  const publicNow = await capturePublicFiles(freshConfig);
+  const publicNow = await capturePublicFiles(
+    freshConfig,
+    freshConfig.generatedOutput === "derived" ? fresh.outputs : undefined,
+  );
   const changedNow = await reviewChangedPaths(
     git,
     commit,
@@ -78,4 +82,5 @@ export async function assertInputsUnchanged(
     throw exportError(
       "Export inputs changed during generation; retry the export.",
     );
+  await assertBaselineUnchanged?.();
 }

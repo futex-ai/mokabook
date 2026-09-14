@@ -1,8 +1,10 @@
 import fs from "node:fs";
+import path from "node:path";
 
 import { MokabookError, type MokabookErrorCode } from "../errors.js";
 import { isInside, projectRealPath, resolveInside } from "./paths.js";
 import { requireString } from "./rules.js";
+import { MOKABOOK_CACHE } from "./cache_paths.js";
 
 interface ReviewOutBoundary {
   entriesDir: string;
@@ -63,11 +65,15 @@ export function validateReviewOut(
   code: MokabookErrorCode = "config-invalid",
 ): void {
   const { entriesDir, mockupsDir, repoRoot } = boundary;
-  const protectedRoots = [mockupsDir, entriesDir];
+  const protectedRoots = [
+    mockupsDir,
+    entriesDir,
+    path.join(repoRoot, MOKABOOK_CACHE),
+  ];
   const realRepoRoot = fs.realpathSync(repoRoot);
-  const realReviewOut = projectRealPath(reviewOut);
+  const realReviewOut = configuredRealPath(reviewOut, label, code);
   const realProtectedRoots = protectedRoots.map((root) =>
-    fs.realpathSync(root),
+    configuredRealPath(root, label, code),
   );
   if (
     reviewOut === repoRoot ||
@@ -94,7 +100,7 @@ export function validateReviewOut(
     }
     throw new MokabookError(
       code,
-      `${label} must not overlap repository, mockup, or source roots`,
+      `${label} must not overlap repository, mockup, source, or cache roots`,
     );
   }
 }
@@ -105,7 +111,7 @@ function requireRealInside(
   label: string,
 ): string {
   const realRepoRoot = fs.realpathSync(repoRoot);
-  const realCandidate = fs.realpathSync(candidate);
+  const realCandidate = configuredRealPath(candidate, label);
   if (!isInside(realRepoRoot, realCandidate)) {
     throw new MokabookError(
       "config-invalid",
@@ -113,4 +119,20 @@ function requireRealInside(
     );
   }
   return realCandidate;
+}
+
+function configuredRealPath(
+  candidate: string,
+  label: string,
+  code: MokabookErrorCode = "config-invalid",
+): string {
+  try {
+    return projectRealPath(candidate);
+  } catch (cause) {
+    throw new MokabookError(
+      code,
+      `${label} has an invalid filesystem path: ${candidate}`,
+      { cause },
+    );
+  }
 }

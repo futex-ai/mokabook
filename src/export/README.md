@@ -15,6 +15,14 @@ The shared `server/changed_content.ts` calculation receives the same captured
 asset reader as comparisons, preserving Serve's material-output/resource Changes
 membership without reading a different current-file snapshot.
 
+Derived mode awaits `prepareReviewRepository` before compiling or capturing
+head input. Public capture and its final recheck substitute the accepted
+compilation for generated files; authored public resources retain confinement
+and input-change checks. The completion marker is revalidated for the pinned
+commit before installation. Missing, replaced, or invalid baseline markers
+abort export while preserving the previous artifact. Cache trees and aliases
+cannot be exported or selected as a destination.
+
 `stage.ts` shares ownership assembly, alias/reference validation, and staged
 file writes between consumer export and repository preview capture.
 `deployment.ts` finalizes a separate complete-artifact identity after provider

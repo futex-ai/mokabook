@@ -7,6 +7,7 @@ import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig, WatchAction } from "../config/types.js";
 import { isExportIgnoredPath } from "../export/ignored.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
+import { isBaselineCachePath } from "../config/cache_paths.js";
 
 const IGNORED_DIRECTORY_NAMES = new Set([
   ".context",
@@ -163,6 +164,7 @@ export function classifyWatchPath(
   resources: ReadonlySet<string> = new Set(),
 ): RuntimeWatchAction {
   const absolute = path.resolve(candidate);
+  if (isBaselineCachePath(absolute, config.repoRoot)) return "ignore";
   if (
     absolute === config.configPath ||
     config.configSourceFiles?.some(
@@ -207,6 +209,7 @@ export function isPackageOwnedIgnoredWatchPath(
   mode: "traverse" | "event" = "traverse",
 ): boolean {
   const absolute = path.resolve(candidate);
+  if (isBaselineCachePath(absolute, config.repoRoot)) return true;
   if (!isInside(config.repoRoot, absolute)) return false;
   if (isRequiredWatchPath(absolute, config)) return false;
   if (isGeneratedOutputPath(absolute, config)) return true;
@@ -238,7 +241,9 @@ export function watchTargets(config: ResolvedConfig): string[] {
       ...rule.paths.map((glob) => globWatchRoot(config.repoRoot, glob)),
     );
   }
-  return [...new Set(targets)].sort();
+  return [...new Set(targets)]
+    .filter((target) => !isBaselineCachePath(target, config.repoRoot))
+    .sort();
 }
 
 function globWatchRoot(repoRoot: string, glob: string): string {

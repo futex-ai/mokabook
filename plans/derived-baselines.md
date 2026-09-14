@@ -124,21 +124,34 @@ a tiny consumer catalogue.
       `npm test`, `npm run example:check`, and `cargo xtask check`; commit and
       push.
 
-## Milestone 4: Config, build, and check modes
+## Milestone 4: Config, build, and check modes — completed
 
-- [ ] Add `generatedOutput` and `review.baselineBuild` to `defineConfig`,
+- [x] Add `generatedOutput` and `review.baselineBuild` to `defineConfig`,
       `ResolvedConfig`, config validation, and `--help` output. Default is
       `committed`.
-- [ ] Add a `TrackedGeneratedOutput` check used by derived-mode `check`: list
+- [x] Add a `TrackedGeneratedOutput` check used by derived-mode `check`: list
       Git-tracked files under `mockupsDir`, intersect with compiled routes and
       the manifest, and fail with the paths and suggested ignore rules.
-- [ ] Keep `build` writing transactionally in both modes.
-- [ ] Wire the composition root in `src/cli/run.ts` to choose
+- [x] Keep `build` writing transactionally in both modes.
+- [x] Wire the composition root in `src/cli/run.ts` to choose
       `CommittedBaselineReader` or `BaselineBuilder` plus
       `RebuiltBaselineReader` from the mode.
-- [ ] Tests for config parsing, both `check` modes, and composition selection.
-- [ ] Update `README.md` and the package protocol CLI table.
-- [ ] Run tests, typecheck, lint, `cargo xtask check`, commit, and push.
+- [x] Tests for config parsing, both `check` modes, and composition selection.
+- [x] Support absent derived output directories without weakening path safety.
+- [x] Preserve typed configuration errors for dangling links and non-directory
+      ancestors when projecting absent output paths.
+- [x] Await baseline preparation outside Serve workers and export capture; pin
+      the prepared commit and retain compiled head documents for selected diffs.
+- [x] Compare ignored generated documents and resources in derived Changes;
+      cover source-only edits, Serve shutdown, and a real derived export.
+- [x] Preserve Git-only `changedPaths` and dependency reasons; classify derived
+      resource-byte differences without Git evidence as material changes.
+- [x] Exclude the cache and its aliases from watch, evidence, shared impact,
+      public reads, and configured or exported output destinations.
+- [x] Update `README.md` and the package protocol CLI table.
+- [x] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
+      `npm test`, `npm run example:check`, and `cargo xtask check`; commit and
+      push.
 
 ## Milestone 5: Design the preparing and failed baseline states — completed
 

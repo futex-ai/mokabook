@@ -40,6 +40,16 @@ Abort the request and await settlement before terminating a worker or shutting
 down its host. Detailed timing phases and the Serve `preparing` presentation
 belong to the later integration milestone.
 
+Mode selection now lives in `review/repository.ts`:
+`prepareReviewRepository(config, base, { signal, onProgress })` creates the Node
+builder or committed reader and returns a pinned repository. Serve's
+`BackgroundGeneration` calls it in the parent after output adoption and before
+`BackgroundCompilation.classify(base, commit)`. The classification worker reads
+the cache and its accepted compiled head output; it cannot start a rebuild.
+Milestone 6 can pass an observer at that parent call to publish `preparing`,
+then transition to classification on completion. Current Serve retains `pending`
+through preparation. Export uses the same composition and rechecks the marker.
+
 `cache_layout.ts` owns `.mokabook-cache/baselines/<commit>`. The builder extracts
 to `source`, runs commands, validates the historical manifest and output tree,
 moves the generated directory to `output`, deletes the extraction, and writes

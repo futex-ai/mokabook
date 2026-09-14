@@ -184,6 +184,11 @@ order.
 `generatedOutput` defaults to `"committed"`; `"derived"` and the derived-only
 `review.baselineBuild` argv list follow the
 [derived baselines contract](./mokabook-derived-baselines.md).
+Derived Check accepts absent local generated output, rejects Git-tracked routes,
+the manifest and cache files, and prints their paths plus ignore guidance.
+Build writes transactionally in both modes. Serve and export await preparation
+before classification; Serve currently retains its loading presentation until
+the separate preparing-state milestone lands.
 `watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
 globs, while stylesheet `match` matches catalogue routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
 matches and watch paths are invalid. Additional watch rules cannot override
@@ -191,6 +196,9 @@ configured source/module rebuilds, reloads for configured stylesheets and
 referenced resources, or package-owned ignores for dependency, build, test, Review, header-proven
 generated, and transaction paths. An unowned public HTML file below
 `mockupsDir` remains consumer-authored and can match an explicit watch rule.
+The repository's `.mokabook-cache/` and its physical aliases are always private
+and ignored before source exceptions or broad globs, and cannot be configured
+as entries, mockups, Review output, or an export destination.
 Authored source directories may sit below `mockupsDir` for a `docs/mockups/src`
 layout, but they may not equal each other or the output root; generated routes
 are collision-checked against those sources before writing. Review output must

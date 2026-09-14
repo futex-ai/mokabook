@@ -30,6 +30,7 @@ export class GitRepositoryEvidence
     commit: string,
     excludedPaths: readonly string[] = [],
   ): Promise<readonly string[]> {
+    excludedPaths = [...new Set([".mokabook-cache", ...excludedPaths])];
     for (const excluded of excludedPaths) assertGitPath(excluded);
     const pathspecs = excludedPaths.map(
       (excluded) => `:(exclude,top,literal)${excluded}`,

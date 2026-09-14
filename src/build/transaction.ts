@@ -25,6 +25,7 @@ async function writeMeasured(
   timeSync("output.validate-targets", () =>
     rejectUnsafeTargets(compilation, config),
   );
+  await fs.promises.mkdir(path.dirname(config.mockupsDir), { recursive: true });
   const temporaryRoot = await fs.promises.mkdtemp(
     path.join(path.dirname(config.mockupsDir), ".mokabook-write-"),
   );

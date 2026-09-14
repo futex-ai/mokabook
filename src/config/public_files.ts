@@ -6,6 +6,7 @@ import { LEGACY_MANIFEST_NAME, MANIFEST_NAME } from "../registry/manifest.js";
 import { locatePath, type FileLocation } from "./file_locations.js";
 import { projectRealPath } from "./paths.js";
 import type { ResolvedConfig } from "./types.js";
+import { isBaselineCachePath } from "./cache_paths.js";
 
 /** Catalogue manifests are internal even when requested through another path. */
 export function isInternalCatalogueFile(
@@ -28,6 +29,7 @@ export function isPrivateStaticPath(
   config: ResolvedConfig,
 ): boolean {
   return (
+    isBaselineCachePath(candidate, config.repoRoot) ||
     isInternalCatalogueFile(candidate, config) ||
     isAuthoringSource(candidate, config)
   );

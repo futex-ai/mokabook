@@ -28,6 +28,11 @@ the shell; no public manifest endpoint is provided.
 An absent or dangling historical-manifest alias remains private without
 preventing unrelated public files from loading.
 
+The repository's `.mokabook-cache/` is package-private in every mode, including
+physical aliases. Public readers, export, resource references, change evidence
+and watchers exclude it before consumer globs or source-watch exceptions.
+Only the dedicated historical baseline reader may read its completed output.
+
 Reserve basenames ending in `.source.html`, `.source.htm`, `.source.ts`,
 `.source.tsx`, `.source.js`, `.source.jsx`, `.source.mts`, `.source.cts`,
 `.source.mjs`, or `.source.cjs`, matched case-insensitively. Their protection is

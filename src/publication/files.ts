@@ -4,6 +4,7 @@ import path from "node:path";
 import { locatePath, type FileLocation } from "../config/file_locations.js";
 import { isInside, projectRealPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { isBaselineCachePath } from "../config/cache_paths.js";
 
 /** A confined file, or link metadata whose target must not be read. */
 export type PublicationFile =
@@ -26,6 +27,7 @@ export async function publicationFiles(
   function excludedPath(file: string): boolean {
     const parts = path.relative(config.repoRoot, file).split(path.sep);
     return (
+      isBaselineCachePath(file, config.repoRoot) ||
       excluded.some((directory) => isInside(directory, file)) ||
       parts.includes(".git") ||
       (!publicRoot &&

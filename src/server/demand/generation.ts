@@ -14,6 +14,7 @@ import type {
   ResourceWatcher,
 } from "../resource_watcher.js";
 import { BackgroundCompilation } from "./background.js";
+import { prepareReviewRepository } from "../../review/repository.js";
 
 export class BackgroundGeneration {
   private worker: BackgroundCompilation | undefined;
@@ -59,15 +60,24 @@ export class BackgroundGeneration {
         if (!current()) return;
         prepared?.adopt();
         this.completed(compilation, runtime);
+        const baseline =
+          runtime.config.generatedOutput === "derived" &&
+          this.classifier instanceof RepositoryCatalogueChangeClassifier
+            ? await prepareReviewRepository(runtime.config, base, {
+                signal: controller.signal,
+              })
+            : undefined;
+        if (!current()) return;
         const snapshot = await timeAsync("changes.classify", () =>
           this.classifier instanceof RepositoryCatalogueChangeClassifier
-            ? worker.classify(base)
+            ? worker.classify(base, baseline?.commit)
             : Promise.race([
                 this.classifier.read(
                   runtime.config,
                   compilation.manifest,
                   base,
                   controller.signal,
+                  { outputs: compilation.outputs },
                 ),
                 new Promise<undefined>((resolve) =>
                   controller.signal.addEventListener(

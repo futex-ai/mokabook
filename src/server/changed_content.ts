@@ -65,8 +65,10 @@ export async function changedContentPaths(
         : [route];
     }),
   );
-  if (publicChanges.size === 0) return [];
+  const derived = config.generatedOutput === "derived";
+  if (!derived && publicChanges.size === 0) return [];
   const pairs = documentPairs(manifest, baseline, publicChanges, documents);
+  if (derived) for (const pair of pairs) pair.changed = true;
   const baseReader = new GitReviewAssetReader(
     baselineResourceConfig(config, baseline),
     git,
@@ -98,17 +100,19 @@ export async function changedContentPaths(
       normalizedDocuments.set(pair.head, normalized.head);
       if (normalized.base !== normalized.head) {
         result.add(repoPath(pair.head));
+        if (derived) publicChanges.add(pair.head);
       } else if (pair.base === pair.head) {
         publicChanges.delete(pair.head);
       }
     }
   }
-  if (publicChanges.size === 0) return [...result].sort();
+  if (!derived && publicChanges.size === 0) return [...result].sort();
   const resources = new ChangedResourceGraph(
     headReader,
     baseReader,
     publicChanges,
     normalizedDocuments,
+    derived,
   );
   for (const pair of pairs) {
     let document = normalizedDocuments.get(pair.head);

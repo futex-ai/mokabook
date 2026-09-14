@@ -17,6 +17,8 @@ import type { ReviewArtifactContent } from "./types.js";
 /** Filesystem boundary for current-worktree Review assets. */
 export interface ReviewAssetReader {
   read(route: string): Promise<Uint8Array>;
+  /** Distinguish a new resource from a rejected historical path when supported. */
+  readIfExists?(route: string): Promise<Uint8Array | undefined>;
   /** Optional bounded bulk read; every requested route must be present or reject. */
   readMany?(
     routes: readonly string[],
@@ -88,6 +90,15 @@ export class GitReviewAssetReader implements ReviewAssetReader {
     private readonly commit: string,
     private readonly mockupsPrefix: string,
   ) {}
+
+  async readIfExists(route: string): Promise<Uint8Array | undefined> {
+    assertPublicStaticRoute(route, this.config);
+    const repoPath = this.mockupsPrefix
+      ? `${this.mockupsPrefix}/${route}`
+      : route;
+    if ((await this.git.fileKind(this.commit, repoPath)) === "missing") return;
+    return this.read(route);
+  }
 
   async read(route: string): Promise<Uint8Array> {
     const files = await this.readMany([route]);

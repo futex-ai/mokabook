@@ -32,6 +32,7 @@ import { repositoryRoot } from "./helpers/fixture.js";
 const sourceRelativePath = "tests/authoring.test.tsx";
 
 const validationConfig: ResolvedConfig = {
+  generatedOutput: "committed",
   colorSchemes: ["light"],
   compatibility: { readManifestV2: false },
   configPath: path.join(repositoryRoot, "mokabook.config.ts"),

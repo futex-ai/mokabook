@@ -32,6 +32,8 @@ export interface WatchConfig {
 
 /** Git comparison and artifact configuration. */
 export interface ReviewConfig {
+  /** Shell-free commands run using trusted historical code in derived mode. */
+  baselineBuild?: readonly (readonly string[])[];
   /** Git ref whose merge base with HEAD is the comparison branch point. */
   base?: string;
   /** Config-relative artifact directory. */
@@ -81,6 +83,8 @@ export interface ModuleResolutionConfig {
 
 /** Public, serializable host configuration. */
 export interface MokabookConfig {
+  /** Retain generated files in Git or rebuild historical output; defaults to committed. */
+  generatedOutput?: "committed" | "derived";
   /** Color schemes rendered for screens; defaults to light only. */
   colorSchemes?: readonly ColorScheme[];
   /** Config-relative structured mockup source directory. */
@@ -105,6 +109,7 @@ export interface MokabookConfig {
 
 /** Absolute, validated configuration consumed by runtime engines. */
 export interface ResolvedConfig {
+  generatedOutput: "committed" | "derived";
   colorSchemes: readonly ColorScheme[];
   compatibility: {
     readManifestV2: boolean;
@@ -120,7 +125,8 @@ export interface ResolvedConfig {
   moduleResolution: ResolvedModuleResolutionConfig;
   renderer?: string;
   repoRoot: string;
-  review: Required<ReviewConfig>;
+  review: Required<Omit<ReviewConfig, "baselineBuild">> &
+    Pick<ReviewConfig, "baselineBuild">;
   stylesheets: readonly StylesheetRule[];
   watch: Required<Pick<WatchConfig, "debounceMs">> & {
     rules: readonly WatchRule[];

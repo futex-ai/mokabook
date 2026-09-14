@@ -14,6 +14,7 @@ import { ResourceGraph } from "../review/resource_graph.js";
 /** Cache shared resource edges for one immutable changed-route calculation. */
 export class ChangedResourceGraph {
   readonly #physicalRoutes = new Map<string, string>();
+  readonly #byteChanges = new Set<string>();
   readonly #graph = new ResourceGraph({
     readReferences: (route) => this.references(route),
   });
@@ -23,6 +24,7 @@ export class ChangedResourceGraph {
     private readonly baseline: ReviewAssetReader,
     private readonly changed: ReadonlySet<string>,
     private readonly documents: ReadonlyMap<string, string>,
+    private readonly compareBytes = false,
   ) {}
 
   /** Inspect transitive local references, terminating even for cyclic imports. */
@@ -36,6 +38,7 @@ export class ChangedResourceGraph {
 
   private isChanged(route: string): boolean {
     return (
+      this.#byteChanges.has(route) ||
       this.changed.has(route) ||
       this.changed.has(this.#physicalRoutes.get(route) ?? route)
     );
@@ -48,17 +51,34 @@ export class ChangedResourceGraph {
       this.#physicalRoutes.set(route, asset.location.physicalRelativePath);
       const bytes = asset.content;
       if (bytes === undefined) {
-        if (!this.isChanged(route))
+        if (!this.compareBytes && !this.isChanged(route))
           throw new MokabookError(
             "review-invalid",
             `referenced resource is missing: ${route}`,
           );
         await this.baseline.read(route);
+        this.#byteChanges.add(route);
         return [];
       }
       const extension = path.posix.extname(route).toLowerCase();
+      if (this.compareBytes) {
+        const before = this.baseline.readIfExists
+          ? await this.baseline.readIfExists(route)
+          : await this.baseline.read(route);
+        if (before === undefined) this.#byteChanges.add(route);
+        else if ([".html", ".htm"].includes(extension)) {
+          const pair = normalizeReviewPair(
+            Buffer.from(before).toString("utf8"),
+            Buffer.from(bytes).toString("utf8"),
+            route,
+          );
+          content = pair.head;
+          if (pair.base !== pair.head) this.#byteChanges.add(route);
+        } else if (!Buffer.from(before).equals(bytes))
+          this.#byteChanges.add(route);
+      }
       if (![".css", ".html", ".htm"].includes(extension)) return [];
-      content = Buffer.from(bytes).toString("utf8");
+      content ??= Buffer.from(bytes).toString("utf8");
       if (extension !== ".css")
         content = normalizeReviewPair(content, content, route).head;
     }

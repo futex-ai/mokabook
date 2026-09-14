@@ -7,10 +7,7 @@ import { resolveExportOutput } from "../../dist/export/paths.js";
 import { ExportTransaction } from "../../dist/export/transaction.js";
 import { errorMessage } from "../../dist/errors.js";
 import { publicationOptions } from "../../dist/publication/options.js";
-import {
-  NodeGitCommandRunner,
-  CommittedRepository,
-} from "../../dist/review/git.js";
+import { prepareReviewRepository } from "../../dist/review/repository.js";
 import { capturePublicationInputs } from "./inputs.mjs";
 import { previewOwnership, stagePreviewArtifact } from "./artifact.mjs";
 import { copyPublicFiles } from "../../dist/publication/resources.js";
@@ -55,27 +52,14 @@ export async function buildPreview(config, output, options = {}) {
       async () => {
         const stage = transaction.stage;
         const excludedRoots = [stage, output, transaction.reservationRoot];
-        const inputs = await capturePublicationInputs(config, excludedRoots);
         const base = capability.includeChanges
           ? (capability.base ?? config.review.base)
           : "";
-        let git;
-        if (capability.includeChanges) {
-          const repository = new CommittedRepository(
-            new NodeGitCommandRunner(config.repoRoot),
-          );
-          const commit = await repository.evidence.mergeBase(base, "HEAD");
-          git = {
-            reader: repository.reader,
-            evidence: new Proxy(repository.evidence, {
-              get(target, key) {
-                if (key === "mergeBase") return async () => commit;
-                const value = Reflect.get(target, key);
-                return typeof value === "function" ? value.bind(target) : value;
-              },
-            }),
-          };
-        }
+        const prepared = capability.includeChanges
+          ? await prepareReviewRepository(config, base)
+          : undefined;
+        const git = prepared?.repository;
+        const inputs = await capturePublicationInputs(config, excludedRoots);
         const snapshot = await loadCatalogueSnapshot(
           config,
           git
@@ -135,6 +119,7 @@ export async function buildPreview(config, output, options = {}) {
             "consumer inputs changed during publication; retry with stable inputs",
           );
         assertSafeOutput(output, config.repoRoot);
+        await prepared?.assertUnchanged();
         if (
           projectRealPath(resolveExportOutput(config, output, contextRoot)) !==
           transaction.output

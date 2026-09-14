@@ -6,7 +6,7 @@ import { MokabookError, errorMessage } from "../errors.js";
 import { readBaseManifest } from "../review/base_manifest.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { compareReview } from "../review/compare.js";
-import { NodeGitCommandRunner, CommittedRepository } from "../review/git.js";
+import { prepareReviewRepository } from "../review/repository.js";
 import { changedContentPaths } from "../server/changed_content.js";
 import { withExportCleanup } from "./cleanup.js";
 import { assertExportActive, exportError } from "./error.js";
@@ -48,17 +48,22 @@ async function generateExport(
   outputRoot?: string,
 ): Promise<ExportResult> {
   try {
-    const git = new CommittedRepository(
-      new NodeGitCommandRunner(config.repoRoot),
-    );
     const base = options.base ?? config.review.base;
-    const commit = await git.evidence.mergeBase(base, "HEAD");
+    const prepared = await prepareReviewRepository(
+      config,
+      base,
+      options.signal ? { signal: options.signal } : {},
+    );
+    const { repository: git, commit } = prepared;
     const baseline = await readBaseManifest(git.reader, commit, config);
     const compilation = await compileCatalogue(config);
     config = { ...config, sourceFiles: compilation.manifest.sourceFiles };
     assertExportActive(options.signal);
     await writeCompilation(compilation, config);
-    const publicFiles = await capturePublicFiles(config);
+    const publicFiles = await capturePublicFiles(
+      config,
+      config.generatedOutput === "derived" ? compilation.outputs : undefined,
+    );
     const assetReader = capturedAssetReader(publicFiles, config);
     const exclusions = [output, transaction.reservationRoot];
     const changed = await reviewChangedPaths(
@@ -120,6 +125,7 @@ async function generateExport(
       commit,
       changed,
       exclusions,
+      () => prepared.assertUnchanged(),
     );
     assertExportActive(options.signal);
     if (

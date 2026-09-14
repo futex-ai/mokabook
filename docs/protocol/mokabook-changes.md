@@ -203,8 +203,10 @@ committed mode those are Git blobs; in
 [derived mode](./mokabook-derived-baselines.md) they come from the cached
 rebuild of that commit produced with the commit's own code. The baseline is
 never rendered with the current tree's code. Commits reachable only from the
-configured base do not enter the comparison. Head artifacts come from the current working tree after
-the same generated-output checks used by `mokabook check` succeed. Selected live
+configured base do not enter the comparison. Head generated artifacts come from
+the validated compilation. Committed mode additionally checks their working-tree
+bytes; derived mode retains compiled bytes through selected comparisons and
+compares all generated views even without changed Git output paths. Selected live
 diffs reuse the accepted manifest and pinned classification; checked-input digests
 reject changed snapshot inputs without repeating an exhaustive build.
 Review inspects only the requested base paths, grouping exact literal pathspecs

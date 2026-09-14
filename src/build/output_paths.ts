@@ -19,7 +19,7 @@ export function validateGeneratedOutputPaths(
 ): void {
   const authoredRoots = [config.entriesDir];
   const realRepoRoot = fs.realpathSync(config.repoRoot);
-  const realMockupsRoot = fs.realpathSync(config.mockupsDir);
+  const realMockupsRoot = projectRealPath(config.mockupsDir);
   const realAuthoredRoots = authoredRoots.map((root) => fs.realpathSync(root));
   if (!isInside(realRepoRoot, realMockupsRoot)) {
     throw new MokabookError(

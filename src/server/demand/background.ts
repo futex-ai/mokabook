@@ -32,7 +32,14 @@ export class BackgroundCompilation {
             pause: this.pause.buffer,
             debug: timingArguments().length > 0,
             gitPort: port2,
-            ...(existing ? { existingManifest: existing.manifest } : {}),
+            ...(existing
+              ? {
+                  existingManifest: existing.manifest,
+                  ...(runtime.config.generatedOutput === "derived"
+                    ? { existingOutputs: existing.outputs }
+                    : {}),
+                }
+              : {}),
           },
           execArgv: [],
           transferList: [port2],
@@ -80,11 +87,18 @@ export class BackgroundCompilation {
   foreground(active: boolean): void {
     Atomics.store(this.pause, 0, Number(active));
   }
-  classify(base: string): Promise<ComponentChangeSnapshot | undefined> {
+  classify(
+    base: string,
+    commit?: string,
+  ): Promise<ComponentChangeSnapshot | undefined> {
     if (this.closed) return Promise.resolve(undefined);
     return new Promise((resolve, reject) => {
       this.classification = { resolve, reject };
-      this.worker.postMessage({ type: "classify", base });
+      this.worker.postMessage({
+        type: "classify",
+        base,
+        ...(commit ? { commit } : {}),
+      });
     });
   }
   close(): Promise<void> {

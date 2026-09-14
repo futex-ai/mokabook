@@ -1,4 +1,3 @@
-import { CommittedBaselineReader } from "./committed.js";
 /** Capture one selection from the accepted catalogue without another exhaustive build. */
 import path from "node:path";
 
@@ -8,13 +7,11 @@ import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import type { ManifestScreen } from "../registry/types.js";
-import {
-  copySnapshotDependencies,
-  FileSystemReviewAssetReader,
-  GitReviewAssetReader,
-} from "./assets.js";
+import { copySnapshotDependencies, GitReviewAssetReader } from "./assets.js";
 import { baselineResourceConfig } from "./base_manifest.js";
 import { SelectedAssetReader } from "./evidence_assets.js";
+import { CompiledReviewAssetReader } from "./head_assets.js";
+import { baselineReaderForCommit } from "./repository.js";
 import { NodeGitCommandRunner, type BaselineReader } from "./git.js";
 import { parseReviewResult } from "./result_validation.js";
 import { compareScreen } from "./screen_compare.js";
@@ -46,10 +43,18 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
     selection: ReviewSelection,
     signal: AbortSignal,
   ): Promise<ReviewArtifact> {
+    if (this.config.generatedOutput === "derived" && !source.headOutputs)
+      throw new MokabookError(
+        "review-invalid",
+        "Compiled comparison input is unavailable",
+      );
     const git =
       this.git ??
-      new CommittedBaselineReader(
+      baselineReaderForCommit(
+        this.config,
+        source.baseCommit,
         new NodeGitCommandRunner(this.config.repoRoot, signal),
+        signal,
       );
     const before = new SelectedAssetReader(
       new GitReviewAssetReader(
@@ -63,7 +68,10 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
       signal,
     );
     const after = new SelectedAssetReader(
-      new FileSystemReviewAssetReader(this.config),
+      new CompiledReviewAssetReader(
+        this.config,
+        source.headOutputs ? new Map(source.headOutputs) : undefined,
+      ),
       signal,
       source.headDigests,
     );

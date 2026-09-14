@@ -61,6 +61,7 @@ export async function classifyComponents(
     dependencies,
     changed: new Set(changedPaths),
     prefix: toPosixPath(path.relative(config.repoRoot, config.mockupsDir)),
+    compareResourceBytes: config.generatedOutput === "derived",
   };
   await Promise.all([
     context.beforeReader.prefetch(

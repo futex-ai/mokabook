@@ -3,6 +3,11 @@ import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
 import { changedContentPaths } from "./changed_content.js";
 import { generatedViews } from "../components/views.js";
 import { EvidenceAssetReader } from "../review/evidence_assets.js";
+import { derivedHeadOutputs } from "../review/head_assets.js";
+import {
+  baselineReaderForCommit,
+  prepareReviewRepository,
+} from "../review/repository.js";
 import type { ReviewEvidence } from "../review/selection_types.js";
 import path from "node:path";
 
@@ -35,6 +40,12 @@ export interface ComponentChangeSource {
   read(commit: string): Promise<ComponentChangeSnapshot | undefined>;
 }
 
+/** Background-owned inputs; a prepared commit prevents builds in disposable workers. */
+export interface CatalogueClassificationInputs {
+  readonly commit?: string;
+  readonly outputs?: ReadonlyMap<string, string>;
+}
+
 /** Read-only catalogue classification boundary used outside the HTTP child. */
 export interface CatalogueChangeClassifier {
   read(
@@ -42,6 +53,7 @@ export interface CatalogueChangeClassifier {
     manifest: Manifest,
     base: string,
     signal?: AbortSignal,
+    accepted?: CatalogueClassificationInputs,
   ): Promise<ComponentChangeSnapshot | undefined>;
 }
 
@@ -54,6 +66,7 @@ export class RepositoryCatalogueChangeClassifier implements CatalogueChangeClass
     manifest: Manifest,
     base: string,
     signal?: AbortSignal,
+    accepted?: CatalogueClassificationInputs,
   ): Promise<ComponentChangeSnapshot | undefined> {
     try {
       const source = new RepositoryComponentChanges(
@@ -62,6 +75,7 @@ export class RepositoryCatalogueChangeClassifier implements CatalogueChangeClass
         base,
         signal,
         this.commands,
+        accepted,
       );
       signal?.throwIfAborted();
       const baseline = await source.baseline();
@@ -109,18 +123,39 @@ export class ComponentChangeCache {
 /** Production read boundary for a last-good catalogue and its current Git branch point. */
 export class RepositoryComponentChanges implements ComponentChangeSource {
   private readonly runner: GitCommandRunner;
-  private readonly git: CommittedRepository;
+  private git: ReviewRepository;
   constructor(
     private readonly config: ResolvedConfig,
     private readonly manifest: Manifest,
     private readonly base: string,
-    signal?: AbortSignal,
+    private readonly signal?: AbortSignal,
     commands?: GitCommandRunner,
+    private readonly accepted?: CatalogueClassificationInputs,
   ) {
     this.runner = commands ?? new NodeGitCommandRunner(config.repoRoot, signal);
     this.git = new CommittedRepository(this.runner);
   }
   async baseline(): Promise<string> {
+    if (this.accepted?.commit) {
+      this.git = {
+        ...this.git,
+        reader: baselineReaderForCommit(
+          this.config,
+          this.accepted.commit,
+          this.runner,
+          this.signal,
+        ),
+      };
+      return this.accepted.commit;
+    }
+    if (this.config.generatedOutput === "derived") {
+      const prepared = await prepareReviewRepository(this.config, this.base, {
+        runner: this.runner,
+        ...(this.signal ? { signal: this.signal } : {}),
+      });
+      this.git = prepared.repository;
+      return prepared.commit;
+    }
     if (
       projectRealPath(
         (await this.runner.run(["rev-parse", "--show-toplevel"])).trim(),
@@ -136,6 +171,7 @@ export class RepositoryComponentChanges implements ComponentChangeSource {
       this.base,
       this.git,
       commit,
+      this.accepted?.outputs,
     );
   }
 }
@@ -147,7 +183,9 @@ export async function readCatalogueChanges(
   base: string,
   git: ReviewRepository,
   commit: string,
+  outputs?: ReadonlyMap<string, string>,
 ): Promise<ComponentChangeSnapshot> {
+  outputs = await derivedHeadOutputs(config, manifest, outputs);
   const baseline = await readBaseManifest(git.reader, commit, config);
   const changedPaths = await reviewChangedPaths(
     git.evidence,
@@ -158,7 +196,7 @@ export async function readCatalogueChanges(
   const components =
     hasRegisteredComponents(baseline) || hasRegisteredComponents(manifest);
   const prefix = toPosixPath(path.relative(config.repoRoot, config.mockupsDir));
-  const reader = new EvidenceAssetReader(config);
+  const reader = new EvidenceAssetReader(config, outputs);
   const result = components
     ? await classifyComponents({
         before: baseline,
@@ -207,6 +245,7 @@ export async function readCatalogueChanges(
       baseRef: base,
       changedPaths,
       headDigests: reader.digests,
+      ...(outputs ? { headOutputs: [...outputs] } : {}),
     },
     ...(result ? { result } : {}),
     changedRoutes: [

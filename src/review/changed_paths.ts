@@ -10,6 +10,7 @@ import {
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
 import type { RepositoryEvidence } from "./git.js";
+import { isBaselineCachePath } from "../config/cache_paths.js";
 
 /** Collect deterministic changes while excluding active and retained output. */
 export async function reviewChangedPaths(
@@ -26,10 +27,17 @@ export async function reviewChangedPaths(
       ),
     ),
   ].sort();
-  const changed = await git.changedPaths(commit, excludedPaths);
+  const changed = await git.changedPaths(commit, [
+    ...excludedPaths,
+    ".mokabook-cache",
+  ]);
   return [...new Set(changed)]
     .filter(
       (candidate) =>
+        !isBaselineCachePath(
+          path.resolve(config.repoRoot, candidate),
+          config.repoRoot,
+        ) &&
         !excludedPaths.some((excluded) => pathBelongsTo(candidate, excluded)),
     )
     .sort();

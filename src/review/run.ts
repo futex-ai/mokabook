@@ -7,11 +7,8 @@ import { validateReviewOut } from "../config/path_validation.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { renderReviewArtifact } from "./artifact.js";
 import { compareReview } from "./compare.js";
-import {
-  NodeGitCommandRunner,
-  CommittedRepository,
-  type ReviewRepository,
-} from "./git.js";
+import type { ReviewRepository } from "./git.js";
+import { prepareReviewRepository } from "./repository.js";
 import type { ReviewResult } from "./types.js";
 import { writeReviewArtifact } from "./write.js";
 
@@ -20,15 +17,14 @@ export async function runReview(
   config: ResolvedConfig,
   baseRef: string,
   outDir: string,
-  git: ReviewRepository = new CommittedRepository(
-    new NodeGitCommandRunner(config.repoRoot),
-  ),
+  git?: ReviewRepository,
   outputStore: GeneratedOutputStore = new FileSystemGeneratedOutputStore(),
   changedPathExclusions: readonly string[] = [],
 ): Promise<ReviewResult> {
   validateReviewOut(outDir, config, "Review output", "review-invalid");
+  git ??= (await prepareReviewRepository(config, baseRef)).repository;
   const compilation = await compileCatalogue(config);
-  outputStore.check(compilation, config);
+  await outputStore.check(compilation, config);
   const artifact = await compareReview(
     compilation,
     config,

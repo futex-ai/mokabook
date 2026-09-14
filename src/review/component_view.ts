@@ -11,6 +11,7 @@ import { normalizeReviewPair, normalizeSingleDocument } from "./ignore.js";
 import { snapshotPath } from "./paths.js";
 import type { ComponentDependencyPolicy } from "./component_metadata.js";
 import type { ComponentMaterialReader } from "./component_resources.js";
+import { changedResourceBytes } from "./component_resource_changes.js";
 
 export interface ComparedComponentView {
   view: ViewReview;
@@ -23,6 +24,7 @@ export interface ComponentViewContext {
   dependencies: ComponentDependencyPolicy;
   changed: ReadonlySet<string>;
   prefix: string;
+  compareResourceBytes?: boolean;
 }
 /** Compare material and declared inputs without altering the retained view documents. */
 export async function compareComponentView(
@@ -103,10 +105,19 @@ export async function compareComponentView(
     projected.after,
     excluded,
   );
+  const byteChanges = context.compareResourceBytes
+    ? await changedResourceBytes(
+        baseResources,
+        headResources,
+        context.beforeReader,
+        context.afterReader,
+      )
+    : new Set<string>();
   for (const resource of new Set([...baseResources, ...headResources])) {
     const path = repoPath(resource);
-    if (context.changed.has(path) && !excluded(resource))
-      reasons.push({ kind: "dependency", path });
+    if (excluded(resource)) continue;
+    if (context.changed.has(path)) reasons.push({ kind: "dependency", path });
+    else if (byteChanges.has(resource)) reasons.push({ kind: "material" });
   }
   const actual = normalizeReviewPair(
     stripMarkers(base, before?.usage, baseRanges),
@@ -123,9 +134,21 @@ export async function compareComponentView(
     actual.head,
     () => false,
   );
+  const actualByteChanges = context.compareResourceBytes
+    ? await changedResourceBytes(
+        actualBefore,
+        actualAfter,
+        context.beforeReader,
+        context.afterReader,
+      )
+    : new Set<string>();
   const actualResourceChange = [
     ...new Set([...actualBefore, ...actualAfter]),
-  ].some((resource) => context.changed.has(repoPath(resource)));
+  ].some(
+    (resource) =>
+      context.changed.has(repoPath(resource)) ||
+      actualByteChanges.has(resource),
+  );
   return {
     changedImplementations: changedComponentImplementations(
       base,

@@ -1,6 +1,6 @@
 # Mokabook
 
-Mokabook turns React-authored mobile and desktop mockups into committed static
+Mokabook turns React-authored mobile and desktop mockups into static
 HTML, exports complete catalogues for hosting, serves them during development, and compares screens
 with their Git baseline on demand. It is app-independent: product screens, component libraries,
 themes, styles, and compatibility adapters stay in the consuming repository.
@@ -29,6 +29,7 @@ Create `mokabook.config.ts`:
 import { defineConfig } from "mokabook";
 
 export default defineConfig({
+  generatedOutput: "committed",
   colorSchemes: ["light", "dark"],
   repoRoot: ".",
   entriesDir: "docs/mockups/src/entries",
@@ -42,6 +43,48 @@ export default defineConfig({
   },
 });
 ```
+
+`generatedOutput` defaults to `"committed"`. To keep generated HTML out of Git,
+set it to `"derived"`. Build still writes transactionally; Check validates the
+compilation and rejects tracked generated files or cache contents, without
+requiring local generated files to exist or match. Authored public CSS and HTML
+remain allowed in Git. Add ignore rules for your generated routes and manifest,
+plus `.mokabook-cache/`, and remove any already tracked generated files from the
+index with `git rm --cached`.
+
+Derived comparisons rebuild the merge-base commit in an isolated extraction,
+using that commit's dependencies and Mokabook version, then cache its output.
+This executes historical code: use a trusted mainline as the base. The default
+commands are `npm ci` followed by
+`npx --no-install mokabook build --config <repository-relative-config-path>`.
+Override the exact ordered argv list when your project needs additional steps:
+
+```ts
+export default defineConfig({
+  generatedOutput: "derived",
+  entriesDir: "docs/mockups/src/entries",
+  mockupsDir: "docs/mockups",
+  review: {
+    baselineBuild: [
+      ["npm", "ci"],
+      ["npm", "run", "build:tooling"],
+      [
+        "npx",
+        "--no-install",
+        "mokabook",
+        "build",
+        "--config",
+        "mokabook.config.ts",
+      ],
+    ],
+  },
+});
+```
+
+Commands run from the historical repository root without a shell; no commands
+are appended to an explicit list. `baselineBuild` is rejected in committed
+mode. See the [derived baseline contract](./docs/protocol/mokabook-derived-baselines.md)
+for cache limits, failure behavior, and the one-catalogue-per-commit cache boundary.
 
 An entry module ends in `.mockup.ts` or `.mockup.tsx` and exports `mockups`:
 
@@ -160,15 +203,15 @@ development dependency, `npx --no-install mokabook` guarantees npm does not
 fall back to the registry. A clean machine may use
 `npx --package mokabook mokabook` without adding a dependency.
 
-| Command                        | Outcome                                                   |
-| ------------------------------ | --------------------------------------------------------- |
-| `mokabook`                     | Browse on demand and watch using a stable development URL |
-| `mokabook serve`               | Serve the catalogue and on-demand diffs; watch by default |
-| `mokabook build`               | Validate and transactionally write generated output       |
-| `mokabook check`               | Compare expected and committed bytes without writing      |
-| `mokabook export --out <path>` | Build a complete static catalogue for your host           |
-| `mokabook --help`              | Show commands and their supported options                 |
-| `mokabook --version`           | Print the installed package version                       |
+| Command                        | Outcome                                                      |
+| ------------------------------ | ------------------------------------------------------------ |
+| `mokabook`                     | Browse on demand and watch using a stable development URL    |
+| `mokabook serve`               | Serve the catalogue and on-demand diffs; watch by default    |
+| `mokabook build`               | Validate and transactionally write generated output          |
+| `mokabook check`               | Validate committed bytes or require untracked derived output |
+| `mokabook export --out <path>` | Build a complete static catalogue for your host              |
+| `mokabook --help`              | Show commands and their supported options                    |
+| `mokabook --version`           | Print the installed package version                          |
 
 Serve starts at port `4173`. If that port, or a concrete `--port` value, is
 already occupied, Mokabook tries each following port in order until one is
@@ -222,7 +265,8 @@ change evidence while current previews remain accessible. See [on-demand Serve](
 
 `build` writes one fragment per effective viewport and color-scheme view plus
 `mokabook-manifest.json` under `mockupsDir`. `check` calculates those bytes
-without writing and reports missing, stale, or orphan generated files. The
+without writing. Committed mode reports missing, stale, or orphan generated
+files; derived mode reports tracked generated or cache paths. The
 manifest stays internal: its source inventory is unavailable through HTTP,
 published assets, and comparison resources. Ordinary public JSON remains
 supported. Browse
