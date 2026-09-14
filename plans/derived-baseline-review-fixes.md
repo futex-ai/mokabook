@@ -88,9 +88,15 @@ Make adoption a committed step that cleanup and cancellation cannot undo.
       section with the trust statement and ignore rules.
 - [x] Validate Markdown, commit and push.
 
-## Milestone 4: Review
+## Milestone 4: Review — completed
 
-- [ ] After the final push, review the complete local diff against
+- [x] After the final push, review the complete local diff against
       `origin/main` using `docs/implementation-review-prompt.md`. Report
       numbered findings with severity, context, impact, lettered options and a
       recommendation. Do not change the implementation.
+
+Review outcome: four findings were reported to the user without changes (one
+medium, three low). The medium finding is that the committed-mode Serve paths
+no longer reach the check that `repoRoot` is the Git top level, and the test
+named for that check now passes for an unrelated reason. Each finding is
+awaiting the user's decision.
