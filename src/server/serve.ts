@@ -1,3 +1,4 @@
+import type { BaselineBuilder } from "../baseline/types.js";
 import { prepareLiveRuntime } from "../build/live_runtime.js";
 import {
   FileSystemGeneratedOutputStore,
@@ -41,6 +42,8 @@ export interface RunningServe {
 
 /** Injectable runtime collaborators for Serve orchestration. */
 export interface ServeDependencies {
+  /** Derived-mode rebuilds; Serve constructs the Node builder when absent. */
+  baselineBuilder?: BaselineBuilder;
   changeClassifier?: CatalogueChangeClassifier;
   configLoader: ConfigLoader;
   outputStore: GeneratedOutputStore;
@@ -83,6 +86,13 @@ export async function serve(
           componentChanges: snapshot ?? null,
           changesStatus: snapshot ? "ready" : "unavailable",
         }),
+      {
+        baselineStatus: (changesStatus) =>
+          server.publishUpdate({ kind: "evidence", changesStatus }),
+        ...(dependencies.baselineBuilder
+          ? { builder: dependencies.baselineBuilder }
+          : {}),
+      },
     );
     const server = await dependencies.serverFactory.start(config, {
       base,

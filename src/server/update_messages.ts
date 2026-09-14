@@ -8,8 +8,11 @@ import type { ManifestV5 } from "../registry/types.js";
 
 import { isSafeCatalogueRoute } from "../config/paths.js";
 
-/** Whether live change detection is running, complete, or could not finish. */
-export type ChangesStatus = "pending" | "ready" | "unavailable";
+/**
+ * Live comparison state. `preparing` precedes `pending` only while a derived
+ * baseline is actually rebuilt; a cache hit and committed mode skip it.
+ */
+export type ChangesStatus = "preparing" | "pending" | "ready" | "unavailable";
 
 /** Evidence updates retain the current rendered content and user interactions. */
 export type CatalogueUpdateKind = "content" | "evidence";
@@ -140,7 +143,12 @@ export function parseChildUpdateMessage(
 }
 
 function isChangesStatus(value: unknown): value is ChangesStatus {
-  return value === "pending" || value === "ready" || value === "unavailable";
+  return (
+    value === "preparing" ||
+    value === "pending" ||
+    value === "ready" ||
+    value === "unavailable"
+  );
 }
 
 function isComponentChanges(

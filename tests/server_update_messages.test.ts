@@ -70,7 +70,12 @@ test("watch update parsing rejects incomplete or unsafe IPC values", () => {
 });
 
 test("watch updates preserve explicit Changes loading and terminal states", () => {
-  for (const status of ["pending", "ready", "unavailable"] as const) {
+  for (const status of [
+    "preparing",
+    "pending",
+    "ready",
+    "unavailable",
+  ] as const) {
     const message = childUpdateMessage(
       2,
       status === "ready" ? [] : undefined,
@@ -84,7 +89,12 @@ test("watch updates preserve explicit Changes loading and terminal states", () =
 
 test("watch updates distinguish evidence from content without guessing from Changes status", () => {
   for (const kind of ["content", "evidence"] as const) {
-    for (const status of ["pending", "ready", "unavailable"] as const) {
+    for (const status of [
+      "preparing",
+      "pending",
+      "ready",
+      "unavailable",
+    ] as const) {
       const message = childUpdateMessage(
         2,
         status === "ready" ? [] : undefined,

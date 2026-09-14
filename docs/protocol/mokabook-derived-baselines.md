@@ -4,9 +4,9 @@
 
 Implementation is tracked by the [derived baselines plan](../../plans/derived-baselines.md).
 Milestones 2–4 implement the separate readers, cached builder, configuration,
-build/check modes and awaiting preparation in Serve/export. Until Milestone 6,
-Serve retains `pending` during preparation. The distinct `preparing` presentation,
-commit-scoped watch lifecycle and detailed rebuild timings below remain targets.
+build/check modes and awaiting preparation in Serve/export. Milestone 6 adds the
+`preparing` presentation and the commit-scoped watch lifecycle. The detailed
+rebuild timings below remain a target.
 
 ## Purpose
 
@@ -66,7 +66,7 @@ committed mode. The documentation for the option states this plainly.
 | ----------- | ------------------------------------ | -------------------------------------------------------- |
 | `build`     | Transactional write to `mockupsDir`  | Same; output is a local artifact, not a commit candidate |
 | `check`     | Expected bytes equal committed bytes | Validate compilation; fail if output is Git-tracked      |
-| `serve`     | Baseline read from Git blobs         | Baseline from the cache, `preparing` until complete      |
+| `serve`     | Baseline read from Git blobs         | Baseline from the cache, `preparing` while rebuilding    |
 | `export`    | Baseline read from Git blobs         | Rebuild synchronously before capture, then export        |
 | Publication | As export                            | As export                                                |
 
@@ -197,12 +197,13 @@ Serve in derived mode starts HTTP and adopts complete generated output exactly
 as in committed mode. The parent owns preparation and its abort controller;
 the disposable classification worker receives the prepared commit and compiled
 head output. The builder never runs inside a worker that can be terminated
-without draining its processes. In the Milestone 6 target state, the evidence
-state while rebuilding is `preparing`: the count
-slot shows the spinner and selecting Changes shows the preparing sidebar with
-product copy, distinct from the `pending` classification state that follows.
-All remains available. A cache hit skips `preparing` and enters `pending`
-directly. A rebuild failure publishes `unavailable` with the existing sidebar
+without draining its processes. The evidence state while a rebuild actually
+runs is `preparing`: the count slot shows the spinner and selecting Changes
+shows the preparing sidebar with product copy, distinct from the `pending`
+classification state that follows. All remains available. Serve opens in
+`pending`, because whether the commit is already cached is only known once the
+builder has consulted the cache; a cache hit therefore never leaves `pending`.
+A rebuild failure publishes `unavailable` with the existing sidebar
 presentation; the typed error reason is logged, not shown in the sidebar.
 
 Watched Serve observes ref changes as today. When the merge base moves, the
@@ -213,10 +214,11 @@ Content updates during `preparing` keep the state; the rebuild is independent
 of the current generation. Late results for a superseded commit are ignored.
 
 The evidence state machine is `preparing → pending → ready | unavailable`, with
-`preparing` omitted on a cache hit or in committed mode. Live evidence updates,
-retained navigation state, and reconnect rules apply to `preparing` exactly as
-they apply to `pending`. The owning mockups are recorded in the
-[shell design](./mokabook-shell-design.md).
+`preparing` omitted on a cache hit or in committed mode. Returning to `pending`
+when the rebuild settles is part of that sequence, so classification always runs
+under `pending`. Live evidence updates, retained navigation state, and reconnect
+rules apply to `preparing` exactly as they apply to `pending`. The owning
+mockups are recorded in the [shell design](./mokabook-shell-design.md).
 
 ## Export And Publication
 

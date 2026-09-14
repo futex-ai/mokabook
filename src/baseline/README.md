@@ -46,9 +46,11 @@ builder or committed reader and returns a pinned repository. Serve's
 `BackgroundGeneration` calls it in the parent after output adoption and before
 `BackgroundCompilation.classify(base, commit)`. The classification worker reads
 the cache and its accepted compiled head output; it cannot start a rebuild.
-Milestone 6 can pass an observer at that parent call to publish `preparing`,
-then transition to classification on completion. Current Serve retains `pending`
-through preparation. Export uses the same composition and rechecks the marker.
+`BackgroundGeneration` passes an observer at that parent call that publishes the
+`preparing` evidence state on `start` and returns to `pending` on `complete`, so
+a cache hit never leaves `pending`. A rejected build reaches the shared error
+path, which logs the typed reason and publishes `unavailable`. Export uses the
+same composition and rechecks the marker.
 
 `cache_layout.ts` owns `.mokabook-cache/baselines/<commit>`. The builder extracts
 to `source`, runs commands, validates the historical manifest and output tree,

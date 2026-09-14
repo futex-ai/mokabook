@@ -15,6 +15,24 @@ import type {
 } from "../resource_watcher.js";
 import { BackgroundCompilation } from "./background.js";
 import { prepareReviewRepository } from "../../review/repository.js";
+import type {
+  BaselineBuilder,
+  BaselineProgress,
+} from "../../baseline/types.js";
+
+/** Collaborators and observers supplied by the Serve composition root. */
+export interface BackgroundGenerationOptions {
+  readonly resources?: ResourceWatcher;
+  /** Resolves when the host shuts down; preparation stays independently cancellable. */
+  readonly shutdown?: Promise<void>;
+  /**
+   * Publish `preparing` while a derived baseline is genuinely rebuilt and
+   * `pending` once it settles. Committed mode and a cache hit never call this.
+   */
+  readonly baselineStatus?: (status: "preparing" | "pending") => void;
+  /** Injected by tests; the composition root builds the real one on demand. */
+  readonly builder?: BaselineBuilder;
+}
 
 export class BackgroundGeneration {
   private worker: BackgroundCompilation | undefined;
@@ -23,6 +41,7 @@ export class BackgroundGeneration {
   private closed = false;
   private busy = false;
   private controller: AbortController | undefined;
+  private readonly shutdown: Promise<void>;
   constructor(
     private readonly store: GeneratedOutputStore,
     private readonly classifier: CatalogueChangeClassifier,
@@ -33,9 +52,10 @@ export class BackgroundGeneration {
     private readonly classified: (
       snapshot: ComponentChangeSnapshot | undefined,
     ) => void,
-    private readonly resources?: ResourceWatcher,
-    private readonly shutdown: Promise<void> = new Promise(() => {}),
-  ) {}
+    private readonly options: BackgroundGenerationOptions = {},
+  ) {
+    this.shutdown = options.shutdown ?? new Promise(() => {});
+  }
 
   start(runtime: ComponentRuntime, base: string, existing?: Compilation): void {
     if (this.closed) return;
@@ -49,7 +69,7 @@ export class BackgroundGeneration {
       try {
         const compilation = await worker.compilation;
         if (!current()) return;
-        prepared = await this.resources?.prepare(
+        prepared = await this.options.resources?.prepare(
           runtime.config,
           compilation,
           this.shutdown,
@@ -65,6 +85,10 @@ export class BackgroundGeneration {
           this.classifier instanceof RepositoryCatalogueChangeClassifier
             ? await prepareReviewRepository(runtime.config, base, {
                 signal: controller.signal,
+                onProgress: this.preparationObserver(current),
+                ...(this.options.builder
+                  ? { builder: this.options.builder }
+                  : {}),
               })
             : undefined;
         if (!current()) return;
@@ -104,6 +128,25 @@ export class BackgroundGeneration {
         await prepared?.close();
       }
     })();
+  }
+
+  /**
+   * Announce `preparing` only for a rebuild this generation started, and return
+   * to `pending` when it settles. A failed rebuild rejects `build()`, so the
+   * shared error path publishes `unavailable` with its reason on stderr alone.
+   */
+  private preparationObserver(
+    current: () => boolean,
+  ): (event: BaselineProgress) => void {
+    let announced = false;
+    return (event) => {
+      if (event.type === "fail" || !current()) return;
+      if (event.type === "start") announced = true;
+      else if (!announced) return;
+      this.options.baselineStatus?.(
+        event.type === "start" ? "preparing" : "pending",
+      );
+    };
   }
 
   foreground(active: boolean): void {

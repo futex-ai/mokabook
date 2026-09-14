@@ -205,7 +205,10 @@ scrollable region scrolls internally:
   comparison” above “This takes a moment. You can keep browsing All while it
   finishes.” before the comparison exists, then “Checking for changes…” while
   detection runs. Only the preparing state carries a secondary line; it is the
-  one state whose message is a title plus detail. A failed comparison, whether
+  one state whose message is a title plus detail, and the one whose spinner
+  aligns to the first line instead of centring on the message. Each count-slot
+  spinner is a status region named after the work it reports, so preparing and
+  checking are distinguishable without opening the sidebar. A failed comparison, whether
   preparation or detection failed, shows the single unavailable message and a
   dash, and never names a command, path, or reason; a completed empty result
   shows `0` and “No changes found.” The filter and tree origin keep their

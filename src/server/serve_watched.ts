@@ -111,8 +111,15 @@ export async function serveWatched(
         snapshot ? "ready" : "unavailable",
         "evidence",
       ),
-    resources,
-    shutdown,
+    {
+      baselineStatus: (changesStatus) =>
+        running.notifyUpdate(undefined, undefined, changesStatus, "evidence"),
+      resources,
+      shutdown,
+      ...(dependencies.baselineBuilder
+        ? { builder: dependencies.baselineBuilder }
+        : {}),
+    },
   );
   running.onForeground?.((active) => background.foreground(active));
   const schedule = (existing?: Compilation) =>

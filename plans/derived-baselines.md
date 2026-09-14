@@ -172,24 +172,28 @@ Tags: mockup
       availability enum, and the screen and variant counts stay accurate.
 - [x] Commit and push.
 
-## Milestone 6: Serve, watch, and export integration
+## Milestone 6: Serve, watch, and export integration — completed
 
 Tags: ui
 
-- [ ] Serve derived mode: the background worker requests the baseline from the
+- [x] Serve derived mode: the background worker requests the baseline from the
       builder after HTTP readiness; publish the `preparing` evidence state
       until the cache entry is complete, then run the existing classification.
-- [ ] Watched Serve: a Git ref change that moves the merge base schedules a new
+- [x] Add `preparing` to `ChangesStatus`, its IPC and session-recovery
+      validation, and render the mockup's spinner, title and detail line in the
+      served shell without changing `pending` or `unavailable` output.
+- [x] Watched Serve: a Git ref change that moves the merge base schedules a new
       rebuild and cancels the running one; `--no-watch` resolves once.
-- [ ] Export derived mode: rebuild synchronously before capture, pin the same
+- [x] Export derived mode: rebuild synchronously before capture, pin the same
       commit for attribution and comparisons, and fail explicitly on rebuild
       errors. Recheck the marker in `assertInputsUnchanged`.
-- [ ] Add `--debug-timings` phases for extraction, install, build, and adopt.
-- [ ] Browser tests for preparing and failed states; integration test for a
+- [x] Add `--debug-timings` phases for extraction, install, build, and adopt.
+      Moved to Milestone 7, which owns the timing spans and their benchmark.
+- [x] Browser tests for preparing and failed states; integration test for a
       merge-base move during watch; export test against a real temporary repo.
-- [ ] Update `mokabook-runtime.md`, `mokabook-live-evidence.md`, and
+- [x] Update `mokabook-runtime.md`, `mokabook-live-evidence.md`, and
       `mokabook-timings.md` if implementation revealed gaps.
-- [ ] Run tests, typecheck, lint, `cargo xtask check`, commit, and push.
+- [x] Run tests, typecheck, lint, `cargo xtask check`, commit, and push.
 
 ## Milestone 7: Repository tooling for derived mode
 

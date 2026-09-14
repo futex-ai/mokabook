@@ -116,7 +116,10 @@ metadata and source-inventory freshness, then binds with local controls enabled.
 Requested views render in a bounded worker. Complete output, catalogue-wide usage
 and Changes follow in background work; versioned updates install only current
 generation evidence. Non-watched Serve has the same readiness boundary and computes
-background evidence once, without later file/ref observation.
+background evidence once, without later file/ref observation. A derived baseline
+is prepared in the parent between output adoption and classification, so a
+replaced worker never orphans a rebuild; the parent cancels and restarts it when
+an observed ref change moves the merge base.
 
 All ordinary routes support GET and HEAD. HEAD returns the same status and
 headers without a body, including `/id` not-found and fragment-validation
@@ -164,6 +167,9 @@ unstaged, and untracked workspace changes remain eligible. When the repository,
 base ref, or common ancestor cannot be resolved, live Browse keeps both tabs and
 shows an explicit unavailable message when Changes is selected. Pending calculation
 shows a spinner in the reserved count slot and, when selected, in the sidebar.
+A derived-baseline rebuild precedes that calculation with its own `preparing`
+state, which uses the same spinner and adds a secondary sidebar line; see the
+[derived baselines contract](./mokabook-derived-baselines.md).
 All remains available throughout; a completed empty result shows zero. See the
 [on-demand lifecycle](./mokabook-on-demand.md).
 Route attribution compares each current manifest entry with its base entry and
