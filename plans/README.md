@@ -2,12 +2,13 @@
 
 ## Active
 
-- [Review Fix Follow-ups](./review-fix-followups.md)
 - [App-Independent Mokabook Npm Library](./app-independent-mokabook-library.md)
 - [Accounting Shell Design Parity](./accounting-shell-design-parity.md)
 
 ## Completed
 
+- [Review Fix Follow-ups](./review-fix-followups.md) — delivered and
+  verified; review findings are recorded for the user's decision.
 - [Derived Baseline Review Fixes](./derived-baseline-review-fixes.md) —
   delivered and verified; review findings are recorded for the user's decision.
 - [Derived Baselines](./derived-baselines.md) — delivered and verified;
