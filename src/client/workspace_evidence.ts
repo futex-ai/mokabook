@@ -1,5 +1,7 @@
 /** Factual comparison evidence belongs in Details, never in the canvas. */
 import type { WorkspaceData } from "../server/shell/workspace_data.js";
+import type { ReviewResult } from "../review/types.js";
+import { workspaceComparisonEvidence } from "./workspace_evidence_data.js";
 import { element } from "./inspector_panels.js";
 import { decodeProps } from "../components/codec.js";
 import { propText } from "./prop_display.js";
@@ -16,10 +18,12 @@ export function renderWorkspaceEvidence(
   panel: HTMLElement,
   data: WorkspaceData,
   variantId?: string,
+  loaded?: ReviewResult,
 ): void {
   const doc = panel.ownerDocument;
+  const evidence = workspaceComparisonEvidence(data, variantId, loaded);
   panel.replaceChildren();
-  panel.hidden = data.status === undefined;
+  panel.hidden = data.status === undefined && !evidence.comparison;
   if (panel.hidden) return;
   panel.append(
     element(doc, "h3", "Comparison details"),
@@ -59,7 +63,7 @@ export function renderWorkspaceEvidence(
         element(doc, "pre", propText(decodeProps(props))),
       );
   }
-  for (const reason of data.change?.reasons ?? [])
+  for (const reason of evidence.reasons)
     if (reason.kind !== "dependency")
       panel.append(
         element(
@@ -70,22 +74,28 @@ export function renderWorkspaceEvidence(
             : labels[reason.kind],
         ),
       );
-  const retained = retainedPaths(data.change?.reasons);
+  const retained = [
+    ...new Set([...retainedPaths(evidence.reasons), ...evidence.legacyPaths]),
+  ].sort();
   appendChangedFiles(doc, panel, retained);
-  appendStyleOutcomes(doc, panel, styleOutcomes(data.change?.reasons));
-  if (data.comparison) {
-    const views =
-      "variants" in data.comparison
-        ? (data.comparison.variants.find((item) => item.id === variantId)
-            ?.views ?? [])
-        : data.comparison.views;
-    appendExcludedStylesheets(doc, panel, excludedStylesheets(views, retained));
+  appendStyleOutcomes(doc, panel, styleOutcomes(evidence.reasons));
+  appendExcludedStylesheets(
+    doc,
+    panel,
+    excludedStylesheets(evidence.resourceViews, retained),
+  );
+  const { comparison, views } = evidence;
+  if (comparison) {
     const ignored = [...new Set(views.flatMap((view) => view.ignoredIds))];
     if (ignored.length)
       panel.append(
         element(doc, "p", `Excluded content: ${ignored.join(", ")}.`),
       );
-    if (!data.change && views.some((view) => view.state === "changed"))
+    if (
+      data.comparison &&
+      !data.change &&
+      views.some((view) => view.state === "changed")
+    )
       panel.append(
         element(
           doc,
@@ -93,10 +103,8 @@ export function renderWorkspaceEvidence(
           "Shared component changes affect this preview. This page has no independent entry in Changes.",
         ),
       );
-    if ("variants" in data.comparison) {
-      const variant = data.comparison.variants.find(
-        (item) => item.id === variantId,
-      );
+    if ("variants" in comparison) {
+      const variant = comparison.variants.find((item) => item.id === variantId);
       if (
         variant?.before &&
         variant.after &&

@@ -126,7 +126,21 @@ export function assembleExport(
       baseline,
       ...(comparison.result.schemaVersion === 3
         ? { result: comparison.result }
-        : {}),
+        : {
+            screenEvidence: comparison.result.screens.map(
+              ({ route, views }) => ({
+                route,
+                views: views.map(
+                  ({ viewport, colorScheme, reasons, excludedResources }) => ({
+                    viewport,
+                    colorScheme,
+                    ...(reasons ? { reasons } : {}),
+                    ...(excludedResources ? { excludedResources } : {}),
+                  }),
+                ),
+              }),
+            ),
+          }),
     },
     updateVersion: 0,
     delivery,

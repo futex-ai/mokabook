@@ -1,7 +1,11 @@
 /** Stylesheet evidence for comparison details and the derived style heading;
  * selector text and analysis vocabulary never leave the details list. */
 import type { EntryChangeReason } from "../review/component_types.js";
-import type { DependencyAnalysis, ViewReview } from "../review/types.js";
+import type {
+  DependencyAnalysis,
+  ViewReview,
+  ViewResourceEvidence,
+} from "../review/types.js";
 import { element } from "./inspector_panels.js";
 
 /** Analysed selectors grouped by the outcome that retained them. */
@@ -53,7 +57,7 @@ export function retainedPaths(
 
 /** Stylesheets examined for these views and set aside on every retaining side. */
 export function excludedStylesheets(
-  views: readonly ViewReview[],
+  views: readonly ViewResourceEvidence[],
   retained: readonly string[],
 ): readonly string[] {
   const kept = new Set(retained);

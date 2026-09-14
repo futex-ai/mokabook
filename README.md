@@ -15,6 +15,11 @@ highlighting. Component implementation edits appear once in Changes; consumers
 are listed as affected, while changes to their supplied props remain screen
 changes. See the [component authoring guide](./src/components/README.md).
 
+Screen-only catalogues also show stylesheet evidence in Details before opening
+a comparison: changed styles that may apply and examined stylesheets whose
+changes do not apply. Opening a comparison preserves those details and adds its
+retained evidence. See [CSS change attribution](./docs/protocol/mokly-css-attribution.md).
+
 ## Use Mokly
 
 Install Mokly and its React peers in the repository that owns the screens:

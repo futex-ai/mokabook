@@ -1,6 +1,6 @@
 import { changedManifestRoutes } from "../registry/changed_routes.js";
 import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
-import { changedContentPaths } from "./changed_content.js";
+import { classifyChangedContent } from "./changed_content.js";
 import { generatedViews } from "../components/views.js";
 import { EvidenceAssetReader } from "../review/evidence_assets.js";
 import type { ReviewEvidence } from "../review/selection_types.js";
@@ -17,6 +17,7 @@ import {
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { classifyComponents } from "../review/component_classification.js";
 import type { ReviewResultV3 } from "../review/component_types.js";
+import type { ScreenResourceEvidence } from "../review/types.js";
 import {
   NodeGitCommandRunner,
   RepositoryGitClient,
@@ -29,6 +30,7 @@ export interface ComponentChangeSnapshot {
   changedRoutes?: readonly string[];
   result?: ReviewResultV3;
   comparison?: ReviewEvidence;
+  screenEvidence?: readonly ScreenResourceEvidence[];
 }
 export interface ComponentChangeSource {
   baseline(): Promise<string>;
@@ -176,7 +178,7 @@ export async function readCatalogueChanges(
         afterReader: reader,
       })
     : undefined;
-  const content = await changedContentPaths(
+  const content = await classifyChangedContent(
     manifest,
     baseline,
     config,
@@ -195,7 +197,7 @@ export async function readCatalogueChanges(
     manifest,
     baseline,
     config,
-    content,
+    content.changedPaths,
   ).filter((route) => !components || pageRoutes.has(route));
   for (const entry of manifest.entries)
     for (const view of generatedViews(entry))
@@ -209,6 +211,9 @@ export async function readCatalogueChanges(
       headDigests: reader.digests,
     },
     ...(result ? { result } : {}),
+    ...(!components && content.screens.length
+      ? { screenEvidence: content.screens }
+      : {}),
     changedRoutes: [
       ...new Set([
         ...routes,

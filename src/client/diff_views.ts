@@ -1,19 +1,8 @@
 /** DOM rendering for isolated before/after views requested by the user. */
 
-import type {
-  ReviewResult,
-  ScreenReview,
-  ViewReview,
-} from "../review/types.js";
+import type { ReviewResult, ViewReview } from "../review/types.js";
 import { currentColorScheme, currentViewport } from "./browse_state.js";
-import {
-  appendChangedFiles,
-  appendExcludedStylesheets,
-  appendStyleOutcomes,
-  excludedStylesheets,
-  isStyleOnlyView,
-  styleOutcomes,
-} from "./style_evidence.js";
+import { isStyleOnlyView } from "./style_evidence.js";
 
 /** Available display modes; Current never requests a comparison. */
 export type DiffMode = "current" | "side" | "overlay" | "difference";
@@ -102,12 +91,6 @@ export function renderDiff(
     section.append(panes);
     stage.append(section);
   }
-  const details = doc.querySelector<HTMLElement>("[data-workspace-evidence]");
-  if (details && loaded.result.schemaVersion === 2) {
-    details.hidden = false;
-    details.replaceChildren();
-    evidence(doc, details, screen, loaded.result.baseRef);
-  }
 }
 
 function pane(
@@ -158,34 +141,6 @@ function pane(
   } else body.append(frame);
   container.append(body);
   return container;
-}
-
-function evidence(
-  doc: Document,
-  stage: HTMLElement,
-  screen: ScreenReview,
-  base: string,
-): void {
-  const details = doc.createElement("details");
-  details.className = "mb-impact-card";
-  const summary = doc.createElement("summary");
-  summary.textContent = "Comparison details";
-  details.append(
-    summary,
-    message(doc, `Compared with the branch point on ${base}.`),
-  );
-  appendChangedFiles(doc, details, screen.sharedImpact);
-  const reasons = screen.views.flatMap((view) => view.reasons ?? []);
-  appendStyleOutcomes(doc, details, styleOutcomes(reasons));
-  appendExcludedStylesheets(
-    doc,
-    details,
-    excludedStylesheets(screen.views, []),
-  );
-  const ignored = [...new Set(screen.views.flatMap((view) => view.ignoredIds))];
-  if (ignored.length > 0)
-    details.append(message(doc, `Excluded content: ${ignored.join(", ")}.`));
-  stage.append(details);
 }
 
 function message(doc: Document, text: string): HTMLElement {

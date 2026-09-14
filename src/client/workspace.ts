@@ -21,6 +21,7 @@ import {
 } from "./inspector_panels.js";
 import { installInspectorTabs } from "./inspector_tabs.js";
 import { renderWorkspaceEvidence } from "./workspace_evidence.js";
+import type { LoadedDiff } from "./diff_views.js";
 import { applyVariant, selectedVariant } from "./workspace_variants.js";
 import {
   mergeWorkspaceEvidence,
@@ -48,9 +49,11 @@ export function installWorkspace(
   const { signal } = controller;
   const query = new URLSearchParams(win.location.search);
   let variant = selectedVariant(data, win.location.search);
+  let loaded: LoadedDiff | undefined;
   root.addEventListener(
     "mokly:workspace-evidence",
     (event) => {
+      loaded = undefined;
       mergeWorkspaceEvidence(
         data,
         (event as CustomEvent<WorkspaceData>).detail,
@@ -167,6 +170,7 @@ export function installWorkspace(
       root.querySelector<HTMLElement>("[data-workspace-evidence]")!,
       data,
       variant.variant?.value.id,
+      loaded?.result,
     );
     const frames = workspaceFrames(root, views);
     const activeFrame = frames.find(
@@ -239,6 +243,11 @@ export function installWorkspace(
   renderUsage(panel("usage")!, data);
   installWorkspaceEvents(root, win, signal, {
     refresh,
+    comparison(comparisonDiff) {
+      loaded = comparisonDiff;
+      if (comparison()) highlight = false;
+      refresh();
+    },
     highlight() {
       highlight = !highlight;
       if (!highlight) selected = undefined;
@@ -277,14 +286,6 @@ export function installWorkspace(
       } else if (tabs.active()) tabs.close();
     },
   });
-  doc.addEventListener(
-    "mokly:comparison",
-    () => {
-      if (comparison()) highlight = false;
-      refresh();
-    },
-    { signal },
-  );
   signal.addEventListener("abort", () => stopHighlight?.(), { once: true });
   refresh();
   if (currentInstance()) open("props");

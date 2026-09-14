@@ -11,8 +11,8 @@ import { waitForClassifiedCount } from "../helpers/watched_catalogue.js";
 
 const BASELINE_CSS = ".auth { color: black; }\n.guide { color: black; }\n";
 
-/** One registered component plus two screens that link the same stylesheet. */
-function evidenceEntrySource(): string {
+/** Two screens sharing a stylesheet, with optional component registration. */
+function evidenceEntrySource(components: boolean): string {
   return `import React from "react";
 import { defineCollection, defineComponent, defineScreen } from "@mokly/mokly";
 const metadata = { dependencies: ["notes.md"], relatedDocs: [] };
@@ -23,8 +23,8 @@ const badge = defineComponent({ ...metadata,
   variants: [{ id: "default", title: "Default", props: { label: "New" } }]
 });
 export const mockups = [
-  defineCollection({ ...metadata, id: "fixture", title: "Fixture", description: "Fixture collection", childIds: ["badge", "home", "details"] }),
-  badge.entry,
+  defineCollection({ ...metadata, id: "fixture", title: "Fixture", description: "Fixture collection", childIds: [${components ? '"badge", ' : ""}"home", "details"] }),
+  ${components ? "badge.entry," : ""}
   defineScreen({ ...metadata, id: "home", title: "Home", description: "Home screen", route: "screens/home.html",
     mobile: <main id="home"><button className="auth">Sign in</button></main>,
     desktop: <main id="home"><button className="auth">Sign in</button></main> }),
@@ -36,8 +36,12 @@ export const mockups = [
 }
 
 /** Serve a Git-backed catalogue whose shared stylesheet gained `rule`. */
-export async function cssEvidenceFixture(rule: string, changed: number) {
-  const fixture = await createFixture(evidenceEntrySource(), {
+export async function cssEvidenceFixture(
+  rule: string,
+  changed: number,
+  components = true,
+) {
+  const fixture = await createFixture(evidenceEntrySource(components), {
     extraConfig:
       'colorSchemes: ["light", "dark"], stylesheets: [{ match: "**/*.html", stylesheets: ["shared.css"] }],',
   });

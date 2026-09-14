@@ -16,6 +16,7 @@ import { ComponentMaterialReader } from "../review/component_resources.js";
 import {
   CssResourceAnalysis,
   type ChangedResource,
+  type ResourceEvidence,
 } from "../review/css/resource_analysis.js";
 import { isStylesheetPath } from "../review/css/paths.js";
 import type { CssDocumentPair } from "../review/css/document.js";
@@ -67,11 +68,11 @@ export class ChangedResourceGraph {
   }
 
   /** Inspect transitive local references, terminating even for cyclic imports. */
-  async affects(
+  async compare(
     source: string,
     document: string,
     before?: { path: string; html: string },
-  ): Promise<boolean> {
+  ): Promise<ResourceEvidence> {
     const resources = await timeAsync("review.resource-graph", () => {
       const seeds = referencedRoutes(source, document, {
         resourceHints: false,
@@ -132,7 +133,7 @@ export class ChangedResourceGraph {
         ...(head === undefined ? {} : { after: parse(head) }),
       });
     }
-    return Boolean(this.css.analyze(changes, pairs).reasons?.length);
+    return this.css.analyze(changes, pairs);
   }
 
   private isChanged(route: string): boolean {

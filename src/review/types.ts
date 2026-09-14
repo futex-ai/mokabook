@@ -39,6 +39,18 @@ export interface ViewReview {
   viewport: Viewport;
 }
 
+/** Classification evidence available without generating comparison snapshots. */
+export type ViewResourceEvidence = Pick<
+  ViewReview,
+  "viewport" | "colorScheme" | "reasons" | "excludedResources"
+>;
+
+/** Screen-only resource evidence retained by the existing live classification. */
+export interface ScreenResourceEvidence {
+  route: string;
+  views: readonly ViewResourceEvidence[];
+}
+
 /** One stable screen route comparison. */
 export interface ScreenReview {
   dependencies: readonly string[];

@@ -104,7 +104,12 @@ invalid or contradictory evidence; canonical artifact serialization preserves it
 Owned CSS retained at an actual invocation also keeps its component in Changes
 when saved variants exclude it. Exact screen declarations remain independent
 only for retained CSS; non-CSS declarations keep their existing file-level policy.
-Inspector presentation is tracked separately from this classification work.
+The screen-only live classifier retains a `ScreenResourceEvidence` slice from
+the same traversal that determines membership. The shell receives its selected
+`ViewResourceEvidence` records without requesting snapshots or component
+classification. Export projects the same slice from its existing v2 result;
+the inspector merges it with loaded comparison details. Result schemas and
+classification policy stay unchanged.
 
 ## Development
 

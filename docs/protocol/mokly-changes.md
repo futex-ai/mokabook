@@ -79,6 +79,16 @@ selected comparisons, and publication. A newline-only edit has no changed rules
 and leaves consumers out of Changes; every viewport and scheme retains its own
 kept or excluded resource evidence.
 
+The shell receives this per-view resource evidence for screen-only catalogues
+as well as component catalogues, including in Current before snapshots exist.
+Live v2 classification retains its existing analysis as `screenEvidence`; the
+workspace selects its `resourceEvidence` slice without a second analysis pass.
+Static exports select that slice from their existing v2 comparison. Both result
+schema versions remain unchanged. Details merge the loaded comparison's evidence
+with classification evidence, preserving retained stylesheet selectors,
+exclusions, and legacy shared-impact/ignored-content details without duplicate
+cards. See the CSS contract's [shell derivation](./mokly-css-attribution.md#shell-derivation).
+
 This detection reads files without rebuilding the baseline, writing snapshots,
 or generating a comparison. Baseline reads are batched; shared resource edges
 are cached within one calculation and cycles terminate. Apart from verified

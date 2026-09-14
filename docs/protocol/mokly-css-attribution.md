@@ -4,11 +4,11 @@
 
 Rule parsing, diffing, document matching, and classification are implemented in
 both result versions, live Serve, watched updates, and publication. The
-inspector presentation below is implemented for catalogues whose comparison
-evidence reaches the shell. A catalogue without registered components still
-classifies Changes correctly, but the shell receives no per-view evidence for
-it, so its retained and excluded stylesheets are not yet visible in the
-inspector. See [CSS Change Attribution](../../plans/css-change-attribution.md).
+inspector receives retained and excluded stylesheet evidence for component
+catalogues and screen-only catalogues, including before a comparison is loaded.
+Screen-only delivery reuses the existing v2 classification; it does not run
+component classification or an additional resource analysis. See
+[CSS Change Attribution](../../plans/css-change-attribution.md).
 
 ## Purpose
 
@@ -297,6 +297,23 @@ recorded in the
   details list, and only where the detail has review value.
 
 ### Shell Derivation
+
+The live classification snapshot retains screen-only `screenEvidence` records
+with a route and per-view `viewport`, `colorScheme`, optional `reasons`, and
+optional `excludedResources`. Paths remain repository-relative. The workspace
+projects the selected screen's views as optional `resourceEvidence`; it does not
+invent v3 entry reasons, component results, or comparison states. Static exports
+project this same slice from the existing v2 comparison. Schema versions remain
+unchanged, and absent evidence remains valid. New classification generations
+replace the slice, clearing stale evidence while Changes is pending/unavailable.
+
+One inspector renderer merges classification evidence with the loaded selected
+comparison. Dependency reasons merge by path with sorted selector unions and
+unresolved precedence. Retained paths suppress exclusions across all selected
+views; loaded v2 shared-impact and ignored-content details remain available.
+Loaded evidence is selection-scoped and cleared on classification invalidation.
+Component ownership facts continue to come from entry reasons and the complete
+classification; a v2 resource change never implies a changed shared component.
 
 `ReviewState` has no resource-only variant, so the browser derives the style
 heading from the view's own evidence instead of a schema change. A view reads

@@ -382,21 +382,26 @@ Their matched, unresolved, and excluded stylesheet evidence is therefore
 computed but never shown. Deliver that evidence to the shell without forcing
 component classification on screen-only catalogues.
 
-- [ ] Add a failing browser or client test first: a screen-only catalogue with
+Completed. Delivered by a Codex session and verified by the coordinator: the
+workspace payload carries a v2 per-view evidence slice, the inspector merges
+loaded comparison evidence with classification evidence, and the unreachable
+legacy v2 card was removed.
+
+- [x] Add a failing browser or client test first: a screen-only catalogue with
       a shared stylesheet edit must show the excluded section on an unaffected
       screen and the matched list on an affected screen.
-- [ ] Extend the shell workspace payload so a schema-v2 catalogue supplies the
+- [x] Extend the shell workspace payload so a schema-v2 catalogue supplies the
       same per-view `reasons` and `excludedResources` slice the v3 payload
       does, produced by the existing v2 classification rather than a second
       analysis pass. Keep the schema versions unchanged.
-- [ ] Make `renderWorkspaceEvidence` merge the loaded comparison's evidence
+- [x] Make `renderWorkspaceEvidence` merge the loaded comparison's evidence
       with the classification evidence instead of replacing the panel, so the
       legacy v2 evidence card in `src/client/diff_views.ts` is either reached
       or deleted. Remove it if it becomes redundant.
-- [ ] Update `docs/protocol/mokly-css-attribution.md` Delivery Status and
+- [x] Update `docs/protocol/mokly-css-attribution.md` Delivery Status and
       `docs/protocol/mokly-changes.md` so v2 catalogues are no longer listed
       as an exception.
-- [ ] Run tests, typecheck, lint, format check, browser tests, and
+- [x] Run tests, typecheck, lint, format check, browser tests, and
       `cargo xtask check`.
 
 ## Milestone 9: Show evidence for screen-only catalogues in the shell

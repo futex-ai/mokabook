@@ -18,6 +18,7 @@ import type {
 } from "../../review/component_types.js";
 import type { Catalogue } from "../catalogue.js";
 import type { ShellContext } from "./context.js";
+import type { ViewResourceEvidence } from "../../review/types.js";
 
 export type EntryStatus = "Added" | "Changed" | "Removed" | "Unmodified";
 export interface WorkspaceVariant {
@@ -59,6 +60,7 @@ export interface WorkspaceData {
   status?: EntryStatus;
   change?: ChangedEntry;
   comparison?: ComponentReview | ScreenReviewV3;
+  resourceEvidence?: readonly ViewResourceEvidence[];
   base: string;
   comparisons: boolean;
   comparisonEligible: boolean;
@@ -83,6 +85,9 @@ export function workspaceData(
 ): WorkspaceData {
   const snapshot = context.componentChanges;
   const result = snapshot?.result;
+  const resourceEvidence = snapshot?.screenEvidence?.find(
+    (screen) => screen.route === entry.route,
+  )?.views;
   const baseline = snapshot?.baseline.entries.find((item) =>
     entry.kind === "component"
       ? item.id === entry.id
@@ -282,5 +287,6 @@ export function workspaceData(
     ...(status ? { status } : {}),
     ...(change ? { change } : {}),
     ...(comparison ? { comparison } : {}),
+    ...(resourceEvidence ? { resourceEvidence } : {}),
   };
 }

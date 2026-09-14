@@ -52,7 +52,11 @@ export function installDiffs(
         screen.dataset["diffVariant"],
       );
     }
-    doc.dispatchEvent(new win.Event("mokly:comparison"));
+    doc.dispatchEvent(
+      new win.CustomEvent<LoadedDiff | undefined>("mokly:comparison", {
+        detail: loadedSelection === selectionKey(screen) ? loaded : undefined,
+      }),
+    );
   };
   doc.addEventListener("mokly:evidence-updated", () => {
     request?.abort();

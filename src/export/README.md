@@ -13,6 +13,10 @@ removal preserves ancestor context without introducing visual comparisons.
 The shared `server/changed_content.ts` calculation receives the same captured
 asset reader as comparisons, preserving Serve's material-output/resource Changes
 membership without reading a different current-file snapshot.
+For screen-only catalogues, `site.ts` projects per-view resource evidence from
+the existing v2 comparison into shell workspace data. Details can show matched,
+unresolved, and excluded stylesheets in Current without fetching comparison
+JSON, and no extra classification pass is needed for this projection.
 
 `stage.ts` shares ownership assembly, alias/reference validation, and staged
 file writes between consumer export and repository preview capture.

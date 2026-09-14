@@ -6,6 +6,7 @@ import { isReservedSource } from "../build/source_inventory.js";
 import { isInside, toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
+import type { ColorScheme, Viewport } from "../authoring/types.js";
 import { MoklyError } from "../errors.js";
 import {
   FORMER_MANIFEST_NAME,
@@ -28,6 +29,10 @@ import {
 } from "../review/ignore.js";
 import { fragmentForView, unionColorSchemes } from "../review/screen_views.js";
 import { pageBaselines } from "../review/page_baselines.js";
+import type {
+  ScreenResourceEvidence,
+  ViewResourceEvidence,
+} from "../review/types.js";
 import { ChangedResourceGraph } from "./changed_resources.js";
 
 interface DocumentPair {
@@ -35,6 +40,13 @@ interface DocumentPair {
   head: string;
   context: string;
   changed: boolean;
+  view?: { route: string; viewport: Viewport; colorScheme: ColorScheme };
+}
+
+/** Material membership and per-view resource evidence from one traversal. */
+export interface ChangedContent {
+  changedPaths: readonly string[];
+  screens: readonly ScreenResourceEvidence[];
 }
 
 /**
@@ -53,6 +65,33 @@ export async function changedContentPaths(
   ),
   documents: "all" | "pages" = "all",
 ): Promise<readonly string[]> {
+  return (
+    await classifyChangedContent(
+      manifest,
+      baseline,
+      config,
+      git,
+      commit,
+      changedPaths,
+      headReader,
+      documents,
+    )
+  ).changedPaths;
+}
+
+/** Preserve resource evidence from the v2 membership pass without repeating analysis. */
+export async function classifyChangedContent(
+  manifest: Manifest,
+  baseline: Manifest,
+  config: ResolvedConfig,
+  git: GitClient,
+  commit: string,
+  changedPaths: readonly string[],
+  headReader: OptionalReviewAssetReader = new FileSystemReviewAssetReader(
+    config,
+  ),
+  documents: "all" | "pages" = "all",
+): Promise<ChangedContent> {
   const prefix = toPosixPath(path.relative(config.repoRoot, config.mockupsDir));
   const repoPath = (route: string) => (prefix ? `${prefix}/${route}` : route);
   const publicChanges = new Set(
@@ -73,7 +112,7 @@ export async function changedContentPaths(
         : [route];
     }),
   );
-  if (publicChanges.size === 0) return [];
+  if (publicChanges.size === 0) return { changedPaths: [], screens: [] };
   const pairs = documentPairs(manifest, baseline, publicChanges, documents);
   const baseReader = new GitReviewAssetReader(
     baselineResourceConfig(config, baseline),
@@ -118,7 +157,9 @@ export async function changedContentPaths(
       }
     }
   });
-  if (publicChanges.size === 0) return [...result].sort();
+  if (publicChanges.size === 0)
+    return { changedPaths: [...result].sort(), screens: [] };
+  const screens = new Map<string, ViewResourceEvidence[]>();
   const resources = new ChangedResourceGraph(
     headReader,
     baseReader,
@@ -137,19 +178,49 @@ export async function changedContentPaths(
           : normalizeSingleDocument(after, pair.context);
       }
       const before = normalizedBases.get(pair.head);
-      if (
-        await resources.affects(
-          pair.head,
-          document,
-          pair.base && before !== undefined
-            ? { path: pair.base, html: before }
-            : undefined,
-        )
-      )
-        result.add(repoPath(pair.head));
+      const evidence = await resources.compare(
+        pair.head,
+        document,
+        pair.base && before !== undefined
+          ? { path: pair.base, html: before }
+          : undefined,
+      );
+      if (evidence.reasons?.length) result.add(repoPath(pair.head));
+      if (pair.view) {
+        const { route, viewport, colorScheme } = pair.view;
+        const views = screens.get(route) ?? [];
+        views.push({
+          viewport,
+          colorScheme,
+          ...(evidence.reasons
+            ? {
+                reasons: evidence.reasons.map((reason) => ({
+                  ...reason,
+                  path: repoPath(reason.path),
+                })),
+              }
+            : {}),
+          ...(evidence.excludedResources
+            ? {
+                excludedResources: evidence.excludedResources.map(
+                  (resource) => ({
+                    ...resource,
+                    path: repoPath(resource.path),
+                  }),
+                ),
+              }
+            : {}),
+        });
+        screens.set(route, views);
+      }
     }
   });
-  return [...result].sort();
+  return {
+    changedPaths: [...result].sort(),
+    screens: [...screens.keys()]
+      .sort()
+      .map((route) => ({ route, views: screens.get(route)! })),
+  };
 }
 
 function documentPairs(
@@ -187,6 +258,7 @@ function documentPairs(
           head: after,
           context: `${screen.route} (${viewport}, ${scheme})`,
           changed: before !== after || changed.has(after),
+          view: { route: screen.route, viewport, colorScheme: scheme },
         });
       }
     }
