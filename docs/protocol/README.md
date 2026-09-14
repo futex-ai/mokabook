@@ -59,6 +59,8 @@ when the historical primary file is absent, never when it is invalid.
   hosting, navigation, and comparison behavior.
 - [Export recovery](./mokly-export-recovery.md) — backup ownership,
   concurrent destination changes, bounded cleanup, and failure reporting.
+- [Export ownership v1](./mokly-export-ownership.md) — public inventory schema
+  and compatibility fixtures for independent upload receivers.
 - [Watched development](./mokly-watch.md)
 - [Catalogue navigation contract](./mokly-navigation.md)
 - [Styled catalogue link controls](./mokly-link-controls.md)

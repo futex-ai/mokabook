@@ -22,6 +22,9 @@ membership without reading a different current-file snapshot.
 
 `stage.ts` shares ownership assembly, alias/reference validation, and staged
 file writes between consumer export and repository preview capture.
+The [public ownership schema and fixtures](../../docs/protocol/mokly-export-ownership.md)
+define the emitted inventory and reader compatibility. Tests exercise them
+against this parser and an independent reader in the packed-consumer smoke.
 `deployment.ts` finalizes a separate complete-artifact identity after provider
 transformation and ownership assembly. `content_id.ts` uses deterministic file
 hashes and alias edges; `shell_metadata.ts` normalizes and stamps only known

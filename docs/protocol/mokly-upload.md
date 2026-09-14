@@ -25,6 +25,12 @@ services; HTTP supports local receivers. Tokens use the bearer-token grammar
 diagnostic stacks. Response bodies, response headers and transport exceptions
 are not printed. No automatic redirects or retries occur.
 
+Value options also accept `--name=value`. Use `--token=-TOKEN` for a credential
+beginning with `-`, or set `MOKLY_TOKEN`. Split only at the first `=`, preserving
+token padding and URL queries. Empty assigned values fail; boolean options such
+as `--no-changes` reject assignments. A separate value beginning with `-` remains
+ambiguous and fails as a missing value; use the assigned form instead.
+
 `--out` defaults to `.context/mokly-publish` beside the config. Relative paths
 resolve beside the loaded config; all [export confinement and ownership
 rules](./mokly-export.md) apply. `--config` uses normal discovery. Comparisons
@@ -174,11 +180,13 @@ lower quotas and return 413. Units are binary (1 MiB = 1,048,576 bytes).
 | Relative path                                            | 1,024 UTF-8 bytes |
 
 Reject invalid gzip/tar, truncated entries, trailing non-padding tar data,
-duplicate JSON keys, missing/extra manifest fields, wrong types, unsupported
+duplicate JSON keys, missing/extra upload-manifest fields, wrong types, unsupported
 versions and invalid field values. Receivers reject duplicate or case-folded
 colliding file paths, file/directory conflicts, absolute paths, empty segments,
 `.`/`..` segments, backslashes, colons and control characters. Paths must be
-valid UTF-8; Unicode is allowed. PAX metadata may specify only the effective
+valid UTF-8; Unicode is allowed. Collision keys use locale-independent Unicode
+lowercasing without normalization, as defined by the [ownership contract](./mokly-export-ownership.md).
+PAX metadata may specify only the effective
 path/size and ordinary file metadata; it cannot authorize links or escapes.
 Only regular files and optional directories are accepted. Reject symlinks,
 hard links, devices, FIFOs, sparse files and other special entries. Extraction
@@ -186,7 +194,8 @@ must remain confined even when a destination already contains symlinks; use an
 empty private staging directory and never trust tar metadata as filesystem
 authority. Do not honor stored user/group ids, executable bits or timestamps.
 
-Require exactly one root upload manifest and valid export ownership marker,
+Require exactly one root upload manifest and an export ownership marker matching
+the [public v1 schema and fixtures](./mokly-export-ownership.md),
 `index.html` and `404.html`. The marker's owned
 inventory must match archive regular files other than the marker itself.
 The source `mokly-manifest.json` is intentionally absent: it contains source

@@ -18,6 +18,10 @@ uncompressed/compressed streams. `http.ts` accepts an injectable fetch function,
 uses a 120-second timeout, disables redirects and maps statuses to fixed errors.
 Remote bodies and exceptions never become user diagnostics. `cli/secrets.ts`
 also redacts tokens from parser/config/build errors and diagnostic stacks.
+Shared CLI value parsing accepts `--name=value`, preserving leading dashes and
+token padding; boolean flags retain their no-value syntax. The packed-consumer
+smoke exercises a leading-dash token and the public ownership fixtures without
+importing package internals.
 
 ```bash
 npm run build

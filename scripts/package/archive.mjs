@@ -54,6 +54,8 @@ export function validatePackageReport(report) {
     "dist/cli/publish.js",
     "dist/publish/run.js",
     "docs/protocol/mokly-upload.md",
+    "docs/protocol/mokly-export-ownership.md",
+    "docs/protocol/fixtures/export-ownership-v1.json",
     "dist/components/definition.js",
     "dist/server/controls/worker.js",
     "dist/browser/component_controls.js",

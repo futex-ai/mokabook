@@ -4,9 +4,14 @@ import http from "node:http";
 import path from "node:path";
 
 import { runCommand } from "./command.mjs";
+import {
+  assertCompleteInventory,
+  checkOwnershipFixtures,
+} from "./ownership.mjs";
 
 /** Exercise only the packed public CLI and documented files against a receiver. */
 export async function smokeConsumerPublish(context, root) {
+  await checkOwnershipFixtures(path.join(root, "node_modules/@mokly/mokly"));
   const uploads = [];
   const server = http.createServer(async (request, response) => {
     const chunks = [];
@@ -27,6 +32,7 @@ export async function smokeConsumerPublish(context, root) {
         bin,
         [
           "publish",
+          "--token=-package-smoke-token==",
           "--out",
           "uploaded",
           "--repository",
@@ -38,7 +44,10 @@ export async function smokeConsumerPublish(context, root) {
       assert.match(stdout, /Published Mokly catalogue/);
       assert.doesNotMatch(stdout + stderr, /package-smoke-token/);
       const upload = uploads.at(-1);
-      assert.equal(upload.headers.authorization, "Bearer package-smoke-token");
+      assert.equal(
+        upload.headers.authorization,
+        "Bearer -package-smoke-token==",
+      );
       assert.equal(upload.headers["content-type"], "application/gzip");
       const archive = path.join(
         context.workingRoot,
@@ -47,6 +56,7 @@ export async function smokeConsumerPublish(context, root) {
       const unpacked = path.join(context.workingRoot, `unpacked-${noChanges}`);
       await fs.promises.writeFile(archive, upload.body);
       await fs.promises.mkdir(unpacked);
+      const { stdout: listing } = await runCommand("tar", ["-tzf", archive]);
       await runCommand("tar", ["-xzf", archive, "-C", unpacked]);
       const manifest = JSON.parse(
         await fs.promises.readFile(
@@ -63,6 +73,7 @@ export async function smokeConsumerPublish(context, root) {
           "utf8",
         ),
       );
+      assertCompleteInventory(marker, listing.trimEnd().split("\n"));
       for (const file of [...marker.files, ".mokly-export-artifact"]) {
         assert.deepEqual(
           await fs.promises.readFile(path.join(unpacked, file)),

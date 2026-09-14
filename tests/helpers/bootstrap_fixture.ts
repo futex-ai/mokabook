@@ -67,6 +67,10 @@ export async function bootstrapFixture(
     ".gitignore": "dist/\nnode_modules/\n.context/\n",
     "README.md": "# Bootstrap test fixture\n",
     "docs/protocol/mokly-upload.md": "# Upload protocol test fixture\n",
+    "docs/protocol/mokly-export-ownership.md":
+      "# Ownership protocol test fixture\n",
+    "docs/protocol/fixtures/export-ownership-v1.json":
+      '{"schemaVersion":1,"cases":[]}\n',
     LICENSE: "MIT\n",
     "CHANGELOG.md": "# Test release\n",
     "source.txt": "reviewed source\n",

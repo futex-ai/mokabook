@@ -161,6 +161,10 @@ fall back to the registry. A clean machine may use
 `npx --package @mokly/mokly mokly` without adding a dependency. The unscoped
 name is not a package alias; imports also use `@mokly/mokly`.
 
+Value options also accept `--name=value`, which supports values beginning with
+`-`, such as `--config=-catalogue.config.ts`. Empty values and assignments to
+boolean flags are rejected.
+
 | Command                     | Outcome                                                   |
 | --------------------------- | --------------------------------------------------------- |
 | `mokly`                     | Browse on demand and watch using a stable development URL |
@@ -674,11 +678,15 @@ combined with `--base`. Publish still requires a committed Git checkout for
 revision metadata. Git remote `origin` (or the sole remote) supplies repository
 identity; `--repository <host>/<owner>/<name>` overrides it.
 
+For a token beginning with `-`, use `--token=-TOKEN` or `MOKLY_TOKEN`.
+
 The output includes an owned `mokly-upload.json` containing repository, revision
 and pinned comparison metadata. Upload failure leaves that local export intact.
 The CLI exits nonzero with typed errors, does not follow redirects or retry, and
 never prints the token. The upload contract defines receiver validation, limits
 and exact rejection categories. Protocol files are included in the npm package.
+The [ownership v1 schema and fixtures](./docs/protocol/mokly-export-ownership.md)
+define the required file inventory for independent receivers.
 
 Use the [public composite GitHub Action](./.github/actions/publish/README.md)
 with an exact released Mokly package version. Check out the consumer, install

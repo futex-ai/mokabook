@@ -1,6 +1,10 @@
 # Publish Catalogue Review
 
-## Findings
+Both initial findings were subsequently validated and fixed with the user's
+approval. Their original analysis is preserved below; see **Approved Follow-up**
+for the changes and verification.
+
+## Initial Findings — addressed
 
 1. **P2 / Medium — Required ownership marker lacks a complete public schema.**
    [Upload validation](../protocol/mokly-upload.md#validation-and-limits),
@@ -43,8 +47,8 @@
    Scope regressions to value options and ensure boolean flags still reject
    assigned values; a new parser dependency is not required.
 
-No finding was applied. These recommendations require a subsequent user
-decision and are not additional required milestones in the delivered plan.
+Neither finding was changed during the initial read-only review. The user's
+later approval added follow-up milestones without reopening completed work.
 
 ## Scope And Delivery
 
@@ -62,7 +66,7 @@ It used focused file/patch inspection and an in-memory compiled-parser probe;
 it did not alter implementation, tests or generated artifacts. This report and
 the plan's delivery checkboxes were recorded after that review.
 
-## Verification And Remaining Release Work
+## Initial Verification And Remaining Release Work
 
 The full `cargo xtask check` gate passed before commit and push, using Node
 22.14.0: all 1,074 unit/integration tests, 247 Chromium tests and three Rust
@@ -82,3 +86,35 @@ The [composite action](../../.github/actions/publish/README.md) is delivered
 under `.github/actions/publish`. Consumers must pin an npm release containing
 this feature before using it remotely. No npm release, separate action
 repository or PR was created. The plan remains active until PR merge.
+
+## Approved Follow-up
+
+Both P2 findings were confirmed before making changes. The ownership format
+had no complete public schema, and a compiled-parser probe rejected an assigned
+leading-dash token that the transport accepted through the environment.
+
+The [ownership v1 contract](../protocol/mokly-export-ownership.md) now defines
+the fields, unknown-field policy, path and collision rules, inventory semantics,
+upload limits and version rejection. Its 27 public valid/invalid fixture cases
+ship with the npm package. The existing exporter parser and an independent
+packed-consumer reader both check those cases; the upload smoke also checks
+every tar member against the marker, including missing, duplicate and extra
+members in focused reader tests. Local recovery behavior is preserved.
+
+The shared CLI parser accepts `--name=value` for every long value option,
+including tokens and paths beginning with `-`. It retains all subsequent `=`
+characters, rejects empty assigned values and boolean assignments, and keeps
+the existing command and numeric validation. Tests cover success and rejection
+over real HTTP, explicit-token precedence, raw/encoded diagnostic redaction,
+and config/output paths beginning with a dash.
+
+Nine regressions failed before implementation. All 41 focused tests then passed,
+along with build, TypeScript, ESLint, Markdown checks and the packed-consumer
+smoke. The smoke uses the installed CLI with a leading-dash padded credential
+in both comparison modes. Full-gate and post-push review delivery is tracked
+in [the plan](../../plans/publish-catalogue.md).
+
+The follow-up `cargo xtask check` passed on Node 22.14.0 before commit and push:
+1,084 unit/integration tests, 247 browser tests, three Rust tests, and all
+dependency, example, package, formatting, lint, types and Rust gates. There
+were no failed, retried, skipped or cancelled tests in this complete run.

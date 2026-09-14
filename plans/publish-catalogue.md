@@ -44,8 +44,33 @@ Complete branch work before review; merge remains the plan completion boundary.
 
 Implementation commit `e7d46d7` was pushed before the read-only review against
 `origin/main` (`5b4c647`). The [review report](../docs/reviews/publish-catalogue.md)
-records two unaddressed P2 findings and their recommended follow-up scopes.
-All branch milestones are complete; this plan stays active until its PR merges.
+records two P2 findings. The user approved fixing both after validation; the
+follow-up milestones below track that work. This plan stays active until merge.
+
+## Milestone 5: Review follow-up protocol — completed
+
+Define the ownership file boundary and unambiguous CLI value syntax first.
+
+- [x] Document ownership v1 fields, reader policy, inventory semantics and public fixture format; link it from upload/export and the README.
+- [x] Document `--name=value` for value options, including leading-dash credentials, empty values and boolean rejection.
+
+## Milestone 6: Review regressions and fixes — completed
+
+Protect the public artifact and argument boundaries with focused regressions.
+
+- [x] Capture failing tests for assigned option values and token secrecy before changing the parser.
+- [x] Capture missing public fixture/package coverage, then add ownership conformance fixtures and check them against the exporter and an independent packed-consumer reader.
+- [x] Implement shared assigned-value parsing and verify command-option restrictions remain enforced.
+- [x] Exercise the installed CLI with a leading-dash token and compare complete uploaded inventories with the documented ownership shape.
+- [x] Update relevant READMEs and record the approved findings as addressed.
+
+## Milestone 7: Follow-up verification and delivery
+
+Deliver the approved fixes and review the complete branch after the push.
+
+- [x] Run focused tests, package/upload smoke tests, Markdown validation and `cargo xtask check`; resolve failures.
+- [ ] After checks pass, `git add -A`, commit with Conventional Commits and push the branch.
+- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md) against `origin/main`; report findings without automatically changing the implementation.
 
 ## Post-merge follow-up (non-blocking)
 
@@ -69,3 +94,11 @@ a raw temporary-storage preparation error (covered before fixing), one native
 Node 24 loader crash, and an intermittent existing watched-comparison browser
 test. The last two passed when rerun independently; the complete final Node 22
 gate passed without retries or skipped tests.
+
+The approved review follow-up also passed `cargo xtask check` on Node 22.14.0:
+1,084 unit/integration tests, 247 browser tests, three Rust tests and every
+formatting, lint, types, dependency, package, example and Rust gate. No test
+failed, was retried, skipped or cancelled. Before that gate, nine new regressions
+failed, then all 41 focused tests and the packed-consumer smoke passed with the
+fixes. The installed package includes the ownership contract and all 27 fixture
+cases; actual uploads use assigned leading-dash credentials in both modes.

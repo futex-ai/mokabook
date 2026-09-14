@@ -32,4 +32,7 @@ Options:
   --no-watch       Serve one deterministic snapshot
   -h, --help       Show help
   -v, --version    Show installed version
+
+Value options also accept --name=value. Use --token=-TOKEN for a leading dash.
+Boolean flags take no value.
 `;

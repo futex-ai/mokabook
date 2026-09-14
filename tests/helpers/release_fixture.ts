@@ -17,6 +17,8 @@ export function packageReport(): PackageReport {
       { path: "dist/cli/publish.js", size: 1 },
       { path: "dist/publish/run.js", size: 1 },
       { path: "docs/protocol/mokly-upload.md", size: 1 },
+      { path: "docs/protocol/mokly-export-ownership.md", size: 1 },
+      { path: "docs/protocol/fixtures/export-ownership-v1.json", size: 1 },
       { path: "dist/export/run.js", size: 1 },
       { path: "dist/export/transaction.js", size: 1 },
       { path: "dist/client/static_delivery.js", size: 1 },

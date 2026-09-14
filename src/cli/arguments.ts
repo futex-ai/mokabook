@@ -46,28 +46,38 @@ export function parseArguments(argv: readonly string[]): CliArguments {
   }
   const parsed: CliArguments = { command, help: false, version: false };
   while (values.length > 0) {
-    const option = values.shift();
-    if (option === "--help" || option === "-h") parsed.help = true;
-    else if (option === "--version" || option === "-v") parsed.version = true;
-    else if (option === "--debug-timings") parsed.debugTimings = true;
-    else if (option === "--watch") parsed.watch = true;
-    else if (option === "--no-watch") parsed.watch = false;
-    else if (option === "--retained-runtime") parsed.retainedRuntime = true;
-    else if (option === "--strict-port") parsed.strictPort = true;
-    else if (option === "--config") parsed.config = takeValue(option, values);
-    else if (option === "--base") parsed.base = takeValue(option, values);
-    else if (option === "--out") parsed.out = takeValue(option, values);
+    const argument = values.shift()!;
+    const separator = argument.indexOf("=");
+    const option = separator < 0 ? argument : argument.slice(0, separator);
+    const assigned = separator < 0 ? undefined : argument.slice(separator + 1);
+    if (argument === "--help" || argument === "-h") parsed.help = true;
+    else if (argument === "--version" || argument === "-v")
+      parsed.version = true;
+    else if (argument === "--debug-timings") parsed.debugTimings = true;
+    else if (argument === "--watch") parsed.watch = true;
+    else if (argument === "--no-watch") parsed.watch = false;
+    else if (argument === "--retained-runtime") parsed.retainedRuntime = true;
+    else if (argument === "--strict-port") parsed.strictPort = true;
+    else if (option === "--config")
+      parsed.config = takeValue(option, values, assigned);
+    else if (option === "--base")
+      parsed.base = takeValue(option, values, assigned);
+    else if (option === "--out")
+      parsed.out = takeValue(option, values, assigned);
     else if (option === "--endpoint")
-      parsed.endpoint = takeValue(option, values);
-    else if (option === "--token") parsed.token = takeValue(option, values);
+      parsed.endpoint = takeValue(option, values, assigned);
+    else if (option === "--token")
+      parsed.token = takeValue(option, values, assigned);
     else if (option === "--repository")
-      parsed.repository = takeValue(option, values);
-    else if (option === "--no-changes") parsed.noChanges = true;
+      parsed.repository = takeValue(option, values, assigned);
+    else if (argument === "--no-changes") parsed.noChanges = true;
     else if (option === "--port")
-      parsed.port = parsePort(takeValue(option, values));
+      parsed.port = parsePort(takeValue(option, values, assigned));
     else if (option === "--update-version")
-      parsed.updateVersion = parseUpdateVersion(takeValue(option, values));
-    else throw new MoklyError("cli-invalid", `unknown option: ${option ?? ""}`);
+      parsed.updateVersion = parseUpdateVersion(
+        takeValue(option, values, assigned),
+      );
+    else throw new MoklyError("cli-invalid", `unknown option: ${argument}`);
   }
   validateCommandOptions(parsed);
   return parsed;
@@ -84,9 +94,13 @@ function parseUpdateVersion(value: string): number {
   return version;
 }
 
-function takeValue(option: string, values: string[]): string {
-  const value = values.shift();
-  if (!value || value.startsWith("-")) {
+function takeValue(
+  option: string,
+  values: string[],
+  assigned?: string,
+): string {
+  const value = assigned ?? values.shift();
+  if (!value || (assigned === undefined && value.startsWith("-"))) {
     throw new MoklyError("cli-invalid", `${option} requires a value`);
   }
   return value;

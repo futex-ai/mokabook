@@ -69,6 +69,12 @@ Screen comparisons are requested from the catalogue. A flag after
 the package name belongs to Mokly; docs must show npx arguments in a form
 that is unambiguous to current npm.
 
+Every long option taking a value accepts `--name=value` as well as
+`--name value`. Split at the first `=` only. Assigned values may start with `-`;
+separate values may not. Empty values, unknown options and assignments to
+boolean flags (including `--help=false`) fail. The same value validation and
+command restrictions apply to both forms; short flags do not take assignments.
+
 The consumer `export` command and its config-relative `--out` option follow the
 [static export contract](./mokly-export.md). It builds first, packages
 comparisons using the configured or overridden Git base, and never uploads.
