@@ -17,7 +17,7 @@ import {
 import { baselineResourceConfig, readBaseManifest } from "./base_manifest.js";
 import { compareComponentCatalogue } from "./component_compare.js";
 import { reviewChangedPaths } from "./changed_paths.js";
-import type { GitClient } from "./git.js";
+import type { ReviewRepository } from "./git.js";
 import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
 import type {
   ReviewArtifact,
@@ -30,16 +30,16 @@ import type {
 export async function compareReview(
   compilation: Compilation,
   config: ResolvedConfig,
-  git: GitClient,
+  git: ReviewRepository,
   baseRef: string,
   outDir = config.review.outDir,
   assetReader: ReviewAssetReader = new FileSystemReviewAssetReader(config),
   changedPathExclusions: readonly string[] = [],
 ): Promise<ReviewArtifact> {
-  const baseCommit = await git.mergeBase(baseRef, "HEAD");
-  const baseManifest = await readBaseManifest(git, baseCommit, config);
+  const baseCommit = await git.evidence.mergeBase(baseRef, "HEAD");
+  const baseManifest = await readBaseManifest(git.reader, baseCommit, config);
   const changedPaths = await reviewChangedPaths(
-    git,
+    git.evidence,
     baseCommit,
     config,
     outDir,
@@ -50,7 +50,7 @@ export async function compareReview(
   );
   const baseAssetReader = new GitReviewAssetReader(
     baselineResourceConfig(config, baseManifest),
-    git,
+    git.reader,
     baseCommit,
     mockupsPrefix,
   );

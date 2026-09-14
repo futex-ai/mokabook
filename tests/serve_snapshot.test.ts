@@ -5,7 +5,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { MokabookError } from "../dist/errors.js";
-import { RepositoryGitClient } from "../dist/review/git.js";
+import { GitRepositoryEvidence } from "../dist/review/git_evidence.js";
 import { NodeCatalogueServerFactory } from "../dist/server/factory.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { configuredServedReview } from "../dist/server/review_routes.js";
@@ -23,13 +23,13 @@ test("no-watch startup retains removed metadata from its single Changes calculat
   const fixture = await changedFixture(context, validEntrySource() + page);
   const classified = observeBackgroundClassification(context, fixture.config);
   await fs.writeFile(fixture.entryPath, validEntrySource());
-  const mergeBase = RepositoryGitClient.prototype.mergeBase;
+  const mergeBase = GitRepositoryEvidence.prototype.mergeBase;
   let calls = 0;
   context.mock.method(
-    RepositoryGitClient.prototype,
+    GitRepositoryEvidence.prototype,
     "mergeBase",
     async function (
-      this: RepositoryGitClient,
+      this: GitRepositoryEvidence,
       ...args: Parameters<typeof mergeBase>
     ) {
       if (++calls > 1)
@@ -58,10 +58,14 @@ test("unavailable startup Changes leaves a complete current catalogue without re
   const classified = observeBackgroundClassification(context, fixture.config);
   await fs.writeFile(fixture.entryPath, validEntrySource());
   let calls = 0;
-  context.mock.method(RepositoryGitClient.prototype, "mergeBase", async () => {
-    calls++;
-    throw new MokabookError("git-failed", "history is unavailable");
-  });
+  context.mock.method(
+    GitRepositoryEvidence.prototype,
+    "mergeBase",
+    async () => {
+      calls++;
+      throw new MokabookError("git-failed", "history is unavailable");
+    },
+  );
   const running = await serve(fixture.config, {
     base: "main",
     port: 0,
@@ -84,10 +88,14 @@ test("server startup rejects invalid current metadata before querying history", 
     "{}",
   );
   let calls = 0;
-  context.mock.method(RepositoryGitClient.prototype, "mergeBase", async () => {
-    calls++;
-    throw new Error("invalid current output must fail first");
-  });
+  context.mock.method(
+    GitRepositoryEvidence.prototype,
+    "mergeBase",
+    async () => {
+      calls++;
+      throw new Error("invalid current output must fail first");
+    },
+  );
 
   await assert.rejects(
     startCatalogueServer(fixture.config, {
@@ -146,13 +154,13 @@ test("a no-watch component catalogue reuses its resolved ownership evidence", as
       '<button className="updated" data-viewport=',
     ),
   );
-  const mergeBase = RepositoryGitClient.prototype.mergeBase;
+  const mergeBase = GitRepositoryEvidence.prototype.mergeBase;
   let calls = 0;
   context.mock.method(
-    RepositoryGitClient.prototype,
+    GitRepositoryEvidence.prototype,
     "mergeBase",
     async function (
-      this: RepositoryGitClient,
+      this: GitRepositoryEvidence,
       ...args: Parameters<typeof mergeBase>
     ) {
       if (++calls > 1) throw new Error("The baseline must stay pinned");

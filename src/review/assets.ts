@@ -10,7 +10,7 @@ import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError, errorMessage } from "../errors.js";
 import { referencedRoutes } from "./asset_references.js";
-import type { GitClient, GitFile } from "./git.js";
+import type { BaselineReader, GitFile } from "./git.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type { ReviewArtifactContent } from "./types.js";
 
@@ -84,7 +84,7 @@ export class FileSystemReviewAssetReader implements OptionalReviewAssetReader {
 export class GitReviewAssetReader implements ReviewAssetReader {
   constructor(
     private readonly config: ResolvedConfig,
-    private readonly git: GitClient,
+    private readonly git: BaselineReader,
     private readonly commit: string,
     private readonly mockupsPrefix: string,
   ) {}
@@ -192,7 +192,7 @@ async function readIndividually(
 }
 
 async function readGitFilesIndividually(
-  git: GitClient,
+  git: BaselineReader,
   commit: string,
   repoPaths: readonly string[],
 ): Promise<ReadonlyMap<string, GitFile>> {

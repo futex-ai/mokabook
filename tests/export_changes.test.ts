@@ -8,7 +8,7 @@ import { capturedAssetReader } from "../dist/export/inputs.js";
 import { readManifest } from "../dist/registry/manifest.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
 import { changedContentPaths } from "../dist/server/changed_content.js";
@@ -74,14 +74,14 @@ test("material Changes can use captured documents without reading current file b
     fragment,
     Buffer.from(captured.get(fragment)!.toString().replace("Details", "Next")),
   );
-  const git = new RepositoryGitClient(new NodeGitCommandRunner(fixture.root));
-  const commit = await git.mergeBase("HEAD", "HEAD");
+  const git = new CommittedRepository(new NodeGitCommandRunner(fixture.root));
+  const commit = await git.evidence.mergeBase("HEAD", "HEAD");
   const reads: string[] = [];
   const result = await changedContentPaths(
     manifest,
     manifest,
     fixture.config,
-    git,
+    git.reader,
     commit,
     [`mockups/${fragment}`],
     {

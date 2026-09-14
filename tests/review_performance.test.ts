@@ -8,23 +8,14 @@ import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { renderReviewArtifact } from "../dist/review/artifact.js";
 import { compareReview } from "../dist/review/compare.js";
-import { RepositoryGitClient, type GitClient } from "../dist/review/git.js";
+import {
+  CommittedRepository,
+  type ReviewRepository,
+} from "../dist/review/git.js";
 import type { ReviewResult } from "../dist/review/types.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 const execFileAsync = promisify(execFile);
-
-interface BatchCapableGitClient extends GitClient {
-  readFiles(
-    commit: string,
-    repoRelativePaths: readonly string[],
-  ): Promise<
-    ReadonlyMap<
-      string,
-      { readonly bytes: Uint8Array; readonly kind: "regular" }
-    >
-  >;
-}
 
 test("Review batches base viewport reads", async (context) => {
   const fixture = await createFixture();
@@ -45,30 +36,34 @@ test("Review batches base viewport reads", async (context) => {
   let batchReads = 0;
   let individualReads = 0;
   let batchedPathCount = 0;
-  const git: BatchCapableGitClient = {
-    changedPaths: async () => [],
-    fileExists: async (_commit, repoPath) => files.has(repoPath),
-    fileKind: async (_commit, repoPath) =>
-      files.has(repoPath) ? "regular" : "missing",
-    readFile: async (_commit, repoPath) => requiredFile(files, repoPath),
-    readFileBytes: async (_commit, repoPath) => {
-      individualReads += 1;
-      return Buffer.from(requiredFile(files, repoPath));
+  const git: ReviewRepository = {
+    evidence: {
+      changedPaths: async () => [],
+      mergeBase: async () => "a".repeat(40),
     },
-    readFiles: async (_commit, repoRelativePaths) => {
-      batchReads += 1;
-      batchedPathCount += repoRelativePaths.length;
-      return new Map(
-        repoRelativePaths.map((repoPath) => [
-          repoPath,
-          {
-            bytes: Buffer.from(requiredFile(files, repoPath)),
-            kind: "regular" as const,
-          },
-        ]),
-      );
+    reader: {
+      fileExists: async (_commit, repoPath) => files.has(repoPath),
+      fileKind: async (_commit, repoPath) =>
+        files.has(repoPath) ? "regular" : "missing",
+      readFile: async (_commit, repoPath) => requiredFile(files, repoPath),
+      readFileBytes: async (_commit, repoPath) => {
+        individualReads += 1;
+        return Buffer.from(requiredFile(files, repoPath));
+      },
+      readFiles: async (_commit, repoRelativePaths) => {
+        batchReads += 1;
+        batchedPathCount += repoRelativePaths.length;
+        return new Map(
+          repoRelativePaths.map((repoPath) => [
+            repoPath,
+            {
+              bytes: Buffer.from(requiredFile(files, repoPath)),
+              kind: "regular" as const,
+            },
+          ]),
+        );
+      },
     },
-    mergeBase: async () => "a".repeat(40),
   };
 
   await compareReview(compilation, config, git, "HEAD");
@@ -78,7 +73,7 @@ test("Review batches base viewport reads", async (context) => {
   assert.equal(individualReads, 0);
 });
 
-test("Review batches dark base fragments through RepositoryGitClient", async (context) => {
+test("Review batches dark base fragments through CommittedRepository", async (context) => {
   const fixture = await createFixture(undefined, {
     extraConfig: 'colorSchemes: ["light", "dark"],',
   });
@@ -92,7 +87,7 @@ test("Review batches dark base fragments through RepositoryGitClient", async (co
   await git(fixture.root, ["add", "."]);
   await git(fixture.root, ["commit", "-qm", "test: dark base catalogue"]);
   const calls: string[][] = [];
-  const client = new RepositoryGitClient({
+  const client = new CommittedRepository({
     run: async (arguments_) => {
       calls.push([...arguments_]);
       return gitOutput(fixture.root, arguments_);
@@ -139,7 +134,7 @@ test("Git reads regular base files through two batch commands", async () => {
   const symlinkObject = "c".repeat(40);
   const regularContent = Buffer.from("content");
   const calls: string[][] = [];
-  const client = new RepositoryGitClient({
+  const client = new CommittedRepository({
     run: async (arguments_) => {
       calls.push([...arguments_]);
       return [
@@ -159,7 +154,7 @@ test("Git reads regular base files through two batch commands", async () => {
     },
   });
 
-  const files = await client.readFiles("a".repeat(40), [
+  const files = await client.reader.readFiles("a".repeat(40), [
     "mockups/regular.html",
     "mockups/linked.html",
     "mockups/missing.html",
@@ -194,7 +189,7 @@ test("Git bounds tree metadata to exact pathspec batches", async () => {
       `mockups/screens/screen-${String(index).padStart(4, "0")}.html`,
   );
   const calls: string[][] = [];
-  const client = new RepositoryGitClient({
+  const client = new CommittedRepository({
     run: async (arguments_) => {
       calls.push([...arguments_]);
       return "";
@@ -204,7 +199,7 @@ test("Git bounds tree metadata to exact pathspec batches", async () => {
     },
   });
 
-  const files = await client.readFiles("a".repeat(40), paths);
+  const files = await client.reader.readFiles("a".repeat(40), paths);
 
   assert.equal(files.size, paths.length);
   assert.ok(calls.length > 1);
@@ -224,7 +219,7 @@ test("Git bounds tree metadata to exact pathspec batches", async () => {
 test("Git rejects a blob too large for a bounded batch", async () => {
   const objectId = "d".repeat(40);
   let contentReads = 0;
-  const client = new RepositoryGitClient({
+  const client = new CommittedRepository({
     run: async () =>
       `100644 blob ${objectId} ${48 * 1024 * 1024 + 1}\tmockups/huge.html\0`,
     runBytesWithInput: async () => {
@@ -234,7 +229,7 @@ test("Git rejects a blob too large for a bounded batch", async () => {
   });
 
   await assert.rejects(
-    client.readFiles("a".repeat(40), ["mockups/huge.html"]),
+    client.reader.readFiles("a".repeat(40), ["mockups/huge.html"]),
     /too large.*bounded Git batch/i,
   );
   assert.equal(contentReads, 0);
@@ -252,7 +247,7 @@ test("Git bounds zero-byte blob batches by object count", async () => {
     ]),
   );
   const contentBatchSizes: number[] = [];
-  const client = new RepositoryGitClient({
+  const client = new CommittedRepository({
     run: async (arguments_) => {
       const separator = arguments_.indexOf("--");
       return arguments_
@@ -274,7 +269,7 @@ test("Git bounds zero-byte blob batches by object count", async () => {
     },
   });
 
-  const files = await client.readFiles("a".repeat(40), paths);
+  const files = await client.reader.readFiles("a".repeat(40), paths);
 
   assert.equal(files.size, paths.length);
   assert.ok(contentBatchSizes.length > 1);

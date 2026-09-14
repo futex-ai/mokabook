@@ -9,11 +9,11 @@ import {
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
-import type { GitClient } from "./git.js";
+import type { RepositoryEvidence } from "./git.js";
 
 /** Collect deterministic changes while excluding active and retained output. */
 export async function reviewChangedPaths(
-  git: GitClient,
+  git: RepositoryEvidence,
   commit: string,
   config: ResolvedConfig,
   outDir: string,

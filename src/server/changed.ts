@@ -8,8 +8,8 @@ import {
 } from "../registry/changes.js";
 import { readManifest } from "../registry/manifest.js";
 import type { ManifestV5 } from "../registry/types.js";
-import type { GitClient } from "../review/git.js";
-import { NodeGitCommandRunner, RepositoryGitClient } from "../review/git.js";
+import type { ReviewRepository } from "../review/git.js";
+import { NodeGitCommandRunner, CommittedRepository } from "../review/git.js";
 import {
   readCatalogueChanges,
   type ComponentChangeSnapshot,
@@ -24,7 +24,7 @@ export interface ResolvedCatalogueChanges extends CatalogueChangeSnapshot {
 export async function computeChangedRoutes(
   config: ResolvedConfig,
   base: string,
-  git?: GitClient,
+  git?: ReviewRepository,
 ): Promise<readonly string[] | undefined> {
   try {
     return (await computeCatalogueChanges(config, base, git)).changedRoutes;
@@ -37,7 +37,7 @@ export async function computeChangedRoutes(
 export async function computeCatalogueChanges(
   config: ResolvedConfig,
   base: string,
-  git?: GitClient,
+  git?: ReviewRepository,
   manifest: ManifestV5 = readManifest(config),
 ): Promise<ResolvedCatalogueChanges> {
   let client = git;
@@ -51,9 +51,9 @@ export async function computeCatalogueChanges(
         "git-failed",
         "catalogue is not the root of a Git repository",
       );
-    client = new RepositoryGitClient(runner);
+    client = new CommittedRepository(runner);
   }
-  const commit = await client.mergeBase(base, "HEAD");
+  const commit = await client.evidence.mergeBase(base, "HEAD");
   const componentChanges = await readCatalogueChanges(
     config,
     manifest,

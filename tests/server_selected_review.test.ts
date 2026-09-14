@@ -38,9 +38,12 @@ function RenderProbe() { appendFileSync(${JSON.stringify(renderLog)}, "render\\n
   const reads: string[] = [];
   const git = {
     ...fixture.git,
-    readFileBytes: async (commit: string, route: string) => {
-      reads.push(route);
-      return fixture.git.readFileBytes(commit, route);
+    reader: {
+      ...fixture.git.reader,
+      readFileBytes: async (commit: string, route: string) => {
+        reads.push(route);
+        return fixture.git.reader.readFileBytes(commit, route);
+      },
     },
   };
   const server = await startCatalogueServer(fixture.config, {

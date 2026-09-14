@@ -19,7 +19,7 @@ import {
 import { readBaseManifest } from "../dist/review/base_manifest.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { buildPreview } from "../scripts/preview/catalogue.mjs";
@@ -271,14 +271,19 @@ for (const schemaVersion of [2, 3, 4, 5]) {
       "-qm",
       "test: historical metadata",
     ]);
-    const git = new RepositoryGitClient(runner);
+    const git = new CommittedRepository(runner);
     config.compatibility.readManifestV2 = schemaVersion === 2;
-    const baseline = await readBaseManifest(git, "HEAD", config);
+    const baseline = await readBaseManifest(git.reader, "HEAD", config);
     assert.equal(
       baseline.schemaVersion,
       schemaVersion === 2 ? 3 : schemaVersion,
     );
-    const reader = new GitReviewAssetReader(config, git, "HEAD", "mockups");
+    const reader = new GitReviewAssetReader(
+      config,
+      git.reader,
+      "HEAD",
+      "mockups",
+    );
     for (const route of [filename, "metadata.json"])
       await assert.rejects(
         reader.read(route),

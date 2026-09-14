@@ -7,7 +7,7 @@ import { isSafeRepositoryPath } from "../config/paths.js";
 import { loadConfig } from "../config/load.js";
 import type { ResolvedConfig } from "../config/types.js";
 import type { OptionalReviewAssetReader } from "../review/assets.js";
-import type { GitClient } from "../review/git.js";
+import type { RepositoryEvidence } from "../review/git.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { exportError } from "./error.js";
 import { capturePublicFiles } from "./public_files.js";
@@ -38,24 +38,13 @@ export function capturedAssetReader(
 }
 
 /** Pin branch identity and changed-path evidence for every comparison consumer. */
-export function pinnedGit(
-  git: GitClient,
+export function pinnedEvidence(
   commit: string,
   changed: readonly string[],
-): GitClient {
+): RepositoryEvidence {
   return {
     mergeBase: async () => commit,
     changedPaths: async () => changed,
-    fileExists: (base, name) => git.fileExists(base, name),
-    fileKind: (base, name) => git.fileKind(base, name),
-    readFile: (base, name) => git.readFile(base, name),
-    readFileBytes: (base, name) => git.readFileBytes(base, name),
-    ...(git.readFiles
-      ? {
-          readFiles: (base: string, names: readonly string[]) =>
-            git.readFiles!(base, names),
-        }
-      : {}),
   };
 }
 
@@ -64,7 +53,7 @@ export async function assertInputsUnchanged(
   config: ResolvedConfig,
   compilation: Compilation,
   publicFiles: ReadonlyMap<string, Buffer>,
-  git: GitClient,
+  git: RepositoryEvidence,
   commit: string,
   changed: readonly string[],
   exclusions: readonly string[],

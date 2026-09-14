@@ -6,7 +6,7 @@ import { readManifest } from "../../dist/registry/manifest.js";
 import { readBaseManifest } from "../../dist/review/base_manifest.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../../dist/review/git.js";
 import { changedFixture } from "./changed_fixture.js";
 
@@ -80,10 +80,14 @@ export const mockups = [
   fixture.git("add", "-A");
   fixture.git("commit", "-qm", "test: historical page baseline");
   const commit = fixture.git("rev-parse", "HEAD").toString().trim();
-  const client = new RepositoryGitClient(
+  const client = new CommittedRepository(
     new NodeGitCommandRunner(fixture.root),
   );
-  const baseline = await readBaseManifest(client, commit, fixture.config);
+  const baseline = await readBaseManifest(
+    client.reader,
+    commit,
+    fixture.config,
+  );
   await fs.rm(artifact);
   if (version === 2) await fs.rm(historicalPath);
   await fs.writeFile(manifestPath, currentManifest);

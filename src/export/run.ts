@@ -6,14 +6,14 @@ import { MokabookError, errorMessage } from "../errors.js";
 import { readBaseManifest } from "../review/base_manifest.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { compareReview } from "../review/compare.js";
-import { NodeGitCommandRunner, RepositoryGitClient } from "../review/git.js";
+import { NodeGitCommandRunner, CommittedRepository } from "../review/git.js";
 import { changedContentPaths } from "../server/changed_content.js";
 import { withExportCleanup } from "./cleanup.js";
 import { assertExportActive, exportError } from "./error.js";
 import {
   assertInputsUnchanged,
   capturedAssetReader,
-  pinnedGit,
+  pinnedEvidence,
 } from "./inputs.js";
 import { resolveExportOutput } from "./paths.js";
 import { capturePublicFiles } from "./public_files.js";
@@ -48,12 +48,12 @@ async function generateExport(
   outputRoot?: string,
 ): Promise<ExportResult> {
   try {
-    const git = new RepositoryGitClient(
+    const git = new CommittedRepository(
       new NodeGitCommandRunner(config.repoRoot),
     );
     const base = options.base ?? config.review.base;
-    const commit = await git.mergeBase(base, "HEAD");
-    const baseline = await readBaseManifest(git, commit, config);
+    const commit = await git.evidence.mergeBase(base, "HEAD");
+    const baseline = await readBaseManifest(git.reader, commit, config);
     const compilation = await compileCatalogue(config);
     config = { ...config, sourceFiles: compilation.manifest.sourceFiles };
     assertExportActive(options.signal);
@@ -62,7 +62,7 @@ async function generateExport(
     const assetReader = capturedAssetReader(publicFiles, config);
     const exclusions = [output, transaction.reservationRoot];
     const changed = await reviewChangedPaths(
-      git,
+      git.evidence,
       commit,
       config,
       config.review.outDir,
@@ -71,7 +71,7 @@ async function generateExport(
     const comparison = await compareReview(
       compilation,
       config,
-      pinnedGit(git, commit, changed),
+      { evidence: pinnedEvidence(commit, changed), reader: git.reader },
       base,
       transaction.stage,
       assetReader,
@@ -81,7 +81,7 @@ async function generateExport(
       compilation.manifest,
       baseline,
       config,
-      git,
+      git.reader,
       commit,
       changed,
       assetReader,
@@ -116,7 +116,7 @@ async function generateExport(
       config,
       compilation,
       publicFiles,
-      git,
+      git.evidence,
       commit,
       changed,
       exclusions,

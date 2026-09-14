@@ -41,22 +41,26 @@ test("Review artifact paths are collision-free for distinct valid routes", async
     compilation,
     config,
     {
-      changedPaths: async () => [],
-      fileExists: async (_commit, repoPath) =>
-        repoPath.endsWith("mokabook-manifest.json"),
-      fileKind: async (_commit, repoPath) =>
-        repoPath.endsWith("mokabook-manifest.json") ? "regular" : "missing",
-      readFile: async (_commit, repoPath) => {
-        if (repoPath.endsWith("mokabook-manifest.json")) return baseManifest;
-        throw new Error(`unexpected Git path ${repoPath}`);
+      evidence: {
+        changedPaths: async () => [],
+        mergeBase: async () => "a".repeat(40),
       },
-      readFileBytes: async (_commit, repoPath) => {
-        if (repoPath.endsWith("mokabook-manifest.json")) {
-          return Buffer.from(baseManifest);
-        }
-        throw new Error(`unexpected Git path ${repoPath}`);
+      reader: {
+        fileExists: async (_commit, repoPath) =>
+          repoPath.endsWith("mokabook-manifest.json"),
+        fileKind: async (_commit, repoPath) =>
+          repoPath.endsWith("mokabook-manifest.json") ? "regular" : "missing",
+        readFile: async (_commit, repoPath) => {
+          if (repoPath.endsWith("mokabook-manifest.json")) return baseManifest;
+          throw new Error(`unexpected Git path ${repoPath}`);
+        },
+        readFileBytes: async (_commit, repoPath) => {
+          if (repoPath.endsWith("mokabook-manifest.json")) {
+            return Buffer.from(baseManifest);
+          }
+          throw new Error(`unexpected Git path ${repoPath}`);
+        },
       },
-      mergeBase: async () => "a".repeat(40),
     },
     "HEAD",
   );
@@ -147,14 +151,18 @@ test("Review retains marker-bearing pane bytes as portable output", async (conte
     compilation,
     config,
     {
-      changedPaths: async () => [],
-      fileExists: async (_commit, repoPath) =>
-        repoPath.endsWith("mokabook-manifest.json"),
-      fileKind: async (_commit, repoPath) =>
-        repoPath.endsWith("mokabook-manifest.json") ? "regular" : "missing",
-      readFile: async () => baseManifest,
-      readFileBytes: async () => Buffer.from(baseManifest),
-      mergeBase: async () => "a".repeat(40),
+      evidence: {
+        changedPaths: async () => [],
+        mergeBase: async () => "a".repeat(40),
+      },
+      reader: {
+        fileExists: async (_commit, repoPath) =>
+          repoPath.endsWith("mokabook-manifest.json"),
+        fileKind: async (_commit, repoPath) =>
+          repoPath.endsWith("mokabook-manifest.json") ? "regular" : "missing",
+        readFile: async () => baseManifest,
+        readFileBytes: async () => Buffer.from(baseManifest),
+      },
     },
     "HEAD",
   );

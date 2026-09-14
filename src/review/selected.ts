@@ -1,3 +1,4 @@
+import { CommittedBaselineReader } from "./committed.js";
 /** Capture one selection from the accepted catalogue without another exhaustive build. */
 import path from "node:path";
 
@@ -14,11 +15,7 @@ import {
 } from "./assets.js";
 import { baselineResourceConfig } from "./base_manifest.js";
 import { SelectedAssetReader } from "./evidence_assets.js";
-import {
-  NodeGitCommandRunner,
-  RepositoryGitClient,
-  type GitClient,
-} from "./git.js";
+import { NodeGitCommandRunner, type BaselineReader } from "./git.js";
 import { parseReviewResult } from "./result_validation.js";
 import { compareScreen } from "./screen_compare.js";
 import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
@@ -41,7 +38,7 @@ import type {
 export class RepositorySelectedReview implements SelectedReviewProvider {
   constructor(
     private readonly config: ResolvedConfig,
-    private readonly git?: GitClient,
+    private readonly git?: BaselineReader,
   ) {}
 
   async generate(
@@ -51,7 +48,7 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
   ): Promise<ReviewArtifact> {
     const git =
       this.git ??
-      new RepositoryGitClient(
+      new CommittedBaselineReader(
         new NodeGitCommandRunner(this.config.repoRoot, signal),
       );
     const before = new SelectedAssetReader(

@@ -15,7 +15,7 @@ import {
   type OptionalReviewAssetReader,
 } from "../review/assets.js";
 import { baselineResourceConfig } from "../review/base_manifest.js";
-import type { GitClient } from "../review/git.js";
+import type { BaselineReader } from "../review/git.js";
 import {
   normalizeReviewPair,
   normalizeSingleDocument,
@@ -39,7 +39,7 @@ export async function changedContentPaths(
   manifest: Manifest,
   baseline: Manifest,
   config: ResolvedConfig,
-  git: GitClient,
+  git: BaselineReader,
   commit: string,
   changedPaths: readonly string[],
   headReader: OptionalReviewAssetReader = new FileSystemReviewAssetReader(

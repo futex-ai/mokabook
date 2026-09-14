@@ -19,8 +19,8 @@ import { classifyComponents } from "../review/component_classification.js";
 import type { ReviewResultV3 } from "../review/component_types.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
-  type GitClient,
+  CommittedRepository,
+  type ReviewRepository,
   type GitCommandRunner,
 } from "../review/git.js";
 
@@ -109,7 +109,7 @@ export class ComponentChangeCache {
 /** Production read boundary for a last-good catalogue and its current Git branch point. */
 export class RepositoryComponentChanges implements ComponentChangeSource {
   private readonly runner: GitCommandRunner;
-  private readonly git: RepositoryGitClient;
+  private readonly git: CommittedRepository;
   constructor(
     private readonly config: ResolvedConfig,
     private readonly manifest: Manifest,
@@ -118,7 +118,7 @@ export class RepositoryComponentChanges implements ComponentChangeSource {
     commands?: GitCommandRunner,
   ) {
     this.runner = commands ?? new NodeGitCommandRunner(config.repoRoot, signal);
-    this.git = new RepositoryGitClient(this.runner);
+    this.git = new CommittedRepository(this.runner);
   }
   async baseline(): Promise<string> {
     if (
@@ -127,7 +127,7 @@ export class RepositoryComponentChanges implements ComponentChangeSource {
       ) !== projectRealPath(this.config.repoRoot)
     )
       throw new Error("Comparison requires the configured repository root");
-    return this.git.mergeBase(this.base, "HEAD");
+    return this.git.evidence.mergeBase(this.base, "HEAD");
   }
   async read(commit: string): Promise<ComponentChangeSnapshot | undefined> {
     return readCatalogueChanges(
@@ -145,12 +145,12 @@ export async function readCatalogueChanges(
   config: ResolvedConfig,
   manifest: Manifest,
   base: string,
-  git: GitClient,
+  git: ReviewRepository,
   commit: string,
 ): Promise<ComponentChangeSnapshot> {
-  const baseline = await readBaseManifest(git, commit, config);
+  const baseline = await readBaseManifest(git.reader, commit, config);
   const changedPaths = await reviewChangedPaths(
-    git,
+    git.evidence,
     commit,
     config,
     config.review.outDir,
@@ -169,7 +169,7 @@ export async function readCatalogueChanges(
         changedPaths,
         beforeReader: new GitReviewAssetReader(
           baselineResourceConfig(config, baseline),
-          git,
+          git.reader,
           commit,
           prefix,
         ),
@@ -180,7 +180,7 @@ export async function readCatalogueChanges(
     manifest,
     baseline,
     config,
-    git,
+    git.reader,
     commit,
     changedPaths,
     reader,

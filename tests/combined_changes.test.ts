@@ -56,7 +56,7 @@ for (const editComponent of [false, true]) {
       fixture.after.manifest,
       fixture.before.manifest,
       fixture.config,
-      fixture.git,
+      fixture.git.reader,
       "a".repeat(40),
       fixture.changedPaths,
       undefined,

@@ -9,7 +9,7 @@ import { errorMessage } from "../../dist/errors.js";
 import { publicationOptions } from "../../dist/publication/options.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../../dist/review/git.js";
 import { capturePublicationInputs } from "./inputs.mjs";
 import { previewOwnership, stagePreviewArtifact } from "./artifact.mjs";
@@ -61,17 +61,20 @@ export async function buildPreview(config, output, options = {}) {
           : "";
         let git;
         if (capability.includeChanges) {
-          const repository = new RepositoryGitClient(
+          const repository = new CommittedRepository(
             new NodeGitCommandRunner(config.repoRoot),
           );
-          const commit = await repository.mergeBase(base, "HEAD");
-          git = new Proxy(repository, {
-            get(target, key) {
-              if (key === "mergeBase") return async () => commit;
-              const value = Reflect.get(target, key);
-              return typeof value === "function" ? value.bind(target) : value;
-            },
-          });
+          const commit = await repository.evidence.mergeBase(base, "HEAD");
+          git = {
+            reader: repository.reader,
+            evidence: new Proxy(repository.evidence, {
+              get(target, key) {
+                if (key === "mergeBase") return async () => commit;
+                const value = Reflect.get(target, key);
+                return typeof value === "function" ? value.bind(target) : value;
+              },
+            }),
+          };
         }
         const snapshot = await loadCatalogueSnapshot(
           config,

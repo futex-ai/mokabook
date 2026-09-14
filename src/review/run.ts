@@ -9,8 +9,8 @@ import { renderReviewArtifact } from "./artifact.js";
 import { compareReview } from "./compare.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
-  type GitClient,
+  CommittedRepository,
+  type ReviewRepository,
 } from "./git.js";
 import type { ReviewResult } from "./types.js";
 import { writeReviewArtifact } from "./write.js";
@@ -20,7 +20,7 @@ export async function runReview(
   config: ResolvedConfig,
   baseRef: string,
   outDir: string,
-  git: GitClient = new RepositoryGitClient(
+  git: ReviewRepository = new CommittedRepository(
     new NodeGitCommandRunner(config.repoRoot),
   ),
   outputStore: GeneratedOutputStore = new FileSystemGeneratedOutputStore(),

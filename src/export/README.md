@@ -4,7 +4,8 @@ This internal package module builds complete consumer sites for ordinary static
 hosting. Consumers use `mokabook export --out <path>`, not a JavaScript deep import.
 Deployment and hosting credentials remain outside Mokabook.
 
-`run.ts` pins one Git baseline, runs the normal build, captures public inputs,
+`run.ts` pins one merge-base commit through `RepositoryEvidence`, retains the
+independent `BaselineReader`, runs the normal build, captures public inputs,
 compares them through the existing review engine, and verifies inputs again
 before installation. `site.ts` uses the existing shell and Browse adapter to
 assemble exact v5 pages, real id aliases, package assets, and immutable comparisons.

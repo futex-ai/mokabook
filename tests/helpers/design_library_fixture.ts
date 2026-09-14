@@ -9,7 +9,7 @@ import {
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { classifyComponents } from "../../dist/review/component_classification.js";
-import type { GitClient } from "../../dist/review/git.js";
+import type { ReviewRepository } from "../../dist/review/git.js";
 import { repositoryRoot } from "./fixture.js";
 
 /** Copy the actual consumer so source-edit tests never mutate the working catalogue. */
@@ -80,7 +80,7 @@ export async function designLibraryFixture(t: {
     });
   }
   const batches: string[][] = [];
-  function git(changedPaths: readonly string[]): GitClient {
+  function git(changedPaths: readonly string[]): ReviewRepository {
     const files = new Map(
       [...resources, ...before.outputs].map(([file, contents]) => [
         `examples/basic/generated/${file}`,
@@ -93,26 +93,33 @@ export async function designLibraryFixture(t: {
       return Buffer.from(contents!);
     };
     return {
-      mergeBase: async () => "a".repeat(40),
-      changedPaths: async () => changedPaths,
-      fileExists: async (_commit, file) => files.has(file),
-      fileKind: async (_commit, file) =>
-        files.has(file) ? "regular" : "missing",
-      readFile: async (commit, file) => (await read(commit, file)).toString(),
-      readFileBytes: read,
-      readFiles: async (commit, files) => {
-        batches.push([...files]);
-        return new Map(
-          await Promise.all(
-            files.map(
-              async (file) =>
-                [
-                  file,
-                  { kind: "regular" as const, bytes: await read(commit, file) },
-                ] as const,
+      evidence: {
+        mergeBase: async () => "a".repeat(40),
+        changedPaths: async () => changedPaths,
+      },
+      reader: {
+        fileExists: async (_commit, file) => files.has(file),
+        fileKind: async (_commit, file) =>
+          files.has(file) ? "regular" : "missing",
+        readFile: async (commit, file) => (await read(commit, file)).toString(),
+        readFileBytes: read,
+        readFiles: async (commit, files) => {
+          batches.push([...files]);
+          return new Map(
+            await Promise.all(
+              files.map(
+                async (file) =>
+                  [
+                    file,
+                    {
+                      kind: "regular" as const,
+                      bytes: await read(commit, file),
+                    },
+                  ] as const,
+              ),
             ),
-          ),
-        );
+          );
+        },
       },
     };
   }

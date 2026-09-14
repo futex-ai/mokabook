@@ -5,7 +5,7 @@ import type { ServerResponse } from "node:http";
 import { encodeUrlPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MokabookError } from "../errors.js";
-import type { GitClient } from "../review/git.js";
+import type { ReviewRepository } from "../review/git.js";
 import { runReview } from "../review/run.js";
 import { RepositorySelectedReview } from "../review/selected.js";
 import type {
@@ -39,11 +39,11 @@ export interface ServedReview extends ReviewArtifactProvider {
 export function configuredServedReview(
   config: ResolvedConfig,
   base: string,
-  git?: GitClient,
+  git?: ReviewRepository,
 ): ServedReview {
   return {
     base,
-    selected: new RepositorySelectedReview(config, git),
+    selected: new RepositorySelectedReview(config, git?.reader),
     async generate(options): Promise<void> {
       await runReview(
         config,

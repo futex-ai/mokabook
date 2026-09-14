@@ -12,8 +12,8 @@ import { compareReview } from "../dist/review/compare.js";
 import { renderReviewArtifact } from "../dist/review/artifact.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
-  type GitClient,
+  CommittedRepository,
+  type ReviewRepository,
 } from "../dist/review/git.js";
 import {
   normalizeReviewPair,
@@ -58,13 +58,13 @@ test("Review ignore normalizes paired regions and retains malformed content", ()
 });
 
 test("Git failures keep typed operation context", async () => {
-  const git = new RepositoryGitClient({
+  const git = new CommittedRepository({
     run: async () => {
       throw new Error("not a repository");
     },
   });
   await assert.rejects(
-    () => git.mergeBase("origin/main", "HEAD"),
+    () => git.evidence.mergeBase("origin/main", "HEAD"),
     /find merge base of origin\/main and HEAD.*not a repository/,
   );
 });
@@ -118,23 +118,27 @@ test("Review classifies added, removed, and unchanged routes independently", asy
     compilation,
     config,
     {
-      changedPaths: async () => [],
-      fileExists: async (_commit, repoPath) => gitFiles.has(repoPath),
-      fileKind: async (_commit, repoPath) =>
-        gitFiles.has(repoPath) ? "regular" : "missing",
-      readFile: async (_commit, repoPath) => {
-        const content = gitFiles.get(repoPath);
-        if (content === undefined)
-          throw new Error(`missing fake Git path ${repoPath}`);
-        return content;
+      evidence: {
+        changedPaths: async () => [],
+        mergeBase: async () => "a".repeat(40),
       },
-      readFileBytes: async (_commit, repoPath) => {
-        const content = gitFiles.get(repoPath);
-        if (content === undefined)
-          throw new Error(`missing fake Git path ${repoPath}`);
-        return Buffer.from(content);
+      reader: {
+        fileExists: async (_commit, repoPath) => gitFiles.has(repoPath),
+        fileKind: async (_commit, repoPath) =>
+          gitFiles.has(repoPath) ? "regular" : "missing",
+        readFile: async (_commit, repoPath) => {
+          const content = gitFiles.get(repoPath);
+          if (content === undefined)
+            throw new Error(`missing fake Git path ${repoPath}`);
+          return content;
+        },
+        readFileBytes: async (_commit, repoPath) => {
+          const content = gitFiles.get(repoPath);
+          if (content === undefined)
+            throw new Error(`missing fake Git path ${repoPath}`);
+          return Buffer.from(content);
+        },
       },
-      mergeBase: async () => "a".repeat(40),
     },
     "HEAD",
   );
@@ -354,7 +358,7 @@ test("Review compares Git base without checkout and writes deterministic artifac
     config,
     "HEAD",
     config.review.outDir,
-    new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+    new CommittedRepository(new NodeGitCommandRunner(fixture.root)),
   );
   assert.equal(
     result.screens.find((screen) => screen.route === "screens/home.html")
@@ -407,7 +411,7 @@ test("Review reports descendants of directory dependencies", async (context) => 
     config,
     "HEAD",
     config.review.outDir,
-    new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+    new CommittedRepository(new NodeGitCommandRunner(fixture.root)),
   );
 
   assert.ok(
@@ -443,25 +447,29 @@ async function git(cwd: string, arguments_: readonly string[]): Promise<void> {
   await execFileAsync("git", [...arguments_], { cwd });
 }
 
-function fakeGit(files: ReadonlyMap<string, string>): GitClient {
+function fakeGit(files: ReadonlyMap<string, string>): ReviewRepository {
   return {
-    changedPaths: async () => [],
-    fileExists: async (_commit, repoPath) => files.has(repoPath),
-    fileKind: async (_commit, repoPath) =>
-      files.has(repoPath) ? "regular" : "missing",
-    readFile: async (_commit, repoPath) => {
-      const content = files.get(repoPath);
-      if (content === undefined)
-        throw new Error(`missing fake Git path ${repoPath}`);
-      return content;
+    evidence: {
+      changedPaths: async () => [],
+      mergeBase: async () => "a".repeat(40),
     },
-    readFileBytes: async (_commit, repoPath) => {
-      const content = files.get(repoPath);
-      if (content === undefined)
-        throw new Error(`missing fake Git path ${repoPath}`);
-      return Buffer.from(content);
+    reader: {
+      fileExists: async (_commit, repoPath) => files.has(repoPath),
+      fileKind: async (_commit, repoPath) =>
+        files.has(repoPath) ? "regular" : "missing",
+      readFile: async (_commit, repoPath) => {
+        const content = files.get(repoPath);
+        if (content === undefined)
+          throw new Error(`missing fake Git path ${repoPath}`);
+        return content;
+      },
+      readFileBytes: async (_commit, repoPath) => {
+        const content = files.get(repoPath);
+        if (content === undefined)
+          throw new Error(`missing fake Git path ${repoPath}`);
+        return Buffer.from(content);
+      },
     },
-    mergeBase: async () => "a".repeat(40),
   };
 }
 

@@ -69,22 +69,23 @@ Documentation only. Every later milestone implements this contract.
 - [x] Validate Markdown with `npm run format:check`, check local link targets,
       review the diff, commit, and push.
 
-## Milestone 2: Separate baseline reads from repository evidence
+## Milestone 2: Separate baseline reads from repository evidence — completed
 
 Refactor with no behavior change. Everything still passes with committed
 baselines.
 
-- [ ] Split `GitClient` in `src/review/git.ts` into `RepositoryEvidence`
+- [x] Split `GitClient` in `src/review/git.ts` into `RepositoryEvidence`
       (`mergeBase`, `changedPaths`) and `BaselineReader` (`fileExists`,
       `fileKind`, `readFile`, `readFileBytes`, `readFiles`). Keep the Git
       implementation as `CommittedBaselineReader`.
-- [ ] Update every consumer in `src/review`, `src/server`, and `src/export` to
+- [x] Update every consumer in `src/review`, `src/server`, and `src/export` to
       depend on the two interfaces; `pinnedGit` in `src/export/inputs.ts`
       becomes a pinned evidence object plus an unchanged reader.
-- [ ] Update unit tests that stub `GitClient` to the new seams; keep the
+- [x] Update unit tests that stub `GitClient` to the new seams; keep the
       batching, symlink rejection, and budget tests intact.
-- [ ] Run `npm test`, `npm run typecheck`, `npm run lint`, `cargo xtask check`,
-      commit, and push.
+- [x] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
+      `npm test`, `npm run example:check`, and `cargo xtask check`; commit and
+      push.
 
 ## Milestone 3: Rebuilt baseline builder and reader
 

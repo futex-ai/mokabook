@@ -9,7 +9,10 @@ import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { compareReview } from "../dist/review/compare.js";
-import { RepositoryGitClient, type GitClient } from "../dist/review/git.js";
+import {
+  CommittedRepository,
+  type ReviewRepository,
+} from "../dist/review/git.js";
 import { runReview } from "../dist/review/run.js";
 import type { ManifestScreen, ManifestV3 } from "../dist/registry/types.js";
 import {
@@ -117,7 +120,7 @@ test("Review excludes its active artifact directory from changed paths", async (
   await git(fixture.root, ["add", "review-link"]);
   await git(fixture.root, ["commit", "-qm", "test: add review link"]);
   const outDir = path.join(reviewLink, "artifact");
-  const client = new RepositoryGitClient({
+  const client = new CommittedRepository({
     run: (arguments_) => gitOutput(fixture.root, arguments_),
     runBytes: (arguments_) => gitBytes(fixture.root, arguments_),
   });
@@ -137,7 +140,7 @@ test("Review excludes its active artifact directory from changed paths", async (
 
 test("Git changed-path collection uses and enforces output exclusions", async () => {
   const calls: string[][] = [];
-  const client = new RepositoryGitClient({
+  const client = new CommittedRepository({
     run: async (arguments_) => {
       calls.push([...arguments_]);
       return arguments_[0] === "diff"
@@ -146,7 +149,9 @@ test("Git changed-path collection uses and enforces output exclusions", async ()
     },
   });
 
-  const changed = await client.changedPaths("a".repeat(40), ["review-output"]);
+  const changed = await client.evidence.changedPaths("a".repeat(40), [
+    "review-output",
+  ]);
 
   assert.deepEqual(changed, ["notes.md"]);
   assert.equal(
@@ -159,14 +164,14 @@ test("Git changed-path collection uses and enforces output exclusions", async ()
 
 test("Git file classification uses a literal pathspec", async () => {
   const calls: string[][] = [];
-  const client = new RepositoryGitClient({
+  const client = new CommittedRepository({
     run: async (arguments_) => {
       calls.push([...arguments_]);
       return "120000\n";
     },
   });
 
-  const kind = await client.fileKind(
+  const kind = await client.reader.fileKind(
     "a".repeat(40),
     "mockups/assets/[linked].css",
   );
@@ -240,25 +245,29 @@ test("Review uses v2 compatibility only when v3 is absent", async (context) => {
   );
 });
 
-function fakeGit(files: ReadonlyMap<string, string>): GitClient {
+function fakeGit(files: ReadonlyMap<string, string>): ReviewRepository {
   return {
-    changedPaths: async () => [],
-    fileExists: async (_commit, repoPath) => files.has(repoPath),
-    fileKind: async (_commit, repoPath) =>
-      files.has(repoPath) ? "regular" : "missing",
-    readFile: async (_commit, repoPath) => {
-      const value = files.get(repoPath);
-      if (value === undefined)
-        throw new Error(`missing fake Git path ${repoPath}`);
-      return value;
+    evidence: {
+      changedPaths: async () => [],
+      mergeBase: async () => "a".repeat(40),
     },
-    readFileBytes: async (_commit, repoPath) => {
-      const value = files.get(repoPath);
-      if (value === undefined)
-        throw new Error(`missing fake Git path ${repoPath}`);
-      return Buffer.from(value);
+    reader: {
+      fileExists: async (_commit, repoPath) => files.has(repoPath),
+      fileKind: async (_commit, repoPath) =>
+        files.has(repoPath) ? "regular" : "missing",
+      readFile: async (_commit, repoPath) => {
+        const value = files.get(repoPath);
+        if (value === undefined)
+          throw new Error(`missing fake Git path ${repoPath}`);
+        return value;
+      },
+      readFileBytes: async (_commit, repoPath) => {
+        const value = files.get(repoPath);
+        if (value === undefined)
+          throw new Error(`missing fake Git path ${repoPath}`);
+        return Buffer.from(value);
+      },
     },
-    mergeBase: async () => "a".repeat(40),
   };
 }
 
