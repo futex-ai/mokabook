@@ -576,12 +576,25 @@ is the intended behaviour and the blocker recorded above. The gate passes
 for `--base HEAD~1`, and will pass on `main` once this branch is
 squash-merged with a compliant title.
 
-## Milestone 10: Review
+## Milestone 10: Review (completed)
 
-- [ ] After the final push, review the complete local diff against
+- [x] After the final push, review the complete local diff against
       `origin/main` using `docs/implementation-review-prompt.md`. Report
       numbered findings with severity, context, impact, lettered options, and
       a recommendation. Do not change the implementation.
+
+Review outcome: six findings were reported to the user without changes
+(two high, one medium, three low). The high findings both concern the new
+commit-title gate: on a GitHub pull request the checkout is a synthetic
+merge commit whose subject is over 90 characters, so the gate would fail
+CI on every PR; and the gate sits second in `cargo xtask check`, so this
+branch's known history violation hides the other eleven gates. The medium
+finding is that Check re-enters the binary as a subprocess instead of
+calling the injected auditor in process. The low findings are an empty
+`--base` passing silently, untested worker error/exit and subprocess
+capture seams, and the crate README omitting the squash-merge constraint.
+Each finding is awaiting the user's decision. The two high findings must be
+resolved before this branch is merged.
 
 ## Post-merge follow-up (non-blocking)
 
