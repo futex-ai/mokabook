@@ -1,4 +1,616 @@
-/* Minimal direction for the public site mockups. Replace this placeholder
-   import with the direction's own layout; reference only the --site-*
-   properties from site-tokens.css and never a literal color. */
+/* Minimal direction for the public site mockups: sparse, centered and
+   generous, with the documentation collapsed into one reading column and a
+   floating on-this-page rail. The baseline sheet supplies the shared parts
+   (brand, buttons, badges, stage, code panel); every rule below references
+   only the --site-* properties from site-tokens.css and never a literal
+   color. The depicted viewport is selected by data-site-viewport on the root
+   so a fragment renders the same composition at any preview width. */
+
 @import "./site.css";
+
+/* Page rhythm */
+
+.mn-root {
+  --mn-band: var(--site-space-12);
+  --mn-measure: calc(var(--site-prose-max) + 2 * var(--site-gutter));
+}
+
+[data-site-viewport="mobile"].mn-root {
+  --mn-band: var(--site-space-10);
+}
+
+.mn-root .site-eyebrow {
+  font-size: var(--site-caption-size);
+  font-weight: var(--site-weight-medium);
+  letter-spacing: 0.12em;
+  line-height: var(--site-caption-line);
+  text-transform: uppercase;
+}
+
+.mn-root .site-actions {
+  justify-content: center;
+}
+
+.mn-root .site-button {
+  padding: 0 var(--site-space-5);
+}
+
+/* Header: brand left, four quiet links right, no boundaries */
+
+.mn-header {
+  align-items: center;
+  padding: var(--site-space-6) var(--site-gutter);
+}
+
+.mn-nav {
+  gap: var(--site-space-6);
+}
+
+.mn-nav-cta {
+  color: var(--site-accent);
+  font-weight: var(--site-weight-medium);
+  gap: var(--site-space-1);
+}
+
+.mn-search {
+  background: var(--site-folio-muted);
+  margin-right: var(--site-space-2);
+}
+
+/* Footer: the brand centered over the seven destinations */
+
+.mn-footer-inner {
+  align-items: center;
+  flex-direction: column;
+  gap: var(--site-space-5);
+  justify-content: center;
+  padding: var(--site-space-10) var(--site-gutter);
+  text-align: center;
+}
+
+.mn-footer-nav {
+  gap: var(--site-space-2) var(--site-space-6);
+  justify-content: center;
+}
+
+/* Home hero */
+
+.mn-main {
+  width: 100%;
+}
+
+.mn-hero {
+  display: grid;
+  gap: var(--site-space-6);
+  justify-items: center;
+  margin: 0 auto;
+  max-width: var(--site-content-max);
+  padding: var(--mn-band) var(--site-gutter) var(--site-space-9);
+  text-align: center;
+  width: 100%;
+}
+
+.mn-hero h1 {
+  font-size: var(--site-hero-size);
+  font-weight: var(--site-weight-semibold);
+  letter-spacing: var(--site-hero-tracking);
+  line-height: var(--site-hero-line);
+}
+
+.mn-hero-lead {
+  color: var(--site-folio-ink-muted);
+  font-size: var(--site-lead-size);
+  line-height: var(--site-lead-line);
+  max-width: 44ch;
+}
+
+.mn-hero .site-actions {
+  margin-top: var(--site-space-2);
+}
+
+.mn-hero-note {
+  color: var(--site-folio-ink-muted);
+  font-size: var(--site-small-size);
+  line-height: var(--site-small-line);
+}
+
+/* The stage sits wide and centered beneath the hero */
+
+.mn-stage {
+  margin: 0 auto;
+  max-width: 880px;
+  padding: 0 var(--site-gutter) var(--mn-band);
+  width: 100%;
+}
+
+/* Sections: a short centered rule, a centered head, then the content */
+
+.mn-section {
+  margin: 0 auto;
+  max-width: var(--site-content-max);
+  padding: var(--mn-band) var(--site-gutter);
+  position: relative;
+  width: 100%;
+}
+
+.mn-section::before {
+  background: var(--site-folio-line-strong);
+  content: "";
+  height: 1px;
+  left: 50%;
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  width: 48px;
+}
+
+.mn-section-head {
+  display: grid;
+  gap: var(--site-space-5);
+  justify-items: center;
+  margin: 0 auto var(--site-space-11);
+  max-width: 46ch;
+  text-align: center;
+}
+
+.mn-section-head h2 {
+  font-size: var(--site-heading2-size);
+  font-weight: var(--site-weight-semibold);
+  line-height: var(--site-heading2-line);
+}
+
+.mn-section-head p {
+  color: var(--site-folio-ink-muted);
+}
+
+/* Three centered feature columns with no boundaries */
+
+.mn-feature-grid {
+  display: grid;
+  gap: var(--site-space-10);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 auto;
+  max-width: var(--site-content-max);
+}
+
+.mn-feature {
+  display: grid;
+  gap: var(--site-space-3);
+  justify-items: center;
+  text-align: center;
+}
+
+.mn-feature-index {
+  display: flex;
+  font-family: var(--site-font-mono);
+  font-size: var(--site-small-size);
+  gap: var(--site-space-2);
+}
+
+.mn-feature-number {
+  color: var(--site-accent);
+}
+
+.mn-feature-label {
+  color: var(--site-folio-ink-muted);
+  letter-spacing: 0.08em;
+}
+
+.mn-feature h3,
+.mn-step h3 {
+  font-size: var(--site-lead-size);
+  font-weight: var(--site-weight-semibold);
+  line-height: var(--site-lead-line);
+}
+
+.mn-feature p,
+.mn-step p {
+  color: var(--site-folio-ink-muted);
+  max-width: 38ch;
+}
+
+/* The closing statement and the three steps in one centered column */
+
+.mn-closing .mn-section-head {
+  margin-bottom: var(--site-space-10);
+}
+
+.mn-closing .mn-steps {
+  display: grid;
+  gap: var(--site-space-7);
+  list-style: none;
+  margin: 0 auto;
+  max-width: 44ch;
+  padding: 0;
+}
+
+.mn-step {
+  display: grid;
+  gap: var(--site-space-2);
+  justify-items: center;
+  text-align: center;
+}
+
+.mn-step + .mn-step {
+  border-top: 1px solid var(--site-folio-line);
+  padding-top: var(--site-space-7);
+}
+
+.mn-step-number {
+  color: var(--site-accent);
+  font-family: var(--site-font-mono);
+  font-size: var(--site-small-size);
+}
+
+/* Document pages: one centered reading column */
+
+.mn-document {
+  margin: 0 auto;
+  max-width: var(--mn-measure);
+  padding: var(--mn-band) var(--site-gutter) var(--site-space-12);
+  width: 100%;
+}
+
+.mn-document-intro {
+  display: grid;
+  gap: var(--site-space-4);
+  justify-items: center;
+  margin-bottom: var(--site-space-10);
+  text-align: center;
+}
+
+.mn-document-intro h1 {
+  font-size: var(--site-heading1-size);
+  font-weight: var(--site-weight-bold);
+  letter-spacing: var(--site-document-tracking);
+  line-height: var(--site-heading1-line);
+}
+
+.mn-lead {
+  color: var(--site-folio-ink-muted);
+  font-size: var(--site-lead-size);
+  line-height: var(--site-lead-line);
+  max-width: 46ch;
+}
+
+/* Documentation trail and section switcher, in place of a sidebar */
+
+.mn-docs {
+  width: 100%;
+}
+
+.mn-docs-nav {
+  border-bottom: 1px solid var(--site-folio-line);
+  display: grid;
+  gap: var(--site-space-4);
+  justify-items: center;
+  padding: var(--site-space-5) var(--site-gutter) var(--site-space-6);
+  width: 100%;
+}
+
+.mn-crumbs {
+  align-items: center;
+  color: var(--site-folio-ink-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: var(--site-small-size);
+  gap: var(--site-space-2);
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+}
+
+.mn-crumb-link {
+  color: var(--site-folio-ink-muted);
+  text-decoration: none;
+}
+
+.mn-crumb-divider {
+  color: var(--site-folio-line-strong);
+}
+
+.mn-crumb-current {
+  color: var(--site-folio-ink);
+  font-weight: var(--site-weight-medium);
+}
+
+.mn-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--site-space-1);
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+}
+
+.mn-section-link {
+  align-items: center;
+  border-radius: var(--site-radius-small);
+  color: var(--site-folio-ink-muted);
+  display: inline-flex;
+  font-size: var(--site-small-size);
+  min-height: var(--site-target-min);
+  padding: 0 var(--site-space-3);
+  text-decoration: none;
+}
+
+.mn-section-link[aria-current] {
+  background: var(--site-accent-soft);
+  color: var(--site-folio-ink);
+  font-weight: var(--site-weight-medium);
+}
+
+/* The reading column with the on-this-page rail floating beside it */
+
+.mn-docs-grid {
+  display: grid;
+  gap: var(--site-space-8);
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, var(--mn-measure))
+    minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: var(--site-docs-max);
+  width: 100%;
+}
+
+.mn-docs-grid > .mn-document {
+  grid-column: 2;
+}
+
+.mn-docs-grid > .mn-onpage {
+  align-self: start;
+  border-left: 1px solid var(--site-folio-line);
+  grid-column: 3;
+  justify-self: start;
+  margin-top: var(--mn-band);
+  padding-left: var(--site-space-5);
+  position: sticky;
+  top: var(--site-space-9);
+  width: var(--site-onpage-width);
+}
+
+.mn-onpage {
+  display: grid;
+}
+
+.mn-onpage h2 {
+  color: var(--site-folio-ink-muted);
+  font-size: var(--site-caption-size);
+  font-weight: var(--site-weight-semibold);
+  letter-spacing: 0.1em;
+  line-height: var(--site-caption-line);
+  margin-bottom: var(--site-space-2);
+  text-transform: uppercase;
+}
+
+.mn-onpage a {
+  align-items: center;
+  color: var(--site-folio-ink-muted);
+  display: flex;
+  font-size: var(--site-small-size);
+  min-height: var(--site-target-min);
+  text-decoration: none;
+}
+
+/* Document body, code and the pager */
+
+.mn-document-body {
+  display: grid;
+  gap: var(--site-space-9);
+}
+
+.mn-document-body section {
+  display: grid;
+  gap: var(--site-space-4);
+  justify-items: start;
+  scroll-margin-top: var(--site-space-6);
+}
+
+.mn-document-body h2 {
+  font-size: var(--site-heading3-size);
+  font-weight: var(--site-weight-semibold);
+  line-height: var(--site-heading3-line);
+}
+
+.mn-document-body p {
+  color: var(--site-folio-ink-muted);
+}
+
+.mn-document-body code {
+  color: var(--site-folio-ink);
+  font-family: var(--site-font-mono);
+  font-size: var(--site-small-size);
+}
+
+.mn-document .site-pager {
+  margin-top: var(--site-space-10);
+  padding-top: var(--site-space-6);
+}
+
+.mn-document .site-pager-item {
+  border: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.mn-document .site-pager-item + .site-pager-item {
+  text-align: right;
+}
+
+/* Changelog: a version and date line, its notes, one hairline between */
+
+.mn-releases {
+  display: grid;
+  gap: var(--site-space-9);
+}
+
+.mn-release {
+  display: grid;
+  gap: var(--site-space-5);
+}
+
+.mn-release + .mn-release {
+  border-top: 1px solid var(--site-folio-line);
+  padding-top: var(--site-space-9);
+}
+
+.mn-release-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--site-space-3);
+  justify-content: space-between;
+}
+
+.mn-release-head h2 {
+  font-size: var(--site-body-size);
+  font-weight: var(--site-weight-semibold);
+  letter-spacing: 0;
+}
+
+.mn-release-head time {
+  color: var(--site-folio-ink-muted);
+  font-size: var(--site-small-size);
+}
+
+.mn-release-notes {
+  display: grid;
+  gap: var(--site-space-3);
+  justify-items: start;
+}
+
+.mn-release-notes h3 {
+  color: var(--site-folio-ink-muted);
+  font-size: var(--site-caption-size);
+  font-weight: var(--site-weight-semibold);
+  letter-spacing: 0.1em;
+  line-height: var(--site-caption-line);
+  text-transform: uppercase;
+}
+
+.mn-release-notes ul + h3 {
+  margin-top: var(--site-space-4);
+}
+
+.mn-release-notes ul {
+  display: grid;
+  gap: var(--site-space-2);
+  list-style: none;
+  padding: 0;
+}
+
+.mn-release-notes li {
+  padding-left: var(--site-space-5);
+  position: relative;
+}
+
+.mn-release-notes li::before {
+  background: var(--site-folio-line-strong);
+  border-radius: var(--site-radius-pill);
+  content: "";
+  height: 4px;
+  left: var(--site-space-2);
+  position: absolute;
+  top: 10px;
+  width: 4px;
+}
+
+.mn-release-link {
+  margin-top: var(--site-space-1);
+}
+
+/* Narrow desktop previews drop the floating rail under the column */
+
+@media (max-width: 1160px) {
+  .mn-docs-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mn-docs-grid > .mn-document,
+  .mn-docs-grid > .mn-onpage {
+    grid-column: 1;
+  }
+
+  .mn-docs-grid > .mn-onpage {
+    border-left: 0;
+    justify-self: center;
+    margin: 0 auto var(--site-space-10);
+    max-width: var(--mn-measure);
+    padding: 0 var(--site-gutter);
+    position: static;
+    width: 100%;
+  }
+}
+
+/* Mobile composition, which the site implements below 768px */
+
+[data-site-viewport="mobile"] .mn-header {
+  flex-direction: column;
+  gap: var(--site-space-3);
+  justify-content: center;
+  padding: var(--site-space-5) var(--site-gutter) var(--site-space-4);
+}
+
+[data-site-viewport="mobile"] .mn-nav {
+  gap: var(--site-space-2) var(--site-space-4);
+  justify-content: center;
+}
+
+[data-site-viewport="mobile"] .mn-search {
+  flex: 1 0 100%;
+  margin-right: 0;
+}
+
+[data-site-viewport="mobile"] .mn-footer-inner {
+  padding: var(--site-space-9) var(--site-gutter);
+}
+
+[data-site-viewport="mobile"] .mn-hero {
+  padding-bottom: var(--site-space-8);
+}
+
+[data-site-viewport="mobile"] .mn-feature-grid {
+  gap: var(--site-space-10);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+[data-site-viewport="mobile"] .mn-section-head {
+  margin-bottom: var(--site-space-9);
+}
+
+[data-site-viewport="mobile"] .mn-docs-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+[data-site-viewport="mobile"] .mn-docs-grid > .mn-document,
+[data-site-viewport="mobile"] .mn-docs-grid > .mn-onpage {
+  grid-column: 1;
+}
+
+[data-site-viewport="mobile"] .mn-docs-nav {
+  padding: var(--site-space-4) var(--site-gutter) var(--site-space-5);
+}
+
+[data-site-viewport="mobile"] .mn-sections {
+  gap: var(--site-space-1) var(--site-space-2);
+}
+
+[data-site-viewport="mobile"] .mn-onpage {
+  background: var(--site-folio-muted);
+  border-left: 0;
+  border-radius: var(--site-radius-small);
+  margin: 0 0 var(--site-space-9);
+  padding: var(--site-space-3) var(--site-space-5);
+  position: static;
+  width: 100%;
+}
+
+[data-site-viewport="mobile"] .mn-document {
+  padding-bottom: var(--site-space-10);
+}
+
+[data-site-viewport="mobile"] .mn-release-head {
+  gap: var(--site-space-1);
+  justify-content: flex-start;
+}
