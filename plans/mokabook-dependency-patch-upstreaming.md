@@ -286,6 +286,77 @@ that the newly written Host contract scopes the loopback rule to the two
 controls endpoints while the implementation gates every Serve request when
 controls are active. Each finding is awaiting the user's decision.
 
+## Milestone 7: Review fixes
+
+Address the eleven findings from the Milestone 6 review using the recommended
+option for each. Backend, tests, and docs only; no mockup or UI work.
+
+- [ ] Finding 1 (option C): make the shared source classifier return a typed
+      denial reason instead of a boolean, and have the generated-route
+      collision check in `src/build/output_paths.ts`, ownership in
+      `src/build/ownership.ts`, the export policy, and resource validation
+      report the actual cause. An exclusion match must say the route matches
+      a public exclusion and name `publicExclude`. Tighten the collision test
+      to assert the cause, not only the route.
+- [ ] Finding 2 (option C): correct `docs/protocol/mokly-component-controls.md`,
+      `src/server/controls/README.md`, `src/server/README.md`, and `README.md`
+      to state that when controls are active the loopback Host rule admits
+      every Serve request and a non-loopback Host returns 403 for the whole
+      catalogue. Add a Node HTTP test asserting 403 on an ordinary catalogue
+      route for a non-loopback Host and 200 for an accepted forwarded Host.
+- [ ] Finding 3 (option C): memoise compiled `Minimatch` instances per
+      `config.publicExclude` in a `WeakMap`, matching the existing index
+      caches in `src/build/source_inventory.ts`, and record a before/after
+      large-fixture traversal measurement under this milestone.
+- [ ] Finding 4 (options D and C): extract the source-index builder out of
+      `isAuthoringSource` into a named private helper so the `aliases` mode
+      parameter is no longer shadowed, and enable
+      `@typescript-eslint/no-shadow` in `eslint.config.js`, fixing whatever it
+      reports. If the lint reports a large volume of unrelated pre-existing
+      shadows, record the count here and rename only; do not leave the lint
+      half-enabled.
+- [ ] Finding 5 (option D): in `src/server/controls/runtime_ipc.ts`, re-run
+      `resolvePublicExclude` on the received `publicExclude` value so the
+      child adopts the same validated, frozen list as `resolveConfig`; reject
+      the startup message on failure. Add a test.
+- [ ] Finding 6 (option C): drop `**/readme.*` from the defaults in code,
+      the four docs, and the config test, and add one sentence in
+      `docs/protocol/mokly-configuration.md` stating the defaults are
+      case-folded so consumers need not add case variants.
+- [ ] Finding 7 (option C): remove the dead `match[0] === host` guard in
+      `localHost` and note in its doc comment that the regex is fully
+      anchored and `$` admits no trailing newline in JavaScript.
+- [ ] Finding 8 (option B): reduce the restated default list in
+      `docs/protocol/mokly-package.md` to a one-sentence pointer at the
+      configuration and source-protection contracts.
+- [ ] Finding 9 (option B): re-wrap the three over-long paragraphs at
+      `docs/protocol/mokly-source-protection.md` lines 53 and 176 and
+      `docs/protocol/mokly-component-controls.md` line 228 to the surrounding
+      80-column convention.
+- [ ] Finding 10 (option B): add one sentence to
+      `docs/protocol/mokly-component-controls.md` recording why `[::1]` is
+      rejected: Serve binds only to `127.0.0.1`, so IPv6 loopback can never
+      reach the socket directly and accepting it would only widen the Host
+      surface without a working path. IPv6 support is out of scope.
+- [ ] Finding 11 (option C): update the Milestone 1 TODO text to name
+      `docs/protocol/mokly-configuration.md` as the owner of `publicExclude`,
+      and add a note under Milestone 1 recording that `mokly-package.md` was
+      split into `mokly-authoring.md`, `mokly-configuration.md`, and
+      `mokly-rendering.md` to stay within the protocol-doc length guidance.
+- [ ] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
+      `npm test`, `npm run example:build`, `npm run example:check`,
+      `npm run test:browser`, `npm run package:smoke`, and `cargo xtask check`.
+- [ ] `git add -A`, commit with Conventional Commits, and push. Inspect
+      `git diff --diff-filter=D --name-status origin/main` before and after;
+      no deletions are expected.
+
+## Milestone 8: Review
+
+- [ ] After the final push, review the complete local diff against
+      `origin/main` using `docs/implementation-review-prompt.md`. Report
+      numbered findings with severity, context, impact, lettered options, and
+      a recommendation. Do not change the implementation.
+
 ## Post-merge follow-up (non-blocking)
 
 - Diagnose why `npm run fixture:large` export exhausts Node's default heap
