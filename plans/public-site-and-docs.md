@@ -48,9 +48,13 @@ pages with shipped scope before the domain goes live.
 
 ## Inputs From The Cloud Repository
 
-Read as data from the cloud workspace on the user's machine
-(`mokly-cloud/untitled`) and copied into `.context/cloud-inputs/` (ignored)
-for reference during implementation:
+Read as data from the cloud repository `mokly-ai/mokly-cloud` at commit
+`47ede2e462699ea6538b23da651822931fd041ed` on branch
+`origin/calummoore/sydney-v1` (local checkout `mokly-cloud/untitled` on the
+user's machine). The marketing mockups will be removed from that repository, so
+always read them from this commit with `git show <sha>:<path>` rather than from
+the branch tip, and copy them into `.context/cloud-inputs/` (ignored) for
+reference during implementation:
 
 - `docs/product-direction.md` — positioning and phases.
 - `docs/protocol/design-tokens.md`, `product-copy.md`, `marketing-site.md`.
@@ -88,8 +92,9 @@ Define the complete site contract before any mockup or code lands. Stop for
 review when the documents and the home copy are ready.
 
 - [x] Create this plan and add it to `plans/README.md`.
-- [ ] Copy the cloud inputs listed above into `.context/cloud-inputs/` and
-      note any CLI statement in them that disagrees with this repository.
+- [ ] Copy the cloud inputs listed above from commit `47ede2e` into
+      `.context/cloud-inputs/` and note any CLI statement in them that
+      disagrees with this repository.
 - [ ] Write `docs/protocol/site.md`: purpose and boundary with the cloud
       repository, route table (`/`, `/docs/…`, `/changelog`, `/terms`,
       `/privacy`), app-origin links, shared header and footer (desktop and
