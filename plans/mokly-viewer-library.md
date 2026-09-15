@@ -216,7 +216,7 @@ Milestone 1 marker-pair finding was addressed by `21f0cb2`. Residual test risk:
 browser coverage is Chromium-only; programmatic or already-transformed calls
 intentionally omit source when invocation information is unavailable.
 
-## Milestone 3: Catalogue read model implementation
+## Milestone 3: Catalogue read model implementation (completed)
 
 Write and serve the confirmed read model from the same projection code.
 
@@ -248,8 +248,8 @@ Write and serve the confirmed read model from the same projection code.
       HTML remains byte-identical apart from the stamped deployment identity.
 - [x] Update READMEs and delivery statuses; run focused tests and
       `cargo xtask check`.
-- [ ] After checks pass, `git add -A`, commit with Conventional Commits, and push.
-- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+- [x] After checks pass, `git add -A`, commit with Conventional Commits, and push.
+- [x] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
       against the complete local diff from `origin/main`; record findings
       without changing the implementation, then stop before Milestone 4.
 
@@ -292,7 +292,60 @@ package checks, Clippy and the Rust file-length audit (eight files). No tests
 were skipped; there were no intermittent failures or browser retries. The
 browser suite took 9.7 minutes, including its larger fixture preparation.
 Markdown validation checked 168 local links; the diff has no file deletions
-against the refreshed `origin/main`. Commit/push and post-push review are pending.
+against the refreshed `origin/main`. Implementation commit `75d04b6` was pushed
+before the review below. Milestone 4 has not started.
+
+### Milestone 3 post-push review
+
+1. **P2 — Historical usage can reference an omitted component.**
+   [views.ts:51](../src/catalogue/views.ts#L51) publishes every retained baseline
+   usage record as ready. When a removed screen used a component whose id is
+   reused by a current page (or whose route is reused), current precedence in
+   `removedManifestEntries` omits the old component metadata. The screen's
+   instances still name that component. A read-only reproduction using the
+   generated example verified that both input manifests pass `parseManifest`,
+   while the projected model fails `readCatalogue` with an unknown-component
+   reference. Doing nothing leaves Serve consumers with an unreadable snapshot
+   and causes export finalization to reject otherwise valid input. **A
+   (recommended):** centralize historical-reference availability during
+   projection, publish unavailable usage when its component metadata cannot be
+   retained under current precedence, and add Serve/export regressions for both
+   id and route reuse. This addresses the whole reference-loss class without
+   weakening the reader. **B:** extend the public contract with separately scoped
+   historical component definitions; this preserves more inspection data but
+   adds schema and reader complexity.
+
+2. **P2 — Alias cleanup renews unused comparison retention.**
+   [public_review.ts:68](../src/server/public_review.ts#L68) prunes aliases using
+   `ReviewGenerationStore.get`, whose documented behavior renews the idle timer
+   ([review_generations.ts:48](../src/server/review_generations.ts#L48)). Every new
+   complete capture therefore touches every retained old generation. Repeated
+   full refreshes less than 60 seconds apart keep unused snapshot directories
+   alive and allow disk use to grow until captures stop. **A (recommended):**
+   add a non-renewing presence/peek operation for pruning and cover repeated
+   captures with a controlled-clock expiry test. Separating presence checks
+   from retention renewal prevents the same cache-management mistake elsewhere.
+   **B:** remove the sweep and prune only when expired aliases are requested;
+   this restores snapshot expiry but leaves an accumulating alias map.
+
+3. **P3 — Runtime delivery status still says the catalogue is unimplemented.**
+   [mokly-runtime.md:31](../docs/protocol/mokly-runtime.md#L31) groups the public
+   catalogue with the future viewer/frame work as not implemented, and the route
+   paragraph near line 121 still describes it as an approved target. This
+   contradicts the implemented endpoint and the updated catalogue/export docs,
+   leaving readers uncertain which public boundary is available. **A
+   (recommended):** update both runtime paragraphs and audit other catalogue
+   delivery-status references when closing the remaining milestones. A focused
+   documentation correction and checklist are sufficient here. **B:** introduce
+   shared machine-readable delivery metadata and generated status snippets;
+   that would prevent drift more broadly but adds tooling for a small set of
+   milestone updates.
+
+The required prompt reviewed the complete 117-file branch diff at `75d04b6`
+against `origin/main` (`87daaa4`) after the implementation push. No findings were
+automatically fixed. These recommendations await the user's decision; they do
+not authorize starting another milestone. Browser verification remains
+Chromium-only. Recording this review is a documentation-only follow-up.
 
 ## Milestone 4: Frame adapter and inspector script
 
