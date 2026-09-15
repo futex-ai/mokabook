@@ -2,6 +2,7 @@
 
 ## Active
 
+- [Firna UI Example Adoption](./firna-ui-example-adoption.md)
 - [Publish Catalogue](./publish-catalogue.md)
 - [App-Independent Mokabook Npm Library](./app-independent-mokabook-library.md)
 - [Accounting Shell Design Parity](./accounting-shell-design-parity.md)
