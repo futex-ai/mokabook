@@ -1,6 +1,8 @@
 import { defineCollection } from "@mokly/mokly";
 
-import { variantScreens } from "../scaffold.js";
+import { editorialChangelogScreen } from "./changelog.js";
+import { editorialDocsScreen } from "./docs.js";
+import { editorialHomeScreen } from "./home.js";
 
 /** The Editorial direction: home, documentation and changelog. */
 export const editorialMockups = [
@@ -17,5 +19,7 @@ export const editorialMockups = [
     relatedDocs: ["docs/protocol/site-directions.md"],
     title: "Editorial",
   }),
-  ...variantScreens("editorial"),
+  editorialHomeScreen,
+  editorialDocsScreen,
+  editorialChangelogScreen,
 ];
