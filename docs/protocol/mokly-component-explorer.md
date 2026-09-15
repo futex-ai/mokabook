@@ -161,7 +161,7 @@ Component-page nested inspection can reuse this same mechanism.
 
 ## Frame And Publishing Boundary
 
-Only package-owned shell code inspects its immediate, same-origin, authenticated
+By default, package-owned shell code inspects its immediate, same-origin, authenticated
 generated frame. Component metadata extends the existing Browse ownership
 validation. Arbitrary legacy documents, nested frames, and comparison snapshots
 receive no new inspection privileges. Consumer scripts, forms, popups, and top
@@ -172,6 +172,17 @@ code, so saved variants, inspector panels, backlinks, and highlighting work with
 development server. Standalone generated fragments retain normal content and
 portable links; they do not require the interactive inspector. Temporary local
 controls are governed separately by the [controls contract](./mokly-component-controls.md).
+
+Approved target: the [viewer](./mokly-viewer.md) accesses boundaries,
+highlighting, scrolling and frame events through [FrameAdapter](./mokly-frame-adapter.md).
+`sameOriginAdapter` encapsulates today's document access without changing
+authentication, visuals or sandbox. An explicit cross-origin host instead uses
+the nonce/origin-checked inspector in current published copies on a separate
+origin with `allow-same-origin allow-scripts`. That host exception enables
+document scripts; local frames and comparison snapshots keep their existing
+restrictions. Host-only pick mode reuses Highlight components and adds no local
+control. Instance lookup uses the [scoped identity contract](./mokly-instances.md),
+not source locations, DOM text or guessed geometry.
 
 ## Mockups And Verification
 

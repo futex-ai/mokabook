@@ -7,9 +7,9 @@ model, the viewer API, and a frame adapter with an embedded inspector script.
 The cloud consumes only published npm packages and documented export artifacts;
 this repository gains no cloud-specific mode, flag, or branch.
 
-Milestones follow the requested order. Each protocol document is discussed and
-confirmed with the user before its implementation milestone starts, and work
-stops for review after every milestone. No new product screens are designed:
+Milestones follow the requested order. The user has approved all seven decisions
+below and the hard constraint; the Milestone 1 confirmation TODOs are satisfied.
+Work stops for review after every milestone. No new product screens are designed:
 the viewer renders the existing shell design unchanged and pick mode reuses the
 Highlight components visuals, so no mockup milestone is planned. If a genuine
 visual gap appears, add a `Tags: mockup` milestone before the affected UI work.
@@ -48,14 +48,20 @@ an interaction locally stops for user approval first.
 
 ## Proposed decisions to confirm with the user
 
+All seven decisions are approved. The precise record/key scope below reflects
+the existing implementation and the Milestone 1 contracts, without a key change.
+
 1. **Instance key format is unchanged.** The existing digest already satisfies
    the stability rule: it changes only when the instance's `moklyInstance` id,
-   its owning entry or parent instance key, or its receiving slot changes.
+   its input owner kind or parent instance key, or its original slot key changes.
+   The containing entry id is not hashed; moving entries changes the scoped
+   reference even when the digest stays the same.
    Prop edits and sibling reordering keep the key. Duplicate ids in one scope
    remain a build error.
 2. **Resolution states** are computed from records only: `present` (same key,
    same `propsKey`, same `order`, same slot), `moved` (same key, different
-   `propsKey`, `order`, or range placement), `missing` (key absent). Resolution
+   `propsKey`, `order`, or normalized slot), `missing` (key absent). Physical
+   range placement is not a field in an instance-record pair. Resolution
    is a pure documented function the viewer exports; no comparison data needed.
 3. **Source locations need a build-step change.** Proposal: enable esbuild
    `jsxDev: true` for consumer entries and resolve `react/jsx-dev-runtime` to a
@@ -99,38 +105,38 @@ an interaction locally stops for user approval first.
 
 ## Milestone 1: Protocol documentation
 
-Define every contract before code. Each document is shared with the user and
-confirmed before the milestone that implements it; later milestones re-open a
-doc only to record confirmed clarifications.
+Define every contract before code. Approval of the seven decisions and local
+invisibility constraint satisfies the confirmation items; later milestones
+record any necessary contract clarifications before implementation.
 
-- [ ] Add `docs/protocol/mokly-instances.md`: key derivation and preimage,
+- [x] Add `docs/protocol/mokly-instances.md`: key derivation and preimage,
       stability rule with an explicit list of edits that change or keep a key,
       resolution states and algorithm, optional `source` location fields and
       the build-step proposal, DOM marker attribute names, comment token
       format, and the one-start/one-end-pair-per-view guarantee.
-- [ ] Stop and confirm the instance contract with the user.
-- [ ] Add `docs/protocol/mokly-catalogue.md`: `__mokly/catalogue.json` shape
+- [x] Stop and confirm the instance contract with the user.
+- [x] Add `docs/protocol/mokly-catalogue.md`: `__mokly/catalogue.json` shape
       with `schemaVersion: 1`, projection rules from manifest v5, omitted
       private fields, Changes state per entry, `review.json` pointer,
       additive-versus-breaking versioning, Serve availability, and same-origin
       and cross-origin fetch rules (public paths, required CORS and
       `nosniff` headers, no credentials).
-- [ ] Stop and confirm the catalogue contract with the user.
-- [ ] Add `docs/protocol/mokly-viewer.md`: `<MoklyViewer>` props, catalogue
+- [x] Stop and confirm the catalogue contract with the user.
+- [x] Add `docs/protocol/mokly-viewer.md`: `<MoklyViewer>` props, catalogue
       sources (object, URL, fetcher), controlled and uncontrolled selection,
       rendered feature inventory cross-referenced to `mokly-runtime.md`,
       slots, events, imperative handle, CSS variable prefix and theming
       boundary, SSR requirement, and host-independence constraints (no host
       knowledge, no network beyond the source, no cookies, no `window.top`).
-- [ ] Add `docs/protocol/mokly-frame-adapter.md`: `FrameAdapter` interface,
+- [x] Add `docs/protocol/mokly-frame-adapter.md`: `FrameAdapter` interface,
       `sameOriginAdapter` behavior, `postMessageAdapter` and inspector script
       protocol (`mokly-inspector` channel, version 1, handshake, nonce, exact
       origins, `event.source` check, bounded discriminated message shapes with
       unknown keys rejected, keys and boxes only, in-frame overlay, no
       top-window effects), the query-parameter host-origin rule, inertness
       without a handshake, and the script size budget.
-- [ ] Stop and confirm the viewer and frame-adapter contracts with the user.
-- [ ] Update overlapping docs: `mokly-export.md` (new public files, the
+- [x] Stop and confirm the viewer and frame-adapter contracts with the user.
+- [x] Update overlapping docs: `mokly-export.md` (new public files, the
       Mokly-owned inspector script versus unchanged consumer content, the
       viewer package as a public API), `mokly-export-delivery.md` (routes
       table, cross-origin headers, sandbox attributes), `mokly-source-protection.md`
@@ -138,9 +144,14 @@ doc only to record confirmed clarifications.
       (optional `source` field), `mokly-component-explorer.md` and
       `mokly-navigation.md` (frame boundary through the adapter),
       `mokly-runtime.md` (Browse is the viewer), and `docs/protocol/README.md`.
-- [ ] Update `docs/architecture/package-boundary.md`, the root README, and
+- [x] Update `docs/architecture/package-boundary.md`, the root README, and
       `plans/README.md`; validate Markdown with Prettier and review the diff.
-- [ ] Commit and push the documentation, then stop for review.
+- [x] After Markdown checks pass, `git add -A`, commit with Conventional
+      Commits, and push the documentation.
+- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+      to review the complete local diff against `origin/main`; report
+      findings with severity, options and recommendations without changing
+      the implementation, then stop before Milestone 2.
 
 ## Milestone 2: Instance identity implementation
 

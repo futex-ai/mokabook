@@ -9,6 +9,11 @@ The public [npm package](https://www.npmjs.com/package/@mokly/mokly) is
 `@mokly/mokly`; its executable remains `mokly`. Releases remain pre-1.0 while
 the consumer contract settles.
 
+The upcoming [`@mokly/viewer`](./docs/protocol/mokly-viewer.md) package will let
+React hosts embed the existing Browse shell using a public catalogue read model.
+Its contracts are approved; implementation is still planned. Local Serve and
+export appearance and interactions will remain unchanged.
+
 Shared components can have their own pages, saved variants and editable props in
 local Serve. Screens record their actual component usage for inspection and
 highlighting. Component implementation edits appear once in Changes; consumers
@@ -960,6 +965,10 @@ variants, comparisons and read-only inspection. Development plans are indexed
 in the [plans index](./plans/README.md).
 
 - [Protocol index](./docs/protocol/README.md)
+- [Instance identity](./docs/protocol/mokly-instances.md),
+  [public catalogue](./docs/protocol/mokly-catalogue.md),
+  [viewer API](./docs/protocol/mokly-viewer.md), and
+  [frame adapters](./docs/protocol/mokly-frame-adapter.md) — approved viewer target.
 - [Package ownership boundary](./docs/architecture/package-boundary.md)
 - [Accounting migration inventory](./docs/migration/accounting-framework-inventory.md)
 - [Styled control migration guide](./docs/migration/accounting-link-controls.md)

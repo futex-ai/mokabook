@@ -8,6 +8,10 @@ and browser behavior for the consumer command, with Cloudflare normalization
 kept in the repository adapter. Delivery is tracked in the
 [consumer static export plan](../../plans/consumer-static-export.md).
 
+The public catalogue, cross-origin inspector and viewer extraction below are
+approved targets tracked by the [viewer library plan](../../plans/mokly-viewer-library.md).
+Existing routes and default same-origin Serve/export behavior stay unchanged.
+
 ## Hosting Contract
 
 Deploy the export directory's contents as the HTTP(S) origin's document root.
@@ -28,20 +32,41 @@ no-store policy. Generic deployments document these header requirements;
 provider adapters may emit the host's metadata files for them. Correctness must
 not depend on a generic static server interpreting `_headers` or `_redirects`.
 
+For the approved cross-origin viewer target, public fetch paths are
+`__mokly/catalogue.json`, `static/**`, `__mokly/client/**`, `__mokly/shell.css`,
+`__mokly/fonts/**` and `__mokly/diffs/__generations/**`. Send correct MIME types,
+`Access-Control-Allow-Origin: <exact app origin>` and
+`X-Content-Type-Options: nosniff`, including GET/HEAD and error responses. Use
+`Vary: Origin` when dynamically selecting an allowed origin. No wildcard CORS,
+cookies, authorization headers or credentials are used; clients fetch with
+`credentials: "omit"`. CORS is unnecessary for same-origin reads. Existing
+revalidation and comparison no-store policies apply; see the
+[catalogue fetch rules](./mokly-catalogue.md#serve-and-fetch-rules).
+
+The default iframe sandbox stays `allow-same-origin`. Cross-origin hosts must
+explicitly use the [postMessage adapter](./mokly-frame-adapter.md), a distinct
+real `frameOrigin`, and `sandbox="allow-same-origin allow-scripts"`. Opaque
+`null` origins are rejected. Query-insensitive hosting preserves the adapter's
+`mokly-host` parameter. This exception enables document scripts on the isolated
+origin; it adds no script permission locally, nor forms, popups, downloads or
+top-navigation permission. Comparison snapshots keep their existing sandbox.
+
 ## Artifact Routes
 
 Paths below are relative to the export directory. URL path segments use the
 existing validated route grammar and are encoded once when written into URLs.
 
-| Path                     | Meaning                                                               |
-| ------------------------ | --------------------------------------------------------------------- |
-| `index.html`             | Full catalogue home                                                   |
-| `view/<route>`           | Full shell for current routed entries and removed screens/pages       |
-| `id/<id>/index.html`     | Static alias showing the same shell as the canonical route            |
-| `static/<public-path>`   | Adapted current fragments and public consumer resources               |
-| `__mokly/`               | Required shell CSS, fonts, browser modules, and comparison generation |
-| `404.html`               | Existing catalogue not-found view                                     |
-| `.mokly-export-artifact` | Public-safe versioned ownership inventory                             |
+| Path                          | Meaning                                                               |
+| ----------------------------- | --------------------------------------------------------------------- |
+| `index.html`                  | Full catalogue home                                                   |
+| `view/<route>`                | Full shell for current routed entries and removed screens/pages       |
+| `id/<id>/index.html`          | Static alias showing the same shell as the canonical route            |
+| `static/<public-path>`        | Adapted current fragments and public consumer resources               |
+| `__mokly/`                    | Required shell CSS, fonts, browser modules, and comparison generation |
+| `__mokly/catalogue.json`      | Approved target: public catalogue read model v1                       |
+| `__mokly/client/inspector.js` | Approved target: inert cross-origin frame inspector                   |
+| `404.html`                    | Existing catalogue not-found view                                     |
+| `.mokly-export-artifact`      | Public-safe versioned ownership inventory                             |
 
 Catalogue routes retain their validated `.html` suffixes; additional public
 `.htm` documents retain their filenames too. Do not
@@ -174,10 +199,21 @@ Normalize each owned root descriptor to its canonical JSON serialization with
 the `[path, contentHash]` pairs by JavaScript string order, sort alias pairs by
 alias path, and SHA-256 the JSON encoding of `[filePairs, aliasPairs]`.
 Do not normalize lookalike metadata inside consumer documents, scripts, or other
-non-shell files. Their bytes participate unchanged.
+non-shell files. Their bytes participate unchanged, except for the explicitly
+owned catalogue field in the approved target below.
 
-Stamp the resulting identity into those owned root descriptors, changing no
-other document bytes. No adapter or inventory mutation may follow finalization.
+The approved catalogue target extends finalization to the exporter-owned
+`__mokly/catalogue.json`: canonicalize its JSON with only its top-level
+`deploymentId` set to 64 zeroes for the file hash, then stamp the same resulting
+artifact identity there and in every owned shell descriptor. Its other bytes,
+the inspector script and inert per-document maps participate normally. Validate
+the catalogue's owned identity field before finalization and replace its staging
+placeholder before installation. This prevents self-reference without changing
+delivery descriptor v2, ownership v1, upload v1 or the review schema.
+
+Stamp the resulting identity into those owned root descriptors (and, in the
+approved target, the owned catalogue field), changing no other bytes.
+No adapter or inventory mutation may follow finalization.
 Every owned root's staging placeholder is replaced before installation. This avoids a
 self-referential hash while covering every deployed byte except the derived
 identity field itself. The comparison generation keeps its separate URL/hash.
