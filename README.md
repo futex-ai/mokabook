@@ -36,9 +36,9 @@ import { defineConfig } from "@mokly/mokly";
 export default defineConfig({
   colorSchemes: ["light", "dark"],
   repoRoot: ".",
-  entriesDir: "docs/mockups/src/entries",
-  mockupsDir: "docs/mockups",
-  renderer: "docs/mockups/src/renderer.tsx",
+  entriesDir: "docs/mockups/entries",
+  mockupsDir: "docs/mockups/generated",
+  renderer: "docs/mockups/renderer.tsx",
   stylesheets: [{ match: "app/**/*.html", stylesheets: ["app.css"] }],
   review: {
     base: "origin/main",
@@ -197,7 +197,11 @@ Serve starts at port `4173`. If that port, or a concrete `--port` value, is
 already occupied, Mokly tries each following port in order until one is
 free. `--port 0` instead asks the operating system to choose a free port.
 Watched Serve keeps the first resolved port for later child restarts so its URL
-stays stable.
+stays stable. Live controls support forwarding through another local port when
+Host is `localhost:<port>` or `127.0.0.1:<port>` with a decimal port from 1 to
+65535 and no leading zero; POST still requires the exact matching HTTP Origin
+and render token. This forwarded-port rule is an approved target awaiting
+implementation; see the [controls contract](./docs/protocol/mokly-component-controls.md).
 
 For slow startup, add `--debug-timings` to any command. It writes structured
 phase timings and aggregate catalogue sizes to stderr while leaving normal
@@ -410,6 +414,8 @@ output and withholds complete evidence; valid on-demand previews remain usable.
 Mokly discovers `mokly.config.ts`, `.mts`, `.js`, or `.mjs` by walking
 upward from the current directory. Every filesystem path is relative to that
 file and confined to `repoRoot`.
+Everything below `mockupsDir` is public unless protected by the
+[source policy](./docs/protocol/mokly-source-protection.md), including public exclusions.
 
 Transitive authoring imports must also remain inside that root. Config, entry,
 renderer, transformer, and page-helper imports outside it fail with the offending
@@ -418,9 +424,20 @@ code inside the root or explicitly configure a common root containing it;
 installed dependencies remain supported outside the root.
 All bundler file inputs are protected authoring sources, including images or
 data imported through asset loaders. Editing them rebuilds the catalogue.
-Assets referenced only by public HTML/CSS URLs remain public resources.
+Assets referenced only by public HTML/CSS URLs remain public resources unless
+another protection rule or public exclusion applies.
 
 - `entriesDir` and `mockupsDir` select structured source and generated output.
+  Prefer sibling `docs/mockups/entries` and `docs/mockups/generated` directories,
+  with `docs/mockups/renderer.tsx` beside them. Keep public assets such as `app.css`
+  in `generated` and developer README/tsconfig files beside it. Nested
+  `docs/mockups/src` layouts remain supported.
+- `publicExclude?: readonly string[]` adds safe POSIX globs matched relative to
+  `mockupsDir`. Defaults are `**/README`, `**/README.*`, `**/readme.*`,
+  `**/tsconfig.json`, and `**/tsconfig.*.json`, all matched case-insensitively.
+  Consumer globs extend these defaults; `[]` retains them. This field is an
+  approved target awaiting implementation; see the
+  [configuration contract](./docs/protocol/mokly-configuration.md#public-exclusion-configuration).
 - `colorSchemes` defaults to `["light"]`; `["light", "dark"]` enables dark
   fragments catalogue-wide, with per-screen light-only opt-outs.
 - `renderer` and ordered `stylesheets` keep product themes and CSS
@@ -469,8 +486,9 @@ Override the exact ordered argv list when your project needs additional steps:
 ```ts
 export default defineConfig({
   generatedOutput: "derived",
-  entriesDir: "docs/mockups/src/entries",
-  mockupsDir: "docs/mockups",
+  entriesDir: "docs/mockups/entries",
+  mockupsDir: "docs/mockups/generated",
+  renderer: "docs/mockups/renderer.tsx",
   review: {
     baselineBuild: [
       ["npm", "ci"],

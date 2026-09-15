@@ -27,12 +27,12 @@ for Host validation; [live evidence](../docs/protocol/mokly-live-evidence.md)
 and [component workspace design](../docs/protocol/mokly-component-workspace-design.md)
 for affected-usage identity and ordering.
 
-## Milestone 1: Documentation and protocol contract
+## Milestone 1: Documentation and protocol contract (completed)
 
 Define every contract that the later milestones implement so no guesswork
 remains.
 
-- [ ] In `docs/protocol/mokly-source-protection.md`, add a "Public
+- [x] In `docs/protocol/mokly-source-protection.md`, add a "Public
       exclusions" section: a config-owned list of repository-relative POSIX
       globs, matched against a public candidate's path relative to
       `mockupsDir` and against its realpath alias, evaluated inside the one
@@ -46,32 +46,32 @@ remains.
       not join `sourceFiles`. Note that a generated route colliding with an
       excluded name fails validation with its referring route, mirroring the
       existing reserved-basename rule.
-- [ ] In `docs/protocol/mokly-package.md`, document the `publicExclude`
+- [x] In `docs/protocol/mokly-package.md`, document the `publicExclude`
       config field (optional `readonly string[]`, validated as safe
       repository-relative glob strings), the defaults, and the recommended
       sibling layout (`docs/mockups/entries`, `docs/mockups/generated`,
       `docs/mockups/renderer.tsx`). Keep the statement that nested
       `docs/mockups/src` layouts remain supported.
-- [ ] In `docs/protocol/mokly-component-controls.md`, replace "validated Host"
+- [x] In `docs/protocol/mokly-component-controls.md`, replace "validated Host"
       with the precise rule: Host must be `localhost` or `127.0.0.1` followed
       by a decimal port between 1 and 65535 with no leading zero; the port
       need not equal the listening socket port because forwarded local ports
       are supported. Origin must equal `http://` plus that Host exactly, and
       the render token is still required on POST. Non-loopback hosts and
       forwarded headers (`x-forwarded-*`) grant nothing.
-- [ ] In `docs/protocol/mokly-live-evidence.md` (or the workspace design doc
+- [x] In `docs/protocol/mokly-live-evidence.md` (or the workspace design doc
       if it is the better owner), state the affected-usage identity: two
       usage links are duplicates when every serialised field matches; the
       first occurrence in evidence order is kept; deduplication performs at
       most one serialisation per usage link.
-- [ ] Update `README.md`: change both config examples to the sibling layout,
+- [x] Update `README.md`: change both config examples to the sibling layout,
       add one sentence under Configuration explaining that everything below
       `mockupsDir` is public unless protected, list `publicExclude` and its
       defaults in the configuration bullets, and mention forwarded-port
       support in the Serve section.
-- [ ] Update `src/export/README.md` and `src/server/README.md` for the
+- [x] Update `src/export/README.md` and `src/server/README.md` for the
       exclusion policy and the Host rule.
-- [ ] Add this plan to `plans/README.md` (done at creation) and validate the
+- [x] Add this plan to `plans/README.md` (done at creation) and validate the
       changed Markdown.
 
 ## Milestone 2: Affected-usage deduplication
@@ -158,6 +158,11 @@ Accept any valid loopback Host port while keeping Origin and token checks.
       port, edit a component prop, and confirm the preview updates; run
       `node dist/cli/bin.js export` on the example and confirm no README or
       tsconfig file appears in the output.
+- [ ] Remove every "approved target", "implementation is pending", and
+      "awaiting implementation" marker that Milestone 1 added to `README.md`,
+      `docs/protocol/*.md`, `src/export/README.md`, and `src/server/README.md`
+      now that the behaviour is implemented; the docs must describe current
+      behaviour only.
 - [ ] Run `cargo xtask check`.
 - [ ] Update `CHANGELOG.md` only if release-please does not own it; otherwise
       rely on Conventional Commit messages such as
