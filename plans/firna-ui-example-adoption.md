@@ -99,9 +99,9 @@ variants through the existing entry definitions.
       `variant` (`outline`/`soft`/`solid`) controls and three saved variants.
 - [ ] Add `examples/basic/entries/components/field.tsx` registering
       `example-field` (route `components/field.html`) around Firna `Input`
-      with `label`, `placeholder`, `hint`, optional `error`, and `disabled`
-      controls and Default, Error, and Disabled saved variants, using no-op
-      change handlers so the control renders enabled.
+      with `label`, `placeholder`, `hint`, optional `error`, `required`, and
+      `size` (`sm`/`md`/`lg`) controls and Default, Error, and Required saved
+      variants, using no-op change handlers so the control renders enabled.
 - [ ] Add `examples/basic/entries/components/related.tsx` registering
       `example-related` (route `components/related.html`) that renders Firna
       `ListItem` rows wrapped in `MockLink asChild`, with a `title` control and
