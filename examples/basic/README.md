@@ -70,6 +70,21 @@ Shared destinations live in [destinations.ts](./entries/design/parts/destination
 selects which transitions each artboard supports. Add an owning screen and its
 contract before enabling a new transition.
 
+## Site design collection
+
+`Design → Site` holds the public Mokly website: `home`, `docs`, `changelog`,
+`terms` and `privacy` under `design/site/`, plus the `Site tour` use case that
+walks them in that order. Each screen renders a distinct mobile and desktop
+component in light and dark, with the shared skip link, header, footer and one
+`main#main` landmark. Sources live in `entries/design/site/`, with the brand,
+chrome, actions, stage, sections, document, docs navigation and code panel
+parts under `entries/design/site/parts/`. These screens use Folio rather than
+the Mokly shell: `generated/site-tokens.css` defines the `--site-*` properties
+for both schemes and `generated/site.css` holds the layout without a single
+literal color, matched ahead of the broader `design/**` stylesheet rule. The
+copy is the approved home copy and the real `CHANGELOG.md` release; the
+contract is the [site design](../../docs/protocol/site-design.md) document.
+
 ## Firna renderer adapter
 
 `renderer.tsx` is the reference consumer adapter for react-native-web
@@ -134,8 +149,9 @@ galleries; `inspector` shows both closed-panel layouts.
 Each child gallery lists at most five owning screens; inspection also links
 two selected-instance screens in a nested gallery.
 
-All sixty-eight design screens use `colorSchemes: ["light"]`: they draw the
-Mokly shell, including the existing dark-selection examples. The two product
+All sixty-eight shell and component design screens use `colorSchemes: ["light"]`:
+they draw the Mokly shell, including the existing dark-selection examples. The
+five Site screens are the exception and render both schemes. The two product
 screens inherit the catalogue's light/dark settings and prove dark generation.
 Design headers retain the approved screen-stack logo: 17px overlapping mobile
 and desktop outlines in a 24px sage square. Desktop keeps the navigation resize

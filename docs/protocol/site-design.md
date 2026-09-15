@@ -92,9 +92,11 @@ within `65ch`.
 - Interactive targets at least `44px`. Controls use a 6px radius; panels and
   the stage use 10px.
 - Docs layout: 244px left sidebar on `folioMuted`, a document column at most
-  976px including 48px side padding, and a 240px on-this-page column; below
-  the breakpoint the sidebar becomes a disclosure above the document and the
-  on-this-page list moves under the title.
+  976px including 48px side padding, and a 240px on-this-page column. Those
+  three columns are the docs measure, up to `1460px` centered, rather than
+  `contentMax`; the header and footer keep `contentMax`. Below the breakpoint
+  the sidebar becomes a disclosure above the document and the on-this-page
+  list moves under the title.
 - Layouts remain usable at 320px width and 200% text zoom. Inspection
   viewports are 390px mobile and 1440px desktop.
 
@@ -166,14 +168,31 @@ for Milestone 4 onward; refinements happen here first, then in the site.
 | `design-site-privacy`   | `design/site/privacy.html`         | Privacy placeholder document                      |
 | `design-site-tour`      | `user-flows/design/site-tour.html` | Home → Docs → Changelog → Terms → Privacy         |
 
-Each screen is one component rendering mobile and desktop variants in light
-and dark. Screens compose shared parts under
-`examples/basic/entries/design/site/parts/`: brand, header, footer, actions,
-stage, feature grid, closing, document page and code panel. Site mockups use
-the example's registered `@firna/ui` controls for buttons, badges and inputs.
-Folio tokens live in `examples/basic/generated/site-tokens.css`; the site
-layout styles in `examples/basic/generated/site.css` reference only those
-properties. Mockup copy comes from the approved home copy in
+The collection is registered from `examples/basic/entries/design/site/index.ts`
+under the example catalogue's `Design` root, and it owns the tour. Each screen
+is one component rendering mobile and desktop variants in light and dark.
+Screens compose shared parts under
+`examples/basic/entries/design/site/parts/`: brand, chrome (skip link, header,
+footer and search control), actions, stage, sections (feature grid and
+closing), document page, docs navigation and code panel.
+
+Controls are plain semantic elements — anchors, buttons, badges and the code
+panel's copy control — styled from the site tokens. The site ships no
+component library, so the mockups depict the markup the site implements rather
+than borrowing the example's `@firna/ui` controls, whose own theme cannot
+express Folio. Folio tokens live in `examples/basic/generated/site-tokens.css`;
+the site layout styles in `examples/basic/generated/site.css` reference only
+those properties.
+
+A fragment selects its composition from `data-site-viewport` on the root
+element rather than a viewport width, so a mobile fragment depicts the mobile
+composition at any preview width; the site implements the same rule as the
+768px breakpoint. Sign in and Get started are absolute links to the default
+application origin. Destinations without an owning mockup — the other
+documentation pages, previous and next — render as plain text, the rule the
+rest of the design catalogue already follows.
+
+Mockup copy comes from the approved home copy in
 [Site](./site.md#home-copy); mockup release facts come from the real
 `CHANGELOG.md` at the time of authoring and are labelled as fixtures in the
 entry description, not in the screen. The stage shows the example's Welcome

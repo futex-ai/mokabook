@@ -123,7 +123,10 @@ for (const viewport of ["mobile", "desktop"] as const) {
 test("every design link resolves to a real same-viewport design artifact without scripts or nested controls", async () => {
   const { manifest } = await designCatalogue;
   const designs = manifest.entries.filter(
-    (entry) => entry.kind === "screen" && entry.id.startsWith("design-"),
+    (entry) =>
+      entry.kind === "screen" &&
+      entry.id.startsWith("design-") &&
+      !entry.id.startsWith("design-site-"),
   );
   const componentDesigns = designs.filter((entry) =>
     entry.id.startsWith("design-component-"),
@@ -193,6 +196,7 @@ test("the canonical documented inventory exactly matches the complete design reg
         "docs/protocol/mokly-component-design.md",
         "docs/protocol/mokly-component-inspector-design.md",
         "docs/protocol/mokly-component-controls-design.md",
+        "docs/protocol/site-design.md",
       ].map((file) => fs.readFile(path.join(repositoryRoot, file), "utf8")),
     )
   ).join("\n");
@@ -203,7 +207,8 @@ test("the canonical documented inventory exactly matches the complete design reg
     .sort();
   const actual = manifest.entries
     .flatMap((entry) =>
-      entry.kind === "screen" && entry.id.startsWith("design-")
+      (entry.kind === "screen" || entry.kind === "use-case") &&
+      entry.id.startsWith("design-")
         ? [`${entry.id} ${entry.route}`]
         : [],
     )

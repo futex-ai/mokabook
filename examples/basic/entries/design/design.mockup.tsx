@@ -16,6 +16,7 @@ import { reviewAvailabilityScreens } from "./review_availability_screens.js";
 import { reviewImpactScreens } from "./review_impact_screens.js";
 import { reviewOutcomeScreens } from "./review_outcome_screens.js";
 import { reviewStyleScreens } from "./review_style_screens.js";
+import { siteMockups } from "./site/index.js";
 
 const DESIGN_DEPENDENCIES = [
   "examples/basic/generated/design-stage.css",
@@ -156,7 +157,7 @@ const designMockups = defineRoot({
 /** The neutral Mokly catalogue and Changes design catalogue. */
 export const mockups = [
   defineCollection({
-    childIds: ["design", "design-library"],
+    childIds: ["design", "design-library", "design-site"],
     dependencies: DESIGN_DEPENDENCIES,
     description: "Neutral design references for the Mokly package.",
     id: "design-root",
@@ -164,4 +165,5 @@ export const mockups = [
     title: "Design",
   }),
   ...designMockups,
+  ...siteMockups,
 ];

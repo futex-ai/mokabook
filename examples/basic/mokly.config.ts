@@ -50,6 +50,10 @@ export default defineConfig({
   },
   stylesheets: [
     {
+      match: "design/site/**",
+      stylesheets: ["site-tokens.css", "site.css"],
+    },
+    {
       match: "design/library/**",
       stylesheets: withLibraryStyles(designBaseStyles, [
         ...componentLayoutStyles,
@@ -106,6 +110,8 @@ export default defineConfig({
           "examples/basic/generated/design-review.css",
           "examples/basic/generated/design-stage.css",
           "examples/basic/generated/design.css",
+          "examples/basic/generated/site-tokens.css",
+          "examples/basic/generated/site.css",
           "examples/basic/generated/styles.css",
           "examples/basic/generated/example-components.css",
         ],

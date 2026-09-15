@@ -146,29 +146,31 @@ Port the Folio marketing screens into this repository's example design
 catalogue so every site screen exists as a mockup before implementation. Stop
 for review with generated pages inspected in both viewports and schemes.
 
-- [ ] Add a `Site` collection under `examples/basic/entries/design/site/`
+- [x] Add a `Site` collection under `examples/basic/entries/design/site/`
       with one component per screen and one screen-spec page of at most five
       screens: home, docs page, changelog, terms, privacy. Each screen renders
       mobile and desktop variants in light and dark.
-- [ ] Port the Folio header, footer, wordmark, hero, feature grid, closing,
-      document page, release entry and policy empty-state parts, reusing the
-      example's registered `@firna/ui` components and adding the Folio tokens
-      to the example's stylesheets without literal colors outside the token
-      definitions.
-- [ ] Broaden the home mockup to the approved copy from Milestone 1: three
+- [x] Port the Folio header, footer, wordmark, hero, feature grid, closing,
+      document page, release entry and policy empty-state parts as plain
+      semantic controls styled from the Folio tokens, and add those tokens to
+      the example's stylesheets without literal colors outside the token
+      definitions. The example's registered `@firna/ui` controls carry their
+      own theme and cannot express Folio, so the mockups depict the markup the
+      site itself implements; recorded in `docs/protocol/site-design.md`.
+- [x] Broaden the home mockup to the approved copy from Milestone 1: three
       numbered features, the open-foundation closing, and the framed
       catalogue stage with a pull request label and a Ready for review badge.
-- [ ] Design the docs page mockup with the left sidebar, on-this-page list,
+- [x] Design the docs page mockup with the left sidebar, on-this-page list,
       previous and next links, a code panel with a copy control and the search
       control, on both viewports.
-- [ ] Add a `site` user flow that reuses the five screens in the order home →
+- [x] Add a `site` user flow that reuses the five screens in the order home →
       docs → changelog → terms → privacy, with links back to each screen.
-- [ ] Update `docs/protocol/site-design.md` with the mockup ids and routes,
+- [x] Update `docs/protocol/site-design.md` with the mockup ids and routes,
       and update the design catalogue docs that list collections.
-- [ ] Run `npm run build`, `npm run example:build`, `npm run example:check`
+- [x] Run `npm run build`, `npm run example:build`, `npm run example:check`
       and smoke-test the pages through `npm run dev`; capture screenshots at
       390px and 1440px in both schemes for the review.
-- [ ] Run `cargo xtask check`, commit and push. Stop for review.
+- [x] Run `cargo xtask check`, commit and push. Stop for review.
 
 ## Milestone 3: Site Workspace Package And Checks
 
