@@ -2,6 +2,7 @@
 
 ## Active
 
+- [Public Site And Docs](./public-site-and-docs.md)
 - [Publish Catalogue](./publish-catalogue.md)
 - [App-Independent Mokabook Npm Library](./app-independent-mokabook-library.md)
 - [Accounting Shell Design Parity](./accounting-shell-design-parity.md)
