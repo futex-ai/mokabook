@@ -11,6 +11,7 @@ import type {
   ManifestComponent,
 } from "./manifest_types.js";
 import { validateProps } from "./props.js";
+import { validateComponentSource } from "./source.js";
 import { sortedStrings, validateResourcePath } from "./validation_helpers.js";
 import { validateViewReferences } from "./view_references.js";
 
@@ -75,9 +76,12 @@ export function validateComponentViewRecord(
         "order",
         "props",
         "propsKey",
+        "source",
       ],
       at,
     );
+    if (instance.source !== undefined)
+      validateComponentSource(instance.source, `${at}.source`);
     if (
       !isComponentKey(instance.key) ||
       !isCatalogueId(instance.id) ||

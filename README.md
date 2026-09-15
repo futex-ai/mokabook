@@ -19,6 +19,9 @@ local Serve. Screens record their actual component usage for inspection and
 highlighting. Component implementation edits appear once in Changes; consumers
 are listed as affected, while changes to their supplied props remain screen
 changes. See the [component authoring guide](./src/components/README.md).
+The public `resolveInstance` helper resolves saved instance records within one
+view. Optional repository-relative invocation locations are captured in manifest
+v5 without affecting identity, Changes, or the local shell.
 
 Screen-only catalogues also show stylesheet evidence in Details before opening
 a comparison: changed styles that may apply and examined stylesheets whose

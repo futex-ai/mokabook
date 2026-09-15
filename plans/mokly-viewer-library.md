@@ -159,24 +159,55 @@ Deliver the confirmed instance contract in the renderer, manifest, and tests
 while keeping generated output for unchanged catalogues byte-identical apart
 from the new optional field.
 
-- [ ] Add failing tests for key stability across prop edits, reorders,
+- [x] Add failing tests for key stability across prop edits, reorders,
       id changes, and re-parenting, plus resolution fixtures for `present`,
       `moved`, and `missing`.
-- [ ] Add a pure, exported instance resolution function under
+- [x] Add a pure, exported instance resolution function under
       `src/components` with typed inputs from `ComponentInstanceRecord`.
-- [ ] Implement the confirmed source-location capture: esbuild `jsxDev`
+- [x] Implement the confirmed source-location capture: esbuild `jsxDev`
       setting, the Mokly dev-runtime shim in the consumer React plugin,
       wrapper stripping, repo-relative path normalization, and rejection of
       absolute or escaping paths.
-- [ ] Extend manifest v5 validation and serialization with the optional
+- [x] Extend manifest v5 validation and serialization with the optional
       `source` field; keep historical readers accepting records without it.
-- [ ] Exclude `source` from `propsKey`, change attribution, and the Changes
+- [x] Exclude `source` from `propsKey`, change attribution, and the Changes
       calculation; add regression tests proving line shifts are not material.
-- [ ] Add a marker conformance test: every recorded range in each view has
+- [x] Make structural Changes projections select their identity fields
+      explicitly so invocation metadata cannot become comparison input.
+- [x] Expose resolution through the consumer's attributed authoring facade
+      as well as the public package entrypoint.
+- [x] Update packed-consumer API allowlists and exercise exported instance
+      records, resolution types, and source capture from the installed package.
+- [x] Add a marker conformance test: every recorded range in each view has
       exactly one matched start/end comment pair in the rendered document,
       including replayed slots that give one instance several ranges.
-- [ ] Regenerate the example catalogue, run relevant tests and
-      `cargo xtask check`, update READMEs, commit, push, and stop for review.
+- [x] Regenerate the example catalogue, run relevant tests and
+      `cargo xtask check`, and update READMEs.
+- [ ] After checks pass, `git add -A`, commit the completed work with
+      Conventional Commits, push, and stop for review.
+- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+      against the complete local diff from `origin/main`; report findings
+      without changing the implementation, then stop before Milestone 3.
+
+Verification notes: the example retains its existing `generatedOutput: "derived"`
+configuration. Its generated HTML and manifest remain ignored local artifacts;
+tracking them would fail `example:check`. Regeneration produced 278 files:
+all 277 HTML documents are byte-identical to the pre-milestone output, and the
+manifest differs only by 1,911 optional instance source records. Authored CSS
+is unchanged. The mobile and desktop Serve smoke checks passed after replacing
+an unsuitable network-idle wait with explicit frame readiness. The 169 focused
+component tests passed. The first full gate stopped on a test assertion lint
+error; that assertion was corrected and the gate restarted.
+The next run passed all 1,532 unit/integration tests and reached the packed ESM
+API allowlist, which needed the new resolver export. The updated ESM, NodeNext,
+clean-cache npx, Accounting and Juno consumers passed independently, including
+installed-package source capture.
+The final `cargo xtask check` passed: 1,532 unit/integration tests, 274 Chromium
+tests, all five packed-consumer scenarios and three Rust tests, plus dependency
+audits, formatting, lint, typechecking, example validation, package checks,
+Clippy and the Rust file-length audit. No tests were skipped and no browser
+retries were needed. Protocol edits only update the two source/identity delivery
+statuses; the normative contract is unchanged.
 
 ## Milestone 3: Catalogue read model implementation
 

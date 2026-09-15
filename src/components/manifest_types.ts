@@ -15,6 +15,12 @@ export interface ComponentInstanceRecord {
   order: number;
   props: ComponentWireProps;
   propsKey: string;
+  source?: ComponentSourceLocation;
+}
+export interface ComponentSourceLocation {
+  path: string;
+  line: number;
+  column: number;
 }
 export interface ComponentSlotRecord {
   key: string;

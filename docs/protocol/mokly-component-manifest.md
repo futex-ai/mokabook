@@ -12,9 +12,9 @@ and `Viewport` retain the [package contract](./mokly-package.md) and the named
 [prop schema](./mokly-component-props.md); `ComponentControl` comes from the
 [controls contract](./mokly-component-controls.md).
 
-The optional instance `source` field below is an approved target for
-[viewer library Milestone 2](../../plans/mokly-viewer-library.md), not current
-output. All existing v5 fields retain their contracts. Updated readers accept
+The optional instance `source` field below is implemented in
+[viewer library Milestone 2](../../plans/mokly-viewer-library.md).
+All existing v5 fields retain their contracts. Updated readers accept
 instances with or without `source`; the manifest version remains 5.
 
 ## Entries And Variants

@@ -44,6 +44,8 @@ export type {
   Viewport,
 } from "./authoring/types.js";
 export { defineComponent } from "./components/definition.js";
+export { resolveInstance } from "./components/resolve_instance.js";
+export type { InstanceResolution } from "./components/resolve_instance.js";
 export type {
   ComponentDefinition,
   ComponentInput,
@@ -67,6 +69,8 @@ export type {
   PropValue,
 } from "./components/prop_types.js";
 export type {
+  ComponentInstanceRecord,
+  ComponentSourceLocation,
   ComponentStyleOwnership,
   ComponentResourceOwnership,
 } from "./components/manifest_types.js";

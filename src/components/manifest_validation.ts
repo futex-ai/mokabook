@@ -60,6 +60,7 @@ export function validateManifestComponent(
     if (
       [
         "moklyInstance",
+        "__moklySource",
         "key",
         "ref",
         "__proto__",

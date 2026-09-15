@@ -2,9 +2,9 @@
 
 ## Delivery Status
 
-Approved target. [Viewer library Milestone 1](../../plans/mokly-viewer-library.md)
-defines this contract; Milestone 2 implements resolution and source capture.
-The key derivation and rendered boundaries below already exist. No new UI,
+Implemented through [viewer library Milestone 2](../../plans/mokly-viewer-library.md),
+including resolution and source capture. The key derivation and rendered boundaries
+retain their existing format. No new UI,
 changed key format, or visible local behavior is approved by this document.
 
 ## Identity And Scope
@@ -124,7 +124,7 @@ errors, not a fourth resolution state.
 
 ## Optional Invocation Source
 
-Milestone 2 adds this optional v5 instance field:
+Manifest v5 includes this optional instance field:
 
 ```ts
 interface ComponentSourceLocation {

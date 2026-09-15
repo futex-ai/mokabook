@@ -1,6 +1,7 @@
 import { normalizeHistoricalDocument } from "../review/ignore.js";
 
 import { canonicalJson } from "./data.js";
+import { instanceStructure } from "./instance_structure.js";
 import type {
   ComponentInputOwner,
   ComponentViewRecord,
@@ -29,7 +30,7 @@ export function structureSignals(
   return {
     instances: view.instances
       .filter((instance) => sameOwner(instance.owner, owner))
-      .map(({ props: _props, propsKey: _key, ...identity }) => identity),
+      .map(instanceStructure),
     slots: view.slots.filter(
       (slot) => sameOwner(slot.owner, owner) && !slot.sourceSlotKey,
     ),
