@@ -9,12 +9,7 @@ import { defineScreen } from "@mokly/mokly";
 import { SITE_SCREENS } from "../../parts/links.js";
 import { variantMetadata } from "../scaffold.js";
 
-import {
-  ProductCrumbs,
-  ProductLayout,
-  ProductUtility,
-  ProductVersion,
-} from "./parts/chrome.js";
+import { ProductEyebrow, ProductLayout } from "./parts/chrome.js";
 import { RELEASES } from "./parts/releases.js";
 
 function ReleaseIndex() {
@@ -41,19 +36,10 @@ function ReleaseIndex() {
 
 function ProductChangelog({ viewport }: { viewport: "mobile" | "desktop" }) {
   return (
-    <ProductLayout
-      active={SITE_SCREENS.changelog}
-      utility={
-        <ProductUtility
-          controls={<ProductVersion label="Latest" />}
-          lead={<ProductCrumbs trail={["Changelog", "Mokly CLI"]} />}
-        />
-      }
-      viewport={viewport}
-    >
+    <ProductLayout active={SITE_SCREENS.changelog} viewport={viewport}>
       <main className="pd-document pd-changelog" id="main">
         <div className="pd-document-intro">
-          <p className="site-eyebrow">Changelog</p>
+          <ProductEyebrow trail={["Changelog"]} />
           <h1>
             What&#8217;s new in <span className="site-accent">Mokly</span>
           </h1>

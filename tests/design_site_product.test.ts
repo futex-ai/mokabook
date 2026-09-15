@@ -31,17 +31,6 @@ const FOOTER_LINKS = [
 const SIGN_IN = "https://app.mokly.ai/sign-in";
 const SIGN_UP = "https://app.mokly.ai/sign-up";
 
-const DOCS_SECTIONS = [
-  "Getting started",
-  "Authoring",
-  "Catalogue",
-  "CLI reference",
-  "Continuous integration",
-  "Mokly Cloud",
-  "Reference",
-  "Review and edit",
-];
-
 const MODULE_LABELS = ["BROWSE", "REVIEW", "EDIT"];
 
 const STEPS = [
@@ -61,13 +50,28 @@ function label(node: Parameters<typeof textContent>[0]): string {
 }
 
 for (const viewport of ["mobile", "desktop"] as const) {
-  test(`${viewport}: the application band carries the header, the utility bar and the version`, async () => {
+  test(`${viewport}: the application band carries one header row and no utility bar`, async () => {
     for (const id of [HOME, DOCS, CHANGELOG]) {
       const { document } = await designDocument(id, viewport);
       const band = byClass(document, "pd-band")[0];
       assert.ok(band, `${id}: missing the application band`);
       const header = byClass(band, "site-header")[0];
       assert.ok(header, id);
+      assert.deepEqual(
+        elements(band, (node) => node.tagName === "header").length,
+        1,
+        `${id}: the band holds the header alone`,
+      );
+      assert.equal(
+        byClass(document, "pd-utility").length,
+        0,
+        `${id}: the utility bar is gone`,
+      );
+      assert.equal(
+        byClass(document, "pd-sections").length,
+        0,
+        `${id}: the utility bar's section links are gone`,
+      );
       const headerLinks = elements(
         header,
         (node) => node.tagName === "a",
@@ -75,11 +79,11 @@ for (const viewport of ["mobile", "desktop"] as const) {
       assert.deepEqual(headerLinks.map(label), HEADER_LINKS, id);
       assert.equal(attribute(headerLinks[2]!, "href"), SIGN_IN, id);
       assert.equal(attribute(headerLinks[3]!, "href"), SIGN_UP, id);
-      const utility = byClass(band, "pd-utility")[0];
-      assert.ok(utility, `${id}: the utility bar sits inside the band`);
-      const version = byClass(document, "pd-version")[0];
-      assert.ok(version, id);
-      assert.match(textContent(version), /0\.9\.0$/, id);
+      assert.equal(
+        byClass(header, "site-search").length,
+        id === DOCS ? 1 : 0,
+        `${id}: search belongs to the documentation header`,
+      );
     }
   });
 
@@ -97,10 +101,12 @@ for (const viewport of ["mobile", "desktop"] as const) {
       );
       const nav = byClass(footer, "pd-footer-nav")[0];
       assert.ok(nav);
-      assert.deepEqual(
-        elements(nav, (node) => node.tagName === "a").map(label),
-        FOOTER_LINKS,
-        id,
+      const links = elements(nav, (node) => node.tagName === "a");
+      assert.deepEqual(links.map(label), FOOTER_LINKS, id);
+      assert.equal(
+        byClass(nav, "pd-footer-link").length,
+        FOOTER_LINKS.length,
+        `${id}: every footer link carries the hoverable class`,
       );
     }
   });
@@ -212,98 +218,13 @@ for (const viewport of ["mobile", "desktop"] as const) {
     assert.equal(byClass(document, "site-actions").length, 2);
   });
 
-  test(`${viewport}: the utility bar links the page's own sections`, async () => {
-    const { document } = await designDocument(HOME, viewport);
-    const sections = byClass(document, "pd-sections")[0];
-    assert.ok(sections);
-    const links = elements(sections, (node) => node.tagName === "a");
-    assert.deepEqual(
-      links.map((link) => attribute(link, "href")),
-      ["#browse", "#review", "#edit", "#foundation"],
-    );
-    assert.match(
-      attribute(links[3]!, "class") ?? "",
-      /site-desktop-only/,
-      "the closing link stays out of the mobile bar",
-    );
-  });
-
-  test(`${viewport}: the documentation tree uses disclosures and a filled current page`, async () => {
-    const { document } = await designDocument(DOCS, viewport);
-    const sections = elements(document, (node) =>
-      (attribute(node, "class") ?? "").split(/\s+/).includes("pd-doc-section"),
-    );
-    assert.equal(sections.length, DOCS_SECTIONS.length);
-    assert.deepEqual(
-      sections.map((section) =>
-        label(byClass(section, "pd-doc-section-head")[0]!),
-      ),
-      DOCS_SECTIONS,
-    );
-    assert.deepEqual(
-      sections.map((section) => attribute(section, "open") !== undefined),
-      DOCS_SECTIONS.map((title) => title === "Getting started"),
-      "only the current section is open",
-    );
-    assert.equal(
-      byClass(document, "pd-tree-chevron").length,
-      DOCS_SECTIONS.length,
-    );
-    const current = byClass(document, "pd-doc-link--current");
-    assert.equal(current.length, 1);
-    assert.equal(label(current[0]!), "Install");
-    assert.equal(attribute(current[0]!, "aria-current"), "page");
-    assert.equal(
-      byClass(document, "pd-doc-tree").length,
-      viewport === "desktop" ? 1 : 0,
-    );
-    assert.equal(
-      byClass(document, "pd-doc-disclosure").length,
-      viewport === "desktop" ? 0 : 1,
-    );
-  });
-
-  test(`${viewport}: the documentation page keeps the search, code panel and rails`, async () => {
-    const { document } = await designDocument(DOCS, viewport);
-    const search = byClass(document, "site-search")[0];
-    assert.ok(search);
-    assert.match(label(search), /Search docs/);
-    assert.equal(
-      byClass(byClass(document, "pd-utility")[0]!, "site-search").length,
-      1,
-      "the search control lives in the utility bar",
-    );
-    const copy = byClass(document, "site-code-copy");
-    assert.equal(copy.length, 1);
-    assert.equal(label(copy[0]!), "Copy");
-    assert.match(
-      label(byClass(document, "site-code-body")[0]!),
-      /npm install --save-dev @mokly\/mokly react react-dom/,
-    );
-    const onPage = byClass(document, "pd-onpage");
-    assert.equal(onPage.length, 1);
-    assert.deepEqual(
-      elements(onPage[0]!, (node) => node.tagName === "a").map((node) =>
-        attribute(node, "href"),
-      ),
-      [
-        "#install-the-package",
-        "#add-the-configuration",
-        "#author-your-first-screen",
-      ],
-    );
-    assert.equal(
-      byClass(document, "pd-docs-rail").length,
-      viewport === "desktop" ? 1 : 0,
-    );
-    assert.equal(
-      label(byClass(document, "pd-pager")[0]!),
-      "PreviousGetting startedNextConfigure",
-    );
-  });
-
   test(`${viewport}: the changelog reads as an indexed Changes list`, async () => {
     const { document, html } = await designDocument(CHANGELOG, viewport);
+    assert.equal(
+      label(byClass(document, "pd-eyebrow")[0]!),
+      "Changelog",
+      "the location trail is the eyebrow above the title",
+    );
     const index = byClass(document, "pd-release-index")[0];
     assert.ok(index, "the changelog carries a release index");
     assert.deepEqual(byClass(index, "pd-release-index-version").map(label), [
@@ -361,7 +282,7 @@ test("the Product stylesheet extends the shared layout and owns its chrome", asy
   assert.match(stylesheet, /@import "\.\/site\.css";/);
   for (const selector of [
     ".pd-band",
-    ".pd-utility",
+    ".pd-eyebrow",
     ".pd-frame",
     ".pd-topbar",
     ".pd-tree",
@@ -376,6 +297,10 @@ test("the Product stylesheet extends the shared layout and owns its chrome", asy
       stylesheet.includes(`${selector} {`),
       `site-product.css defines ${selector}`,
     );
+  assert.ok(
+    !stylesheet.includes(".pd-utility"),
+    "the utility bar's rules are gone",
+  );
   assert.match(
     stylesheet,
     /\[data-site-viewport="mobile"\] \.pd-module-grid/,
@@ -383,19 +308,29 @@ test("the Product stylesheet extends the shared layout and owns its chrome", asy
   );
 });
 
-test("the depicted version is the changelog's latest release", async () => {
+test("the depicted version heads the documentation tree", async () => {
   const changelog = await fs.readFile(
     path.join(repositoryRoot, "CHANGELOG.md"),
     "utf8",
   );
   const latest = /^## \[(\d+\.\d+\.\d+)\]/m.exec(changelog)?.[1];
   assert.ok(latest);
-  for (const id of [HOME, DOCS, CHANGELOG]) {
+  for (const viewport of ["mobile", "desktop"] as const) {
+    const { document } = await designDocument(DOCS, viewport);
+    const version = byClass(document, "pd-version");
+    assert.equal(version.length, 1, viewport);
+    assert.equal(
+      label(version[0]!),
+      `Mokly CLI${latest}`,
+      "the tree heads with the published Mokly CLI version",
+    );
+  }
+  for (const id of [HOME, CHANGELOG]) {
     const { document } = await designDocument(id, "desktop");
-    assert.match(
-      textContent(byClass(document, "pd-version")[0]!),
-      new RegExp(`${latest.replace(/\./g, "\\.")}$`),
-      id,
+    assert.equal(
+      byClass(document, "pd-version").length,
+      0,
+      `${id}: the version chip belongs to the documentation tree`,
     );
   }
 });

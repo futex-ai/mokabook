@@ -5,61 +5,19 @@
  * and the chrome carries the hierarchy.
  */
 
-import { MockLink, defineScreen } from "@mokly/mokly";
+import { defineScreen } from "@mokly/mokly";
 
 import { SiteActions } from "../../parts/actions.js";
 import { SITE_SCREENS } from "../../parts/links.js";
 import { variantMetadata } from "../scaffold.js";
 
-import {
-  ProductLayout,
-  ProductUtility,
-  ProductVersion,
-} from "./parts/chrome.js";
-import {
-  MODULE_LINKS,
-  ProductClosing,
-  ProductModules,
-} from "./parts/modules.js";
+import { ProductLayout } from "./parts/chrome.js";
+import { ProductClosing, ProductModules } from "./parts/modules.js";
 import { CatalogueFrame } from "./parts/shell.js";
-
-function SectionLinks() {
-  return (
-    <nav aria-label="Sections" className="pd-sections">
-      {MODULE_LINKS.map((link, index) => (
-        <a
-          className={
-            index < 3 ? "pd-section-link" : "pd-section-link site-desktop-only"
-          }
-          href={`#${link.id}`}
-          key={link.id}
-        >
-          {link.label}
-        </a>
-      ))}
-    </nav>
-  );
-}
 
 function ProductHome({ viewport }: { viewport: "mobile" | "desktop" }) {
   return (
-    <ProductLayout
-      active={SITE_SCREENS.home}
-      utility={
-        <ProductUtility
-          controls={
-            <MockLink
-              className="pd-version-link site-desktop-only"
-              to={SITE_SCREENS.changelog}
-            >
-              <ProductVersion label="Mokly CLI" />
-            </MockLink>
-          }
-          lead={<SectionLinks />}
-        />
-      }
-      viewport={viewport}
-    >
+    <ProductLayout active={SITE_SCREENS.home} viewport={viewport}>
       <main className="pd-main" id="main">
         <section className="pd-hero">
           <p className="pd-hero-eyebrow">A design tool for teams that ship</p>

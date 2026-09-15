@@ -206,20 +206,20 @@ Apply the user's refinements to the Product direction in place, following the
 Selection section of `docs/protocol/site-directions.md`. Stop for review with
 screenshots at both viewports and schemes.
 
-- [ ] Remove the utility bar from the Product home, docs and changelog; move
+- [x] Remove the utility bar from the Product home, docs and changelog; move
       search into the header, the version chip to the sidebar top and the
       location breadcrumb to the title eyebrow.
-- [ ] Add hover states to every link and control in the Product stylesheet
+- [x] Add hover states to every link and control in the Product stylesheet
       and cover them with a test that asserts each interactive class has a
       `:hover` rule that changes more than color.
-- [ ] Rework the Product docs page: unfilled sidebar on the canvas with a
+- [x] Rework the Product docs page: unfilled sidebar on the canvas with a
       hairline rule, all sections expanded with rubric heads, hover and
       current fills, Editorial's ruled document structure and pull-quote
       lead, an on-this-page rail on its own hairline, card-style previous
       and next.
-- [ ] Update `tests/design_site_product.test.ts` for the new structure and
+- [x] Update `tests/design_site_product.test.ts` for the new structure and
       capture the three screens at 390px and 1440px in light and dark.
-- [ ] Run `cargo xtask check`, commit and push. Stop for review.
+- [x] Run `cargo xtask check`, commit and push. Stop for review.
 
 ## Milestone 3: Site Workspace Package And Checks
 

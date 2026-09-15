@@ -1,7 +1,9 @@
 /**
- * The Product documentation page: the application band carries the location
- * crumb, the search control and the published version, and the body is the
- * shell's three-column reading layout — tree, document, on-this-page.
+ * The Product documentation page: search sits in the header, the tree sits
+ * on the page canvas behind a vertical hairline, and the document keeps a
+ * ruled reading structure — an accent-ruled lead, hairlines between the
+ * intro, the body and the previous and next row, and its own on-this-page
+ * rail hung from a hairline at the outer edge.
  */
 
 import { defineScreen } from "@mokly/mokly";
@@ -10,13 +12,7 @@ import { CodePanel } from "../../parts/code_panel.js";
 import { SITE_SCREENS } from "../../parts/links.js";
 import { variantMetadata } from "../scaffold.js";
 
-import {
-  ProductCrumbs,
-  ProductLayout,
-  ProductSearch,
-  ProductUtility,
-  ProductVersion,
-} from "./parts/chrome.js";
+import { ProductEyebrow, ProductLayout } from "./parts/chrome.js";
 import { DOCS_HEADINGS, DOCS_PAGE } from "./parts/docs_data.js";
 import {
   DocsOnThisPage,
@@ -28,30 +24,14 @@ import {
 function ProductDocs({ viewport }: { viewport: "mobile" | "desktop" }) {
   const desktop = viewport === "desktop";
   return (
-    <ProductLayout
-      active={SITE_SCREENS.docs}
-      utility={
-        <ProductUtility
-          controls={
-            <>
-              <ProductSearch />
-              <span className="site-desktop-only">
-                <ProductVersion label="Version" />
-              </span>
-            </>
-          }
-          lead={<ProductCrumbs trail={["Documentation", DOCS_PAGE.section]} />}
-        />
-      }
-      viewport={viewport}
-    >
+    <ProductLayout active={SITE_SCREENS.docs} search viewport={viewport}>
       <div className="pd-docs">
         {desktop ? <DocsTree /> : <DocsTreeDisclosure />}
-        <main className="pd-document" id="main">
+        <main className="pd-document pd-docs-document" id="main">
           <div className="pd-document-intro">
-            <p className="site-eyebrow">{DOCS_PAGE.section}</p>
+            <ProductEyebrow trail={["Documentation", DOCS_PAGE.section]} />
             <h1>{DOCS_PAGE.page}</h1>
-            <p className="site-lead">
+            <p className="pd-pullquote">
               Add Mokly to the repository that holds your components.
             </p>
           </div>
@@ -111,7 +91,7 @@ export function ProductDocsMobile() {
 export const productDocsScreen = defineScreen({
   ...variantMetadata("product"),
   description:
-    "A documentation page in the shell's reading layout: a utility bar with search and the workspace package version, a section tree with disclosures, the copyable install command, the on-this-page rail and previous and next.",
+    "A documentation page in the shell's reading layout: search in the header, an unfilled section tree carrying the workspace package version, the copyable install command, the on-this-page rail and previous and next.",
   desktop: <ProductDocsDesktop />,
   id: "design-site-product-docs",
   mobile: <ProductDocsMobile />,

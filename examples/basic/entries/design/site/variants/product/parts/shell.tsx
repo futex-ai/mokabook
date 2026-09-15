@@ -187,10 +187,7 @@ function WelcomeScreen() {
 function ScreenHeader() {
   return (
     <div className="pd-screen-head">
-      <nav
-        aria-label="Catalogue location"
-        className="pd-crumbs pd-crumbs--shell"
-      >
+      <nav aria-label="Catalogue location" className="pd-crumbs">
         <span className="pd-crumb">Catalogue home</span>
         <span className="pd-crumb">
           <span aria-hidden="true" className="pd-crumb-sep">

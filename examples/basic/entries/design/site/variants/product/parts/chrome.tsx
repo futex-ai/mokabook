@@ -1,8 +1,8 @@
 /**
- * Chrome for the Product direction: a white application band holding the
- * header and a utility bar, and a footer whose seven site destinations are
- * grouped into columns. The band, the crumb trail and the control geometry
- * follow the Mokly catalogue shell.
+ * Chrome for the Product direction: a white application band holding one
+ * header row, and a footer whose seven site destinations are grouped into
+ * columns. The documentation search sits in the header beside the
+ * navigation; the location trail is set as the eyebrow above a page title.
  */
 
 import type { ReactNode } from "react";
@@ -20,18 +20,18 @@ import {
 import { SearchGlyph } from "./glyphs.js";
 import { PACKAGE_VERSION } from "./version.js";
 
-/** The catalogue's crumb trail, reused as the site's location line. */
-export function ProductCrumbs({ trail }: { trail: readonly string[] }) {
+/** The location trail, set as the eyebrow line above the page title. */
+export function ProductEyebrow({ trail }: { trail: readonly string[] }) {
   return (
-    <nav aria-label="Location" className="pd-crumbs">
-      {trail.map((crumb, index) => (
-        <span className="pd-crumb" key={crumb}>
+    <nav aria-label="Location" className="pd-eyebrow">
+      {trail.map((step, index) => (
+        <span className="pd-eyebrow-step" key={step}>
           {index > 0 ? (
-            <span aria-hidden="true" className="pd-crumb-sep">
+            <span aria-hidden="true" className="pd-eyebrow-sep">
               &#8250;
             </span>
           ) : null}
-          {crumb}
+          {step}
         </span>
       ))}
     </nav>
@@ -58,28 +58,17 @@ export function ProductSearch() {
   );
 }
 
-/** The utility bar under the header: location on the left, controls right. */
-export function ProductUtility({
-  controls,
-  lead,
+function ProductHeader({
+  active,
+  search,
 }: {
-  controls: ReactNode;
-  lead: ReactNode;
+  active: SiteScreen;
+  search: boolean;
 }) {
-  return (
-    <div className="pd-utility">
-      <div className="pd-utility-inner">
-        {lead}
-        <div className="pd-utility-controls">{controls}</div>
-      </div>
-    </div>
-  );
-}
-
-function ProductHeader({ active }: { active: SiteScreen }) {
   return (
     <header className="site-header pd-header">
       <SiteBrand />
+      {search ? <ProductSearch /> : null}
       <nav aria-label="Main" className="site-nav pd-nav">
         <MockLink
           aria-current={currentPage(active, SITE_SCREENS.docs)}
@@ -124,6 +113,7 @@ function FooterGroup({
       {screens.map(([screen, label]) => (
         <MockLink
           aria-current={currentPage(active, screen)}
+          className="pd-footer-link"
           key={screen}
           to={screen}
         >
@@ -154,8 +144,12 @@ function ProductFooter({ active }: { active: SiteScreen }) {
           />
           <div className="pd-footer-group">
             <p className="pd-footer-heading">Account</p>
-            <a href={APP_LINKS.signIn}>Sign in</a>
-            <a href={APP_LINKS.signUp}>Get started</a>
+            <a className="pd-footer-link" href={APP_LINKS.signIn}>
+              Sign in
+            </a>
+            <a className="pd-footer-link" href={APP_LINKS.signUp}>
+              Get started
+            </a>
           </div>
           <FooterGroup
             active={active}
@@ -175,12 +169,12 @@ function ProductFooter({ active }: { active: SiteScreen }) {
 export function ProductLayout({
   active,
   children,
-  utility,
+  search = false,
   viewport,
 }: {
   active: SiteScreen;
   children: ReactNode;
-  utility: ReactNode;
+  search?: boolean;
   viewport: "mobile" | "desktop";
 }) {
   return (
@@ -189,8 +183,7 @@ export function ProductLayout({
         Skip to content
       </a>
       <div className="pd-band">
-        <ProductHeader active={active} />
-        {utility}
+        <ProductHeader active={active} search={search} />
       </div>
       {children}
       <ProductFooter active={active} />

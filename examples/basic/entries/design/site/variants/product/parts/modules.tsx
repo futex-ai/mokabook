@@ -94,7 +94,6 @@ interface ProductModule {
   detail: ReactNode;
   id: string;
   label: string;
-  name: string;
   number: string;
   title: string;
 }
@@ -105,7 +104,6 @@ const MODULES: readonly ProductModule[] = [
     detail: <BrowseDetail />,
     id: "browse",
     label: "BROWSE",
-    name: "Browse",
     number: "01",
     title: "See every branch as screens.",
   },
@@ -114,7 +112,6 @@ const MODULES: readonly ProductModule[] = [
     detail: <ReviewDetail />,
     id: "review",
     label: "REVIEW",
-    name: "Review",
     number: "02",
     title: "Comment on the screen itself.",
   },
@@ -123,16 +120,9 @@ const MODULES: readonly ProductModule[] = [
     detail: <EditDetail />,
     id: "edit",
     label: "EDIT",
-    name: "Edit",
     number: "03",
     title: "Ask for the change beside the screen.",
   },
-];
-
-/** Section links to the three modules and the closing, under the header. */
-export const MODULE_LINKS: readonly { id: string; label: string }[] = [
-  ...MODULES.map((module) => ({ id: module.id, label: module.name })),
-  { id: "foundation", label: "Open foundation" },
 ];
 
 /** Browse, review and edit, each with its framed detail of the shell. */
