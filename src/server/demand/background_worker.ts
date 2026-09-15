@@ -4,7 +4,7 @@ import { parentPort, workerData, type MessagePort } from "node:worker_threads";
 
 import { compileRuntime } from "../../build/compile_runtime.js";
 import type { ComponentRuntime } from "../../build/component_runtime.js";
-import { runWithTimings } from "../../diagnostics/timings.js";
+import { runWithTimings, timeAsync } from "../../diagnostics/timings.js";
 import { errorMessage } from "../../errors.js";
 import type { ManifestV5 } from "../../registry/types.js";
 import { RepositoryCatalogueChangeClassifier } from "../component_changes.js";
@@ -51,15 +51,11 @@ parentPort?.on(
         return;
       }
       await checkpoint();
-      const snapshot = await classifier.read(
-        runtime.config,
-        manifest!,
-        message.base,
-        undefined,
-        {
+      const snapshot = await timeAsync("changes.classify", () =>
+        classifier.read(runtime.config, manifest!, message.base, undefined, {
           ...(message.commit ? { commit: message.commit } : {}),
           ...(outputs ? { outputs } : {}),
-        },
+        }),
       );
       parentPort?.postMessage({ type: "classified", snapshot });
     });

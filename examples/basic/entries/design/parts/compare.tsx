@@ -30,12 +30,11 @@ export function CompareToolbar({
 const STATE_LABELS: Record<ReviewState, string> = {
   added: "New screen",
   changed: "Screen changed",
-  "ignored-only": "Only excluded content changed",
   removed: "Screen removed",
-  unchanged: "No changes to this screen",
+  "styles-changed": "Styles this screen uses changed",
 };
 
-/** Comparison status and secondary evidence share the scrollable screen stage. */
+/** The scrollable stage of a loaded comparison, headed by its outcome. */
 export function ComparisonStage({
   children,
   state,

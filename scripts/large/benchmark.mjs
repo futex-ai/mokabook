@@ -6,7 +6,7 @@ import { chromium, expect } from "@playwright/test";
 import { loadConfig } from "../../dist/config/load.js";
 
 import { resetFixtureBaseline } from "./baseline.mjs";
-import { waitForBrowseChanges } from "./browse.mjs";
+import { expectedStylesheetChanges, waitForBrowseChanges } from "./browse.mjs";
 import { start, stop, waitFor } from "./process.mjs";
 import { baselineMeasurement } from "./timings.mjs";
 
@@ -123,13 +123,16 @@ export async function benchmark(repository, fixture) {
         );
         await waitForBrowseChanges(url);
         const classified = await (await fetch(url)).text();
-        expect(classified).toMatch(/class="mbk-nav-filter-count">0</);
+        const changedRoutes = expectedStylesheetChanges;
+        expect(classified).toContain(
+          `class="mbk-nav-filter-count">${changedRoutes}<`,
+        );
         const changesReadyMs = Math.round(performance.now() - beginning);
         expect(errors).toEqual([]);
         const baseline = derived
           ? baselineMeasurement(running.timings, beginning, state === "warm")
           : {};
-        runs.push({ ...measured, changesReadyMs, ...baseline });
+        runs.push({ ...measured, changesReadyMs, changedRoutes, ...baseline });
         if (usableMs >= 5000)
           throw new Error(
             `${state} usable startup exceeded 5 seconds: ${usableMs}ms`,

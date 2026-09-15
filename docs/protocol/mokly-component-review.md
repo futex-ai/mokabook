@@ -49,7 +49,14 @@ type EntryChangeReason =
       kind:
         "added" | "removed" | "metadata" | "material" | "inputs" | "structure";
     }
-  | { kind: "dependency"; path: string }
+  | {
+      kind: "dependency";
+      path: string;
+      analysis?: {
+        status: "matched" | "unresolved";
+        selectors: readonly string[];
+      };
+    }
   | { kind: "screen"; route: string };
 
 interface ChangedEntry extends ReviewEntrySides {
@@ -137,12 +144,28 @@ means caller-owned logical occurrence identity/order changed. Record every
 applicable reason, without deriving membership from raw fragment paths alone.
 
 A dependency reason's path must be in `changedPaths` and be independent evidence
-under the ownership rules. A screen reason is allowed only on a use case and
+under the ownership rules. A stylesheet dependency reason may carry the
+[CSS change attribution](./mokly-css-attribution.md) `analysis` record;
+its `selectors` are sorted and duplicate-free, `analysis` appears only on
+stylesheet paths in analysis scope, a view carries `material: true` exactly
+when its normalized documents differ, and a view's `excludedResources` paths must be in
+`changedPaths` and never coincide with that view's dependency reasons. A screen reason is allowed only on a use case and
 must reference a directly changed screen actually used on at least one side.
 Use cases also retain their own metadata/dependency reasons. One screen with
 only affected component evidence cannot produce a use-case screen reason.
 An affected-only consumer has no ChangedEntry unless it has another direct
 reason. Its full comparison remains available through the other result arrays.
+
+Views carry optional dependency-only `reasons` alongside optional
+`excludedResources` in both schemas. Omit either list when empty and sort it
+uniquely by path. `matched` analysis requires selectors; `unresolved` permits an
+empty selector list. Entry reasons merge retained view evidence by path with a
+sorted selector union and unresolved precedence. Entry ownership can suppress
+a view resource reason from direct membership; one view excluding a path does
+not conflict with another keeping it. A component's reasons also aggregate owned
+CSS retained at actual invocations, even if its saved variants all exclude that
+path. Their unchanged view states remain accurate. Public stylesheet globs alone
+add no reason, and an exact screen declaration cannot override rule exclusion.
 
 Each affected record groups one changed component and one canonical consumer.
 Its component id must appear in `changes` with kind component, and evidence

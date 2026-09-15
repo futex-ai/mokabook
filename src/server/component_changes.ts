@@ -24,14 +24,16 @@ import {
 } from "../review/repository.js";
 import type { ReadOnlyReviewRepository } from "../review/repository.js";
 import type { ReviewEvidence } from "../review/selection_types.js";
+import type { ScreenResourceEvidence } from "../review/types.js";
 
-import { changedContentPaths } from "./changed_content.js";
+import { classifyChangedContent } from "./changed_content.js";
 
 export interface ComponentChangeSnapshot {
   baseline: Manifest;
   changedRoutes?: readonly string[];
   result?: ReviewResultV3;
   comparison?: ReviewEvidence;
+  screenEvidence?: readonly ScreenResourceEvidence[];
 }
 export interface ComponentChangeSource {
   baseline(): Promise<string>;
@@ -201,7 +203,7 @@ export async function readCatalogueChanges(
         afterReader: reader,
       })
     : undefined;
-  const content = await changedContentPaths(
+  const content = await classifyChangedContent(
     manifest,
     baseline,
     config,
@@ -220,7 +222,7 @@ export async function readCatalogueChanges(
     manifest,
     baseline,
     config,
-    content,
+    content.changedPaths,
   ).filter((route) => !components || pageRoutes.has(route));
   for (const entry of manifest.entries)
     for (const view of generatedViews(entry))
@@ -235,6 +237,9 @@ export async function readCatalogueChanges(
       ...(outputs ? { headOutputs: [...outputs] } : {}),
     },
     ...(result ? { result } : {}),
+    ...(!components && content.screens.length
+      ? { screenEvidence: content.screens }
+      : {}),
     changedRoutes: [
       ...new Set([
         ...routes,

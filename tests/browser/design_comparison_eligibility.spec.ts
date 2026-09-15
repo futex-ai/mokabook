@@ -17,6 +17,9 @@ const changedDesigns = new Set([
   "design-review-changed",
   "design-review-difference",
   "design-review-dark-scheme",
+  "design-review-style-matched",
+  "design-review-style-unresolved",
+  "design-review-style-unnamed",
   "design-publication-changes",
 ]);
 
@@ -46,7 +49,12 @@ for (const viewport of ["desktop", "mobile"] as const) {
       const expected = changedDesigns.has(entry.id) || componentComparison;
       const toolbar = page.locator(".mbk-cmp-toolbar");
       await expect(toolbar, entry.id).toHaveCount(expected ? 1 : 0);
-      if (expected) {
+      if (!expected) {
+        await expect(
+          page.locator(".mbk-comparison-stage h3"),
+          entry.id,
+        ).toHaveCount(0);
+      } else {
         await expect(toolbar, entry.id).toHaveCSS(
           "background-color",
           "rgb(255, 255, 255)",

@@ -1,12 +1,10 @@
 /** DOM rendering for isolated before/after views requested by the user. */
 
-import type {
-  ReviewResult,
-  ScreenReview,
-  ViewReview,
-} from "../review/types.js";
+import type { ReviewResult, ViewReview } from "../review/types.js";
 
 import { currentColorScheme, currentViewport } from "./browse_state.js";
+import { entryWording } from "./entry_wording.js";
+import { isStyleOnlyView } from "./style_evidence.js";
 
 /** Available display modes; Current never requests a comparison. */
 export type DiffMode = "current" | "side" | "overlay" | "difference";
@@ -24,6 +22,8 @@ const STATE_LABELS = {
   removed: "Screen removed",
   unchanged: "No changes to this screen",
 } as const;
+
+const STYLE_LABEL = "Styles this screen uses changed";
 
 /** Render the selected screen, viewport, and scheme without changing the shell. */
 export function renderDiff(
@@ -63,6 +63,7 @@ export function renderDiff(
   }
   stage.replaceChildren();
   stage.dataset["diffKey"] = key;
+  const wording = entryWording(component ? "component" : "screen");
   for (const size of ["mobile", "desktop"] as const) {
     if (viewport !== "both" && viewport !== size) continue;
     const view =
@@ -77,7 +78,10 @@ export function renderDiff(
     section.className = `mbk-diff-view mbk-diff-${size}`;
     section.dataset["diffViewport"] = size;
     const heading = doc.createElement("h3");
-    heading.textContent = `${size === "mobile" ? "Mobile" : "Desktop"} · ${component ? STATE_LABELS[view.state].replace(/screen/g, "variant").replace(/Screen/g, "Variant") : STATE_LABELS[view.state]}${scheme !== view.colorScheme ? " · Light only" : ""}`;
+    const label = isStyleOnlyView(view)
+      ? STYLE_LABEL
+      : STATE_LABELS[view.state];
+    heading.textContent = `${size === "mobile" ? "Mobile" : "Desktop"} · ${wording.label(label)}${scheme !== view.colorScheme ? " · Light only" : ""}`;
     section.append(heading);
     const panes = doc.createElement("div");
     panes.className = "mb-panes";
@@ -89,12 +93,6 @@ export function renderDiff(
     );
     section.append(panes);
     stage.append(section);
-  }
-  const details = doc.querySelector<HTMLElement>("[data-workspace-evidence]");
-  if (details && loaded.result.schemaVersion === 2) {
-    details.hidden = false;
-    details.replaceChildren();
-    evidence(doc, details, screen, loaded.result.baseRef);
   }
 }
 
@@ -146,38 +144,6 @@ function pane(
   } else body.append(frame);
   container.append(body);
   return container;
-}
-
-function evidence(
-  doc: Document,
-  stage: HTMLElement,
-  screen: ScreenReview,
-  base: string,
-): void {
-  const details = doc.createElement("details");
-  details.className = "mb-impact-card";
-  const summary = doc.createElement("summary");
-  summary.textContent = "Comparison details";
-  details.append(
-    summary,
-    message(doc, `Compared with the branch point on ${base}.`),
-  );
-  if (screen.sharedImpact.length > 0) {
-    details.append(
-      message(doc, "Changes to these files may affect this screen:"),
-    );
-    const list = doc.createElement("ul");
-    for (const input of screen.sharedImpact) {
-      const item = doc.createElement("li");
-      item.textContent = input;
-      list.append(item);
-    }
-    details.append(list);
-  }
-  const ignored = [...new Set(screen.views.flatMap((view) => view.ignoredIds))];
-  if (ignored.length > 0)
-    details.append(message(doc, `Excluded content: ${ignored.join(", ")}.`));
-  stage.append(details);
 }
 
 function message(doc: Document, text: string): HTMLElement {

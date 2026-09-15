@@ -1,5 +1,8 @@
 /** Disposable shell input and layout subscriptions, independent of workspace state. */
+import type { LoadedDiff } from "./diff_views.js";
+
 export interface WorkspaceActions {
+  comparison(loaded: LoadedDiff | undefined): void;
   refresh(): void;
   highlight(): void;
   scheme(): void;
@@ -14,6 +17,12 @@ export function installWorkspaceEvents(
   actions: WorkspaceActions,
 ): void {
   const doc = root.ownerDocument;
+  doc.addEventListener(
+    "mokly:comparison",
+    (event) =>
+      actions.comparison((event as CustomEvent<LoadedDiff | undefined>).detail),
+    { signal },
+  );
   root.addEventListener(
     "click",
     (event) => {

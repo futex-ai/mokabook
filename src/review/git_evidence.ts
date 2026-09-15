@@ -1,3 +1,4 @@
+import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
 
 import type { RepositoryEvidence } from "./git.js";
@@ -13,18 +14,20 @@ export class GitRepositoryEvidence
     baseReference: string,
     headReference: string,
   ): Promise<string> {
-    const output = await this.run(
-      ["merge-base", "--", baseReference, headReference],
-      `find merge base of ${baseReference} and ${headReference}`,
-    );
-    const commit = output.trim();
-    if (!/^[a-f0-9]{40,64}$/.test(commit)) {
-      throw new MoklyError(
-        "git-failed",
-        `Git returned an invalid merge base for ${baseReference} and ${headReference}`,
+    return timeAsync("review.base-commit", async () => {
+      const output = await this.run(
+        ["merge-base", "--", baseReference, headReference],
+        `find merge base of ${baseReference} and ${headReference}`,
       );
-    }
-    return commit;
+      const commit = output.trim();
+      if (!/^[a-f0-9]{40,64}$/.test(commit)) {
+        throw new MoklyError(
+          "git-failed",
+          `Git returned an invalid merge base for ${baseReference} and ${headReference}`,
+        );
+      }
+      return commit;
+    });
   }
 
   async changedPaths(

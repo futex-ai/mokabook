@@ -3,12 +3,23 @@ import path from "node:path";
 
 import { validateReviewOut } from "../config/path_validation.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError, errorMessage } from "../errors.js";
 
 import type { ReviewArtifactContent } from "./types.js";
 
 /** Replace an owned Review artifact directory as one filesystem transaction. */
 export async function writeReviewArtifact(
+  files: ReadonlyMap<string, ReviewArtifactContent>,
+  outDir: string,
+  config: ResolvedConfig,
+): Promise<void> {
+  return timeAsync("review.write-artifact", () =>
+    writeMeasured(files, outDir, config),
+  );
+}
+
+async function writeMeasured(
   files: ReadonlyMap<string, ReviewArtifactContent>,
   outDir: string,
   config: ResolvedConfig,

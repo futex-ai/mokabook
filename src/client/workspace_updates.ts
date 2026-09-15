@@ -49,6 +49,7 @@ export function mergeWorkspaceEvidence(
     "status",
     "change",
     "comparison",
+    "resourceEvidence",
     "usageComplete",
     "previewGeneration",
     "renderCapability",

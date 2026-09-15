@@ -11,18 +11,18 @@ test("mixed component design styles retain their actual rendered resource scope"
     ["design-components.css", 32, 15],
     ["design-component-inspection.css", 32, 15],
     ["design-component-details.css", 32, 15],
-    ["design-component-inspector.css", 64, 15],
-    ["design-component-workspace.css", 64, 15],
+    ["design-component-inspector.css", 68, 15],
+    ["design-component-workspace.css", 68, 15],
     ["design-component-view.css", 32, 15],
     ["design-component-controls.css", 11, 15],
-    ["design.css", 64, 15],
+    ["design.css", 68, 15],
     ["design-library.css", 0, 15],
   ] as const)
     await t.test(stylesheet, async () => {
       await fixture.reset();
       await fixture.edit(
         `examples/basic/generated/${stylesheet}`,
-        (source) => source + "\n.layout-regression { gap: 17px; }\n",
+        (source) => source + "\nbody { gap: 17px; }\n",
       );
       const expected = fixture.before.manifest.entries.filter((entry) =>
         generatedViews(entry).some((view) =>
@@ -39,14 +39,6 @@ test("mixed component design styles retain their actual rendered resource scope"
       );
       const result = await fixture.compare();
       const ids = expected.map((entry) => entry.id);
-      if (stylesheet === "design.css")
-        ids.push(
-          "example-action",
-          "example-details",
-          "example-toolbar",
-          "example-tour",
-          "example-welcome",
-        );
       assert.deepEqual(
         result.changes
           .map((change) => (change.after ?? change.before)!.id)
@@ -63,7 +55,7 @@ test("mixed component design styles retain their actual rendered resource scope"
       else
         assert.ok(
           result.sharedImpact.includes("examples/basic/generated/design.css"),
-          "the pre-existing global dependency policy stays conservative",
+          "the glob remains diagnostic evidence without adding unrelated entries",
         );
     });
 });

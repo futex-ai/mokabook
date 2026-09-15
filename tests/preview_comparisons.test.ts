@@ -29,7 +29,7 @@ test("published comparisons retain real baseline bytes, removed routes, and isol
     result.screens.map((screen) => [screen.id, screen.state]),
     [
       ["added", "added"],
-      ["details", "unchanged"],
+      ["details", "changed"],
       ["home", "changed"],
       ["removed", "removed"],
     ],

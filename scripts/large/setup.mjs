@@ -12,7 +12,7 @@ export function fixtureRecord(repository, size, generatedOutput = "committed") {
   return path.join(
     repository,
     ".context",
-    `large-${size.areas}-${size.screens}-${size.rows}${generatedOutput === "derived" ? "-derived" : ""}.json`,
+    `large-${size.areas}-${size.screens}-${size.rows}-${size.stylesheets}-${size.stylesheetShare}${generatedOutput === "derived" ? "-derived" : ""}.json`,
   );
 }
 
@@ -71,6 +71,11 @@ export async function prepareFixture(
     "-qm",
     "test: large catalogue baseline",
   );
+  if (size.stylesheets > 0)
+    await fs.appendFile(
+      path.join(root, "mockups/assets/shared-1.css"),
+      ".scale-unrelated-rule { outline: 1px solid rebeccapurple; }\n",
+    );
   const record = {
     ...fixture,
     setupMs: Math.round(performance.now() - beginning),
@@ -102,7 +107,7 @@ export async function preparedFixture(
     return fixture;
   } catch {
     throw new Error(
-      `Prepare this fixture first: npm run fixture:large -- --areas ${size.areas} --screens ${size.screens} --rows ${size.rows}${generatedOutput === "derived" ? " --derived" : ""}`,
+      `Prepare this fixture first: npm run fixture:large -- --areas ${size.areas} --screens ${size.screens} --rows ${size.rows} --stylesheets ${size.stylesheets} --stylesheet-share ${size.stylesheetShare}${generatedOutput === "derived" ? " --derived" : ""}`,
     );
   }
 }

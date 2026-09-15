@@ -53,7 +53,11 @@ export function installDiffs(
         screen.dataset["diffVariant"],
       );
     }
-    doc.dispatchEvent(new win.Event("mokly:comparison"));
+    doc.dispatchEvent(
+      new win.CustomEvent<LoadedDiff | undefined>("mokly:comparison", {
+        detail: loadedSelection === selectionKey(screen) ? loaded : undefined,
+      }),
+    );
   };
   doc.addEventListener("mokly:evidence-updated", () => {
     request?.abort();
@@ -120,8 +124,9 @@ export function installDiffs(
               : "Comparison unavailable",
           );
         }
+        const payload: unknown = await response.json();
         comparison = {
-          result: parseReviewResult(await response.json()),
+          result: parseReviewResult(payload),
           url: response.url,
         };
       }

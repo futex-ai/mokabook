@@ -11,10 +11,12 @@ import type { ManifestScreen } from "../registry/types.js";
 
 import { copySnapshotDependencies, GitReviewAssetReader } from "./assets.js";
 import { baselineResourceConfig } from "./base_manifest.js";
+import { ComponentMaterialReader } from "./component_resources.js";
 import { SelectedAssetReader } from "./evidence_assets.js";
 import type { BaselineReader } from "./git.js";
 import { CompiledReviewAssetReader } from "./head_assets.js";
 import { baselineReaderForCommit } from "./repository.js";
+import { ResourceComparison } from "./resource_comparison.js";
 import { parseReviewResult } from "./result_validation.js";
 import { compareScreen } from "./screen_compare.js";
 import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
@@ -153,6 +155,15 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
       new Map(),
       new Set(),
       new Set(),
+      new ResourceComparison(
+        new ComponentMaterialReader(beforeReader),
+        new ComponentMaterialReader(afterReader),
+        new Set(source.changedPaths),
+        toPosixPath(
+          path.relative(this.config.repoRoot, this.config.mockupsDir),
+        ),
+      ),
+      this.config,
     );
     return {
       baseCommit: source.baseCommit,

@@ -78,9 +78,29 @@ for (const viewport of ["mobile", "desktop"] as const) {
       "design-review-removed",
       "design-browse-dark-scheme",
       "design-browse-light-only",
+      "design-review-style-excluded",
     ]) {
       const { document } = await designDocument(source, viewport);
       assert.equal(byClass(document, "mbk-cmp-toolbar").length, 0, source);
+    }
+    for (const source of [
+      "design-review-style-matched",
+      "design-review-style-unresolved",
+      "design-review-style-unnamed",
+    ]) {
+      const { document } = await designDocument(source, viewport);
+      const toolbar = byClass(document, "mbk-cmp-toolbar")[0];
+      assert.ok(toolbar, source);
+      assert.deepEqual(
+        destinations(elements(toolbar, (node) => node.tagName === "a")),
+        [],
+        source,
+      );
+      assert.deepEqual(
+        byClass(toolbar, "active").map((node) => textContent(node).trim()),
+        ["Side by side"],
+        source,
+      );
     }
     for (const [source, expected] of [
       ["design-review-dark-scheme", []],

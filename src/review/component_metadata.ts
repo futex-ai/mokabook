@@ -174,9 +174,34 @@ export class ComponentDependencyPolicy {
 export function uniqueReasons(
   reasons: readonly EntryChangeReason[],
 ): EntryChangeReason[] {
-  return [
-    ...new Map(reasons.map((item) => [canonicalJson(item), item])).values(),
-  ].sort(
+  const merged = new Map<string, EntryChangeReason>();
+  for (const reason of reasons) {
+    const key = `${reason.kind}:${"path" in reason ? reason.path : "route" in reason ? reason.route : ""}`;
+    const previous = merged.get(key);
+    if (reason.kind === "dependency" && previous?.kind === "dependency") {
+      const analyses = [previous.analysis, reason.analysis].filter(
+        (analysis) => analysis !== undefined,
+      );
+      if (analyses.length) {
+        merged.set(key, {
+          ...reason,
+          analysis: {
+            status: analyses.some(
+              (analysis) => analysis.status === "unresolved",
+            )
+              ? "unresolved"
+              : "matched",
+            selectors: [
+              ...new Set(analyses.flatMap((analysis) => analysis.selectors)),
+            ].sort(),
+          },
+        });
+        continue;
+      }
+    }
+    merged.set(key, reason);
+  }
+  return [...merged.values()].sort(
     (a, b) =>
       lexical(a.kind, b.kind) ||
       lexical(

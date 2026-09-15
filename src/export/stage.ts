@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { timeAsync } from "../diagnostics/timings.js";
 import type { StaticDelivery } from "../navigation/delivery.js";
 import type { ReviewArtifactContent } from "../review/types.js";
 
@@ -29,12 +30,14 @@ export async function stageExport(
   );
   validateExportReferences(files.files, aliases);
   const deploymentId = finalizeDeployment(files.files, shells, aliases);
-  for (const [name, bytes] of files.files) {
-    assertExportActive(signal);
-    const target = path.join(stage, name);
-    await fs.promises.mkdir(path.dirname(target), { recursive: true });
-    await fs.promises.writeFile(target, bytes);
-  }
+  await timeAsync("review.write-artifact", async () => {
+    for (const [name, bytes] of files.files) {
+      assertExportActive(signal);
+      const target = path.join(stage, name);
+      await fs.promises.mkdir(path.dirname(target), { recursive: true });
+      await fs.promises.writeFile(target, bytes);
+    }
+  });
   await capture?.(files.files);
   return deploymentId;
 }

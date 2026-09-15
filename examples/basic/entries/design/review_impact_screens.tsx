@@ -1,38 +1,19 @@
 import { screen } from "@mokly/mokly";
 
 import { PreviewWorkspace } from "./components/parts/workspace.js";
-import { ComparisonStage } from "./parts/compare.js";
 import { DESTINATIONS } from "./parts/destinations.js";
 import { DetailsPanel } from "./parts/details.js";
-import { MiniWelcome } from "./parts/mini_screens.js";
 import { NavDrawer, NavTree } from "./parts/nav.js";
 import {
   EmptyReviewNav,
   IgnoredImpactCard,
   SharedImpactCard,
+  WelcomeShot,
 } from "./parts/review.js";
-import { ScreenHead, Shell, ViewSwitch } from "./parts/shell.js";
-import { BrowserFrame, PhoneFrame } from "./parts/stage.js";
+import { WelcomeHead } from "./parts/screen_heads.js";
+import { Shell } from "./parts/shell.js";
 
 type ReviewViewport = "desktop" | "mobile";
-
-function WelcomeShot({
-  viewport,
-  comparison = true,
-}: {
-  viewport: ReviewViewport;
-  comparison?: boolean;
-}) {
-  return viewport === "desktop" ? (
-    <BrowserFrame address="example.test/welcome" expandable={!comparison}>
-      <MiniWelcome />
-    </BrowserFrame>
-  ) : (
-    <PhoneFrame small>
-      <MiniWelcome compact />
-    </PhoneFrame>
-  );
-}
 
 function SharedImpactSummary({ viewport }: { viewport: ReviewViewport }) {
   return (
@@ -41,14 +22,8 @@ function SharedImpactSummary({ viewport }: { viewport: ReviewViewport }) {
       viewport={viewport}
       nav={<NavTree activeLabel="Welcome" changedCount={0} />}
     >
-      <ScreenHead
-        crumbs={["Example", "Screens"]}
-        idChip="example-welcome"
-        title="Welcome"
-        action={<ViewSwitch active={viewport} />}
-      />
+      <WelcomeHead active={viewport} />
       <PreviewWorkspace
-        stage={false}
         inspector={
           <DetailsPanel
             subject="welcome"
@@ -57,9 +32,7 @@ function SharedImpactSummary({ viewport }: { viewport: ReviewViewport }) {
           />
         }
         render={(previewViewport) => (
-          <ComparisonStage state="unchanged" viewport={previewViewport}>
-            <WelcomeShot viewport={previewViewport} comparison={false} />
-          </ComparisonStage>
+          <WelcomeShot viewport={previewViewport} comparison={false} />
         )}
       />
     </Shell>
@@ -73,14 +46,8 @@ function IgnoredOnlyCompare({ viewport }: { viewport: ReviewViewport }) {
       viewport={viewport}
       nav={<NavTree activeLabel="Welcome" changedCount={0} />}
     >
-      <ScreenHead
-        action={<ViewSwitch active={viewport} />}
-        crumbs={["Example", "Screens"]}
-        idChip="example-welcome"
-        title="Welcome"
-      />
+      <WelcomeHead active={viewport} />
       <PreviewWorkspace
-        stage={false}
         inspector={
           <DetailsPanel
             subject="welcome"
@@ -89,9 +56,7 @@ function IgnoredOnlyCompare({ viewport }: { viewport: ReviewViewport }) {
           />
         }
         render={(previewViewport) => (
-          <ComparisonStage state="ignored-only" viewport={previewViewport}>
-            <WelcomeShot viewport={previewViewport} comparison={false} />
-          </ComparisonStage>
+          <WelcomeShot viewport={previewViewport} comparison={false} />
         )}
       />
     </Shell>
@@ -110,12 +75,7 @@ function EmptyChanges({ viewport }: { viewport: ReviewViewport }) {
         ) : null
       }
     >
-      <ScreenHead
-        action={<ViewSwitch active={viewport} />}
-        crumbs={["Example", "Screens"]}
-        idChip="example-welcome"
-        title="Welcome"
-      />
+      <WelcomeHead active={viewport} />
       <PreviewWorkspace
         inspector={<DetailsPanel subject="welcome" />}
         render={(previewViewport) => (

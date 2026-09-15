@@ -19,7 +19,7 @@ import {
 } from "./result_records.js";
 import type { ReviewResult } from "./types.js";
 
-/** Decode both published result versions; malformed new records never grant suppression. */
+/** Shared browser/server decoder preserves material flags and validates each view's evidence. */
 export function parseReviewResult(value: unknown): ReviewResult {
   try {
     return validateResult(value);
@@ -54,7 +54,7 @@ function validateResult(value: unknown): ReviewResult {
   const changed = reviewStrings(result.changedPaths, reviewPath);
   reviewStrings(result.sharedImpact, reviewPath);
   const screens = reviewArray(result.screens).map((screen) =>
-    validateReviewScreen(screen, version),
+    validateReviewScreen(screen, version, false, changed),
   );
   requireOrdered(screens, (screen) => String(screen.route));
   const ignoredKeys: string[] = [];
@@ -80,7 +80,7 @@ function validateResult(value: unknown): ReviewResult {
   requireOrdered(ignoredKeys, (key) => key);
   if (version === 3) {
     const components = reviewArray(result.components).map((component) =>
-      validateReviewScreen(component, 3, true),
+      validateReviewScreen(component, 3, true, changed),
     );
     requireOrdered(components, (component) => String(component.id));
     const changes = reviewArray(result.changes).map((entry) =>

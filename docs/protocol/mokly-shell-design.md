@@ -65,6 +65,10 @@ contract until their standalone screens are implemented.
 | `design-review-shared-impact`         | `design/review/impact/shared-impact.html`          | Unchanged screen from All with evidence                   |
 | `design-review-ignored-only`          | `design/review/impact/ignored-only.html`           | Ignored-only Current view with evidence                   |
 | `design-review-empty`                 | `design/review/impact/empty.html`                  | Empty Changes filter retaining Current                    |
+| `design-review-style-matched`         | `design/review/impact/stylesheets/matched.html`    | Changed styles that apply to the screen                   |
+| `design-review-style-unresolved`      | `design/review/impact/stylesheets/unresolved.html` | A style change that can reach anything on the screen      |
+| `design-review-style-unnamed`         | `design/review/impact/stylesheets/unnamed.html`    | The same reach with no style name to list                 |
+| `design-review-style-excluded`        | `design/review/impact/stylesheets/excluded.html`   | Changed stylesheet examined and excluded                  |
 | `design-review-preparing`             | `design/review/availability/preparing.html`        | Changes selected while the comparison is prepared         |
 | `design-review-unavailable`           | `design/review/availability/unavailable.html`      | Changes selected after the comparison could not be made   |
 | `design-page-view`                    | `design/browse/pages/view.html`                    | Complete document in its declared collection              |
@@ -81,6 +85,16 @@ Additional owning groups keep each new page at no more than five screens:
   behavior.
 - `design/browse/publication/catalogue.html` and `changes.html` specify review
   omitted and included, using the existing Welcome stage.
+- `design/review/impact/stylesheets/matched.html`, `unresolved.html`,
+  `unnamed.html`, and `excluded.html` specify rule-aware stylesheet evidence
+  beneath the impact states, so the impact page itself keeps its three screens.
+  Matched, unresolved, and unnamed stay in Changes and open the loaded
+  side-by-side comparison with the "Styles this screen uses changed" stage
+  heading; `unnamed.html` is the same reach with no style name, so its lead
+  sentence ends with a full stop and no list. Excluded is viewed from All, stays
+  out, and shows the plain current preview with no comparison band, no stage
+  heading, and the terminal status line. Their evidence contract is
+  [CSS evidence in the shell](./mokly-css-evidence-shell.md).
 - `design/review/availability/preparing.html` and `unavailable.html` specify the
   two Changes states that carry no comparison data yet, keeping the impact group
   to its own three aggregate outcomes.
@@ -389,7 +403,7 @@ retry controls are available after an explicit comparison request. The target
 component shell makes the band conditional on changed screens, Changed or
 Removed component variants, or verified affected-consumer evidence. The updated mockups omit it on
 every Browse, Added screen/variant, Removed screen, shared-impact-only,
-ignored-only, and empty state. Removed screens show a status badge and current
+ignored-only, excluded-stylesheet-only, and empty state. Removed screens show a status badge and current
 empty state instead. Comparison bands always retain
 an opaque surface and their border. Static catalogues without comparison data
 omit the band.
@@ -398,7 +412,11 @@ eligibility, evidence availability, and initial inspector disclosure are modeled
 independently in the mockups, matching the runtime rather than using the presence
 of a mode band to decide whether Details exists or starts open.
 
-Both viewports reuse the existing device-frame components. Before and current
+Both viewports reuse the existing device-frame components. Stylesheet evidence
+presentation, including its secondary details and the evidence spacing shared
+by the mockup card and the shell, is owned by
+[CSS evidence in the shell](./mokly-css-evidence-shell.md).
+Before and current
 snapshots remain in script-disabled iframes. Overlay composites the current
 pane at 50% opacity; Difference uses CSS difference blending. Missing panes for
 eligible Removed component variants remain side by side for readability in every mode. No pixel percentages are

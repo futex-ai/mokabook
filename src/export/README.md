@@ -22,6 +22,13 @@ removal preserves ancestor context without introducing visual comparisons.
 The shared `server/changed_content.ts` calculation receives the same captured
 asset reader as comparisons, preserving Serve's material-output/resource Changes
 membership without reading a different current-file snapshot.
+For screen-only catalogues, `site.ts` projects per-view resource evidence from
+the existing v2 comparison into shell workspace data. Details can show matched,
+unresolved, and excluded stylesheets in Current without fetching comparison
+JSON, and no extra classification pass is needed for this projection.
+The projection omits views without retained or excluded resources and drops
+screens whose evidence slice is empty. Comparison JSON separately retains all
+view states and the material-change flag.
 
 With comparisons enabled, derived mode awaits `prepareReviewRepository` before
 compiling or capturing head input. Public capture and its final recheck substitute the accepted
@@ -33,6 +40,9 @@ cannot be exported or selected as a destination.
 
 `stage.ts` shares ownership assembly, alias/reference validation, and staged
 file writes between consumer export and repository preview capture.
+With `--debug-timings`, `review.write-artifact` measures its complete staged
+file-write loop, including comparison files. Validation and installation remain
+outside that span; the caller's `export` span includes all phases.
 The [public ownership schema and fixtures](../../docs/protocol/mokly-export-ownership.md)
 define the emitted inventory and reader compatibility. Tests exercise them
 against this parser and an independent reader in the packed-consumer smoke.

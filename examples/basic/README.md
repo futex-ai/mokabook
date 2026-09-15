@@ -24,7 +24,7 @@ The [large fixture](../../tests/fixtures/large/README.md)
 uses the same Firna/React Native Web rendering stack with configurable volume,
 without expanding this example or slowing ordinary development startup.
 
-Mokly's 64 design screens now use 15 registered shared components, including
+Mokly's 68 design screens now use 15 registered shared components, including
 the footer tabs panel. Open **Components → Design → Shared components** for Chrome, Controls,
 Inspector and Preview galleries with 58 saved variants, real mobile/desktop
 previews and editable local props. The outer Components and Usage tabs show actual
@@ -88,9 +88,9 @@ render plain React DOM need none of this and can keep a plain
 `renderToStaticMarkup` adapter.
 
 The `Design` navigation group is the owning design catalogue for Mokly's
-Browse and Changes views. Its thirty-two Browse, page, publication and Changes screens cover navigation,
-Details, tags, color schemes, comparison outcomes, and the preparing and
-unavailable comparison states. Thirty-two component
+Browse and Changes views. Its thirty-six Browse, page, publication and Changes
+screens cover navigation, Details, tags, color schemes, comparison outcomes,
+stylesheet evidence, and the preparing and unavailable comparison states. Thirty-two component
 explorer screens add component pages, saved variants, affected screens,
 repeated/nested inspection, highlighting, and empty or removed states. The shared icon inspector and complete controls
 mockups include edited/reset, optional, loading, validation, retry, comparison,
@@ -134,7 +134,7 @@ galleries; `inspector` shows both closed-panel layouts.
 Each child gallery lists at most five owning screens; inspection also links
 two selected-instance screens in a nested gallery.
 
-All sixty-four design screens use `colorSchemes: ["light"]`: they draw the
+All sixty-eight design screens use `colorSchemes: ["light"]`: they draw the
 Mokly shell, including the existing dark-selection examples. The two product
 screens inherit the catalogue's light/dark settings and prove dark generation.
 Design headers retain the approved screen-stack logo: 17px overlapping mobile
@@ -151,12 +151,17 @@ A shared implementation edit appears on its component page and lists consuming
 screens as affected; independent screen inputs, slots or instance changes still
 appear in Changes. This is tested against fully registered baseline snapshots.
 
-The shared inspector/workspace sheets cover all 64 design screens and standalone
+The shared inspector/workspace sheets cover all 68 design screens and standalone
 library hosts. Other mixed component-design sheets remain scoped to the 32
 component-design routes and hosts; the controls sheet additionally remains
-scoped to its eleven owning screen routes. Global `review.sharedImpact` policy is
-unchanged. Actual rendered resource references and generated usage determine the
-scope; regression tests cover each exclusive sheet and the mixed/global sheets.
+scoped to its eleven owning screen routes. `review.sharedImpact` is fallback
+impact evidence for files the rendered resource graph cannot see, such as source
+or token modules. Linked stylesheets, including imported sheets, are attributed
+by rule: a changed rule must potentially match a view or be unresolved to keep
+that dependency. A broad stylesheet glob cannot restore an excluded stylesheet
+or add an unreferenced public file to Changes. Actual rendered references,
+generated usage and component ownership determine the scope; regression tests
+cover each exclusive sheet and the mixed/global sheets.
 
 The recorded tokens and responsive rules live in the
 [shell design contract](../../docs/protocol/mokly-shell-design.md); component
@@ -176,6 +181,11 @@ disclosure are independent. The
 shared-impact and ignored-only examples open from All with zero Changes and one
 Current preview. Dependency evidence remains available in Details, while
 unchanged output and paired ignored-only edits do not fill the review list.
+The nested `design/review/impact/stylesheets/` group adds the rule-aware
+stylesheet states: a changed stylesheet whose changed styles apply to the
+screen, one whose change can apply anywhere, and one examined and excluded so
+the screen stays out of Changes. Their contract is
+[CSS change attribution](../../docs/protocol/mokly-css-attribution.md).
 
 From the repository root:
 

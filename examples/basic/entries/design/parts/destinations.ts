@@ -32,6 +32,10 @@ export const DESTINATIONS = {
   shared: "design-review-shared-impact",
   ignored: "design-review-ignored-only",
   empty: "design-review-empty",
+  styleMatched: "design-review-style-matched",
+  styleUnresolved: "design-review-style-unresolved",
+  styleUnnamed: "design-review-style-unnamed",
+  styleExcluded: "design-review-style-excluded",
   preparing: "design-review-preparing",
   unavailable: "design-review-unavailable",
 } as const;

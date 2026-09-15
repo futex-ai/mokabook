@@ -3,17 +3,23 @@ import crypto from "node:crypto";
 
 import type { ColorScheme, Viewport } from "../authoring/types.js";
 import type { Compilation } from "../build/compile.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
 import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
 import type { ManifestScreen } from "../registry/types.js";
 import { VIEWPORTS } from "../registry/views.js";
 
 import {
+  analysisOwnsStylesheet,
+  assertViewAnalysisScope,
+} from "./css/paths.js";
+import {
   normalizeHistoricalDocument,
   normalizeReviewPair,
   normalizeSingleDocument,
 } from "./ignore.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
+import type { ResourceComparison } from "./resource_comparison.js";
 import {
   aggregateState,
   fragmentForView,
@@ -36,6 +42,8 @@ export async function compareScreen(
   files: Map<string, ReviewArtifactContent>,
   baseSeeds: Set<string>,
   headSeeds: Set<string>,
+  resources: ResourceComparison,
+  config: ResolvedConfig,
 ): Promise<ScreenReview> {
   const entry = head ?? base;
   if (!entry)
@@ -84,19 +92,56 @@ export async function compareScreen(
         addArtifactFile(files, afterPath, after);
         headSeeds.add(headFragment);
       }
-      views.push(
-        compareView(
-          before,
-          after,
-          entry.route,
-          viewport,
-          colorScheme,
-          beforePath,
-          afterPath,
-        ),
+      const view = compareView(
+        before,
+        after,
+        entry.route,
+        viewport,
+        colorScheme,
+        beforePath,
+        afterPath,
       );
+      const normalized =
+        before !== undefined && after !== undefined
+          ? normalizeReviewPair(
+              normalizeHistoricalDocument(before),
+              after,
+              entry.route,
+            )
+          : {
+              base:
+                before === undefined
+                  ? undefined
+                  : normalizeSingleDocument(
+                      normalizeHistoricalDocument(before),
+                      entry.route,
+                    ),
+              head:
+                after === undefined
+                  ? undefined
+                  : normalizeSingleDocument(after, entry.route),
+            };
+      const evidence = await resources.compare(
+        baseFragment && normalized.base !== undefined
+          ? { path: baseFragment, html: normalized.base }
+          : undefined,
+        headFragment && normalized.head !== undefined
+          ? { path: headFragment, html: normalized.head }
+          : undefined,
+      );
+      views.push({
+        ...view,
+        ...evidence,
+        state:
+          view.state !== "added" &&
+          view.state !== "removed" &&
+          evidence.reasons?.length
+            ? "changed"
+            : view.state,
+      });
     }
   }
+  assertViewAnalysisScope(views, config);
   const dependencies = [
     ...new Set([...(base?.dependencies ?? []), ...(head?.dependencies ?? [])]),
   ].sort();
@@ -109,7 +154,16 @@ export async function compareScreen(
     dependencies,
     id: entry.id,
     route: entry.route,
-    sharedImpact: [...new Set([...sharedImpact, ...dependencyImpact])].sort(),
+    sharedImpact: [
+      ...new Set([
+        ...[...sharedImpact, ...dependencyImpact].filter(
+          (path) => !analysisOwnsStylesheet(path, config),
+        ),
+        ...views.flatMap(
+          (view) => view.reasons?.map((reason) => reason.path) ?? [],
+        ),
+      ]),
+    ].sort(),
     state: aggregateState(views.map((view) => view.state)),
     title: entry.title,
     views,
@@ -139,6 +193,7 @@ function compareView(
       ...(afterPath ? { afterPath } : {}),
       colorScheme,
       ignoredIds: [],
+      material: true,
       state: "added",
       viewport,
     };
@@ -147,6 +202,7 @@ function compareView(
       ...(beforePath ? { beforePath } : {}),
       colorScheme,
       ignoredIds: [],
+      material: true,
       state: "removed",
       viewport,
     };
@@ -163,6 +219,7 @@ function compareView(
     ...(beforePath ? { beforePath } : {}),
     colorScheme,
     ignoredIds: normalized.ignoredIds,
+    ...(!normalizedEqual ? { material: true as const } : {}),
     state: rawEqual
       ? "unchanged"
       : normalizedEqual

@@ -3,14 +3,15 @@ import { DESTINATIONS } from "./destinations.js";
 
 interface MiniScreenProps {
   compact?: boolean;
+  restyled?: boolean;
   revised?: boolean;
 }
 
 /** Miniature depiction of the example Welcome fragment. */
-export function MiniWelcome({ compact, revised }: MiniScreenProps) {
+export function MiniWelcome({ compact, restyled, revised }: MiniScreenProps) {
   const navigation = useDesignNavigation();
   return (
-    <div className="mbk-shot">
+    <div className={restyled ? "mbk-shot mbk-shot--restyled" : "mbk-shot"}>
       <div className="mbk-shot-pad">
         <div className="mbk-shot-nav">
           {compact ? "Menu" : "Example navigation"}

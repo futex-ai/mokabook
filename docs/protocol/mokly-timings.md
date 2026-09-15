@@ -42,6 +42,53 @@ resource discovery, transactional output, and Changes have separate spans.
 Graph work for watcher inventory and source-freshness validation is deliberately
 visible even when it repeats compilation's graph work.
 
+Review phases use the same session, role and parent context as their caller:
+
+- `review.base-commit` measures Git merge-base resolution and commit validation.
+  Pinned readers reuse the resolved commit without another Git span.
+- `review.changed-paths` covers output exclusions, tracked/untracked discovery,
+  deduplication and sorting, including later input-freshness checks.
+- `review.base-manifest` covers historical manifest selection, reading, parsing
+  and validation, including compatibility fallback.
+- `review.base-documents` covers each bulk baseline-document read, including
+  live component prefetch and bounded live document-comparison batches. It does
+  not include subsequent lazy resource reads or an already-prefetched no-op.
+- `review.compare-screens` surrounds the complete screen comparison loop. The
+  component-aware loop also compares saved variants and entry metadata. Live
+  document checks use separate occurrences for material and resource comparison
+  loops; a baseline-document batch span can therefore be nested inside one.
+- `review.resource-graph` covers reference discovery and transitive traversal
+  for each material view or live document, and each before/after snapshot-copy
+  closure. It includes resource reads and copying into the in-memory artifact.
+  Cached traversals are still measured; watcher inventory keeps its own stages.
+- `review.css-analysis` measures the synchronous parse/diff/match/reduce pass
+  for one changed, reachable stylesheet and one before/after document pair.
+  It includes parser-cache lookups or parsing, and runs for cache hits and empty
+  diffs. Resource reads, input document-tree preparation and aggregation across
+  embedded documents remain outside this span. A contained parse or selector
+  failure returns unresolved evidence with span status `ok`; an escaping error
+  ends the span with `error`. It logs no paths, selectors, CSS or document text.
+- `review.write-artifact` surrounds the owned Review directory transaction,
+  including validation and cleanup. Export uses it for the complete artifact's
+  staged file-write loop, including comparison files; export validation and
+  installation remain outside that span.
+
+Export review phases nest under `export`. Serve review phases nest under
+`changes.classify`; its background worker opens a local span of that name in
+its own `background` session. This is distinct from the supervising process's
+wait for classification and has no cross-session parent id. Resource traversals
+inside comparison loops are children of those loops. Repeated names identify
+separate invocations, and concurrent viewport traversals can overlap. Build and
+Check do not run review, so they emit no `review.*` stages. Instrumentation never
+adds review work to a command or writes artifacts during background classification.
+
+For aggregate stage time, take the union of each stage's
+`[elapsedMs - durationMs, elapsedMs]` end-record intervals within one session.
+For the scale fixture's CSS share of total review time, divide the union of
+`review.css-analysis` intervals by the enclosing background worker's
+`changes.classify` duration, separately for cold and warm runs. Do not use the
+supervisor's wait span, whole startup time, or sums across sessions.
+
 ## Historical baseline phases
 
 `baseline.resolve` measures repository-root validation and resolving (or accepting
@@ -75,6 +122,13 @@ slots, both viewports and color schemes, logical links, whole-document pages,
 flows, local CSS imports, and images. Sizes are configurable. It is a repeatable
 workload for locating scaling costs, not a claim of identical Accounting data
 or timings. It must provide a Git baseline so Changes performs real comparison.
+Additional shared stylesheets have configurable count and per-area screen share
+(defaults: four and 0.5, rounded up). After the baseline commit, setup adds an
+unrelated rule to the first sheet. Background Changes therefore exercises actual
+stylesheet dependency evidence; rule attribution excludes the unrelated rule
+from every linked screen, so the benchmark expects zero Changes, including
+flows. The fixture guide documents
+zero-count/share cases and the separate complete-export measurement.
 
 `fixture:large` explicitly prepares and records an isolated baseline under
 `.context`; setup time includes exhaustive Build and Git and is reported separately.

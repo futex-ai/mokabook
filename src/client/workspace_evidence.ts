@@ -1,18 +1,37 @@
 /** Factual comparison evidence belongs in Details, never in the canvas. */
 import { decodeProps } from "../components/codec.js";
+import type { ReviewResult } from "../review/types.js";
 import type { WorkspaceData } from "../server/shell/workspace_data.js";
 
+import { entryWording } from "./entry_wording.js";
 import { element } from "./inspector_panels.js";
 import { propText } from "./prop_display.js";
+import {
+  appendChangedFiles,
+  appendExcludedStylesheets,
+  appendStyleOutcomes,
+  excludedStylesheets,
+  retainedPaths,
+  styleOutcomes,
+} from "./style_evidence.js";
+import { workspaceComparisonEvidence } from "./workspace_evidence_data.js";
 
+/**
+ * Merge classification with loaded evidence; loaded details win, preserving
+ * selector unions and unresolved precedence. Retained paths suppress exclusions
+ * across all selected views. Only Unmodified gets the terminal no-changes line.
+ * See docs/protocol/mokly-css-evidence-shell.md#shell-derivation.
+ */
 export function renderWorkspaceEvidence(
   panel: HTMLElement,
   data: WorkspaceData,
   variantId?: string,
+  loaded?: ReviewResult,
 ): void {
   const doc = panel.ownerDocument;
+  const evidence = workspaceComparisonEvidence(data, variantId, loaded);
   panel.replaceChildren();
-  panel.hidden = data.status === undefined;
+  panel.hidden = data.status === undefined && !evidence.comparison;
   if (panel.hidden) return;
   panel.append(
     element(doc, "h3", "Comparison details"),
@@ -52,30 +71,39 @@ export function renderWorkspaceEvidence(
         element(doc, "pre", propText(decodeProps(props))),
       );
   }
-  for (const reason of data.change?.reasons ?? [])
-    panel.append(
-      element(
-        doc,
-        "p",
-        reason.kind === "dependency"
-          ? `Related file changed: ${reason.path}`
-          : reason.kind === "screen"
+  for (const reason of evidence.reasons)
+    if (reason.kind !== "dependency")
+      panel.append(
+        element(
+          doc,
+          "p",
+          reason.kind === "screen"
             ? `A screen in this flow changed: ${reason.route}`
             : labels[reason.kind],
-      ),
-    );
-  if (data.comparison) {
-    const views =
-      "variants" in data.comparison
-        ? (data.comparison.variants.find((item) => item.id === variantId)
-            ?.views ?? [])
-        : data.comparison.views;
+        ),
+      );
+  const retained = [
+    ...new Set([...retainedPaths(evidence.reasons), ...evidence.legacyPaths]),
+  ].sort();
+  appendChangedFiles(doc, panel, retained);
+  appendStyleOutcomes(doc, panel, styleOutcomes(evidence.reasons));
+  appendExcludedStylesheets(
+    doc,
+    panel,
+    excludedStylesheets(evidence.resourceViews, retained),
+  );
+  const { comparison, views } = evidence;
+  if (comparison) {
     const ignored = [...new Set(views.flatMap((view) => view.ignoredIds))];
     if (ignored.length)
       panel.append(
         element(doc, "p", `Excluded content: ${ignored.join(", ")}.`),
       );
-    if (!data.change && views.some((view) => view.state === "changed"))
+    if (
+      data.comparison &&
+      !data.change &&
+      views.some((view) => view.state === "changed")
+    )
       panel.append(
         element(
           doc,
@@ -83,10 +111,8 @@ export function renderWorkspaceEvidence(
           "Shared component changes affect this preview. This page has no independent entry in Changes.",
         ),
       );
-    if ("variants" in data.comparison) {
-      const variant = data.comparison.variants.find(
-        (item) => item.id === variantId,
-      );
+    if ("variants" in comparison) {
+      const variant = comparison.variants.find((item) => item.id === variantId);
       if (
         variant?.before &&
         variant.after &&
@@ -106,5 +132,5 @@ export function renderWorkspaceEvidence(
     }
   }
   if (data.status === "Unmodified")
-    panel.append(element(doc, "p", "No changes to this saved view."));
+    panel.append(element(doc, "p", entryWording(data.entry.kind).noChanges));
 }

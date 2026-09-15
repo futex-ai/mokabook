@@ -15,8 +15,7 @@ test("each exclusive library stylesheet changes its component and only affects r
       await fixture.reset();
       await fixture.edit(
         `examples/basic/generated/design-library/${group}/${slug}.css`,
-        (source) =>
-          source + "\n.shared-style-regression { outline-width: 3px; }\n",
+        (source) => source + "\nbody { outline-width: 3px; }\n",
       );
       const result = await fixture.compare();
       assert.deepEqual(

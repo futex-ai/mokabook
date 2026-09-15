@@ -8,19 +8,26 @@ import {
 } from "../components/comparison_projection.js";
 import { validateComponentRanges } from "../components/ranges.js";
 import type { GeneratedComponentView } from "../components/views.js";
+import { MoklyError } from "../errors.js";
 
 import type { ComponentDependencyPolicy } from "./component_metadata.js";
+import {
+  ownedCssReasons,
+  type OwnedCssReason,
+} from "./component_resource_attribution.js";
 import { changedResourceBytes } from "./component_resource_changes.js";
 import type { ComponentMaterialReader } from "./component_resources.js";
 import type { EntryChangeReason } from "./component_types.js";
 import { normalizeReviewPair, normalizeSingleDocument } from "./ignore.js";
 import { snapshotPath } from "./paths.js";
+import type { ResourceComparison } from "./resource_comparison.js";
 import type { ViewReview } from "./types.js";
 
 export interface ComparedComponentView {
   view: ViewReview;
   reasons: readonly EntryChangeReason[];
   changedImplementations: ReadonlySet<string>;
+  ownedResources: readonly OwnedCssReason[];
 }
 export interface ComponentViewContext {
   beforeReader: ComponentMaterialReader;
@@ -28,6 +35,7 @@ export interface ComponentViewContext {
   dependencies: ComponentDependencyPolicy;
   changed: ReadonlySet<string>;
   prefix: string;
+  resources: ResourceComparison;
   compareResourceBytes?: boolean;
 }
 /** Compare material and declared inputs without altering the retained view documents. */
@@ -38,7 +46,11 @@ export async function compareComponentView(
   root?: string,
 ): Promise<ComparedComponentView> {
   const selected = after ?? before;
-  if (!selected) throw new Error("Comparison view requires at least one side");
+  if (!selected)
+    throw new MoklyError(
+      "review-invalid",
+      "Comparison view requires at least one side",
+    );
   const base = before
     ? await context.beforeReader.text(before.path)
     : undefined;
@@ -60,16 +72,28 @@ export async function compareComponentView(
     state: before ? "removed" : "added",
   };
   if (base === undefined || head === undefined) {
-    normalizeSingleDocument(
+    const normalized = normalizeSingleDocument(
       base !== undefined
         ? stripHistoricalMarkers(base)
         : stripMarkers(head!, after!.usage, headRanges),
       selected.path,
     );
+    const evidence = await context.resources.compare(
+      before ? { path: before.path, html: normalized } : undefined,
+      after ? { path: after.path, html: normalized } : undefined,
+    );
     return {
-      view,
-      reasons: [{ kind: "material" }],
+      view: { ...view, ...evidence, material: true },
+      reasons: [{ kind: "material" }, ...(evidence.reasons ?? [])],
       changedImplementations: new Set(),
+      ownedResources: ownedCssReasons(
+        evidence.reasons ?? [],
+        context.dependencies,
+        context.prefix,
+        before?.usage,
+        after?.usage,
+        root,
+      ),
     };
   }
   const projected = projectComponentPair(
@@ -86,6 +110,11 @@ export async function compareComponentView(
   if (projected.before !== projected.after) reasons.push({ kind: "material" });
   if (projected.inputs) reasons.push({ kind: "inputs" });
   if (projected.structure) reasons.push({ kind: "structure" });
+  const actual = normalizeReviewPair(
+    stripHistoricalMarkers(base),
+    stripMarkers(head, after?.usage, headRanges),
+    selected.path,
+  );
   const repoPath = (path: string) =>
     context.prefix ? `${context.prefix}/${path}` : path;
   const excluded = (path: string) =>
@@ -97,61 +126,65 @@ export async function compareComponentView(
       after?.usage,
       root,
     );
-  const baseResources = await context.beforeReader.resources(
-    before!.path,
-    projected.before,
+  const evidence = await context.resources.compare(
+    { path: before!.path, html: projected.before },
+    { path: after!.path, html: projected.after },
     excluded,
+    { before: actual.base, after: actual.head },
   );
-  const headResources = await context.afterReader.resources(
-    after!.path,
-    projected.after,
-    excluded,
+  reasons.push(...(evidence.reasons ?? []));
+  const actualEvidence = await context.resources.compare(
+    { path: before!.path, html: actual.base },
+    { path: after!.path, html: actual.head },
   );
   const byteChanges = context.compareResourceBytes
     ? await changedResourceBytes(
-        baseResources,
-        headResources,
+        await context.beforeReader.resources(
+          before!.path,
+          projected.before,
+          excluded,
+        ),
+        await context.afterReader.resources(
+          after!.path,
+          projected.after,
+          excluded,
+        ),
         context.beforeReader,
         context.afterReader,
       )
     : new Set<string>();
-  for (const resource of new Set([...baseResources, ...headResources])) {
-    const path = repoPath(resource);
-    if (excluded(resource)) continue;
-    if (context.changed.has(path)) reasons.push({ kind: "dependency", path });
-    else if (byteChanges.has(resource)) reasons.push({ kind: "material" });
-  }
-  const actual = normalizeReviewPair(
-    stripHistoricalMarkers(base),
-    stripMarkers(head, after?.usage, headRanges),
-    selected.path,
-  );
-  const actualBefore = await context.beforeReader.resources(
-    before!.path,
-    actual.base,
-    () => false,
-  );
-  const actualAfter = await context.afterReader.resources(
-    after!.path,
-    actual.head,
-    () => false,
-  );
+  if ([...byteChanges].some((route) => !context.changed.has(repoPath(route))))
+    reasons.push({ kind: "material" });
   const actualByteChanges = context.compareResourceBytes
     ? await changedResourceBytes(
-        actualBefore,
-        actualAfter,
+        await context.beforeReader.resources(
+          before!.path,
+          actual.base,
+          () => false,
+        ),
+        await context.afterReader.resources(
+          after!.path,
+          actual.head,
+          () => false,
+        ),
         context.beforeReader,
         context.afterReader,
       )
     : new Set<string>();
-  const actualResourceChange = [
-    ...new Set([...actualBefore, ...actualAfter]),
-  ].some(
-    (resource) =>
-      context.changed.has(repoPath(resource)) ||
-      actualByteChanges.has(resource),
-  );
+  const actualResourceChange =
+    Boolean(actualEvidence.reasons?.length) ||
+    [...actualByteChanges].some(
+      (route) => !context.changed.has(repoPath(route)),
+    );
   return {
+    ownedResources: ownedCssReasons(
+      actualEvidence.reasons ?? [],
+      context.dependencies,
+      context.prefix,
+      before?.usage,
+      after?.usage,
+      root,
+    ),
     changedImplementations: changedComponentImplementations(
       base,
       head,
@@ -162,7 +195,9 @@ export async function compareComponentView(
     ),
     view: {
       ...view,
+      ...actualEvidence,
       ignoredIds: actual.ignoredIds,
+      ...(actual.base !== actual.head ? { material: true as const } : {}),
       state:
         actual.base !== actual.head || actualResourceChange
           ? "changed"

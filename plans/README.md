@@ -8,6 +8,9 @@
 
 ## Completed
 
+- [CSS Change Attribution](./css-change-attribution.md) — delivered, two
+  rounds of review fixes applied, and reviewed three times; nine follow-up
+  findings from the third review await the user's decision.
 - [Review Fix Follow-ups](./review-fix-followups.md) — delivered and
   verified; review findings are recorded for the user's decision.
 - [Derived Baseline Review Fixes](./derived-baseline-review-fixes.md) —

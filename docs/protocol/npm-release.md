@@ -46,6 +46,11 @@ dependencies.
 The exporter's Koffi dependency supplies OS-enforced exclusive directory rename;
 its optional platform binaries must remain available for export. The native
 bridge is lazy and does not load for build/check/serve or help.
+The standalone CSS rule parser uses the production `lightningcss` dependency.
+Keep its optional native packages installed: Linux x64 glibc, macOS arm64/x64,
+and Windows x64 binaries cover the CI runners. Its Node floor is below Mokly's
+22.14 floor. The installed Node package has no automatic WASM fallback;
+upstream's separate `lightningcss-wasm` package is not a Mokly dependency.
 Publish uses `tar-stream` to encode finalized export bytes as portable USTAR/PAX
 without invoking a platform tar executable or walking the output again.
 
@@ -101,8 +106,10 @@ gate on Ubuntu:
 - release Node 24 with npm 11.7.0.
 
 Both install Rust 1.95.0, install Chromium, and run `cargo xtask check`.
-Focused macOS and Windows jobs additionally run native export move and
-destination-race tests at the minimum Node version. The `Required CI` aggregator
+Focused macOS and Windows jobs additionally run native export move,
+destination-race, and CSS rule parser/diff tests at the minimum Node version.
+The Ubuntu complete gates also exercise CSS parsing on Node 22.14 and 24.
+The `Required CI` aggregator
 fails unless both complete gates and both platform jobs succeed and is the
 branch-rule status to require. CI checks out complete Git history so the preview regression
 can resolve `origin/main`, and uses `npm ci` with the committed lockfile. Action

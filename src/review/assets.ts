@@ -8,6 +8,7 @@ import {
   publicPathLocation,
 } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError, errorMessage } from "../errors.js";
 
 import { referencedRoutes } from "./asset_references.js";
@@ -24,6 +25,10 @@ export interface ReviewAssetReader {
   readMany?(
     routes: readonly string[],
   ): Promise<ReadonlyMap<string, Uint8Array>>;
+  /** Missing files are explicit; unsafe or non-regular files still reject. */
+  readManyIfExists?(
+    routes: readonly string[],
+  ): Promise<ReadonlyMap<string, Uint8Array | undefined>>;
 }
 
 /** A worktree reader that distinguishes absent files from invalid resources. */
@@ -112,6 +117,20 @@ export class GitReviewAssetReader implements ReviewAssetReader {
   async readMany(
     routes: readonly string[],
   ): Promise<ReadonlyMap<string, Uint8Array>> {
+    const loaded = await this.readManyIfExists(routes);
+    const files = new Map<string, Uint8Array>();
+    for (const route of routes) {
+      const content = loaded.get(route);
+      if (content === undefined)
+        throw assetError(route, "not a regular Git file (missing)");
+      files.set(route, content);
+    }
+    return files;
+  }
+
+  async readManyIfExists(
+    routes: readonly string[],
+  ): Promise<ReadonlyMap<string, Uint8Array | undefined>> {
     const requested = [...new Set(routes)].sort().map((route) => {
       assertPublicStaticRoute(route, this.config);
       return {
@@ -125,16 +144,16 @@ export class GitReviewAssetReader implements ReviewAssetReader {
       const gitFiles = this.git.readFiles
         ? await this.git.readFiles(this.commit, repoPaths)
         : await readGitFilesIndividually(this.git, this.commit, repoPaths);
-      const files = new Map<string, Uint8Array>();
+      const files = new Map<string, Uint8Array | undefined>();
       for (const { repoPath, route } of requested) {
         const file = gitFiles.get(repoPath);
-        if (!file || file.kind !== "regular") {
+        if (!file || (file.kind !== "regular" && file.kind !== "missing")) {
           throw assetError(
             route,
             `not a regular Git file (${file?.kind ?? "missing"})`,
           );
         }
-        files.set(route, file.bytes);
+        files.set(route, file.kind === "regular" ? file.bytes : undefined);
       }
       return files;
     } catch (error) {
@@ -163,38 +182,40 @@ export async function copySnapshotDependencies(
     routes: readonly string[],
   ) => Promise<ReadonlyMap<string, ReviewArtifactContent>>,
 ): Promise<void> {
-  let queued = [...seedRoutes].sort();
-  const seen = new Set<string>();
-  while (queued.length > 0) {
-    const batch = queued.filter((route) => !seen.has(route));
-    for (const route of batch) seen.add(route);
-    const missing = batch.filter(
-      (route) => files.get(snapshotPath(side, route)) === undefined,
-    );
-    if (missing.length > 0) {
-      const loaded = readMany
-        ? await readMany(missing)
-        : await readIndividually(missing, read);
-      for (const route of missing) {
-        const content = loaded.get(route);
-        if (content === undefined) {
-          throw assetError(route, "batch reader omitted the file");
+  return timeAsync("review.resource-graph", async () => {
+    let queued = [...seedRoutes].sort();
+    const seen = new Set<string>();
+    while (queued.length > 0) {
+      const batch = queued.filter((route) => !seen.has(route));
+      for (const route of batch) seen.add(route);
+      const missing = batch.filter(
+        (route) => files.get(snapshotPath(side, route)) === undefined,
+      );
+      if (missing.length > 0) {
+        const loaded = readMany
+          ? await readMany(missing)
+          : await readIndividually(missing, read);
+        for (const route of missing) {
+          const content = loaded.get(route);
+          if (content === undefined) {
+            throw assetError(route, "batch reader omitted the file");
+          }
+          addArtifactFile(files, snapshotPath(side, route), content);
         }
-        addArtifactFile(files, snapshotPath(side, route), content);
       }
+      const discovered = new Set<string>();
+      for (const route of batch) {
+        const content = files.get(snapshotPath(side, route));
+        if (content === undefined) {
+          throw assetError(route, "snapshot dependency is unavailable");
+        }
+        for (const dependency of referencedRoutes(route, content)) {
+          if (!seen.has(dependency)) discovered.add(dependency);
+        }
+      }
+      queued = [...discovered].sort();
     }
-    const discovered = new Set<string>();
-    for (const route of batch) {
-      const content = files.get(snapshotPath(side, route));
-      if (content === undefined) {
-        throw assetError(route, "snapshot dependency is unavailable");
-      }
-      for (const dependency of referencedRoutes(route, content)) {
-        if (!seen.has(dependency)) discovered.add(dependency);
-      }
-    }
-    queued = [...discovered].sort();
-  }
+  });
 }
 
 async function readIndividually(

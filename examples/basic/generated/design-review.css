@@ -27,8 +27,16 @@
   font-weight: 600;
 }
 
-.mbk-comparison-details p, .mbk-comparison-details ul {
+/* The inspector-scoped copies outrank the later `.ce-inspector p` rule, which
+   otherwise wins on equal specificity and takes the card's authored spacing. */
+.mbk-comparison-details p, .mbk-comparison-details ul,
+.ce-inspector .mbk-comparison-details p, .ce-inspector .mbk-comparison-details ul {
   margin: 8px 0 0;
+}
+
+.mbk-comparison-details ul + p,
+.ce-inspector .mbk-comparison-details ul + p {
+  margin-top: 14px;
 }
 
 .mbk-compare {

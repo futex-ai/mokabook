@@ -1,6 +1,7 @@
 import type { Compilation } from "../build/compile.js";
 import { generatedViews } from "../components/views.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import type { Manifest } from "../registry/types.js";
 
 import {
@@ -8,6 +9,7 @@ import {
   type GitReviewAssetReader,
   type ReviewAssetReader,
 } from "./assets.js";
+import { CompilationAssetReader } from "./compilation_assets.js";
 import { classifyComponents } from "./component_classification.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type { ReviewArtifact, ReviewArtifactContent } from "./types.js";
@@ -29,18 +31,29 @@ export async function compareComponentCatalogue(
   const headPaths = compilation.manifest.entries.flatMap((entry) =>
     generatedViews(entry).map((view) => view.path),
   );
-  const baseFiles = await baseReader.readMany(basePaths);
+  const baseFiles = await timeAsync("review.base-documents", () =>
+    baseReader.readMany(basePaths),
+  );
   const beforeReader: ReviewAssetReader = {
+    readManyIfExists: (routes) => baseReader.readManyIfExists(routes),
     read: async (route) => baseFiles.get(route) ?? baseReader.read(route),
-  };
-  const afterReader: ReviewAssetReader = {
-    read: async (route) => {
-      const generated = compilation.outputs.get(route);
-      return generated === undefined
-        ? headReader.read(route)
-        : Buffer.from(generated);
+    readMany: async (routes) => {
+      const missing = routes.filter((route) => !baseFiles.has(route));
+      const loaded = missing.length
+        ? await baseReader.readMany(missing)
+        : new Map<string, Uint8Array>();
+      return new Map(
+        routes.map((route) => [
+          route,
+          baseFiles.get(route) ?? loaded.get(route)!,
+        ]),
+      );
     },
   };
+  const afterReader = new CompilationAssetReader(
+    compilation.outputs,
+    headReader,
+  );
   const result = await classifyComponents({
     before: baseline,
     after: compilation.manifest,

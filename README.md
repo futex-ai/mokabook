@@ -15,6 +15,11 @@ highlighting. Component implementation edits appear once in Changes; consumers
 are listed as affected, while changes to their supplied props remain screen
 changes. See the [component authoring guide](./src/components/README.md).
 
+Screen-only catalogues also show stylesheet evidence in Details before opening
+a comparison: changed styles that may apply and examined stylesheets whose
+changes do not apply. Opening a comparison preserves those details and adds its
+retained evidence. See [CSS change attribution](./docs/protocol/mokly-css-attribution.md).
+
 ## Use Mokly
 
 Install Mokly and its React peers in the repository that owns the screens:
@@ -43,6 +48,12 @@ export default defineConfig({
 });
 ```
 
+Use `review.sharedImpact` as fallback impact evidence for files the rendered
+resource graph cannot see, such as source components or token modules. Linked
+stylesheets and their imports are attributed by rule automatically: a view keeps
+the dependency only when a changed rule could match or cannot be resolved.
+Unmatched rules are examined and excluded; a broad stylesheet glob cannot
+override that exclusion or add unreferenced public files to Changes.
 This configuration uses the default `generatedOutput: "committed"`. Commit the
 generated HTML and manifest alongside their source. Check verifies that generated
 bytes match the current compilation; comparisons read their baseline from Git
@@ -192,6 +203,8 @@ For slow startup, add `--debug-timings` to any command. It writes structured
 phase timings and aggregate catalogue sizes to stderr while leaving normal
 output and generated files unchanged. It separates bundling, rendering,
 validation, file writes, watcher setup, child readiness, and background Changes.
+Review timings distinguish Git baseline and document reads, comparison loops,
+resource traversal, CSS rule analysis, and artifact writes. Build and Check do not run review.
 Parent timings include child phases; overlapping timings must not be added
 together. See the [diagnostic contract](./docs/protocol/mokly-timings.md).
 
@@ -203,6 +216,10 @@ searchable navigation and a real preview within five seconds for both a fresh
 process and a warm restart, exercises Props, themes, viewports and pages, and
 waits for Changes separately. Use matching `--areas 2 --screens 10 --rows 6`
 options for smaller setup and benchmark runs. Fixtures stay under `.context`.
+The default fixture also has four shared stylesheets linked by half its screens
+and an unrelated stylesheet-rule edit after the Git baseline. Configure that
+workload with matching `--stylesheets` and `--stylesheet-share` options on setup
+and benchmark commands.
 Pass `--derived` to fixture setup and benchmark for a separately recorded
 source-only baseline with its own packaged Mokly and dependency lockfile.
 The benchmark requires a cold rebuild and a warm cache hit, reporting baseline
@@ -266,8 +283,10 @@ metadata remain unchanged. Source locations and dependency declarations are
 evidence, so reorganizing them alone does not fill Changes. Generated fragments
 use the comparison engine's paired ignore rules: excluded chrome-only edits
 stay out, while material keys and changes to screen content remain reviewable.
-Linked CSS, fonts, images, and transitive local resources still mark the screens
-that reference them; unrelated shared files do not mark the whole catalogue.
+Linked stylesheet edits mark a view only when a changed rule could apply or
+cannot be resolved. Formatting-only or unrelated rules are recorded as examined
+and excluded. Fonts, images, and other transitive resources retain file-level
+impact; unrelated public files do not mark the whole catalogue.
 For public file and directory aliases, edits to the target also mark consuming
 screens and pages, even when the alias itself is unchanged.
 The filter validates referenced public files, including changed stylesheets and
@@ -307,6 +326,13 @@ their Removed status and an explicit current empty state without comparison
 controls; removed component variants retain an explicit missing current side.
 Affected consumers can show their real before/after differences without entering Changes. Comparison,
 shared-impact, and declared-dependency evidence stays in the Details inspector.
+A changed stylesheet adds a secondary list there naming the changed styles that
+apply to the screen, or saying the change can apply anywhere on it. A stylesheet
+whose changed styles reach nothing on the screen is listed as examined and
+excluded instead, and never produces a Changes row. A screen kept only by a
+stylesheet edit reads "Styles this screen uses changed" above its comparison.
+Selector text stays inside that secondary list. See the
+[CSS change attribution contract](./docs/protocol/mokly-css-attribution.md).
 Evidence remains available independently of comparison controls. Links and
 incoming comparison URLs are checked against the selected saved view, so a
 current-only Added or Removed screen cannot activate a hidden comparison;
@@ -409,7 +435,8 @@ Assets referenced only by public HTML/CSS URLs remain public resources.
   ignores, configured stylesheets, and referenced resources; this includes
   unrelated authored static HTML under `mockupsDir`. `review` selects the Git
   base ref used to find the branch point,
-  internal snapshot directory, and shared-impact globs.
+  internal snapshot directory, and `review.sharedImpact` fallback globs for files
+  the resource graph cannot see. Linked stylesheets are attributed by rule.
 - `compatibility.readManifestV2` permits a historical v2 Git baseline only when
   its canonical manifest is absent. Current output always requires v5. A temporary `compatibility.transformer` may deterministically
   repair already-authored documents during a consumer cutover; final links,
@@ -883,7 +910,7 @@ adding navigation footers to the artboards. The [workspace designs](./docs/proto
 eligible comparisons retain an opaque toolbar. The desktop grip sits on its
 divider line.
 
-All 56 design screens reuse the 15 registered components in
+All 68 design screens reuse the 15 registered components in
 **Components → Design → Shared components**, including the footer tabs panel. The library
 provides 56 saved variants, local prop controls, real usage and component-owned
 change attribution. See the [shared design library guide](./examples/basic/entries/design/library/README.md).
@@ -907,8 +934,8 @@ canonical destinations and the controls that remain visual depictions.
   live updates served to the browser.
 - [`src/navigation`](./src/navigation) and [`src/browse`](./src/browse) — shared
   logical-target grammar and ownership-aware HTML adaptation.
-- [`src/review`](./src/review) — Git extraction, comparison, ignore normalization,
-  and isolated comparison snapshots.
+- [`src/review`](./src/review/README.md) — Git extraction, comparison, ignore
+  normalization, isolated snapshots, and CSS rule attribution shared by Changes.
 - [`src/build/source_inventory.ts`](./src/build/source_inventory.ts) — resolved
   authoring inputs; [`src/config/public_files.ts`](./src/config/public_files.ts)
   applies the shared source and internal-metadata policy to public resources.

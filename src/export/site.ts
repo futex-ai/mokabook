@@ -130,7 +130,32 @@ export function assembleExport(
             baseline,
             ...(comparison.result.schemaVersion === 3
               ? { result: comparison.result }
-              : {}),
+              : {
+                  screenEvidence: comparison.result.screens
+                    .map(({ route, views }) => ({
+                      route,
+                      views: views
+                        .filter(
+                          (view) =>
+                            view.reasons?.length ||
+                            view.excludedResources?.length,
+                        )
+                        .map(
+                          ({
+                            viewport,
+                            colorScheme,
+                            reasons,
+                            excludedResources,
+                          }) => ({
+                            viewport,
+                            colorScheme,
+                            ...(reasons ? { reasons } : {}),
+                            ...(excludedResources ? { excludedResources } : {}),
+                          }),
+                        ),
+                    }))
+                    .filter((screen) => screen.views.length > 0),
+                }),
           },
         }
       : { comparisons: false }),

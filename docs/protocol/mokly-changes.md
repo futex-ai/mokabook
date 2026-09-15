@@ -62,10 +62,38 @@ Historical snapshot reads continue to require regular Git files and reject
 symlink blobs; detecting current impact does not relax baseline validation.
 A deleted resource still marks its consumers only when its closest existing
 ancestor is a confined public directory and its baseline is a regular Git file.
+Live classification walks a changed or moved document's branch-point resource
+graph whenever the document changed or one of its current stylesheets changed,
+regardless of whether any stylesheet is in the diff, so verified deletions of
+non-stylesheet resources keep marking their consumers. Only an unchanged,
+unmoved view with no changed stylesheet skips that walk, and the complete
+comparison produces the same retained evidence for every view.
 Dangling symlinks, escaping symlinks, source-root references, and newly missing
 resources fail validation rather than being treated as deletions. Snapshot
 generation still requires current references to resolve, including resources
 whose verified deletion made their consumers eligible for Changes.
+
+Linked stylesheet edits are narrowed by
+[CSS change attribution](./mokly-css-attribution.md): a changed stylesheet
+keeps a view in Changes only when a changed
+rule could match that view's document or the analysis cannot resolve the rule.
+Stylesheets whose changed rules match nothing on a view are recorded as examined
+and excluded rather than as dependency evidence. Fonts, images, and embedded
+documents keep file-level attribution.
+This same analysis runs in live classification, watched updates, complete and
+selected comparisons, and publication. A newline-only edit has no changed rules
+and leaves consumers out of Changes; every viewport and scheme retains its own
+kept or excluded resource evidence.
+
+The shell receives this per-view resource evidence for screen-only catalogues
+as well as component catalogues, including in Current before snapshots exist.
+Live v2 classification retains its existing analysis as `screenEvidence`; the
+workspace selects its `resourceEvidence` slice without a second analysis pass.
+Static exports select that slice from their existing v2 comparison. Both result
+schema versions remain unchanged. Details merge the loaded comparison's evidence
+with classification evidence, preserving retained stylesheet selectors,
+exclusions, and legacy shared-impact/ignored-content details without duplicate
+cards. See [CSS evidence in the shell](./mokly-css-evidence-shell.md#shell-derivation).
 
 This detection reads baseline files without writing snapshots or generating a
 comparison; derived mode obtains them from the completed cache entry. Baseline reads are batched; shared resource edges
@@ -236,13 +264,14 @@ Complete comparison output contains `review.json`, `summary.md`, an ownership ma
 and the isolated snapshots. No HTML report or navigation payload is written.
 The summary's `output changes` count includes only screens classified as added,
 removed, or changed, counting each screen once across all viewports and color
-schemes. Ignored-only screens remain a separate diagnostic count.
+schemes. Changed views include retained rendering-resource evidence as well as
+material document changes. Ignored-only screens remain a separate diagnostic count.
 `impact evidence` independently counts screens with shared-impact or dependency
 evidence, including screens with output changes; `impact-only` is the subset
 without output changes and can overlap ignored-only. Neither evidence nor
 ignored-only edits inflate output changes. These counts aggregate fragment
-comparisons per screen; the catalogue Changes total also considers rendered
-resources, reviewable metadata, and flows. Complete JSON retains every screen and its
+comparisons per screen; the catalogue Changes total also considers reviewable
+metadata and flows. Complete JSON retains every screen and its
 evidence. Selected live responses contain only the requested screen or saved variant
 and retain its snapshots in memory.
 
@@ -286,10 +315,30 @@ interface ReviewResult {
       beforePath?: string;
       afterPath?: string;
       ignoredIds: readonly string[];
+      material?: true;
+      reasons?: readonly {
+        kind: "dependency";
+        path: string;
+        analysis?: {
+          status: "matched" | "unresolved";
+          selectors: readonly string[];
+        };
+      }[];
+      excludedResources?: readonly {
+        path: string;
+        reason: "no-matching-rule";
+      }[];
     }[];
   }[];
 }
 ```
+
+Optional view `material`, `reasons`, and `excludedResources` implement
+[CSS change attribution](./mokly-css-attribution.md). `material` is present
+exactly when the view's normalized documents differ. Empty optional lists are
+omitted; historical results without them remain valid. Retained resource reasons
+make paired views changed. Entry `sharedImpact` includes a stylesheet only if
+some view kept it, and summary counts follow these states.
 
 Routes sort in deterministic catalogue order; views sort by viewport
 (`mobile`, then `desktop`) and then color scheme (`light`, then `dark`).

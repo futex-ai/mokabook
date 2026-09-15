@@ -15,6 +15,7 @@ import { publicationScreens } from "./publication_screens.js";
 import { reviewAvailabilityScreens } from "./review_availability_screens.js";
 import { reviewImpactScreens } from "./review_impact_screens.js";
 import { reviewOutcomeScreens } from "./review_outcome_screens.js";
+import { reviewStyleScreens } from "./review_style_screens.js";
 
 const DESIGN_DEPENDENCIES = [
   "examples/basic/generated/design-stage.css",
@@ -99,7 +100,17 @@ const designMockups = defineRoot({
           title: "Comparison outcomes",
         }),
         collection({
-          children: reviewImpactScreens,
+          children: [
+            ...reviewImpactScreens,
+            collection({
+              children: reviewStyleScreens,
+              description:
+                "Rule-aware stylesheet evidence: styles that apply, styles that could apply anywhere with and without names to list, and a stylesheet examined and excluded.",
+              id: "design-review-stylesheets",
+              segment: "stylesheets",
+              title: "Stylesheet evidence",
+            }),
+          ],
           description:
             "Aggregate review states: shared impact, ignored regions, empty.",
           id: "design-review-impact",

@@ -5,6 +5,7 @@ import { minimatch } from "minimatch";
 import type { Compilation } from "../build/compile.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync } from "../diagnostics/timings.js";
 import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
 import type { ManifestScreen, Manifest } from "../registry/types.js";
 
@@ -16,8 +17,11 @@ import {
 } from "./assets.js";
 import { baselineResourceConfig, readBaseManifest } from "./base_manifest.js";
 import { reviewChangedPaths } from "./changed_paths.js";
+import { CompilationAssetReader } from "./compilation_assets.js";
 import { compareComponentCatalogue } from "./component_compare.js";
+import { ComponentMaterialReader } from "./component_resources.js";
 import type { ReadOnlyReviewRepository } from "./repository.js";
+import { ResourceComparison } from "./resource_comparison.js";
 import { compareScreen } from "./screen_compare.js";
 import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
 import type {
@@ -74,8 +78,10 @@ export async function compareReview(
   const headSeeds = new Set<string>();
   const baseByRoute = screenMap(baseManifest);
   const headByRoute = screenMap(compilation.manifest);
-  const baseDocuments = await baseAssetReader.readMany(
-    [...baseByRoute.values()].flatMap((screen) => fragmentRoutes(screen)),
+  const baseDocuments = await timeAsync("review.base-documents", () =>
+    baseAssetReader.readMany(
+      [...baseByRoute.values()].flatMap((screen) => fragmentRoutes(screen)),
+    ),
   );
   const routes = [
     ...new Set([...baseByRoute.keys(), ...headByRoute.keys()]),
@@ -86,23 +92,35 @@ export async function compareReview(
     ),
   );
   const screens: ScreenReview[] = [];
-  for (const route of routes) {
-    const base = baseByRoute.get(route);
-    const head = headByRoute.get(route);
-    screens.push(
-      await compareScreen(
-        base,
-        head,
-        baseDocuments,
-        compilation,
-        changedPaths,
-        sharedImpact,
-        files,
-        baseSeeds,
-        headSeeds,
-      ),
-    );
-  }
+  const resources = new ResourceComparison(
+    new ComponentMaterialReader(baseAssetReader),
+    new ComponentMaterialReader(
+      new CompilationAssetReader(compilation.outputs, assetReader),
+    ),
+    new Set(changedPaths),
+    mockupsPrefix,
+  );
+  await timeAsync("review.compare-screens", async () => {
+    for (const route of routes) {
+      const base = baseByRoute.get(route);
+      const head = headByRoute.get(route);
+      screens.push(
+        await compareScreen(
+          base,
+          head,
+          baseDocuments,
+          compilation,
+          changedPaths,
+          sharedImpact,
+          files,
+          baseSeeds,
+          headSeeds,
+          resources,
+          config,
+        ),
+      );
+    }
+  });
   await copySnapshotDependencies(
     files,
     "before",
