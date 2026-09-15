@@ -1,6 +1,8 @@
 import { defineCollection } from "@mokly/mokly";
 
-import { variantScreens } from "../scaffold.js";
+import { bandsChangelogScreen } from "./changelog.js";
+import { bandsDocsScreen } from "./docs.js";
+import { bandsHomeScreen } from "./home.js";
 
 /** The Bands direction: home, documentation and changelog. */
 export const bandsMockups = [
@@ -17,5 +19,7 @@ export const bandsMockups = [
     relatedDocs: ["docs/protocol/site-directions.md"],
     title: "Bands",
   }),
-  ...variantScreens("bands"),
+  bandsHomeScreen,
+  bandsDocsScreen,
+  bandsChangelogScreen,
 ];
