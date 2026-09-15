@@ -134,7 +134,7 @@ review when the documents and the home copy are ready.
       section to the root `README.md` that links to them and to this plan.
 - [x] Update `docs/protocol/npm-release.md` so its CI section describes the
       site jobs that later milestones add.
-- [ ] Validate the changed Markdown with Prettier, review the diff, commit
+- [x] Validate the changed Markdown with Prettier, review the diff, commit
       with Conventional Commits and push. Stop for review of the protocol
       documents and the home copy.
 
