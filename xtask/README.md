@@ -8,11 +8,10 @@ internal binary and is not published to npm or crates.io.
 - Run the current source-level TypeScript, package, example, and Rust suite.
 - Fail verification when the live dependency audit reports an advisory or error.
 - Enforce the Rust file-length limit.
-- Enforce the 50-character commit-title limit for branch history.
 
 ## What This Crate Does
 
-The crate provides `cargo xtask check`, `cargo xtask commit-title-lint`, and
+The crate provides the implementation behind `cargo xtask check` and
 `cargo xtask rust-file-length-lint`.
 The Node unit/integration suite runs at most two test files concurrently;
 individual concurrency tests and their existing timeouts remain unchanged.
@@ -21,20 +20,10 @@ workspace dependency categories. It requires registry access; an audit or networ
 failure stops subsequent checks. Packed-consumer smokes separately audit the
 consumer's resolved production dependencies without workspace overrides.
 
-After the dependency audit, Check runs `commit-title-lint` against
-`origin/main..HEAD`. The standalone command accepts `--base <ref>` to change
-the excluded history. It reads Git subjects with `git log --format=%s`, counts
-Unicode characters rather than UTF-8 bytes, allows exactly 50, and reports
-every overlong title with its count. Commit bodies are not checked. An empty
-range passes; an unavailable base, Git failure, or invalid UTF-8 output fails
-the gate. The command only reads history and never rewrites commits.
-
 ## Quick Start
 
 ```bash
 cargo xtask check
-cargo xtask commit-title-lint
-cargo xtask commit-title-lint --base HEAD~0
 cargo xtask rust-file-length-lint --all
 ```
 
@@ -50,7 +39,6 @@ cargo test --package xtask
 
 - `src/cli.rs` parses and dispatches commands.
 - `src/command.rs` defines the injected command-runner boundary.
-- `src/commit_title.rs` audits captured Git subjects through that boundary.
 - `src/check.rs` defines the complete source, packed-consumer, browser, and Rust
   verification sequence.
 

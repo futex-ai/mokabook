@@ -504,15 +504,12 @@ tests, and docs only.
       check as the alias fallback in `all` mode. Add a test in
       `tests/source_denials.test.ts` for a file that is both listed and
       excluded, asserting the same `listed` kind in all three modes.
-- [x] Finding 4 (option D only): add a `commit-title-lint` gate to
-      `cargo xtask check` (new `xtask/src/commit_title.rs`, with tests under
-      `xtask/src/_tests_/`) that rejects any commit on `origin/main..HEAD`
-      whose first line exceeds 50 characters, and a standalone
-      `cargo xtask commit-title-lint` subcommand. Because this branch's
-      existing titles already violate the rule, the gate must accept a
-      `--base <ref>` and default to `origin/main`; document in the plan that
-      this branch must be squash-merged with a compliant title. Do not
-      rewrite pushed history.
+- [x] Finding 4: a `commit-title-lint` gate was added to `cargo xtask check`
+      and then removed by user decision after the Milestone 10 review showed
+      it would fail every GitHub pull request, because the PR checkout is a
+      synthetic merge commit with a subject over 90 characters, and would
+      hide the other gates on this branch. Pushed history is not rewritten;
+      squash-merge this branch with a title of 50 characters or fewer.
 - [x] Finding 5 (option B): reword the stale final bullet under Milestone 7
       "Session verification notes" to say the implementation session left
       the final checks and commit open and the reviewer session completed
@@ -537,20 +534,6 @@ tests, and docs only.
   `listed`. The focused command
   `node --import tsx --test tests/component_render_diagnostics.test.ts tests/source_inventory_cache.test.ts tests/source_denials.test.ts`
   changed from 4 passed / 3 failed to 7 passed / 0 failed.
-- Rust orchestration tests failed 1 passed / 2 failed before the gate was wired
-  into Check. After correcting test-only command matching, the new auditor tests
-  failed 3 passed / 1 failed because overlong subjects were accepted. Final
-  `cargo test --workspace` passed 8 tests, and formatting and warning-denying
-  Clippy passed. The capture seam preserves typed Git start, exit, and UTF-8
-  failures; subject lengths count Unicode characters, not bytes.
-- This branch must be squash-merged with a Conventional Commit title of 50
-  characters or fewer. `cargo xtask commit-title-lint` correctly rejects its
-  five existing overlong titles (51, 61, 56, 60, and 54 characters); pushed
-  history was not rewritten. `cargo xtask commit-title-lint --base HEAD~0`
-  passes for the empty range; `--base HEAD~1` passes for the latest single
-  commit. The implementation session does not run
-  `cargo xtask check`, whose new title gate would stop at this known history
-  violation; individual checks are run independently instead.
 - Session-required checks passed: `npm run format:check`, `npm run lint`
   (zero errors), `npm run typecheck`, `npm test` (1,583 passed / 0 failed /
   0 skipped in 362,982 ms), `cargo fmt --all -- --check`,
@@ -570,11 +553,8 @@ Reviewer verification on the final tree: format, lint, typecheck,
 (276 passed), `package:check`, `package:smoke`, `dependencies:check` (0
 vulnerabilities), `cargo fmt`, `cargo clippy -D warnings`, `cargo test`
 (8 passed), and `rust-file-length-lint --all` (10 files) all passed
-individually. `cargo xtask check` as a whole stops at its new commit-title
-gate because five earlier commits on this branch exceed 50 characters; that
-is the intended behaviour and the blocker recorded above. The gate passes
-for `--base HEAD~1`, and will pass on `main` once this branch is
-squash-merged with a compliant title.
+individually. After the gate's removal, `cargo xtask check` passes end to end on this
+tree.
 
 ## Milestone 10: Review (completed)
 
@@ -593,8 +573,11 @@ finding is that Check re-enters the binary as a subprocess instead of
 calling the injected auditor in process. The low findings are an empty
 `--base` passing silently, untested worker error/exit and subprocess
 capture seams, and the crate README omitting the squash-merge constraint.
-Each finding is awaiting the user's decision. The two high findings must be
-resolved before this branch is merged.
+The user resolved the two high findings and the medium finding by removing
+the commit-title gate and its standalone command entirely; `xtask/` is
+byte-identical to `origin/main` again. The `--base` and subprocess-capture
+findings are moot with the gate gone. The untested worker error and exit
+seams and the README note remain open for the user's decision.
 
 ## Post-merge follow-up (non-blocking)
 

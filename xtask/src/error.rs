@@ -1,7 +1,6 @@
 //! Typed failures produced by repository automation.
 
 use std::io;
-use std::string::FromUtf8Error;
 
 use thiserror::Error;
 
@@ -30,14 +29,6 @@ pub(crate) enum Error {
         /// Exit code or signal description.
         status: String,
     },
-    /// Captured subprocess stdout was not valid UTF-8.
-    #[error("[xtask/command] `{command}` returned invalid UTF-8: {source}")]
-    CommandOutputEncoding {
-        /// Human-readable command.
-        command: String,
-        /// Originating text-decoding error.
-        source: FromUtf8Error,
-    },
     /// A filesystem operation used by a repository audit failed.
     #[error("[xtask/filesystem] {operation} `{path}` failed: {source}")]
     Filesystem {
@@ -52,12 +43,6 @@ pub(crate) enum Error {
     #[error("[xtask/rust-file-length] files exceed 300 lines:\n{details}")]
     RustFileLength {
         /// Sorted violation report.
-        details: String,
-    },
-    /// Commit subjects exceeded the workspace character limit.
-    #[error("[xtask/commit_title] commit titles exceed 50 characters:\n{details}")]
-    CommitTitleLength {
-        /// Commit subjects and their character counts in Git log order.
         details: String,
     },
 }

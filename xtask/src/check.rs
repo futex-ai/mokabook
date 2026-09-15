@@ -32,10 +32,9 @@ impl CheckRunner for DefaultCheckRunner {
     }
 }
 
-fn commands() -> [CommandSpec; 13] {
+fn commands() -> [CommandSpec; 12] {
     [
         npm(&["run", "dependencies:check"]),
-        cargo(&["xtask", "commit-title-lint"]),
         npm(&["run", "format:check"]),
         npm(&["run", "lint"]),
         npm(&["run", "typecheck"]),
