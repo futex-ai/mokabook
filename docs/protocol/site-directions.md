@@ -45,6 +45,39 @@ retired. Until then the baseline remains the implementation reference.
 | `minimal`   | Minimal   | Sparse, centered, generous white space; single-column docs with a floating on-this-page rail       |
 | `bands`     | Bands     | Alternating full-bleed canvas and muted bands; sticky docs sidebar and a timeline changelog        |
 
+## Selection
+
+On 2026-09-15 the user selected **Product** for the home and changelog, with
+these refinements, and asked for the documentation page to move toward
+**Editorial** while staying in keeping with Product:
+
+- Remove the utility bar under the header on every Product screen. The docs
+  search control moves into the header; the version chip moves to the top of
+  the docs sidebar; the location breadcrumb becomes the eyebrow above the
+  page title.
+- Every link and control has a hover state: header and footer links, both
+  button styles, sidebar and on-this-page links, previous and next, release
+  index rows and the code panel's copy control. Hover never relies on color
+  alone: links gain an underline or the quiet filled background; buttons use
+  `accentHover` or the muted surface.
+- The docs sidebar sits on the page canvas, not a filled panel, separated
+  from the document by a hairline. Every section is listed expanded, with
+  rubric section heads, 44px link rows, a quiet `folioMuted` fill on hover
+  and the `accentSoft` fill with `accent` text on the current page.
+- The document column keeps Editorial's ruled structure: hairline rules
+  between intro, body and the previous/next row, the lead set as an
+  accent-ruled pull quote, and an on-this-page rail hung from its own
+  hairline. Code panels, badges and buttons keep Product's chrome.
+- Reference points for the docs experience: Storybook's docs (global header
+  search, a two-level expanded tree, version label above the tree, copy
+  control on code blocks, card-style previous and next) and Claude's docs
+  (a wide reading measure with a short description under the title). No
+  feature from those sites is depicted unless Mokly has it.
+
+The refined Product screens stay under `design/site/product/` until the user
+confirms them; promotion to the baseline `design/site/` routes and retirement
+of the other four directions happen in a later milestone.
+
 ## Inventory
 
 | Entry id                          | Route                                  | Screen                       |
