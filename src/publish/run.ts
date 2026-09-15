@@ -4,8 +4,9 @@ import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
 import type { exportCatalogue } from "../export/run.js";
-import { parseReviewResult } from "../review/result_validation.js";
 import type { GitCommandRunner } from "../review/git.js";
+import { parseReviewResult } from "../review/result_validation.js";
+
 import { bundleUpload } from "./bundle.js";
 import { uploadCatalogue } from "./http.js";
 import { UPLOAD_MANIFEST, validateUploadManifest } from "./manifest.js";

@@ -3,7 +3,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 
@@ -54,7 +56,11 @@ for (const change of [
       await fixture.build();
     }
     assert.deepEqual(
-      await computeChangedRoutes(fixture.config, "HEAD"),
+      await computeChangedRoutes(
+        fixture.config,
+        "HEAD",
+        committedReviewRepository(fixture.config),
+      ),
       change === "material" || change === "resource" ? ["handbook.html"] : [],
     );
   });
@@ -84,5 +90,12 @@ test("Changes cannot treat a historical authoring input as a deleted public reso
       '<script src="../helper.js"></script></head>',
     ),
   );
-  assert.equal(await computeChangedRoutes(fixture.config, "HEAD"), undefined);
+  assert.equal(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    undefined,
+  );
 });

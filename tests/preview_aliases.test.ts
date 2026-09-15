@@ -6,6 +6,7 @@ import test from "node:test";
 import { promisify } from "node:util";
 
 import { exportCatalogue } from "../dist/export/run.js";
+
 import {
   createExportFixture,
   directoryFiles,

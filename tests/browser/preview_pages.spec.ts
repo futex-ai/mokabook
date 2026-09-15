@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { createPreviewComparisonFixture } from "../helpers/preview_comparison_fixture.js";
+
 import { servePreviewFixture, type PreviewFixture } from "./preview_fixture.js";
 
 let fixture: Awaited<ReturnType<typeof createPreviewComparisonFixture>>;

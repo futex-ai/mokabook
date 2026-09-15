@@ -1,4 +1,5 @@
 import type { NavigationState } from "../../parts/navigation_states.js";
+
 import {
   COMPONENT_PAGES,
   CONTROLS_PAGES,

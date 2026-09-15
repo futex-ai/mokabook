@@ -6,6 +6,7 @@ import test from "node:test";
 import { promisify } from "node:util";
 
 import type { ReviewResult } from "../dist/review/types.js";
+
 import { repositoryRoot } from "./helpers/fixture.js";
 import { createPreviewComparisonFixture } from "./helpers/preview_comparison_fixture.js";
 
@@ -26,12 +27,12 @@ test("publication pins one baseline for Changes and comparisons when its ref adv
       "--eval",
       `import { execFileSync } from "node:child_process";
        import { loadConfig } from "./dist/config/load.js";
-       import { RepositoryGitClient } from "./dist/review/git.js";
+       import { GitRepositoryEvidence } from "./dist/review/git_evidence.js";
        import { buildPreview } from "./scripts/preview/catalogue.mjs";
        const config = await loadConfig(process.argv[1]);
-       const original = RepositoryGitClient.prototype.mergeBase;
+       const original = GitRepositoryEvidence.prototype.mergeBase;
        let calls = 0;
-       RepositoryGitClient.prototype.mergeBase = async function (...args) {
+       GitRepositoryEvidence.prototype.mergeBase = async function (...args) {
          if (++calls !== 1) throw new Error("baseline resolved more than once");
          const commit = await original.apply(this, args);
          execFileSync("git", ["update-ref", "refs/remotes/origin/main", "HEAD"], { cwd: config.repoRoot });

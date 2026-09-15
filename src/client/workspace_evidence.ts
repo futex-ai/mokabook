@@ -1,7 +1,8 @@
 /** Factual comparison evidence belongs in Details, never in the canvas. */
-import type { WorkspaceData } from "../server/shell/workspace_data.js";
-import { element } from "./inspector_panels.js";
 import { decodeProps } from "../components/codec.js";
+import type { WorkspaceData } from "../server/shell/workspace_data.js";
+
+import { element } from "./inspector_panels.js";
 import { propText } from "./prop_display.js";
 
 export function renderWorkspaceEvidence(

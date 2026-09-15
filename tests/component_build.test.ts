@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
-import { loadConfig } from "../dist/config/load.js";
 import { decodeProps } from "../dist/components/codec.js";
 import { instanceKey, slotKey } from "../dist/components/keys.js";
 import { validateComponentRanges } from "../dist/components/ranges.js";
+import { loadConfig } from "../dist/config/load.js";
 import { parseManifest, serializeManifest } from "../dist/registry/manifest.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 

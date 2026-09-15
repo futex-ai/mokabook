@@ -8,6 +8,12 @@
 
 ## Completed
 
+- [Review Fix Follow-ups](./review-fix-followups.md) — delivered and
+  verified; review findings are recorded for the user's decision.
+- [Derived Baseline Review Fixes](./derived-baseline-review-fixes.md) —
+  delivered and verified; review findings are recorded for the user's decision.
+- [Derived Baselines](./derived-baselines.md) — delivered and verified;
+  review findings are recorded for the user's decision.
 - [Mokly Package Migration](./mokly-package-migration.md) — repository fixes
   delivered and reviewed; authenticated GitHub publishing-protection setup
   remains an external prerequisite.

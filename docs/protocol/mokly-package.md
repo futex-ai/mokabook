@@ -3,7 +3,7 @@
 ## Scope
 
 Mokly is shared developer tooling for repositories that keep visual mockups
-as code and committed static artifacts. The package owns catalogue definitions,
+as code with committed or derived static artifacts. The package owns catalogue definitions,
 generation, validation, browsing, and on-demand comparisons. A consumer owns all product
 screens, product copy, product components, styling, theme setup, and generated
 product output.
@@ -52,7 +52,7 @@ The public commands are:
 mokly                 Alias for `mokly serve`
 mokly serve           Serve the catalogue and diffs; watch by default
 mokly build           Generate static artifacts and the manifest
-mokly check           Validate source and committed generated output
+mokly check           Validate source and generated output for the configured mode
 mokly export --out <path>  Build a complete static catalogue for hosting
 mokly publish         Export and upload to a configured catalogue service
 mokly --help          Show commands, options, and config discovery
@@ -103,6 +103,7 @@ the following contract:
 
 - `mockupsDir`: output/catalogue root, such as `docs/mockups`;
 - `entriesDir`: structured `*.mockup.ts` and `*.mockup.tsx` source directory;
+- `repoRoot`: repository root, defaulting to the config file's directory;
 - a light-only or light-and-dark catalogue rendering set;
 - optional renderer-module path and declarative route-to-stylesheet rules;
 - optional consumer package roots, aliases, conditions, fields, extensions, and
@@ -118,6 +119,17 @@ repo-relative POSIX paths. Config validation rejects path traversal, output
 outside the repository (including through symlinks), overlapping
 authored/generated roots, duplicate rules, and a watch path that cannot be
 classified safely.
+
+Before reading Git, `repoRoot` must resolve through symlinks to the same path
+as `git rev-parse --show-toplevel` run from that directory. A nested root fails
+with `config-invalid`, naming both paths. This validation belongs to config's
+Git boundary, not unconditional config loading: build in either output mode,
+committed Check and publication without comparisons need no Git repository.
+Derived Check requires Git to inspect tracking. Serve's parent, classifier and
+HTTP child, comparison export and preview all validate before their first Git
+read. All remains usable when history is unavailable; an explicit comparison
+request retains the typed configuration error. Missing refs or history keep
+their existing command-specific errors.
 
 No default may encode `docs/mockups` as a mandatory location, Accounting route
 families, Bookfolio/Firna product tokens, email-template paths, or a TypeScript
@@ -146,6 +158,7 @@ type ModuleLoader =
 interface MoklyConfig {
   colorSchemes?: readonly ColorScheme[]; // ["light"]
   entriesDir: string;
+  generatedOutput?: "committed" | "derived"; // "committed"
   mockupsDir: string;
   repoRoot?: string; // config directory
   renderer?: string;
@@ -165,6 +178,7 @@ interface MoklyConfig {
   }[];
   review?: {
     base?: string; // origin/main; merge base with HEAD
+    baselineBuild?: readonly (readonly string[])[]; // derived mode only
     outDir?: string; // .context/mokly-review
     sharedImpact?: readonly string[];
   };
@@ -191,6 +205,16 @@ that must include `"light"`; it defaults to `["light"]` and normalizes to
 light-first order. Shared `stylesheets` apply to every generated view, with a
 matching `lightStylesheets` or `darkStylesheets` list appended in declaration
 order.
+`generatedOutput` defaults to `"committed"`; `"derived"` and the derived-only
+`review.baselineBuild` argv list follow the
+[derived baselines contract](./mokly-derived-baselines.md).
+`baselineBuild` is invalid in committed mode, including a staged migration;
+enable a repository-specific recipe together with the derived mode switch.
+Derived Check accepts absent local generated output, rejects Git-tracked routes,
+the manifest and cache files, and prints their paths plus ignore guidance.
+Build writes transactionally in both modes. Serve and export await preparation
+before classification; Serve publishes `preparing` when a rebuild is needed,
+then `pending` while classification runs. Cache hits skip `preparing`.
 `watch.rules[].paths` and Review `sharedImpact` are repository-relative POSIX
 globs, while stylesheet `match` matches catalogue routes. `repoRoot` defaults to the config directory. Duplicate stylesheet
 matches and watch paths are invalid. Additional watch rules cannot override
@@ -198,6 +222,9 @@ configured source/module rebuilds, reloads for configured stylesheets and
 referenced resources, or package-owned ignores for dependency, build, test, Review, header-proven
 generated, and transaction paths. An unowned public HTML file below
 `mockupsDir` remains consumer-authored and can match an explicit watch rule.
+The repository's `.mokly-cache/` and its physical aliases are always private
+and ignored before source exceptions or broad globs, and cannot be configured
+as entries, mockups, Review output, or an export destination.
 Authored source directories may sit below `mockupsDir` for a `docs/mockups/src`
 layout, but they may not equal each other or the output root; generated routes
 are collision-checked against those sources before writing. Review output must

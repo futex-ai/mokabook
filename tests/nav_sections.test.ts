@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { ManifestComponent } from "../dist/components/manifest_types.js";
 import {
   isNavDisclosureClosed,
   isNavDisclosureKey,
   NavDisclosurePreference,
   type NavPreferenceStorage,
 } from "../dist/client/browse_navigation.js";
+import type { ManifestComponent } from "../dist/components/manifest_types.js";
 import type {
   ManifestCollection,
   ManifestEntry,
@@ -21,6 +21,7 @@ import {
   type NavLeafNode,
   type NavNode,
 } from "../dist/server/shell/nav_tree.js";
+
 import { asDocument, FakeNode } from "./helpers/fake_dom.js";
 
 test("page and component sections preserve only their relevant hierarchy", () => {

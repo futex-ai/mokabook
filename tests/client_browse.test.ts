@@ -1,10 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import {
-  isEligibleBrowseLink,
-  NavigationSequencer,
-} from "../dist/client/navigation.js";
+import { parseBrowseRecoveryState } from "../dist/client/browse_recovery.js";
 import {
   captureBrowseState,
   currentColorScheme,
@@ -12,7 +9,11 @@ import {
   setColorScheme,
   type BrowseRecoveryState,
 } from "../dist/client/browse_state.js";
-import { parseBrowseRecoveryState } from "../dist/client/browse_recovery.js";
+import {
+  isEligibleBrowseLink,
+  NavigationSequencer,
+} from "../dist/client/navigation.js";
+
 import { FakeClassList } from "./helpers/fake_dom.js";
 
 const base = {

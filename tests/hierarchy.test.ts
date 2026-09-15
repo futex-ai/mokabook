@@ -1,18 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import type {
+  RegistryDefinition,
+  ResolvedRegistryEntry,
+} from "../dist/authoring/types.js";
 import { defineCollection, defineScreen } from "../dist/index.js";
+import { analyzeHierarchy } from "../dist/registry/hierarchy.js";
 import {
   createManifest,
   parseManifest,
   parseHistoricalManifest,
 } from "../dist/registry/manifest.js";
 import type { ManifestV5 } from "../dist/registry/types.js";
-import type {
-  RegistryDefinition,
-  ResolvedRegistryEntry,
-} from "../dist/authoring/types.js";
-import { analyzeHierarchy } from "../dist/registry/hierarchy.js";
 
 interface TestEntry {
   childIds?: readonly string[];

@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
 import { execFile } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
+import { parseArguments } from "../dist/cli/arguments.js";
 import {
   collection,
   defineRoot,
@@ -12,7 +13,7 @@ import {
   reviewMaterialKey,
   screen,
 } from "../dist/index.js";
-import { parseArguments } from "../dist/cli/arguments.js";
+
 import { repositoryRoot } from "./helpers/fixture.js";
 
 const execFileAsync = promisify(execFile);

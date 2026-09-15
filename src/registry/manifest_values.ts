@@ -1,5 +1,5 @@
-import { MoklyError } from "../errors.js";
 import { isSafeCatalogueRoute, isSafeRepositoryPath } from "../config/paths.js";
+import { MoklyError } from "../errors.js";
 
 /** Validate a portable routed catalogue URL. */
 export function validateRoute(route: string, label: string): void {

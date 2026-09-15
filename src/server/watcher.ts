@@ -1,6 +1,8 @@
 import chokidar, { type FSWatcher } from "chokidar";
+
 import type { ResolvedConfig } from "../config/types.js";
 import { errorMessage } from "../errors.js";
+
 import {
   isPackageOwnedIgnoredWatchPath,
   watchTargets,

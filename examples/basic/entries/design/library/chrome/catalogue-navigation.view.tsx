@@ -1,7 +1,8 @@
-import { useDesignStyle } from "../style_context.js";
 import type { CSSProperties } from "react";
+
 import type { Viewport } from "@mokly/mokly";
 import { MockLink } from "@mokly/mokly";
+
 import { DesignLink } from "../../parts/design_navigation.js";
 import type { DesignDestination } from "../../parts/destinations.js";
 import {
@@ -13,11 +14,13 @@ import {
   PageIcon,
 } from "../../parts/icons.js";
 import { NavResizeHandle } from "../../parts/nav_resize.js";
-import type { CatalogueNavigationProps } from "./catalogue-navigation.js";
+import { useDesignStyle } from "../style_context.js";
+
 import {
   navigationSections,
   type NavigationRow,
 } from "./catalogue-navigation-sections.js";
+import type { CatalogueNavigationProps } from "./catalogue-navigation.js";
 
 /** Left padding applied to a top-level (depth 0) row, in pixels. */
 const ROOT_INSET = 8;
@@ -48,6 +51,40 @@ function navRowStyle(depth: number): CSSProperties {
   style.backgroundSize = sizes.join(", ");
   style.backgroundRepeat = "no-repeat";
   return style as CSSProperties;
+}
+
+/**
+ * Availability wording shown in place of the Changes rows. A `spinner` entry
+ * names the work still running; a `detail` entry adds the secondary line.
+ */
+const CHANGES_MESSAGES = {
+  pending: { title: "Checking for changes…", spinner: "Checking for changes" },
+  preparing: {
+    title: "Preparing comparison",
+    spinner: "Preparing comparison",
+    detail: "This takes a moment. You can keep browsing All while it finishes.",
+  },
+  unavailable: { title: "Changes are unavailable. You can still browse All." },
+} as const;
+
+type ChangesMessage = (typeof CHANGES_MESSAGES)[keyof typeof CHANGES_MESSAGES];
+
+function ChangesStatusBody({ message }: { message: ChangesMessage }) {
+  return (
+    <div className="mbk-nav-status" role="status">
+      {"spinner" in message ? (
+        <span className="mbk-nav-spinner" aria-hidden="true" />
+      ) : null}
+      {"detail" in message ? (
+        <span className="mbk-nav-status-text">
+          <span className="mbk-nav-status-title">{message.title}</span>
+          <span className="mbk-nav-status-detail">{message.detail}</span>
+        </span>
+      ) : (
+        message.title
+      )}
+    </div>
+  );
 }
 
 function NavRow({
@@ -133,6 +170,8 @@ export function CatalogueNavigationView({
   viewport,
 }: CatalogueNavigationProps & { viewport: Viewport }) {
   useDesignStyle("catalogue-navigation");
+  const status =
+    changesStatus === "ready" ? undefined : CHANGES_MESSAGES[changesStatus];
   const sections = navigationSections(rows);
   const body = (
     <>
@@ -162,16 +201,16 @@ export function CatalogueNavigationView({
             >
               Changes
               <span className="mbk-nav-filter-count">
-                {changesStatus === "pending" ? (
+                {status && "spinner" in status ? (
                   <span
                     className="mbk-nav-spinner"
-                    aria-label="Checking for changes"
+                    aria-label={status.spinner}
                     role="status"
                   />
-                ) : changesStatus === "ready" ? (
-                  changedCount
-                ) : (
+                ) : status ? (
                   "—"
+                ) : (
+                  changedCount
                 )}
               </span>
             </span>
@@ -179,15 +218,8 @@ export function CatalogueNavigationView({
         </div>
       ) : null}
       <div className="mbk-nav-scroll">
-        {changedOnly && changesStatus !== "ready" ? (
-          <div className="mbk-nav-status" role="status">
-            {changesStatus === "pending" ? (
-              <span className="mbk-nav-spinner" aria-hidden="true" />
-            ) : null}
-            {changesStatus === "pending"
-              ? "Checking for changes…"
-              : "Changes are unavailable. You can still browse All."}
-          </div>
+        {changedOnly && status ? (
+          <ChangesStatusBody message={status} />
         ) : (
           sections.map((section) => (
             <details

@@ -2,6 +2,7 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import { Script } from "node:vm";
+
 import type { LoadedGraph } from "./load_graph.js";
 
 export interface ConsumerBundle {

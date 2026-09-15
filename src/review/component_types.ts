@@ -1,5 +1,6 @@
 import type { ColorScheme, Viewport } from "../authoring/types.js";
 import type { ManifestComponentVariant } from "../components/manifest_types.js";
+
 import type {
   ReviewResultV2,
   ReviewState,

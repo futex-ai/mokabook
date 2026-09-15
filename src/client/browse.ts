@@ -1,15 +1,21 @@
 /** Progressive Browse shell enhancement served at /__mokly/client/browse.js. */
 
-import { installDiffs } from "./diffs.js";
-import { installWorkspace } from "./workspace.js";
+import { handleBrowseControl } from "./browse_controls.js";
 import { createBrowserDetailsPreference } from "./browse_details.js";
-import { createBrowserNavPreference } from "./browse_navigation.js";
+import { applyNavigationEvidence } from "./browse_evidence.js";
+import { fetchBrowseDestination } from "./browse_fetch.js";
 import {
   collapseFrame,
   expandedFrame,
   handleAddressClick,
   handleFrameClick,
 } from "./browse_frames.js";
+import { browseLinkTarget } from "./browse_links.js";
+import { createBrowserNavPreference } from "./browse_navigation.js";
+import {
+  applyNavVisibility,
+  selectAndRevealRoute,
+} from "./browse_navigation_state.js";
 import {
   captureRegionScrolls,
   currentColorScheme,
@@ -20,28 +26,22 @@ import {
   setViewport,
 } from "./browse_state.js";
 import {
-  applyNavVisibility,
-  selectAndRevealRoute,
-} from "./browse_navigation_state.js";
-import { applyPreviewFragmentQuery } from "./preview_fragment.js";
-import { isSameBrowseDocument, NavigationSequencer } from "./navigation.js";
-import { applyNavigationEvidence } from "./browse_evidence.js";
-import { fetchBrowseDestination } from "./browse_fetch.js";
-import {
   beginNavigation,
   finishNavigation,
   readPageStamp,
 } from "./browse_update_state.js";
-import { browseLinkTarget } from "./browse_links.js";
-import { handleBrowseControl } from "./browse_controls.js";
 import { copyText } from "./clipboard.js";
+import { installDiffs } from "./diffs.js";
 import { attachFrameNavigation } from "./frame_navigation.js";
+import { isSameBrowseDocument, NavigationSequencer } from "./navigation.js";
+import { applyPreviewFragmentQuery } from "./preview_fragment.js";
 import { documentFrameHref, normalizeStaticAlias } from "./static_delivery.js";
 import {
   handleTagControlClick,
   handleTagPickerKeydown,
   syncTagChips,
 } from "./tag_filter.js";
+import { installWorkspace } from "./workspace.js";
 
 interface ScrollState {
   scrolls?: Record<string, number>;

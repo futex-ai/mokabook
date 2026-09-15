@@ -69,6 +69,13 @@ for (const mobile of [false, true]) {
         "2",
       );
       expect(await navigationState(page)).toEqual(before);
+      server.publishUpdate({ kind: "evidence", changesStatus: "preparing" });
+      await expect(page.locator("[data-changes-status]")).toHaveAttribute(
+        "data-changes-status",
+        "preparing",
+      );
+      expect(await navigationState(page)).toEqual(before);
+      await expect(page.locator('[data-filter="all"]')).toBeFocused();
       server.publishUpdate({
         kind: "evidence",
         changedRoutes: ["screens/details.html"],

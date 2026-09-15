@@ -6,11 +6,12 @@ import {
   isSafeCatalogueRoute,
   projectRealPath,
 } from "../config/paths.js";
-import type { ResolvedConfig } from "../config/types.js";
 import { isInternalCatalogueFile } from "../config/public_files.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError, errorMessage } from "../errors.js";
-import { isAuthoringSource } from "./source_inventory.js";
 import { MANIFEST_NAME } from "../registry/manifest.js";
+
+import { isAuthoringSource } from "./source_inventory.js";
 
 /** Reject generated routes that escape output or target authored source trees. */
 export function validateGeneratedOutputPaths(
@@ -19,7 +20,7 @@ export function validateGeneratedOutputPaths(
 ): void {
   const authoredRoots = [config.entriesDir];
   const realRepoRoot = fs.realpathSync(config.repoRoot);
-  const realMockupsRoot = fs.realpathSync(config.mockupsDir);
+  const realMockupsRoot = projectRealPath(config.mockupsDir);
   const realAuthoredRoots = authoredRoots.map((root) => fs.realpathSync(root));
   if (!isInside(realRepoRoot, realMockupsRoot)) {
     throw new MoklyError(

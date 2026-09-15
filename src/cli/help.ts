@@ -12,8 +12,8 @@ Usage:
 
 Commands:
   serve    Build and serve the catalogue with on-demand diffs
-  build    Generate static HTML documents and the catalogue manifest
-  check    Validate source and committed generated output without writing
+  build    Transactionally generate static HTML documents and the manifest
+  check    Validate source and generated output for the configured mode
   export   Build a complete static catalogue to deploy with your own host
   publish  Export and upload a catalogue to your chosen service
 
@@ -35,4 +35,11 @@ Options:
 
 Value options also accept --name=value. Use --token=-TOKEN for a leading dash.
 Boolean flags take no value.
+
+Configuration:
+  generatedOutput       "committed" (default) checks files match source;
+                        "derived" checks generated files are untracked
+  review.baselineBuild  Derived-only argv arrays run without a shell using
+                        trusted historical code. Defaults: npm ci, then
+                        npx --no-install mokly build --config <config-path>
 `;

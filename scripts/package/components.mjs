@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runBin, smokeServer } from "./fixture.mjs";
+
 import { inspectConsumerExport } from "./export.mjs";
+import { runBin, smokeServer } from "./fixture.mjs";
 
 /** Exercise the installed component API, worker, provider graph and static exporter. */
 export async function smokeRegisteredComponents(

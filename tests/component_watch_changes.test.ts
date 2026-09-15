@@ -2,10 +2,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
+
 import { serve } from "../dist/server/serve.js";
 import type { WorkspaceData } from "../dist/server/shell/workspace_data.js";
-import { componentEntrySource } from "./helpers/component_fixture.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
+import { componentEntrySource } from "./helpers/component_fixture.js";
 import {
   catalogue,
   changedCount,

@@ -11,20 +11,21 @@ import type { RunningServer, ServerOptions } from "../dist/server/http.js";
 import { serve } from "../dist/server/serve.js";
 import { restartWithRecovery } from "../dist/server/serve_lifecycle.js";
 import {
+  type ProcessSupervisor,
+  type ProcessSupervisorFactory,
+} from "../dist/server/supervisor.js";
+import {
   NotificationGate,
   WatchActionQueue,
   WatchDebouncer,
   classifyWatchPath,
   type DebounceClock,
 } from "../dist/server/watch_events.js";
-import {
-  type ProcessSupervisor,
-  type ProcessSupervisorFactory,
-} from "../dist/server/supervisor.js";
 import type {
   ConsumerWatcher,
   ConsumerWatcherFactory,
 } from "../dist/server/watcher.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("notification gate preserves startup events", () => {

@@ -1,13 +1,14 @@
 import { ScreenHead, type ArtboardViewport } from "../../parts/shell.js";
 import { EmptyState } from "../../parts/stage_content.js";
-import { ViewControls } from "./view_controls.js";
-import { PreviewWorkspace } from "./workspace.js";
-import { SCREENS, screenIdentity } from "./metadata.js";
+
+import { screenComparison } from "./comparison_fixtures.js";
 import { INSPECTION_PAGES } from "./destinations.js";
+import { SCREENS, screenIdentity } from "./metadata.js";
 import { ExplorerShell } from "./navigation.js";
 import { ScreenDetails } from "./screen_details.js";
-import { screenComparison } from "./comparison_fixtures.js";
 import { ConsumerFrame, type ScreenPageState } from "./screen_preview.js";
+import { ViewControls } from "./view_controls.js";
+import { PreviewWorkspace } from "./workspace.js";
 
 export function ScreenPage({
   state,

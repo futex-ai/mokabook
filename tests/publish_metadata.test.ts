@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { validateUploadManifest } from "../dist/publish/manifest.js";
 import {
   parseRepository,
   readUploadIdentity,
 } from "../dist/publish/metadata.js";
-import { validateUploadManifest } from "../dist/publish/manifest.js";
 import type { GitCommandRunner } from "../dist/review/git.js";
 
 const head = "a".repeat(40);

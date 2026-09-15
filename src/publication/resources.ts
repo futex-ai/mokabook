@@ -7,6 +7,7 @@ import { publicFileLocation } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { referencedRoutes } from "../review/asset_references.js";
 import type { Catalogue } from "../server/catalogue.js";
+
 import { publicationFiles, readPublicationFile } from "./files.js";
 
 /** Materialize public aliases as regular files and validate their exported resources. */

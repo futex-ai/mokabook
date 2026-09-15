@@ -1,26 +1,27 @@
 import path from "node:path";
-import { timeAsync, timeSync, timingCounts } from "../diagnostics/timings.js";
 
-import { graphSourceFiles, normalizeSourceFiles } from "./source_inventory.js";
 import { build } from "esbuild";
-import { evaluateBundle, rememberBundle } from "./consumer_bundle.js";
 
 import type { RegistryDefinition } from "../authoring/types.js";
 import type { CompatibilityTransformer } from "../compatibility/types.js";
-import type { ResolvedConfig } from "../config/types.js";
-import { MoklyError, errorMessage } from "../errors.js";
 import type { ComponentGraphRenderer } from "../components/render.js";
+import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync, timeSync, timingCounts } from "../diagnostics/timings.js";
+import { MoklyError, errorMessage } from "../errors.js";
 import type { Renderer } from "../renderer/types.js";
-import { discoverEntryModules } from "./discovery.js";
-import {
-  consumerReactPlugin,
-  packageNodePaths,
-} from "./consumer_resolution.js";
+
+import { evaluateBundle, rememberBundle } from "./consumer_bundle.js";
 import {
   CONSUMER_ENTRY_PATH,
   consumerEntryPlugin,
   packageApiPlugin,
 } from "./consumer_entry.js";
+import {
+  consumerReactPlugin,
+  packageNodePaths,
+} from "./consumer_resolution.js";
+import { discoverEntryModules } from "./discovery.js";
+import { graphSourceFiles, normalizeSourceFiles } from "./source_inventory.js";
 
 /** Consumer modules loaded in one React-safe esbuild graph. */
 export interface LoadedGraph {

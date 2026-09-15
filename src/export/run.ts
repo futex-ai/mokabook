@@ -1,20 +1,21 @@
 import { compileCatalogue } from "../build/compile.js";
 import { writeCompilation } from "../build/transaction.js";
-import type { ResolvedConfig } from "../config/types.js";
 import { projectRealPath } from "../config/paths.js";
+import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError, errorMessage } from "../errors.js";
 import { readBaseManifest } from "../review/base_manifest.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { compareReview } from "../review/compare.js";
-import { NodeGitCommandRunner, RepositoryGitClient } from "../review/git.js";
+import { prepareReviewRepository } from "../review/prepare.js";
 import type { ReviewArtifact } from "../review/types.js";
 import { changedContentPaths } from "../server/changed_content.js";
+
 import { withExportCleanup } from "./cleanup.js";
 import { assertExportActive, exportError } from "./error.js";
 import {
   assertInputsUnchanged,
   capturedAssetReader,
-  pinnedGit,
+  pinnedEvidence,
 } from "./inputs.js";
 import { resolveExportOutput } from "./paths.js";
 import { capturePublicFiles } from "./public_files.js";
@@ -49,41 +50,46 @@ async function generateExport(
   outputRoot?: string,
 ): Promise<ExportResult> {
   try {
-    const git = new RepositoryGitClient(
-      new NodeGitCommandRunner(config.repoRoot),
-    );
     const base = options.base ?? config.review.base;
-    const commit = options.noChanges
+    const prepared = options.noChanges
       ? undefined
-      : await git.mergeBase(base, "HEAD");
-    const baseline =
-      commit === undefined
-        ? undefined
-        : await readBaseManifest(git, commit, config);
+      : await prepareReviewRepository(
+          config,
+          base,
+          options.signal ? { signal: options.signal } : {},
+        );
+    const baseline = prepared
+      ? await readBaseManifest(prepared.reader, prepared.commit, config)
+      : undefined;
     const compilation = await compileCatalogue(config);
     config = { ...config, sourceFiles: compilation.manifest.sourceFiles };
     assertExportActive(options.signal);
     await writeCompilation(compilation, config);
-    const publicFiles = await capturePublicFiles(config);
+    const publicFiles = await capturePublicFiles(
+      config,
+      config.generatedOutput === "derived" ? compilation.outputs : undefined,
+    );
     const assetReader = capturedAssetReader(publicFiles, config);
     const exclusions = [output, transaction.reservationRoot];
-    const changed =
-      commit === undefined
-        ? []
-        : await reviewChangedPaths(
-            git,
-            commit,
-            config,
-            config.review.outDir,
-            exclusions,
-          );
+    const changed = prepared
+      ? await reviewChangedPaths(
+          prepared.evidence,
+          prepared.commit,
+          config,
+          config.review.outDir,
+          exclusions,
+        )
+      : [];
     let comparison: ReviewArtifact | undefined;
     let contentChanges: readonly string[] = [];
-    if (commit !== undefined && baseline !== undefined) {
+    if (prepared && baseline) {
       comparison = await compareReview(
         compilation,
         config,
-        pinnedGit(git, commit, changed),
+        {
+          evidence: pinnedEvidence(prepared.commit, changed),
+          reader: prepared.reader,
+        },
         base,
         transaction.stage,
         assetReader,
@@ -93,8 +99,8 @@ async function generateExport(
         compilation.manifest,
         baseline,
         config,
-        git,
-        commit,
+        prepared.reader,
+        prepared.commit,
         changed,
         assetReader,
         comparison.result.schemaVersion === 3 ? "pages" : "all",
@@ -130,8 +136,7 @@ async function generateExport(
       config,
       compilation,
       publicFiles,
-      git,
-      commit,
+      prepared,
       changed,
       exclusions,
     );

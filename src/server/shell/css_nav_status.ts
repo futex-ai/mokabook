@@ -35,6 +35,30 @@ export const SHELL_NAV_STATUS_CSS = `
 
 .mbk-nav-status[hidden] { display: none; }
 
+.mbk-nav-status:has(.mbk-nav-status-text) {
+  align-items: flex-start;
+}
+
+.mbk-nav-status:has(.mbk-nav-status-text) .mbk-nav-spinner {
+  margin-top: 3px;
+}
+
+.mbk-nav-status-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mbk-nav-status-title {
+  color: var(--chrome-ink-2);
+  font-weight: 600;
+}
+
+.mbk-nav-status-detail {
+  color: var(--chrome-muted);
+  font-size: 11.5px;
+}
+
 @keyframes mbk-nav-spin {
   to { transform: rotate(360deg); }
 }

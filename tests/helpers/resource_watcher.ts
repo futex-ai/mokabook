@@ -10,6 +10,7 @@ import type {
   ConsumerWatchOptions,
   WatchIgnorePredicate,
 } from "../../dist/server/watcher.js";
+
 import { createFixture, removeFixture } from "./fixture.js";
 
 /** Resource graph whose imported stylesheet can swap between existing leaves. */

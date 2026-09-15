@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+
 import { RenderStore } from "../dist/server/controls/store.js";
 import type { TransientRender } from "../dist/server/controls/transient_assets.js";
 

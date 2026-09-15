@@ -1,6 +1,6 @@
 # Mokly
 
-Mokly turns React-authored mobile and desktop mockups into committed static
+Mokly turns React-authored mobile and desktop mockups into static
 HTML, exports complete catalogues for hosting, serves them during development, and compares screens
 with their Git baseline on demand. It is app-independent: product screens, component libraries,
 themes, styles, and compatibility adapters stay in the consuming repository.
@@ -42,6 +42,12 @@ export default defineConfig({
   },
 });
 ```
+
+This configuration uses the default `generatedOutput: "committed"`. Commit the
+generated HTML and manifest alongside their source. Check verifies that generated
+bytes match the current compilation; comparisons read their baseline from Git
+without executing historical code. [Derived output](#derived-output) is an
+optional mode for repositories that want to keep generated files out of Git.
 
 An entry module ends in `.mockup.ts` or `.mockup.tsx` and exports `mockups`:
 
@@ -165,16 +171,16 @@ Value options also accept `--name=value`, which supports values beginning with
 `-`, such as `--config=-catalogue.config.ts`. Empty values and assignments to
 boolean flags are rejected.
 
-| Command                     | Outcome                                                   |
-| --------------------------- | --------------------------------------------------------- |
-| `mokly`                     | Browse on demand and watch using a stable development URL |
-| `mokly serve`               | Serve the catalogue and on-demand diffs; watch by default |
-| `mokly build`               | Validate and transactionally write generated output       |
-| `mokly check`               | Compare expected and committed bytes without writing      |
-| `mokly export --out <path>` | Build a complete static catalogue for your host           |
-| `mokly publish`             | Export and upload a catalogue to your chosen service      |
-| `mokly --help`              | Show commands and their supported options                 |
-| `mokly --version`           | Print the installed package version                       |
+| Command                     | Outcome                                                      |
+| --------------------------- | ------------------------------------------------------------ |
+| `mokly`                     | Browse on demand and watch using a stable development URL    |
+| `mokly serve`               | Serve the catalogue and on-demand diffs; watch by default    |
+| `mokly build`               | Validate and transactionally write generated output          |
+| `mokly check`               | Validate committed bytes or require untracked derived output |
+| `mokly export --out <path>` | Build a complete static catalogue for your host              |
+| `mokly publish`             | Export and upload a catalogue to your chosen service         |
+| `mokly --help`              | Show commands and their supported options                    |
+| `mokly --version`           | Print the installed package version                          |
 
 Serve starts at port `4173`. If that port, or a concrete `--port` value, is
 already occupied, Mokly tries each following port in order until one is
@@ -197,6 +203,10 @@ searchable navigation and a real preview within five seconds for both a fresh
 process and a warm restart, exercises Props, themes, viewports and pages, and
 waits for Changes separately. Use matching `--areas 2 --screens 10 --rows 6`
 options for smaller setup and benchmark runs. Fixtures stay under `.context`.
+Pass `--derived` to fixture setup and benchmark for a separately recorded
+source-only baseline with its own packaged Mokly and dependency lockfile.
+The benchmark requires a cold rebuild and a warm cache hit, reporting baseline
+preparation separately while keeping the five-second navigation target for both.
 See the [large fixture guide](./tests/fixtures/large/README.md).
 
 Serve validates a lightweight catalogue index and makes navigation and local Props
@@ -228,7 +238,8 @@ change evidence while current previews remain accessible. See [on-demand Serve](
 
 `build` writes one fragment per effective viewport and color-scheme view plus
 `mokly-manifest.json` under `mockupsDir`. `check` calculates those bytes
-without writing and reports missing, stale, or orphan generated files. The
+without writing. Committed mode reports missing, stale, or orphan generated
+files; derived mode reports tracked generated or cache paths. The
 manifest stays internal: its source inventory is unavailable through HTTP,
 published assets, and comparison resources. Ordinary public JSON remains
 supported. Browse
@@ -408,6 +419,55 @@ Use `MockLink` for catalogue destinations. Raw relative links remain suitable
 for real static assets and complete documents, but logical screen/use-case routes
 do not name generated files in schema v5.
 
+### Derived output
+
+Set `generatedOutput: "derived"` to keep generated HTML out of Git, as this
+repository's example does.
+Build still writes transactionally; Check validates the
+compilation and rejects tracked generated files or cache contents, without
+requiring local generated files to exist or match. Authored public CSS and HTML
+remain allowed in Git. Add ignore rules for your generated routes and manifest,
+plus `.mokly-cache/`, and remove any already tracked generated files from the
+index with `git rm --cached`.
+The index check also recognizes ownership headers on generated pages that were
+renamed or removed from the current catalogue, even without local copies.
+
+Derived comparisons rebuild the merge-base commit in an isolated extraction,
+using that commit's dependencies and Mokly version, then cache its output.
+This executes historical code: use a trusted mainline as the base. The default
+commands are `npm ci` followed by
+`npx --no-install mokly build --config <repository-relative-config-path>`.
+Override the exact ordered argv list when your project needs additional steps:
+
+```ts
+export default defineConfig({
+  generatedOutput: "derived",
+  entriesDir: "docs/mockups/src/entries",
+  mockupsDir: "docs/mockups",
+  review: {
+    baselineBuild: [
+      ["npm", "ci"],
+      ["npm", "run", "build:tooling"],
+      ["npx", "--no-install", "mokly", "build", "--config", "mokly.config.ts"],
+    ],
+  },
+});
+```
+
+Commands run from the historical repository root without a shell; no commands
+are appended to an explicit list. `baselineBuild` is rejected in committed
+mode. See the [derived baseline contract](./docs/protocol/mokly-derived-baselines.md)
+and [storage rules](./docs/protocol/mokly-baseline-storage.md) for cache limits,
+network configuration, Windows npm/npx launching, and the one-catalogue-per-commit
+cache boundary. Ordinary edits keep an active baseline rebuild running; changing
+the branch point or build settings replaces it.
+Windows builds preserve native npm/npx launchers and use operating-system job
+ownership so cancelling a build also stops programs it started, even after its
+launcher exits. Keep the package's optional native dependencies installed;
+missing process-tree support fails before the historical build starts.
+Temporary cache-lock cleanup failures are reported separately without losing
+the build's lock ownership.
+
 ## Whole-document pages
 
 Use a page for an existing complete HTML document without inventing device
@@ -492,8 +552,9 @@ forcing React peers to the consumer's one runtime.
 - **A watched edit fails:** fix the reported candidate build/config error. The
   last-good server remains active and adopts the next valid change.
 - **Export cannot find its baseline:** fetch the configured base with enough
-  Git history and retain its committed manifest/fragments. Export never fetches
-  history and does not silently omit comparisons.
+  Git history. Committed mode needs its manifest/fragments in Git; derived mode
+  needs a working historical install/build recipe. Export never fetches history
+  and does not silently omit comparisons.
 - **Export refuses its destination:** choose a missing/empty directory outside
   source, generated, dependency, and comparison roots. Keep unrelated files out
   of owned exports. For a retained reservation, confirm no export is running,
@@ -508,12 +569,28 @@ repository tasks.
 ```bash
 npm ci
 npm run build
+npm run example:build
 npm test
 npm run test:browser
-npm run example:build
 npm run example:check
 cargo xtask check
 ```
+
+The example's generated HTML and manifest are ignored local artifacts; its
+authored CSS remains tracked. Both test entrypoints build the package and example
+before loading tests, including direct-from-disk design checks. `example:check`
+validates compilation and rejects tracked generated output even when the local
+files are absent. Example baselines run `npm ci`, `npm run build`, then
+`npm run example:build` in the historical extraction.
+
+JavaScript and TypeScript imports stay at the top, grouped as Node builtins,
+external packages, package self-imports, parent imports, then sibling/index imports.
+Paths are alphabetical within each group, with every parent depth before siblings
+and blank lines between groups.
+The package's own `@mokly/mokly` public entrypoint is always a repository module,
+including before `dist/` has been built. `npm run lint -- --fix` applies the
+`import/first` and `import/order` rules, provided by the ESLint 10-compatible
+`eslint-plugin-import-x` package.
 
 For local development after installing dependencies, run:
 
@@ -572,19 +649,23 @@ recovery and reports the last published state if it times out.
 
 `cargo xtask check` is the authoritative local gate. It starts with a live
 dependency audit (`npm run dependencies:check`), then includes formatting,
-lint, typechecking, unit/integration tests, the committed example, package
+lint, typechecking, unit/integration tests, the derived example, package
 allowlist and license checks, clean packed ESM/NodeNext/npx/Accounting/Juno
 consumers, Chromium tests, and all Rust checks. It also audits the freshly
 resolved packed consumer's production dependencies. Registry access is required;
 known advisories or registry errors fail verification. See the
 [dependency security contract](./docs/protocol/dependency-security.md).
-`npm test` limits test-file parallelism to four workers to keep subprocess-heavy
+`npm test` limits test-file parallelism to two workers to keep subprocess-heavy
 fixtures within their existing startup deadlines on shared developer machines.
 All tests still run, including their explicit concurrent-writer and race cases.
 Watcher tests use `tests/helpers/watched_catalogue.ts` to await a newer version
 and the expected Changes state within the existing deadline. Multi-operation
 edits can publish intermediate states; the first newer version alone does not
 prove that an entire replacement or repair has completed.
+Process-lifecycle tests use `tests/helpers/process_state.ts` for inspection and
+cleanup. A helper disappearing before `ps` runs is a successful exit, not a test
+failure. Only the defined empty no-match result and `ESRCH` during cleanup are
+accepted; running helpers and other command or permission failures still fail.
 
 ## Export And Publish A Consumer Build
 
@@ -600,7 +681,8 @@ Export builds first, then packages the complete catalogue, real id aliases,
 assets, and Git comparisons. `--out` is required and config-relative, not
 working-directory-relative; absolute paths must remain inside `repoRoot`.
 `--base` overrides `review.base` (default `origin/main`). The Git branch point
-must contain the committed manifest and required fragments/assets; CI should
+must contain the required authored assets and either committed generated output
+or the source and tooling needed by the derived baseline recipe; CI should
 check out full history. Normal build validation, including nonempty registry
 requirements, still applies.
 
@@ -674,7 +756,8 @@ npx mokly publish --no-changes --repository git.example.com/team/project
 prefer the token environment variable to avoid shell history. `--out` defaults
 to `.context/mokly-publish` beside the config. Comparisons are included unless
 `--no-changes` is given; that option needs no baseline history and cannot be
-combined with `--base`. Publish still requires a committed Git checkout for
+combined with `--base`. Derived catalogues also skip the historical rebuild in
+this mode. Publish still requires a committed Git checkout for
 revision metadata. Git remote `origin` (or the sole remote) supplies repository
 identity; `--repository <host>/<owner>/<name>` overrides it.
 

@@ -1,5 +1,5 @@
-import { viewControls } from "../../library/controls/view-controls.js";
 import { optional, useDesignInstance } from "../../library/composition.js";
+import { viewControls } from "../../library/controls/view-controls.js";
 import type { ArtboardViewport } from "../../parts/shell.js";
 
 export interface HighlightOption {

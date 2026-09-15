@@ -1,6 +1,7 @@
-import React from "react";
-
 import { FirnaButton, FirnaCard } from "@firna/ui";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
 import {
   definePage,
   defineCollection,
@@ -10,9 +11,8 @@ import {
   ReviewIgnore,
 } from "@mokly/mokly";
 
-import { renderToStaticMarkup } from "react-dom/server";
-import { renderComponent } from "../legacy/components.js";
 import { accent } from "../../shared/tokens.js";
+import { renderComponent } from "../legacy/components.js";
 
 const common = {
   dependencies: ["packages/firna-ui/index.tsx", "shared/tokens.ts"],

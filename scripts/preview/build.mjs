@@ -1,7 +1,8 @@
 import path from "node:path";
 
-import { publicationArguments } from "../../dist/publication/options.js";
 import { loadConfig } from "../../dist/config/load.js";
+import { publicationArguments } from "../../dist/publication/options.js";
+
 import { buildPreview } from "./catalogue.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");

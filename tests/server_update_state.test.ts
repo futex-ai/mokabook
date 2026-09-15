@@ -6,6 +6,7 @@ import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { loadCatalogueSnapshot } from "../dist/server/catalogue_snapshot.js";
 import { startCatalogueServer } from "../dist/server/http.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("published updates replace or clear changed-route shell state", async (context) => {

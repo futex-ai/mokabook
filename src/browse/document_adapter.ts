@@ -1,7 +1,7 @@
 import { parse } from "parse5";
 
-import { validateComponentRanges } from "../components/ranges.js";
 import { hasGeneratedOwnershipHeader } from "../build/ownership.js";
+import { validateComponentRanges } from "../components/ranges.js";
 import { MoklyError } from "../errors.js";
 import { logicalMarker, parseLogicalMarker } from "../navigation/logical.js";
 import {
@@ -16,6 +16,7 @@ import {
   serializeBrowsingTarget,
 } from "../navigation/target.js";
 import type { Catalogue } from "../server/catalogue.js";
+
 import { expectedPortableHref, trustedDocument } from "./trusted_document.js";
 
 interface HtmlAttribute {

@@ -8,12 +8,16 @@ export async function catalogue(url: string): Promise<string> {
 }
 
 /** Wait for initial background publication before testing an already-running catalogue. */
-export function waitForInitialChanges(url: string): Promise<string> {
+export function waitForInitialChanges(
+  url: string,
+  timeoutMs = 20_000,
+): Promise<string> {
   return waitForPublished(
     url,
     0,
     (html) => /data-changes-status="(?:ready|unavailable)"/.test(html),
     "completed initial Changes",
+    timeoutMs,
   );
 }
 
@@ -84,8 +88,9 @@ async function waitForPublished(
   previous: number,
   settled: (html: string) => boolean,
   expectation: string,
+  timeoutMs = 20_000,
 ): Promise<string> {
-  const deadline = performance.now() + 20_000;
+  const deadline = performance.now() + timeoutMs;
   let published: string | undefined;
   let latest: string | undefined;
   while (performance.now() < deadline) {

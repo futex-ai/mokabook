@@ -74,11 +74,20 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
+      - name: Read baseline dependency lockfile
+        run: |
+          mkdir -p .context
+          baseline_commit="$(git merge-base HEAD origin/main)"
+          git show "${baseline_commit}:package-lock.json" > .context/baseline-package-lock.json
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: 24
           package-manager-cache: false
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            .context/baseline-package-lock.json
       - name: Validate Cloudflare configuration
         run: |
           missing=0

@@ -6,6 +6,7 @@ import test from "node:test";
 import { discoverConfig, loadConfig } from "../dist/config/load.js";
 import { validateRelativeRoute } from "../dist/config/paths.js";
 import { resolveConfig } from "../dist/config/validate.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("config discovery walks upward from nested workspace directories", async (context) => {

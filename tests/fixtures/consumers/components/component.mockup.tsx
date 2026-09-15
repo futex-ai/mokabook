@@ -1,4 +1,5 @@
 import React, { type ReactNode } from "react";
+
 import { defineComponent, defineScreen } from "@mokly/mokly";
 
 const metadata = { dependencies: [], relatedDocs: [] };

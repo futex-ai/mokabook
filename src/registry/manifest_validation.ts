@@ -4,8 +4,9 @@ import {
 } from "../components/manifest_validation.js";
 import { MoklyError } from "../errors.js";
 import { isCatalogueId } from "../navigation/logical.js";
-import { validateManifestRelationships } from "./manifest_relationships.js";
+
 import { validateEntry, validateCurrentFields } from "./manifest_entries.js";
+import { validateManifestRelationships } from "./manifest_relationships.js";
 import {
   record,
   stringArray,

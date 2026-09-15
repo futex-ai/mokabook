@@ -10,13 +10,14 @@ import type {
   WorkspaceData,
   WorkspaceVariant,
 } from "../server/shell/workspace_data.js";
+
 import { currentColorScheme, setColorScheme } from "./browse_state.js";
 import { controlFields, type ControlFields } from "./control_fields.js";
+import { controlSurface, controlsUnavailable } from "./control_surface.js";
 import {
   requestComponentPreview,
   componentPreviewExpired,
 } from "./control_transport.js";
-import { controlSurface, controlsUnavailable } from "./control_surface.js";
 import { renderProps } from "./inspector_panels.js";
 import { applyVariant } from "./workspace_variants.js";
 

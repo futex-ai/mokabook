@@ -1,10 +1,11 @@
+import { normalizeHistoricalDocument } from "../review/ignore.js";
+
 import { canonicalJson } from "./data.js";
 import type {
   ComponentInputOwner,
   ComponentViewRecord,
 } from "./manifest_types.js";
 import { validateComponentRanges, type RenderedRange } from "./ranges.js";
-import { normalizeHistoricalDocument } from "../review/ignore.js";
 
 /** Canonicalize historical material only after its original coordinates are consumed. */
 export function stripHistoricalMarkers(html: string): string {

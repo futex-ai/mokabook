@@ -1,8 +1,10 @@
 /** The consumer render adapter runs only in this terminable worker. */
 import { parentPort, workerData } from "node:worker_threads";
-import { evaluateBundle } from "../../build/consumer_bundle.js";
+
 import type { ComponentRuntime } from "../../build/component_runtime.js";
+import { evaluateBundle } from "../../build/consumer_bundle.js";
 import type { ComponentRenderRequest } from "../../components/render_types.js";
+
 import { renderTransient } from "./transient.js";
 
 const runtime = workerData as ComponentRuntime;

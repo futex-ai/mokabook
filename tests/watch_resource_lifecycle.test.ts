@@ -7,6 +7,7 @@ import { compileCatalogue } from "../dist/build/compile.js";
 import { ResourceWatcher } from "../dist/server/resource_watcher.js";
 import { prepareWatchedOutput } from "../dist/server/serve_lifecycle.js";
 import { classifyWatchPath } from "../dist/server/watch_events.js";
+
 import {
   resourceFixture,
   ResourceWatcherFactory,

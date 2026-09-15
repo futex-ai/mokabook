@@ -1,19 +1,39 @@
 /** Background output/evidence can be adopted only by its still-current source generation. */
-import type { ComponentRuntime } from "../../build/component_runtime.js";
+import type { BaselineBuilder } from "../../baseline/types.js";
 import type { Compilation } from "../../build/compile.js";
+import type { ComponentRuntime } from "../../build/component_runtime.js";
 import type { GeneratedOutputStore } from "../../build/output_store.js";
-import { errorMessage } from "../../errors.js";
+import type { ResolvedConfig } from "../../config/types.js";
 import { timeAsync, timingCounts } from "../../diagnostics/timings.js";
+import { errorMessage } from "../../errors.js";
+import { RepositoryCatalogueChangeClassifier } from "../component_changes.js";
 import type {
   CatalogueChangeClassifier,
   ComponentChangeSnapshot,
 } from "../component_changes.js";
-import { RepositoryCatalogueChangeClassifier } from "../component_changes.js";
 import type {
   PreparedResourceWatch,
   ResourceWatcher,
 } from "../resource_watcher.js";
+
 import { BackgroundCompilation } from "./background.js";
+import { BackgroundBaseline } from "./baseline.js";
+
+/** Collaborators and observers supplied by the Serve composition root. */
+export interface BackgroundGenerationOptions {
+  readonly resources?: ResourceWatcher;
+  /** Resolves when the host shuts down; preparation stays independently cancellable. */
+  readonly shutdown?: Promise<void>;
+  /** The parent publishes or revokes the read capability for this generation. */
+  readonly baselinePrepared?: (commit: string | null) => void;
+  /**
+   * Publish `preparing` while a derived baseline is genuinely rebuilt and
+   * `pending` once it settles. Committed mode and a cache hit never call this.
+   */
+  readonly baselineStatus?: (status: "preparing" | "pending") => void;
+  /** Injected by tests; the composition root builds the real one on demand. */
+  readonly builder?: BaselineBuilder;
+}
 
 export class BackgroundGeneration {
   private worker: BackgroundCompilation | undefined;
@@ -21,7 +41,9 @@ export class BackgroundGeneration {
   private sequence = 0;
   private closed = false;
   private busy = false;
+  private readonly baseline: BackgroundBaseline;
   private controller: AbortController | undefined;
+  private readonly shutdown: Promise<void>;
   constructor(
     private readonly store: GeneratedOutputStore,
     private readonly classifier: CatalogueChangeClassifier,
@@ -32,9 +54,15 @@ export class BackgroundGeneration {
     private readonly classified: (
       snapshot: ComponentChangeSnapshot | undefined,
     ) => void,
-    private readonly resources?: ResourceWatcher,
-    private readonly shutdown: Promise<void> = new Promise(() => {}),
-  ) {}
+    private readonly options: BackgroundGenerationOptions = {},
+  ) {
+    this.shutdown = options.shutdown ?? new Promise(() => {});
+    this.baseline = new BackgroundBaseline(
+      options.baselineStatus,
+      options.baselinePrepared,
+      options.builder,
+    );
+  }
 
   start(runtime: ComponentRuntime, base: string, existing?: Compilation): void {
     if (this.closed) return;
@@ -48,7 +76,7 @@ export class BackgroundGeneration {
       try {
         const compilation = await worker.compilation;
         if (!current()) return;
-        prepared = await this.resources?.prepare(
+        prepared = await this.options.resources?.prepare(
           runtime.config,
           compilation,
           this.shutdown,
@@ -59,15 +87,27 @@ export class BackgroundGeneration {
         if (!current()) return;
         prepared?.adopt();
         this.completed(compilation, runtime);
+        const baseline =
+          runtime.config.generatedOutput === "derived" &&
+          this.classifier instanceof RepositoryCatalogueChangeClassifier
+            ? await this.baseline.prepare(
+                runtime.config,
+                base,
+                controller.signal,
+              )
+            : undefined;
+        if (!current()) return;
+        if (baseline) this.options.baselinePrepared?.(baseline.commit);
         const snapshot = await timeAsync("changes.classify", () =>
           this.classifier instanceof RepositoryCatalogueChangeClassifier
-            ? worker.classify(base)
+            ? worker.classify(base, baseline?.commit)
             : Promise.race([
                 this.classifier.read(
                   runtime.config,
                   compilation.manifest,
                   base,
                   controller.signal,
+                  { outputs: compilation.outputs },
                 ),
                 new Promise<undefined>((resolve) =>
                   controller.signal.addEventListener(
@@ -96,14 +136,19 @@ export class BackgroundGeneration {
     })();
   }
 
+  get changesStatus(): "preparing" | "pending" {
+    return this.baseline.status;
+  }
+
   foreground(active: boolean): void {
     this.busy = active;
     this.worker?.foreground(active);
   }
-  async invalidate(): Promise<void> {
+  async invalidate(config?: ResolvedConfig): Promise<void> {
     this.sequence++;
     this.controller?.abort();
     this.controller = undefined;
+    if (config) await this.baseline.reconfigure(config);
     const worker = this.worker;
     this.worker = undefined;
     await worker?.close();
@@ -111,6 +156,8 @@ export class BackgroundGeneration {
   }
   async close(): Promise<void> {
     this.closed = true;
+    this.controller?.abort();
+    await this.baseline.close();
     await this.invalidate();
   }
 }

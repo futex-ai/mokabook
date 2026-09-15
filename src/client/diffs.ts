@@ -1,6 +1,7 @@
 /** Lazy comparison requests, with cancellation when a user leaves the screen. */
 
 import { parseReviewResult } from "../review/result_validation.js";
+
 import { renderDiff, type DiffMode, type LoadedDiff } from "./diff_views.js";
 import { readStaticDelivery } from "./static_delivery.js";
 

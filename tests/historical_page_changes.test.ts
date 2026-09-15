@@ -3,9 +3,11 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { committedReviewRepository } from "../dist/review/repository.js";
+import { createCatalogue } from "../dist/server/catalogue.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
 import { changedContentPaths } from "../dist/server/changed_content.js";
-import { createCatalogue } from "../dist/server/catalogue.js";
+
 import {
   historicalPageFixture,
   pageDocument,
@@ -62,7 +64,7 @@ for (const version of [2, 3] as const) {
           fixture.manifest,
           fixture.baseline,
           fixture.config,
-          fixture.client,
+          fixture.client.reader,
           fixture.commit,
           paths,
         ),
@@ -75,7 +77,11 @@ for (const version of [2, 3] as const) {
 
   test(`v${version} page migration attributes Changes to current metadata without historical rows`, async (context) => {
     const fixture = await historicalPageFixture(context, version);
-    const changes = await computeCatalogueChanges(fixture.config, "HEAD");
+    const changes = await computeCatalogueChanges(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    );
     assert.deepEqual(changes.changedRoutes, ["handbook.html"]);
     assert.deepEqual(changes.removedEntries, []);
     const catalogue = createCatalogue(fixture.manifest, changes.removedEntries);
@@ -103,7 +109,7 @@ for (const failure of ["symlink", "private", "invalid-ignore"] as const) {
         fixture.manifest,
         fixture.baseline,
         fixture.config,
-        fixture.client,
+        fixture.client.reader,
         fixture.commit,
         ["mockups/handbook.html"],
       ),
@@ -121,7 +127,11 @@ test("a renamed legacy route is an added page without pairing or synthetic remov
     route: "old-handbook.html",
     document: pageDocument.replace("end:nav", "end:other"),
   });
-  const changes = await computeCatalogueChanges(fixture.config, "HEAD");
+  const changes = await computeCatalogueChanges(
+    fixture.config,
+    "HEAD",
+    committedReviewRepository(fixture.config),
+  );
   assert.deepEqual(changes.changedRoutes, ["handbook.html"]);
   assert.deepEqual(changes.removedEntries, []);
 });

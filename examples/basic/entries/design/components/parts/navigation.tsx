@@ -1,14 +1,15 @@
-import { MockLink } from "@mokly/mokly";
 import type { ReactNode } from "react";
+
+import { MockLink } from "@mokly/mokly";
 
 import { NavTree, type NavNode } from "../../parts/nav.js";
 import { Shell, type ArtboardViewport } from "../../parts/shell.js";
+
 import {
   COMPONENT_PAGES,
   INSPECTION_PAGES,
   type ComponentDesignDestination,
 } from "./destinations.js";
-
 import type { CatalogueIdentity } from "./metadata.js";
 
 export type ChangeScenario =

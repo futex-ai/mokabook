@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { setImmediate } from "node:timers/promises";
 import test from "node:test";
+import { setImmediate } from "node:timers/promises";
 
 import { parseBrowseRecoveryState } from "../dist/client/browse_recovery.js";
 import type { BrowseRecoveryState } from "../dist/client/browse_state.js";
@@ -61,7 +61,12 @@ test("a ready version newer than the served page reloads immediately", () => {
 });
 
 test("Browse recovery parsing rejects malformed session state", () => {
-  for (const changesStatus of ["pending", "ready", "unavailable"] as const) {
+  for (const changesStatus of [
+    "preparing",
+    "pending",
+    "ready",
+    "unavailable",
+  ] as const) {
     const state = { ...browseState(), changesStatus };
     assert.deepEqual(parseBrowseRecoveryState(state), state);
   }

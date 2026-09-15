@@ -10,6 +10,7 @@ import { NodeGitCommandRunner } from "../dist/review/git.js";
 import { loadCatalogueSnapshot } from "../dist/server/catalogue_snapshot.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { buildPreview } from "../scripts/preview/catalogue.mjs";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("publication fingerprints inventoried helpers inside an otherwise ignored context directory", async (context) => {

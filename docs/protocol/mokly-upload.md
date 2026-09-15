@@ -39,6 +39,8 @@ are included by default: `--base` overrides `review.base` (default `origin/main`
 entries and comparison assets/controls. It rejects an explicit `--base`.
 Both modes build and validate the catalogue. Publish requires a Git checkout
 with a commit even without comparisons, to identify the uploaded revision.
+Derived catalogues rebuild the pinned baseline only when comparisons are enabled;
+`--no-changes` requires neither that history nor a historical install/build.
 Uncommitted authoring changes are permitted: `headSha` identifies checkout
 context, not a claim that every exported byte exists at that commit.
 

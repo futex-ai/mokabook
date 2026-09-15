@@ -1,4 +1,3 @@
-import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -6,8 +5,10 @@ import { pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { repositoryRoot } from "../helpers/fixture.js";
+
 import { loadComparison } from "./comparison_actions.js";
 import { comparisonFixture } from "./diffs_fixture.js";
+import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 
 let fixture: Awaited<ReturnType<typeof comparisonFixture>>;
 test.beforeAll(async () => {

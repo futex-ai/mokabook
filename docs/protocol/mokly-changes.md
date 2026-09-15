@@ -67,8 +67,8 @@ resources fail validation rather than being treated as deletions. Snapshot
 generation still requires current references to resolve, including resources
 whose verified deletion made their consumers eligible for Changes.
 
-This detection reads files without rebuilding the baseline, writing snapshots,
-or generating a comparison. Baseline reads are batched; shared resource edges
+This detection reads baseline files without writing snapshots or generating a
+comparison; derived mode obtains them from the completed cache entry. Baseline reads are batched; shared resource edges
 are cached within one calculation and cycles terminate. Apart from verified
 resource deletions, an unavailable or invalid input leaves Changes explicitly
 unavailable, preserving the tabs and access through All in live Serve.
@@ -79,7 +79,9 @@ complete generated output has been adopted, never during a shell request.
 The watched parent publishes the result. Until the immutable route, baseline, and
 component-evidence snapshot arrives, Browse keeps both tabs without inventing a
 Changes count. A spinner occupies the reserved count slot, and selecting Changes
-shows a loading sidebar. Content updates clear the previous snapshot and publish
+shows a loading sidebar. Derived mode publishes a distinct `preparing` state
+before `pending` while its baseline rebuild runs; see the
+[derived baselines contract](./mokly-derived-baselines.md). Content updates clear the previous snapshot and publish
 pending status before notifying the browser, then publish a terminal ready or
 unavailable status only when the latest sequence finishes. Empty ready results
 show zero; unavailable results show a dash and a plain unavailable message.
@@ -196,10 +198,15 @@ See [the shell design](./mokly-shell-design.md) and
 Live background classification, complete comparison generation, and publishing
 with `--include-changes` compare the workspace with a configured base ref, defaulting
 to `origin/main`. It resolves the merge base shared by `HEAD` and that ref, then
-reads the committed `mockupsDir` tree at that branch point without checking it
-out or rebuilding it. Commits reachable only from the configured base do not
-enter the comparison. Head artifacts come from the current working tree after
-the same generated-output checks used by `mokly check` succeed. Selected live
+reads the `mockupsDir` tree at that branch point without checking it out. In
+committed mode those are Git blobs; in
+[derived mode](./mokly-derived-baselines.md) they come from the cached
+rebuild of that commit produced with the commit's own code. The baseline is
+never rendered with the current tree's code. Commits reachable only from the
+configured base do not enter the comparison. Head generated artifacts come from
+the validated compilation. Committed mode additionally checks their working-tree
+bytes; derived mode retains compiled bytes through selected comparisons and
+compares all generated views even without changed Git output paths. Selected live
 diffs reuse the accepted manifest and pinned classification; checked-input digests
 reject changed snapshot inputs without repeating an exhaustive build.
 Review inspects only the requested base paths, grouping exact literal pathspecs

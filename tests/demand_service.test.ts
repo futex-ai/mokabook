@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import test from "node:test";
-import { DocumentService } from "../dist/server/demand/service.js";
+
 import { DocumentCache } from "../dist/build/document_cache.js";
 import { prepareLiveRuntime } from "../dist/build/live_runtime.js";
 import { loadConfig } from "../dist/config/load.js";
+import { DocumentService } from "../dist/server/demand/service.js";
+
 import {
   createFixture,
   removeFixture,

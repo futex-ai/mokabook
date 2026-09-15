@@ -1,6 +1,7 @@
 /** Served shell pages composed from the catalogue and shell views. */
 
 import type { ManifestEntry } from "../registry/types.js";
+
 import type { Catalogue } from "./catalogue.js";
 import type { ShellContext } from "./shell/context.js";
 import { renderShellPage } from "./shell/document.js";

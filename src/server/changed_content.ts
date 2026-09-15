@@ -19,14 +19,15 @@ import {
   type OptionalReviewAssetReader,
 } from "../review/assets.js";
 import { baselineResourceConfig } from "../review/base_manifest.js";
-import type { GitClient } from "../review/git.js";
+import type { BaselineReader } from "../review/git.js";
 import {
   normalizeHistoricalDocument,
   normalizeReviewPair,
   normalizeSingleDocument,
 } from "../review/ignore.js";
-import { fragmentForView, unionColorSchemes } from "../review/screen_views.js";
 import { pageBaselines } from "../review/page_baselines.js";
+import { fragmentForView, unionColorSchemes } from "../review/screen_views.js";
+
 import { ChangedResourceGraph } from "./changed_resources.js";
 
 interface DocumentPair {
@@ -44,7 +45,7 @@ export async function changedContentPaths(
   manifest: Manifest,
   baseline: Manifest,
   config: ResolvedConfig,
-  git: GitClient,
+  git: BaselineReader,
   commit: string,
   changedPaths: readonly string[],
   headReader: OptionalReviewAssetReader = new FileSystemReviewAssetReader(
@@ -72,8 +73,10 @@ export async function changedContentPaths(
         : [route];
     }),
   );
-  if (publicChanges.size === 0) return [];
+  const derived = config.generatedOutput === "derived";
+  if (!derived && publicChanges.size === 0) return [];
   const pairs = documentPairs(manifest, baseline, publicChanges, documents);
+  if (derived) for (const pair of pairs) pair.changed = true;
   const baseReader = new GitReviewAssetReader(
     baselineResourceConfig(config, baseline),
     git,
@@ -107,17 +110,19 @@ export async function changedContentPaths(
       normalizedDocuments.set(pair.head, normalized.head);
       if (normalized.base !== normalized.head) {
         result.add(repoPath(pair.head));
+        if (derived) publicChanges.add(pair.head);
       } else if (pair.base === pair.head) {
         publicChanges.delete(pair.head);
       }
     }
   }
-  if (publicChanges.size === 0) return [...result].sort();
+  if (!derived && publicChanges.size === 0) return [...result].sort();
   const resources = new ChangedResourceGraph(
     headReader,
     baseReader,
     publicChanges,
     normalizedDocuments,
+    derived,
   );
   for (const pair of pairs) {
     let document = normalizedDocuments.get(pair.head);

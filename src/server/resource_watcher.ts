@@ -1,18 +1,19 @@
 /** Transactional watches for resources discovered from generated output. */
 
 import path from "node:path";
-import { timeAsync } from "../diagnostics/timings.js";
 
 import type { Compilation } from "../build/compile.js";
 import { isInside } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import { NotificationGate } from "./watch_events.js";
-import type { ConsumerWatcher, ConsumerWatcherFactory } from "./watcher.js";
+import { timeAsync } from "../diagnostics/timings.js";
+
 import { watcherReadyBeforeShutdown } from "./serve_lifecycle.js";
+import { NotificationGate } from "./watch_events.js";
 import {
   discoverWatchResources,
   type ResourceWatchSnapshot,
 } from "./watch_resources.js";
+import type { ConsumerWatcher, ConsumerWatcherFactory } from "./watcher.js";
 
 /** Ready resource inputs adopted only after the matching output succeeds. */
 export interface PreparedResourceWatch {

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { metadataRow } from "../library/inspector/metadata-row.js";
+
 import { useDesignInstance } from "../library/composition.js";
+import { metadataRow } from "../library/inspector/metadata-row.js";
 
 export function MetaRow({
   children,

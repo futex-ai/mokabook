@@ -1,4 +1,5 @@
 import { defineComponent, type ComponentProps } from "@mokly/mokly";
+
 import { libraryMetadata } from "../metadata.js";
 import {
   changeStatus,
@@ -9,6 +10,7 @@ import {
   optionalText,
   text,
 } from "../schemas.js";
+
 import { ScreenHeaderView } from "./screen-header.view.js";
 
 const propSchema = {

@@ -12,6 +12,7 @@ import {
   LEGACY_MANIFEST_NAME,
   MANIFEST_NAME,
 } from "../registry/manifest.js";
+
 import { exportError } from "./error.js";
 
 const PRIVATE_DIRECTORIES = new Set([

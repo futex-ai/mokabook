@@ -1,16 +1,17 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { setTimeout as delay } from "node:timers/promises";
 import test from "node:test";
+import { setTimeout as delay } from "node:timers/promises";
 
-import { exportCatalogue } from "../dist/export/run.js";
 import { EXPORT_MARKER } from "../dist/export/ownership.js";
+import { exportCatalogue } from "../dist/export/run.js";
 import {
   classifyWatchPath,
   isPackageOwnedIgnoredWatchPath,
 } from "../dist/server/watch_events.js";
 import { ChokidarWatcherFactory } from "../dist/server/watcher.js";
+
 import { createExportFixture } from "./helpers/export_fixture.js";
 
 test("watch ownership follows the inventory and does not suppress unowned descendants", async (context) => {

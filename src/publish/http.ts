@@ -1,4 +1,5 @@
 import { MoklyError, type MoklyErrorCode } from "../errors.js";
+
 import type { UploadOptions } from "./types.js";
 
 const REJECTIONS: Readonly<Record<number, readonly [MoklyErrorCode, string]>> =

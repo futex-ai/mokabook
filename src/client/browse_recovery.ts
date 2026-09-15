@@ -19,6 +19,7 @@ export function parseBrowseRecoveryState(
   if (
     typeof changedOnly !== "boolean" ||
     (changesStatus !== undefined &&
+      changesStatus !== "preparing" &&
       changesStatus !== "pending" &&
       changesStatus !== "ready" &&
       changesStatus !== "unavailable") ||

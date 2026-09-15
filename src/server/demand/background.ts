@@ -1,9 +1,11 @@
 /** Bound background lifetime to one accepted source generation. */
 import { MessageChannel, Worker } from "node:worker_threads";
-import type { ComponentRuntime } from "../../build/component_runtime.js";
+
 import type { Compilation } from "../../build/compile.js";
+import type { ComponentRuntime } from "../../build/component_runtime.js";
 import { timingArguments } from "../../diagnostics/timings.js";
 import type { ComponentChangeSnapshot } from "../component_changes.js";
+
 import { BackgroundGitHost } from "./git_host.js";
 
 export class BackgroundCompilation {
@@ -32,7 +34,14 @@ export class BackgroundCompilation {
             pause: this.pause.buffer,
             debug: timingArguments().length > 0,
             gitPort: port2,
-            ...(existing ? { existingManifest: existing.manifest } : {}),
+            ...(existing
+              ? {
+                  existingManifest: existing.manifest,
+                  ...(runtime.config.generatedOutput === "derived"
+                    ? { existingOutputs: existing.outputs }
+                    : {}),
+                }
+              : {}),
           },
           execArgv: [],
           transferList: [port2],
@@ -80,11 +89,18 @@ export class BackgroundCompilation {
   foreground(active: boolean): void {
     Atomics.store(this.pause, 0, Number(active));
   }
-  classify(base: string): Promise<ComponentChangeSnapshot | undefined> {
+  classify(
+    base: string,
+    commit?: string,
+  ): Promise<ComponentChangeSnapshot | undefined> {
     if (this.closed) return Promise.resolve(undefined);
     return new Promise((resolve, reject) => {
       this.classification = { resolve, reject };
-      this.worker.postMessage({ type: "classify", base });
+      this.worker.postMessage({
+        type: "classify",
+        base,
+        ...(commit ? { commit } : {}),
+      });
     });
   }
   close(): Promise<void> {

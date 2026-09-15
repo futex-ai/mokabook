@@ -4,6 +4,7 @@
 import type { ReactNode } from "react";
 
 import type { Catalogue } from "../catalogue.js";
+
 import { structuredCrumbTrail } from "./nav_tree.js";
 import type { CatalogueCrumb } from "./nav_tree.js";
 import type { RouteTarget } from "./target.js";

@@ -1,6 +1,8 @@
 import { defineComponent, type ComponentProps } from "@mokly/mokly";
+
 import { libraryMetadata } from "../metadata.js";
 import { comparisonDestinations, comparisonMode, flag } from "../schemas.js";
+
 import { ComparisonToolbarView } from "./comparison-toolbar.view.js";
 
 const propSchema = {

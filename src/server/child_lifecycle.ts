@@ -1,6 +1,7 @@
 /** One child owns readiness, terminal observation and an idempotent cleanup operation. */
 
 import { MoklyError, errorMessage } from "../errors.js";
+
 import type { ChildHandle } from "./child_process.js";
 import type { ChildCommand } from "./update_messages.js";
 

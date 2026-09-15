@@ -1,4 +1,5 @@
 import { defineComponent } from "@mokly/mokly";
+
 import { action } from "./action.js";
 
 const dependency = "examples/basic/generated/example-components.css";

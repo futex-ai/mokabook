@@ -1,5 +1,6 @@
 /** Private Serve controls protocol; these values never enter generated metadata. */
 import type { ColorScheme, Viewport } from "../authoring/types.js";
+
 import type { ComponentViewRecord } from "./manifest_types.js";
 import type {
   ComponentWirePrimitive,

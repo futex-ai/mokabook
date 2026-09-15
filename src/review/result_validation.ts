@@ -1,5 +1,5 @@
 import { canonicalJson } from "../components/data.js";
-import type { ReviewResult } from "./types.js";
+
 import type { ReviewResultV3 } from "./component_types.js";
 import {
   requireEqual,
@@ -17,6 +17,7 @@ import {
   validateChangedEntry,
   validateReviewScreen,
 } from "./result_records.js";
+import type { ReviewResult } from "./types.js";
 
 /** Decode both published result versions; malformed new records never grant suppression. */
 export function parseReviewResult(value: unknown): ReviewResult {

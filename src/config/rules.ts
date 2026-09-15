@@ -1,5 +1,6 @@
 import type { ColorScheme } from "../authoring/types.js";
 import { MoklyError } from "../errors.js";
+
 import { validateRelativeRoute } from "./paths.js";
 import type { StylesheetRule, WatchRule } from "./types.js";
 

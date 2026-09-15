@@ -1,6 +1,8 @@
 import { defineComponent, type ComponentProps } from "@mokly/mokly";
+
 import { libraryMetadata } from "../metadata.js";
 import { changeStatus } from "../schemas.js";
+
 import { ChangeStatusView } from "./change-status.view.js";
 
 const propSchema = {

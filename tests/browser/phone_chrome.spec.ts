@@ -4,6 +4,7 @@ import { pathToFileURL } from "node:url";
 import { expect, test } from "@playwright/test";
 
 import { repositoryRoot } from "../helpers/fixture.js";
+
 import { chooseViewport } from "./workspace_actions.js";
 
 for (const width of [390, 1280]) {

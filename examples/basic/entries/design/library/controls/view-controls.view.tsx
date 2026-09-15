@@ -1,7 +1,9 @@
-import { useDesignStyle } from "../style_context.js";
 import { useId } from "react";
+
 import { ViewIcon } from "../../components/parts/view_icons.js";
 import { DesignLink } from "../../parts/design_navigation.js";
+import { useDesignStyle } from "../style_context.js";
+
 import type { ViewControlsProps } from "./view-controls.js";
 
 const reasons = {

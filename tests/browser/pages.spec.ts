@@ -1,5 +1,6 @@
-import { chooseViewport } from "./workspace_actions.js";
 import { expect, test } from "@playwright/test";
+
+import { chooseViewport } from "./workspace_actions.js";
 
 for (const width of [390, 1280]) {
   test(`catalogue guidance includes documents at ${width}px`, async ({

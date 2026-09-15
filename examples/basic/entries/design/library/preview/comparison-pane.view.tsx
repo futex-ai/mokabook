@@ -1,4 +1,5 @@
 import { useDesignStyle } from "../style_context.js";
+
 import type { ComparisonPaneProps } from "./comparison-pane.js";
 
 export function ComparisonPaneView({

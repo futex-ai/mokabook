@@ -34,6 +34,8 @@ not remove it from this list. Links can open the actual before/current screen
 comparison even when the screen has no row in Changes.
 
 Affected describes dependency/usage evidence, not proof of a visual regression.
+In derived mode, a resource-byte difference without a changed Git path is a
+material change. It does not invent a Git dependency reason or changed path.
 No pixel counts or layout-safety claims are inferred. A changed component can
 alter surrounding layout without changing any screen-owned markup.
 

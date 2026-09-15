@@ -1,5 +1,5 @@
 import { DESTINATIONS } from "./destinations.js";
-import { NavTree, type NavNode } from "./nav.js";
+import { NavDrawer, NavTree, type ChangesStatus, type NavNode } from "./nav.js";
 
 /** Comparison classification states depicted by the design mockups. */
 export type ReviewState =
@@ -63,6 +63,18 @@ export function ReviewNav({
 /** Empty Changes retains the catalogue filter. */
 export function EmptyReviewNav() {
   return <NavTree changedOnly changedCount={0} nodes={[]} />;
+}
+
+/** Changes keeps its tabs and origin while a comparison is not yet usable. */
+export function AvailabilityNav({
+  drawer = false,
+  status,
+}: {
+  drawer?: boolean;
+  status: ChangesStatus;
+}) {
+  const props = { changedOnly: true, changesStatus: status, nodes: [] };
+  return drawer ? <NavDrawer {...props} /> : <NavTree {...props} />;
 }
 
 /** File evidence belongs in the secondary comparison details. */

@@ -1,5 +1,6 @@
-import type { ReviewResultV3 } from "./component_types.js";
 import type { ColorScheme, Viewport } from "../authoring/types.js";
+
+import type { ReviewResultV3 } from "./component_types.js";
 
 /** Text or binary bytes retained in one static Review artifact. */
 export type ReviewArtifactContent = string | Uint8Array;

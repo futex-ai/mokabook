@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { CompareGrid, MissingPane, Pane } from "../../parts/compare.js";
 import type { ArtboardViewport } from "../../parts/shell.js";
+
 import type { ActionProps } from "./action_props.js";
 import { toolbarPrompt } from "./fixtures.js";
 import { PreviewScheme } from "./view_controls.js";

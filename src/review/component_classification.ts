@@ -1,5 +1,5 @@
-import { variantAddress, viewPairs } from "./component_pairing.js";
 import path from "node:path";
+
 import { minimatch } from "minimatch";
 
 import { canonicalJson } from "../components/data.js";
@@ -8,9 +8,9 @@ import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { analyzeHierarchy } from "../registry/hierarchy.js";
 import type { Manifest, ManifestEntry } from "../registry/types.js";
+
 import type { ReviewAssetReader } from "./assets.js";
 import { affectedConsumers } from "./component_affected.js";
-import { validateComponentReviewSources } from "./component_result_sources.js";
 import {
   address,
   ComponentDependencyPolicy,
@@ -19,7 +19,9 @@ import {
   metadata,
   uniqueReasons,
 } from "./component_metadata.js";
+import { variantAddress, viewPairs } from "./component_pairing.js";
 import { ComponentMaterialReader } from "./component_resources.js";
+import { validateComponentReviewSources } from "./component_result_sources.js";
 import type {
   ChangedEntry,
   ComponentReview,
@@ -61,6 +63,7 @@ export async function classifyComponents(
     dependencies,
     changed: new Set(changedPaths),
     prefix: toPosixPath(path.relative(config.repoRoot, config.mockupsDir)),
+    compareResourceBytes: config.generatedOutput === "derived",
   };
   await Promise.all([
     context.beforeReader.prefetch(

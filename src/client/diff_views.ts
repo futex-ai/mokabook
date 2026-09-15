@@ -5,6 +5,7 @@ import type {
   ScreenReview,
   ViewReview,
 } from "../review/types.js";
+
 import { currentColorScheme, currentViewport } from "./browse_state.js";
 
 /** Available display modes; Current never requests a comparison. */

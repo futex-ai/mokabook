@@ -1,6 +1,7 @@
 import path from "node:path";
-import { prepareFixture, preparedFixture } from "./setup.mjs";
+
 import { start, stop } from "./process.mjs";
+import { prepareFixture, preparedFixture } from "./setup.mjs";
 
 const repository = path.resolve(import.meta.dirname, "../..");
 async function main() {
@@ -11,9 +12,11 @@ async function main() {
   const size = { areas: 30, screens: 40, rows: 12 };
   let debug = mode === "benchmark";
   let config;
+  let generatedOutput = "committed";
   while (args.length) {
     const flag = args.shift();
     if (flag === "--debug-timings") debug = true;
+    else if (flag === "--derived") generatedOutput = "derived";
     else if (flag === "--config") {
       const value = args.shift();
       if (!value || value.startsWith("--"))
@@ -28,10 +31,11 @@ async function main() {
   }
   if (size.screens < 2)
     throw new Error("screens must be at least two per area");
-  if (mode === "generate") return prepareFixture(repository, size, debug);
+  if (mode === "generate")
+    return prepareFixture(repository, size, debug, generatedOutput);
   const fixture = config
     ? { configPath: config, root: path.dirname(config), size }
-    : await preparedFixture(repository, size);
+    : await preparedFixture(repository, size, generatedOutput);
   if (mode === "benchmark") {
     const { benchmark } = await import("./benchmark.mjs");
     return benchmark(repository, fixture);

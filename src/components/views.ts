@@ -1,6 +1,7 @@
 import type { ColorScheme, Viewport } from "../authoring/types.js";
 import type { ManifestEntry, ManifestScreen } from "../registry/types.js";
 import { VIEWPORTS } from "../registry/views.js";
+
 import type {
   ComponentViewRecord,
   ManifestComponentVariant,

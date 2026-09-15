@@ -11,13 +11,16 @@ npm run dev:large -- --debug-timings
 npm run benchmark:large
 npm run fixture:large -- --areas 2 --screens 10 --rows 6
 npm run benchmark:large -- --areas 2 --screens 10 --rows 6
+npm run fixture:large -- --derived
+npm run dev:large -- --derived --debug-timings
+npm run benchmark:large -- --derived
 ```
 
 `fixture:large` creates a `.context/mokly-large-*` directory, builds its output
 and commits a `main` baseline **inside that isolated fixture**, not in Mokly's
 repository. It reports setup time separately and saves a size-keyed record for reuse.
-Ordinary `dev:large` and `benchmark:large` startup never repeats the baseline build
-or package compilation. Run `npm run build` explicitly after changing Mokly's
+Committed `dev:large` and `benchmark:large` reuse those baseline bytes.
+Neither mode repeats package compilation. Run `npm run build` explicitly after changing Mokly's
 source. Missing setup fails with the matching preparation command; `--config`
 can select an existing fixture. `dev:large` serves until Ctrl-C.
 
@@ -30,6 +33,36 @@ JSON records separate listening, usable startup, Props, cached delivery and Chan
 times. Either usable startup at five seconds or above fails the command.
 Chrome is launched before timing; “cold” means application-cold, not a flushed
 OS page cache. Generated fixtures remain for inspection.
+
+### Derived baselines
+
+`--derived` uses a separate record for the same dimensions and leaves generated
+HTML and the manifest untracked. Setup packs the already-built Mokly package
+into `tooling/mokly.tgz`, pins Firna and its peers from this repository's
+lockfile, creates the consumer's own lockfile and installs it. Source, public
+CSS/SVG, the package archive and lockfile form the fixture's Git baseline.
+`node_modules` and `.mokly-cache` remain ignored. Source-only setup does not
+build or prewarm the baseline cache.
+
+Cold Serve executes `npm ci` and
+`npx --no-install mokly build --config mokly.config.ts` from the archived
+commit. It therefore uses the fixture commit's packaged Mokly and dependencies,
+even after this checkout's package changes. The current side uses the CLI in
+this checkout. Regenerate the fixture to baseline a newer package version.
+
+The benchmark resets only the pinned baseline entry while holding its lock,
+requires a real cold rebuild, then requires a cache hit on the warm restart.
+Stop other servers using the fixture before running it; an active builder makes
+the reset fail. Normal `dev:large` reuses completed entries. The npm download and
+OS caches are retained in both cases; “cold” refers to rebuilt-output caching.
+
+Both runs must provide usable navigation within five seconds. JSON additionally
+reports `baselineMs`, `baselineReadyMs`, `preparingToPendingMs`, `cacheHit` and
+`baselinePhases`. These come from builder timings, so they also work without
+Serve's preparing UI. A warm hit has zero `preparingToPendingMs`. Baseline
+preparation and final Changes are measured separately from navigation and have
+no five-second budget. To smoke-test faster, add matching
+`--areas 2 --screens 10 --rows 6` options to both setup and benchmark.
 
 Defaults are 30 areas, 40 screens per area, and 12 records per screen. Each area
 adds two registered components with three saved variants, a page and one flow
@@ -63,7 +96,8 @@ five-second interactive target.
 
 Key files: `generate.ts` produces consumer sources; `area.tsx`, `components.tsx`
 and `screens.tsx` define the catalogue; `renderer.tsx` collects native styles;
-`scripts/large/setup.mjs` owns baseline setup and `benchmark.mjs` owns browser
+`scripts/large/setup.mjs` owns baseline setup, `toolchain.mjs` archives the derived
+tooling, `baseline.mjs` resets the pinned cache safely, and `benchmark.mjs` owns browser
 acceptance. The
 [diagnostic contract](../../../docs/protocol/mokly-timings.md) describes timing
 records, inclusive durations and process boundaries.

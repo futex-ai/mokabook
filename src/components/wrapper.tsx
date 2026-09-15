@@ -1,6 +1,7 @@
 import { isValidElement, useContext, type ReactNode } from "react";
 
 import { isCatalogueId } from "../navigation/logical.js";
+
 import { invalidData } from "./data.js";
 import { componentInputs } from "./inputs.js";
 import { slotKey } from "./keys.js";

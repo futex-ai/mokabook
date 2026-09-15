@@ -8,6 +8,7 @@ import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import type { ServedReview } from "../dist/server/review_routes.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("an in-flight explicit refresh queues one fresh generation", async (context) => {

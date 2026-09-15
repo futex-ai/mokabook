@@ -1,19 +1,21 @@
 /** Watched Serve adopts lightweight generations; exhaustive work follows in the background. */
 import { randomBytes } from "node:crypto";
-import { bindTimings, timeAsync } from "../diagnostics/timings.js";
-import { loadConsumerGraph } from "../build/load_graph.js";
-import { prepareLiveRuntime } from "../build/live_runtime.js";
+
 import type { Compilation } from "../build/compile.js";
 import type { ComponentRuntime } from "../build/component_runtime.js";
+import { prepareLiveRuntime } from "../build/live_runtime.js";
+import { loadConsumerGraph } from "../build/load_graph.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { bindTimings, timeAsync } from "../diagnostics/timings.js";
 import { errorMessage } from "../errors.js";
+
 import { RepositoryCatalogueChangeClassifier } from "./component_changes.js";
 import { BackgroundGeneration } from "./demand/generation.js";
-import { PreviewResources } from "./demand/resources.js";
 import {
   GitReferenceObserver,
   RepositoryGitReferences,
 } from "./demand/git_references.js";
+import { PreviewResources } from "./demand/resources.js";
 import { ResourceWatcher } from "./resource_watcher.js";
 import type { RunningServe, ServeDependencies, ServeOptions } from "./serve.js";
 import {
@@ -23,7 +25,6 @@ import {
   watcherReadyBeforeShutdown,
 } from "./serve_lifecycle.js";
 import type { ProcessSupervisor } from "./supervisor.js";
-import { createSourceWatcher } from "./watcher.js";
 import {
   classifyWatchPath,
   NotificationGate,
@@ -32,6 +33,7 @@ import {
   WatchDebouncer,
   watchTargets,
 } from "./watch_events.js";
+import { createSourceWatcher } from "./watcher.js";
 
 export async function serveWatched(
   config: ResolvedConfig,
@@ -111,8 +113,23 @@ export async function serveWatched(
         snapshot ? "ready" : "unavailable",
         "evidence",
       ),
-    resources,
-    shutdown,
+    {
+      baselinePrepared: (commit) =>
+        running.notifyUpdate(
+          undefined,
+          undefined,
+          "pending",
+          "evidence",
+          commit,
+        ),
+      baselineStatus: (changesStatus) =>
+        running.notifyUpdate(undefined, undefined, changesStatus, "evidence"),
+      resources,
+      shutdown,
+      ...(dependencies.baselineBuilder
+        ? { builder: dependencies.baselineBuilder }
+        : {}),
+    },
   );
   running.onForeground?.((active) => background.foreground(active));
   const schedule = (existing?: Compilation) =>
@@ -134,6 +151,12 @@ export async function serveWatched(
   const restart = async () => {
     try {
       await restartWithRecovery(running);
+      running.notifyUpdate(
+        undefined,
+        undefined,
+        background.changesStatus,
+        "evidence",
+      );
     } finally {
       if (!closed) schedule(activeCompilation);
     }
@@ -157,7 +180,7 @@ export async function serveWatched(
         return;
       const next = await prepareLiveRuntime(nextConfig);
       if (closed) return;
-      await background.invalidate();
+      await background.invalidate(next.config);
       if (closed) return;
       const previous = watcher;
       activeConfig = next.config;
@@ -193,7 +216,12 @@ export async function serveWatched(
       if (activeCompilation) {
         await background.invalidate();
         if (!closed) {
-          running.notifyUpdate(undefined, undefined, "pending", "evidence");
+          running.notifyUpdate(
+            undefined,
+            undefined,
+            background.changesStatus,
+            "evidence",
+          );
           schedule(activeCompilation);
         }
       }
@@ -221,7 +249,7 @@ export async function serveWatched(
         signature = nextSignature;
         await restart();
       } else {
-        running.notifyUpdate(undefined);
+        running.notifyUpdate(undefined, undefined, background.changesStatus);
         schedule();
       }
       return;
@@ -234,7 +262,7 @@ export async function serveWatched(
       action === "reload" ? "live" : "stage",
     );
     if (action === "reload") {
-      running.notifyUpdate(undefined);
+      running.notifyUpdate(undefined, undefined, background.changesStatus);
       schedule(activeCompilation);
     } else await restart();
   };

@@ -1,5 +1,6 @@
-import { MockLink } from "@mokly/mokly";
 import { useId } from "react";
+
+import { MockLink } from "@mokly/mokly";
 
 export type InspectionSelection = "off" | "outer" | "nested";
 

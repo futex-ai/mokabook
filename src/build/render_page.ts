@@ -1,6 +1,7 @@
 import type { ResolvedRegistryEntry } from "../authoring/types.js";
 import { MoklyError, errorMessage } from "../errors.js";
 import { serializeReviewSentinels } from "../renderer/sentinels.js";
+
 import { generatedHeader } from "./ownership.js";
 
 /** Capture a complete document once, outside viewport/component rendering. */

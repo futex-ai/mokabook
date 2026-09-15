@@ -6,6 +6,7 @@ import { promisify } from "node:util";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
+
 import { comparisonEntrySource } from "./comparison_source.js";
 import { createFixture, removeFixture, repositoryRoot } from "./fixture.js";
 

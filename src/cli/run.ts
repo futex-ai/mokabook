@@ -1,11 +1,12 @@
 import { compileCatalogue } from "../build/compile.js";
 import { FileSystemGeneratedOutputStore } from "../build/output_store.js";
 import { loadConfig } from "../config/load.js";
+import { runWithTimings, timeAsync } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
-import { runWithTimings, timeAsync, timeSync } from "../diagnostics/timings.js";
 import { runServerChild } from "../server/child.js";
 import { receiveComponentRuntimeStartup } from "../server/controls/runtime_ipc.js";
 import { serve, type RunningServe } from "../server/serve.js";
+
 import { parseArguments, type CliArguments } from "./arguments.js";
 import { runExport } from "./export.js";
 import { HELP } from "./help.js";
@@ -72,9 +73,13 @@ async function execute(arguments_: CliArguments, cwd: string): Promise<number> {
   }
   if (arguments_.command === "check") {
     const compilation = await compileCatalogue(config);
-    timeSync("output.check", () => outputStore.check(compilation, config));
+    await timeAsync("output.check", async () =>
+      outputStore.check(compilation, config),
+    );
     process.stdout.write(
-      `Mokly output is current (${compilation.outputs.size} files).\n`,
+      config.generatedOutput === "derived"
+        ? `Mokly output is valid and untracked (${compilation.outputs.size} files).\n`
+        : `Mokly output is current (${compilation.outputs.size} files).\n`,
     );
     return 0;
   }

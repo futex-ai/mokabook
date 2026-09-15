@@ -1,6 +1,7 @@
+import { expect, test, type Page } from "@playwright/test";
+
 import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 import { expectFrameSource } from "./workspace_actions.js";
-import { expect, test, type Page } from "@playwright/test";
 
 const welcomeRow = 'a[data-nav-row][data-route="screens/welcome.html"]';
 const detailsRow = 'a[data-nav-row][data-route="screens/details.html"]';

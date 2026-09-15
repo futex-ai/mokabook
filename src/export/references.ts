@@ -2,15 +2,16 @@ import path from "node:path";
 
 import { isSafeRepositoryPath } from "../config/paths.js";
 import {
-  extractCssReferences,
-  extractHtmlReferences,
-} from "../html_references.js";
-import {
   fragmentViolation,
   htmlResource,
   type ResourceReference,
 } from "../html_link_validation.js";
+import {
+  extractCssReferences,
+  extractHtmlReferences,
+} from "../html_references.js";
 import type { ReviewArtifactContent } from "../review/types.js";
+
 import { exportError } from "./error.js";
 import { ExportPathIndex } from "./path_index.js";
 

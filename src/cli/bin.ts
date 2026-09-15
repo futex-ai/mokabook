@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { errorMessage } from "../errors.js";
+
 import { run } from "./run.js";
 import { redactCliSecrets } from "./secrets.js";
 

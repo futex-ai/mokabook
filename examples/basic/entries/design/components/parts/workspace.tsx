@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { DesignInstances } from "../../library/composition.js";
 
+import { DesignInstances } from "../../library/composition.js";
 import { NavResizeHandle } from "../../parts/nav_resize.js";
 import type { ArtboardViewport } from "../../parts/shell.js";
 import { Stage } from "../../parts/stage.js";

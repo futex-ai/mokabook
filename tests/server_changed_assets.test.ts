@@ -3,7 +3,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 
@@ -32,10 +34,14 @@ for (const resource of ["home.css", "nested.css", "image.svg"]) {
       },
     );
     await fs.appendFile(path.join(fixture.mockupsDir, resource), "\n");
-    assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
-      "screens/home.html",
-      "user-flows/tour.html",
-    ]);
+    assert.deepEqual(
+      await computeChangedRoutes(
+        fixture.config,
+        "HEAD",
+        committedReviewRepository(fixture.config),
+      ),
+      ["screens/home.html", "user-flows/tour.html"],
+    );
   });
 }
 
@@ -49,7 +55,14 @@ test("unused public files and broad shared-impact globs do not fill Changes", as
     ...fixture.config,
     review: { ...fixture.config.review, sharedImpact: ["mockups/**"] },
   };
-  assert.deepEqual(await computeChangedRoutes(config, "HEAD"), []);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      config,
+      "HEAD",
+      committedReviewRepository(config),
+    ),
+    [],
+  );
 });
 
 test("Changes includes a removed resource referenced by an unchanged screen", async (t) => {
@@ -65,10 +78,14 @@ test("Changes includes a removed resource referenced by an unchanged screen", as
     },
   );
   await fs.unlink(path.join(fixture.mockupsDir, "image.svg"));
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
-    "screens/home.html",
-    "user-flows/tour.html",
-  ]);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    ["screens/home.html", "user-flows/tour.html"],
+  );
 });
 
 test("assets used only inside paired ignored regions stay out of Changes", async (t) => {
@@ -90,5 +107,12 @@ test("assets used only inside paired ignored regions stay out of Changes", async
     },
   );
   await fs.appendFile(path.join(fixture.mockupsDir, "image.svg"), "\n");
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), []);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    [],
+  );
 });

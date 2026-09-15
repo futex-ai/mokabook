@@ -5,8 +5,9 @@ import test from "node:test";
 
 import { runExport } from "../dist/cli/export.js";
 import { errorMessage, MoklyError } from "../dist/errors.js";
-import { exportCatalogue } from "../dist/export/run.js";
 import { fileExportOperations } from "../dist/export/operations.js";
+import { exportCatalogue } from "../dist/export/run.js";
+
 import { createExportFixture } from "./helpers/export_fixture.js";
 
 test("export preserves the primary failure when reservation cleanup also fails", async (context) => {

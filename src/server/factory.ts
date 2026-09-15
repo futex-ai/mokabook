@@ -1,4 +1,5 @@
 import type { ResolvedConfig } from "../config/types.js";
+
 import {
   startCatalogueServer,
   type RunningServer,

@@ -103,6 +103,8 @@ jobs:
         run: npm run build
       - name: Verify exclusive directory transactions
         run: node --import tsx --test tests/export_rename.test.ts tests/export_destination_races.test.ts
+      - name: Verify native baseline commands
+        run: node --import tsx --test tests/baseline_platform.test.ts tests/baseline_process_tree.test.ts
 
   required:
     name: Required CI

@@ -7,6 +7,7 @@ import {
   handleTagPickerKeydown,
   syncTagChips,
 } from "../dist/client/tag_filter.js";
+
 import { asDocument, asElement, FakeNode } from "./helpers/fake_dom.js";
 
 test("a tag chip enters its term and filters the catalogue", () => {

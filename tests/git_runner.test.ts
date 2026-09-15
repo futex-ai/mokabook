@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { execFileSync } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 
 import { NodeGitCommandRunner } from "../dist/review/git.js";
+
 import { blockingGit, processExists } from "./helpers/blocking_git.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";
+import { readProcessField } from "./helpers/process_state.js";
 
 test("the Git runner aborts an active subprocess", async () => {
   const controller = new AbortController();
@@ -89,12 +90,9 @@ test(
     await command;
     assert.equal(processExists(gitPid), false);
     if (processExists(helperPid)) {
-      const state = execFileSync(
-        "ps",
-        ["-o", "stat=", "-p", String(helperPid)],
-        { encoding: "utf8" },
-      ).trim();
-      assert.match(state, /^Z/, "Git helper is still executing");
+      const state = readProcessField(helperPid, "stat");
+      if (state !== undefined)
+        assert.match(state, /^Z/, "Git helper is still executing");
     }
   },
 );

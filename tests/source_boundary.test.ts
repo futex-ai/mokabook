@@ -5,6 +5,7 @@ import test from "node:test";
 
 import { loadConsumerGraph } from "../dist/build/load_graph.js";
 import { loadConfig } from "../dist/config/load.js";
+
 import {
   createFixture,
   registerFixturePage,

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { isSafeRepositoryPath } from "../config/paths.js";
+
 import { exportError } from "./error.js";
 
 /** Public-safe proof that a directory was installed by the exporter. */

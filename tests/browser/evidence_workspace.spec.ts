@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
+
 import type { ReviewResultV3 } from "../../dist/review/component_types.js";
 import { controlsEntrySource } from "../helpers/component_controls_fixture.js";
 import { startEvidenceFixture } from "../helpers/evidence_fixture.js";
+
 import { expectFrameLoaded } from "./workspace_actions.js";
 
 test("Usage and Changes completion preserve edited props and their live preview", async ({

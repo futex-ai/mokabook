@@ -1,18 +1,20 @@
-import { componentEntrySource } from "./helpers/component_fixture.js";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
 import { MoklyError } from "../dist/errors.js";
-import { RepositoryGitClient } from "../dist/review/git.js";
+import { GitRepositoryEvidence } from "../dist/review/git_evidence.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { NodeCatalogueServerFactory } from "../dist/server/factory.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { configuredServedReview } from "../dist/server/review_routes.js";
 import { serve } from "../dist/server/serve.js";
-import { changedFixture } from "./helpers/changed_fixture.js";
-import { validEntrySource } from "./helpers/fixture.js";
+
 import { observeBackgroundClassification } from "./helpers/background_classification.js";
+import { changedFixture } from "./helpers/changed_fixture.js";
+import { componentEntrySource } from "./helpers/component_fixture.js";
+import { validEntrySource } from "./helpers/fixture.js";
 
 const page = `
 import { definePage } from "@mokly/mokly";
@@ -23,13 +25,13 @@ test("no-watch startup retains removed metadata from its single Changes calculat
   const fixture = await changedFixture(context, validEntrySource() + page);
   const classified = observeBackgroundClassification(context, fixture.config);
   await fs.writeFile(fixture.entryPath, validEntrySource());
-  const mergeBase = RepositoryGitClient.prototype.mergeBase;
+  const mergeBase = GitRepositoryEvidence.prototype.mergeBase;
   let calls = 0;
   context.mock.method(
-    RepositoryGitClient.prototype,
+    GitRepositoryEvidence.prototype,
     "mergeBase",
     async function (
-      this: RepositoryGitClient,
+      this: GitRepositoryEvidence,
       ...args: Parameters<typeof mergeBase>
     ) {
       if (++calls > 1)
@@ -58,10 +60,14 @@ test("unavailable startup Changes leaves a complete current catalogue without re
   const classified = observeBackgroundClassification(context, fixture.config);
   await fs.writeFile(fixture.entryPath, validEntrySource());
   let calls = 0;
-  context.mock.method(RepositoryGitClient.prototype, "mergeBase", async () => {
-    calls++;
-    throw new MoklyError("git-failed", "history is unavailable");
-  });
+  context.mock.method(
+    GitRepositoryEvidence.prototype,
+    "mergeBase",
+    async () => {
+      calls++;
+      throw new MoklyError("git-failed", "history is unavailable");
+    },
+  );
   const running = await serve(fixture.config, {
     base: "main",
     port: 0,
@@ -84,16 +90,24 @@ test("server startup rejects invalid current metadata before querying history", 
     "{}",
   );
   let calls = 0;
-  context.mock.method(RepositoryGitClient.prototype, "mergeBase", async () => {
-    calls++;
-    throw new Error("invalid current output must fail first");
-  });
+  context.mock.method(
+    GitRepositoryEvidence.prototype,
+    "mergeBase",
+    async () => {
+      calls++;
+      throw new Error("invalid current output must fail first");
+    },
+  );
 
   await assert.rejects(
     startCatalogueServer(fixture.config, {
       base: "main",
       port: 0,
-      review: configuredServedReview(fixture.config, "main"),
+      review: configuredServedReview(
+        fixture.config,
+        "main",
+        committedReviewRepository(fixture.config),
+      ),
     }),
     { code: "manifest-invalid" },
   );
@@ -143,13 +157,13 @@ test("a no-watch component catalogue reuses its resolved ownership evidence", as
       '<button className="updated" data-viewport=',
     ),
   );
-  const mergeBase = RepositoryGitClient.prototype.mergeBase;
+  const mergeBase = GitRepositoryEvidence.prototype.mergeBase;
   let calls = 0;
   context.mock.method(
-    RepositoryGitClient.prototype,
+    GitRepositoryEvidence.prototype,
     "mergeBase",
     async function (
-      this: RepositoryGitClient,
+      this: GitRepositoryEvidence,
       ...args: Parameters<typeof mergeBase>
     ) {
       if (++calls > 1) throw new Error("The baseline must stay pinned");

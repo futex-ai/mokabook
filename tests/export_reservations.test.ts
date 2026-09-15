@@ -4,8 +4,9 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { ExportTransaction } from "../dist/export/transaction.js";
 import { RESERVATION_DIRECTORY } from "../dist/export/reservation.js";
+import { ExportTransaction } from "../dist/export/transaction.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("concurrent filesystem aliases share a single export reservation", async (context) => {

@@ -1,8 +1,9 @@
-import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 import { expect, test } from "@playwright/test";
 
 import { createPreviewComparisonFixture } from "../helpers/preview_comparison_fixture.js";
+
 import { servePreviewFixture, type PreviewFixture } from "./preview_fixture.js";
+import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 
 let fixture: Awaited<ReturnType<typeof createPreviewComparisonFixture>>;
 let preview: PreviewFixture;

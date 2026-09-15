@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+
 import { validateRenderRequest } from "../dist/components/render_request.js";
+
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 
 test("render requests merge only declared controls with lossless values and optional unset", async (t) => {

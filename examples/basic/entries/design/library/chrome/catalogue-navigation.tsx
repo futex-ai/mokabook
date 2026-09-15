@@ -1,7 +1,9 @@
 import { defineComponent, type ComponentProps } from "@mokly/mokly";
+
+import { NAV_TREE } from "../../parts/nav_data.js";
 import { libraryMetadata } from "../metadata.js";
 import { destination, flag, optionalText, text } from "../schemas.js";
-import { NAV_TREE } from "../../parts/nav_data.js";
+
 import { CatalogueNavigationView } from "./catalogue-navigation.view.js";
 
 const propSchema = {
@@ -37,7 +39,10 @@ const propSchema = {
     changedCount: { schema: { kind: "number", minimum: 0, integer: true } },
     changedOnly: flag,
     changesStatus: {
-      schema: { kind: "enum", values: ["ready", "pending", "unavailable"] },
+      schema: {
+        kind: "enum",
+        values: ["ready", "pending", "preparing", "unavailable"],
+      },
       optional: true,
     },
     showChanges: { ...flag, optional: true },
@@ -74,6 +79,7 @@ export const catalogueNavigation = defineComponent({
       options: [
         { label: "Ready", value: "ready" },
         { label: "Checking", value: "pending" },
+        { label: "Preparing", value: "preparing" },
         { label: "Unavailable", value: "unavailable" },
       ],
     },
@@ -110,6 +116,16 @@ export const catalogueNavigation = defineComponent({
       id: "loading",
       title: "Checking for changes",
       props: { ...sample, changedOnly: true, changesStatus: "pending" },
+    },
+    {
+      id: "preparing",
+      title: "Preparing comparison",
+      props: { ...sample, changedOnly: true, changesStatus: "preparing" },
+    },
+    {
+      id: "unavailable",
+      title: "Changes unavailable",
+      props: { ...sample, changedOnly: true, changesStatus: "unavailable" },
     },
   ],
 });

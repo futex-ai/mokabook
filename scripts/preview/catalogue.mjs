@@ -1,20 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { isInside, projectRealPath } from "../../dist/config/paths.js";
+import { errorMessage } from "../../dist/errors.js";
 import { withExportCleanup } from "../../dist/export/cleanup.js";
 import { assertExportOwnership } from "../../dist/export/ownership.js";
 import { resolveExportOutput } from "../../dist/export/paths.js";
 import { ExportTransaction } from "../../dist/export/transaction.js";
-import { errorMessage } from "../../dist/errors.js";
 import { publicationOptions } from "../../dist/publication/options.js";
-import {
-  NodeGitCommandRunner,
-  RepositoryGitClient,
-} from "../../dist/review/git.js";
-import { capturePublicationInputs } from "./inputs.mjs";
-import { previewOwnership, stagePreviewArtifact } from "./artifact.mjs";
 import { copyPublicFiles } from "../../dist/publication/resources.js";
-import { isInside, projectRealPath } from "../../dist/config/paths.js";
+import { prepareReviewRepository } from "../../dist/review/prepare.js";
 import { loadCatalogueSnapshot } from "../../dist/server/catalogue_snapshot.js";
 import { computeCatalogueChanges } from "../../dist/server/changed.js";
 import {
@@ -23,11 +18,14 @@ import {
   loadShellFontAssets,
 } from "../../dist/server/client_modules.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
+
+import { previewOwnership, stagePreviewArtifact } from "./artifact.mjs";
 import {
   captureComparison,
   previewComparisonProvider,
   publishComparison,
 } from "./comparisons.mjs";
+import { capturePublicationInputs } from "./inputs.mjs";
 
 const liveUpdateScript =
   '<script src="/__mokly/client/browser.js" type="module"></script>';
@@ -55,24 +53,14 @@ export async function buildPreview(config, output, options = {}) {
       async () => {
         const stage = transaction.stage;
         const excludedRoots = [stage, output, transaction.reservationRoot];
-        const inputs = await capturePublicationInputs(config, excludedRoots);
         const base = capability.includeChanges
           ? (capability.base ?? config.review.base)
           : "";
-        let git;
-        if (capability.includeChanges) {
-          const repository = new RepositoryGitClient(
-            new NodeGitCommandRunner(config.repoRoot),
-          );
-          const commit = await repository.mergeBase(base, "HEAD");
-          git = new Proxy(repository, {
-            get(target, key) {
-              if (key === "mergeBase") return async () => commit;
-              const value = Reflect.get(target, key);
-              return typeof value === "function" ? value.bind(target) : value;
-            },
-          });
-        }
+        const prepared = capability.includeChanges
+          ? await prepareReviewRepository(config, base)
+          : undefined;
+        const git = prepared;
+        const inputs = await capturePublicationInputs(config, excludedRoots);
         const snapshot = await loadCatalogueSnapshot(
           config,
           git
@@ -132,6 +120,7 @@ export async function buildPreview(config, output, options = {}) {
             "consumer inputs changed during publication; retry with stable inputs",
           );
         assertSafeOutput(output, config.repoRoot);
+        await prepared?.assertUnchanged();
         if (
           projectRealPath(resolveExportOutput(config, output, contextRoot)) !==
           transaction.output

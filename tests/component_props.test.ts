@@ -1,4 +1,3 @@
-import type { PropValue } from "../dist/components/prop_types.js";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
@@ -9,9 +8,10 @@ import {
   encodeValue,
   decodeValue,
 } from "../dist/components/codec.js";
-import { validatePropSchema } from "../dist/components/schema.js";
-import { validateProps } from "../dist/components/props.js";
 import { canonicalJson } from "../dist/components/data.js";
+import type { PropValue } from "../dist/components/prop_types.js";
+import { validateProps } from "../dist/components/props.js";
+import { validatePropSchema } from "../dist/components/schema.js";
 
 const schema = {
   kind: "object",

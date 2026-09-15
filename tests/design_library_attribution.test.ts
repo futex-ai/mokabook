@@ -4,6 +4,7 @@ import test from "node:test";
 import { generatedViews } from "../dist/components/views.js";
 import { compareReview } from "../dist/review/compare.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
+
 import { designLibrary } from "./helpers/design_library.js";
 import { designLibraryFixture } from "./helpers/design_library_fixture.js";
 
@@ -209,8 +210,8 @@ test("screen query and field values remain direct changes in their owning design
     });
 });
 
-test("the expanded registered catalogue uses one baseline view batch and agrees across Serve and comparison", async (t) => {
-  const fixture = await designLibraryFixture(t);
+test("the committed catalogue uses one baseline view batch and agrees across Serve and comparison", async (t) => {
+  const fixture = await designLibraryFixture(t, "committed");
   const file =
     "examples/basic/entries/design/library/controls/tag-chip.view.tsx";
   await fixture.edit(file, (source) =>

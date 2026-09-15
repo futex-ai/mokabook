@@ -155,3 +155,38 @@ test("concurrent sessions and later watcher callbacks retain isolated diagnostic
   assert.ok(a.some((event) => event.stage === "watch.rebuild"));
   assert.notEqual(a[0]!.session, b[0]!.session);
 });
+
+test("result metadata is opt-in and cannot replace an operation's outcome", async () => {
+  const events: TimingEvent[] = [];
+  const unavailable = () => {
+    throw new Error("metadata failed");
+  };
+  assert.equal(
+    await runWithTimings(false, "test", () =>
+      timeAsync("baseline", async () => 7, unavailable),
+    ),
+    7,
+  );
+  await runWithTimings(
+    true,
+    "test",
+    async () => {
+      assert.equal(await timeAsync("baseline", async () => 7, unavailable), 7);
+      await timeAsync(
+        "baseline",
+        async () => true,
+        (cacheHit) => ({ cacheHit }),
+      );
+    },
+    { write: (event) => events.push(event) },
+  );
+  assert.deepEqual(
+    events
+      .filter((event) => event.event === "end")
+      .map((event) => [event.status, event.cacheHit]),
+    [
+      ["ok", undefined],
+      ["ok", true],
+    ],
+  );
+});

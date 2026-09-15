@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { exportCatalogue } from "../dist/export/run.js";
+
 import {
   createExportFixture,
   directoryFiles,
