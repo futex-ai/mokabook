@@ -172,8 +172,9 @@ from the new optional field.
       `source` field; keep historical readers accepting records without it.
 - [ ] Exclude `source` from `propsKey`, change attribution, and the Changes
       calculation; add regression tests proving line shifts are not material.
-- [ ] Add a marker conformance test: every instance in each view has exactly
-      one matched start/end comment pair in the rendered document.
+- [ ] Add a marker conformance test: every recorded range in each view has
+      exactly one matched start/end comment pair in the rendered document,
+      including replayed slots that give one instance several ranges.
 - [ ] Regenerate the example catalogue, run relevant tests and
       `cargo xtask check`, update READMEs, commit, push, and stop for review.
 
