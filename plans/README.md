@@ -2,9 +2,10 @@
 
 ## Active
 
-- [Mokly Viewer Library](./mokly-viewer-library.md) — Milestone 1 protocol
-  contracts completed and reviewed; one review finding awaits a decision. Implementation remains
-  in Milestones 2–6, with no visible local product change permitted.
+- [Mokly Viewer Library](./mokly-viewer-library.md) — Milestones 1–2 completed
+  and reviewed; the earlier marker-pair finding is addressed and the instance
+  implementation has no new review findings. Implementation remains in
+  Milestones 3–6, with no visible local product change permitted.
 - [Publish Catalogue](./publish-catalogue.md)
 - [App-Independent Mokabook Npm Library](./app-independent-mokabook-library.md)
 - [Accounting Shell Design Parity](./accounting-shell-design-parity.md)

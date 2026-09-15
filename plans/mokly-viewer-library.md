@@ -153,7 +153,7 @@ record any necessary contract clarifications before implementation.
       findings with severity, options and recommendations without changing
       the implementation, then stop before Milestone 2.
 
-## Milestone 2: Instance identity implementation
+## Milestone 2: Instance identity implementation (completed)
 
 Deliver the confirmed instance contract in the renderer, manifest, and tests
 while keeping generated output for unchanged catalogues byte-identical apart
@@ -183,9 +183,9 @@ from the new optional field.
       including replayed slots that give one instance several ranges.
 - [x] Regenerate the example catalogue, run relevant tests and
       `cargo xtask check`, and update READMEs.
-- [ ] After checks pass, `git add -A`, commit the completed work with
+- [x] After checks pass, `git add -A`, commit the completed work with
       Conventional Commits, push, and stop for review.
-- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+- [x] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
       against the complete local diff from `origin/main`; report findings
       without changing the implementation, then stop before Milestone 3.
 
@@ -208,6 +208,13 @@ audits, formatting, lint, typechecking, example validation, package checks,
 Clippy and the Rust file-length audit. No tests were skipped and no browser
 retries were needed. Protocol edits only update the two source/identity delivery
 statuses; the normative contract is unchanged.
+
+Post-push review: implementation commit `1662441` was reviewed using the required
+prompt against the complete branch diff from `origin/main`. No new findings were
+identified and no implementation changes were made during review. The earlier
+Milestone 1 marker-pair finding was addressed by `21f0cb2`. Residual test risk:
+browser coverage is Chromium-only; programmatic or already-transformed calls
+intentionally omit source when invocation information is unavailable.
 
 ## Milestone 3: Catalogue read model implementation
 
