@@ -347,7 +347,7 @@ automatically fixed. These recommendations await the user's decision; they do
 not authorize starting another milestone. Browser verification remains
 Chromium-only. Recording this review is a documentation-only follow-up.
 
-## Milestone 4: Frame adapter and inspector script
+## Milestone 4: Frame adapter and inspector script (completed)
 
 Tags: ui
 
@@ -375,7 +375,7 @@ cross-origin path.
 - [x] Add browser tests with a cross-origin fixture page: handshake, instance
       boxes, highlight, scroll, hover, click, in-frame link navigation,
       rejected messages from wrong origins, wrong sources, and wrong nonces.
-- [ ] Update READMEs, run relevant tests and `cargo xtask check`, commit,
+- [x] Update READMEs, run relevant tests and `cargo xtask check`, commit,
       push, and stop for review.
 
 - [x] Validate compact range parents before numeric conversion; reject broken
@@ -415,8 +415,8 @@ indices, retaining the original href, target, namespace and degradation checks.
       match the pre-milestone capture; retain comparison snapshot bytes exactly.
 - [x] Cover inspector budget, bundle confinement, release inventory, lifecycle
       failures and current-only metadata injection in focused regressions.
-- [ ] After checks pass, `git add -A`, commit with Conventional Commits and push.
-- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+- [x] After checks pass, `git add -A`, commit with Conventional Commits and push.
+- [x] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
       against the complete local diff from `origin/main`; record numbered
       findings with severity, options and recommendations without changing code.
 
@@ -469,8 +469,60 @@ no browser retries or intermittent failures occurred in the final gate. The
 browser suite took 9.5 minutes. The working tree stayed stable during this run.
 All changed source/test files are within 300 lines. Local Markdown links and the
 diff were validated; there are no file deletions against refreshed `origin/main`
-(`87daaa4`). The required post-push review is pending. Milestone 3 notes and
-findings remain byte-unchanged.
+(`87daaa4`). Implementation commit `6c244bb` was pushed before the review below.
+Milestone 3 notes and findings remain byte-unchanged.
+
+### Milestone 4 post-push review
+
+1. **P2 — Viewport-fixed components lose their visible element bounds.**
+   [geometry.ts:45](../src/inspector/geometry.ts#L45) skips the measured element
+   before recording its fixed positioning. An ordinary overflow ancestor then
+   clips a viewport-fixed element even though that ancestor does not clip its
+   actual paint. A Chromium probe against the published minified inspector used
+   an 80-by-40 overflow-hidden ancestor and a fixed 160-by-40 button at
+   `(200, 150)`. Chrome reported that rectangle and hit-tested the button, while
+   the adapter returned an empty box array. Adding button text returned only the
+   text rectangle. Both adapters' public boundary lists use this reader. Doing
+   nothing leaves visible fixed controls unavailable to picking or only partly
+   highlighted. **A (recommended):** define and share containing-block-aware
+   clipping across adapter measurements and local highlighting, with browser
+   regressions for viewport-fixed controls, transformed containing blocks, text
+   and nested scrollers. This broader geometry seam prevents the parallel local
+   and inspector implementations from drifting; retain the bundle budget and
+   existing local visual baselines. **B:** move the fixed-position flag update
+   ahead of the skip and add only this regression. That is a smaller patch but
+   does not establish which ancestors legitimately clip a fixed descendant.
+
+2. **P2 — Consumer CSS can paint over highlighted component pixels.**
+   [overlay.ts:15](../src/inspector/overlay.ts#L15) sets positioning and pointer
+   styles on an ordinary `div`, leaving its other computed styles consumer-owned.
+   The shadow root isolates the SVG shapes, but not this host. A Chromium probe
+   with `div { background: rgb(255, 0, 0) }` gave the host a red 390-by-300
+   background; screenshots of the selected button differed before and after
+   highlighting because the host painted behind the mask's transparent cutout.
+   Doing nothing permits consumer styles to obscure selected content or hide
+   the overlay, violating pixel preservation for cross-origin inspection.
+   **A (recommended):** establish an explicit style reset for the overlay host
+   and test consumer background, display, opacity and box-model rules, including
+   important declarations. Keep the shadow root and test original component
+   pixels through its cutouts. A scoped presentation boundary plus regressions
+   is sufficient; the overlay does not need an architectural replacement.
+   **B:** change the host to a custom element to avoid generic `div` selectors.
+   That reduces collisions but leaves universal and inherited styles unchecked.
+
+The required prompt reviewed the complete 178-file branch diff at `6c244bb`
+against `origin/main` (`87daaa4`) after the implementation push, using
+`git diff origin/main...HEAD`. The 180-file tip-to-tip summary additionally
+includes main-only release 0.9.0 metadata; no integration or release-metadata
+changes were made. Coverage included instance/source capture, catalogue readers
+and projection, server/watch/comparison lifecycle, both frame transports,
+publication/export, bundle tooling, fixtures, tests and protocol alignment.
+The three recorded Milestone 3 findings still await the user's decision and
+were not changed or fixed. These two additional findings were confirmed with
+isolated browser probes; no implementation or test files changed during review.
+Browser verification remains Chromium-only, and the inspector has zero bytes of
+headroom under its enforced budget. Recording this review is a documentation-only
+follow-up. Milestone 5 has not started.
 
 ## Milestone 5: Extract the viewer package
 
