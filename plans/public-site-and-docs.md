@@ -92,10 +92,10 @@ Define the complete site contract before any mockup or code lands. Stop for
 review when the documents and the home copy are ready.
 
 - [x] Create this plan and add it to `plans/README.md`.
-- [ ] Copy the cloud inputs listed above from commit `47ede2e` into
+- [x] Copy the cloud inputs listed above from commit `47ede2e` into
       `.context/cloud-inputs/` and note any CLI statement in them that
       disagrees with this repository.
-- [ ] Write `docs/protocol/site.md`: purpose and boundary with the cloud
+- [x] Write `docs/protocol/site.md`: purpose and boundary with the cloud
       repository, route table (`/`, `/docs/…`, `/changelog`, `/terms`,
       `/privacy`), app-origin links, shared header and footer (desktop and
       mobile variants, skip link, `aria-current`), positioning and the four
@@ -104,17 +104,17 @@ review when the documents and the home copy are ready.
       bodies, no invented dates), the copy rules, the `status: ahead`
       frontmatter convention, the go-live alignment checklist, and the answers
       to the open questions.
-- [ ] Draft the full home copy in `docs/protocol/site.md` against the
+- [x] Draft the full home copy in `docs/protocol/site.md` against the
       positioning: eyebrow, two-line hero heading with the second line in the
-      accent, lead, note, hero stage caption rules, four numbered features
-      (browse, review, edit, open foundation), and the closing with the
+      accent, lead, note, hero stage caption rules, three numbered features
+      (browse, review, edit), and the open-foundation closing with the
       three-step workflow. Use the existing Folio copy as the tone reference.
-- [ ] Write `docs/protocol/site-design.md`: Folio surface, accent, status and
+- [x] Write `docs/protocol/site-design.md`: Folio surface, accent, status and
       focus tokens for both schemes, type roles and the hero rule, spacing
       scale, layout constants, breakpoints, radii, focus ring, brand and
       wordmark, the scheme override attribute, and the rule that stylesheets
       never contain literal colors.
-- [ ] Write `docs/protocol/site-docs.md`: docs information architecture
+- [x] Write `docs/protocol/site-docs.md`: docs information architecture
       (getting started, authoring, catalogue, CLI reference, continuous
       integration, Mokly Cloud, reference, review and edit), content
       collection frontmatter (`title`, `description`, `section`, `order`,
@@ -123,16 +123,16 @@ review when the documents and the home copy are ready.
       version source, the CLI reference verification rule, and the explicit
       allowlist for publishing `docs/protocol` documents from their Markdown
       source with link rewriting rules for excluded documents.
-- [ ] Write `docs/protocol/site-delivery.md`: static-only rule, per-page
+- [x] Write `docs/protocol/site-delivery.md`: static-only rule, per-page
       metadata (title, description, canonical, Open Graph and Twitter cards
       with generated images), `sitemap.xml`, `robots.txt`, the changelog Atom
       feed, accessibility requirements, the test matrix (build, link check,
       Playwright at 390px and 1440px in light and dark, Lighthouse
       thresholds), the `cargo xtask check` and CI wiring, the deployment
       workflow, pull request previews and the release process.
-- [ ] Add the four documents to `docs/protocol/README.md` and add a Website
+- [x] Add the four documents to `docs/protocol/README.md` and add a Website
       section to the root `README.md` that links to them and to this plan.
-- [ ] Update `docs/protocol/npm-release.md` so its CI section describes the
+- [x] Update `docs/protocol/npm-release.md` so its CI section describes the
       site jobs that later milestones add.
 - [ ] Validate the changed Markdown with Prettier, review the diff, commit
       with Conventional Commits and push. Stop for review of the protocol
@@ -155,9 +155,9 @@ for review with generated pages inspected in both viewports and schemes.
       example's registered `@firna/ui` components and adding the Folio tokens
       to the example's stylesheets without literal colors outside the token
       definitions.
-- [ ] Broaden the home mockup to the approved copy from Milestone 1: four
-      numbered features and the framed catalogue stage with a pull request
-      label and a Ready for review badge.
+- [ ] Broaden the home mockup to the approved copy from Milestone 1: three
+      numbered features, the open-foundation closing, and the framed
+      catalogue stage with a pull request label and a Ready for review badge.
 - [ ] Design the docs page mockup with the left sidebar, on-this-page list,
       previous and next links, a code panel with a copy control and the search
       control, on both viewports.
@@ -232,7 +232,7 @@ Build the marketing pages from the approved copy and real sources. Stop for
 review with screenshots.
 
 - [ ] Implement the home page: hero with the approved copy and both actions,
-      the framed catalogue stage, four numbered features in a column grid on
+      the framed catalogue stage, three numbered features in a column grid on
       desktop, and the closing with the three-step workflow and both actions.
 - [ ] Render the stage from this repository's example catalogue at build
       time: run the example build, copy the chosen screen documents and their

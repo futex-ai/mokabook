@@ -77,6 +77,10 @@ when the historical primary file is absent, never when it is invalid.
 - [Registered components in Mokly's design catalogue](./mokly-design-components.md)
   — implemented shared design components and ownership rules, with the
   [component library inventory](./mokly-design-component-library.md).
+- [Public site](./site.md) — approved target: the marketing home, docs,
+  changelog and legal routes built from this repository, with
+  [site design](./site-design.md), [site docs](./site-docs.md) and
+  [site delivery](./site-delivery.md).
 - [CI and npm release contract](./npm-release.md)
   - [One-time registry bootstrap](./npm-bootstrap.md)
   - [GitHub publishing protections](./npm-github-protections.md)

@@ -111,7 +111,10 @@ destination-race, and CSS rule parser/diff tests at the minimum Node version.
 The Ubuntu complete gates also exercise CSS parsing on Node 22.14 and 24.
 The `Required CI` aggregator
 fails unless both complete gates and both platform jobs succeed and is the
-branch-rule status to require. CI checks out complete Git history so the preview regression
+branch-rule status to require. The [site delivery contract](./site-delivery.md)
+adds the public site's `site:check` step to `cargo xtask check` and a
+`site-lighthouse` job that the aggregator also requires once the site package
+lands. CI checks out complete Git history so the preview regression
 can resolve `origin/main`, and uses `npm ci` with the committed lockfile. Action
 revisions are immutable commit hashes with reviewed version comments; runtime
 versions are explicit. Fork pull requests receive no release secrets or write

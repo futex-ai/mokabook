@@ -869,6 +869,19 @@ cleanup operations.
 npx --no-install wrangler pages project create mokabook --production-branch main
 ```
 
+## Website
+
+The public website (marketing home, documentation, changelog, Terms and
+Privacy) is built from this repository as the `site/` workspace package and
+deployed as static files; Mokly Cloud keeps only the logged-in application.
+The [site contract](./docs/protocol/site.md) defines routes, app-origin links
+and the home copy; [site design](./docs/protocol/site-design.md) fixes the
+Folio tokens and the mockups under the example design catalogue;
+[site docs](./docs/protocol/site-docs.md) defines the documentation
+architecture and verification; [site delivery](./docs/protocol/site-delivery.md)
+defines build, tests and deployment. The work is tracked in the
+[public site plan](./plans/public-site-and-docs.md).
+
 ## Releasing
 
 Changes use Conventional Commits. On `main`, release-please maintains the
