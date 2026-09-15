@@ -458,12 +458,22 @@ defaults-prepending resolver on the parent's already-resolved list, doubling
 the defaults. The corrected version validates without prepending, rejects a
 missing value, and is covered by `tests/component_runtime_ipc.test.ts`.
 
-## Milestone 8: Review
+## Milestone 8: Review (completed)
 
-- [ ] After the final push, review the complete local diff against
+- [x] After the final push, review the complete local diff against
       `origin/main` using `docs/implementation-review-prompt.md`. Report
       numbered findings with severity, context, impact, lettered options, and
       a recommendation. Do not change the implementation.
+
+Review outcome: six low-severity findings were reported to the user without
+changes. The reviewer confirmed all eleven Milestone 7 fixes as correct,
+including the corrected IPC validation. The findings are: the enriched
+preview-resource failure message is discarded by the worker's bare catch;
+the manifest bypass spreads a fabricated config and defeats the source-index
+cache; the reported denial kind for a file that is both listed and excluded
+depends on the alias mode; five commit titles exceed 50 characters; one
+stale session note contradicts the ticked TODOs; and the docs describe glob
+relativity three different ways. Each is awaiting the user's decision.
 
 ## Post-merge follow-up (non-blocking)
 
