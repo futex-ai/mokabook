@@ -14,6 +14,15 @@ the viewer renders the existing shell design unchanged and pick mode reuses the
 Highlight components visuals, so no mockup milestone is planned. If a genuine
 visual gap appears, add a `Tags: mockup` milestone before the affected UI work.
 
+## Hard constraint: no visible change to the local product
+
+`mokly serve` and `mokly export` must look and behave exactly as they do
+today. The same shell markup, shell CSS, and enhancement runtime ship from the
+new package. The read model file, the inert inspector script, source-location
+data, and host-only pick mode are invisible locally: nothing new is rendered,
+linked, or reachable in the shell. Any milestone that would change a pixel or
+an interaction locally stops for user approval first.
+
 ## Findings that shape the design
 
 - `src/server/shell/*.tsx` already renders the shell with React
