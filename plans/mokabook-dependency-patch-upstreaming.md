@@ -89,9 +89,10 @@ identity, order, or comparison membership.
 - [ ] Extract the deduplication in `src/server/shell/workspace_data.ts` into
       a small pure helper (for example `dedupeUsageLinks(links)`) that keeps
       a `Set` of serialised keys, and use it at the `affected` site.
-- [ ] Confirm `npm run benchmark:large` or the large fixture (`npm run
-    fixture:large`, `npm run dev:large`) no longer exhausts the default heap
-      when exporting; record the before/after observation in this plan.
+- [ ] Confirm the large fixture no longer exhausts the default heap when
+      exporting. Use `npm run fixture:large` to generate it and
+      `npm run benchmark:large` to measure; record the before/after
+      observation in this plan.
 
 ## Milestone 3: Configurable public exclusions with defaults
 
@@ -159,10 +160,11 @@ Accept any valid loopback Host port while keeping Origin and token checks.
       tsconfig file appears in the output.
 - [ ] Run `cargo xtask check`.
 - [ ] Update `CHANGELOG.md` only if release-please does not own it; otherwise
-      rely on Conventional Commit messages (`feat(config): add publicExclude`,
+      rely on Conventional Commit messages such as
+      `feat(config): add publicExclude`,
       `fix(serve): accept forwarded loopback ports`,
-      `perf(workspace): dedupe affected usages linearly`, `docs: recommend
-    sibling mockup layout`).
+      `perf(workspace): dedupe affected usages linearly`, and
+      `docs: recommend sibling mockup layout`.
 - [ ] `git add -A`, commit, and push the branch. Before and after commit,
       inspect `git diff --name-status origin/main` and
       `git diff --diff-filter=D --name-status origin/main`; no deletions are
