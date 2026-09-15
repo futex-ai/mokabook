@@ -271,12 +271,20 @@ into `generated/` produced 1,148 files with no README or tsconfig and with
 for `/static/data.json`, 404 (not 403) for a controls preview route with a
 forwarded `Host: localhost:5555`, and 403 for `Host: example.com`.
 
-## Milestone 6: Review
+## Milestone 6: Review (completed)
 
-- [ ] After the final push, review the complete local diff against
+- [x] After the final push, review the complete local diff against
       `origin/main` using `docs/implementation-review-prompt.md`. Report
       numbered findings with severity, context, impact, lettered options, and
       a recommendation. Do not change the implementation.
+
+Review outcome: eleven findings were reported to the user without changes
+(two medium, nine low). The medium findings are that a generated route
+colliding with a default exclusion such as `readme.html` fails the build with
+a message blaming an authored source root instead of `publicExclude`, and
+that the newly written Host contract scopes the loopback rule to the two
+controls endpoints while the implementation gates every Serve request when
+controls are active. Each finding is awaiting the user's decision.
 
 ## Post-merge follow-up (non-blocking)
 
