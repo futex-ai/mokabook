@@ -524,7 +524,7 @@ Browser verification remains Chromium-only, and the inspector has zero bytes of
 headroom under its enforced budget. Recording this review is a documentation-only
 follow-up. Milestone 5 has not started.
 
-## Milestone 5: Extract the viewer package
+## Milestone 5: Extract the viewer package (completed)
 
 Tags: ui
 
@@ -551,7 +551,7 @@ Create `@mokly/viewer` and make Serve and export its first hosts.
       postMessage adapter against the cross-origin test page.
 - [x] Add the package README following the repository README rules and update
       the root README, architecture docs, and protocol delivery statuses.
-- [ ] Run relevant tests and `cargo xtask check`, commit, push, and stop for
+- [x] Run relevant tests and `cargo xtask check`, commit, push, and stop for
       review.
 
 ### Milestone 5 extraction checklist
@@ -580,9 +580,9 @@ Create `@mokly/viewer` and make Serve and export its first hosts.
 - [x] Preserve native disclosure interactions made before module initialization
       through preference/recovery restoration; cover deliberately delayed modules
       and retain every existing watch test unchanged.
-- [ ] After focused checks and `cargo xtask check` pass, `git add -A`, commit
+- [x] After focused checks and `cargo xtask check` pass, `git add -A`, commit
       with Conventional Commits and the requested co-author trailer, and push.
-- [ ] After that push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+- [x] After that push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
       against the complete local diff from `origin/main`; record findings with
       severity, impact, lettered options and recommendations without fixing them.
 
@@ -751,7 +751,85 @@ diff against refreshed `origin/main` (`87daaa4`) has only two deletions:
 `src/server/shell/css_chrome.ts` and `css_nav.ts`, whose content now lives in split
 viewer modules and retains exactly the original concatenated CSS. Other source
 relocations preserve history. No example sources, release configuration or
-workflow files changed. Commit/push and post-push review follow below.
+workflow files changed. Implementation commit `9ad564a` passed these checks and
+was pushed before the review below; its remote tracking ref matches the commit.
+
+### Milestone 5 post-push review
+
+1. **P2 — Changing viewport leaves pick mode active without its visuals.**
+   [frames.ts:68](../packages/viewer/src/viewer/frames.ts#L68) replaces frame
+   sessions when the visible viewport/view changes, but `clear` does not end or
+   reset the active `Picking` state. A browser probe started picking on Mobile,
+   changed selection to Desktop, and observed the highlight-layer count drop
+   from one to zero. Another `startPick()` resolved with zero layers and no new
+   start event; no end event had fired. Doing nothing leaves the host believing
+   that picking is active while the new frame has no pick mask or activation.
+   **A (recommended):** make frame replacement a shared lifecycle boundary that
+   ends active/pending picking exactly once and resets inspection state, using
+   the documented navigation reason for a view transition. Add same-origin and
+   postMessage regressions for viewport, scheme and variant changes, including
+   pending activation. This closes the transition class rather than patching one
+   toolbar handler. **B:** preserve picking across replacements and explicitly
+   reactivate every replacement session before accepting clicks. That offers
+   continuity but needs more cancellation/state coordination and a clarified
+   event contract.
+
+2. **P2 — A flow fragment is applied to every step.**
+   [frames.ts:75](../packages/viewer/src/viewer/frames.ts#L75) assigns the global
+   route fragment to every mounted frame, overriding the first-step-only rule
+   already used by [public_stage.tsx:128](../packages/viewer/src/viewer/public_stage.tsx#L128)
+   and the navigation contract. A browser probe navigated a two-step use case
+   to `?fragment=example-anchor`; both frame document URLs acquired
+   `#example-anchor`. Doing nothing can scroll later steps to an unrelated
+   same-named anchor, making the embedded flow disagree with local Browse and
+   the portable fallback. **A (recommended):** resolve per-frame fragment scope
+   in one descriptor/URL boundary consumed by both markup and adapter mounting,
+   with multi-step same/cross-origin regressions. The existing duplicated
+   decisions have already diverged, so sharing this small rule is preferable to
+   maintaining another conditional. **B:** guard the assignment with
+   `stepIndex === undefined || stepIndex === 0` and add a focused regression;
+   this fixes the immediate behavior but leaves the duplicate policy.
+
+3. **P2 — Imperative highlighting loses the requested frame scope for labels.**
+   [frames.ts:176](../packages/viewer/src/viewer/frames.ts#L176) stores only the
+   instance key after highlighting the requested session; keys intentionally
+   remain stable across viewports. [frame_labels.ts:53](../packages/viewer/src/viewer/frame_labels.ts#L53)
+   then queries every session with that key. With Both visible, a browser probe
+   highlighted the Mobile `action` instance and observed one Mobile mask but two
+   `Action · action` label buttons, one on each viewport. Those buttons dispatch
+   their respective frame's instance events. Doing nothing presents an
+   unrequested Desktop selection target and makes labels disagree with the
+   highlighted view. **A (recommended):** retain a typed, frame-scoped highlight
+   request through mask, label and event rendering, distinguishing a public
+   `InstanceRef` from the workspace's intentional multi-view key highlighting.
+   Cover Both, schemes, variants and repeated flow steps across both adapters.
+   This modest state-model change prevents scope from being lost in other
+   inspection operations. **B:** retain the selected session separately and
+   filter label queries to it; this is smaller but requires careful replacement
+   invalidation and keeps parallel highlight-state representations.
+
+The required prompt reviewed the complete **590-file** diff at
+`9ad564abaeecba73833dd9fcee33028539fd00e0` using
+`git diff origin/main...HEAD`, after the push, against `origin/main` (`87daaa4`).
+The 592-file tip-to-tip inventory additionally includes pre-existing main-only
+release metadata; no integration or release edits were made. Coverage included
+source/instance capture, catalogue projection/validation, public Serve/watch and
+comparison lifecycles, export ownership and schemas, package/tarball boundaries,
+vanilla asset delivery, React source/selection/slot/handle lifecycle, frame
+transports, tests, docs and the recorded byte evidence. Focused browser probes
+retain their output in `.context/viewer-m5/review-probes.log` and
+`review-scope-probe.log`. No implementation or test file changed during review.
+
+The earlier Milestone 3 and 4 review records remain untouched. Their historical
+reference, retention, fixed-geometry and overlay-style implementation findings
+still await the user's decision. Required Milestone 5 delivery-status updates
+supersede the earlier documentation-status observation without rewriting its
+historical record. These three new recommendations also await that decision;
+none was automatically fixed. Residual verification limits are Chromium-only
+browser coverage, the recorded small screenshot raster differences, and zero
+inspector budget headroom. The final complete gate remains green; these probes
+identify missing behavioral coverage, not a failed gate that was ignored.
+Milestone 6 and release automation remain outside this completed milestone.
 
 ## Milestone 6: Release preparation and verification
 
