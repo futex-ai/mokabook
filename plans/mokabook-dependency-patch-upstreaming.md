@@ -475,6 +475,66 @@ depends on the alias mode; five commit titles exceed 50 characters; one
 stale session note contradicts the ticked TODOs; and the docs describe glob
 relativity three different ways. Each is awaiting the user's decision.
 
+## Milestone 9: Second-review fixes
+
+Address the six Milestone 8 findings. Finding 4 is handled by adding a
+mechanical commit-title check only; already-pushed history is not rewritten,
+and the PR should be squash-merged with a compliant title. Backend, tooling,
+tests, and docs only.
+
+- [ ] Finding 1 (option B with A): make the render worker in
+      `src/server/controls/worker.ts` post `{ ok: false, reason }` with the
+      caught error's message instead of a bare `{ ok: false }`; have
+      `src/server/controls/worker_client.ts` carry that reason on the typed
+      `render-failed` error as a server-side detail and write it to stderr
+      through the same pattern the watcher uses, while the HTTP body stays
+      the generic product message. Add a test that a preview-resource
+      exclusion match reaches the server log and does not reach the client.
+- [ ] Finding 2 (option C with D): replace the
+      `{ ...config, publicExclude: Object.freeze([]) }` manifest bypass in
+      `src/build/output_paths.ts` and `src/build/ownership.ts` with an
+      explicit typed option on `isAuthoringSource` (for example
+      `{ ignorePublicExclusions: true }`) so the real config always flows
+      through; key `sourceIndexes` on `config.sourceFiles` rather than on
+      config identity so spread configs still hit the cache. Add a test that
+      the manifest classification does not rebuild the source index.
+- [ ] Finding 3 (option B): run the lexical `isListedSource` check in all
+      three alias modes before the exclusion check so precedence is entries,
+      reserved, listed, exclusion everywhere; keep the realpath source-index
+      check as the alias fallback in `all` mode. Add a test in
+      `tests/source_denials.test.ts` for a file that is both listed and
+      excluded, asserting the same `listed` kind in all three modes.
+- [ ] Finding 4 (option D only): add a `commit-title-lint` gate to
+      `cargo xtask check` (new `xtask/src/commit_title.rs`, with tests under
+      `xtask/src/_tests_/`) that rejects any commit on `origin/main..HEAD`
+      whose first line exceeds 50 characters, and a standalone
+      `cargo xtask commit-title-lint` subcommand. Because this branch's
+      existing titles already violate the rule, the gate must accept a
+      `--base <ref>` and default to `origin/main`; document in the plan that
+      this branch must be squash-merged with a compliant title. Do not
+      rewrite pushed history.
+- [ ] Finding 5 (option B): reword the stale final bullet under Milestone 7
+      "Session verification notes" to say the implementation session left
+      the final checks and commit open and the reviewer session completed
+      them.
+- [ ] Finding 6 (option A): rename the shape rule to "safe relative POSIX
+      glob" in `docs/protocol/mokly-source-protection.md` and
+      `docs/protocol/mokly-configuration.md`, matching the `config-invalid`
+      error text, and let the separate sentence own the matching base.
+- [ ] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
+      `npm test`, `npm run example:build`, `npm run example:check`,
+      `npm run test:browser`, `npm run package:smoke`, `cargo fmt --all --
+    --check`, `cargo clippy --workspace --all-targets -- -D warnings`,
+      `cargo test --workspace`, and `cargo xtask check`.
+- [ ] `git add -A`, commit with a title of 50 characters or fewer, and push.
+
+## Milestone 10: Review
+
+- [ ] After the final push, review the complete local diff against
+      `origin/main` using `docs/implementation-review-prompt.md`. Report
+      numbered findings with severity, context, impact, lettered options, and
+      a recommendation. Do not change the implementation.
+
 ## Post-merge follow-up (non-blocking)
 
 - Diagnose why `npm run fixture:large` export exhausts Node's default heap
