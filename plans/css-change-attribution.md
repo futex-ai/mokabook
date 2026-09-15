@@ -2,9 +2,12 @@
 
 ## Status And Outcome
 
-Milestones 1 through 10 are complete, committed, and pushed. The final review
-reported fourteen findings; the user chose to address all of them. Milestones
-11 through 15 carry that work.
+Milestones 1 through 15 are complete, committed, and pushed. The first review
+reported fourteen findings and the user chose to address all of them in
+Milestones 11 through 14. The second review confirmed thirteen fixed and one
+partially fixed, and reported nine further findings that await the user's
+decision; the most severe is a lazy base-side traversal that skips deleted
+non-stylesheet resources when the diff contains no stylesheet.
 
 A single edit to a shared stylesheet currently marks every screen that links
 that stylesheet as a dependency change, and a broad `review.sharedImpact` glob
@@ -682,7 +685,7 @@ empty unresolved case, and the material-plus-stylesheet heading.
 ## Milestone 15: Commit and review the fixes
 
 - [x] Run `git add -A`, commit using Conventional Commits, and push the branch.
-- [ ] Review the complete local diff against `origin/main` using
+- [x] Review the complete local diff against `origin/main` using
       `docs/implementation-review-prompt.md` after the push. Report findings
       with severity, context, impact, lettered options, and a recommendation;
       do not change the implementation.

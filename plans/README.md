@@ -7,8 +7,9 @@
 
 ## Completed
 
-- [CSS Change Attribution](./css-change-attribution.md) — delivered and
-  verified; review findings are recorded for the user's decision.
+- [CSS Change Attribution](./css-change-attribution.md) — delivered, review
+  fixes applied, and re-reviewed; nine follow-up findings await the user's
+  decision.
 - [Mokly Package Migration](./mokly-package-migration.md) — repository fixes
   delivered and reviewed; authenticated GitHub publishing-protection setup
   remains an external prerequisite.
