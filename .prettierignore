@@ -12,3 +12,4 @@ docs/protocol/fixtures/catalogue-v1.json
 
 # release-please owns the changelog format
 CHANGELOG.md
+packages/viewer/CHANGELOG.md

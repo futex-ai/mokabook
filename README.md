@@ -15,8 +15,9 @@ Browse shell in React hosts using the public
 selection, slots, inspection events, an imperative handle and
 [frame adapters](./docs/protocol/mokly-frame-adapter.md). Serve and export use its
 static renderer and vanilla enhancements; exported browsers contain no React.
-Both packages build and are tested together. Coordinated npm release configuration
-remains Milestone 6; local Serve/export presentation is unchanged.
+Both packages build, release and are tested together. The viewer publishes before
+the CLI, which depends on its exact version. Local Serve/export presentation is
+unchanged; first viewer registration remains post-merge.
 
 Shared components can have their own pages, saved variants and editable props in
 local Serve. Screens record their actual component usage for inspection and
@@ -894,27 +895,32 @@ npx --no-install wrangler pages project create mokabook --production-branch main
 
 ## Releasing
 
-Changes use Conventional Commits. On `main`, release-please maintains the
-reviewed version/changelog PR; merging that PR creates an immutable `vX.Y.Z`
-release. The same [Release workflow](./.github/workflows/release.yml) checks the
-tag, reruns the full gate, packs and smoke-tests the exact tarball, guards an
-already-published version, and publishes through npm trusted publishing. A
-bounded post-publish check tolerates npm metadata, tarball, dist-tag, and
-signature propagation before proving the registry artifact. A manual
-`publish_ref` retries only an existing tag. See the
-[release protocol](./docs/protocol/npm-release.md) for the current release/retry
-procedure and maintainer settings. Package versions are release-managed.
+Changes use Conventional Commits. On `main`, release-please maintains one reviewed
+PR for both packages, their independent versions and changelogs, and the CLI's
+exact viewer dependency. The first viewer release is **0.1.0**, paired with
+**CLI 0.10.0** because 0.9.0 is already published. Merging the release PR creates
+immutable `vX.Y.Z` CLI and `viewer-vX.Y.Z` viewer tags at the same commit.
+
+The [Release workflow](./.github/workflows/release.yml) verifies both tags,
+reruns the full gate and smoke-tests both exact tarballs in clean consumers.
+It publishes and verifies the viewer before the CLI, retaining both inventories,
+hashes and registry signature/provenance results. A manual dispatch from `main`
+retries the existing `publish_ref` and `viewer_ref` pair, skipping only a matching
+already-published archive. See the [release protocol](./docs/protocol/npm-release.md)
+for version pairing, evidence and the complete retry procedure.
 
 The one-time [Mokly registry bootstrap](./docs/protocol/npm-bootstrap.md) is
 complete: `@mokly/mokly@0.8.0` is the accepted initial `latest` release and also
 retains the `bootstrap` tag. Do not repeat registration or reset release state.
 Later reviewed releases advance `latest`; `bootstrap` remains on `0.8.0`. The
 bootstrap record retains the isolated-build procedure and reviewed source SHA.
-Before the first automated release, complete and verify the GitHub release
-token's repository access and the
-[GitHub publishing protections](./docs/protocol/npm-github-protections.md)
-with an authorized maintainer account. The interactive bootstrap does not prove
-OIDC publishing works. Do not add an npm write token to GitHub.
+The viewer is a separate public scoped package and needs its own
+[first publication and trusted publisher](./docs/protocol/npm-bootstrap.md#viewer-first-publication)
+after the release PR merges. Verify organization package-creation/team access,
+2FA and [both tag streams' GitHub protections](./docs/protocol/npm-github-protections.md)
+with an authorized maintainer. Initial interactive registration has npm signature
+and reviewed-source evidence, not OIDC provenance. Do not store an npm write token
+in GitHub. Release preparation itself publishes nothing and creates no tags.
 
 The synthetic fixture at [`examples/basic`](./examples/basic/README.md) proves
 custom rendering, stylesheets, id links, collections, use cases, and
@@ -988,7 +994,8 @@ in the [plans index](./plans/README.md).
   [public catalogue](./docs/protocol/mokly-catalogue.md),
   [viewer API](./docs/protocol/mokly-viewer.md), and
   [frame adapters](./docs/protocol/mokly-frame-adapter.md) — identity, catalogue and
-  adapters are implemented; the viewer package remains planned.
+  adapters are implemented; the viewer package is verified and awaiting its
+  first release.
 - [Package ownership boundary](./docs/architecture/package-boundary.md)
 - [Accounting migration inventory](./docs/migration/accounting-framework-inventory.md)
 - [Styled control migration guide](./docs/migration/accounting-link-controls.md)

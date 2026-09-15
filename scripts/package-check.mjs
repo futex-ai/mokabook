@@ -2,8 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { inspectBrowserGraph } from "./package/browser_graph.mjs";
+import { checkPackagePair } from "./package/pair.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "..");
+await checkPackagePair(repositoryRoot);
 const packageJson = JSON.parse(
   await fs.promises.readFile(path.join(repositoryRoot, "package.json"), "utf8"),
 );
@@ -47,10 +49,7 @@ const viewer = JSON.parse(
     "utf8",
   ),
 );
-if (
-  packageJson.dependencies["@mokly/viewer"] !== viewer.version ||
-  viewer.version !== "0.1.0"
-)
+if (packageJson.dependencies["@mokly/viewer"] !== viewer.version)
   throw new Error("CLI must depend on the exact viewer version");
 if (
   JSON.stringify(packageJson.workspaces) !== '["packages/viewer"]' ||

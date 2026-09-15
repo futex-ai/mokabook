@@ -130,6 +130,19 @@ shared pure build/comparison value contracts; it contains no CLI execution or
 filesystem access. Hosts embedding React normally use only the root entry and
 stylesheet.
 
+## Releases
+
+The first viewer release is 0.1.0, paired with CLI 0.10.0 (CLI 0.9.0 is already
+published). One release-please PR updates independent versions, both changelogs
+and the CLI's exact viewer dependency. Viewer tags are `viewer-vX.Y.Z`; CLI tags
+remain `vX.Y.Z`. The release workflow verifies both tags at one commit, checks
+and smokes both tarballs, then publishes and verifies the viewer before the CLI.
+Unchanged packages receive a patch when their paired package releases.
+See the [release contract](../../docs/protocol/npm-release.md) and the
+[one-time viewer registration](../../docs/protocol/npm-bootstrap.md#viewer-first-publication).
+Preparation does not publish packages; first registration requires a maintainer
+after the release PR merges.
+
 ## Development
 
 From the repository root:
@@ -145,7 +158,9 @@ cargo xtask check
 
 The root build compiles this workspace first, then the CLI. Package smoke tests
 pack the viewer before the CLI and install both archives with the CLI's exact
-version dependency. Release coordination is tracked separately in Milestone 6.
+version dependency. Every public entry and server rendering of the published
+catalogue fixture are exercised from clean installs; production dependency
+auditing includes both packages.
 
 ### Key Code
 

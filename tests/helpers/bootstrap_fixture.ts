@@ -25,6 +25,7 @@ interface BootstrapModule {
     repositoryRoot: string;
     expectedCommit: string;
     destination: string;
+    packageName?: string;
   }): Promise<{ archivePath: string; report: BootstrapReport }>;
 }
 
@@ -63,7 +64,7 @@ export async function bootstrapFixture(
     version: "0.1.0",
     license: "MIT",
     type: "module",
-    files: ["dist", "README.md", "LICENSE"],
+    files: ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
     scripts: { prepack: "node ../../build.mjs" },
   };
   const distFiles = packageReport()
@@ -93,6 +94,7 @@ export async function bootstrapFixture(
     "packages/viewer/package.json": JSON.stringify(viewerPackage),
     "packages/viewer/README.md": "# Viewer release fixture\n",
     "packages/viewer/LICENSE": "MIT\n",
+    "packages/viewer/CHANGELOG.md": "# Viewer test release\n",
     ".gitignore": "dist/\nnode_modules/\n.context/\n",
     "README.md": "# Bootstrap test fixture\n",
     "docs/protocol/mokly-upload.md": "# Upload protocol test fixture\n",

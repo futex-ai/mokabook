@@ -6,7 +6,12 @@ import type {
   MoklyViewerHandle,
   ViewerSelection,
 } from "@mokly/viewer";
+import { resolveInstance } from "@mokly/viewer/data";
+import { initializeBrowseShell } from "@mokly/viewer/runtime";
 import { renderViewer } from "@mokly/viewer/server";
+
+export const runtimeEntry: typeof initializeBrowseShell = initializeBrowseShell;
+export const dataEntry: typeof resolveInstance = resolveInstance;
 
 export function ViewerConsumer({
   catalogue,

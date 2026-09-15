@@ -45,14 +45,15 @@ export async function inspectDryRun(repositoryRoot, name = "@mokly/mokly") {
 }
 
 export function validatePackageReport(report, name = "@mokly/mokly") {
+  assert.ok(["@mokly/mokly", "@mokly/viewer"].includes(name));
   assert.equal(report.name, name);
+  assert.match(report.version, /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
+  assert.match(report.integrity, /^sha512-/);
+  assert.match(report.shasum, /^[a-f0-9]{40}$/);
   if (name === "@mokly/viewer") {
     validateViewerReport(report);
     return;
   }
-  assert.match(report.version, /^\d+\.\d+\.\d+$/);
-  assert.match(report.integrity, /^sha512-/);
-  assert.match(report.shasum, /^[a-f0-9]{40}$/);
   const files = report.files.map((file) => file.path);
   for (const required of [
     "dist/index.js",
@@ -119,12 +120,15 @@ export function validateViewerReport(report) {
     "dist/server.js",
     "dist/server.d.ts",
     "dist/runtime.js",
+    "dist/runtime.d.ts",
     "dist/data.js",
+    "dist/data.d.ts",
     "dist/styles.css",
     "dist/browser/inspector.js",
     "dist/assets/fonts/Inter-OFL.txt",
     "LICENSE",
     "README.md",
+    "CHANGELOG.md",
     "package.json",
   ])
     assert.ok(

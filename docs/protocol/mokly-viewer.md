@@ -4,8 +4,9 @@
 
 Implemented by [viewer library Milestone 5](../../plans/mokly-viewer-library.md).
 The workspace package, React API, static server entry and first-party hosts are
-available in this checkout. Coordinated npm release configuration remains
-Milestone 6. Local Serve/export presentation is unchanged.
+available in this checkout. [Coordinated release preparation](./npm-release.md)
+is implemented by Milestone 6; publication and the viewer's first registration
+remain post-merge. Local Serve/export presentation is unchanged.
 
 ## Package And Props
 

@@ -835,10 +835,10 @@ Milestone 6 and release automation remain outside this completed milestone.
 
 Prepare both packages to release together from the merge.
 
-- [ ] Configure release-please for two components, `@mokly/viewer` starting at
+- [x] Configure release-please for two components, `@mokly/viewer` starting at
       `0.1.0` and the matching `@mokly/mokly` minor bump; update
       `npm-release.md`, publish action, and release fixtures.
-- [ ] Extend package checks and smoke tests to pack, install, and exercise
+- [x] Extend package checks and smoke tests to pack, install, and exercise
       both tarballs from a clean consumer.
 - [ ] Run `cargo xtask check`; after it passes, `git add -A`, commit with
       Conventional Commits, and push the branch.
@@ -847,10 +847,73 @@ Prepare both packages to release together from the merge.
       numbered, severity-rated findings with options and recommendations
       without changing the implementation.
 
+### Milestone 6 verification notes
+
+Release preparation uses two Node components and a combined `node-workspace`
+release PR with `updateAllPackages: true`. The viewer manifest starts at 0.0.0;
+the feature bump produces its first 0.1.0 release. Independent versions use
+`vX.Y.Z` and `viewer-vX.Y.Z` tags, and both tags must identify the same commit.
+The CLI's exact viewer dependency and its root lockfile edge update together.
+
+The original 0.9.0 pairing was already taken: read-only checks on 15 September
+2026 found `v0.9.0` at `87daaa4` and npm `@mokly/mokly@0.9.0` as `latest`.
+The four release-metadata changes from main are preserved, so the next feature
+release is CLI 0.10.0 with viewer 0.1.0. No existing tag or published version is
+reused. The version clarification was raised while independent work continued.
+Viewer npm lookup returned E404; its first publication, organization permissions
+and separate trusted publisher remain maintainer work after merge.
+
+The 36 focused release/bootstrap/action tests pass with no skips or retries.
+Three regressions were first red: missing manifest validation (two cases) and
+rejection of viewer reports by the CLI-only registry guard. The new packed
+archive tests additionally reject local dependency links, stale/ranged versions
+and modified tarball bytes. Existing bootstrap and action coverage is retained.
+
+`npm run package:check` and `npm run package:smoke` pass, including all five
+clean-consumer scenarios and the production dependency audit. SSR renders both
+the installed public fixture and the real CLI export; all five viewer entry
+points resolve. A local rehearsal with the action's pinned release-please 17.6.0
+engine produces one combined PR and real tag names for 0.10.0/0.1.0, a CLI-only
+fix at 0.10.1/0.1.1, and a breaking feature at 0.11.0/0.2.0. Both manifests,
+changelogs, dependency edges and workspace lock versions update together;
+`npm ci --dry-run --ignore-scripts` accepts the rehearsed lockfile. The targeted
+JSON updater covers the engine's root-lockfile dependency gap.
+
+The CI workflow already invokes the root workspace build through typecheck and
+the complete gate; no additional build step is needed. Four import-order lint
+errors in the initial edits were fixed; lint, TypeScript and Markdown checks
+pass. `cargo xtask check` passed on 15 September 2026: 1,643 Node tests,
+313 Chromium tests and 3 Rust tests, with no failures, retries or skips. The
+dependency audit reported zero vulnerabilities; formatting, lint, both package
+typechecks/builds, example check, package checks, all five consumer smokes, Rust
+formatting/Clippy and the eight-file Rust length audit passed. The example check
+validated 278 derived/untracked files. Local tools were Node 24.14.1, npm 11.11.0
+and Rust 1.98.1; the pinned CI toolchains remain unchanged.
+
+The exact release-artifact path was also exercised: `scripts/release/pack.mjs`
+packed both archives, and `scripts/package-smoke.mjs --artifacts` consumed those
+same paths in all five scenarios. The inspector remains 8,192 bytes with SHA256
+`72f6a1ddf8e23c0ed50901e51b279e1342e6039720b1bb18108aaaa38dc68128`.
+No schema, export layout, inspector budget or viewer implementation changed in
+this milestone. Evidence is retained under `.context/viewer-m6/` in
+`xtask-check.log`, `focused-final.log`, `package-check.log`, `package-smoke.log`,
+`exact-artifacts.log`, `rehearsal.log` and `rehearsed-ci.log`.
+
+Earlier milestone verification notes and findings remain byte-unmodified.
+Post-push review results will be recorded below.
+
 ## Post-merge follow-up (non-blocking)
 
-- Merge the release-please PR so `@mokly/viewer` 0.1.0 and the matching
-  `@mokly/mokly` version publish together; report both versions.
-- Smoke-test the published packages from a clean consumer: mount the viewer
-  with the postMessage adapter against a published export on a second origin.
-- Close this plan in `plans/README.md` when the PR merges.
+- Merge the combined release-please PR for viewer 0.1.0 and CLI 0.10.0, checking
+  exact pairing, lockfile, both changelogs and required CI. Complete the
+  [viewer first publication](../docs/protocol/npm-bootstrap.md#viewer-first-publication)
+  from its immutable tagged commit and configure its separate trusted publisher
+  while the `npm` job awaits approval; verify both tag streams' protections.
+- Verify and report both published versions, tags/commit, exact CLI dependency,
+  tarball hashes/inventories, `latest` tags and signatures/provenance evidence.
+  Record the interactive viewer bootstrap's lack of OIDC provenance explicitly.
+- Smoke-test both published packages from a clean consumer: CLI export/build,
+  all viewer public imports and SSR, then mount the viewer with the postMessage
+  adapter against a published export on a second origin using its CORS contract.
+- Close this plan in `plans/README.md` when the implementation PR merges;
+  publication and the published-package smoke remain non-blocking follow-up.
