@@ -103,7 +103,7 @@ the existing implementation and the Milestone 1 contracts, without a key change.
    consumer smoke tests install both tarballs. release-please gains a second
    component so both packages release from one merge.
 
-## Milestone 1: Protocol documentation
+## Milestone 1: Protocol documentation (completed)
 
 Define every contract before code. Approval of the seven decisions and local
 invisibility constraint satisfies the confirmation items; later milestones
@@ -148,7 +148,7 @@ record any necessary contract clarifications before implementation.
       `plans/README.md`; validate Markdown with Prettier and review the diff.
 - [x] After Markdown checks pass, `git add -A`, commit with Conventional
       Commits, and push the documentation.
-- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+- [x] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
       to review the complete local diff against `origin/main`; report
       findings with severity, options and recommendations without changing
       the implementation, then stop before Milestone 2.
