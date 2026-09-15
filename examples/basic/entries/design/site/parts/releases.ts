@@ -1,26 +1,26 @@
 /**
- * Release facts for the Minimal changelog. Every version, date, note and
- * compare link is the real entry from this repository's CHANGELOG.md at the
- * time of authoring, including the compare links the earlier releases were
- * published with.
+ * Release facts depicted on the changelog. Every version, date,
+ * note and compare link is taken from this repository's `CHANGELOG.md` at
+ * the time of authoring; the mockup never states a release fact of its own.
  */
 
-/** One group of notes inside a release, such as features or bug fixes. */
-export type ReleaseGroup = {
+/** One group of notes inside a release, such as Features or Bug fixes. */
+export interface ReleaseGroup {
   notes: readonly string[];
   title: string;
-};
+}
 
 /** One published release of the Mokly CLI. */
-export type Release = {
+export interface Release {
   compare: string;
   date: string;
   groups: readonly ReleaseGroup[];
+  id: string;
   readableDate: string;
   version: string;
-};
+}
 
-/** The three most recent releases, newest first. */
+/** Every depicted release, newest first. */
 export const RELEASES: readonly Release[] = [
   {
     compare: "https://github.com/mokly-ai/mokly/compare/v0.8.0...v0.9.0",
@@ -41,7 +41,16 @@ export const RELEASES: readonly Release[] = [
         ],
         title: "Features",
       },
+      {
+        notes: [
+          "Keep added and removed screens current-only",
+          "Load selected comparisons and recover expired snapshots",
+          "Preserve catalogue state on evidence updates",
+        ],
+        title: "Bug fixes",
+      },
     ],
+    id: "release-0-9-0",
     readableDate: "15 September 2026",
     version: "0.9.0",
   },
@@ -62,6 +71,7 @@ export const RELEASES: readonly Release[] = [
         title: "Performance",
       },
     ],
+    id: "release-0-8-0",
     readableDate: "11 September 2026",
     version: "0.8.0",
   },
@@ -74,6 +84,7 @@ export const RELEASES: readonly Release[] = [
         title: "Bug fixes",
       },
     ],
+    id: "release-0-7-1",
     readableDate: "11 September 2026",
     version: "0.7.1",
   },

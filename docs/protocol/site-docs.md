@@ -48,15 +48,28 @@ landing at `/docs`.
 
 ## Docs Layout
 
-- Left sidebar generated from the collection: section titles with their pages
-  in order; the current page is marked with `aria-current="page"` and a quiet
-  filled background. Below the breakpoint the sidebar is a native disclosure
-  labelled with the current section and page.
+- Left section tree generated from the collection: section titles with their
+  pages in order, every section listed expanded under a mono rubric head. The
+  tree sits on the page canvas rather than in a filled panel and is separated
+  from the document by one vertical hairline. Rows are 44px targets with a
+  `folioMuted` hover fill; the current page is marked with
+  `aria-current="page"` and takes the `accentSoft` fill with `accent` text.
+  The published Mokly CLI version heads the tree as a quiet chip linking the
+  changelog. Below the breakpoint the tree is a native disclosure labelled
+  with the current section and page.
+- The document is ruled: the location trail is the eyebrow above the page
+  heading, the page description is set as an accent-ruled pull quote, and
+  hairlines separate the intro, each body section and the previous and next
+  row.
 - Right "On this page" list generated from the page's `h2` and `h3` headings,
-  in a `nav` labelled "On this page"; pages with fewer than two headings omit
-  it. On mobile it renders under the lead.
+  in a `nav` labelled "On this page" hung from its own hairline at the outer
+  edge; pages with fewer than two headings omit it. It drops on narrow
+  desktop widths and renders under the title on mobile.
 - Previous and next links at the foot of the document follow sidebar order
-  across section boundaries.
+  across section boundaries and are cards that take a `folioLineStrong` edge
+  on hover.
+- The search control sits in the site header on documentation routes; there
+  is no utility bar.
 - Code blocks render in the Folio code panel with a language label when the
   fence names one and a copy control that writes the block's text to the
   clipboard and confirms "Copied" for two seconds. Shell commands appear only

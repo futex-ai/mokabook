@@ -12,7 +12,7 @@ import {
 } from "./helpers/design_catalogue.js";
 import { repositoryRoot } from "./helpers/fixture.js";
 
-const DOCS = "design-site-product-docs";
+const DOCS = "design-site-docs";
 
 const DOCS_SECTIONS = [
   "Getting started",
@@ -25,7 +25,7 @@ const DOCS_SECTIONS = [
   "Review and edit",
 ];
 
-/** Every interactive class the direction promises a hover state for. */
+/** Every interactive class the site promises a hover state for. */
 const HOVER_CLASSES = [
   "site-nav-link",
   "site-brand",
@@ -33,14 +33,15 @@ const HOVER_CLASSES = [
   "site-button--secondary",
   "site-button--quiet",
   "site-code-copy",
-  "pd-search",
-  "pd-version-link",
-  "pd-footer-link",
-  "pd-doc-link",
-  "pd-onpage-link",
-  "pd-pager-item",
-  "pd-release-index-link",
-  "pd-release-link",
+  "site-search",
+  "site-link",
+  "site-version-link",
+  "site-footer-link",
+  "site-doc-link",
+  "site-onpage-link",
+  "site-pager-item",
+  "site-release-index-link",
+  "site-release-link",
 ];
 
 /** Hover must change more than color alone. */
@@ -79,38 +80,38 @@ function rules(source: string): { declarations: string; selector: string }[] {
 for (const viewport of ["mobile", "desktop"] as const) {
   test(`${viewport}: the documentation tree lists every section expanded`, async () => {
     const { document } = await designDocument(DOCS, viewport);
-    const tree = byClass(document, "pd-doc-tree")[0];
+    const tree = byClass(document, "site-doc-tree")[0];
     assert.ok(tree, "the tree renders in both compositions");
     assert.equal(
       elements(tree, (node) => node.tagName === "details").length,
       0,
       "no section hides behind a disclosure",
     );
-    const sections = byClass(tree, "pd-doc-section");
+    const sections = byClass(tree, "site-doc-section");
     assert.deepEqual(
       sections.map((section) =>
-        label(byClass(section, "pd-doc-section-head")[0]!),
+        label(byClass(section, "site-doc-section-head")[0]!),
       ),
       DOCS_SECTIONS,
     );
     assert.equal(
-      byClass(tree, "pd-rubric").length,
+      byClass(tree, "site-rubric").length,
       DOCS_SECTIONS.length,
       "every section head is set as a rubric",
     );
-    const current = byClass(tree, "pd-doc-link--current");
+    const current = byClass(tree, "site-doc-link--current");
     assert.equal(current.length, 1);
     assert.equal(label(current[0]!), "Install");
     assert.equal(attribute(current[0]!, "aria-current"), "page");
-    const foot = byClass(tree, "pd-doc-tree-foot")[0];
+    const foot = byClass(tree, "site-doc-tree-foot")[0];
     assert.ok(foot, "the tree closes with the changelog link");
     assert.equal(label(foot), "Changelog");
     assert.equal(
-      byClass(document, "pd-docs-side").length,
+      byClass(document, "site-docs-side").length,
       viewport === "desktop" ? 1 : 0,
       "the canvas column belongs to the desktop composition",
     );
-    const disclosure = byClass(document, "pd-doc-disclosure")[0];
+    const disclosure = byClass(document, "site-doc-disclosure")[0];
     if (viewport === "desktop") {
       assert.equal(disclosure, undefined);
       return;
@@ -125,13 +126,13 @@ for (const viewport of ["mobile", "desktop"] as const) {
 
   test(`${viewport}: the document reads as a ruled column with its own rail`, async () => {
     const { document } = await designDocument(DOCS, viewport);
-    const main = byClass(document, "pd-docs-document")[0];
+    const main = byClass(document, "site-docs-document")[0];
     assert.ok(main, "the document column carries the reading measure");
     assert.equal(attribute(main, "id"), "main");
-    const intro = byClass(main, "pd-document-intro")[0];
+    const intro = byClass(main, "site-document-intro")[0];
     assert.ok(intro);
     assert.equal(
-      label(byClass(intro, "pd-eyebrow")[0]!),
+      label(byClass(intro, "site-trail")[0]!),
       "Documentation›Getting started",
       "the location trail is the eyebrow above the title",
     );
@@ -140,7 +141,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       "Install",
     );
     assert.equal(
-      label(byClass(intro, "pd-pullquote")[0]!),
+      label(byClass(intro, "site-pullquote")[0]!),
       "Add Mokly to the repository that holds your components.",
       "the lead is set as the accent-ruled pull quote",
     );
@@ -153,10 +154,10 @@ for (const viewport of ["mobile", "desktop"] as const) {
       /npm install --save-dev @mokly\/mokly react react-dom/,
     );
 
-    const onPage = byClass(document, "pd-onpage");
+    const onPage = byClass(document, "site-onpage");
     assert.equal(onPage.length, 1);
     assert.deepEqual(
-      byClass(onPage[0]!, "pd-onpage-link").map((node) =>
+      byClass(onPage[0]!, "site-onpage-link").map((node) =>
         attribute(node, "href"),
       ),
       [
@@ -166,24 +167,24 @@ for (const viewport of ["mobile", "desktop"] as const) {
       ],
     );
     assert.equal(
-      byClass(document, "pd-docs-rail").length,
+      byClass(document, "site-docs-rail").length,
       viewport === "desktop" ? 1 : 0,
       "the rail hangs beside the document only on the wide composition",
     );
     assert.equal(
-      label(byClass(document, "pd-pager")[0]!),
+      label(byClass(document, "site-pager")[0]!),
       "PreviousGetting startedNextConfigure",
     );
-    assert.equal(byClass(document, "pd-pager-item").length, 2);
+    assert.equal(byClass(document, "site-pager-item").length, 2);
   });
 }
 
 test("the documentation search control sits in the header", async () => {
   for (const viewport of ["mobile", "desktop"] as const) {
     const { document } = await designDocument(DOCS, viewport);
-    const header = byClass(document, "pd-header")[0];
+    const header = byClass(document, "site-header")[0];
     assert.ok(header);
-    const search = byClass(header, "pd-search");
+    const search = byClass(header, "site-search");
     assert.equal(search.length, 1, viewport);
     assert.match(label(search[0]!), /Search docs/);
     assert.equal(search[0]!.tagName, "button");
@@ -191,13 +192,13 @@ test("the documentation search control sits in the header", async () => {
 });
 
 test("every interactive control changes more than color on hover", async () => {
-  const source = await stylesheet("site-product.css");
+  const source = await stylesheet("site.css");
   const parsed = rules(source);
   for (const className of HOVER_CLASSES) {
     const matching = parsed.filter((rule) =>
       rule.selector.includes(`.${className}:hover`),
     );
-    assert.ok(matching.length > 0, `site-product.css hovers .${className}`);
+    assert.ok(matching.length > 0, `site.css hovers .${className}`);
     assert.ok(
       matching.some((rule) =>
         HOVER_PROPERTIES.some((property) =>
@@ -224,16 +225,18 @@ test("the shared focus ring stays visible on every control", async () => {
 });
 
 test("the documentation tree sits on the page canvas behind a hairline", async () => {
-  const source = await stylesheet("site-product.css");
+  const source = await stylesheet("site.css");
   const parsed = rules(source);
-  const side = parsed.find((rule) => rule.selector.trim() === ".pd-docs-side");
+  const side = parsed.find(
+    (rule) => rule.selector.trim() === ".site-docs-side",
+  );
   assert.ok(side, "the tree column is declared");
   assert.match(
     side.declarations,
     /border-right: 1px solid var\(--site-folio-line\)/,
     "one hairline separates the tree from the document",
   );
-  for (const selector of [".pd-docs-side", ".pd-doc-tree"]) {
+  for (const selector of [".site-docs-side", ".site-doc-tree"]) {
     const rule = parsed.find((entry) => entry.selector.trim() === selector);
     assert.ok(rule, selector);
     assert.ok(
@@ -241,18 +244,20 @@ test("the documentation tree sits on the page canvas behind a hairline", async (
       `${selector} is not a filled panel`,
     );
   }
-  const rail = parsed.find((rule) => rule.selector.trim() === ".pd-docs-rail");
+  const rail = parsed.find(
+    (rule) => rule.selector.trim() === ".site-docs-rail",
+  );
   assert.ok(rail);
   assert.match(
     rail.declarations,
     /border-left: 1px solid var\(--site-folio-line\)/,
     "the on-this-page rail hangs from its own hairline",
   );
-  const link = parsed.find((rule) => rule.selector.trim() === ".pd-doc-link");
+  const link = parsed.find((rule) => rule.selector.trim() === ".site-doc-link");
   assert.ok(link);
   assert.match(link.declarations, /min-height: var\(--site-target-min\)/);
   const current = parsed.find((rule) =>
-    rule.selector.includes(".pd-doc-link--current,"),
+    rule.selector.includes(".site-doc-link--current,"),
   );
   assert.ok(current, "the current page keeps the accent fill");
   assert.match(current.declarations, /background: var\(--site-accent-soft\)/);

@@ -68,8 +68,10 @@ Every page renders the same header and footer around one `main` landmark.
   rounded secondary button **Get started →**.
 - Mobile header (below 768px): brand, **Docs**, **Sign in**. Changelog and
   Get started leave the header; there is no menu control.
-- Footer: brand, then **Home**, **Docs**, **Changelog**, **Sign in**,
-  **Get started**, **Terms**, **Privacy**.
+- Footer: the brand with the line stating the Mokly CLI is open source under
+  the MIT license, then three link columns in this reading order — Product
+  (**Home**, **Docs**, **Changelog**), Account (**Sign in**,
+  **Get started**) and Legal (**Terms**, **Privacy**).
 - A skip link to `#main` is the first focusable element. The current route's
   header and footer links carry `aria-current="page"`; a docs page marks
   **Docs**. Every link and control has a visible focus ring and a target of at

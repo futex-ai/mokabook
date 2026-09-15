@@ -2,9 +2,11 @@
 
 The public site uses Folio, the design selected for the Mokly product and
 marketing on 2026-09-15, so moving from the site to the app feels like one
-product. This contract fixes the tokens, type, layout and brand the site must
-implement, and the mockups that are its visual source of truth. Routes and
-copy are in [Site](./site.md).
+product. Its composition is Product, chosen by the user on 2026-09-15 from a
+five-direction exploration whose other four directions were retired when
+Product was promoted to the baseline mockups. This contract fixes the tokens,
+type, layout and brand the site must implement, and the mockups that are its
+visual source of truth. Routes and copy are in [Site](./site.md).
 
 ## Ownership
 
@@ -85,18 +87,18 @@ within `65ch`.
 
 - Spacing scale in pixels: 0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96.
 - Breakpoint `768px`; below it use the mobile composition.
-- `contentMax` `1120px` centered for marketing content; header and footer
-  align to the same measure. Prose measure `65ch`. Form width `440px`.
+- Wide measure `1360px` centered for the application band, the home, the
+  documentation and the changelog. `contentMax` `1120px` centers the
+  changelog's index and entries. Prose measure `65ch`. Form width `440px`.
 - Gutters `20px` mobile, `40px` desktop. Section spacing `48px` mobile,
   `80px` desktop.
-- Interactive targets at least `44px`. Controls use a 6px radius; panels and
-  the stage use 10px.
-- Docs layout: 244px left sidebar on `folioMuted`, a document column at most
-  976px including 48px side padding, and a 240px on-this-page column. Those
-  three columns are the docs measure, up to `1460px` centered, rather than
-  `contentMax`; the header and footer keep `contentMax`. Below the breakpoint
-  the sidebar becomes a disclosure above the document and the on-this-page
-  list moves under the title.
+- Interactive targets at least `44px`. Controls use a 6px radius; panels, the
+  catalogue frame and the feature modules use 10px.
+- Docs layout: a 272px section-tree column on the page canvas separated by a
+  vertical hairline, a document column at most `768px`, and a 240px
+  on-this-page rail hung from its own hairline. The rail drops below `1100px`;
+  below the breakpoint the tree becomes a disclosure above the document and
+  the on-this-page list moves under the title.
 - Layouts remain usable at 320px width and 200% text zoom. Inspection
   viewports are 390px mobile and 1440px desktop.
 
@@ -123,58 +125,89 @@ in `accent`. The mark and wordmark together link Home.
 
 ## Components
 
-- Header and footer: flex rows within `contentMax`; footer has a `folioLine`
-  top hairline. Links are `small` in `folioInkMuted`, 44px tall; the current
-  route is `folioInk`. The desktop **Get started →** is a small rounded
-  secondary button with a `folioLineStrong` boundary; the hero and closing
-  **Get started →** are solid `accent` buttons with `onAccent` text; **Read
-  the docs** is a quiet button with no fill.
-- Stage: `folioSurface` panel with a `folioLine` border, `medium` radius and
-  shadow. Head row holds the pull request label (`small`) and the **Ready for
-  review** badge (success text on `successSoft`, pill, with a decorative dot).
-  Body is 500px tall on desktop and 440px on mobile and clips its content.
-  Foot row names the screen.
-- Feature grid: three columns on desktop, one on mobile; each article has a
-  `folioLine` top hairline, the mono number, a `lead`-sized title and muted
-  body.
-- Closing: `folioMuted` panel with `medium` radius on desktop (no radius on
-  mobile), two columns on desktop, copy and actions left, the ordered steps
-  right with accent mono markers.
-- Document pages (changelog, terms, privacy, docs): eyebrow, page heading,
-  optional lead, then content with `folioLine` section hairlines. Changelog
-  entries are two columns on desktop, version and date left, notes right.
-  Terms and Privacy use an 840px measure with the placeholder heading and the
-  cross-policy link.
+- Header: one row inside a `folioSurface` application band with a `folioLine`
+  bottom hairline, aligned to the wide measure. There is no utility bar. Links
+  are `small` in `folioInkMuted`, 44px tall and underlined on hover; the
+  current route is `folioInk`. The documentation search control sits in that
+  header beside the navigation and appears on no other route. The desktop
+  **Get started →** is a small rounded secondary button with a
+  `folioLineStrong` boundary; the hero and closing **Get started →** are solid
+  `accent` buttons with `onAccent` text; **Read the docs** is a quiet button
+  with no fill. Every link and control has a hover state that changes more
+  than color alone.
+- Footer: a `folioSurface` band that pairs the brand and the line stating the
+  Mokly CLI is open source under the MIT license with three link columns —
+  Product (Home, Docs, Changelog), Account (Sign in, Get started) and Legal
+  (Terms, Privacy). Columns become two on mobile.
+- Catalogue frame: the home's principal image, a `folioSurface` panel with a
+  `folioLine` border, `medium` radius and shadow. The head row holds the pull
+  request label (`small`) and the **Ready for review** badge (success text on
+  `successSoft`, pill, with a decorative dot); the foot row names the screen.
+  Inside it the Mokly shell is redrawn from the tokens: the top bar with the
+  mark and the catalogue search field, the catalogue navigation with its Pages
+  and Components sections, the All or Changes filter and depth-ruled rows, the
+  screen header with crumbs, title and id chip, and the dotted stage holding
+  the example screen. The shell is 624px tall on desktop and 520px on mobile,
+  where the navigation column is dropped.
+- Feature modules: three columns on desktop, one on mobile. Each module is a
+  `folioSurface` card with a `medium` radius whose head is a dotted panel
+  framing one detail of the shell — the Changes filter, a comment pinned to a
+  screen, the agent rail beside a screen — above the mono number, the label, a
+  `lead`-sized title and muted body.
+- Closing: `folioMuted` panel with `medium` radius, two columns on desktop,
+  copy and actions left, the ordered steps right with accent mono markers.
+- Documentation: the section tree sits on the page canvas rather than in a
+  filled panel, separated from the document by one vertical hairline. The
+  published Mokly CLI version heads it as a quiet chip linking the changelog,
+  every section is listed expanded under a mono rubric head, rows are 44px
+  targets with a `folioMuted` hover fill, and the current page takes
+  `accentSoft` with `accent` text. The document is ruled: the location trail
+  eyebrow, the page heading and an accent-ruled pull-quote lead close with a
+  hairline, body sections are separated by hairlines, and previous and next
+  are cards that take a `folioLineStrong` edge on hover. The on-this-page rail
+  hangs from its own hairline at the outer edge.
+- Changelog: a sticky release index of version and date beside the entries,
+  each row pairing the **Mokly CLI** version badge, the date and the release
+  link with the grouped notes of that release.
+- Policy documents (terms, privacy): the same chrome and document column at
+  the 840px measure, with the location eyebrow, the page heading, the
+  placeholder heading and the cross-policy link.
 - Code panel: `folioSurface` with a `folioLine` border, `small` radius, mono
   text, and a copy control in the top-right corner with a visible label on
   focus and a confirmation after copying.
-- Status badges, buttons and the search control keep the shared control
-  geometry; no site stylesheet overrides a control's font, radius or colors.
+- Status badges, buttons, the search control and the version chip keep the
+  shared control geometry; no site stylesheet overrides a control's font,
+  radius or colors.
 
 ## Mockups
 
-The Folio marketing screens from the cloud repository at commit `47ede2e` are
-ported into this repository's example design catalogue under
-`examples/basic/entries/design/site/` and generated under
+The five site screens live in this repository's example design catalogue
+under `examples/basic/entries/design/site/` and are generated under
 `examples/basic/generated/design/site/`. They are the visual source of truth
 for Milestone 4 onward; refinements happen here first, then in the site.
 
-| Entry id                | Route                              | Screen                                            |
-| ----------------------- | ---------------------------------- | ------------------------------------------------- |
-| `design-site-home`      | `design/site/home.html`            | Home with hero, stage, features and closing       |
-| `design-site-docs`      | `design/site/docs.html`            | A docs page with sidebar, on-this-page and search |
-| `design-site-changelog` | `design/site/changelog.html`       | Changelog with one release entry                  |
-| `design-site-terms`     | `design/site/terms.html`           | Terms placeholder document                        |
-| `design-site-privacy`   | `design/site/privacy.html`         | Privacy placeholder document                      |
-| `design-site-tour`      | `user-flows/design/site-tour.html` | Home → Docs → Changelog → Terms → Privacy         |
+| Entry id                | Route                              | Screen                                               |
+| ----------------------- | ---------------------------------- | ---------------------------------------------------- |
+| `design-site-home`      | `design/site/home.html`            | Home with hero, catalogue frame, modules and closing |
+| `design-site-docs`      | `design/site/docs.html`            | A docs page with the section tree, rail and search   |
+| `design-site-changelog` | `design/site/changelog.html`       | Changelog with the release index and three entries   |
+| `design-site-terms`     | `design/site/terms.html`           | Terms placeholder document                           |
+| `design-site-privacy`   | `design/site/privacy.html`         | Privacy placeholder document                         |
+| `design-site-tour`      | `user-flows/design/site-tour.html` | Home → Docs → Changelog → Terms → Privacy            |
 
 The collection is registered from `examples/basic/entries/design/site/index.ts`
 under the example catalogue's `Design` root, and it owns the tour. Each screen
 is one component rendering mobile and desktop variants in light and dark.
 Screens compose shared parts under
-`examples/basic/entries/design/site/parts/`: brand, chrome (skip link, header,
-footer and search control), actions, stage, sections (feature grid and
-closing), document page, docs navigation and code panel.
+`examples/basic/entries/design/site/parts/`: `links.ts` (catalogue ids,
+application links and current-route marking), `metadata.ts` (the shared
+dependencies and related documents), `brand.tsx` (mark and wordmark),
+`chrome.tsx` (skip link, application band, header, search, location trail,
+version chip and grouped footer), `actions.tsx`, `glyphs.tsx`, `shell.tsx`
+(the framed catalogue), `modules.tsx` (the feature modules and the closing),
+`docs_data.ts` (the documentation architecture), `docs_navigation.tsx` (the
+section tree, on-this-page rail and pager), `code_panel.tsx`, `releases.ts`
+(the depicted releases) and `version.ts` (the depicted package version).
 
 Controls are plain semantic elements — anchors, buttons, badges and the code
 panel's copy control — styled from the site tokens. The site ships no

@@ -5,7 +5,6 @@ import { docsScreen } from "./docs_screen.js";
 import { homeScreen } from "./home_screen.js";
 import { SITE_METADATA } from "./parts/metadata.js";
 import { privacyScreen, termsScreen } from "./policy_screens.js";
-import { siteVariantMockups } from "./variants/index.js";
 
 /** The public site design: the five routes the website serves, and its tour. */
 export const siteMockups = [
@@ -18,10 +17,9 @@ export const siteMockups = [
       "design-site-terms",
       "design-site-privacy",
       "design-site-tour",
-      "design-site-variants",
     ],
     description:
-      "Folio marketing and documentation screens for the public Mokly website.",
+      "The marketing and documentation screens of the public Mokly website.",
     id: "design-site",
     title: "Site",
   }),
@@ -45,5 +43,4 @@ export const siteMockups = [
     ],
     title: "Site tour",
   }),
-  ...siteVariantMockups,
 ];

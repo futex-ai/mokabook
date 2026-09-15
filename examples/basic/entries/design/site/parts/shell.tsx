@@ -77,29 +77,31 @@ function RowGlyph({ kind }: { kind: RowKind }) {
 }
 
 function rowClassName(row: NavigationRow): string {
-  const classes = ["pd-row"];
-  if (row.kind === "collection") classes.push("pd-row--group");
-  if (row.current) classes.push("pd-row--current");
+  const classes = ["site-row"];
+  if (row.kind === "collection") classes.push("site-row--group");
+  if (row.current) classes.push("site-row--current");
   return classes.join(" ");
 }
 
 function NavigationTree() {
   return (
-    <nav aria-label="Catalogue" className="pd-tree">
-      <div className="pd-tree-head">
+    <nav aria-label="Catalogue" className="site-tree">
+      <div className="site-tree-head">
         Catalogue<span>Collapse all</span>
       </div>
-      <div className="pd-filter" role="group" aria-label="Catalogue filter">
-        <span className="pd-filter-option pd-filter-option--current">All</span>
-        <span className="pd-filter-option">
-          Changes<span className="pd-filter-count">3</span>
+      <div className="site-filter" role="group" aria-label="Catalogue filter">
+        <span className="site-filter-option site-filter-option--current">
+          All
+        </span>
+        <span className="site-filter-option">
+          Changes<span className="site-filter-count">3</span>
         </span>
       </div>
-      <div className="pd-tree-scroll">
+      <div className="site-tree-scroll">
         {NAVIGATION.map((section) => (
-          <div className="pd-tree-section" key={section.title}>
-            <p className="pd-tree-section-head">
-              <span aria-hidden="true" className="pd-tree-chevron">
+          <div className="site-tree-section" key={section.title}>
+            <p className="site-tree-section-head">
+              <span aria-hidden="true" className="site-tree-chevron">
                 <ChevronGlyph />
               </span>
               {section.title}
@@ -107,15 +109,15 @@ function NavigationTree() {
             {section.rows.map((row) => (
               <span
                 className={rowClassName(row)}
-                data-pd-depth={row.depth}
+                data-site-depth={row.depth}
                 key={`${section.title}-${row.label}-${row.depth}`}
               >
-                <span aria-hidden="true" className="pd-row-ico">
+                <span aria-hidden="true" className="site-row-ico">
                   <RowGlyph kind={row.kind} />
                 </span>
-                <span className="pd-row-label">{row.label}</span>
+                <span className="site-row-label">{row.label}</span>
                 {row.count === undefined ? null : (
-                  <span className="pd-row-count">{row.count}</span>
+                  <span className="site-row-count">{row.count}</span>
                 )}
               </span>
             ))}
@@ -128,24 +130,24 @@ function NavigationTree() {
 
 function ShellTopBar({ viewport }: { viewport: "mobile" | "desktop" }) {
   return (
-    <div className="pd-topbar">
+    <div className="site-topbar">
       {viewport === "mobile" ? (
-        <span aria-hidden="true" className="pd-topbar-menu">
+        <span aria-hidden="true" className="site-topbar-menu">
           <span />
           <span />
           <span />
         </span>
       ) : null}
-      <span className="pd-topbar-brand">
-        <span aria-hidden="true" className="pd-topbar-mark">
+      <span className="site-topbar-brand">
+        <span aria-hidden="true" className="site-topbar-mark">
           <MarkGlyph />
         </span>
         {viewport === "desktop" ? "Mokly" : null}
       </span>
-      <span className="pd-topbar-search">
+      <span className="site-topbar-search">
         <SearchGlyph />
         Search catalogue&#8230;
-        <span aria-hidden="true" className="pd-topbar-tag">
+        <span aria-hidden="true" className="site-topbar-tag">
           <TagGlyph />
         </span>
       </span>
@@ -155,7 +157,7 @@ function ShellTopBar({ viewport }: { viewport: "mobile" | "desktop" }) {
 
 function WelcomeScreen() {
   return (
-    <div className="site-shot pd-shot">
+    <div className="site-shot">
       <div className="site-shot-bar">
         <span aria-hidden="true" className="site-shot-dots">
           <span />
@@ -186,25 +188,25 @@ function WelcomeScreen() {
 
 function ScreenHeader() {
   return (
-    <div className="pd-screen-head">
-      <nav aria-label="Catalogue location" className="pd-crumbs">
-        <span className="pd-crumb">Catalogue home</span>
-        <span className="pd-crumb">
-          <span aria-hidden="true" className="pd-crumb-sep">
+    <div className="site-screen-head">
+      <nav aria-label="Catalogue location" className="site-crumbs">
+        <span className="site-crumb">Catalogue home</span>
+        <span className="site-crumb">
+          <span aria-hidden="true" className="site-crumb-sep">
             &#8250;
           </span>
           Example
         </span>
-        <span className="pd-crumb">
-          <span aria-hidden="true" className="pd-crumb-sep">
+        <span className="site-crumb">
+          <span aria-hidden="true" className="site-crumb-sep">
             &#8250;
           </span>
           Screens
         </span>
       </nav>
-      <div className="pd-screen-title-row">
-        <span className="pd-screen-title">{STAGE_SCREEN}</span>
-        <span className="pd-idchip">#welcome</span>
+      <div className="site-screen-title-row">
+        <span className="site-screen-title">{STAGE_SCREEN}</span>
+        <span className="site-idchip">#welcome</span>
       </div>
     </div>
   );
@@ -220,29 +222,29 @@ export function CatalogueFrame({
   viewport: "mobile" | "desktop";
 }) {
   return (
-    <figure className="pd-frame">
-      <div className="pd-frame-head">
-        <span className="pd-frame-label">{STAGE_PULL_REQUEST}</span>
+    <figure className="site-frame">
+      <div className="site-frame-head">
+        <span className="site-frame-label">{STAGE_PULL_REQUEST}</span>
         <span className="site-badge site-badge--success">
           <span aria-hidden="true" className="site-badge-dot" />
           Ready for review
         </span>
       </div>
-      <div className="pd-shell">
+      <div className="site-shell">
         <ShellTopBar viewport={viewport} />
-        <div className="pd-shell-body">
+        <div className="site-shell-body">
           {viewport === "desktop" ? <NavigationTree /> : null}
-          <div className="pd-shell-main">
+          <div className="site-shell-main">
             <ScreenHeader />
-            <div className="pd-stage">
-              <p className="pd-stage-label">Desktop</p>
+            <div className="site-stage">
+              <p className="site-stage-label">Desktop</p>
               <WelcomeScreen />
             </div>
           </div>
         </div>
       </div>
-      <figcaption className="pd-frame-foot">
-        <span className="pd-frame-foot-label">Screen</span>
+      <figcaption className="site-frame-foot">
+        <span className="site-frame-foot-label">Screen</span>
         {STAGE_SCREEN}
       </figcaption>
     </figure>

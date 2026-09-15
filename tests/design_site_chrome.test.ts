@@ -12,11 +12,15 @@ import {
 } from "./helpers/design_catalogue.js";
 import { repositoryRoot } from "./helpers/fixture.js";
 
-const HOME = "design-site-product-home";
-const DOCS = "design-site-product-docs";
-const CHANGELOG = "design-site-product-changelog";
+const HOME = "design-site-home";
+const DOCS = "design-site-docs";
+const CHANGELOG = "design-site-changelog";
+const TERMS = "design-site-terms";
+const PRIVACY = "design-site-privacy";
 
-const HEADER_LINKS = ["Docs", "Changelog", "Sign in", "Get started →"];
+const SCREENS = [HOME, DOCS, CHANGELOG, TERMS, PRIVACY];
+
+const FOOTER_GROUPS = ["Product", "Account", "Legal"];
 
 const FOOTER_LINKS = [
   "Home",
@@ -27,9 +31,6 @@ const FOOTER_LINKS = [
   "Terms",
   "Privacy",
 ];
-
-const SIGN_IN = "https://app.mokly.ai/sign-in";
-const SIGN_UP = "https://app.mokly.ai/sign-up";
 
 const MODULE_LABELS = ["BROWSE", "REVIEW", "EDIT"];
 
@@ -51,36 +52,23 @@ function label(node: Parameters<typeof textContent>[0]): string {
 
 for (const viewport of ["mobile", "desktop"] as const) {
   test(`${viewport}: the application band carries one header row and no utility bar`, async () => {
-    for (const id of [HOME, DOCS, CHANGELOG]) {
+    for (const id of SCREENS) {
       const { document } = await designDocument(id, viewport);
-      const band = byClass(document, "pd-band")[0];
+      const band = byClass(document, "site-band")[0];
       assert.ok(band, `${id}: missing the application band`);
-      const header = byClass(band, "site-header")[0];
-      assert.ok(header, id);
-      assert.deepEqual(
+      assert.ok(byClass(band, "site-header")[0], id);
+      assert.equal(
         elements(band, (node) => node.tagName === "header").length,
         1,
         `${id}: the band holds the header alone`,
       );
       assert.equal(
-        byClass(document, "pd-utility").length,
-        0,
-        `${id}: the utility bar is gone`,
+        elements(document, (node) => node.tagName === "header").length,
+        1,
+        `${id}: the page carries no second header row`,
       );
       assert.equal(
-        byClass(document, "pd-sections").length,
-        0,
-        `${id}: the utility bar's section links are gone`,
-      );
-      const headerLinks = elements(
-        header,
-        (node) => node.tagName === "a",
-      ).slice(1);
-      assert.deepEqual(headerLinks.map(label), HEADER_LINKS, id);
-      assert.equal(attribute(headerLinks[2]!, "href"), SIGN_IN, id);
-      assert.equal(attribute(headerLinks[3]!, "href"), SIGN_UP, id);
-      assert.equal(
-        byClass(header, "site-search").length,
+        byClass(document, "site-search").length,
         id === DOCS ? 1 : 0,
         `${id}: search belongs to the documentation header`,
       );
@@ -88,23 +76,28 @@ for (const viewport of ["mobile", "desktop"] as const) {
   });
 
   test(`${viewport}: the footer groups the seven destinations into columns`, async () => {
-    for (const id of [HOME, DOCS, CHANGELOG]) {
+    for (const id of SCREENS) {
       const { document } = await designDocument(id, viewport);
-      const footer = byClass(document, "pd-footer")[0];
+      const footer = byClass(document, "site-footer")[0];
       assert.ok(footer, id);
-      const groups = byClass(footer, "pd-footer-group");
+      assert.match(
+        label(byClass(footer, "site-footer-brand")[0]!),
+        /open source under the MIT license/,
+        `${id}: the footer states the license`,
+      );
+      const groups = byClass(footer, "site-footer-group");
       assert.equal(groups.length, 3, `${id}: three footer columns`);
       assert.deepEqual(
-        groups.map((group) => label(byClass(group, "pd-footer-heading")[0]!)),
-        ["Product", "Account", "Legal"],
+        groups.map((group) => label(byClass(group, "site-footer-heading")[0]!)),
+        FOOTER_GROUPS,
         id,
       );
-      const nav = byClass(footer, "pd-footer-nav")[0];
+      const nav = byClass(footer, "site-footer-nav")[0];
       assert.ok(nav);
       const links = elements(nav, (node) => node.tagName === "a");
       assert.deepEqual(links.map(label), FOOTER_LINKS, id);
       assert.equal(
-        byClass(nav, "pd-footer-link").length,
+        byClass(nav, "site-footer-link").length,
         FOOTER_LINKS.length,
         `${id}: every footer link carries the hoverable class`,
       );
@@ -113,37 +106,37 @@ for (const viewport of ["mobile", "desktop"] as const) {
 
   test(`${viewport}: the home frames the catalogue shell around the Welcome screen`, async () => {
     const { document } = await designDocument(HOME, viewport);
-    const frame = byClass(document, "pd-frame")[0];
+    const frame = byClass(document, "site-frame")[0];
     assert.ok(frame, "the home renders the catalogue frame");
     assert.equal(
-      label(byClass(frame, "pd-frame-head")[0]!),
+      label(byClass(frame, "site-frame-head")[0]!),
       "Pull request #71Ready for review",
     );
     assert.equal(byClass(frame, "site-badge-dot").length, 1);
-    assert.equal(label(byClass(frame, "pd-frame-foot")[0]!), "ScreenWelcome");
+    assert.equal(label(byClass(frame, "site-frame-foot")[0]!), "ScreenWelcome");
 
-    const topBar = byClass(frame, "pd-topbar")[0];
+    const topBar = byClass(frame, "site-topbar")[0];
     assert.ok(topBar, "the frame shows the shell's top bar");
     assert.match(label(topBar), /Search catalogue/);
-    assert.equal(byClass(topBar, "pd-topbar-mark").length, 1);
+    assert.equal(byClass(topBar, "site-topbar-mark").length, 1);
     assert.equal(
-      byClass(topBar, "pd-topbar-menu").length,
+      byClass(topBar, "site-topbar-menu").length,
       viewport === "mobile" ? 1 : 0,
       "the menu control belongs to the mobile shell",
     );
 
-    const head = byClass(frame, "pd-screen-head")[0];
+    const head = byClass(frame, "site-screen-head")[0];
     assert.ok(head);
     assert.equal(
-      label(byClass(head, "pd-crumbs")[0]!),
+      label(byClass(head, "site-crumbs")[0]!),
       "Catalogue home›Example›Screens",
     );
-    assert.equal(label(byClass(head, "pd-screen-title")[0]!), "Welcome");
-    assert.equal(label(byClass(head, "pd-idchip")[0]!), "#welcome");
+    assert.equal(label(byClass(head, "site-screen-title")[0]!), "Welcome");
+    assert.equal(label(byClass(head, "site-idchip")[0]!), "#welcome");
 
-    const stage = byClass(frame, "pd-stage")[0];
+    const stage = byClass(frame, "site-stage")[0];
     assert.ok(stage);
-    assert.equal(label(byClass(stage, "pd-stage-label")[0]!), "Desktop");
+    assert.equal(label(byClass(stage, "site-stage-label")[0]!), "Desktop");
     const shot = byClass(stage, "site-shot")[0];
     assert.ok(shot, "the stage holds the Welcome screen in a browser frame");
     assert.equal(
@@ -155,37 +148,37 @@ for (const viewport of ["mobile", "desktop"] as const) {
 
   test(`${viewport}: the home navigation depicts the Pages and Components sections`, async () => {
     const { document } = await designDocument(HOME, viewport);
-    const tree = byClass(document, "pd-tree")[0];
+    const tree = byClass(document, "site-tree")[0];
     if (viewport === "mobile") {
       assert.equal(tree, undefined, "the mobile shell hides the tree");
       return;
     }
     assert.ok(tree);
-    assert.deepEqual(byClass(tree, "pd-tree-section-head").map(label), [
+    assert.deepEqual(byClass(tree, "site-tree-section-head").map(label), [
       "Pages",
       "Components",
     ]);
-    assert.deepEqual(byClass(tree, "pd-filter-option").map(label), [
+    assert.deepEqual(byClass(tree, "site-filter-option").map(label), [
       "All",
       "Changes3",
     ]);
     assert.equal(
-      label(byClass(tree, "pd-filter-option--current")[0]!),
+      label(byClass(tree, "site-filter-option--current")[0]!),
       "All",
       "All is the quiet filled current filter",
     );
-    const current = byClass(tree, "pd-row--current");
+    const current = byClass(tree, "site-row--current");
     assert.equal(current.length, 1);
     assert.equal(label(current[0]!), "Welcome");
-    const depths = byClass(tree, "pd-row").map((row) =>
-      attribute(row, "data-pd-depth"),
+    const depths = byClass(tree, "site-row").map((row) =>
+      attribute(row, "data-site-depth"),
     );
     assert.deepEqual([...new Set(depths)].sort(), ["0", "1", "2"]);
   });
 
   test(`${viewport}: the home modules pair the feature copy with a shell detail`, async () => {
     const { document } = await designDocument(HOME, viewport);
-    const modules = byClass(document, "pd-module");
+    const modules = byClass(document, "site-module");
     assert.equal(modules.length, 3);
     assert.deepEqual(
       modules.map((module) => attribute(module, "id")),
@@ -197,18 +190,24 @@ for (const viewport of ["mobile", "desktop"] as const) {
     );
     for (const module of modules)
       assert.equal(
-        byClass(module, "pd-detail").length,
+        byClass(module, "site-detail").length,
         1,
         "every module frames one shell detail",
       );
     const [browse, review, edit] = modules;
-    assert.match(label(byClass(browse!, "pd-filter")[0]!), /All\s*Changes\s*3/);
-    assert.equal(byClass(review!, "pd-pin").length, 2);
-    assert.match(label(byClass(review!, "pd-comment")[0]!), /Comment/);
-    assert.match(label(byClass(review!, "pd-comment-approve")[0]!), /Approve/);
-    assert.match(label(byClass(edit!, "pd-agent")[0]!), /Agent session/);
-    assert.match(label(byClass(edit!, "pd-agent-input")[0]!), /Describe/);
-    const steps = byClass(document, "pd-step");
+    assert.match(
+      label(byClass(browse!, "site-filter")[0]!),
+      /All\s*Changes\s*3/,
+    );
+    assert.equal(byClass(review!, "site-pin").length, 2);
+    assert.match(label(byClass(review!, "site-comment")[0]!), /Comment/);
+    assert.match(
+      label(byClass(review!, "site-comment-approve")[0]!),
+      /Approve/,
+    );
+    assert.match(label(byClass(edit!, "site-agent")[0]!), /Agent session/);
+    assert.match(label(byClass(edit!, "site-agent-input")[0]!), /Describe/);
+    const steps = byClass(document, "site-step");
     assert.deepEqual(
       steps.map((step) =>
         label(elements(step, (node) => node.tagName === "h3")[0]!),
@@ -221,13 +220,13 @@ for (const viewport of ["mobile", "desktop"] as const) {
   test(`${viewport}: the changelog reads as an indexed Changes list`, async () => {
     const { document, html } = await designDocument(CHANGELOG, viewport);
     assert.equal(
-      label(byClass(document, "pd-eyebrow")[0]!),
+      label(byClass(document, "site-trail")[0]!),
       "Changelog",
       "the location trail is the eyebrow above the title",
     );
-    const index = byClass(document, "pd-release-index")[0];
+    const index = byClass(document, "site-release-index")[0];
     assert.ok(index, "the changelog carries a release index");
-    assert.deepEqual(byClass(index, "pd-release-index-version").map(label), [
+    assert.deepEqual(byClass(index, "site-release-index-version").map(label), [
       "0.9.0",
       "0.8.0",
       "0.7.1",
@@ -238,7 +237,7 @@ for (const viewport of ["mobile", "desktop"] as const) {
       ),
       ["#release-0-9-0", "#release-0-8-0", "#release-0-7-1"],
     );
-    const releases = byClass(document, "pd-release");
+    const releases = byClass(document, "site-release");
     assert.equal(releases.length, 3);
     assert.deepEqual(
       releases.map((release) =>
@@ -257,53 +256,73 @@ for (const viewport of ["mobile", "desktop"] as const) {
     );
     assert.deepEqual(
       releases.map((release) =>
-        attribute(byClass(release, "pd-release-link")[0]!, "href"),
+        attribute(byClass(release, "site-release-link")[0]!, "href"),
       ),
       COMPARE_LINKS,
     );
     assert.deepEqual(
-      byClass(releases[0]!, "pd-release-group-head").map(label),
+      byClass(releases[0]!, "site-release-group-head").map(label),
       ["Breaking changes", "Features", "Bug fixes"],
     );
     assert.deepEqual(
-      byClass(releases[1]!, "pd-release-group-head").map(label),
+      byClass(releases[1]!, "site-release-group-head").map(label),
       ["Features", "Bug fixes", "Performance"],
     );
     assert.match(html, /Split catalogue navigation into sections/);
     assert.match(html, /Start large catalogues with on-demand previews/);
   });
+
+  test(`${viewport}: both policies read as the site's document column`, async () => {
+    for (const id of [TERMS, PRIVACY]) {
+      const { document } = await designDocument(id, viewport);
+      const main = byClass(document, "site-policy")[0];
+      assert.ok(main, `${id}: the policy uses the document column`);
+      assert.equal(main.tagName, "main");
+      assert.equal(attribute(main, "id"), "main");
+      const intro = byClass(main, "site-document-intro")[0];
+      assert.ok(intro, id);
+      assert.equal(label(byClass(intro, "site-eyebrow")[0]!), "Using Mokly");
+      assert.equal(byClass(main, "site-policy-empty").length, 1, id);
+    }
+  });
 }
 
-test("the Product stylesheet extends the shared layout and owns its chrome", async () => {
+test("the site stylesheet is self-contained and owns the whole chrome", async () => {
   const stylesheet = await fs.readFile(
-    path.join(repositoryRoot, "examples/basic/generated/site-product.css"),
+    path.join(repositoryRoot, "examples/basic/generated/site.css"),
     "utf8",
   );
-  assert.match(stylesheet, /@import "\.\/site\.css";/);
+  assert.doesNotMatch(
+    stylesheet,
+    /@import/,
+    "the baseline sheet stands on its own",
+  );
+  assert.doesNotMatch(
+    stylesheet,
+    /\.pd-/,
+    "every class carries the site- prefix",
+  );
   for (const selector of [
-    ".pd-band",
-    ".pd-eyebrow",
-    ".pd-frame",
-    ".pd-topbar",
-    ".pd-tree",
-    ".pd-screen-head",
-    ".pd-stage",
-    ".pd-module",
-    ".pd-doc-tree",
-    ".pd-release",
-    ".pd-footer-nav",
+    ".site-band",
+    ".site-trail",
+    ".site-frame",
+    ".site-topbar",
+    ".site-tree",
+    ".site-screen-head",
+    ".site-stage",
+    ".site-module",
+    ".site-doc-tree",
+    ".site-release",
+    ".site-policy",
+    ".site-footer-nav",
   ])
     assert.ok(
       stylesheet.includes(`${selector} {`),
-      `site-product.css defines ${selector}`,
+      `site.css defines ${selector}`,
     );
-  assert.ok(
-    !stylesheet.includes(".pd-utility"),
-    "the utility bar's rules are gone",
-  );
   assert.match(
     stylesheet,
-    /\[data-site-viewport="mobile"\] \.pd-module-grid/,
+    /\[data-site-viewport="mobile"\] \.site-module-grid/,
     "the mobile composition collapses the module grid",
   );
 });
@@ -317,7 +336,7 @@ test("the depicted version heads the documentation tree", async () => {
   assert.ok(latest);
   for (const viewport of ["mobile", "desktop"] as const) {
     const { document } = await designDocument(DOCS, viewport);
-    const version = byClass(document, "pd-version");
+    const version = byClass(document, "site-version");
     assert.equal(version.length, 1, viewport);
     assert.equal(
       label(version[0]!),
@@ -325,10 +344,10 @@ test("the depicted version heads the documentation tree", async () => {
       "the tree heads with the published Mokly CLI version",
     );
   }
-  for (const id of [HOME, CHANGELOG]) {
+  for (const id of [HOME, CHANGELOG, TERMS, PRIVACY]) {
     const { document } = await designDocument(id, "desktop");
     assert.equal(
-      byClass(document, "pd-version").length,
+      byClass(document, "site-version").length,
       0,
       `${id}: the version chip belongs to the documentation tree`,
     );

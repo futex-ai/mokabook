@@ -1,5 +1,5 @@
 /**
- * The documentation architecture the Product direction depicts. Sections and
+ * The documentation architecture the site depicts. Sections and
  * their page order follow the information architecture in
  * `docs/protocol/site-docs.md`; destinations the design catalogue does not
  * own render as plain text, the rule the rest of the design mockups follow.

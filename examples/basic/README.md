@@ -77,21 +77,21 @@ contract before enabling a new transition.
 walks them in that order. Each screen renders a distinct mobile and desktop
 component in light and dark, with the shared skip link, header, footer and one
 `main#main` landmark. Sources live in `entries/design/site/`, with the brand,
-chrome, actions, stage, sections, document, docs navigation and code panel
-parts under `entries/design/site/parts/`. These screens use Folio rather than
-the Mokly shell: `generated/site-tokens.css` defines the `--site-*` properties
-for both schemes and `generated/site.css` holds the layout without a single
-literal color, matched ahead of the broader `design/**` stylesheet rule. The
-copy is the approved home copy and the real `CHANGELOG.md` release; the
-contract is the [site design](../../docs/protocol/site-design.md) document.
+chrome, actions, glyphs, catalogue shell, feature modules, document data,
+docs navigation, releases, version and code panel parts under
+`entries/design/site/parts/`.
 
-`Design → Site → Directions` holds five candidate directions for a more
-refined site (Editorial, Product, Grid, Minimal, Bands), each applied to the
-home, a documentation page and the changelog under `design/site/<slug>/`.
-Each direction owns `generated/site-<slug>.css`, matched ahead of the baseline
-rule, and its sources under `entries/design/site/variants/<slug>/`. The
-[site directions](../../docs/protocol/site-directions.md) document records the
-intent of each and the inventory; one is selected before implementation.
+The site reads as the marketing face of the catalogue it publishes: a white
+application band carries one header row, the home frames the Mokly shell —
+top bar, catalogue navigation, screen header and stage — as its principal
+image, the documentation page puts search in the header with the section tree
+on the page canvas, and the footer groups the seven destinations into Product,
+Account and Legal columns. These screens use Folio rather than the Mokly
+shell: `generated/site-tokens.css` defines the `--site-*` properties for both
+schemes and `generated/site.css` holds the layout without a single literal
+color, matched ahead of the broader `design/**` stylesheet rule. The copy is
+the approved home copy and the real `CHANGELOG.md` releases; the contract is
+the [site design](../../docs/protocol/site-design.md) document.
 
 ## Firna renderer adapter
 

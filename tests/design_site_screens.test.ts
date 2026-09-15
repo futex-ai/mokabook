@@ -77,7 +77,6 @@ test("the site collection and its tour reuse the five screens in order", async (
   assert.deepEqual(collection.childIds, [
     ...SITE_SCREENS.map(([id]) => id),
     "design-site-tour",
-    "design-site-variants",
   ]);
   const root = manifest.entries.find((entry) => entry.id === "design-root");
   assert.ok(root?.kind === "collection");

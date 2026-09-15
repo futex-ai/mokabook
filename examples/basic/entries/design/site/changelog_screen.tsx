@@ -1,75 +1,100 @@
+/**
+ * The changelog, read as the catalogue's Changes list: an index of
+ * the published releases beside rows that pair a version badge and date with
+ * the grouped notes of that release.
+ */
+
 import { defineScreen } from "@mokly/mokly";
 
-import { SiteLayout } from "./parts/chrome.js";
-import { SiteDocument } from "./parts/document.js";
+import { SiteLayout, SiteTrail } from "./parts/chrome.js";
 import { SITE_SCREENS } from "./parts/links.js";
 import { SITE_METADATA } from "./parts/metadata.js";
+import { RELEASES } from "./parts/releases.js";
 
-const RELEASE = {
-  breaking: [
-    "Install and import @mokly/mokly. The unscoped name is not a package alias; the CLI remains mokly.",
-  ],
-  compare: "https://github.com/mokly-ai/mokly/compare/v0.8.0...v0.9.0",
-  date: "2026-09-15",
-  features: [
-    "Publish catalogues to upload services",
-    "Add CSS change attribution",
-    "Add derived baseline output",
-    "Split catalogue navigation into sections",
-  ],
-  readableDate: "15 September 2026",
-  version: "0.9.0",
-};
+function ReleaseIndex() {
+  return (
+    <nav aria-label="Releases" className="site-release-index">
+      <p className="site-tree-head">Releases</p>
+      {RELEASES.map((release, index) => (
+        <a
+          className={
+            index === 0
+              ? "site-release-index-link site-release-index-link--current"
+              : "site-release-index-link"
+          }
+          href={`#${release.id}`}
+          key={release.id}
+        >
+          <span className="site-release-index-version">{release.version}</span>
+          <span className="site-release-index-date">
+            {release.readableDate}
+          </span>
+        </a>
+      ))}
+    </nav>
+  );
+}
 
 function SiteChangelog({ viewport }: { viewport: "mobile" | "desktop" }) {
   return (
     <SiteLayout active={SITE_SCREENS.changelog} viewport={viewport}>
-      <SiteDocument
-        eyebrow="Changelog"
-        title={
-          <>
+      <main className="site-document site-changelog" id="main">
+        <div className="site-document-intro">
+          <SiteTrail trail={["Changelog"]} />
+          <h1>
             What&#8217;s new in <span className="site-accent">Mokly</span>
-          </>
-        }
-      >
-        <article className="site-release">
-          <div className="site-release-meta">
-            <h2>
-              <span className="site-badge site-badge--neutral">
-                Mokly CLI {RELEASE.version}
-              </span>
-            </h2>
-            <time dateTime={RELEASE.date}>{RELEASE.readableDate}</time>
+          </h1>
+          <p className="site-lead">
+            Every release of the Mokly CLI, newest first.
+          </p>
+        </div>
+        <div className="site-changelog-body">
+          <ReleaseIndex />
+          <div className="site-releases">
+            {RELEASES.map((release) => (
+              <article
+                className="site-release"
+                id={release.id}
+                key={release.id}
+              >
+                <div className="site-release-meta">
+                  <h2>
+                    <span className="site-badge site-badge--neutral">
+                      Mokly CLI {release.version}
+                    </span>
+                  </h2>
+                  <time dateTime={release.date}>{release.readableDate}</time>
+                  <a className="site-release-link" href={release.compare}>
+                    Read release details <span aria-hidden="true">&#8599;</span>
+                  </a>
+                </div>
+                <div className="site-release-notes">
+                  {release.groups.map((group) => (
+                    <div className="site-release-group" key={group.title}>
+                      <p className="site-release-group-head">{group.title}</p>
+                      <ul>
+                        {group.notes.map((note) => (
+                          <li key={note}>{note}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ))}
           </div>
-          <div className="site-release-notes">
-            <h3>Breaking changes</h3>
-            <ul>
-              {RELEASE.breaking.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-            <h3>Features</h3>
-            <ul>
-              {RELEASE.features.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-            <a className="site-link" href={RELEASE.compare}>
-              Read release details <span aria-hidden="true">&#8599;</span>
-            </a>
-          </div>
-        </article>
-      </SiteDocument>
+        </div>
+      </main>
     </SiteLayout>
   );
 }
 
-/** The changelog at the desktop composition, version and date beside the notes. */
+/** The changelog with its release index beside the entries. */
 export function SiteChangelogDesktop() {
   return <SiteChangelog viewport="desktop" />;
 }
 
-/** The changelog stacked for the mobile composition. */
+/** The changelog stacked, the index above the entries. */
 export function SiteChangelogMobile() {
   return <SiteChangelog viewport="mobile" />;
 }
@@ -77,7 +102,7 @@ export function SiteChangelogMobile() {
 export const changelogScreen = defineScreen({
   ...SITE_METADATA,
   description:
-    "One release entry with its Mokly CLI label, date, grouped notes and release link. The facts are the real 0.9.0 entry of this repository's CHANGELOG.md at the time of authoring.",
+    "Releases as a Changes-style list beside a release index. The 0.9.0, 0.8.0 and 0.7.1 facts are the real entries of this repository's CHANGELOG.md at the time of authoring.",
   desktop: <SiteChangelogDesktop />,
   id: "design-site-changelog",
   mobile: <SiteChangelogMobile />,

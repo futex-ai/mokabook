@@ -1,5 +1,5 @@
 /**
- * Line glyphs for the Product direction. They mirror the catalogue shell's
+ * Line glyphs for the site screens. They mirror the catalogue shell's
  * own icon set so the depicted product chrome reads as the same tool, and
  * they inherit color so the site tokens decide every stroke.
  */

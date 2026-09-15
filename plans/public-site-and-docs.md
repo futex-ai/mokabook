@@ -230,21 +230,21 @@ exploration. After this milestone `design/site/` holds the five site screens
 in the Product design, the directions collection no longer exists, and the
 protocol documents describe one design.
 
-- [ ] Move the Product screens and parts to `examples/basic/entries/design/site/`
+- [x] Move the Product screens and parts to `examples/basic/entries/design/site/`
       as the baseline home, docs and changelog; rework terms and privacy to
       the Product chrome; keep the ids `design-site-*`, the routes under
       `design/site/`, the `design-site-tour` use case, and both schemes.
-- [ ] Replace `examples/basic/generated/site.css` with the Product layout and
+- [x] Replace `examples/basic/generated/site.css` with the Product layout and
       delete `site-<slug>.css` for every direction; keep `site-tokens.css`.
-- [ ] Delete `examples/basic/entries/design/site/variants/`, the direction
+- [x] Delete `examples/basic/entries/design/site/variants/`, the direction
       config rules and watch paths, `docs/protocol/site-directions.md`, and
       the direction tests; fold the Product tests into the baseline site
       tests.
-- [ ] Update `docs/protocol/site-design.md` (components, docs layout and
+- [x] Update `docs/protocol/site-design.md` (components, docs layout and
       mockups sections), `docs/protocol/site-docs.md` (docs layout), the
       protocol index, the example README and the inventory test list so they
       describe the promoted design only.
-- [ ] Capture the five screens at 390px and 1440px in light and dark.
+- [x] Capture the five screens at 390px and 1440px in light and dark.
 - [ ] Run `cargo xtask check`, commit and push. Stop for review.
 
 ## Milestone 3: Site Workspace Package And Checks

@@ -197,7 +197,6 @@ test("the canonical documented inventory exactly matches the complete design reg
         "docs/protocol/mokly-component-inspector-design.md",
         "docs/protocol/mokly-component-controls-design.md",
         "docs/protocol/site-design.md",
-        "docs/protocol/site-directions.md",
       ].map((file) => fs.readFile(path.join(repositoryRoot, file), "utf8")),
     )
   ).join("\n");

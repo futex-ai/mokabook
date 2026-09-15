@@ -1,7 +1,13 @@
+/**
+ * Terms and Privacy. Both read as the site's document column inside the same
+ * chrome as the rest of the site: the location eyebrow, the page title, the
+ * placeholder body the site publishes until approved text exists, and the
+ * link across to the other policy.
+ */
+
 import { MockLink, defineScreen } from "@mokly/mokly";
 
 import { SiteLayout } from "./parts/chrome.js";
-import { SiteDocument } from "./parts/document.js";
 import { SITE_SCREENS, type SiteScreen } from "./parts/links.js";
 import { SITE_METADATA } from "./parts/metadata.js";
 
@@ -22,14 +28,18 @@ function PolicyScreen({
 }) {
   return (
     <SiteLayout active={active} viewport={viewport}>
-      <SiteDocument eyebrow="Using Mokly" policy title={title}>
+      <main className="site-document site-policy" id="main">
+        <div className="site-document-intro">
+          <p className="site-eyebrow">Using Mokly</p>
+          <h1>{title}</h1>
+        </div>
         <div className="site-policy-empty">
           <h2>{heading}</h2>
           <MockLink className="site-link" to={crossTo}>
             {crossLabel} <span aria-hidden="true">&#8594;</span>
           </MockLink>
         </div>
-      </SiteDocument>
+      </main>
     </SiteLayout>
   );
 }

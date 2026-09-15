@@ -1,5 +1,5 @@
 /**
- * The three product modules on the home. Each pairs the approved feature
+ * The three feature modules on the home. Each pairs the approved feature
  * copy with a small framed detail of the catalogue shell — the Changes
  * filter, a comment pinned to a screen, and the agent rail beside a screen —
  * drawn as token-styled shapes carrying only real product labels.
@@ -7,25 +7,26 @@
 
 import type { ReactNode } from "react";
 
-import { SiteActions } from "../../../parts/actions.js";
-
+import { SiteActions } from "./actions.js";
 import { SendGlyph } from "./glyphs.js";
 
 function BrowseDetail() {
   return (
-    <div className="pd-detail">
-      <div className="pd-filter pd-filter--detail">
-        <span className="pd-filter-option pd-filter-option--current">All</span>
-        <span className="pd-filter-option">
-          Changes<span className="pd-filter-count">3</span>
+    <div className="site-detail">
+      <div className="site-filter site-filter--detail">
+        <span className="site-filter-option site-filter-option--current">
+          All
+        </span>
+        <span className="site-filter-option">
+          Changes<span className="site-filter-count">3</span>
         </span>
       </div>
-      <div className="pd-detail-rows">
+      <div className="site-detail-rows">
         {["Welcome", "Details", "Action"].map((label) => (
-          <span className="pd-detail-row" key={label}>
-            <span aria-hidden="true" className="pd-detail-dot" />
+          <span className="site-detail-row" key={label}>
+            <span aria-hidden="true" className="site-detail-dot" />
             {label}
-            <span className="pd-detail-chip">Changed</span>
+            <span className="site-detail-chip">Changed</span>
           </span>
         ))}
       </div>
@@ -35,26 +36,26 @@ function BrowseDetail() {
 
 function ReviewDetail() {
   return (
-    <div className="pd-detail pd-detail--split">
-      <div className="pd-detail-screen">
+    <div className="site-detail site-detail--split">
+      <div className="site-detail-screen">
         <span
           aria-hidden="true"
-          className="pd-detail-bar pd-detail-bar--wide"
+          className="site-detail-bar site-detail-bar--wide"
         />
-        <span aria-hidden="true" className="pd-detail-block" />
-        <span aria-hidden="true" className="pd-detail-bar" />
-        <span className="pd-pin">1</span>
+        <span aria-hidden="true" className="site-detail-block" />
+        <span aria-hidden="true" className="site-detail-bar" />
+        <span className="site-pin">1</span>
       </div>
-      <div className="pd-comment">
-        <p className="pd-comment-head">
-          <span className="pd-pin pd-pin--inline">1</span>Comment
+      <div className="site-comment">
+        <p className="site-comment-head">
+          <span className="site-pin site-pin--inline">1</span>Comment
         </p>
         <span
           aria-hidden="true"
-          className="pd-detail-bar pd-detail-bar--wide"
+          className="site-detail-bar site-detail-bar--wide"
         />
-        <span aria-hidden="true" className="pd-detail-bar" />
-        <span className="pd-comment-approve">Approve</span>
+        <span aria-hidden="true" className="site-detail-bar" />
+        <span className="site-comment-approve">Approve</span>
       </div>
     </div>
   );
@@ -62,25 +63,25 @@ function ReviewDetail() {
 
 function EditDetail() {
   return (
-    <div className="pd-detail pd-detail--split">
-      <div className="pd-detail-screen">
+    <div className="site-detail site-detail--split">
+      <div className="site-detail-screen">
         <span
           aria-hidden="true"
-          className="pd-detail-bar pd-detail-bar--wide"
+          className="site-detail-bar site-detail-bar--wide"
         />
-        <span aria-hidden="true" className="pd-detail-block" />
-        <span aria-hidden="true" className="pd-detail-bar" />
+        <span aria-hidden="true" className="site-detail-block" />
+        <span aria-hidden="true" className="site-detail-bar" />
       </div>
-      <div className="pd-agent">
-        <p className="pd-comment-head">Agent session</p>
-        <span aria-hidden="true" className="pd-agent-turn" />
+      <div className="site-agent">
+        <p className="site-comment-head">Agent session</p>
+        <span aria-hidden="true" className="site-agent-turn" />
         <span
           aria-hidden="true"
-          className="pd-agent-turn pd-agent-turn--reply"
+          className="site-agent-turn site-agent-turn--reply"
         />
-        <span className="pd-agent-input">
+        <span className="site-agent-input">
           Describe the change
-          <span aria-hidden="true" className="pd-agent-send">
+          <span aria-hidden="true" className="site-agent-send">
             <SendGlyph />
           </span>
         </span>
@@ -89,7 +90,7 @@ function EditDetail() {
   );
 }
 
-interface ProductModule {
+interface SiteModule {
   body: string;
   detail: ReactNode;
   id: string;
@@ -98,7 +99,7 @@ interface ProductModule {
   title: string;
 }
 
-const MODULES: readonly ProductModule[] = [
+const MODULES: readonly SiteModule[] = [
   {
     body: "Each branch and pull request publishes a catalogue built from your real components. Changes shows what moved, and the check on the pull request counts it.",
     detail: <BrowseDetail />,
@@ -126,10 +127,10 @@ const MODULES: readonly ProductModule[] = [
 ];
 
 /** Browse, review and edit, each with its framed detail of the shell. */
-export function ProductModules() {
+export function SiteModules() {
   return (
-    <section className="pd-modules">
-      <div className="pd-section-head">
+    <section className="site-modules">
+      <div className="site-section-head">
         <h2>
           Browse, review, edit.
           <br />
@@ -137,16 +138,16 @@ export function ProductModules() {
         </h2>
         <p>Every branch becomes a catalogue your whole team can open.</p>
       </div>
-      <div className="pd-module-grid">
+      <div className="site-module-grid">
         {MODULES.map((module) => (
-          <article className="pd-module" id={module.id} key={module.id}>
-            <div className="pd-module-detail">{module.detail}</div>
-            <p className="pd-module-eyebrow">
-              <span className="pd-module-number">{module.number}</span>
+          <article className="site-module" id={module.id} key={module.id}>
+            <div className="site-module-detail">{module.detail}</div>
+            <p className="site-module-eyebrow">
+              <span className="site-module-number">{module.number}</span>
               <span className="site-feature-label">{module.label}</span>
             </p>
             <h3>{module.title}</h3>
-            <p className="pd-module-body">{module.body}</p>
+            <p className="site-module-body">{module.body}</p>
           </article>
         ))}
       </div>
@@ -170,11 +171,11 @@ const STEPS = [
 ] as const;
 
 /** The open-foundation closing with the repeated actions and three steps. */
-export function ProductClosing() {
+export function SiteClosing() {
   return (
-    <section className="pd-closing" id="foundation">
-      <div className="pd-closing-panel">
-        <div className="pd-closing-copy">
+    <section className="site-closing" id="foundation">
+      <div className="site-closing-panel">
+        <div className="site-closing-copy">
           <p className="site-eyebrow">An open foundation</p>
           <h2>
             Your screens.
@@ -188,10 +189,10 @@ export function ProductClosing() {
           </p>
           <SiteActions />
         </div>
-        <ol className="pd-steps">
+        <ol className="site-steps">
           {STEPS.map((step, index) => (
-            <li className="pd-step" key={step.title}>
-              <span className="pd-step-number">0{index + 1}</span>
+            <li className="site-step" key={step.title}>
+              <span className="site-step-number">0{index + 1}</span>
               <h3>{step.title}</h3>
               <p>{step.body}</p>
             </li>

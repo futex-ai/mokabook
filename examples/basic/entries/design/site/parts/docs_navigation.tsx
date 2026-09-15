@@ -1,128 +1,50 @@
+/**
+ * The documentation navigation. The tree sits on the page canvas rather than
+ * in a filled panel: the version label heads it, every section is listed
+ * expanded under a rubric head, page rows are full-height targets and the
+ * page you are reading carries the shell's quiet accent fill.
+ */
+
 import { MockLink } from "@mokly/mokly";
 
+import { SiteVersion } from "./chrome.js";
+import { DOCS_HEADINGS, DOCS_PAGE, DOCS_SECTIONS } from "./docs_data.js";
 import { SITE_SCREENS } from "./links.js";
 
-/**
- * The documentation architecture. Entries the design catalogue does not own
- * are depicted as plain text, the same rule the rest of the design mockups
- * follow for destinations that have no authored screen.
- */
-const DOCS_SECTIONS = [
-  {
-    pages: ["Install", "Configure", "Your first screen", "Build", "Serve"],
-    title: "Getting started",
-  },
-  {
-    pages: [
-      "Config",
-      "Screens",
-      "Components",
-      "Viewports and color schemes",
-      "Collections and tags",
-      "Use-case flows",
-      "Pages",
-      "Links",
-      "Review-ignore",
-    ],
-    title: "Authoring",
-  },
-  {
-    pages: [
-      "Browse",
-      "Search and filters",
-      "Changes",
-      "Details",
-      "Export and host",
-    ],
-    title: "Catalogue",
-  },
-  {
-    pages: [
-      "serve",
-      "build",
-      "check",
-      "export",
-      "publish",
-      "Options and exit status",
-    ],
-    title: "CLI reference",
-  },
-  {
-    pages: [
-      "GitHub Action",
-      "Publish from CI",
-      "Project tokens",
-      "The upload",
-      "The check on a pull request",
-    ],
-    title: "Continuous integration",
-  },
-  {
-    pages: [
-      "Overview",
-      "Connect a repository",
-      "Branches and pull requests",
-      "Sharing and access",
-      "Organizations and roles",
-      "Settings",
-    ],
-    title: "Mokly Cloud",
-  },
-  {
-    pages: [
-      "Static export delivery",
-      "Export ownership",
-      "Catalogue upload",
-      "Catalogue navigation",
-      "Styled link controls",
-      "Pages in the catalogue",
-    ],
-    title: "Reference",
-  },
-  {
-    pages: [
-      "Comments",
-      "Approvals",
-      "Pull request sync",
-      "Agent sessions",
-      "Click to reference",
-    ],
-    title: "Review and edit",
-  },
-] as const;
-
-/** The section and page this docs mockup renders. */
-export const DOCS_PAGE = { page: "Install", section: "Getting started" };
-
-function DocsSectionList() {
+function TreeBody() {
   return (
     <>
-      {DOCS_SECTIONS.map((section) => (
-        <div className="site-docs-section" key={section.title}>
-          <span>{section.title}</span>
-          <ul>
-            {section.pages.map((page) =>
-              page === DOCS_PAGE.page ? (
-                <li key={page}>
-                  <MockLink
-                    aria-current="page"
-                    className="site-docs-link"
-                    to={SITE_SCREENS.docs}
-                  >
+      <MockLink className="site-version-link" to={SITE_SCREENS.changelog}>
+        <SiteVersion label="Mokly CLI" />
+      </MockLink>
+      <div className="site-doc-tree-scroll">
+        {DOCS_SECTIONS.map((section) => (
+          <div className="site-doc-section" key={section.title}>
+            <p className="site-doc-section-head site-rubric">{section.title}</p>
+            <ul>
+              {section.pages.map((page) =>
+                page === DOCS_PAGE.page ? (
+                  <li key={page}>
+                    <MockLink
+                      aria-current="page"
+                      className="site-doc-link site-doc-link--current"
+                      to={SITE_SCREENS.docs}
+                    >
+                      {page}
+                    </MockLink>
+                  </li>
+                ) : (
+                  <li className="site-doc-link" key={page}>
                     {page}
-                  </MockLink>
-                </li>
-              ) : (
-                <li className="site-docs-link" key={page}>
-                  {page}
-                </li>
-              ),
-            )}
-          </ul>
-        </div>
-      ))}
-      <div className="site-docs-section">
-        <MockLink className="site-docs-link" to={SITE_SCREENS.changelog}>
+                  </li>
+                ),
+              )}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <div className="site-doc-tree-foot">
+        <MockLink className="site-doc-link" to={SITE_SCREENS.changelog}>
           Changelog
         </MockLink>
       </div>
@@ -130,26 +52,52 @@ function DocsSectionList() {
   );
 }
 
-/** The left sidebar listing every documentation section in order. */
-export function DocsSidebar() {
+/** The tree beside the document, hung on the page's own vertical hairline. */
+export function DocsTree() {
   return (
-    <nav aria-label="Documentation" className="site-docs-sidebar">
-      <DocsSectionList />
-    </nav>
+    <div className="site-docs-side">
+      <nav aria-label="Documentation" className="site-doc-tree">
+        <TreeBody />
+      </nav>
+    </div>
   );
 }
 
-/** Below the breakpoint the sidebar becomes a disclosure above the document. */
-export function DocsDisclosure() {
+/** Below the breakpoint the tree collapses into a disclosure. */
+export function DocsTreeDisclosure() {
   return (
-    <details className="site-docs-disclosure">
+    <details className="site-doc-disclosure">
       <summary>
-        {DOCS_PAGE.section} / {DOCS_PAGE.page}
+        {DOCS_PAGE.section}
+        <span aria-hidden="true" className="site-trail-sep">
+          &#8250;
+        </span>
+        {DOCS_PAGE.page}
       </summary>
-      <nav aria-label="Documentation">
-        <DocsSectionList />
+      <nav aria-label="Documentation" className="site-doc-tree">
+        <TreeBody />
       </nav>
     </details>
+  );
+}
+
+/** The on-this-page rail, generated from the document's own headings. */
+export function DocsOnThisPage() {
+  return (
+    <nav aria-labelledby="on-this-page" className="site-onpage">
+      <h2 className="site-rubric" id="on-this-page">
+        On this page
+      </h2>
+      <ol>
+        {DOCS_HEADINGS.map((heading) => (
+          <li key={heading.id}>
+            <a className="site-onpage-link" href={`#${heading.id}`}>
+              {heading.title}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
   );
 }
 
@@ -158,11 +106,11 @@ export function DocsPager() {
   return (
     <nav aria-label="Pagination" className="site-pager">
       <span className="site-pager-item">
-        <span>Previous</span>
+        <span className="site-pager-label site-rubric">Previous</span>
         Getting started
       </span>
-      <span className="site-pager-item">
-        <span>Next</span>
+      <span className="site-pager-item site-pager-item--next">
+        <span className="site-pager-label site-rubric">Next</span>
         Configure
       </span>
     </nav>
