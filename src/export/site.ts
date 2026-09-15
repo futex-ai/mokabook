@@ -1,6 +1,14 @@
+import path from "node:path";
+
 import { adaptBrowseDocument } from "../browse/document_adapter.js";
 import type { Compilation } from "../build/compile.js";
+import { projectCatalogue } from "../catalogue/projection.js";
+import {
+  CATALOGUE_PATH,
+  serializeCatalogue,
+} from "../catalogue/serialization.js";
 import { canonicalJson } from "../components/data.js";
+import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import {
   catalogueViewHref,
@@ -162,6 +170,23 @@ export function assembleExport(
     updateVersion: 0,
     delivery,
   };
+  inventory.add(
+    CATALOGUE_PATH,
+    serializeCatalogue(
+      projectCatalogue({
+        configPath: toPosixPath(
+          path.relative(config.repoRoot, config.configPath),
+        ),
+        catalogue,
+        changesStatus: comparison ? "ready" : "disabled",
+        changedRoutes: context.changedRoutes,
+        evidence: context.componentChanges,
+        comparison: comparison?.result,
+        comparisonUrl: delivery.comparisonUrl?.slice(1) ?? null,
+        revision: { content: 0, evidence: 0 },
+      }),
+    ),
+  );
   addShell("index.html", homePage(catalogue, context), delivery);
   const notFoundDelivery = { ...delivery, canonicalPath: "/404.html" };
   addShell(

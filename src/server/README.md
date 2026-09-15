@@ -5,6 +5,25 @@ comparison snapshots. `serve.ts` owns single-process Serve; `serve_watched.ts`
 owns watchers, background work and the supervised HTTP child. `http.ts` and
 `child.ts` serve accepted inputs and never prepare historical baselines.
 
+GET/HEAD `/__mokly/catalogue.json` returns the public v1
+[read model](../catalogue/README.md) as JSON with `Cache-Control: no-store`.
+`public_catalogue.ts` serializes an atomic snapshot when accepted content,
+background usage/Changes or actual on-demand view records arrive. Requests only
+read the retained bytes. Content revisions follow accepted content versions;
+evidence revisions advance independently. Failed candidates preserve the last
+snapshot, and superseded generations cannot replace it. `catalogue_update.ts`
+prepares updates before publication; `http_types.ts` owns the lifecycle types.
+
+`screen_view_changes.ts` retains per-view screen-only material decisions from
+the existing classification pass. The public projection does not infer Changes
+membership from visual comparisons or invent empty usage for unfinished views.
+`public_review.ts` adds content-addressed aliases for matching complete explicit
+comparisons, verifying snapshot bytes against accepted input digests. Selected
+comparisons leave the catalogue pointer null. Public aliases never regenerate or
+redirect to another generation; invalidation clears the pointer, and retained
+aliases continue to serve their original generation. These updates add no shell
+requests, UI, or changes to existing local comparison controls.
+
 `demand/baseline.ts` owns baseline preparation and its cancellation drain,
 independent of the content generations in `demand/generation.ts`.
 It calls `review/prepare.ts` after adopting current output, then supplies the

@@ -34,7 +34,7 @@ when the historical primary file is absent, never when it is invalid.
 - [Build and Browse runtime](./mokly-runtime.md)
 - [Component instance identity](./mokly-instances.md) — existing key/boundary
   rules and approved resolution/source-location target.
-- [Public catalogue read model](./mokly-catalogue.md) — approved target:
+- [Public catalogue read model](./mokly-catalogue.md) — implemented:
   public inventory v1 beside the private manifest.
 - [Embeddable viewer](./mokly-viewer.md) — approved `@mokly/viewer` API and
   unchanged local shell extraction.

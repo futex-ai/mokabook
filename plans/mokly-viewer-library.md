@@ -220,22 +220,79 @@ intentionally omit source when invocation information is unavailable.
 
 Write and serve the confirmed read model from the same projection code.
 
-- [ ] Add failing tests for projection shape, omitted private fields,
+- [x] Add failing tests for projection shape, omitted private fields,
       deterministic serialization, schema-version fixture, and rejection of
       absolute paths or manifest-internal data.
-- [ ] Implement the projection module under `src/catalogue` behind a typed
+- [x] Implement the projection module under `src/catalogue` behind a typed
       interface shared by Serve and export; add public fixtures under
       `docs/protocol/fixtures`.
-- [ ] Export writes `__mokly/catalogue.json` through the normal stage,
+- [x] Export writes `__mokly/catalogue.json` through the normal stage,
       inventory, collision, and deployment-identity flow; Serve serves it at
       the same path and refreshes it on watched updates.
-- [ ] Add cross-origin fetch coverage: a static fixture server sending the
+  - [x] Exercise the real watched child and background evidence lifecycle
+        through validated public snapshots and content/evidence revisions.
+- [x] Add cross-origin fetch coverage: a static fixture server sending the
       documented headers and a browser test fetching the read model from a
       second origin.
-- [ ] Verify upload archives and ownership inventories include the file
+- [x] Verify upload archives and ownership inventories include the file
       without schema changes; update packed-consumer and release fixtures.
-- [ ] Update READMEs, run relevant tests and `cargo xtask check`, commit,
-      push, and stop for review.
+- [x] Extend the bootstrap package fixture and keep simulated legacy previews
+      free of the new catalogue file before testing their migration.
+- [x] Retain exact screen-only per-view attribution for the public model,
+      alongside existing resource evidence, without another comparison pass.
+- [x] Give complete live comparisons a content-addressed public alias; leave
+      selected-only generations unpinned and reject stale completion results.
+- [x] Validate known usage union fields while tolerating additive fields;
+      retain historical usage when current component props or slots change.
+- [x] Include the read model in repository preview capture and prove shell
+      HTML remains byte-identical apart from the stamped deployment identity.
+- [x] Update READMEs and delivery statuses; run focused tests and
+      `cargo xtask check`.
+- [ ] After checks pass, `git add -A`, commit with Conventional Commits, and push.
+- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+      against the complete local diff from `origin/main`; record findings
+      without changing the implementation, then stop before Milestone 4.
+
+### Milestone 3 verification notes
+
+The public v1 model now uses a shared typed allowlist projection for Serve,
+consumer export and repository preview. Export finalization validates and stamps
+its owned identity field after inventory/ownership assembly; upload and ownership
+schemas stay at v1. Packed-consumer checks read the public file and extract it
+from actual upload archives. The local shell still uses embedded data.
+
+Tests were added before implementation for projection/privacy, canonical bytes,
+fixture/version conformance, export inventory/identity and live GET/HEAD. Later
+regressions captured contradictory usage union fields and historical component
+slot changes before fixing them. Focused verification passes 20 catalogue tests
+and seven Chromium browser tests, with no skips or retries. The real watched
+child test covers content adoption, background evidence and metadata restarts;
+stale complete comparisons cannot pin superseded evidence. All 20 exported HTML
+files in the unchanged consumer fixture match pre-milestone bytes after
+normalizing only the stamped deployment identity.
+
+Documentation now marks catalogue delivery implemented while leaving the viewer
+and inspector planned. One normative gap required clarification: existing live
+comparison URLs use UUIDs and can represent selected-only results, whereas the
+catalogue pointer requires a complete immutable 64-hex generation. Matching
+complete results gain a content-addressed alias; selected-only results stay
+unpinned, superseded completion is ignored, and unavailable aliases return 404
+without redirects or generation. No other normative contracts or wire schemas
+changed. The canonical public JSON fixture is exempt from Prettier because its
+exact protocol serialization is covered by conformance tests.
+
+The first full gate ran 1,552 Node tests and found seven fixture failures:
+four bootstrap packages omitted the newly required public documentation, and
+three simulated legacy previews incorrectly retained the new catalogue file.
+The fixtures were corrected without relaxing production validation; all 15
+affected regression tests pass. The second `cargo xtask check` passed all 1,552
+Node tests, 276 Chromium tests, five packed-consumer scenarios and three Rust
+tests, plus dependency audits, formatting, lint, typechecking, example validation,
+package checks, Clippy and the Rust file-length audit (eight files). No tests
+were skipped; there were no intermittent failures or browser retries. The
+browser suite took 9.7 minutes, including its larger fixture preparation.
+Markdown validation checked 168 local links; the diff has no file deletions
+against the refreshed `origin/main`. Commit/push and post-push review are pending.
 
 ## Milestone 4: Frame adapter and inspector script
 

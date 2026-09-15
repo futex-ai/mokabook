@@ -18,7 +18,10 @@ import { validateViewReferences } from "./view_references.js";
 export function validateComponentViews(
   value: unknown,
   dark: boolean,
-  components: ReadonlyMap<string, ManifestComponent>,
+  components: ReadonlyMap<
+    string,
+    Pick<ManifestComponent, "propSchema" | "slots">
+  >,
   at: string,
   rootId?: string,
 ): asserts value is readonly ComponentViewRecord[] {
@@ -60,9 +63,13 @@ export function validateComponentViews(
 /** Validate one actual render without asserting completeness of other views. */
 export function validateComponentViewRecord(
   view: ComponentViewRecord,
-  components: ReadonlyMap<string, ManifestComponent>,
+  components: ReadonlyMap<
+    string,
+    Pick<ManifestComponent, "propSchema" | "slots">
+  >,
   at: string,
   rootId?: string,
+  historical = false,
 ): void {
   for (const instance of view.instances) {
     exactKeys(
@@ -100,11 +107,13 @@ export function validateComponentViewRecord(
       invalidData(at, "invalid instance order");
     const component = components.get(instance.componentId);
     if (!component) invalidData(at, "instance names an unknown component");
-    const props = validateProps(
-      component.propSchema,
-      decodeProps(instance.props),
-      `${at} / ${instance.id}`,
-    );
+    const props = historical
+      ? decodeProps(instance.props)
+      : validateProps(
+          component.propSchema,
+          decodeProps(instance.props),
+          `${at} / ${instance.id}`,
+        );
     if (
       canonicalJson(encodeProps(props)) !== canonicalJson(instance.props) ||
       reviewMaterialKey(props) !== instance.propsKey
@@ -139,7 +148,7 @@ export function validateComponentViewRecord(
   const instances = new Map(view.instances.map((item) => [item.key, item]));
   const slots = new Map(view.slots.map((item) => [item.key, item]));
   validateOrders(view.instances, at);
-  validateViewReferences(view, components, instances, slots, at);
+  validateViewReferences(view, components, instances, slots, at, historical);
   const rendered = new Set([
     ...view.instances.map((instance) => instance.componentId),
     ...(rootId ? [rootId] : []),

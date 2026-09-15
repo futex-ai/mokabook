@@ -14,6 +14,7 @@ import type { ComponentChangeSnapshot } from "./component_changes.js";
 import { handleDemandRequest } from "./demand/http.js";
 import type { DocumentService } from "./demand/service.js";
 import { homePage, notFoundPage } from "./pages.js";
+import type { PublicCatalogueSource } from "./public_catalogue.js";
 import { send } from "./respond.js";
 import type { ReviewRoutes } from "./review_routes.js";
 import { shellContext } from "./shell/context.js";
@@ -40,10 +41,21 @@ export async function handleCatalogueRequest(
   documents?: DocumentService,
   changesStatus?: ChangesStatus,
   contentVersion?: number,
+  publicCatalogue?: PublicCatalogueSource,
 ): Promise<void> {
   if (method !== "GET" && method !== "HEAD")
     return send(response, 405, "text/plain", "Method not allowed", method);
   const url = new URL(rawUrl, "http://mokly.invalid");
+  if (url.pathname === "/__mokly/catalogue.json" && publicCatalogue) {
+    response.setHeader("Cache-Control", "no-store");
+    return send(
+      response,
+      200,
+      "application/json",
+      publicCatalogue.read(),
+      method,
+    );
+  }
   if (
     documents &&
     (await handleDemandRequest(url, method, response, catalogue, documents))

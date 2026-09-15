@@ -26,9 +26,9 @@ readers. They are not authoring inputs and must not be added to `sourceFiles`
 merely to make them private. Ordinary public JSON remains supported. Browsers
 receive the catalogue data they need through the shell; no public manifest
 endpoint is provided.
-The approved [public catalogue target](./mokly-catalogue.md) adds
+The implemented [public catalogue](./mokly-catalogue.md) adds
 `/__mokly/catalogue.json` beside this private boundary; it is not a manifest
-endpoint. Serve/export will allowlist its viewer fields and omit `sourceFiles`,
+endpoint. Serve/export allowlist its viewer fields and omit `sourceFiles`,
 resolved dependency evidence, ownership/style offsets, legacy envelopes and
 absolute paths. Authored display metadata and optional
 [instance source locations](./mokly-instances.md#optional-invocation-source)

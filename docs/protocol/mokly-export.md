@@ -8,10 +8,10 @@ shares its artifact validation, static delivery, and output transaction. The
 delivery of this contract and the [static delivery contract](./mokly-export-delivery.md).
 Normal build validation and the existing comparison schema remain authoritative.
 
-Approved target additions are tracked by the
-[viewer library plan](../../plans/mokly-viewer-library.md): the public catalogue,
-inert published inspector and separate viewer package described below are not
-implemented yet. Their delivery must preserve local Serve/export presentation.
+The [viewer library plan](../../plans/mokly-viewer-library.md) tracks the
+implemented public catalogue and the still-approved targets for an inert
+published inspector and separate viewer package. Local Serve/export presentation
+is unchanged.
 
 ## Scope
 
@@ -234,13 +234,14 @@ config modules, npm packages, `.git`, local environment files, comparison
 diagnostic summaries, or comparison ownership markers. The export's own
 public-safe inventory is distinct from private comparison metadata.
 
-The approved target adds [`__mokly/catalogue.json`](./mokly-catalogue.md) and
-`__mokly/client/inspector.js` to the same collision-checked ownership/upload
-inventories. The read model is a public allowlist projection of manifest v5;
+[`__mokly/catalogue.json`](./mokly-catalogue.md) is implemented in the same
+collision-checked ownership/upload inventories. The approved inspector target
+will add `__mokly/client/inspector.js`. The read model is a public allowlist projection of manifest v5;
 `mokly-manifest.json` remains excluded. Ownership v1, upload v1, review v2/v3
 and delivery descriptor v2 keep their schema versions. Deployment identity
-includes both files under the [delivery hashing rule](./mokly-export-delivery.md#deployment-identity).
-Only the ownership-aware adapter's current published HTML copies gain the
+includes the catalogue under the [delivery hashing rule](./mokly-export-delivery.md#deployment-identity)
+and will include the inspector when implemented.
+Under that approved target, only the ownership-aware adapter's current published HTML copies gain the
 Mokly-owned inspector script and bounded inert boundary metadata. The
 [inspector contract](./mokly-frame-adapter.md) requires a host handshake before
 activation. Authored/generated files on disk and comparison document bytes

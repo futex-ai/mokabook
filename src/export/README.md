@@ -53,6 +53,17 @@ shell roots while preserving other bytes and rejecting adapter metadata drift.
 Descriptor version 2 lets both old and current clients reload across incompatible
 deployments. Comparison generation URLs retain their separate content identity.
 
+`site.ts` also writes the [public catalogue projection](../catalogue/README.md)
+at `__mokly/catalogue.json`. Its per-entry Changes state uses the same accepted
+attribution as the shell. It enters the normal collision-checked inventory,
+ownership v1 marker and upload v1 archive without changing either schema.
+Finalization validates the catalogue and canonicalizes only its top-level
+`deploymentId` to zeroes for hashing, then stamps the same identity as the shell.
+Other catalogue fields participate in the hash, including additive fields.
+Export revisions are zero; current-only exports have disabled Changes and a
+null comparison pointer. Repository preview capture uses the same projection
+and finalization. Shell HTML retains its existing bytes apart from the identity.
+
 `paths.ts`, `ownership.ts`, and `transaction.ts` constrain replacement to a
 validated, exclusively reserved output. `destination.ts` retains initial absence
 or exact bigint directory identity and checks it before and after capture.

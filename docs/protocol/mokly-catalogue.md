@@ -2,9 +2,9 @@
 
 ## Delivery Status
 
-Approved target. [Viewer library Milestone 3](../../plans/mokly-viewer-library.md)
-implements this contract. The file is not emitted/served yet; the manifest stays
-private and local Browse appearance and behavior remain unchanged.
+Implemented through [viewer library Milestone 3](../../plans/mokly-viewer-library.md).
+Serve, export and repository preview share the public projection. The manifest
+stays private; local Browse keeps its embedded data, appearance and behavior.
 
 ## Location And Types
 
@@ -219,6 +219,9 @@ meaning, new union discriminants or incompatible paths require a new version.
 This file and the inspector asset are additive inventory entries: ownership v1,
 upload v1, review v2/v3 and delivery descriptor v2 remain unchanged.
 
+The [public v1 fixture](./fixtures/catalogue-v1.json) ships in the npm package
+and is checked by the reader/projection conformance tests.
+
 ## Serve And Fetch Rules
 
 Serve uses `Cache-Control: no-store` and live-index metadata, with pending usage
@@ -233,6 +236,12 @@ existing reload lifecycle. Serve hashes the canonical public snapshot with its
 Live comparison URLs stay null until a matching immutable generation exists;
 Serve's existing explicit comparison integration prepares it and refreshes the
 model without moving that work onto catalogue GET or altering local controls.
+
+Only a complete comparison can supply this catalogue-wide pointer; selected-only
+generations leave it null. A matching complete live generation gains a
+content-addressed alias while retaining its existing local URL. Public aliases
+serve their retained generation directly, return 404 when unavailable, and never
+redirect or generate work. Superseded completions cannot set the pointer.
 
 Public paths are `__mokly/catalogue.json`, `static/**`,
 `__mokly/client/**`, `__mokly/shell.css`, `__mokly/fonts/**`, and immutable

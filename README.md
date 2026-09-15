@@ -11,8 +11,9 @@ the consumer contract settles.
 
 The upcoming [`@mokly/viewer`](./docs/protocol/mokly-viewer.md) package will let
 React hosts embed the existing Browse shell using a public catalogue read model.
-Its contracts are approved; implementation is still planned. Local Serve and
-export appearance and interactions will remain unchanged.
+The public [catalogue read model](./docs/protocol/mokly-catalogue.md) is implemented;
+viewer extraction remains planned. Local Serve and export appearance and
+interactions remain unchanged.
 
 Shared components can have their own pages, saved variants and editable props in
 local Serve. Screens record their actual component usage for inspection and
@@ -755,6 +756,13 @@ from comparison generations. Navigation from an old tab performs a full reload
 when the deployed catalogue, assets, or host aliases change, even if the
 comparison files are unchanged. Within one deployment, navigation remains
 progressive. Hosting must revalidate mutable files so that reload can fetch them.
+
+Exports include `__mokly/catalogue.json`: versioned public navigation, entry,
+instance, Changes and comparison-pointer data. It shares the shell's deployment
+identity and appears in `.mokly-export-artifact` and publish archives. Serve
+provides the same URL as an atomic snapshot with content/evidence revisions and
+no-store caching. The private `mokly-manifest.json` remains excluded. The
+[public v1 fixture](./docs/protocol/fixtures/catalogue-v1.json) ships with the package.
 
 Concurrent exports to filesystem aliases of the same destination share one
 reservation. The internal `.mokly-export-reservations` directory retains

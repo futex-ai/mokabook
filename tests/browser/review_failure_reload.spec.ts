@@ -7,10 +7,8 @@ import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
 import type { ReviewResultV2 } from "../../dist/review/types.js";
-import {
-  startCatalogueServer,
-  type RunningServer,
-} from "../../dist/server/http.js";
+import { startCatalogueServer } from "../../dist/server/http.js";
+import type { RunningServer } from "../../dist/server/http_types.js";
 import type { ServedReview } from "../../dist/server/review_routes.js";
 import {
   createFixture,

@@ -27,6 +27,10 @@ import type { ReviewEvidence } from "../review/selection_types.js";
 import type { ScreenResourceEvidence } from "../review/types.js";
 
 import { classifyChangedContent } from "./changed_content.js";
+import {
+  screenViewChanges,
+  type ScreenViewChanges,
+} from "./screen_view_changes.js";
 
 export interface ComponentChangeSnapshot {
   baseline: Manifest;
@@ -34,6 +38,7 @@ export interface ComponentChangeSnapshot {
   result?: ReviewResultV3;
   comparison?: ReviewEvidence;
   screenEvidence?: readonly ScreenResourceEvidence[];
+  screenViews?: readonly ScreenViewChanges[];
 }
 export interface ComponentChangeSource {
   baseline(): Promise<string>;
@@ -237,6 +242,16 @@ export async function readCatalogueChanges(
       ...(outputs ? { headOutputs: [...outputs] } : {}),
     },
     ...(result ? { result } : {}),
+    ...(!components
+      ? {
+          screenViews: screenViewChanges(
+            manifest,
+            baseline,
+            config,
+            content.changedPaths,
+          ),
+        }
+      : {}),
     ...(!components && content.screens.length
       ? { screenEvidence: content.screens }
       : {}),

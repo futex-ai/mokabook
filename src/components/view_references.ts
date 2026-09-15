@@ -10,10 +10,14 @@ import type {
 /** Input ownership and physical range placement have separate validated graphs. */
 export function validateViewReferences(
   view: ComponentViewRecord,
-  components: ReadonlyMap<string, ManifestComponent>,
+  components: ReadonlyMap<
+    string,
+    Pick<ManifestComponent, "propSchema" | "slots">
+  >,
   instances: ReadonlyMap<string, ComponentInstanceRecord>,
   slots: ReadonlyMap<string, ComponentSlotRecord>,
   at: string,
+  historical = false,
 ): void {
   const ownerExists = (owner: ComponentInputOwner) => {
     if (owner.kind === "instance" && !instances.has(owner.instanceKey))
@@ -47,7 +51,8 @@ export function validateViewReferences(
     const instance = instances.get(slot.instanceKey);
     if (
       !instance ||
-      !components.get(instance.componentId)?.slots.includes(slot.name)
+      (!historical &&
+        !components.get(instance.componentId)?.slots.includes(slot.name))
     )
       invalidData(
         at,
