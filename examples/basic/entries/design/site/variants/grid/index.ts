@@ -1,6 +1,8 @@
 import { defineCollection } from "@mokly/mokly";
 
-import { variantScreens } from "../scaffold.js";
+import { gridChangelogScreen } from "./changelog.js";
+import { gridDocsScreen } from "./docs.js";
+import { gridHomeScreen } from "./home.js";
 
 /** The Grid direction: home, documentation and changelog. */
 export const gridMockups = [
@@ -17,5 +19,7 @@ export const gridMockups = [
     relatedDocs: ["docs/protocol/site-directions.md"],
     title: "Grid",
   }),
-  ...variantScreens("grid"),
+  gridHomeScreen,
+  gridDocsScreen,
+  gridChangelogScreen,
 ];
