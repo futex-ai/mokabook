@@ -15,9 +15,9 @@ export interface StyleOutcome {
 }
 
 const OUTCOME_LEAD: Record<DependencyAnalysis["status"], string> = {
-  matched: "Changed styles that apply to this screen:",
+  matched: "Changed styles that apply to this screen",
   unresolved:
-    "This change can apply anywhere on the screen, so the screen stays in Changes:",
+    "This change can apply anywhere on the screen, so the screen stays in Changes",
 };
 
 const EXCLUDED_LEAD = {
@@ -101,7 +101,7 @@ export function appendStyleOutcomes(
   outcomes: readonly StyleOutcome[],
 ): void {
   for (const outcome of outcomes) {
-    panel.append(element(doc, "p", OUTCOME_LEAD[outcome.status]));
+    panel.append(element(doc, "p", outcomeLead(outcome)));
     if (!outcome.selectors.length) continue;
     const list = element(doc, "ul");
     for (const selector of outcome.selectors) {
@@ -131,6 +131,11 @@ export function appendExcludedStylesheets(
     element(doc, "p", "Examined and excluded:"),
     pathList(doc, paths),
   );
+}
+
+/** A colon introduces the selectors that follow; without them the lead closes. */
+function outcomeLead(outcome: StyleOutcome): string {
+  return `${OUTCOME_LEAD[outcome.status]}${outcome.selectors.length ? ":" : "."}`;
 }
 
 function pathList(doc: Document, paths: readonly string[]): HTMLUListElement {

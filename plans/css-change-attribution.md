@@ -660,23 +660,28 @@ three comparison-bearing style screens.
 
 Tags: ui
 
-- [ ] Finding 4. Branch the terminal status line on entry kind: "No changes
+Completed. Delivered by an Opus 5 agent and verified by the coordinator:
+one entry-kind wording helper, the colon-free empty unresolved lead, the
+mockup's evidence spacing, and browser coverage for the terminal line, the
+empty unresolved case, and the material-plus-stylesheet heading.
+
+- [x] Finding 4. Branch the terminal status line on entry kind: "No changes
       to this screen." for screens and "No changes to this saved view." for
       variants, through one shared wording helper also used by
       `diff_views.ts`.
-- [ ] Finding 5. Use a colon-free unresolved lead when there are no
+- [x] Finding 5. Use a colon-free unresolved lead when there are no
       selectors; update the existing empty-selector test.
-- [ ] Finding 11. Add paragraph and list spacing rules to
+- [x] Finding 11. Add paragraph and list spacing rules to
       `.mbk-comparison-evidence` matching the mockup card.
-- [ ] Extend the client unit tests and `tests/browser/css_evidence.spec.ts`
+- [x] Extend the client unit tests and `tests/browser/css_evidence.spec.ts`
       for the corrected copy, the material-plus-stylesheet heading, and the
       empty unresolved case.
-- [ ] Run tests, typecheck, lint, format check, browser tests, and
+- [x] Run tests, typecheck, lint, format check, browser tests, and
       `cargo xtask check`.
 
 ## Milestone 15: Commit and review the fixes
 
-- [ ] Run `git add -A`, commit using Conventional Commits, and push the branch.
+- [x] Run `git add -A`, commit using Conventional Commits, and push the branch.
 - [ ] Review the complete local diff against `origin/main` using
       `docs/implementation-review-prompt.md` after the push. Report findings
       with severity, context, impact, lettered options, and a recommendation;

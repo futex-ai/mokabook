@@ -2,27 +2,37 @@ import { expect, test } from "@playwright/test";
 
 import { cssEvidenceFixture } from "./css_evidence_fixture.js";
 import {
+  CHANGED_HEADING,
   EXCLUDED_LEAD,
   FILES_LEAD,
   INSPECTOR_VIEWPORTS,
   MATCHED_LEAD,
+  SCREEN_TERMINAL,
   STYLESHEET,
   UNRESOLVED_LEAD,
+  VARIANT_TERMINAL,
+  evidenceSpacing,
   openCatalogue,
+  openComparison,
   openEvidence,
 } from "./css_evidence_page.js";
 import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 
 let matched: Awaited<ReturnType<typeof cssEvidenceFixture>>;
 let unresolved: Awaited<ReturnType<typeof cssEvidenceFixture>>;
+let material: Awaited<ReturnType<typeof cssEvidenceFixture>>;
 
 test.beforeAll(async () => {
   matched = await cssEvidenceFixture(".auth { padding: 2px; }\n", 1);
   unresolved = await cssEvidenceFixture(".guide { --tone: red; }\n", 3);
+  material = await cssEvidenceFixture(".auth { padding: 2px; }\n", 1, true, {
+    material: true,
+  });
 });
 test.afterAll(async () => {
   await matched?.close();
   await unresolved?.close();
+  await material?.close();
 });
 
 for (const [name, size] of INSPECTOR_VIEWPORTS) {
@@ -51,6 +61,11 @@ for (const [name, size] of INSPECTOR_VIEWPORTS) {
       await expect(evidence).not.toContainText("no-matching-rule");
       await expect(page.locator("h2")).toHaveText("Home");
       await expect(page.locator(".mbk-screen-head")).not.toContainText(".auth");
+      expect(await evidenceSpacing(evidence)).toEqual({
+        paragraph: "8px",
+        list: "8px",
+        afterList: "14px",
+      });
 
       for (const scheme of ["dark", "light"] as const)
         for (const size of ["mobile", "desktop"] as const) {
@@ -78,8 +93,12 @@ for (const [name, size] of INSPECTOR_VIEWPORTS) {
         evidence.getByText("Examined and excluded:", { exact: true }),
       ).toBeVisible();
       await expect(evidence.getByRole("listitem")).toHaveText([STYLESHEET]);
+      await expect(
+        evidence.getByText(SCREEN_TERMINAL, { exact: true }),
+      ).toBeVisible();
       await expect(evidence).not.toContainText(FILES_LEAD);
       await expect(evidence).not.toContainText(MATCHED_LEAD);
+      await expect(evidence).not.toContainText(VARIANT_TERMINAL);
       await expect(evidence.locator("code.mbk-code")).toHaveCount(0);
 
       await expect(page.locator(".mbk-nav-filter-count")).toHaveText("1");
@@ -108,6 +127,34 @@ for (const [name, size] of INSPECTOR_VIEWPORTS) {
       await expect(evidence.locator("code.mbk-code")).toHaveText([".guide"]);
       await expect(evidence).not.toContainText("unresolved");
       await expect(evidence).not.toContainText("matched");
+    });
+
+    test("an unchanged saved view closes with its own status line", async ({
+      page,
+    }) => {
+      await page.goto(`${matched.url}/view/components/badge.html`);
+      await expect(page.locator("[data-workspace-status]")).toHaveText(
+        "Unmodified",
+      );
+      const evidence = await openEvidence(page);
+      await expect(
+        evidence.getByText(VARIANT_TERMINAL, { exact: true }),
+      ).toBeVisible();
+      await expect(evidence).not.toContainText(SCREEN_TERMINAL);
+    });
+
+    test("a rendered change keeps the screen heading beside its styles", async ({
+      page,
+    }) => {
+      await page.goto(`${material.url}/view/screens/home.html`);
+      const evidence = await openEvidence(page);
+      await expect(
+        evidence.getByText(MATCHED_LEAD, { exact: true }),
+      ).toBeVisible();
+      await expect(await openComparison(page)).toHaveText([
+        `Mobile · ${CHANGED_HEADING}`,
+        `Desktop · ${CHANGED_HEADING}`,
+      ]);
     });
 
     test("the comparison heading leads with the style outcome", async ({

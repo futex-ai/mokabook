@@ -31,6 +31,7 @@ export function loadBrowserClientModules(): ReadonlyMap<string, Buffer> {
     "workspace_evidence.js",
     "workspace_evidence_data.js",
     "style_evidence.js",
+    "entry_wording.js",
     "prop_display.js",
     "inspector_resize.js",
     "inspector_tabs.js",

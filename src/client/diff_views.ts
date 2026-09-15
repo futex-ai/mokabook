@@ -2,6 +2,7 @@
 
 import type { ReviewResult, ViewReview } from "../review/types.js";
 import { currentColorScheme, currentViewport } from "./browse_state.js";
+import { entryWording } from "./entry_wording.js";
 import { isStyleOnlyView } from "./style_evidence.js";
 
 /** Available display modes; Current never requests a comparison. */
@@ -61,6 +62,7 @@ export function renderDiff(
   }
   stage.replaceChildren();
   stage.dataset["diffKey"] = key;
+  const wording = entryWording(component ? "component" : "screen");
   for (const size of ["mobile", "desktop"] as const) {
     if (viewport !== "both" && viewport !== size) continue;
     const view =
@@ -78,7 +80,7 @@ export function renderDiff(
     const label = isStyleOnlyView(view)
       ? STYLE_LABEL
       : STATE_LABELS[view.state];
-    heading.textContent = `${size === "mobile" ? "Mobile" : "Desktop"} · ${component ? label.replace(/screen/g, "variant").replace(/Screen/g, "Variant") : label}${scheme !== view.colorScheme ? " · Light only" : ""}`;
+    heading.textContent = `${size === "mobile" ? "Mobile" : "Desktop"} · ${wording.label(label)}${scheme !== view.colorScheme ? " · Light only" : ""}`;
     section.append(heading);
     const panes = doc.createElement("div");
     panes.className = "mb-panes";

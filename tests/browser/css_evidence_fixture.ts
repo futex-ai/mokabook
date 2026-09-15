@@ -10,6 +10,8 @@ import { createFixture, removeFixture } from "../helpers/fixture.js";
 import { waitForClassifiedCount } from "../helpers/watched_catalogue.js";
 
 const BASELINE_CSS = ".auth { color: black; }\n.guide { color: black; }\n";
+/** The Home screen's own copy, which a material fixture edits after baseline. */
+const HOME_LABEL = "Sign in";
 
 /**
  * Screens sharing a stylesheet, with optional component registration.
@@ -18,7 +20,7 @@ const BASELINE_CSS = ".auth { color: black; }\n.guide { color: black; }\n";
  * mobile only, so one screen can hold a retained mobile view and a released
  * desktop view of the same stylesheet.
  */
-function evidenceEntrySource(components: boolean): string {
+function evidenceEntrySource(components: boolean, home: string): string {
   return `import React from "react";
 import { defineCollection, defineComponent, defineScreen } from "@mokly/mokly";
 const metadata = { dependencies: ["notes.md"], relatedDocs: [] };
@@ -32,8 +34,8 @@ export const mockups = [
   defineCollection({ ...metadata, id: "fixture", title: "Fixture", description: "Fixture collection", childIds: [${components ? '"badge", ' : '"compact", '}"home", "details"] }),
   ${components ? "badge.entry," : ""}
   defineScreen({ ...metadata, id: "home", title: "Home", description: "Home screen", route: "screens/home.html",
-    mobile: <main id="home"><button className="auth">Sign in</button></main>,
-    desktop: <main id="home"><button className="auth">Sign in</button></main> }),
+    mobile: <main id="home"><button className="auth">${home}</button></main>,
+    desktop: <main id="home"><button className="auth">${home}</button></main> }),
   defineScreen({ ...metadata, id: "details", title: "Details", description: "Detail screen", route: "screens/details.html",
     mobile: <main id="details"><p className="guide">Guide</p></main>,
     desktop: <main id="details"><p className="guide">Guide</p></main> })${
@@ -48,16 +50,25 @@ export const mockups = [
 `;
 }
 
-/** Serve a Git-backed catalogue whose shared stylesheet gained `rule`. */
+/**
+ * Serve a Git-backed catalogue whose shared stylesheet gained `rule`.
+ *
+ * `material` also edits the Home screen's own markup after the baseline
+ * commit, so one view carries both a rendered change and stylesheet evidence.
+ */
 export async function cssEvidenceFixture(
   rule: string,
   changed: number,
   components = true,
+  options: { material?: boolean } = {},
 ) {
-  const fixture = await createFixture(evidenceEntrySource(components), {
-    extraConfig:
-      'colorSchemes: ["light", "dark"], stylesheets: [{ match: "**/*.html", stylesheets: ["shared.css"] }],',
-  });
+  const fixture = await createFixture(
+    evidenceEntrySource(components, HOME_LABEL),
+    {
+      extraConfig:
+        'colorSchemes: ["light", "dark"], stylesheets: [{ match: "**/*.html", stylesheets: ["shared.css"] }],',
+    },
+  );
   const stylesheet = path.join(fixture.mockupsDir, "shared.css");
   await fs.writeFile(stylesheet, BASELINE_CSS);
   const config = await loadConfig(fixture.root);
@@ -69,6 +80,11 @@ export async function cssEvidenceFixture(
   git("config", "user.email", "mokly@example.invalid");
   git("add", ".");
   git("commit", "-qm", "test: catalogue baseline");
+  if (options.material)
+    await fs.writeFile(
+      fixture.entryPath,
+      evidenceEntrySource(components, `${HOME_LABEL} now`),
+    );
   await fs.appendFile(stylesheet, rule);
   await writeCompilation(await compileCatalogue(config), config);
   const running = await serve(config, { base: "main", port: 0, watch: false });

@@ -89,6 +89,47 @@ test("the inspector lists changed files, applying styles, then exclusions", () =
   assert.equal(node.hidden, false);
 });
 
+test("the terminal line names the screen or the saved view it compared", () => {
+  const unmodified = {
+    base: "main",
+    status: "Unmodified",
+    components: [],
+    comparisonEligible: false,
+    comparisons: true,
+    inputChanges: [],
+    relatedComponents: [],
+    usedBy: [],
+    affected: [],
+    removed: false,
+    variants: [],
+    views: [],
+  };
+
+  const screen = fakePanel();
+  renderWorkspaceEvidence(
+    screen.panel as unknown as HTMLElement,
+    {
+      ...unmodified,
+      entry: { id: "home", kind: "screen", route: "screens/home.html" },
+    } as unknown as WorkspaceData,
+  );
+  assert.match(fakeMarkup(screen.node), /<p>No changes to this screen\.<\/p>$/);
+
+  const component = fakePanel();
+  renderWorkspaceEvidence(
+    component.panel as unknown as HTMLElement,
+    {
+      ...unmodified,
+      entry: { id: "badge", kind: "component", route: "components/badge.html" },
+    } as unknown as WorkspaceData,
+    "default",
+  );
+  assert.match(
+    fakeMarkup(component.node),
+    /<p>No changes to this saved view\.<\/p>$/,
+  );
+});
+
 function fakePanel(): { node: FakeMarkupElement; panel: Element } {
   const node = new FakeMarkupDocument().createElement("section");
   return { node, panel: node as unknown as Element };

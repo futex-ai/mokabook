@@ -8,10 +8,13 @@ import {
   FILES_LEAD,
   INSPECTOR_VIEWPORTS,
   MATCHED_LEAD,
+  SCREEN_TERMINAL,
   STYLESHEET,
   STYLE_HEADING,
   UNCHANGED_HEADING,
+  UNNAMED_LEAD,
   UNRESOLVED_LEAD,
+  evidenceSpacing,
   openCatalogue,
   openComparison,
   openEvidence,
@@ -20,14 +23,21 @@ import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 
 let matched: Awaited<ReturnType<typeof cssEvidenceFixture>>;
 let unresolved: Awaited<ReturnType<typeof cssEvidenceFixture>>;
+let unnamed: Awaited<ReturnType<typeof cssEvidenceFixture>>;
 
 test.beforeAll(async () => {
   matched = await cssEvidenceFixture(".auth { padding: 2px; }\n", 2, false);
   unresolved = await cssEvidenceFixture(".guide { --tone: red; }\n", 3, false);
+  unnamed = await cssEvidenceFixture(
+    "@keyframes fixture-fade { from { opacity: 1; } to { opacity: 0.6; } }\n",
+    3,
+    false,
+  );
 });
 test.afterAll(async () => {
   await matched?.close();
   await unresolved?.close();
+  await unnamed?.close();
 });
 
 for (const [name, size] of INSPECTOR_VIEWPORTS) {
@@ -96,6 +106,33 @@ for (const [name, size] of INSPECTOR_VIEWPORTS) {
       await expect(evidence).not.toContainText("matched");
     });
 
+    test("a change with no style to name says so and lists nothing", async ({
+      page,
+    }) => {
+      await page.goto(`${unnamed.url}/view/screens/home.html`);
+      await expect(page.locator("[data-workspace-status]")).toHaveText(
+        "Changed",
+      );
+      const evidence = await openEvidence(page);
+      await expect(
+        evidence.getByText(UNNAMED_LEAD, { exact: true }),
+      ).toBeVisible();
+      await expect(evidence.getByRole("listitem")).toHaveText([STYLESHEET]);
+      await expect(evidence.locator("code.mbk-code")).toHaveCount(0);
+      await expect(evidence).not.toContainText(UNRESOLVED_LEAD);
+      await expect(evidence).not.toContainText(MATCHED_LEAD);
+      await expect(evidence).not.toContainText(EXCLUDED_LEAD);
+      expect(await evidenceSpacing(evidence)).toEqual({
+        paragraph: "8px",
+        list: "8px",
+        afterList: "14px",
+      });
+      await expect(await openComparison(page)).toHaveText([
+        `Mobile · ${STYLE_HEADING}`,
+        `Desktop · ${STYLE_HEADING}`,
+      ]);
+    });
+
     test("an excluded screen stays out of Changes and explains why", async ({
       page,
     }) => {
@@ -115,6 +152,9 @@ for (const [name, size] of INSPECTOR_VIEWPORTS) {
       await expect(evidence).not.toContainText(MATCHED_LEAD);
       await expect(evidence).not.toContainText(UNRESOLVED_LEAD);
       await expect(evidence).not.toContainText("no-matching-rule");
+      await expect(
+        evidence.getByText(SCREEN_TERMINAL, { exact: true }),
+      ).toBeVisible();
       await expect(evidence.locator("code.mbk-code")).toHaveCount(0);
       await expect(page.locator(".mbk-diff-toolbar")).toBeHidden();
       await expect(page.locator("[data-diff-stage]")).toBeHidden();

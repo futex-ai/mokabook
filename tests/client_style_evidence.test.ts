@@ -166,14 +166,14 @@ test("unresolved evidence says the change can apply anywhere", () => {
   );
 });
 
-test("an unresolved outcome without selectors renders no list", () => {
+test("an unresolved outcome without selectors closes with a full stop", () => {
   const { doc, node, panel } = fakePanel();
 
   appendStyleOutcomes(doc, panel, [{ status: "unresolved", selectors: [] }]);
 
   assert.equal(
     fakeMarkup(node),
-    "<p>This change can apply anywhere on the screen, so the screen stays in Changes:</p>",
+    "<p>This change can apply anywhere on the screen, so the screen stays in Changes.</p>",
   );
 });
 

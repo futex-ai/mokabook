@@ -3,6 +3,7 @@ import type { WorkspaceData } from "../server/shell/workspace_data.js";
 import type { ReviewResult } from "../review/types.js";
 import { workspaceComparisonEvidence } from "./workspace_evidence_data.js";
 import { element } from "./inspector_panels.js";
+import { entryWording } from "./entry_wording.js";
 import { decodeProps } from "../components/codec.js";
 import { propText } from "./prop_display.js";
 import {
@@ -124,5 +125,5 @@ export function renderWorkspaceEvidence(
     }
   }
   if (data.status === "Unmodified")
-    panel.append(element(doc, "p", "No changes to this saved view."));
+    panel.append(element(doc, "p", entryWording(data.entry.kind).noChanges));
 }
