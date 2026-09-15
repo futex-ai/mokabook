@@ -40,7 +40,10 @@ import {
 import { aggregateIgnored, aggregateState } from "./screen_views.js";
 import { ResourceComparison } from "./resource_comparison.js";
 import { CssResourceAnalysis } from "./css/resource_analysis.js";
-import { analysisOwnsStylesheet } from "./css/paths.js";
+import {
+  analysisOwnsStylesheet,
+  assertViewAnalysisScope,
+} from "./css/paths.js";
 import type { CssRuleParser } from "./css/types.js";
 import {
   exactScreenCssReasons,
@@ -172,6 +175,10 @@ export async function classifyComponents(
             entry.kind === "component" ? entry.id : undefined,
           ),
         ),
+      );
+      assertViewAnalysisScope(
+        compared.map((result) => result.view),
+        config,
       );
       reasons.push(...compared.flatMap((result) => result.reasons));
       reasons.push(

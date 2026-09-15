@@ -4,6 +4,8 @@ import path from "node:path";
 import { isInside } from "../../config/paths.js";
 import { isPrivateStaticPath } from "../../config/public_files.js";
 import type { ResolvedConfig } from "../../config/types.js";
+import { MoklyError } from "../../errors.js";
+import type { ViewReview } from "../types.js";
 import { isStylesheetPath } from "./stylesheet_path.js";
 
 /** Only public stylesheets inside the rendered output root can be analysed. */
@@ -17,4 +19,18 @@ export function analysisOwnsStylesheet(
     isInside(config.mockupsDir, candidate) &&
     !isPrivateStaticPath(candidate, config)
   );
+}
+
+/** Reject analysed view evidence outside the producer's resolved public scope. */
+export function assertViewAnalysisScope(
+  views: readonly ViewReview[],
+  config: ResolvedConfig,
+): void {
+  for (const view of views)
+    for (const reason of view.reasons ?? [])
+      if (reason.analysis && !analysisOwnsStylesheet(reason.path, config))
+        throw new MoklyError(
+          "review-invalid",
+          `analysed resource is outside stylesheet scope: ${reason.path}`,
+        );
 }

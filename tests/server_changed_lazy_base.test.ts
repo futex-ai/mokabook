@@ -14,7 +14,9 @@ import {
 } from "../dist/review/git.js";
 import { classifyChangedContent } from "../dist/server/changed_content.js";
 import { ChangedResourceGraph } from "../dist/server/changed_resources.js";
+import { changedFixture } from "./helpers/changed_fixture.js";
 import { cssAttributionFixture } from "./helpers/css_attribution_fixture.js";
+import { validEntrySource } from "./helpers/fixture.js";
 
 for (const resource of ["image.svg", "unused.css", "shared.css"])
   test(`live ${resource} changes read base documents only for CSS consumers`, async (t) => {
@@ -107,6 +109,53 @@ test("deleted stylesheet resources still retain their consumers", async (t) => {
     result.screens[0]?.views[0]?.reasons?.[0]?.analysis?.status,
     "unresolved",
   );
+});
+
+test("changed documents retain a removed image without any stylesheet in the diff", async (t) => {
+  const image = '<img src="../image.svg" alt="Logo" />';
+  const fixture = await changedFixture(
+    t,
+    validEntrySource({ body: `<p>Home</p>${image}` }),
+    undefined,
+    async ({ mockupsDir }) => {
+      await fs.writeFile(
+        path.join(mockupsDir, "image.svg"),
+        '<svg xmlns="http://www.w3.org/2000/svg"/>',
+      );
+    },
+  );
+  const baseline = readManifest(fixture.config);
+  await fs.writeFile(
+    fixture.entryPath,
+    (await fs.readFile(fixture.entryPath, "utf8")).replaceAll(image, ""),
+  );
+  await fs.unlink(path.join(fixture.mockupsDir, "image.svg"));
+  await fixture.build();
+  const git = new RepositoryGitClient(new NodeGitCommandRunner(fixture.root));
+  const commit = await git.mergeBase("main", "HEAD");
+  const changedPaths = await git.changedPaths(commit);
+  assert.ok(changedPaths.includes("mockups/image.svg"));
+  assert.ok(changedPaths.every((route) => !/\.css$/i.test(route)));
+  const result = await classifyChangedContent(
+    readManifest(fixture.config),
+    baseline,
+    fixture.config,
+    git,
+    commit,
+    changedPaths,
+  );
+  for (const viewport of ["mobile", "desktop"])
+    assert.ok(
+      result.changedPaths.includes(`mockups/screens/home.${viewport}.html`),
+    );
+  const consumer = result.screens.find(
+    (screen) => screen.route === "screens/home.html",
+  );
+  assert.equal(consumer?.views.length, 2);
+  for (const view of consumer!.views)
+    assert.deepEqual(view.reasons, [
+      { kind: "dependency", path: "mockups/image.svg" },
+    ]);
 });
 
 test("moved documents retain changed stylesheets reachable only from their base route", async (t) => {

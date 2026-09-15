@@ -115,7 +115,10 @@ flex: 1;
   margin-top: 10px;
 }
 
-.mbk-nav-section a {
+/* The artboard-scoped copy outranks the later `.ce-design a` rule, which
+   otherwise wins on equal specificity and tints catalogue rows like links. */
+.mbk-nav-section a,
+.ce-design .mbk-nav-section a {
   color: inherit;
   text-decoration: none;
 }

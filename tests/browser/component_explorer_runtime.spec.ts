@@ -196,9 +196,19 @@ test("component comparisons follow changed variants while added variants stay cu
   await page.getByLabel("Viewport", { exact: true }).selectOption("mobile");
   await loadComparison(page, "Overlay");
   await expect(page.locator("[data-diff-stage] iframe")).toHaveCount(2);
-  await expect(page.locator("[data-diff-stage] .mb-impact-card")).toHaveCount(
-    0,
-  );
+  await expect(
+    page.locator("[data-diff-stage] [data-workspace-evidence]"),
+  ).toHaveCount(0);
+  await expect(
+    page.locator("[data-diff-stage] .mbk-comparison-evidence"),
+  ).toHaveCount(0);
+  await expect(page.locator("[data-workspace-evidence]")).toHaveCount(1);
+  await expect(page.locator(".mbk-comparison-evidence")).toHaveCount(1);
+  await expect(
+    page.locator(
+      '[data-inspector-panel="details"] [data-workspace-evidence].mbk-comparison-evidence',
+    ),
+  ).toHaveCount(1);
   await expect(page.locator('[data-inspector-panel="details"]')).toContainText(
     "Rendered content changed.",
   );

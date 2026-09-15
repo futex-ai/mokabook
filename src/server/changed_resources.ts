@@ -109,9 +109,7 @@ export class ChangedResourceGraph {
     const changedDocument =
       before && (before.path !== source || before.html !== document);
     const bases =
-      before &&
-      (changedStylesheet ||
-        (changedDocument && [...this.changed].some(isStylesheetPath)))
+      before && (changedStylesheet || changedDocument)
         ? await this.#baseGraph.collect(
             referencedRoutes(before.path, before.html, {
               resourceHints: false,

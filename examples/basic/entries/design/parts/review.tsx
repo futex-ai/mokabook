@@ -3,14 +3,8 @@ import { MiniWelcome } from "./mini_screens.js";
 import { NavTree, type NavNode } from "./nav.js";
 import { BrowserFrame, PhoneFrame } from "./stage.js";
 
-/** Comparison classification states depicted by the design mockups. */
-export type ReviewState =
-  | "added"
-  | "changed"
-  | "ignored-only"
-  | "removed"
-  | "styles-changed"
-  | "unchanged";
+/** Comparison classification states depicted inside a loaded comparison. */
+export type ReviewState = "added" | "changed" | "removed" | "styles-changed";
 
 const CHANGED_NODES: readonly NavNode[] = [
   {

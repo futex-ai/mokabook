@@ -15,6 +15,12 @@ import {
   styleOutcomes,
 } from "./style_evidence.js";
 
+/**
+ * Merge classification with loaded evidence; loaded details win, preserving
+ * selector unions and unresolved precedence. Retained paths suppress exclusions
+ * across all selected views. Only Unmodified gets the terminal no-changes line.
+ * See docs/protocol/mokly-css-evidence-shell.md#shell-derivation.
+ */
 export function renderWorkspaceEvidence(
   panel: HTMLElement,
   data: WorkspaceData,

@@ -14,6 +14,9 @@ resource globs cannot bypass the graph or restore excluded stylesheets. These
 review interfaces are internal; the package authoring API is unchanged.
 `analysisOwnsStylesheet` owns the shared public-output boundary. Source/token
 stylesheets outside that boundary retain file-level shared impact in both schemas.
+After comparing views, both producers call `assertViewAnalysisScope` to reject
+analysed reasons outside that boundary with `review-invalid`. The shared decoder
+checks stylesheet identity; only producers have the resolved scope configuration.
 
 ```ts
 import { diffCssRules } from "./css/diff.js";

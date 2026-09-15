@@ -15,7 +15,10 @@ import {
 } from "./ignore.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type { ResourceComparison } from "./resource_comparison.js";
-import { analysisOwnsStylesheet } from "./css/paths.js";
+import {
+  analysisOwnsStylesheet,
+  assertViewAnalysisScope,
+} from "./css/paths.js";
 import {
   aggregateState,
   fragmentForView,
@@ -137,6 +140,7 @@ export async function compareScreen(
       });
     }
   }
+  assertViewAnalysisScope(views, config);
   const dependencies = [
     ...new Set([...(base?.dependencies ?? []), ...(head?.dependencies ?? [])]),
   ].sort();

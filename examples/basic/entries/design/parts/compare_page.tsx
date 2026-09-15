@@ -11,13 +11,6 @@ import type { ScreenSubject } from "./subjects.js";
 
 export type CompareViewport = "desktop" | "mobile";
 
-const COMPARED_STATES: readonly ReviewState[] = [
-  "added",
-  "changed",
-  "removed",
-  "styles-changed",
-];
-
 interface ComparePageProps {
   design: DesignDestination;
   subject: ScreenSubject;
@@ -58,7 +51,7 @@ export function ComparePage({
       }
     >
       <ScreenHead
-        comparisons={COMPARED_STATES.includes(state)}
+        comparisons
         action={<ViewSwitch active={viewport} />}
         comparisonMode={mode ?? "side-by-side"}
         crumbs={["Example", "Screens"]}

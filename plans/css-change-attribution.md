@@ -282,6 +282,47 @@ in the end-to-end rows. The ten-percent CSS-pass trigger for a parsed-rule-cache
 follow-up is not reached. The deltas include all Milestone 12 changes and run
 variance; they are not an isolated estimate of the base-read optimization.
 
+### Re-review timings (Milestone 17)
+
+Measured on 2026-09-15 in the Amazon Linux 2023 x86_64 sandbox
+(8 CPUs, approximately 16 GiB RAM), using Node v24.21.0. This task's other
+heavy checks were idle during the benchmark; a separate design task was active
+in the workspace. These are single diagnostic cold/warm runs, not statistical
+estimates of the fix's cost.
+
+Regenerated the full default fixture with `npm run fixture:large`
+(61,977 ms setup), then ran `npm run benchmark:large`, which enables
+`--debug-timings`. Dimensions remain 30 areas, 40 screens per area, 12 rows,
+four shared stylesheets and a 0.5 share: 1,410 routes and 5,550 documents.
+Cold/warm usable startup was 3,644 / 3,613 ms; complete Changes reached Browse
+at 113,716 / 117,889 ms. Both runs passed the five-second startup limit and
+reported zero changed routes. No Export measurement was repeated.
+
+The table uses the same per-session interval unions as Milestone 12; parent
+rows include child work. Each run has three comparison loops, 22,110 resource
+traversals and 4,800 CSS-analysis passes. All 26,918 background spans per run
+completed successfully. The default fixture changes only CSS; the new
+deleted-image and cross-path equivalence tests cover the restored base graph
+traversal for changed documents without CSS in the diff.
+
+| Span                     | Full Serve cold (ms) | Full Serve warm (ms) |
+| ------------------------ | -------------------: | -------------------: |
+| `review.base-commit`     |                 8.03 |                 8.33 |
+| `review.changed-paths`   |             1,100.52 |             1,130.90 |
+| `review.base-manifest`   |               800.24 |               860.62 |
+| `review.base-documents`  |             1,541.64 |             1,569.35 |
+| `review.compare-screens` |            38,581.27 |            40,596.07 |
+| `review.resource-graph`  |            16,256.31 |            16,920.60 |
+| `review.css-analysis`    |             1,155.48 |             1,291.35 |
+| `review.write-artifact`  |                    — |                    — |
+| `changes.classify`       |            42,322.10 |            44,434.52 |
+
+Compared with Milestone 12, `changes.classify` was 990.25 ms lower cold
+(-2.29%) and 1,004.18 ms higher warm (+2.31%). The CSS pass was 2.73% cold and
+2.91% warm of background classification, below the ten-percent follow-up
+trigger. Document preparation, discovery and validation remain outside the CSS
+span; the end-to-end figures include that work and run variance.
+
 ## Milestone 1: Define the rule-aware attribution contract
 
 Documentation-only milestone. The protocol must be complete and approved by
@@ -722,54 +763,65 @@ Documentation-only milestone.
 
 ## Milestone 17: Backend re-review fixes
 
-- [ ] Finding 1. In `src/server/changed_resources.ts`, collect the base graph
+Completed. Delivered by a Codex session and verified by the coordinator on
+the combined tree with Milestone 18. The base graph is collected for every
+changed or moved document; a cross-path equivalence test guards live and
+complete classification; producers assert analysis scope.
+
+- [x] Finding 1. In `src/server/changed_resources.ts`, collect the base graph
       whenever a stylesheet changed or the document changed or moved; drop the
       conjunct that also requires a stylesheet in `changedPaths`. Add a
       failing test first in `tests/server_changed_lazy_base.test.ts`: a
       changed document whose deleted image is its only evidence, with no
       stylesheet anywhere in the diff, keeps the consumer in Changes.
-- [ ] Finding 1. Add a cross-path equivalence test asserting
+- [x] Finding 1. Add a cross-path equivalence test asserting
       `classifyChangedContent` and `compareReview` retain the same reason
       set per view for the same fixture, parameterised over a diff with and
       without a stylesheet. Re-run `benchmark:large` on the Milestone 3
       fixture and record the figures in the timings section.
-- [ ] Finding 5. Assert in `screen_compare.ts` and
+- [x] Finding 5. Assert in `screen_compare.ts` and
       `component_classification.ts` that every analysed reason path satisfies
       `analysisOwnsStylesheet`, failing with `review-invalid`; unit test it
       with an injected out-of-scope analysed reason.
-- [ ] Finding 7. Add a doc comment to `renderWorkspaceEvidence` naming the
+- [x] Finding 7. Add a doc comment to `renderWorkspaceEvidence` naming the
       merge contract and linking the shell derivation rule.
-- [ ] Finding 8. Replace the `.mb-impact-card` assertion in
+- [x] Finding 8. Replace the `.mb-impact-card` assertion in
       `tests/browser/component_explorer_runtime.spec.ts` with one asserting
       the diff stage contains no evidence panel and evidence lives only in
       the workspace evidence container.
-- [ ] Run tests, typecheck, lint, format check, browser tests, and
+- [x] Run tests, typecheck, lint, format check, browser tests, and
       `cargo xtask check`.
 
 ## Milestone 18: Correct the impact mockups
 
 Tags: mockup
 
-- [ ] Finding 2. Remove the `ComparisonStage` wrapper from
+Completed. Delivered by an Opus 5 agent and verified by the coordinator. The
+shared-impact and ignored-only screens render the plain preview; the
+eligibility spec forbids stage headings without a toolbar; the audit found
+and fixed three equal-specificity collisions between mockup card rules and
+later inspector rules.
+
+- [x] Finding 2. Remove the `ComparisonStage` wrapper from
       `design-review-shared-impact` and `design-review-ignored-only` so both
       render the plain current preview like `design-review-style-excluded`.
       Remove the `unchanged` and `ignored-only` state labels from the design
       parts if nothing else uses them.
-- [ ] Finding 2. Extend `tests/browser/design_comparison_eligibility.spec.ts`
+- [x] Finding 2. Extend `tests/browser/design_comparison_eligibility.spec.ts`
       to assert that any design screen without a comparison toolbar has no
       comparison stage heading.
-- [ ] Finding 3. Raise the specificity of the `.mbk-comparison-details`
+- [x] Finding 3. Raise the specificity of the `.mbk-comparison-details`
       paragraph and list rules in `examples/basic/generated/design-review.css`
       so the card renders 8px above and 14px after a list despite the later
       inspector stylesheet; audit the design catalogue for other `mbk-*` card
       rules overridden by `ce-*` rules of equal specificity and fix any found
       the same way.
-- [ ] Build and check the example, run the design tests and the eligibility
+- [x] Build and check the example, run the design tests and the eligibility
       browser spec, and open each changed page from disk in both variants.
 
 ## Milestone 19: Commit and review the re-review fixes
 
-- [ ] Run `git add -A`, commit using Conventional Commits, and push the branch.
+- [x] Run `git add -A`, commit using Conventional Commits, and push the branch.
 - [ ] Review the complete local diff against `origin/main` using
       `docs/implementation-review-prompt.md` after the push. Report findings
       with severity, context, impact, lettered options, and a recommendation;
