@@ -29,5 +29,5 @@ node --import tsx --test tests/browse_document_adapter.test.ts tests/inspector_p
 
 See [navigation](../../docs/protocol/mokly-navigation.md),
 [frame inspection](../../docs/protocol/mokly-frame-adapter.md),
-[inspector implementation](../inspector/README.md), and
+[inspector implementation](../../packages/viewer/src/inspector/README.md), and
 [export assembly](../export/README.md).

@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
 import type { ServerResponse } from "node:http";
 
-import { generatedViews } from "../components/views.js";
+import { generatedViews, parseReviewResult } from "@mokly/viewer/data";
+import type { ReviewResult } from "@mokly/viewer/data";
+
 import { comparisonContentId } from "../export/content_id.js";
 import { ownedEntries } from "../export/ownership.js";
-import { parseReviewResult } from "../review/result_validation.js";
 import type { SelectedReviewSource } from "../review/selection_types.js";
-import type { ReviewResult } from "../review/types.js";
 
 import { readConfinedFile } from "./confined_file.js";
 import { safeDecodePath, send } from "./respond.js";

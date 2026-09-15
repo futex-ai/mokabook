@@ -1,10 +1,14 @@
-import { isCatalogueId } from "../navigation/logical.js";
+import type { ObjectPropSchema } from "@mokly/viewer";
+import {
+  isCatalogueId,
+  validateControlledValues,
+  validateControls,
+  invalidData,
+  plainKeys,
+  validatePropSchema,
+} from "@mokly/viewer/data";
 
-import { validateControlledValues, validateControls } from "./controls.js";
-import { invalidData, plainKeys } from "./data.js";
 import { componentInputs } from "./inputs.js";
-import type { ObjectPropSchema } from "./prop_types.js";
-import { validatePropSchema } from "./schema.js";
 import type {
   ComponentDefinition,
   ComponentInput,

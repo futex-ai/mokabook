@@ -1,9 +1,7 @@
 import { createHash } from "node:crypto";
 
-import { canonicalJson } from "../components/data.js";
-
-import type { CatalogueReadModel } from "./types.js";
-import { repositoryPath } from "./values.js";
+import type { CatalogueReadModel } from "@mokly/viewer";
+import { canonicalJson, repositoryPath } from "@mokly/viewer/data";
 
 export const CATALOGUE_PATH = "__mokly/catalogue.json";
 export const ZERO_DEPLOYMENT_ID = "0".repeat(64);

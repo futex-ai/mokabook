@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { instanceKey } from "../dist/components/keys.js";
-import type { ComponentInstanceRecord } from "../dist/components/manifest_types.js";
 import { resolveInstance, reviewMaterialKey } from "../dist/index.js";
+import { instanceKey } from "../packages/viewer/dist/components/keys.js";
+import type { ComponentInstanceRecord } from "../packages/viewer/dist/components/manifest_types.js";
 
 const previous: ComponentInstanceRecord = {
   key: instanceKey({ kind: "entry" }, undefined, "action"),

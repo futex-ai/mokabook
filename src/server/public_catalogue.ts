@@ -1,5 +1,8 @@
 import path from "node:path";
 
+import type { ComponentViewRecord } from "@mokly/viewer";
+import { counter, generatedViews } from "@mokly/viewer/data";
+
 import type { CompiledDocument } from "../build/document_compiler.js";
 import { projectCatalogue } from "../catalogue/projection.js";
 import type { CatalogueProjectionInput } from "../catalogue/projection_input.js";
@@ -7,9 +10,6 @@ import {
   identifyLiveCatalogue,
   serializeCatalogue,
 } from "../catalogue/serialization.js";
-import { counter } from "../catalogue/values.js";
-import type { ComponentViewRecord } from "../components/manifest_types.js";
-import { generatedViews } from "../components/views.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 

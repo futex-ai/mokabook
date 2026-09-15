@@ -1,9 +1,12 @@
-import type { ComponentViewRecord } from "../components/manifest_types.js";
-import type { ReviewResult } from "../review/types.js";
-import type { Catalogue } from "../server/catalogue.js";
-import type { ComponentChangeSnapshot } from "../server/component_changes.js";
+import type {
+  ComponentViewRecord,
+  CatalogueReadModel,
+  ChangesStatus,
+} from "@mokly/viewer";
+import type { ReviewResult } from "@mokly/viewer/data";
+import type { Catalogue } from "@mokly/viewer/server";
 
-import type { CatalogueReadModel, ChangesStatus } from "./types.js";
+import type { ComponentChangeSnapshot } from "../server/component_changes.js";
 
 /** Accepted state only: projection has no filesystem, Git, clock or renderer dependency. */
 export interface CatalogueProjectionInput {

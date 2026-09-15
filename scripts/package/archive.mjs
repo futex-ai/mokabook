@@ -11,7 +11,11 @@ const ROOT_FILES = new Set([
   "package.json",
 ]);
 
-export async function createPackageArchive(repositoryRoot, destination) {
+export async function createPackageArchive(
+  repositoryRoot,
+  destination,
+  name = "@mokly/mokly",
+) {
   await fs.promises.mkdir(destination, { recursive: true });
   const { stdout } = await runCommand(
     "npm",
@@ -21,14 +25,14 @@ export async function createPackageArchive(repositoryRoot, destination) {
   const reports = JSON.parse(stdout);
   assert.equal(reports.length, 1, "npm pack must create exactly one archive");
   const report = reports[0];
-  validatePackageReport(report);
+  validatePackageReport(report, name);
   return {
     archivePath: path.join(destination, report.filename),
     report,
   };
 }
 
-export async function inspectDryRun(repositoryRoot) {
+export async function inspectDryRun(repositoryRoot, name = "@mokly/mokly") {
   const { stdout } = await runCommand(
     "npm",
     ["pack", "--dry-run", "--json", "--ignore-scripts"],
@@ -36,12 +40,16 @@ export async function inspectDryRun(repositoryRoot) {
   );
   const reports = JSON.parse(stdout);
   assert.equal(reports.length, 1, "npm pack dry-run must return one report");
-  validatePackageReport(reports[0]);
+  validatePackageReport(reports[0], name);
   return reports[0];
 }
 
-export function validatePackageReport(report) {
-  assert.equal(report.name, "@mokly/mokly");
+export function validatePackageReport(report, name = "@mokly/mokly") {
+  assert.equal(report.name, name);
+  if (name === "@mokly/viewer") {
+    validateViewerReport(report);
+    return;
+  }
   assert.match(report.version, /^\d+\.\d+\.\d+$/);
   assert.match(report.integrity, /^sha512-/);
   assert.match(report.shasum, /^[a-f0-9]{40}$/);
@@ -59,17 +67,11 @@ export function validatePackageReport(report) {
     "docs/protocol/mokly-catalogue.md",
     "docs/protocol/fixtures/catalogue-v1.json",
     "dist/catalogue/projection.js",
-    "dist/catalogue/reader.js",
-    "dist/catalogue/types.d.ts",
     "dist/components/definition.js",
     "dist/server/controls/worker.js",
-    "dist/browser/component_controls.js",
-    "dist/browser/inspector.js",
     "docs/protocol/mokly-frame-adapter.md",
     "dist/export/run.js",
     "dist/export/transaction.js",
-    "dist/client/static_delivery.js",
-    "dist/navigation/delivery.js",
     ...ROOT_FILES,
   ]) {
     assert.ok(files.includes(required), `package is missing ${required}`);
@@ -94,7 +96,7 @@ export async function inspectRuntimeLicenses(repositoryRoot) {
     ),
   );
   const invalid = Object.entries(lock.packages)
-    .filter(([key, value]) => key && value.dev !== true)
+    .filter(([key, value]) => key && value.dev !== true && value.link !== true)
     .filter(([, value]) => {
       const license = value.license;
       return (
@@ -105,4 +107,33 @@ export async function inspectRuntimeLicenses(repositoryRoot) {
     })
     .map(([key]) => key);
   assert.deepEqual(invalid, [], "runtime dependency licenses must be declared");
+}
+
+export function validateViewerReport(report) {
+  assert.equal(report.name, "@mokly/viewer");
+  assert.match(report.version, /^\d+\.\d+\.\d+$/);
+  const files = report.files.map((file) => file.path);
+  for (const required of [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/server.js",
+    "dist/server.d.ts",
+    "dist/runtime.js",
+    "dist/data.js",
+    "dist/styles.css",
+    "dist/browser/inspector.js",
+    "dist/assets/fonts/Inter-OFL.txt",
+    "LICENSE",
+    "README.md",
+    "package.json",
+  ])
+    assert.ok(
+      files.includes(required),
+      `viewer package is missing ${required}`,
+    );
+  for (const file of files)
+    assert.ok(
+      file.startsWith("dist/") || ROOT_FILES.has(file),
+      `viewer contains non-allowlisted path ${file}`,
+    );
 }

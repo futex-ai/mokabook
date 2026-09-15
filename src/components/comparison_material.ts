@@ -1,11 +1,9 @@
+import type { ComponentInputOwner, ComponentViewRecord } from "@mokly/viewer";
+import { canonicalJson } from "@mokly/viewer/data";
+
 import { normalizeHistoricalDocument } from "../review/ignore.js";
 
-import { canonicalJson } from "./data.js";
 import { instanceStructure } from "./instance_structure.js";
-import type {
-  ComponentInputOwner,
-  ComponentViewRecord,
-} from "./manifest_types.js";
 import { validateComponentRanges, type RenderedRange } from "./ranges.js";
 
 /** Canonicalize historical material only after its original coordinates are consumed. */

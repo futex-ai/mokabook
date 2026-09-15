@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import vm from "node:vm";
 
-import { inspectorPool } from "../scripts/inspector-pool.mjs";
+import { inspectorPool } from "../packages/viewer/scripts/inspector-pool.mjs";
 
 function execute(source: string): string {
   const context = { result: "", window: {}, document: {} };

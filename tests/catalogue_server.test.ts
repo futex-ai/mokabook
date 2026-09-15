@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import test from "node:test";
 
-import { canonicalJson } from "../dist/components/data.js";
+import { canonicalJson } from "../packages/viewer/dist/components/data.js";
 
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { startEvidenceFixture } from "./helpers/evidence_fixture.js";

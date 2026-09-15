@@ -1,12 +1,16 @@
-import type { ManifestComponentVariant } from "../components/manifest_types.js";
-import { fragmentViews } from "../components/views.js";
-import type { ManifestEntry, ManifestScreen } from "../registry/types.js";
+import type { ManifestComponentVariant, CatalogueView } from "@mokly/viewer";
+import type { ManifestEntry, ManifestScreen } from "@mokly/viewer/data";
+import {
+  fragmentViews,
+  readInstance,
+  readRange,
+  readSlot,
+  lexical,
+  publicPath,
+} from "@mokly/viewer/data";
 
 import { comparisonSelection } from "./changes.js";
-import { readInstance, readRange, readSlot } from "./component_values.js";
 import type { CatalogueProjectionInput } from "./projection_input.js";
-import type { CatalogueView } from "./types.js";
-import { lexical, publicPath } from "./values.js";
 
 export function projectViews(
   input: CatalogueProjectionInput,

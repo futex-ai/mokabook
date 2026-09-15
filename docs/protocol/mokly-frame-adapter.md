@@ -2,8 +2,7 @@
 
 ## Delivery Status
 
-Implemented under [viewer library Milestone 4](../../plans/mokly-viewer-library.md);
-package extraction follows in Milestone 5. Local
+Implemented in `@mokly/viewer` through [viewer library Milestones 4–5](../../plans/mokly-viewer-library.md). Local
 Serve/export keep today's same-origin sandbox and visible behavior. Only an
 explicit cross-origin host uses the new inspector transport.
 
@@ -25,6 +24,7 @@ interface InstanceBoundary {
 interface FrameMount {
   url: URL;
   usage: CatalogueUsage;
+  signal?: AbortSignal;
 }
 type NavigationTarget =
   | { kind: "self" | "top" | "parent" | "blank" }
@@ -77,6 +77,9 @@ Caller-approved query parameters are retained; no selectors or comparison paths
 are accepted. Mount replaces the document with iframe history
 replacement semantics. A load, view/scheme swap or disposal invalidates the old
 session and its pending work; responses from it never update a new mount.
+An optional mount signal cancels both pending initialization and an active
+session. Built-in adapters remove cancellation listeners on disposal. Viewer
+cleanup also fences late custom-adapter results and disposes them immediately.
 
 Boxes are finite CSS pixels relative to the frame's visible content viewport,
 after internal scrolling, clipping ancestors and occlusion, before host scaling.
@@ -99,7 +102,7 @@ diagnostics are not extracted from consumer text.
 ## Same-Origin Implementation
 
 `sameOriginAdapter` moves today's `contentDocument` access behind this interface:
-[`component_geometry.ts`](../../src/client/component_geometry.ts), range-node
+[`component_geometry.ts`](../../packages/viewer/src/client/component_geometry.ts), range-node
 and occlusion helpers, `component_highlight.ts`, `frame_navigation.ts`, and
 the frame access in Browse state and workspace preview/controls. Preserve URL,
 immediate-document, ownership and range authentication, clipping, highlighting,

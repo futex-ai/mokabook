@@ -1,16 +1,15 @@
 import { isValidElement, useContext, type ReactNode } from "react";
 
-import { isCatalogueId } from "../navigation/logical.js";
+import type { ComponentSlotRecord, ComponentRangeTarget } from "@mokly/viewer";
+import {
+  isCatalogueId,
+  invalidData,
+  slotKey,
+  validateComponentSource,
+} from "@mokly/viewer/data";
 
-import { invalidData } from "./data.js";
 import { componentInputs } from "./inputs.js";
-import { slotKey } from "./keys.js";
-import type {
-  ComponentSlotRecord,
-  ComponentRangeTarget,
-} from "./manifest_types.js";
 import { ComponentContext, type ComponentScope } from "./render_context.js";
-import { validateComponentSource } from "./source.js";
 import type { ComponentDefinition } from "./types.js";
 
 interface CapturedSlot {

@@ -6,7 +6,11 @@ import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
 import { repositoryRoot } from "./fixture.js";
-import { packageReport, type PackageReport } from "./release_fixture.js";
+import {
+  packageReport,
+  viewerPackageReport,
+  type PackageReport,
+} from "./release_fixture.js";
 
 const execute = promisify(execFile);
 
@@ -49,12 +53,27 @@ export async function bootstrapFixture(
     type: "module",
     license: "MIT",
     bin: { mokly: "./dist/cli/bin.js" },
+    workspaces: ["packages/viewer"],
+    dependencies: { "@mokly/viewer": "0.1.0" },
     files: ["dist", "docs/protocol", "README.md", "LICENSE", "CHANGELOG.md"],
     scripts: { prepack: "node build.mjs" },
   };
+  const viewerPackage = {
+    name: "@mokly/viewer",
+    version: "0.1.0",
+    license: "MIT",
+    type: "module",
+    files: ["dist", "README.md", "LICENSE"],
+    scripts: { prepack: "node ../../build.mjs" },
+  };
   const distFiles = packageReport()
     .files.map((file) => file.path)
-    .filter((file) => file.startsWith("dist/"));
+    .filter((file) => file.startsWith("dist/"))
+    .concat(
+      viewerPackageReport()
+        .files.filter((file) => file.path.startsWith("dist/"))
+        .map((file) => `packages/viewer/${file.path}`),
+    );
   for (const [name, content] of Object.entries({
     "package.json": JSON.stringify(packageJson),
     "package-lock.json": JSON.stringify({
@@ -62,8 +81,18 @@ export async function bootstrapFixture(
       version: packageJson.version,
       lockfileVersion: 3,
       requires: true,
-      packages: { "": packageJson },
+      packages: {
+        "": packageJson,
+        "packages/viewer": viewerPackage,
+        "node_modules/@mokly/viewer": {
+          resolved: "packages/viewer",
+          link: true,
+        },
+      },
     }),
+    "packages/viewer/package.json": JSON.stringify(viewerPackage),
+    "packages/viewer/README.md": "# Viewer release fixture\n",
+    "packages/viewer/LICENSE": "MIT\n",
     ".gitignore": "dist/\nnode_modules/\n.context/\n",
     "README.md": "# Bootstrap test fixture\n",
     "docs/protocol/mokly-upload.md": "# Upload protocol test fixture\n",
@@ -79,6 +108,7 @@ export async function bootstrapFixture(
     "source.txt": "reviewed source\n",
     "build.mjs": `import fs from "node:fs/promises";
 import path from "node:path";
+process.chdir(import.meta.dirname);
 const source = await fs.readFile("source.txt", "utf8");
 for (const file of ${JSON.stringify(distFiles)}) {
   await fs.mkdir(path.dirname(file), { recursive: true });

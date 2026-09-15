@@ -8,8 +8,8 @@ and browser behavior for the consumer command, with Cloudflare normalization
 kept in the repository adapter. Delivery is tracked in the
 [consumer static export plan](../../plans/consumer-static-export.md).
 
-The public catalogue and cross-origin inspector are implemented; viewer
-extraction remains an approved target tracked by the [viewer library plan](../../plans/mokly-viewer-library.md).
+The public catalogue, cross-origin inspector and viewer package are implemented
+through Milestone 5 of the [viewer library plan](../../plans/mokly-viewer-library.md).
 Existing routes and default same-origin Serve/export behavior stay unchanged.
 
 ## Hosting Contract
@@ -32,7 +32,7 @@ no-store policy. Generic deployments document these header requirements;
 provider adapters may emit the host's metadata files for them. Correctness must
 not depend on a generic static server interpreting `_headers` or `_redirects`.
 
-For cross-origin catalogue consumers and the approved viewer target, public fetch paths are
+For cross-origin catalogue and viewer consumers, public fetch paths are
 `__mokly/catalogue.json`, `static/**`, `__mokly/client/**`, `__mokly/shell.css`,
 `__mokly/fonts/**` and `__mokly/diffs/__generations/**`. Send correct MIME types,
 `Access-Control-Allow-Origin: <exact app origin>` and
@@ -179,6 +179,34 @@ modules. The browser graph must be complete without unused server dependencies.
 All product data, counts, and comparison results come from the real captured
 catalogue and Git inputs. No publishing, sandbox, or environment labels are added
 to product screens. The existing light/dark, mobile/desktop shell design applies.
+
+## Viewer Extraction Assets
+
+Milestone 5 preserves all existing `__mokly` paths. `client/browse.js` becomes
+first-party composition and imports `client/browse_runtime.js`, which owns the
+shared vanilla enhancement runtime. Additional modules are
+`client/services.js` (optional private-host capability injection),
+`client/catalogue_updates.js` (validated read-model revision adoption),
+`client/early_disclosures.js` (native choices during module startup),
+`client/control_view_key.js`, `client/workspace_inspection.js` and
+`client/workspace_props.js` (shared workspace helpers). Serve and export use the
+same complete module inventory; static mode never activates private services or
+starts update requests. Serve loads `catalogue_updates.js` dynamically only when
+adopting evidence, so validation cannot delay initial live-state restoration.
+The delivered graph check covers static and dynamic imports.
+`navigation-resize.js` retains its existing delivery
+name and synchronously captures early native disclosure choices. Deferred
+preference and reload recovery retain those newer choices; capture listeners
+and temporary attributes are removed on load or page exit. The inspector
+remains `client/inspector.js` at the 8,192-byte cap.
+
+The React entry, React renderer and embedding-only scoped stylesheet are excluded
+from the standalone browser inventory. Standalone `shell.css` and font bytes are
+unchanged. Module changes alter deployment identity as required below. An export
+from a changed workspace also records its new `changedPaths` in `review.json`,
+which changes that generation's hash; snapshot and comparison resource bytes
+remain unchanged. The plan records the measured before/after module inventory
+and byte counts against the pre-extraction export.
 
 ## Deployment Identity
 

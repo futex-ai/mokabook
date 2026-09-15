@@ -4,8 +4,8 @@ import { test } from "node:test";
 import { parse, type DefaultTreeAdapterMap } from "parse5";
 
 import { compileCatalogue } from "../dist/build/compile.js";
-import type { ComponentViewRecord } from "../dist/components/manifest_types.js";
 import { loadConfig } from "../dist/config/load.js";
+import type { ComponentViewRecord } from "../packages/viewer/dist/components/manifest_types.js";
 
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { createFixture, removeFixture } from "./helpers/fixture.js";

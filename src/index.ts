@@ -22,12 +22,11 @@ export {
 } from "./authoring/definitions.js";
 export { MockLink, mockLink } from "./authoring/links.js";
 export { ReviewIgnore, ReviewIgnoreScope } from "./authoring/review_ignore.js";
-export { reviewMaterialKey } from "./authoring/review_material.js";
+export { reviewMaterialKey } from "@mokly/viewer/data";
 export type {
   PageInput,
   PageDefinition,
   NestedPageInput,
-  ColorScheme,
   CollectionDefinition,
   CollectionInput,
   EntryInput,
@@ -41,11 +40,11 @@ export type {
   UseCaseDefinition,
   UseCaseInput,
   UseCaseStep,
-  Viewport,
 } from "./authoring/types.js";
+export type { ColorScheme, Viewport } from "@mokly/viewer";
 export { defineComponent } from "./components/definition.js";
-export { resolveInstance } from "./components/resolve_instance.js";
-export type { InstanceResolution } from "./components/resolve_instance.js";
+export { resolveInstance } from "@mokly/viewer";
+export type { InstanceResolution } from "@mokly/viewer";
 export type {
   ComponentDefinition,
   ComponentInput,
@@ -58,7 +57,7 @@ export type {
   ComponentControl,
   ComponentControlLabel,
   ControlFor,
-} from "./components/control_types.js";
+} from "@mokly/viewer";
 export type {
   ComponentPropsData,
   DataPropField,
@@ -67,13 +66,13 @@ export type {
   ObjectPropSchema,
   PropPrimitive,
   PropValue,
-} from "./components/prop_types.js";
+} from "@mokly/viewer";
 export type {
   ComponentInstanceRecord,
   ComponentSourceLocation,
   ComponentStyleOwnership,
   ComponentResourceOwnership,
-} from "./components/manifest_types.js";
+} from "@mokly/viewer";
 export type { Renderer, RenderInput, RenderResult } from "./renderer/types.js";
 export type {
   CompatibilityTransformer,

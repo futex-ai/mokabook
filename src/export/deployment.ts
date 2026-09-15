@@ -1,8 +1,8 @@
-import { readCatalogue } from "../catalogue/reader.js";
+import { readCatalogue } from "@mokly/viewer";
+import { canonicalJson } from "@mokly/viewer/data";
+import type { StaticDelivery, ReviewArtifactContent } from "@mokly/viewer/data";
+
 import { CATALOGUE_PATH } from "../catalogue/serialization.js";
-import { canonicalJson } from "../components/data.js";
-import type { StaticDelivery } from "../navigation/delivery.js";
-import type { ReviewArtifactContent } from "../review/types.js";
 
 import { deploymentContentId } from "./content_id.js";
 import { exportError } from "./error.js";

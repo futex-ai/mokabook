@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { catalogueAtBaseline } from "../dist/server/catalogue.js";
+import { catalogueAtBaseline } from "../dist/server/baseline_catalogue.js";
 import { readCatalogueChanges } from "../dist/server/component_changes.js";
+import { readCatalogue } from "../packages/viewer/src/catalogue/reader.js";
 import { projectCatalogue } from "../src/catalogue/projection.js";
-import { readCatalogue } from "../src/catalogue/reader.js";
 import { serializeCatalogue } from "../src/catalogue/serialization.js";
 
 import { componentEntrySource } from "./helpers/component_fixture.js";

@@ -14,6 +14,11 @@ evidence revisions advance independently. Failed candidates preserve the last
 snapshot, and superseded generations cannot replace it. `catalogue_update.ts`
 prepares updates before publication; `http_types.ts` owns the lifecycle types.
 
+Shell pages render through `@mokly/viewer/server` with CLI-owned live context.
+`public_catalogue_model.ts` validates each serialized public revision once and
+reuses it across shell requests until the bytes change. CSS, browser modules,
+fonts, events and static documents bypass that decoding entirely.
+
 `screen_view_changes.ts` retains per-view screen-only material decisions from
 the existing classification pass. The public projection does not infer Changes
 membership from visual comparisons or invent empty usage for unfinished views.

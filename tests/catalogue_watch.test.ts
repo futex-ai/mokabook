@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import test from "node:test";
 import { setTimeout } from "node:timers/promises";
 
-import { readCatalogue } from "../dist/catalogue/reader.js";
-import type { CatalogueReadModel } from "../dist/catalogue/types.js";
 import { serve } from "../dist/server/serve.js";
+import { readCatalogue } from "../packages/viewer/dist/catalogue/reader.js";
+import type { CatalogueReadModel } from "../packages/viewer/dist/catalogue/types.js";
 
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { createExportFixture } from "./helpers/export_fixture.js";

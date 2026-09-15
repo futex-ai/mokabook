@@ -3,9 +3,12 @@ import fs from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
 
-import { encodeMessage } from "../dist/inspector/schema.js";
+import { encodeMessage } from "../packages/viewer/dist/inspector/schema.js";
 
-const bundle = fs.readFileSync("dist/browser/inspector.js", "utf8");
+const bundle = fs.readFileSync(
+  "packages/viewer/dist/browser/inspector.js",
+  "utf8",
+);
 const nonce = "a".repeat(32);
 function harness(query: string) {
   const messages: { data: string; origin: string }[] = [];

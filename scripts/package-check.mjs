@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { inspectBrowserGraph } from "./package/browser_graph.mjs";
+
 const repositoryRoot = path.resolve(import.meta.dirname, "..");
 const packageJson = JSON.parse(
   await fs.promises.readFile(path.join(repositoryRoot, "package.json"), "utf8"),
@@ -32,9 +34,47 @@ if (!bin.startsWith("#!/usr/bin/env node"))
   throw new Error("built executable lost its shebang");
 
 const inspector = await fs.promises.readFile(
-  path.join(repositoryRoot, "dist/browser/inspector.js"),
+  path.join(repositoryRoot, "packages/viewer/dist/browser/inspector.js"),
 );
 if (inspector.length > 8192)
   throw new Error(
     `Inspector exceeds 8,192-byte budget: ${inspector.length} bytes`,
   );
+
+const viewer = JSON.parse(
+  await fs.promises.readFile(
+    path.join(repositoryRoot, "packages/viewer/package.json"),
+    "utf8",
+  ),
+);
+if (
+  packageJson.dependencies["@mokly/viewer"] !== viewer.version ||
+  viewer.version !== "0.1.0"
+)
+  throw new Error("CLI must depend on the exact viewer version");
+if (
+  JSON.stringify(packageJson.workspaces) !== '["packages/viewer"]' ||
+  viewer.license !== "MIT" ||
+  viewer.type !== "module"
+)
+  throw new Error("Invalid viewer workspace");
+for (const file of await fs.promises.readdir(
+  path.join(repositoryRoot, "packages/viewer/dist"),
+  { recursive: true },
+)) {
+  if (
+    !file.endsWith(".js") ||
+    file === "server.js" ||
+    file === "viewer/server.js" ||
+    file === "shell/document.js"
+  )
+    continue;
+  const source = await fs.promises.readFile(
+    path.join(repositoryRoot, "packages/viewer/dist", file),
+    "utf8",
+  );
+  if (/from ["'](?:node:|@mokly\/mokly)/.test(source))
+    throw new Error(`Viewer has a forbidden dependency: ${file}`);
+}
+
+inspectBrowserGraph();

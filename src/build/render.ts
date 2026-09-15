@@ -2,18 +2,23 @@ import path from "node:path";
 
 import { minimatch } from "minimatch";
 
-import type { ColorScheme, ResolvedRegistryEntry } from "../authoring/types.js";
-import type { ComponentViewRecord } from "../components/manifest_types.js";
-import { componentFragmentRoute } from "../components/paths.js";
+import type { ColorScheme, ComponentViewRecord } from "@mokly/viewer";
+import type { ArtifactView } from "@mokly/viewer/data";
+import {
+  componentFragmentRoute,
+  encodeUrlPath,
+  effectiveColorSchemes,
+  VIEWPORTS,
+} from "@mokly/viewer/data";
+
+import type { ResolvedRegistryEntry } from "../authoring/types.js";
 import type { ComponentGraphRenderer } from "../components/render.js";
 import { rebaseStyleOwnership } from "../components/style_ownership.js";
-import { encodeUrlPath, toPosixPath } from "../config/paths.js";
+import { toPosixPath } from "../config/paths.js";
 import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError, errorMessage } from "../errors.js";
 import { fragmentRoute } from "../registry/manifest.js";
-import type { ArtifactView } from "../registry/views.js";
-import { effectiveColorSchemes, VIEWPORTS } from "../registry/views.js";
 import { serializeReviewSentinels } from "../renderer/sentinels.js";
 import type { Renderer } from "../renderer/types.js";
 

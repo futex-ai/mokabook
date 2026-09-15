@@ -1,25 +1,27 @@
-import { invalidData } from "../components/data.js";
-import type { ManifestEntry } from "../registry/types.js";
-
-import { entryChanges, comparisonSelection } from "./changes.js";
-import { readControls, readProps, readSchema } from "./component_values.js";
-import type { CatalogueProjectionInput } from "./projection_input.js";
-import { catalogueIdentity, ZERO_DEPLOYMENT_ID } from "./serialization.js";
-import { projectTree } from "./tree.js";
 import type {
   CatalogueCollection,
   CatalogueEntry,
   CatalogueReadModel,
   CatalogueRoutedEntry,
   CatalogueVariant,
-} from "./types.js";
+} from "@mokly/viewer";
+import type { ManifestEntry } from "@mokly/viewer/data";
 import {
+  invalidData,
+  readControls,
+  readProps,
+  readSchema,
+  projectTree,
   comparisonPath,
   lexical,
   publicPath,
   relatedDoc,
   repositoryPath,
-} from "./values.js";
+} from "@mokly/viewer/data";
+
+import { entryChanges, comparisonSelection } from "./changes.js";
+import type { CatalogueProjectionInput } from "./projection_input.js";
+import { catalogueIdentity, ZERO_DEPLOYMENT_ID } from "./serialization.js";
 import { projectViews } from "./views.js";
 
 /** Explicit public allowlist shared by static assembly and live snapshot publication. */

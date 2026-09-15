@@ -1,45 +1,29 @@
-# Browse client and frame adapters
+# Standalone viewer host
 
-These browser modules enhance the existing server-rendered Browse shell. They
-own navigation, viewport and theme state, comparisons, and component inspection.
-The package build bundles their pure dependencies into `dist/browser`; the
-server's explicit client-module allowlist also supplies the export inventory.
+These modules compose `@mokly/viewer/runtime` for local Serve and exported
+catalogues. `browse.ts` boots the shared vanilla enhancements; exported browsers
+never load React. Reusable navigation, inspection and frame adapters live in
+[the viewer package](../../packages/viewer/README.md).
 
-`frame_adapter.ts` defines the transport-independent mount, boundary, highlight,
-scroll and event interfaces in the [frame contract](../../docs/protocol/mokly-frame-adapter.md).
-They remain internal modules until the viewer package extraction. A host supplies
-a selected public view URL and its validated, scoped catalogue usage.
+`browser.ts` and `live_updates.ts` retain the private Serve event stream and reload
+recovery. `browse_refresh.ts` validates public evidence revisions through the
+viewer update seam, then reconciles private shell evidence in place. Navigation
+and content generation checks fence both responses before adoption. Authored
+content changes retain the existing reload lifecycle.
 
-`same_origin_adapter.ts` retains script-disabled frames and parent-owned overlays.
-Its private current-document capabilities support the synchronous local shell,
-scroll restoration and authenticated temporary control previews. Direct frame
-document/window access lives in the local transport, rather than workspace,
-Browse state, or controls. `component_geometry.ts` retains its existing geometry
-entrypoints and clipping behavior; `same_origin_highlight.ts` owns the unchanged
-mask, labels, selection and observer lifecycle.
+The revision validator loads on demand after an evidence response arrives.
+It is absent from the initial module graph, so live-state restoration does not
+wait for catalogue decoding code. Cancellation and navigation fences also cover
+that deferred import. Package graph checks validate dynamic asset imports.
 
-`post_message_adapter.ts` explicitly opts into a separate HTTP(S) origin. It sets
-the cross-origin sandbox, replaces iframe history, and negotiates a fresh random
-nonce after load. `message_transport.ts` owns the five-second request timeouts,
-16-request bound and response matching. A replacement or disposal invalidates
-the session and all pending work. Subscriptions share one remote event set;
-removing the final subscriber sends an empty replacement set.
-Public operations recheck disposal after awaiting a reply so a just-resolved
-response cannot escape a replaced mount. Oversized usage maps keep content
-mountable and report inspection as unavailable with the `limit` code.
+The synchronous viewer bootstrap captures native disclosure choices made before
+module initialization. Browse preferences and one-shot recovery retain these
+newer choices, then load completion persists them and removes the capture state.
 
-The host must resolve navigation events through its validated catalogue and
-existing route/new-context handling. Events contain logical identities and
-activation metadata, never consumer URLs. The transport does not open windows.
-Local Serve/export do not select this adapter or expose a pick control.
+`control_transport.ts` and `workspace_loading.ts` keep local temporary previews
+and on-demand rendering private. They are injected with `installViewerServices`;
+export supplies no capabilities. No private tokens enter catalogue JSON.
 
-```bash
-npm run build
-node --import tsx --test tests/inspector_schema.test.ts tests/post_message_adapter.test.ts
-npx playwright test tests/browser/frame_adapter.spec.ts tests/browser/frame_adapter_security.spec.ts tests/browser/same_origin_adapter.spec.ts
-```
-
-Related boundaries: [inspector](../inspector/README.md),
-[Browse document adaptation](../browse/README.md),
-[logical navigation](../../docs/protocol/mokly-navigation.md), and
-[implementation plans](../../plans/README.md).
+Run `npm test`, `npm run test:browser`, and `cargo xtask check` from the repository
+root. See the [viewer contract](../../docs/protocol/mokly-viewer.md) and
+[Serve lifecycle](../server/README.md).

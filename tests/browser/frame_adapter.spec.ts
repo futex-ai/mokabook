@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-import type * as PostAdapter from "../../dist/client/post_message_adapter.js";
-import type { ComponentViewRecord } from "../../dist/components/manifest_types.js";
+import type * as PostAdapter from "../../packages/viewer/dist/client/post_message_adapter.js";
+import type { ComponentViewRecord } from "../../packages/viewer/dist/components/manifest_types.js";
 
 import {
   crossOriginFixture,

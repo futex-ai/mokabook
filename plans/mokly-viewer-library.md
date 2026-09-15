@@ -530,29 +530,228 @@ Tags: ui
 
 Create `@mokly/viewer` and make Serve and export its first hosts.
 
-- [ ] Add npm workspaces with `packages/viewer` (`@mokly/viewer`, MIT,
+- [x] Add npm workspaces with `packages/viewer` (`@mokly/viewer`, MIT,
       React peer dependency, ESM, type declarations); extend build, lint,
       typecheck, format, package check, and packed-consumer smoke scripts.
-- [ ] Move the shell TSX, shell CSS, enhancement runtime, adapters, and
+- [x] Move the shell TSX, shell CSS, enhancement runtime, adapters, and
       navigation client modules into the package; the CLI package imports the
       viewer by version and keeps serve, export, build, and comparison code.
-- [ ] Implement `<MoklyViewer>`: catalogue source handling, controlled and
+- [x] Implement `<MoklyViewer>`: catalogue source handling, controlled and
       uncontrolled selection, every slot, every event, the imperative handle,
       CSS variable theming, and an SSR entry that renders static shell HTML.
-- [ ] Mount the viewer in Serve and export with no slots and the same-origin
+- [x] Mount the viewer in Serve and export with no slots and the same-origin
       adapter; Serve's live-update client refreshes the read model and drives
       the viewer's update path.
-- [ ] Acceptance: the exported example site is functionally identical (byte
+- [x] Acceptance: the exported example site is functionally identical (byte
       comparison of shell output with justified diffs listed), all existing
       browser tests pass unchanged or with justified edits, and watched-update
       behavior is preserved.
-- [ ] Add package tests: rendering from a read-model fixture, each slot, each
+- [x] Add package tests: rendering from a read-model fixture, each slot, each
       event, controlled selection, imperative handle, SSR output, and the
       postMessage adapter against the cross-origin test page.
-- [ ] Add the package README following the repository README rules and update
+- [x] Add the package README following the repository README rules and update
       the root README, architecture docs, and protocol delivery statuses.
 - [ ] Run relevant tests and `cargo xtask check`, commit, push, and stop for
       review.
+
+### Milestone 5 extraction checklist
+
+- [x] Capture the HEAD export, served shell markup, generated-document hashes,
+      and mobile/desktop screenshots in `.context/viewer-m5` before edits.
+- [x] Move shared browser-safe value types and validators to their real viewer
+      owner; replace Node-only hashing in catalogue validation with a tested
+      synchronous browser-safe implementation, preserving all digest bytes.
+- [x] Keep private controls, on-demand view requests and watched transports in
+      the CLI, injected through documented framework-neutral runtime seams.
+- [x] Verify effect replay, independent roots, cancellation, source replacement,
+      every slot/event/handle operation, and cross-origin React hosting.
+- [x] Record every export HTML/CSS/module byte difference and unchanged watched
+      browser tests; keep comparison snapshots and inspector bytes unchanged.
+- [x] Cover invalid prop selection, idle pick cancellation and shell variant/fragment
+      navigation with regressions; preserve safe errors and committed event semantics.
+- [x] Consolidate imports at the new owner and split package-manifest and
+      registry/classification helpers to keep production files within 300 lines.
+- [x] Keep Serve assets independent of catalogue decoding and cache validated
+      public revisions for shell requests; re-run latency and full-gate checks.
+- [x] Synchronize comparison-recovery coverage with the replacement document's
+      load event; preserve every behavior assertion and repeat the regression.
+- [x] Keep the catalogue validator off Serve's initial browser module graph;
+      prove live recovery boots without it and evidence loads it only on demand.
+- [x] Preserve native disclosure interactions made before module initialization
+      through preference/recovery restoration; cover deliberately delayed modules
+      and retain every existing watch test unchanged.
+- [ ] After focused checks and `cargo xtask check` pass, `git add -A`, commit
+      with Conventional Commits and the requested co-author trailer, and push.
+- [ ] After that push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+      against the complete local diff from `origin/main`; record findings with
+      severity, impact, lettered options and recommendations without fixing them.
+
+### Milestone 5 verification notes
+
+The pre-edit baseline is commit `695a856b53e68a987418b15ea0527f0f60751d7e`.
+`.context/viewer-m5/baseline/` contains its actual CLI export; shell responses,
+generated HTML hashes and 390×844 / 1440×1000 screenshots were captured before
+extraction. `after/`, `acceptance.json`, logs and capture/comparison scripts retain
+the measured result. No generated example files are tracked: this example uses
+derived output. Milestones 1–4 and their review records remain byte-unmodified.
+
+Both packages build with exact dependency `@mokly/viewer: "0.1.0"`. CLI producers
+now import browser-safe DTOs/validators from their viewer owner; private controls,
+watch, on-demand compilation and repository access stay in the CLI. The public
+React/SSR entries and documented `./runtime` / `./data` boundaries are tested from
+real tarballs. Source moves used `git mv`; split CSS modules concatenate to the
+original bytes. Release configuration, workflows and the publish action are
+unchanged for Milestone 6.
+
+Measured export acceptance (uncompressed bytes):
+
+- 1,162 baseline files → 1,169 files: seven added client modules, no removed paths
+  except the content-addressed comparison generation relocation.
+- All 180 shell HTML files (37,658,133 bytes) match exactly after replacing only
+  the owned deployment id and comparison generation id with their new values.
+  No markup, copy, geometry, stylesheet or frame-resource change is normalized.
+- Standalone CSS remains **41,123 bytes**, SHA-256
+  `b5456d7988b623a90ec1457511e6629524599617963711f6bcd2485a0fc96e5f`.
+  Fonts and all 277 generated example HTML hashes match the baseline.
+- All **608** comparison snapshot/resource files match byte-for-byte at their
+  generation-relative paths. `review.json` grows 456,424 → 474,731 bytes solely
+  because `changedPaths` records this extraction (178 → 590 paths). Its schema,
+  classifications and other fields are identical. That changes the immutable
+  generation id; browser-module changes also change deployment identity.
+- Catalogue JSON remains 5,417,032 bytes, with only the two owned identities above
+  differing. Ownership metadata grows 135,729 → 136,018 bytes for the seven module
+  paths; its schema is unchanged. Upload schemas are unchanged.
+- Browser inventory: **244,632 → 314,489 bytes** (+69,857), with 49 modules
+  unchanged, 14 existing modules changed and seven added. The exact changes follow.
+  The additional reader is used by Serve's update bridge; exports do not initiate
+  that private transport. No React or hydration enters the standalone graph.
+- Inspector stays **8,192 bytes** and byte-identical, SHA-256
+  `72f6a1ddf8e23c0ed50901e51b279e1342e6039720b1bb18108aaaa38dc68128`.
+- Local screenshots are visually identical, with raster differences confined to
+  rounded edges: final mobile capture differs in 16 of 329,160 pixels (maximum
+  channel delta 11), and desktop in seven of 1,440,000 (maximum delta one).
+  Earlier captures varied between zero/several edge pixels, including an exact
+  desktop match and six mobile pixels at delta one. This is not a pixel-exact
+  acceptance claim. No pixels were edited or masked. The first capture hit a
+  navigation timeout; a longer timeout passed.
+
+All paths in this table are under `__mokly/client/`. Existing paths are retained;
+the new module names and delivery behavior are documented in
+[`mokly-export-delivery.md`](../docs/protocol/mokly-export-delivery.md).
+
+| Module                     | Before |  After | Reason                                                                         |
+| -------------------------- | -----: | -----: | ------------------------------------------------------------------------------ |
+| `browse.js`                |  8,583 |    607 | CLI composition injects private services and starts the shared runtime.        |
+| `browse_refresh.js`        |  1,794 |  2,738 | Lazy validated adoption with cancellation/navigation fences.                   |
+| `browse_runtime.js`        |      0 |  8,612 | Extracted vanilla Browse controller and early native choice restoration.       |
+| `browse_state.js`          |  6,641 |  6,739 | Retains early native choices after one-shot reload recovery.                   |
+| `catalogue_updates.js`     |      0 | 58,646 | Public revision adoption with bundled browser-safe catalogue validation.       |
+| `component_controls.js`    | 13,606 | 13,649 | Uses injected CLI control transport.                                           |
+| `control_view_key.js`      |      0 |    146 | Shared pure control-view key helper.                                           |
+| `diffs.js`                 | 30,301 | 30,346 | Optional embedding error callback; local behavior retained.                    |
+| `early_disclosures.js`     |      0 |  1,791 | Temporary native disclosure capture, restoration and cleanup.                  |
+| `frame_mount.js`           |  1,440 |  1,522 | Public cancellation of pending built-in mounts.                                |
+| `inspector_tabs.js`        |  2,777 |  2,769 | Accepts the scoped viewer document.                                            |
+| `navigation-resize.js`     |  4,335 |  9,103 | Disposable resize setup plus synchronous early disclosure capture/persistence. |
+| `post_message_adapter.js`  |  6,622 |  6,788 | Honors optional mount cancellation.                                            |
+| `same_origin_adapter.js`   |  9,707 |  9,937 | Mount cancellation and embedding overlay ownership.                            |
+| `same_origin_highlight.js` |  5,537 |  5,578 | Appends overlays inside the embedded style scope.                              |
+| `same_origin_mount.js`     |  5,879 |  6,092 | Pending mount cancellation and listener cleanup.                               |
+| `services.js`              |      0 |    499 | Optional private-host capabilities and lazy revision-adopter loading.          |
+| `workspace.js`             |  9,298 |  9,112 | Injected inspection/loading plus extracted workspace helpers.                  |
+| `workspace_events.js`      |  1,661 |  1,653 | Uses the scoped viewer document.                                               |
+| `workspace_inspection.js`  |      0 |  1,086 | Shared inspection/label/button helpers.                                        |
+| `workspace_props.js`       |      0 |    625 | Shared real-props rendering helper.                                            |
+
+Focused validation: **55 Node tests and 21 Chromium viewer tests passed**, with
+zero skips. New regressions first reproduced invalid prop-selection crashes,
+idle pick cancellation clearing an explicit highlight, and dropped shell
+variant/fragment state. New assertions also cover every slot/event/handle,
+strict replay, source cancellation/retry, independent roots, safe failures,
+controlled round trips, same/cross-origin frames, default-variant events,
+source/adapter replacement, host callback exceptions and inherited theming.
+A test initially inspected an iframe `src` attribute rather than the actual
+`location.replace` destination; it now verifies the loaded document URL. The
+accent test similarly now checks documented variables and actual brand colors.
+
+Existing browser test assertions remain unchanged. Import locations changed in
+`component_geometry`, `css_screen_evidence`, `design_comparison_eligibility`,
+`design_library`, `evidence_workspace`, `frame_adapter`, `same_origin_adapter`
+and `review_failure_reload`; `component_design_fixture` uses the new DTO owner.
+`frame_adapter_fixture` exposes real public catalogue data and its existing logical
+links for embedding tests. `watch.spec.ts` is byte-unmodified. Existing large
+legacy test bodies remain intact; all new viewer files and modified production
+files are within the 300-line cap.
+
+`review_failure_reload.spec.ts` additionally waits for the replacement document's
+load event after observing its new server-rendered version. Its unchanged
+assertions had clicked Overlay before the replacement module graph finished
+loading (trace: click at 471,305 ms; new event-stream connection at 471,350 ms).
+The full run passed 1,632 Node tests and 310/311 browsers; an independent rerun
+reproduced this readiness race. The wait uses the actual load lifecycle, with no
+sleep, timeout increase or relaxed assertions. This is a justified test-only
+synchronization change; all five existing watch tests passed unchanged.
+The corrected comparison-recovery test passed five consecutive independent runs
+in 22.4 seconds before restarting the complete gate.
+
+That restarted gate passed 1,632 Node tests and the corrected comparison test,
+but finished with 310/311 browsers after an intermittent disclosure failure in
+`watch.spec.ts` (duplicate titles across reloads). All five tests in that file
+passed unchanged on the independent rerun in 25.6 seconds. The retained trace
+shows the two native disclosure clicks overlapping the new document's live-state
+restoration; the previous full run passed this case. No watch assertions or
+timeouts were changed. The next full gate repeated that failure, as recorded below.
+
+The disclosure failure repeated in that full run (again 310/311 browsers), so
+an independent pass was not treated as sufficient. Its trace isolated delayed
+live-state restoration behind the new eager catalogue-validator import. A new
+browser regression first failed with validation unavailable during startup.
+The CLI now loads the adopter through a lazy public runtime seam only after an
+evidence response arrives, retaining cancellation/navigation checks after the
+import. Initial live recovery no longer waits for validation code. The same
+regression proves the validator is requested once on demand and evidence applies
+without reloading. Six Node checks, the dynamic browser-graph package gate and
+nine focused browser cases passed, including all five unchanged watch tests.
+
+Repeated bootstrap/watch coverage then exposed a second startup window: native
+summary clicks could precede deferred preference and reload restoration. A new
+delayed-module regression failed before the fix. The synchronous bootstrap now
+captures those native choices, reapplies them after either restoration, persists
+them at load and removes its listeners/attributes on load or exit. Nested
+interactive controls and prevented/non-primary clicks are excluded. This passed
+34 focused Node tests and 21 browser cases (both bootstrap regressions plus all
+five unchanged watch cases, repeated three times). The final cleanup assertions
+also passed both bootstrap tests. The watch file remains byte-unmodified.
+
+The first full gate passed 1,626 Node tests, dependency audit, formatting, lint,
+typechecks/builds, example validation and every packed-consumer check. It was
+deliberately interrupted during browsers after catalogue decoding on every asset
+request made example cases take 24–38 seconds. Five regression cases first
+reproduced the asset-path bug; assets now bypass catalogue decoding, and shell
+requests cache only an unchanged validated serialized revision. The focused
+follow-up passed 16 Node and nine unchanged browser tests (0.4–2.8 seconds per
+browser case; 21.2 seconds total). The revision-cache test covers replacement,
+invalid data rejection and recovery. This was a performance correction, not a
+flaky-test retry.
+
+The final `cargo xtask check` passed **1,632 Node tests**, **313 Chromium tests**,
+**five packed-consumer scenarios** and **three Rust tests**, with no failures,
+skips or retries. The Node suite took 424 seconds and Chromium 10.3 minutes.
+All five unchanged watch tests, both startup regressions and the synchronized
+comparison-recovery case passed in that complete run. Audit reported zero
+vulnerabilities; formatting, ESLint, both TypeScript builds/typechecks, example
+validation, package/inspector/browser-graph checks, Rust formatting, Clippy and
+the eight-file Rust length audit passed. The tree stayed stable throughout.
+The log is `.context/viewer-m5/xtask-check-final.log`.
+
+Markdown validation checked 262 local links; the only missing targets are the two
+inspector source links in the intentionally untouched historical Milestone 4
+review. Every changed production file meets the 300-line cap. The rename-aware
+diff against refreshed `origin/main` (`87daaa4`) has only two deletions:
+`src/server/shell/css_chrome.ts` and `css_nav.ts`, whose content now lives in split
+viewer modules and retains exactly the original concatenated CSS. Other source
+relocations preserve history. No example sources, release configuration or
+workflow files changed. Commit/push and post-push review follow below.
 
 ## Milestone 6: Release preparation and verification
 

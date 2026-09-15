@@ -1,4 +1,4 @@
-import type { ComponentInstanceRecord } from "./manifest_types.js";
+import type { ComponentInstanceRecord } from "@mokly/viewer";
 
 /** Input structure is explicit so new inspection metadata cannot become Changes evidence. */
 export function instanceStructure(instance: ComponentInstanceRecord) {

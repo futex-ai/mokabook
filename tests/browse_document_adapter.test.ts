@@ -7,7 +7,7 @@ import { adaptBrowseDocument } from "../dist/browse/document_adapter.js";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { generatedHeader } from "../dist/build/ownership.js";
 import { loadConfig } from "../dist/config/load.js";
-import { createCatalogue } from "../dist/server/catalogue.js";
+import { createCatalogue } from "../packages/viewer/dist/shell/catalogue.js";
 
 import {
   registerFixturePage,

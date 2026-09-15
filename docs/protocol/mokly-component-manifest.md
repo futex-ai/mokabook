@@ -7,7 +7,7 @@ through the public `defineComponent` API. These are the normative interfaces
 for the [component contract](./mokly-components.md). `ManifestEntryBase`,
 `ManifestScreen`, `ManifestPage`, `ManifestCollection`, `ManifestUseCase`,
 and `Viewport` retain the [package contract](./mokly-package.md) and the named
-[registry interfaces](../../src/registry/types.ts).
+[registry interfaces](../../packages/viewer/src/registry/types.ts).
 `ColorScheme` is `"light" | "dark"`. Prop/wire types come from the
 [prop schema](./mokly-component-props.md); `ComponentControl` comes from the
 [controls contract](./mokly-component-controls.md).

@@ -31,12 +31,20 @@ try {
   );
   await inspectDryRun(repositoryRoot);
   await inspectRuntimeLicenses(repositoryRoot);
+  const viewerRoot = path.join(repositoryRoot, "packages/viewer");
+  await inspectDryRun(viewerRoot, "@mokly/viewer");
+  const { archivePath: viewerArchivePath } = await createPackageArchive(
+    viewerRoot,
+    path.join(workingRoot, "viewer-archive"),
+    "@mokly/viewer",
+  );
   const { archivePath } = await createPackageArchive(
     repositoryRoot,
     path.join(workingRoot, "archive"),
   );
   const context = {
     archivePath,
+    viewerArchivePath,
     fixturesRoot,
     packageVersion: packageJson.version,
     versions: {

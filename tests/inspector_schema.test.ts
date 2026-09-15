@@ -5,8 +5,8 @@ import {
   validMessage,
   encodeMessage,
   type MessageBody,
-} from "../dist/inspector/schema.js";
-import { boundedJson } from "../dist/inspector/values.js";
+} from "../packages/viewer/dist/inspector/schema.js";
+import { boundedJson } from "../packages/viewer/dist/inspector/values.js";
 
 const nonce = "1".repeat(32),
   key = "a".repeat(64);

@@ -4,9 +4,12 @@ import fs from "node:fs/promises";
 import { test } from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
-import { instanceKey, slotKey } from "../dist/components/keys.js";
-import type { ComponentInputOwner } from "../dist/components/manifest_types.js";
 import { loadConfig } from "../dist/config/load.js";
+import {
+  instanceKey,
+  slotKey,
+} from "../packages/viewer/dist/components/keys.js";
+import type { ComponentInputOwner } from "../packages/viewer/dist/components/manifest_types.js";
 
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { screenView } from "./helpers/component_views.js";

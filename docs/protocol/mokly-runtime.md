@@ -28,11 +28,10 @@ fragment transport, ownership-aware preview adaptation, and active-tree
 disclosure are implemented. Their delivery history is recorded in the completed
 [in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).
 
-Approved target: Browse becomes the first host of [`@mokly/viewer`](./mokly-viewer.md)
-under the [viewer library plan](../../plans/mokly-viewer-library.md). The package
-extraction, public catalogue and optional frame transport are not implemented
-yet; the shell markup, CSS, enhancements and all visible local behavior below
-must remain unchanged.
+Browse is a first-party host of [`@mokly/viewer`](./mokly-viewer.md). The package,
+public catalogue and optional frame transport are implemented through Milestone 5
+of the [viewer library plan](../../plans/mokly-viewer-library.md). The existing
+local shell, CSS, interactions and script-disabled sandbox remain unchanged.
 
 ## Component Workspaces
 
@@ -118,7 +117,7 @@ worker isolation and generation-local caches. Browse exposes:
   redirects to immutable generations and snapshot files beneath the same prefix;
 - package-owned client and update endpoints under `/__mokly/`.
 
-The approved target also serves [`/__mokly/catalogue.json`](./mokly-catalogue.md)
+Serve also exposes [`/__mokly/catalogue.json`](./mokly-catalogue.md)
 as the public read model, refreshed atomically on watched content/evidence
 updates. It keeps the private manifest and on-demand readiness boundary intact.
 
@@ -157,7 +156,7 @@ source and route directories never create current navigation groups.
 
 ## Browse Shell
 
-In the approved target, this same shell is rendered by the viewer package's
+This same shell is rendered by the viewer package's
 TSX/SSR entry and enhanced by its existing vanilla runtime. Serve/export mount
 it without slots using the [same-origin adapter](./mokly-frame-adapter.md).
 React remains absent from exported browsers. Slots, theming and host-triggered

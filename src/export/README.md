@@ -69,7 +69,7 @@ adapter adds its deferred script and bounded inert identity map only to owned
 current HTML copies. Generated files and immutable comparison snapshots remain
 byte-unmodified. Local frames retain `allow-same-origin`, with scripts disabled
 and parent-owned highlighting; an explicit cross-origin host uses the
-[frame adapter handshake](../inspector/README.md). The script and maps enter the
+[frame adapter handshake](../../packages/viewer/src/inspector/README.md). The script and maps enter the
 existing ownership/upload inventories and deployment hash without schema changes.
 Repository preview validates the copied consumer resources before adding the
 inspector, then validates the complete export inventory. This preserves the

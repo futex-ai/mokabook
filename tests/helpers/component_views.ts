@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 
 import type { Compilation } from "../../dist/build/compile.js";
-import type { ComponentViewRecord } from "../../dist/components/manifest_types.js";
-import type { Manifest } from "../../dist/registry/types.js";
+import type { ComponentViewRecord } from "../../packages/viewer/dist/components/manifest_types.js";
+import type { Manifest } from "../../packages/viewer/dist/registry/types.js";
 
 /** Every actual screen and saved-variant view, in its own entry scope. */
 export function componentViews(manifest: Manifest): ComponentViewRecord[] {

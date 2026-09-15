@@ -2,10 +2,10 @@
 
 ## Delivery Status
 
-Approved target. [Viewer library Milestone 5](../../plans/mokly-viewer-library.md)
-implements this contract after instance, catalogue and frame-adapter work.
-`@mokly/viewer` is an upcoming package, not an available API in this checkout.
-All seven plan decisions and the no-visible-local-change constraint are approved.
+Implemented by [viewer library Milestone 5](../../plans/mokly-viewer-library.md).
+The workspace package, React API, static server entry and first-party hosts are
+available in this checkout. Coordinated npm release configuration remains
+Milestone 6. Local Serve/export presentation is unchanged.
 
 ## Package And Props
 
@@ -13,7 +13,13 @@ All seven plan decisions and the no-visible-local-change constraint are approved
 with declarations and React/React DOM peers. `@mokly/mokly` depends on its
 released version; the viewer never imports the CLI, Node, Git or consumer code.
 The public React entry exports `MoklyViewer`, its types, the adapters and
-`resolveInstance` from the [instance contract](./mokly-instances.md).
+`readCatalogue` and `resolveInstance` from the public data contracts.
+The documented `./runtime` integration entry supplies standalone initialization,
+private-service injection, recovery and validated catalogue revision adoption.
+Its lazy revision-adopter loader keeps validation off Serve's startup path.
+`./data` owns shared pure value/validation contracts used by CLI producers.
+These are package entry points, not aliases for CLI modules. `./server` also
+exports typed standalone context and `viewerAssetUrl` for package assets.
 
 ```ts
 import type { CSSProperties, ReactNode, Ref } from "react";
@@ -126,7 +132,8 @@ when present, require `onSelectionChange` and do not also accept
 into current state, validates it and emits a complete next state only if changed.
 Controlled changes remain proposals until the host supplies them back; incoming
 props do not echo an event. Uncontrolled mode commits the next state itself.
-Switching control mode requires remounting. Never mutate supplied objects/arrays.
+Invalid selection props render an unavailable state and emit one selection error;
+invalid imperative selections reject without committing. Switching control mode requires remounting. Never mutate supplied objects/arrays.
 
 Free text and tags follow [Browse search](./mokly-runtime.md#browse-shell):
 parse case-insensitive `tag:` terms out of search into a deduplicated tag list,
@@ -154,6 +161,9 @@ The first accepted instance click emits `onInstanceClick`, ends pick, then emits
 source replacement and errors end an active pick exactly once with their reason.
 `cancelPick` is idempotent. Pick emits no selection callback unless selection
 actually changes. No pick button is added to the default local shell.
+Concurrent `startPick` calls share one activation and one start event. Cancelling
+a pending activation rejects its promise; only an activated pick emits an end
+event. Starting pick focuses the viewer so keyboard cancellation stays scoped.
 Async failures reject the handle promise and emit one `onError`; error messages
 are product-safe and contain no private paths. Unmount cancels without later
 callbacks. User callback exceptions are not reclassified as viewer errors.
@@ -196,7 +206,10 @@ defaults and contrast requirements from the [shell design](./mokly-shell-design.
 These tune shell color only, not consumer fragments. Internal classes, DOM
 selectors, `--chrome-*` tokens, breakpoints, geometry and structural styles are
 not an override API. Do not replace shell CSS or inject host CSS into frames.
-Slot sizing/pointer controls are the explicit layout extension boundary.
+Slot sizing/pointer controls are the explicit layout extension boundary. The
+embedded stylesheet uses CSS `@scope` to exclude the host page and slot content,
+with a relative packaged font URL. Hosts need browsers with CSS scope support.
+Standalone CSS and font URLs remain unchanged.
 
 React renders the existing server shell TSX. An effect boots the existing
 framework-neutral enhancement runtime against that viewer's root. React owns
@@ -215,6 +228,8 @@ in place and content changes through the existing reload lifecycle. That host
 integration retains local controls, live CSS/comparison evidence and on-demand
 rendering; private tokens/evidence never enter catalogue JSON. Export supplies
 no such capability. Hosts do not need undocumented manifest access.
+Standalone native disclosure actions during startup take precedence over older
+preferences and reload snapshots; startup capture is removed after load or exit.
 
 ## SSR And Host Independence
 
@@ -223,7 +238,10 @@ export. It synchronously accepts a validated object source, its base URL and
 initial selection/slots, and returns static shell HTML; URL/fetcher sources and
 browser handles/effects are not accepted during SSR. CLI-owned context supplies
 the existing route, live capabilities or static delivery descriptor through its
-server integration. The browser graph never imports this entry. Export includes
+server integration. That context already contains accepted data; it bypasses
+public-source decoding. Serve validates each serialized public revision once and
+shares it across shell requests; asset delivery never decodes the catalogue.
+The browser graph never imports this entry. Export includes
 the same CSS and vanilla enhancement modules, with **no React or hydration in
 exported browsers**. Client React hosts boot that runtime in an effect instead.
 

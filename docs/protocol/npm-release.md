@@ -32,12 +32,22 @@ release and also retains the `bootstrap` tag. Do not repeat the bootstrap
 publication; later reviewed releases advance `latest` through the normal
 release workflow.
 
-`publishConfig` targets the public npm registry with public access. The package
-contains compiled runtime code, declarations, package-owned shell assets,
+`publishConfig` targets the public npm registry with public access. The CLI package
+contains compiled runtime code, declarations, private host modules,
 README, LICENSE, CHANGELOG, package metadata and `docs/protocol`. The protocol
 documents ship with the exact package version so independent upload receivers
 can implement its documented file boundary. Source fixtures, tests, plans,
 caches, review artifacts and generated demo output are not published.
+
+The repository also builds the `@mokly/viewer` workspace at version 0.1.0. Its
+MIT ESM distribution owns shell assets, public data readers, adapters, React
+mounting and Node-only SSR. The CLI declares an exact registry version dependency.
+Root build, clean, formatting, lint, typecheck and package gates cover both
+packages. Pack the viewer first; local smoke and release fixtures install both
+tarballs explicitly so an unpublished viewer is never resolved from the registry.
+Consumer fixtures exercise viewer SSR, browser bundle boundaries and NodeNext
+declarations. Coordinated release configuration is Milestone 6; the workflows,
+publish action, release-please config and release manifest remain unchanged.
 
 Runtime dependencies are intentional and minimal. Mokly does not take a
 runtime dependency on `@firna/ui`, Accounting, Juno, Playwright, or a consumer's

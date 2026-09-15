@@ -1,8 +1,7 @@
-import type { ManifestEntry } from "../registry/types.js";
-import type { ReviewState } from "../review/types.js";
+import type { CatalogueChanges, ComparisonSelection } from "@mokly/viewer";
+import type { ManifestEntry, ReviewState } from "@mokly/viewer/data";
 
 import type { CatalogueProjectionInput } from "./projection_input.js";
-import type { CatalogueChanges, ComparisonSelection } from "./types.js";
 
 export function entryChanges(
   entry: ManifestEntry,

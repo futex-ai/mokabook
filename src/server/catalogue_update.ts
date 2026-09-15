@@ -1,4 +1,6 @@
-import { catalogueAtBaseline, type Catalogue } from "./catalogue.js";
+import { type Catalogue } from "@mokly/viewer/server";
+
+import { catalogueAtBaseline } from "./baseline_catalogue.js";
 import type { ComponentChangeSnapshot } from "./component_changes.js";
 import type { CatalogueUpdate, ChangesStatus } from "./update_messages.js";
 

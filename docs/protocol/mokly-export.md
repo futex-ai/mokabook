@@ -9,8 +9,8 @@ delivery of this contract and the [static delivery contract](./mokly-export-deli
 Normal build validation and the existing comparison schema remain authoritative.
 
 The [viewer library plan](../../plans/mokly-viewer-library.md) tracks the
-implemented public catalogue and inert published inspector; the separate viewer
-package remains an approved target. Local Serve/export presentation
+implemented public catalogue, inert published inspector and separate viewer
+package. Local Serve/export presentation
 is unchanged.
 
 ## Scope
@@ -251,7 +251,7 @@ implement inspection. Default local frames keep scripts disabled.
 Core export modules belong under `src/export` and compile into `dist`. Consumers
 must not deep-import package internals or copy repository scripts. The CLI is
 the supported interface for export; no public JavaScript export engine API is
-added. The upcoming [`@mokly/viewer`](./mokly-viewer.md) is a separate supported
+added. The [`@mokly/viewer`](./mokly-viewer.md) package is a separate supported
 React/SSR viewer API consuming public catalogue data, not an export engine or
 permission to import CLI internals. Serve and export become its first hosts,
 retaining the existing shell, CSS and vanilla browser runtime without shipping

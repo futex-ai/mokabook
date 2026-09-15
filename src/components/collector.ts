@@ -1,17 +1,20 @@
-import { reviewMaterialKey } from "../authoring/review_material.js";
-
-import { encodeProps } from "./codec.js";
-import { canonicalJson, invalidData } from "./data.js";
-import { instanceInputs } from "./instance_structure.js";
-import { instanceKey } from "./keys.js";
 import type {
   ComponentInputOwner,
   ComponentInstanceRecord,
   ComponentRangeTarget,
   ComponentSlotRecord,
   ComponentSourceLocation,
-} from "./manifest_types.js";
-import type { ComponentPropsData } from "./prop_types.js";
+  ComponentPropsData,
+} from "@mokly/viewer";
+import {
+  reviewMaterialKey,
+  encodeProps,
+  canonicalJson,
+  invalidData,
+  instanceKey,
+} from "@mokly/viewer/data";
+
+import { instanceInputs } from "./instance_structure.js";
 import type { ComponentDefinition, ComponentRenderContext } from "./types.js";
 
 export interface OwnershipScope {

@@ -1,5 +1,6 @@
+import type { ManifestV5 } from "@mokly/viewer/data";
+
 import type { ComponentRuntime } from "../build/component_runtime.js";
-import type { ManifestV5 } from "../registry/types.js";
 
 import type { CatalogueSnapshot } from "./catalogue_snapshot.js";
 import type {

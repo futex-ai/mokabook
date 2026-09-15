@@ -6,11 +6,11 @@ import type {
   MountedFrame,
   FrameAdapter,
   InstanceBoundary,
-} from "../../dist/client/frame_adapter.js";
+} from "../../packages/viewer/dist/client/frame_adapter.js";
 import {
   encodeMessage,
   type MessageBody,
-} from "../../dist/inspector/schema.js";
+} from "../../packages/viewer/dist/inspector/schema.js";
 
 export const instanceKey = "a".repeat(64);
 export const frameView: FrameMount = {

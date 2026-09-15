@@ -1,12 +1,14 @@
 import http, { type ServerResponse } from "node:http";
 
+import { createCatalogue } from "@mokly/viewer/server";
+
 import type { ComponentRuntime } from "../build/component_runtime.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync, timeSync } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
 import { parseManifest } from "../registry/manifest.js";
 
-import { catalogueAtBaseline, createCatalogue } from "./catalogue.js";
+import { catalogueAtBaseline } from "./baseline_catalogue.js";
 import {
   catalogueSnapshotForConfig,
   loadServedCatalogueSnapshot,

@@ -10,8 +10,11 @@ import { inspectorMarkup } from "../dist/browse/inspector_metadata.js";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { loadConfig } from "../dist/config/load.js";
 import { exportCatalogue } from "../dist/export/run.js";
-import { readMetadata, metadataKeys } from "../dist/inspector/metadata.js";
-import { createCatalogue } from "../dist/server/catalogue.js";
+import {
+  readMetadata,
+  metadataKeys,
+} from "../packages/viewer/dist/inspector/metadata.js";
+import { createCatalogue } from "../packages/viewer/dist/shell/catalogue.js";
 import { buildPreview } from "../scripts/preview/catalogue.mjs";
 
 import { componentEntrySource } from "./helpers/component_fixture.js";

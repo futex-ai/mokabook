@@ -1,12 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import type { Catalogue } from "@mokly/viewer/server";
+
 import { adaptBrowseDocument } from "../browse/document_adapter.js";
 import { locatePath } from "../config/file_locations.js";
 import { publicFileLocation } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { referencedRoutes } from "../review/asset_references.js";
-import type { Catalogue } from "../server/catalogue.js";
 
 import { publicationFiles, readPublicationFile } from "./files.js";
 

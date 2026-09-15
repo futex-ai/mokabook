@@ -5,18 +5,19 @@ import type { Page } from "@playwright/test";
 
 import { adaptBrowseDocument } from "../../dist/browse/document_adapter.js";
 import { compileCatalogue } from "../../dist/build/compile.js";
-import type {
-  FrameEvent,
-  MountedFrame,
-} from "../../dist/client/frame_adapter.js";
-import type * as PostAdapter from "../../dist/client/post_message_adapter.js";
-import type { ComponentViewRecord } from "../../dist/components/manifest_types.js";
+import { projectCatalogue } from "../../dist/catalogue/projection.js";
 import { loadConfig } from "../../dist/config/load.js";
-import { createCatalogue } from "../../dist/server/catalogue.js";
 import {
   loadBrowserClientModules,
   loadBrowserNavigationModules,
 } from "../../dist/server/client_modules.js";
+import type {
+  FrameEvent,
+  MountedFrame,
+} from "../../packages/viewer/dist/client/frame_adapter.js";
+import type * as PostAdapter from "../../packages/viewer/dist/client/post_message_adapter.js";
+import type { ComponentViewRecord } from "../../packages/viewer/dist/components/manifest_types.js";
+import { createCatalogue } from "../../packages/viewer/dist/shell/catalogue.js";
 import { componentEntrySource } from "../helpers/component_fixture.js";
 import { createFixture, removeFixture } from "../helpers/fixture.js";
 import { serveStaticFiles } from "../helpers/static_server.js";
@@ -71,6 +72,14 @@ export async function crossOriginFixture(
   return {
     host,
     frames,
+    root,
+    catalogue: projectCatalogue({
+      configPath: "mokly.config.ts",
+      catalogue,
+      changesStatus: "disabled",
+      comparisonUrl: null,
+      revision: { content: 0, evidence: 0 },
+    }),
     usage,
     async close() {
       await frames.close();

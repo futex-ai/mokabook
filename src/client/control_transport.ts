@@ -3,10 +3,9 @@ import type {
   ComponentRenderRequest,
   ComponentRenderSuccess,
   RenderCapability,
-} from "../components/render_types.js";
-import type { GeneratedComponentView } from "../components/views.js";
-
-import { localFramePath } from "./same_origin_adapter.js";
+  GeneratedComponentView,
+} from "@mokly/viewer/data";
+import { localFramePath } from "@mokly/viewer/runtime";
 
 export async function requestComponentPreview(
   request: ComponentRenderRequest,

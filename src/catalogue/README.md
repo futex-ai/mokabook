@@ -2,8 +2,8 @@
 
 This module projects accepted catalogue and Changes evidence into the public
 `schemaVersion: 1` read model at `__mokly/catalogue.json`. Serve, consumer export,
-and repository preview use the same projection. The local shell continues to
-use its embedded data and does not request this file.
+and repository preview use the same projection. The local shell keeps its embedded private data; Serve
+evidence updates also adopt the validated public snapshot in place.
 
 `projection_input.ts` is the typed input boundary. It accepts validated manifest
 v5 or live-index metadata, the collection forest, and accepted comparison/usage
@@ -13,7 +13,7 @@ Changes membership comes from route/component attribution, independently of
 per-view comparison eligibility. Removed entries retain baseline labels and
 null current paths; uncomputed usage stays pending or unavailable.
 
-`types.ts` defines the public contract. `reader.ts` and its value/reference
+`@mokly/viewer` owns the public types and `readCatalogue`; its value/reference
 validators reject unsupported versions, malformed known fields, private evidence,
 unsafe paths, and broken references while tolerating additive fields. Component
 schemas, controls, wire props, keys and ranges reuse their existing validators.
@@ -31,7 +31,7 @@ zeroed and advances content/evidence revisions on accepted updates.
 
 The [public fixture](../../docs/protocol/fixtures/catalogue-v1.json) ships in the
 npm package. Consumers need the documented JSON artifact, not a CLI deep import.
-The separate viewer package remains a later milestone.
+The viewer package consumes this projection without importing the CLI.
 
 ```sh
 npm run build

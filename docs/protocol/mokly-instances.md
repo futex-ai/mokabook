@@ -15,7 +15,7 @@ An instance is one logical invocation of a `defineComponent` wrapper. Its
 The component root of its own saved variant is the entry owner, not a used
 instance. Replaying captured slot content can place one instance more than once.
 
-The exact algorithm in [`keys.ts`](../../src/components/keys.ts) is:
+The exact algorithm in [`keys.ts`](../../packages/viewer/src/components/keys.ts) is:
 
 ```ts
 const preimage = [

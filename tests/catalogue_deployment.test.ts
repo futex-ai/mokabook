@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { canonicalJson } from "../dist/components/data.js";
 import { exportCatalogue } from "../dist/export/run.js";
+import { canonicalJson } from "../packages/viewer/dist/components/data.js";
 
 import {
   createExportFixture,

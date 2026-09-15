@@ -1,22 +1,22 @@
 import { parse } from "parse5";
 
-import { hasGeneratedOwnershipHeader } from "../build/ownership.js";
-import { validateComponentRanges } from "../components/ranges.js";
-import { MoklyError } from "../errors.js";
-import type { LinkIdentity } from "../inspector/metadata.js";
-import { logicalMarker, parseLogicalMarker } from "../navigation/logical.js";
 import {
+  logicalMarker,
+  parseLogicalMarker,
   duplicateReservedAttributeName,
   reservedAttributesInStartTag,
   type HtmlSourceLocation,
   type ReservedAttributeName,
   type ReservedAttributeOccurrence,
-} from "../navigation/reserved_attributes.js";
-import {
   parseBrowsingTarget,
   serializeBrowsingTarget,
-} from "../navigation/target.js";
-import type { Catalogue } from "../server/catalogue.js";
+} from "@mokly/viewer/data";
+import type { LinkIdentity } from "@mokly/viewer/runtime";
+import type { Catalogue } from "@mokly/viewer/server";
+
+import { hasGeneratedOwnershipHeader } from "../build/ownership.js";
+import { validateComponentRanges } from "../components/ranges.js";
+import { MoklyError } from "../errors.js";
 
 import { inspectorInsertion, inspectorMarkup } from "./inspector_metadata.js";
 import { expectedPortableHref, trustedDocument } from "./trusted_document.js";

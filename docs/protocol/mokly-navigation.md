@@ -9,8 +9,8 @@ in the completed
 [Whole-document pages](./mokly-pages.md) use the same logical links, IDs,
 source ownership, and collection ancestry as screens and use cases.
 
-The [frame adapters](./mokly-frame-adapter.md) are implemented; viewer package
-extraction remains planned. This document's same-origin interactions remain
+The [frame adapters](./mokly-frame-adapter.md) and `@mokly/viewer` package
+are implemented. This document's same-origin interactions remain
 authoritative.
 
 ## Scope
@@ -272,7 +272,7 @@ navigation from URLs, `data-nav-href`, or visible labels.
 
 The implemented `sameOriginAdapter` preserves this existing behavior;
 direct `contentDocument` access lives behind the local transport interface.
-The upcoming viewer package exposes the same boundary. Logical target
+The viewer package exposes the same boundary. Logical target
 parsing, marker/ownership checks, modifier/target classification, canonical
 routes and safe degradation do not change. No adapter gains nested-frame access.
 The optional `postMessageAdapter` requires a separate, nonopaque frame origin

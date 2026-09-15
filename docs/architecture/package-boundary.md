@@ -48,15 +48,16 @@ and in memory; controls do not change source, committed fragments or Changes.
 Static export carries saved variants and inspection without the local capability.
 See the [component contract](../protocol/mokly-components.md).
 
-## Approved Viewer Package Boundary
+## Viewer Package Boundary
 
-The [viewer plan](../../plans/mokly-viewer-library.md) adds npm workspaces with
-`packages/viewer` published as `@mokly/viewer`; the root remains `@mokly/mokly`
-and depends on its released version. This is an approved target, not the current
-single-package layout. Shell TSX/CSS, enhancement/runtime navigation and frame
-adapters move together. The CLI retains config, authoring/build, comparisons,
+The repository uses npm workspaces with `packages/viewer` as `@mokly/viewer`
+(version 0.1.0); root `@mokly/mokly` depends on exactly that version, without
+`workspace:` or filesystem dependency specifiers. Shell TSX/CSS, enhancement
+runtime, navigation, frame adapters, inspector and public catalogue/instance
+readers belong to the viewer. Shared pure validation and DTOs live there too. The CLI retains config, authoring/build, comparisons,
 Serve/watch, export/upload and private control/evidence transports. The viewer
-never imports the CLI, Node/server modules, Git or consumer application code.
+never imports the CLI, Node built-ins, Git or consumer application code. Its `./server` entry
+is explicitly Node-only SSR and is excluded from the browser entry graph.
 
 The public boundary consists of [scoped instances](../protocol/mokly-instances.md),
 the [catalogue v1 projection](../protocol/mokly-catalogue.md), the
@@ -72,7 +73,10 @@ the CLI host; explicit cross-origin hosts use the bounded inspector protocol.
 Public catalogue and inspector files join existing export/upload inventories
 without schema changes. The manifest/source inventory stays private. Build,
 package and packed-consumer checks must cover both tarballs and their dependency
-direction; release-please gains a second component for coordinated releases.
+direction. Pack the viewer first and install both archives in clean consumers.
+The documented root, `./server`, `./runtime`, `./data` and stylesheet exports
+replace source deep imports. Release-please configuration for coordinated releases
+remains Milestone 6; this extraction does not modify release automation.
 
 ## Complete-Document Boundary
 
@@ -134,7 +138,7 @@ artifact validation, deployment identity, and the output transaction, and reuse
 the same shell renderer and comparison engine. Watch ignores inventory-listed
 export files while traversing output directories for new authored files.
 
-The upcoming viewer is a separate public rendering API; it does not expose
+The viewer is a separate public rendering API; it does not expose
 the export engine as a JavaScript API or take over deployment/authentication.
 
 ## Related Docs

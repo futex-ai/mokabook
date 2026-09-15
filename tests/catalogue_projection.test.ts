@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import test from "node:test";
 
-import { createCatalogue } from "../dist/server/catalogue.js";
 import { readCatalogueChanges } from "../dist/server/component_changes.js";
+import { createCatalogue } from "../packages/viewer/dist/shell/catalogue.js";
+import { readCatalogue } from "../packages/viewer/src/catalogue/reader.js";
 import { projectCatalogue } from "../src/catalogue/projection.js";
-import { readCatalogue } from "../src/catalogue/reader.js";
 import { serializeCatalogue } from "../src/catalogue/serialization.js";
 
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";

@@ -1,4 +1,5 @@
-import { encodeUrlPath } from "../config/paths.js";
+import { encodeUrlPath } from "@mokly/viewer/data";
+
 import { MoklyError } from "../errors.js";
 
 import { safeDecodePath } from "./respond.js";

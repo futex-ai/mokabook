@@ -1,11 +1,11 @@
-import type { ComponentViewRecord } from "../components/manifest_types.js";
+import type { ComponentViewRecord } from "@mokly/viewer";
+import type { HtmlSourceLocation } from "@mokly/viewer/data";
 import {
   readMetadata,
   compactRanges,
   type LinkIdentity,
-} from "../inspector/metadata.js";
-import { BYTE_LIMIT } from "../inspector/values.js";
-import type { HtmlSourceLocation } from "../navigation/reserved_attributes.js";
+  BYTE_LIMIT,
+} from "@mokly/viewer/runtime";
 
 interface SourceNode {
   tagName?: string;

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-import type * as LocalAdapter from "../../dist/client/same_origin_adapter.js";
-import type { ComponentViewRecord } from "../../dist/components/manifest_types.js";
+import type * as LocalAdapter from "../../packages/viewer/dist/client/same_origin_adapter.js";
+import type { ComponentViewRecord } from "../../packages/viewer/dist/components/manifest_types.js";
 
 import {
   crossOriginFixture,

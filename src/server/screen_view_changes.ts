@@ -1,10 +1,10 @@
 import path from "node:path";
 
-import { generatedViews } from "../components/views.js";
+import { generatedViews } from "@mokly/viewer/data";
+import type { Manifest, ViewReview } from "@mokly/viewer/data";
+
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
-import type { Manifest } from "../registry/types.js";
-import type { ViewReview } from "../review/types.js";
 
 export interface ScreenViewChanges {
   route: string;

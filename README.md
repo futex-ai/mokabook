@@ -9,12 +9,14 @@ The public [npm package](https://www.npmjs.com/package/@mokly/mokly) is
 `@mokly/mokly`; its executable remains `mokly`. Releases remain pre-1.0 while
 the consumer contract settles.
 
-The upcoming [`@mokly/viewer`](./docs/protocol/mokly-viewer.md) package will let
-React hosts embed the existing Browse shell using a public catalogue read model.
-The public [catalogue read model](./docs/protocol/mokly-catalogue.md) and
-[frame adapters](./docs/protocol/mokly-frame-adapter.md) are implemented;
-viewer extraction remains planned. Local Serve and export appearance and
-interactions remain unchanged.
+The [`@mokly/viewer`](./packages/viewer/README.md) workspace embeds the existing
+Browse shell in React hosts using the public
+[catalogue read model](./docs/protocol/mokly-catalogue.md). It provides controlled
+selection, slots, inspection events, an imperative handle and
+[frame adapters](./docs/protocol/mokly-frame-adapter.md). Serve and export use its
+static renderer and vanilla enhancements; exported browsers contain no React.
+Both packages build and are tested together. Coordinated npm release configuration
+remains Milestone 6; local Serve/export presentation is unchanged.
 
 Shared components can have their own pages, saved variants and editable props in
 local Serve. Screens record their actual component usage for inspection and
@@ -949,12 +951,13 @@ canonical destinations and the controls that remain visual depictions.
   Git identity and the injectable HTTP boundary.
 - [`src/build`](./src/build) — single-graph bundling, compilation, links, check,
   and transactional writes.
-- [`src/server`](./src/server) — manifest-backed HTTP, the responsive shell,
-  and the watched child lifecycle.
-- [`src/client`](./src/client) — progressive Browse navigation and versioned
-  live updates served to the browser.
-- [`src/navigation`](./src/navigation) and [`src/browse`](./src/browse) — shared
-  logical-target grammar and ownership-aware HTML adaptation.
+- [`packages/viewer`](./packages/viewer/README.md) — React/SSR shell, catalogue
+  readers, navigation, adapters, inspection and reusable browser enhancements.
+- [`src/server`](./src/server) — manifest-backed HTTP and the watched child lifecycle.
+- [`src/client`](./src/client) — private Serve updates, controls and on-demand loading.
+- [`packages/viewer/src/navigation`](./packages/viewer/src/navigation) and
+  [`src/browse`](./src/browse) — shared logical-target grammar and ownership-aware
+  HTML adaptation.
 - [`src/review`](./src/review/README.md) — Git extraction, comparison, ignore
   normalization, isolated snapshots, and CSS rule attribution shared by Changes.
 - [`src/build/source_inventory.ts`](./src/build/source_inventory.ts) — resolved

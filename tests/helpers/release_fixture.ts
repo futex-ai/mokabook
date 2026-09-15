@@ -22,16 +22,10 @@ export function packageReport(): PackageReport {
       { path: "docs/protocol/mokly-catalogue.md", size: 1 },
       { path: "docs/protocol/fixtures/catalogue-v1.json", size: 1 },
       { path: "dist/catalogue/projection.js", size: 1 },
-      { path: "dist/catalogue/reader.js", size: 1 },
-      { path: "dist/catalogue/types.d.ts", size: 1 },
       { path: "dist/export/run.js", size: 1 },
       { path: "dist/export/transaction.js", size: 1 },
-      { path: "dist/client/static_delivery.js", size: 1 },
-      { path: "dist/navigation/delivery.js", size: 1 },
       { path: "dist/components/definition.js", size: 1 },
       { path: "dist/server/controls/worker.js", size: 1 },
-      { path: "dist/browser/component_controls.js", size: 1 },
-      { path: "dist/browser/inspector.js", size: 1 },
       { path: "docs/protocol/mokly-frame-adapter.md", size: 1 },
       { path: "README.md", size: 1 },
       { path: "LICENSE", size: 1 },
@@ -42,5 +36,27 @@ export function packageReport(): PackageReport {
     name: "@mokly/mokly",
     shasum: "b".repeat(40),
     version: "1.2.3",
+  };
+}
+
+export function viewerPackageReport(): PackageReport {
+  return {
+    ...packageReport(),
+    name: "@mokly/viewer",
+    version: "0.1.0",
+    files: [
+      "dist/index.js",
+      "dist/index.d.ts",
+      "dist/server.js",
+      "dist/server.d.ts",
+      "dist/runtime.js",
+      "dist/data.js",
+      "dist/styles.css",
+      "dist/browser/inspector.js",
+      "dist/assets/fonts/Inter-OFL.txt",
+      "README.md",
+      "LICENSE",
+      "package.json",
+    ].map((path) => ({ path, size: 1 })),
   };
 }

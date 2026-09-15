@@ -2,9 +2,13 @@ import path from "node:path";
 
 import type { JSXSource } from "react/jsx-dev-runtime";
 
-import { exactKeys, invalidData } from "../components/data.js";
-import type { ComponentSourceLocation } from "../components/manifest_types.js";
-import { validateComponentSource } from "../components/source.js";
+import type { ComponentSourceLocation } from "@mokly/viewer";
+import {
+  exactKeys,
+  invalidData,
+  validateComponentSource,
+} from "@mokly/viewer/data";
+
 import { isInside, projectRealPath, toPosixPath } from "../config/paths.js";
 
 /** Convert bundler coordinates to confined metadata without exposing checkout paths. */
