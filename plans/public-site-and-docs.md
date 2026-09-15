@@ -188,14 +188,14 @@ and the others are retired in a later milestone.
 - [x] Scaffold the `Directions` collection with one collection, three routes
       and one stylesheet per direction, config rules, watch paths and the
       `tests/design_site_directions.test.ts` coverage.
-- [ ] Editorial direction: home, docs and changelog.
-- [ ] Product direction: home, docs and changelog.
-- [ ] Grid direction: home, docs and changelog.
-- [ ] Minimal direction: home, docs and changelog.
-- [ ] Bands direction: home, docs and changelog.
-- [ ] Capture every direction at 390px and 1440px in light and dark and
-      review them together; record the user's selection in
-      `docs/protocol/site-directions.md`.
+- [x] Editorial direction: home, docs and changelog.
+- [x] Product direction: home, docs and changelog.
+- [x] Grid direction: home, docs and changelog.
+- [x] Minimal direction: home, docs and changelog.
+- [x] Bands direction: home, docs and changelog.
+- [x] Capture every direction at 390px and 1440px in light and dark and
+      review them together.
+- [ ] Record the user's selection in `docs/protocol/site-directions.md`.
 - [ ] Run `cargo xtask check`, commit and push. Stop for review.
 
 ## Milestone 3: Site Workspace Package And Checks

@@ -85,6 +85,14 @@ literal color, matched ahead of the broader `design/**` stylesheet rule. The
 copy is the approved home copy and the real `CHANGELOG.md` release; the
 contract is the [site design](../../docs/protocol/site-design.md) document.
 
+`Design → Site → Directions` holds five candidate directions for a more
+refined site (Editorial, Product, Grid, Minimal, Bands), each applied to the
+home, a documentation page and the changelog under `design/site/<slug>/`.
+Each direction owns `generated/site-<slug>.css`, matched ahead of the baseline
+rule, and its sources under `entries/design/site/variants/<slug>/`. The
+[site directions](../../docs/protocol/site-directions.md) document records the
+intent of each and the inventory; one is selected before implementation.
+
 ## Firna renderer adapter
 
 `renderer.tsx` is the reference consumer adapter for react-native-web
