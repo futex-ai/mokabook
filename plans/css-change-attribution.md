@@ -3,11 +3,10 @@
 ## Status And Outcome
 
 Milestones 1 through 15 are complete, committed, and pushed. The first review
-reported fourteen findings and the user chose to address all of them in
-Milestones 11 through 14. The second review confirmed thirteen fixed and one
-partially fixed, and reported nine further findings that await the user's
-decision; the most severe is a lazy base-side traversal that skips deleted
-non-stylesheet resources when the diff contains no stylesheet.
+reported fourteen findings, addressed in Milestones 11 through 14. The second
+review confirmed thirteen fixed and one partially fixed and reported nine
+further findings; the user chose to address all of them in Milestones 16
+through 19.
 
 A single edit to a shared stylesheet currently marks every screen that links
 that stylesheet as a dependency change, and a broad `review.sharedImpact` glob
@@ -686,6 +685,92 @@ empty unresolved case, and the material-plus-stylesheet heading.
 
 - [x] Run `git add -A`, commit using Conventional Commits, and push the branch.
 - [x] Review the complete local diff against `origin/main` using
+      `docs/implementation-review-prompt.md` after the push. Report findings
+      with severity, context, impact, lettered options, and a recommendation;
+      do not change the implementation.
+
+## Milestone 16: Define the re-review fix contract
+
+Documentation-only milestone.
+
+- [x] Finding 1. In `docs/protocol/mokly-changes.md`, state that live
+      classification walks a changed or moved document's base-side resource
+      graph regardless of whether any stylesheet changed, so verified
+      deletions of non-stylesheet resources keep marking consumers; only
+      unchanged, unmoved views without a changed stylesheet skip the walk.
+      Correct `src/review/README.md` to match.
+- [x] Finding 4. In `docs/protocol/mokly-css-attribution.md`, remove the two
+      sentences saying a historical result without `material` is treated as
+      unknown, and replace them with the reason historical results are safe:
+      the style label also requires an `analysis`-bearing reason, which only
+      producers that emit `material` write.
+- [x] Finding 5. Reword the analysis-scope validation rule so producers
+      guarantee scope during discovery through `analysisOwnsStylesheet` and
+      assert it, while the shared decoder validates stylesheet identity only.
+- [x] Finding 6. Split `docs/protocol/mokly-css-attribution.md` at the Shell
+      Presentation seam into the analysis contract and a new
+      `docs/protocol/mokly-css-evidence-shell.md` presentation contract; move
+      the stylesheet evidence paragraphs from `mokly-shell-design.md` into the
+      new document; cross-link both; update the protocol index and every
+      inbound link.
+- [x] Finding 2. Add to the shell presentation contract that no design screen
+      without a comparison toolbar renders a comparison stage heading.
+- [x] Finding 3. Reword the spacing paragraph so the mockup card is required
+      to render 8px above paragraphs and lists and 14px after a list, and the
+      shell matches it.
+- [x] Validate Markdown and relative links.
+
+## Milestone 17: Backend re-review fixes
+
+- [ ] Finding 1. In `src/server/changed_resources.ts`, collect the base graph
+      whenever a stylesheet changed or the document changed or moved; drop the
+      conjunct that also requires a stylesheet in `changedPaths`. Add a
+      failing test first in `tests/server_changed_lazy_base.test.ts`: a
+      changed document whose deleted image is its only evidence, with no
+      stylesheet anywhere in the diff, keeps the consumer in Changes.
+- [ ] Finding 1. Add a cross-path equivalence test asserting
+      `classifyChangedContent` and `compareReview` retain the same reason
+      set per view for the same fixture, parameterised over a diff with and
+      without a stylesheet. Re-run `benchmark:large` on the Milestone 3
+      fixture and record the figures in the timings section.
+- [ ] Finding 5. Assert in `screen_compare.ts` and
+      `component_classification.ts` that every analysed reason path satisfies
+      `analysisOwnsStylesheet`, failing with `review-invalid`; unit test it
+      with an injected out-of-scope analysed reason.
+- [ ] Finding 7. Add a doc comment to `renderWorkspaceEvidence` naming the
+      merge contract and linking the shell derivation rule.
+- [ ] Finding 8. Replace the `.mb-impact-card` assertion in
+      `tests/browser/component_explorer_runtime.spec.ts` with one asserting
+      the diff stage contains no evidence panel and evidence lives only in
+      the workspace evidence container.
+- [ ] Run tests, typecheck, lint, format check, browser tests, and
+      `cargo xtask check`.
+
+## Milestone 18: Correct the impact mockups
+
+Tags: mockup
+
+- [ ] Finding 2. Remove the `ComparisonStage` wrapper from
+      `design-review-shared-impact` and `design-review-ignored-only` so both
+      render the plain current preview like `design-review-style-excluded`.
+      Remove the `unchanged` and `ignored-only` state labels from the design
+      parts if nothing else uses them.
+- [ ] Finding 2. Extend `tests/browser/design_comparison_eligibility.spec.ts`
+      to assert that any design screen without a comparison toolbar has no
+      comparison stage heading.
+- [ ] Finding 3. Raise the specificity of the `.mbk-comparison-details`
+      paragraph and list rules in `examples/basic/generated/design-review.css`
+      so the card renders 8px above and 14px after a list despite the later
+      inspector stylesheet; audit the design catalogue for other `mbk-*` card
+      rules overridden by `ce-*` rules of equal specificity and fix any found
+      the same way.
+- [ ] Build and check the example, run the design tests and the eligibility
+      browser spec, and open each changed page from disk in both variants.
+
+## Milestone 19: Commit and review the re-review fixes
+
+- [ ] Run `git add -A`, commit using Conventional Commits, and push the branch.
+- [ ] Review the complete local diff against `origin/main` using
       `docs/implementation-review-prompt.md` after the push. Report findings
       with severity, context, impact, lettered options, and a recommendation;
       do not change the implementation.

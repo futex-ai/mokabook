@@ -62,6 +62,12 @@ Historical snapshot reads continue to require regular Git files and reject
 symlink blobs; detecting current impact does not relax baseline validation.
 A deleted resource still marks its consumers only when its closest existing
 ancestor is a confined public directory and its baseline is a regular Git file.
+Live classification walks a changed or moved document's branch-point resource
+graph whenever the document changed or one of its current stylesheets changed,
+regardless of whether any stylesheet is in the diff, so verified deletions of
+non-stylesheet resources keep marking their consumers. Only an unchanged,
+unmoved view with no changed stylesheet skips that walk, and the complete
+comparison produces the same retained evidence for every view.
 Dangling symlinks, escaping symlinks, source-root references, and newly missing
 resources fail validation rather than being treated as deletions. Snapshot
 generation still requires current references to resolve, including resources
@@ -87,7 +93,7 @@ Static exports select that slice from their existing v2 comparison. Both result
 schema versions remain unchanged. Details merge the loaded comparison's evidence
 with classification evidence, preserving retained stylesheet selectors,
 exclusions, and legacy shared-impact/ignored-content details without duplicate
-cards. See the CSS contract's [shell derivation](./mokly-css-attribution.md#shell-derivation).
+cards. See [CSS evidence in the shell](./mokly-css-evidence-shell.md#shell-derivation).
 
 This detection reads files without rebuilding the baseline, writing snapshots,
 or generating a comparison. Baseline reads are batched; shared resource edges

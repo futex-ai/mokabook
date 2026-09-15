@@ -2,7 +2,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 
 /** The one changed stylesheet every evidence fixture screen links. */
 export const STYLESHEET = "mockups/shared.css";
-/** Inspector copy fixed by docs/protocol/mokly-css-attribution.md. */
+/** Inspector copy fixed by docs/protocol/mokly-css-evidence-shell.md. */
 export const FILES_LEAD = "Changes to these files may affect this screen:";
 export const MATCHED_LEAD = "Changed styles that apply to this screen:";
 export const UNRESOLVED_LEAD =

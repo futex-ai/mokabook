@@ -48,6 +48,8 @@ when the historical primary file is absent, never when it is invalid.
 - [Component change attribution](./mokly-component-changes.md)
 - [CSS change attribution](./mokly-css-attribution.md) — approved
   target: rule-aware stylesheet evidence.
+- [CSS evidence in the shell](./mokly-css-evidence-shell.md) — inspector and
+  comparison-stage presentation of stylesheet evidence.
 - [Component pages and screen inspection](./mokly-component-explorer.md)
 - [Component explorer design catalogue](./mokly-component-design.md)
 - [Component icon inspector design](./mokly-component-inspector-design.md)

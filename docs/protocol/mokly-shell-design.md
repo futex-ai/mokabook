@@ -92,7 +92,7 @@ Additional owning groups keep each new page at no more than five screens:
   sentence ends with a full stop and no list. Excluded is viewed from All, stays
   out, and shows the plain current preview with no comparison band, no stage
   heading, and the terminal status line. Their evidence contract is
-  [CSS change attribution](./mokly-css-attribution.md).
+  [CSS evidence in the shell](./mokly-css-evidence-shell.md).
 
 Every screen ships one mobile and one desktop variant. Mockup implementation
 notes live in entry descriptions, rationale, and related docs — never inside
@@ -392,14 +392,9 @@ independently in the mockups, matching the runtime rather than using the presenc
 of a mode band to decide whether Details exists or starts open.
 
 Both viewports reuse the existing device-frame components. Stylesheet evidence
-uses the same secondary details: a changed stylesheet that reaches the screen
-names the changed styles that apply, and a changed stylesheet that reaches
-nothing is listed as examined and excluded without producing a Changes row.
-The shell's evidence container adopts the approved mockup card's paragraph and
-list spacing — 8px above each paragraph or list, and 14px between a list and the
-paragraph that follows it — while keeping its own separator treatment, a top
-rule above the evidence, rather than the mockup's bordered card. The mockup card
-keeps the appearance it already has; only the shell adopts its spacing.
+presentation, including its secondary details and the evidence spacing shared
+by the mockup card and the shell, is owned by
+[CSS evidence in the shell](./mokly-css-evidence-shell.md).
 Before and current
 snapshots remain in script-disabled iframes. Overlay composites the current
 pane at 50% opacity; Difference uses CSS difference blending. Missing panes for

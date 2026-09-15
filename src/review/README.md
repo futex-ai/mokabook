@@ -114,9 +114,10 @@ depth; optional counterpart CSS reads distinguish missing files from invalid
 ones. Per-side readers cache bytes, and the injected parser caches identical CSS
 text for the run. Live resource validation additionally retains its alias and
 verified-deletion behavior.
-Live classification batches base documents only for material changes and views
-with changed stylesheet resources. Unchanged views without changed CSS skip base
-view reads and base graph traversal. Current resource validation still checks Git
+Live classification batches base documents for changed or moved documents and
+for views with changed stylesheet resources. Only an unchanged, unmoved view
+without changed CSS skips base view reads and base graph traversal, so verified
+deletions of non-stylesheet resources are still discovered from the before side. Current resource validation still checks Git
 counterparts for verified deletions and pairs embedded documents' ignored regions.
 Changed documents retain discovery of resources removed from their before side.
 Unexpected parser or matcher failures keep only the failing resource
