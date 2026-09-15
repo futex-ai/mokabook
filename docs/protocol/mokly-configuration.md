@@ -184,10 +184,15 @@ compatibility does not restore source discovery or legacy configuration.
 
 `publicExclude?: readonly string[]` extends the defaults in the
 [source-protection contract](./mokly-source-protection.md#public-exclusions):
-`**/README`, `**/README.*`, `**/readme.*`, `**/tsconfig.json`, and
-`**/tsconfig.*.json`. Resolution prepends them to consumer entries without
+`**/README`, `**/README.*`, `**/tsconfig.json`, and `**/tsconfig.*.json`.
+The defaults are case-folded, so consumers need not add case variants.
+Resolution prepends them to consumer entries without
 mutating the input; omission and an empty array produce the defaults alone.
-The resolved list is readonly. Repeated globs are harmless and do not fail config.
+The resolved list is frozen. Watched children require this already-resolved
+array and use the shared glob validator to adopt a frozen copy with exactly
+the transferred entries, without prepending defaults again. Missing, non-array
+or unsafe values reject the startup message. Repeated globs are harmless and
+do not fail config.
 
 Validate the array and each string at config load. A safe repository-relative
 POSIX glob is nonempty and contains no absolute/drive/UNC prefix, backslash,

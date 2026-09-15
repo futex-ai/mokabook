@@ -50,12 +50,14 @@ paths relative to `mockupsDir`. Excluded requests return 404; excluded edits are
 not public content evidence, and exclusion alone never adds `sourceFiles`.
 Manifest/cache privacy and independently discovered authoring inputs remain protected.
 
-Live controls use the [Host contract](../../docs/protocol/mokly-component-controls.md#request-and-lifecycle-rules):
-render POST and preview GET/HEAD accept only `localhost:<port>` or
-`127.0.0.1:<port>` with an explicit decimal port from 1 to 65535, without a
-leading zero. A forwarded local port may differ from the listening socket port.
-POST Origin must equal `http://` plus Host exactly and the render token is still
-required. Preview GET/HEAD uses Host and its authenticated render id; it does
+When controls are active, every Serve request uses the
+[Host contract](../../docs/protocol/mokly-component-controls.md#request-and-lifecycle-rules):
+accept only `localhost:<port>` or `127.0.0.1:<port>` with an explicit decimal
+port from 1 to 65535, without a leading zero. A non-loopback Host returns 403
+for the whole catalogue, including ordinary pages and static assets. A forwarded
+local port may differ from the listening socket port. Render POST Origin must
+equal `http://` plus Host exactly and the render token is still required.
+Preview GET/HEAD uses Host and its authenticated render id; it does
 not require the POST token or Origin. Non-loopback hosts and `x-forwarded-*`
 headers grant no access; invalid required authorization returns 403.
 

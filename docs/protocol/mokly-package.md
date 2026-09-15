@@ -96,16 +96,10 @@ Mokly searches upward for `mokly.config.ts`, `.mts`, `.js`, or `.mjs`, unless
 The [configuration contract](./mokly-configuration.md) defines the complete typed
 shape, path validation, source/output boundaries, and individual field behavior.
 
-`publicExclude?: readonly string[]` accepts safe repository-relative POSIX glob
-strings, matched against public candidates relative to `mockupsDir` and their
-realpath aliases. Consumer globs extend these shipped defaults:
-`**/README`, `**/README.*`, `**/readme.*`, `**/tsconfig.json`, and
-`**/tsconfig.*.json`. Matching is case-insensitive. Omission or `[]` keeps the
-defaults. Unsafe globs fail with `config-invalid`; see the exact
-[validation rules](./mokly-configuration.md#public-exclusion-configuration).
-The shared [source policy](./mokly-source-protection.md#public-exclusions) owns
-public access, publication, generated-route collision checks, and change evidence.
-Exclusion alone never adds an authoring input to `sourceFiles`.
+`publicExclude` defaults and validation follow the
+[configuration contract](./mokly-configuration.md#public-exclusion-configuration),
+with matching and public access defined by the
+[source-protection contract](./mokly-source-protection.md#public-exclusions).
 
 Recommend sibling source and output directories: `entriesDir` is
 `docs/mockups/entries`, `mockupsDir` is `docs/mockups/generated`, and `renderer`

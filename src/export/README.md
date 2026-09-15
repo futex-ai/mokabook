@@ -88,7 +88,10 @@ Capture, reference validation, Review reads and content-change classification
 must agree on candidate and realpath-alias matching relative to `mockupsDir`.
 Excluded files stay out of public inventory without becoming `sourceFiles`;
 manifest/cache privacy remains unconditional. Generated routes or references
-colliding with exclusions fail validation with the referring route.
+colliding with exclusions fail validation with the referring route, matched glob,
+and `publicExclude` field. The shared classifier retains distinct entries-root,
+reserved-name, listed-input, and exclusion causes for diagnostic boundaries;
+public HTTP continues returning 404 for protected paths.
 Build and export share HTML anchor validation through
 `html_link_validation.ts`. Watch traverses owned output directories to discover
 unlisted authored files while ignoring the recorded generated files.

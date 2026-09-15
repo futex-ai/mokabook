@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { sourceDenialMessage } from "../build/source_denial.js";
 import { isAuthoringSource } from "../build/source_inventory.js";
+import { errorMessage } from "../errors.js";
 import {
   FORMER_MANIFEST_NAME,
   LEGACY_MANIFEST_NAME,
@@ -39,10 +41,38 @@ export function isPrivateStaticPath(
   resolveAliases = true,
 ): boolean {
   return (
-    isBaselineCachePath(candidate, config.repoRoot, resolveAliases) ||
-    isInternalCatalogueFile(candidate, config, resolveAliases) ||
-    isAuthoringSource(candidate, config, resolveAliases ? "all" : "none")
+    privateStaticPathReason(candidate, config, resolveAliases) !== undefined
   );
+}
+
+/** Preserve the protection cause for validation while HTTP readers return not found. */
+export function privateStaticPathReason(
+  candidate: string,
+  config: ResolvedConfig,
+  resolveAliases = true,
+): string | undefined {
+  if (isBaselineCachePath(candidate, config.repoRoot, resolveAliases))
+    return "targets the private .mokly-cache directory";
+  if (isInternalCatalogueFile(candidate, config, resolveAliases))
+    return "targets internal catalogue metadata";
+  const denial = isAuthoringSource(
+    candidate,
+    config,
+    resolveAliases ? "all" : "none",
+  );
+  return denial && sourceDenialMessage(denial);
+}
+
+/** Explain a failed public-file check without replacing its caller's typed error. */
+export function publicFileFailureReason(
+  candidate: string,
+  config: ResolvedConfig,
+): string | undefined {
+  try {
+    return privateStaticPathReason(candidate, config);
+  } catch (error) {
+    return `could not resolve public path: ${errorMessage(error)}`;
+  }
 }
 
 /** Locate a public path, retaining confined missing paths for deletion handling. */

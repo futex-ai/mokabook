@@ -89,7 +89,7 @@ export async function classifyChangedContent(
       const candidate = path.resolve(config.repoRoot, changed);
       if (
         !isInside(config.mockupsDir, candidate) ||
-        isAuthoringSource(candidate, config, "exclusions")
+        isAuthoringSource(candidate, config, "exclusions") !== undefined
       )
         return [];
       const route = toPosixPath(path.relative(config.mockupsDir, candidate));

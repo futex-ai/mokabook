@@ -9,7 +9,6 @@ import { createFixture, removeFixture } from "./helpers/fixture.js";
 const defaults = [
   "**/README",
   "**/README.*",
-  "**/readme.*",
   "**/tsconfig.json",
   "**/tsconfig.*.json",
 ];

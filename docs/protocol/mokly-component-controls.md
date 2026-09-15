@@ -151,16 +151,20 @@ Use structured error codes for invalid input, unknown entry, stale generation,
 render failure, and temporary capacity limits. Map them to 400, 404, 409, 422,
 and 429 respectively; oversized bodies return 413 and unsupported methods 405.
 
-For render POST and preview GET/HEAD, Host must be exactly `localhost:<port>`
-or `127.0.0.1:<port>`, where `<port>` contains only decimal digits, has no leading
-zero, and is between 1 and 65535 inclusive. Require an explicit port; reject
-other hostnames, IP spellings, IPv6, whitespace, suffixes, and userinfo. The Host
-port need not equal the listening socket port: forwarded local ports are supported.
-Non-loopback hosts and forwarded headers (`x-forwarded-*`) grant nothing; never
-use those headers to repair Host, Origin, or authorization.
+When controls are active, every Serve request requires Host to be exactly
+`localhost:<port>` or `127.0.0.1:<port>`, where `<port>` contains only decimal
+digits, has no leading zero, and is between 1 and 65535 inclusive. Require an
+explicit port; reject other hostnames, IP spellings, IPv6, whitespace, suffixes,
+and userinfo. A non-loopback Host returns 403 for the whole catalogue, including
+ordinary pages and static assets. The Host port need not equal the listening
+socket port: forwarded local ports are supported. Serve binds only to
+`127.0.0.1`, so `[::1]` cannot reach the socket directly and accepting it would
+widen the Host surface without a working path; IPv6 support is out of scope.
+Forwarded headers (`x-forwarded-*`) grant nothing; never use those headers to
+repair Host, Origin, or authorization.
 
-On POST, Origin must equal `http://` plus the accepted Host exactly, including
-its explicit port, and `X-Mokly-Render-Token` must match the shell-issued
+On render POST, Origin must equal `http://` plus the accepted Host exactly,
+including its explicit port, and `X-Mokly-Render-Token` must match the shell-issued
 unpredictable token. No case folding, default-port removal, trailing slash, or
 scheme substitution is allowed for this comparison. Preview GET/HEAD requires
 Host validation and the authenticated render id, without requiring Origin or the
@@ -224,8 +228,10 @@ type/constraint errors, preset resolution, malformed bodies, request size,
 origin/Host/token validation, old generations, worker failure/timeout, and queue
 bounds. Cover both loopback names through a different forwarded port for POST
 and preview reads, missing/zero/oversized/leading-zero ports, non-loopback Host
-with loopback forwarded headers, and mismatched Origin or token. Prove repeat
-renders use the same consumer providers and React runtime resolution as saved variants and never mutate generated output. Assert that
+with loopback forwarded headers, and mismatched Origin or token. Cover ordinary
+catalogue routes with rejected non-loopback and accepted forwarded Hosts.
+Prove repeat renders use the same consumer providers and React runtime
+resolution as saved variants and never mutate generated output. Assert that
 control requests create no filesystem output, Git status change, watch event,
 rebuild/reload notification, Check orphan, or publication entry, including when
 a consumer explicitly watches its repository root. Test aggregate bundle byte

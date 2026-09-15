@@ -9,7 +9,11 @@ import { safeDecodePath } from "../respond.js";
 
 import type { ComponentRenderService } from "./service.js";
 
-/** Accept exact loopback Host names with any canonical valid port, including forwarded ports. */
+/**
+ * Accept exact loopback Host names with any canonical valid port, including
+ * forwarded ports. The regex is fully anchored; without multiline mode,
+ * JavaScript's $ admits no trailing newline.
+ */
 export function localHost(
   request: Pick<IncomingMessage, "headers">,
 ): string | undefined {
@@ -17,9 +21,7 @@ export function localHost(
   const match = /^(?:localhost|127\.0\.0\.1):([1-9][0-9]{0,4})$/.exec(
     host ?? "",
   );
-  return match && match[0] === host && Number(match[1]) <= 65_535
-    ? host
-    : undefined;
+  return match && Number(match[1]) <= 65_535 ? host : undefined;
 }
 export async function handleControls(
   request: IncomingMessage,

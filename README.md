@@ -197,10 +197,12 @@ Serve starts at port `4173`. If that port, or a concrete `--port` value, is
 already occupied, Mokly tries each following port in order until one is
 free. `--port 0` instead asks the operating system to choose a free port.
 Watched Serve keeps the first resolved port for later child restarts so its URL
-stays stable. Live controls support forwarding through another local port when
-Host is `localhost:<port>` or `127.0.0.1:<port>` with a decimal port from 1 to
-65535 and no leading zero; POST still requires the exact matching HTTP Origin
-and render token. See the [controls contract](./docs/protocol/mokly-component-controls.md).
+stays stable. When controls are active, every Serve request requires Host to be
+`localhost:<port>` or `127.0.0.1:<port>` with a decimal port from 1 to 65535 and
+no leading zero. Forwarding through another local port is supported; a
+non-loopback Host returns 403 for the whole catalogue. Render POST still requires
+the exact matching HTTP Origin and render token. See the
+[controls contract](./docs/protocol/mokly-component-controls.md).
 
 For slow startup, add `--debug-timings` to any command. It writes structured
 phase timings and aggregate catalogue sizes to stderr while leaving normal
@@ -432,8 +434,8 @@ another protection rule or public exclusion applies.
   in `generated` and developer README/tsconfig files beside it. Nested
   `docs/mockups/src` layouts remain supported.
 - `publicExclude?: readonly string[]` adds safe POSIX globs matched relative to
-  `mockupsDir`. Defaults are `**/README`, `**/README.*`, `**/readme.*`,
-  `**/tsconfig.json`, and `**/tsconfig.*.json`, all matched case-insensitively.
+  `mockupsDir`. Defaults are `**/README`, `**/README.*`, `**/tsconfig.json`, and
+  `**/tsconfig.*.json`, all matched case-insensitively.
   Consumer globs extend these defaults; `[]` retains them. See the
   [configuration contract](./docs/protocol/mokly-configuration.md#public-exclusion-configuration).
 - `colorSchemes` defaults to `["light"]`; `["light", "dark"]` enables dark

@@ -5,10 +5,12 @@ index preparation; it does not wait for exhaustive Build. Static export never
 supplies a capability, token, or rendering endpoint.
 The public authoring API and ordinary renderer remain the integration boundary.
 
-The parent shell sends controlled overrides to
-`POST /__mokly/components/render`. Host must be exactly `localhost:<port>` or
-`127.0.0.1:<port>`, with a decimal port from 1 to 65535 and no leading zero.
-Forwarded local ports may differ from the listening socket port. POST requires
+When controls are active, every Serve request requires Host to be exactly
+`localhost:<port>` or `127.0.0.1:<port>`, with a decimal port from 1 to 65535
+and no leading zero. A non-loopback Host returns 403 for the whole catalogue,
+including ordinary pages and static assets. Forwarded local ports may differ
+from the listening socket port. The parent shell sends controlled overrides to
+`POST /__mokly/components/render`, which requires
 Origin to equal `http://` plus Host exactly, the shell token, current generation,
 saved variant and view. Preview GET/HEAD validates Host and its authenticated
 render id without requiring Origin or the POST token. `x-forwarded-*` headers
@@ -38,6 +40,9 @@ ids; malformed or foreign ids return 404. Every response is `no-store` and
 Watched Serve transfers the accepted configuration, live catalogue index and bundle
 over private IPC before readiness. No rendered HTML or full manifest file is sent.
 The child validates metadata and source freshness and binds with controls enabled.
+It requires the already-resolved `publicExclude` array and uses the shared
+config validator to adopt a frozen copy without prepending defaults again.
+Missing, non-array or unsafe values reject the startup message.
 The controls worker evaluates a compact retained runtime once, without unrelated
 HTML or usage. A successful source update with an unchanged index applies its
 runtime to the live child before publishing the reload event. A changed index or

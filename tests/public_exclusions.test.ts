@@ -80,15 +80,14 @@ test("source policy matches both aliases and projects missing children relative 
     "README.json",
     ...excludedNames,
   ])
-    assert.equal(
+    assert.ok(
       isAuthoringSource(path.join(config.mockupsDir, name), config),
-      true,
       name,
     );
   for (const name of permittedNames)
     assert.equal(
       isAuthoringSource(path.join(config.mockupsDir, name), config),
-      false,
+      undefined,
       name,
     );
 });
@@ -102,7 +101,16 @@ for (const route of ["README.html", "internal/page.html"]) {
     t.after(() => removeFixture(fixture));
     await assert.rejects(
       compileCatalogue(await loadConfig(fixture.root)),
-      (error: Error) => error.message.includes(route),
+      (error: Error) => {
+        assert.match(error.message, /matches public exclusion.*publicExclude/);
+        assert.ok(error.message.includes(route));
+        assert.ok(
+          error.message.includes(
+            route === "README.html" ? "**/README.*" : "internal/**",
+          ),
+        );
+        return true;
+      },
     );
     await assert.rejects(fs.stat(path.join(fixture.mockupsDir, route)), {
       code: "ENOENT",
@@ -123,9 +131,12 @@ test("build rejects an excluded public resource with its referring route", async
   );
   await assert.rejects(
     compileCatalogue(await loadConfig(fixture.root)),
-    (error: Error) =>
-      error.message.includes("screens/home") &&
-      error.message.includes("README.html"),
+    (error: Error) => {
+      assert.match(error.message, /matches public exclusion.*publicExclude/);
+      assert.ok(error.message.includes("screens/home"));
+      assert.ok(error.message.includes("README.html"));
+      return true;
+    },
   );
 });
 
@@ -164,12 +175,12 @@ test("canonical builder metadata remains writable when excluded from public read
     isOwned(path.join(config.mockupsDir, "mokly-manifest.json"), config),
     true,
   );
-  assert.equal(
+  assert.deepEqual(
     isAuthoringSource(
       path.join(config.mockupsDir, "mokly-manifest.json"),
       config,
     ),
-    true,
+    { kind: "exclusion", glob: "**/*" },
   );
 });
 

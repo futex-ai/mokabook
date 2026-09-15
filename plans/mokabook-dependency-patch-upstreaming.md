@@ -21,8 +21,8 @@ hunk, so the consumer patch can be deleted on the next upgrade:
 Backend, documentation, and tooling only; no mockup or UI work.
 
 Protocol owners: [source protection](../docs/protocol/mokly-source-protection.md)
-and [package contract](../docs/protocol/mokly-package.md) for the exclusion
-list and layout guidance; [component controls](../docs/protocol/mokly-component-controls.md)
+and [configuration contract](../docs/protocol/mokly-configuration.md) for the
+exclusion list and layout guidance; [component controls](../docs/protocol/mokly-component-controls.md)
 for Host validation; [live evidence](../docs/protocol/mokly-live-evidence.md)
 and [component workspace design](../docs/protocol/mokly-component-workspace-design.md)
 for affected-usage identity and ordering.
@@ -39,14 +39,13 @@ remains.
       shared source-classification policy so HTTP, generated-resource
       validation, Review reads, static publication, and change classification
       agree. State the shipped defaults (`**/README`, `**/README.*`,
-      `**/readme.*` case-insensitively, `**/tsconfig.json`,
-      `**/tsconfig.*.json`), that consumer globs extend rather than replace the
-      defaults, that an exclusion cannot make a manifest or `.mokly-cache/`
+      `**/tsconfig.json`, `**/tsconfig.*.json`, all case-insensitively), that
+      consumer globs extend rather than replace the defaults, that an exclusion cannot make a manifest or `.mokly-cache/`
       path public, and that excluded files are not authoring inputs and do
       not join `sourceFiles`. Note that a generated route colliding with an
       excluded name fails validation with its referring route, mirroring the
       existing reserved-basename rule.
-- [x] In `docs/protocol/mokly-package.md`, document the `publicExclude`
+- [x] In `docs/protocol/mokly-configuration.md`, document the `publicExclude`
       config field (optional `readonly string[]`, validated as safe
       repository-relative glob strings), the defaults, and the recommended
       sibling layout (`docs/mockups/entries`, `docs/mockups/generated`,
@@ -73,6 +72,11 @@ remains.
       exclusion policy and the Host rule.
 - [x] Add this plan to `plans/README.md` (done at creation) and validate the
       changed Markdown.
+
+Documentation ownership note: `mokly-package.md` was split into
+`mokly-authoring.md`, `mokly-configuration.md`, and `mokly-rendering.md` to stay
+within the protocol-doc length guidance. `mokly-configuration.md` owns the
+`publicExclude` configuration contract; the package contract links to it.
 
 ## Milestone 2: Affected-usage deduplication (completed)
 
@@ -284,71 +288,175 @@ colliding with a default exclusion such as `readme.html` fails the build with
 a message blaming an authored source root instead of `publicExclude`, and
 that the newly written Host contract scopes the loopback rule to the two
 controls endpoints while the implementation gates every Serve request when
-controls are active. Each finding is awaiting the user's decision.
+controls are active. The chosen fixes are recorded under Milestone 7.
 
-## Milestone 7: Review fixes
+## Milestone 7: Review fixes (completed)
 
 Address the eleven findings from the Milestone 6 review using the recommended
 option for each. Backend, tests, and docs only; no mockup or UI work.
 
-- [ ] Finding 1 (option C): make the shared source classifier return a typed
+- [x] Finding 1 (option C): make the shared source classifier return a typed
       denial reason instead of a boolean, and have the generated-route
       collision check in `src/build/output_paths.ts`, ownership in
       `src/build/ownership.ts`, the export policy, and resource validation
       report the actual cause. An exclusion match must say the route matches
       a public exclusion and name `publicExclude`. Tighten the collision test
       to assert the cause, not only the route.
-- [ ] Finding 2 (option C): correct `docs/protocol/mokly-component-controls.md`,
+  - [x] Preserve typed resource-validation errors when formatting a denial
+        encounters a dangling alias; add and run the regression before fixing.
+- [x] Finding 2 (option C): correct `docs/protocol/mokly-component-controls.md`,
       `src/server/controls/README.md`, `src/server/README.md`, and `README.md`
       to state that when controls are active the loopback Host rule admits
       every Serve request and a non-loopback Host returns 403 for the whole
       catalogue. Add a Node HTTP test asserting 403 on an ordinary catalogue
       route for a non-loopback Host and 200 for an accepted forwarded Host.
-- [ ] Finding 3 (option C): memoise compiled `Minimatch` instances per
+- [x] Finding 3 (option C): memoise compiled `Minimatch` instances per
       `config.publicExclude` in a `WeakMap`, matching the existing index
       caches in `src/build/source_inventory.ts`, and record a before/after
       large-fixture traversal measurement under this milestone.
-- [ ] Finding 4 (options D and C): extract the source-index builder out of
+- [x] Finding 4 (options D and C): extract the source-index builder out of
       `isAuthoringSource` into a named private helper so the `aliases` mode
       parameter is no longer shadowed, and enable
       `@typescript-eslint/no-shadow` in `eslint.config.js`, fixing whatever it
       reports. If the lint reports a large volume of unrelated pre-existing
       shadows, record the count here and rename only; do not leave the lint
       half-enabled.
-- [ ] Finding 5 (option D): in `src/server/controls/runtime_ipc.ts`, re-run
-      `resolvePublicExclude` on the received `publicExclude` value so the
-      child adopts the same validated, frozen list as `resolveConfig`; reject
-      the startup message on failure. Add a test.
-- [ ] Finding 6 (option C): drop `**/readme.*` from the defaults in code,
+- [x] Finding 5 (option D, corrected IPC contract): extract
+      `validatePublicExclude` from `resolvePublicExclude` so configuration
+      resolution alone prepends defaults. In `src/server/controls/runtime_ipc.ts`,
+      require the already-resolved `publicExclude` array and validate it into
+      a frozen copy preserving exactly the transferred entries. Reject missing,
+      non-array or unsafe values. Test the resolved payload sent by the parent,
+      including the absence of duplicated defaults and all rejection cases.
+- [x] Finding 6 (option C): drop `**/readme.*` from the defaults in code,
       the four docs, and the config test, and add one sentence in
       `docs/protocol/mokly-configuration.md` stating the defaults are
       case-folded so consumers need not add case variants.
-- [ ] Finding 7 (option C): remove the dead `match[0] === host` guard in
+- [x] Finding 7 (option C): remove the dead `match[0] === host` guard in
       `localHost` and note in its doc comment that the regex is fully
       anchored and `$` admits no trailing newline in JavaScript.
-- [ ] Finding 8 (option B): reduce the restated default list in
+- [x] Finding 8 (option B): reduce the restated default list in
       `docs/protocol/mokly-package.md` to a one-sentence pointer at the
       configuration and source-protection contracts.
-- [ ] Finding 9 (option B): re-wrap the three over-long paragraphs at
+- [x] Finding 9 (option B): re-wrap the three over-long paragraphs at
       `docs/protocol/mokly-source-protection.md` lines 53 and 176 and
       `docs/protocol/mokly-component-controls.md` line 228 to the surrounding
       80-column convention.
-- [ ] Finding 10 (option B): add one sentence to
+- [x] Finding 10 (option B): add one sentence to
       `docs/protocol/mokly-component-controls.md` recording why `[::1]` is
       rejected: Serve binds only to `127.0.0.1`, so IPv6 loopback can never
       reach the socket directly and accepting it would only widen the Host
       surface without a working path. IPv6 support is out of scope.
-- [ ] Finding 11 (option C): update the Milestone 1 TODO text to name
+- [x] Finding 11 (option C): update the Milestone 1 TODO text to name
       `docs/protocol/mokly-configuration.md` as the owner of `publicExclude`,
       and add a note under Milestone 1 recording that `mokly-package.md` was
       split into `mokly-authoring.md`, `mokly-configuration.md`, and
       `mokly-rendering.md` to stay within the protocol-doc length guidance.
-- [ ] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
+- [x] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
       `npm test`, `npm run example:build`, `npm run example:check`,
       `npm run test:browser`, `npm run package:smoke`, and `cargo xtask check`.
-- [ ] `git add -A`, commit with Conventional Commits, and push. Inspect
+- [x] `git add -A`, commit with Conventional Commits, and push. Inspect
       `git diff --diff-filter=D --name-status origin/main` before and after;
       no deletions are expected.
+
+### Session verification notes
+
+- Finding 3: generated the default fixture with `npm run fixture:large`
+  (1,410 routes, 5,550 documents, 5,551 checked files; setup 66,823 ms).
+  Before caching, Check took 62,966 ms with 1,041,652 KiB peak child RSS.
+  With only the compiled-matcher cache changed, the same Check took 56,942 ms
+  with 1,022,032 KiB peak child RSS: 6,024 ms (9.6%) less elapsed time.
+  Both traversals passed. The default-list cleanup and typed-denial refactor
+  were excluded from this comparison. This is one run per version on the same
+  generated fixture, with no concurrent heavy checks or heap override, not a
+  statistical performance guarantee. Commands:
+
+  ```sh
+  npm run fixture:large
+  python3 .context/measure-command.py node dist/cli/bin.js check --config .context/mokly-large-Zpalam/mokly.config.ts
+  npm run build
+  python3 .context/measure-command.py node dist/cli/bin.js check --config .context/mokly-large-Zpalam/mokly.config.ts
+  ```
+
+  Logs: `.context/m7-fixture-large.log`, `.context/m7-traversal-before.log`,
+  `.context/m7-traversal-after.log`, and `.context/m7-cache-build.log`.
+
+- Finding 4: after extracting the private source-index builder, enabling
+  `@typescript-eslint/no-shadow` and running
+  `npm run lint -- --format json --output-file .context/m7-shadow-lint.json`
+  reported 73 existing shadows across 54 files (73 errors, no other lint
+  errors). This exceeds the approximately twenty-item limit, so the rule was
+  removed completely. The extracted builder uses `sourceAliases`; unrelated
+  shadows were left unchanged.
+- Finding 5: the parent transfers an already-resolved `publicExclude` list.
+  The child requires an array and uses `validatePublicExclude` to validate
+  every glob and brace alternative, adopting a frozen copy of exactly those
+  entries. Missing values, non-arrays and unsafe globs reject startup messages
+  and wait for a valid one. Only `resolvePublicExclude` prepends defaults for
+  consumer configuration; the child never resolves the list again. The corrected
+  IPC regression uses the parent's resolved payload and confirms five entries
+  (four defaults plus one glob), rather than the nine produced by re-resolution.
+  Before the correction, the four IPC tests failed: accepted lists duplicated
+  defaults, and omission incorrectly restored defaults instead of rejecting the
+  message. Evidence: `.context/m7-ipc-correction-red.log`.
+- Finding 2 covers an existing implementation with incorrect documentation.
+  The added ordinary-route HTTP test passes against the original Host guard.
+  Temporarily limiting the compiled guard to controls endpoints made that test
+  fail (0 passed / 1 failed): `/` returned 200 instead of 403. The mutation was
+  restored immediately. The test covers `/`, a component catalogue page and a
+  saved static fragment through both forwarded loopback names. An initial
+  incorrect fixture fragment URL was corrected before this mutation check.
+- Findings 1, 5 and 6 were covered by failing assertions before implementation:
+  the typed classifier and route/resource diagnostics lacked the cause, IPC
+  accepted unvalidated values, and config retained the duplicate default.
+  The separate resource-boundary regressions failed 0 passed / 5 failed before
+  their fixes, including the missing referring stylesheet route and the export
+  snapshot's missing exclusion cause. Logs are in `.context/m7-*-tests.log`.
+- Final focused verification: 99 passed / 0 failed / 0 skipped, including
+  generated ownership, default and consumer exclusions, current/historical
+  Review, public metadata, forwarded Hosts and startup IPC. Typed reasons and
+  their shared diagnostic formatter live in the sibling `source_denial.ts`;
+  `source_inventory.ts` remains 182 lines. Protocol documents remain between
+  163 and 244 lines. No mockup, UI or generated example changes were needed.
+- The first full `npm test` passed 1,577 tests. A subsequent targeted regression
+  exposed raw filesystem errors while describing dangling resource aliases
+  (0 passed / 1 failed before the fix). The diagnostic adapter now preserves
+  the stylesheet/component boundary's typed error and referring route, while
+  keeping strict classification and alias handling unchanged. The focused suite
+  includes this extra regression; the final full rerun is recorded below.
+- Final session checks passed: `npm run format:check`, `npm run lint` (zero
+  errors), `npm run typecheck`, and `npm test` (1,578 passed / 0 failed /
+  0 skipped in 357,113 ms). `npm run example:build` generated 278 files and
+  `npm run example:check` validated all 278. The generated example has no diff.
+  Changed Markdown's relative file links and `git diff --check` also passed.
+  Logs are `.context/m7-format-check.log`, `.context/m7-lint.log`,
+  `.context/m7-typecheck.log`, `.context/m7-npm-test.log`,
+  `.context/m7-example-build.log`, and `.context/m7-example-check.log`.
+- Finding 5 correction verification: `npm run format:check`, `npm run lint`
+  (zero errors or warnings), and `npm run typecheck` passed. The focused
+  command `node --import tsx --test tests/component_runtime_ipc.test.ts
+tests/config_public_exclusions.test.ts tests/watched_child_startup.test.ts`
+  passed 36 tests, including all four rewritten IPC regressions. The first
+  `npm test` run passed 1,576 tests and failed one test file after Node
+  v24.14.1 crashed in `node::cjs_lexer::Parse` while loading
+  `tests/watch_resource_boundaries.test.ts`. That file passed 2 tests on an
+  isolated rerun. Without further implementation changes, the complete
+  `npm test` retry passed 1,578 tests / 0 failed / 0 skipped in 357,321 ms.
+  Logs are `.context/m7-ipc-correction-*.log`; the successful full rerun is
+  `.context/m7-ipc-correction-npm-test-retry.log`. The generated example has no diff.
+- Per the implementation session's scope, the final checks and commit/push
+  TODOs remain open for the reviewer, including browser tests, package smoke,
+  and `cargo xtask check`. No branch commit or push was made. Milestone 8 was
+  not started.
+
+Reviewer verification on the final tree: format, lint, typecheck,
+`npm test` (1,578 passed), `npm run example:build` and `example:check`
+(278 files), `npm run test:browser` (276 passed), `npm run package:smoke`,
+and `cargo xtask check` all passed. The reviewer found and returned one
+defect in the first finding 5 implementation: the watched child re-ran the
+defaults-prepending resolver on the parent's already-resolved list, doubling
+the defaults. The corrected version validates without prepending, rejects a
+missing value, and is covered by `tests/component_runtime_ipc.test.ts`.
 
 ## Milestone 8: Review
 

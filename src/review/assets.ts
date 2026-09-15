@@ -4,7 +4,7 @@ import path from "node:path";
 import type { FileLocation } from "../config/file_locations.js";
 import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import {
-  isPrivateStaticPath,
+  privateStaticPathReason,
   publicPathLocation,
 } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
@@ -66,7 +66,11 @@ export class FileSystemReviewAssetReader implements OptionalReviewAssetReader {
     try {
       const location = publicPathLocation(candidate, this.config);
       if (!location) {
-        throw assetError(route, "not a public static file");
+        const denial = privateStaticPathReason(candidate, this.config);
+        throw assetError(
+          route,
+          `not a public static file${denial ? `: ${denial}` : ""}`,
+        );
       }
       let stat;
       try {
@@ -258,11 +262,12 @@ function assertPublicStaticRoute(
 ): string {
   if (!isSafeRepositoryPath(route)) throw assetError(route, "unsafe path");
   const candidate = path.resolve(config.mockupsDir, route);
-  if (
-    !isInside(config.mockupsDir, candidate) ||
-    isPrivateStaticPath(candidate, config, false)
-  ) {
-    throw assetError(route, "not a public static file");
+  const denial = privateStaticPathReason(candidate, config, false);
+  if (!isInside(config.mockupsDir, candidate) || denial) {
+    throw assetError(
+      route,
+      `not a public static file${denial ? `: ${denial}` : ""}`,
+    );
   }
   return candidate;
 }

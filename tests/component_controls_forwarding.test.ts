@@ -45,6 +45,10 @@ test("controls Host rejects alternate spellings, noncanonical ports and missing 
     " localhost:80",
     "localhost:80 ",
     "localhost:80\n",
+    "localhost:80\r",
+    "localhost:80\r\n",
+    "localhost:80\u2028",
+    "localhost:80\u2029",
     "localhost:80/path",
     "localhost:80,127.0.0.1:80",
   ]) {
@@ -53,6 +57,43 @@ test("controls Host rejects alternate spellings, noncanonical ports and missing 
       socket: { localPort: 4173 },
     };
     assert.equal(localHost(request), undefined, host ?? "Missing Host");
+  }
+});
+
+test("active controls enforce loopback Host admission on ordinary catalogue routes", async (t) => {
+  const fixture = await componentReviewFixture(t, (source) => source);
+  const server = await startCatalogueServer(fixture.config, {
+    base: "main",
+    port: 0,
+    componentRuntime: componentRuntime(fixture.after),
+  });
+  t.after(() => server.close());
+  const forwardedPort = Number(new URL(server.url).port) === 4173 ? 4174 : 4173;
+  for (const route of [
+    "/",
+    "/view/components/action.html",
+    "/static/components/action.variants/default.mobile.html",
+  ]) {
+    assert.equal(
+      (
+        await request(server.url + route, "GET", {
+          host: "example.com:4173",
+          "x-forwarded-host": `localhost:${forwardedPort}`,
+        })
+      ).status,
+      403,
+      route,
+    );
+    for (const hostname of ["localhost", "127.0.0.1"])
+      assert.equal(
+        (
+          await request(server.url + route, "GET", {
+            host: `${hostname}:${forwardedPort}`,
+          })
+        ).status,
+        200,
+        `${hostname} ${route}`,
+      );
   }
 });
 

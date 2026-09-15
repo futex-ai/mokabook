@@ -50,12 +50,17 @@ must live under `entriesDir`, use a reserved basename, or match a public exclusi
 Ordinary public browser scripts are not made private merely because they end in `.js`.
 
 Reject generated output routes that use a reserved source basename, match a
-public exclusion, or overlap any protected input, including through a symlink. A generated ownership header,
-logical link, or asset reference cannot override source or internal-metadata
-protection. Only the builder's canonical manifest output may target its internal
-metadata path. A request
-for a protected file has the existing not-found behavior; a generated document
-that needs it as a public resource fails validation with its referring route.
+public exclusion, or overlap any protected input, including through a symlink.
+A generated ownership header, logical link, or asset reference cannot override
+source or internal-metadata protection. Only the builder's canonical manifest
+output may target its internal metadata path. A request for a protected file has
+the existing not-found behavior; a generated document that needs it as a public
+resource fails validation with its referring route. The shared classifier retains
+the denial cause: entries root, reserved basename, listed input, or exclusion
+with its matched glob. Build, ownership, publication, and resource diagnostics
+report that cause; exclusion errors name `publicExclude` and the matched glob.
+Stylesheet and component-resource failures keep their typed validation errors
+and referring routes even when a file's alias cannot be resolved.
 
 ## Public Exclusions
 
@@ -70,7 +75,6 @@ Ship these defaults, in this order:
 
 - `**/README`
 - `**/README.*`
-- `**/readme.*`
 - `**/tsconfig.json`
 - `**/tsconfig.*.json`
 
@@ -163,19 +167,21 @@ the browser. A failed candidate keeps the last-good generation. Asset checks
 continue resolving the requested realpath at read time so changed symlinks
 cannot bypass the generation's protected paths.
 
-For v5 or historical page-v4 Review resources, use that baseline's structurally validated
-inventory, entry source paths, and reserved-name rules. Never execute historical
-config with the current package or rebuild a Git baseline to refresh its
-inventory; a [derived baseline](./mokly-derived-baselines.md) is built once
-by its own commit's tooling and then read like any historical baseline. Historical v2/v3 and component-v4
-readers retain their version-specific source/root safeguards and also deny
-reserved source basenames; they are the only readers allowed to lack v5's
-inventory. Internal manifest paths stay private for every historical schema.
+For v5 or historical page-v4 Review resources, use that baseline's structurally
+validated inventory, entry source paths, and reserved-name rules. Never execute
+historical config with the current package or rebuild a Git baseline to refresh
+its inventory; a [derived baseline](./mokly-derived-baselines.md) is built once
+by its own commit's tooling and then read like any historical baseline.
+Historical v2/v3 and component-v4 readers retain their version-specific
+source/root safeguards and also deny reserved source basenames; they are the
+only readers allowed to lack v5's inventory. Internal manifest paths stay private
+for every historical schema.
 The active resolved config's public exclusions apply to every historical schema,
 matched relative to that baseline's mockups root; never execute historical config
-to obtain exclusions or add them to its source inventory. Historical paths use the baseline reader's validated file kinds, never current
-disk targets. Git and derived-baseline resource readers reject historical symlinks
-rather than following them.
+to obtain exclusions or add them to its source inventory. Historical paths use
+the baseline reader's validated file kinds, never current disk targets. Git and
+derived-baseline resource readers reject historical symlinks rather than
+following them.
 Current-side resource reads always use the current validated policy.
 
 ## Acceptance
