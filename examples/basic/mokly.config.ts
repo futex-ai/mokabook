@@ -50,6 +50,26 @@ export default defineConfig({
   },
   stylesheets: [
     {
+      match: "design/site/editorial/**",
+      stylesheets: ["site-tokens.css", "site-editorial.css"],
+    },
+    {
+      match: "design/site/product/**",
+      stylesheets: ["site-tokens.css", "site-product.css"],
+    },
+    {
+      match: "design/site/grid/**",
+      stylesheets: ["site-tokens.css", "site-grid.css"],
+    },
+    {
+      match: "design/site/minimal/**",
+      stylesheets: ["site-tokens.css", "site-minimal.css"],
+    },
+    {
+      match: "design/site/bands/**",
+      stylesheets: ["site-tokens.css", "site-bands.css"],
+    },
+    {
       match: "design/site/**",
       stylesheets: ["site-tokens.css", "site.css"],
     },
@@ -112,6 +132,11 @@ export default defineConfig({
           "examples/basic/generated/design.css",
           "examples/basic/generated/site-tokens.css",
           "examples/basic/generated/site.css",
+          "examples/basic/generated/site-editorial.css",
+          "examples/basic/generated/site-product.css",
+          "examples/basic/generated/site-grid.css",
+          "examples/basic/generated/site-minimal.css",
+          "examples/basic/generated/site-bands.css",
           "examples/basic/generated/styles.css",
           "examples/basic/generated/example-components.css",
         ],

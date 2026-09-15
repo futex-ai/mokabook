@@ -172,6 +172,32 @@ for review with generated pages inspected in both viewports and schemes.
       390px and 1440px in both schemes for the review.
 - [x] Run `cargo xtask check`, commit and push. Stop for review.
 
+## Milestone 2A: Site Design Directions
+
+Tags: mockup
+
+Explore five refined directions for the public site before implementation.
+Each direction is applied consistently to the home, a documentation page and
+the changelog, stays within the Folio tokens and the Mokly catalogue chrome,
+and is registered in the design catalogue for side-by-side review. The user
+selects one afterwards; the selected direction replaces the baseline screens
+and the others are retired in a later milestone.
+
+- [x] Write `docs/protocol/site-directions.md` with the shared rules, the five
+      direction intents and the screen inventory.
+- [x] Scaffold the `Directions` collection with one collection, three routes
+      and one stylesheet per direction, config rules, watch paths and the
+      `tests/design_site_directions.test.ts` coverage.
+- [ ] Editorial direction: home, docs and changelog.
+- [ ] Product direction: home, docs and changelog.
+- [ ] Grid direction: home, docs and changelog.
+- [ ] Minimal direction: home, docs and changelog.
+- [ ] Bands direction: home, docs and changelog.
+- [ ] Capture every direction at 390px and 1440px in light and dark and
+      review them together; record the user's selection in
+      `docs/protocol/site-directions.md`.
+- [ ] Run `cargo xtask check`, commit and push. Stop for review.
+
 ## Milestone 3: Site Workspace Package And Checks
 
 Create the site package and wire its checks into the repository gate before

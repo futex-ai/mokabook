@@ -1,0 +1,4 @@
+/* Minimal direction for the public site mockups. Replace this placeholder
+   import with the direction's own layout; reference only the --site-*
+   properties from site-tokens.css and never a literal color. */
+@import "./site.css";
