@@ -6,6 +6,8 @@ import type {
 } from "../components/render_types.js";
 import type { GeneratedComponentView } from "../components/views.js";
 
+import { localFramePath } from "./same_origin_adapter.js";
+
 export async function requestComponentPreview(
   request: ComponentRenderRequest,
   capability: RenderCapability,
@@ -61,7 +63,7 @@ export async function componentPreviewExpired(
   signal: AbortSignal,
 ): Promise<boolean> {
   const preview = [...previews].find(
-    (result) => frame.contentWindow?.location.pathname === result.previewUrl,
+    (result) => localFramePath(frame) === result.previewUrl,
   );
   if (!preview) return false;
   const response = await fetch(preview.previewUrl, {

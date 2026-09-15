@@ -10,6 +10,7 @@ import {
   applyNavVisibility,
   selectAndRevealRoute,
 } from "./browse_navigation_state.js";
+import { replaceLocalFrame } from "./same_origin_adapter.js";
 import { syncTagChips } from "./tag_filter.js";
 
 /** Color scheme selection applied to fragment frames and device chrome. */
@@ -239,7 +240,7 @@ export function setColorScheme(doc: Document, value: BrowseColorScheme): void {
         frame.getAttribute("src")) !== next
     ) {
       const target = frame as HTMLIFrameElement;
-      target.contentWindow?.location.replace(new URL(next, doc.URL).href);
+      replaceLocalFrame(target, new URL(next, doc.URL));
       frame.setAttribute("data-fragment-current", next);
     }
   }

@@ -3,9 +3,9 @@ import type { GeneratedComponentView } from "../components/views.js";
 import type { WorkspaceData } from "../server/shell/workspace_data.js";
 
 import { currentColorScheme, currentViewport } from "./browse_state.js";
-import { authenticateRanges } from "./component_geometry.js";
 import type { HighlightFrame } from "./component_highlight.js";
 import { element } from "./inspector_panels.js";
+import { localInspection, localFrameReady } from "./same_origin_adapter.js";
 
 export function workspaceViews(
   doc: Document,
@@ -38,7 +38,7 @@ export function workspaceFrames(
     );
     return frame &&
       value.usage &&
-      authenticateRanges(frame, value.path, value.usage)
+      localInspection(frame, value.path, value.usage)
       ? [{ frame, path: value.path, usage: value.usage }]
       : [];
   });
@@ -55,12 +55,7 @@ export function revealWorkspaceInstance(
     `iframe[data-workspace-frame="${viewport}"]`,
   );
   if (!frame || !view?.usage) return;
-  const range = authenticateRanges(frame, view.path, view.usage)?.ranges.get(
-    key,
-  )?.[0];
-  const node = range?.startContainer.childNodes[range.startOffset];
-  const target = node?.nodeType === 1 ? (node as Element) : node?.parentElement;
-  target?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  localInspection(frame, view.path, view.usage)?.reveal(key);
 }
 export function highlightUnavailable(
   root: HTMLElement,
@@ -85,11 +80,8 @@ export function highlightUnavailable(
       );
       try {
         return (
-          frame?.contentDocument?.readyState === "complete" &&
-          decodeURIComponent(frame.contentWindow!.location.pathname).replace(
-            /\.html$/,
-            "",
-          ) === `/static/${view.path}`.replace(/\.html$/, "") &&
+          frame &&
+          localFrameReady(frame, view.path) &&
           !frames.some((item) => item.frame === frame)
         );
       } catch {

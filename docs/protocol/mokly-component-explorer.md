@@ -173,7 +173,7 @@ development server. Standalone generated fragments retain normal content and
 portable links; they do not require the interactive inspector. Temporary local
 controls are governed separately by the [controls contract](./mokly-component-controls.md).
 
-Approved target: the [viewer](./mokly-viewer.md) accesses boundaries,
+The implemented frame boundary lets the upcoming [viewer](./mokly-viewer.md) access boundaries,
 highlighting, scrolling and frame events through [FrameAdapter](./mokly-frame-adapter.md).
 `sameOriginAdapter` encapsulates today's document access without changing
 authentication, visuals or sandbox. An explicit cross-origin host instead uses

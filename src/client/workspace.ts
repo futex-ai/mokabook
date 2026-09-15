@@ -10,7 +10,6 @@ import {
   setViewport,
 } from "./browse_state.js";
 import { ComponentControls } from "./component_controls.js";
-import { authenticateRanges, rangeBounds } from "./component_geometry.js";
 import { installComponentHighlight } from "./component_highlight.js";
 import type { LoadedDiff } from "./diff_views.js";
 import {
@@ -20,6 +19,7 @@ import {
   renderUsage,
 } from "./inspector_panels.js";
 import { installInspectorTabs } from "./inspector_tabs.js";
+import { localInspection } from "./same_origin_adapter.js";
 import { installWorkspaceEvents } from "./workspace_events.js";
 import { renderWorkspaceEvidence } from "./workspace_evidence.js";
 import { workspaceLoader } from "./workspace_loading.js";
@@ -178,12 +178,12 @@ export function installWorkspace(
       (frame) => frame.usage.viewport === activeViewport,
     );
     if (selected && activeFrame) {
-      const ranges = authenticateRanges(
+      const inspection = localInspection(
         activeFrame.frame,
         activeFrame.path,
         activeFrame.usage,
       )!;
-      if (!rangeBounds(activeFrame.frame, ranges, new Set([selected])).length)
+      if (!inspection.measure(new Set([selected])).length)
         panel("props")!.append(
           element(
             doc,

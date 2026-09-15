@@ -71,6 +71,7 @@ export async function bootstrapFixture(
       "# Ownership protocol test fixture\n",
     "docs/protocol/fixtures/export-ownership-v1.json":
       '{"schemaVersion":1,"cases":[]}\n',
+    "docs/protocol/mokly-frame-adapter.md": "# Frame protocol test fixture\n",
     "docs/protocol/mokly-catalogue.md": "# Catalogue protocol test fixture\n",
     "docs/protocol/fixtures/catalogue-v1.json": '{"schemaVersion":1}\n',
     LICENSE: "MIT\n",

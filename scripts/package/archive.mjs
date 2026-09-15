@@ -64,6 +64,8 @@ export function validatePackageReport(report) {
     "dist/components/definition.js",
     "dist/server/controls/worker.js",
     "dist/browser/component_controls.js",
+    "dist/browser/inspector.js",
+    "docs/protocol/mokly-frame-adapter.md",
     "dist/export/run.js",
     "dist/export/transaction.js",
     "dist/client/static_delivery.js",

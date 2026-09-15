@@ -5,6 +5,8 @@ import path from "node:path";
 
 import { build } from "esbuild";
 
+import { bundleInspector } from "./inspector-bundle.mjs";
+
 const repositoryRoot = path.resolve(import.meta.dirname, "..");
 const source = path.join(repositoryRoot, "src", "server", "shell", "assets");
 const target = path.join(repositoryRoot, "dist", "server", "shell", "assets");
@@ -57,4 +59,9 @@ await build({
 await fs.promises.copyFile(
   path.join(repositoryRoot, "dist", "client", "navigation-resize.js"),
   path.join(browserRoot, "navigation-resize.js"),
+);
+
+await bundleInspector(
+  path.join(repositoryRoot, "src", "inspector", "index.ts"),
+  path.join(browserRoot, "inspector.js"),
 );

@@ -8,8 +8,8 @@ and browser behavior for the consumer command, with Cloudflare normalization
 kept in the repository adapter. Delivery is tracked in the
 [consumer static export plan](../../plans/consumer-static-export.md).
 
-The public catalogue is implemented; the cross-origin inspector and viewer
-extraction remain approved targets tracked by the [viewer library plan](../../plans/mokly-viewer-library.md).
+The public catalogue and cross-origin inspector are implemented; viewer
+extraction remains an approved target tracked by the [viewer library plan](../../plans/mokly-viewer-library.md).
 Existing routes and default same-origin Serve/export behavior stay unchanged.
 
 ## Hosting Contract
@@ -64,7 +64,7 @@ existing validated route grammar and are encoded once when written into URLs.
 | `static/<public-path>`        | Adapted current fragments and public consumer resources               |
 | `__mokly/`                    | Required shell CSS, fonts, browser modules, and comparison generation |
 | `__mokly/catalogue.json`      | Public catalogue read model v1                                        |
-| `__mokly/client/inspector.js` | Approved target: inert cross-origin frame inspector                   |
+| `__mokly/client/inspector.js` | Inert cross-origin frame inspector                                    |
 | `404.html`                    | Existing catalogue not-found view                                     |
 | `.mokly-export-artifact`      | Public-safe versioned ownership inventory                             |
 

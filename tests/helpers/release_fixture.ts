@@ -31,6 +31,8 @@ export function packageReport(): PackageReport {
       { path: "dist/components/definition.js", size: 1 },
       { path: "dist/server/controls/worker.js", size: 1 },
       { path: "dist/browser/component_controls.js", size: 1 },
+      { path: "dist/browser/inspector.js", size: 1 },
+      { path: "docs/protocol/mokly-frame-adapter.md", size: 1 },
       { path: "README.md", size: 1 },
       { path: "LICENSE", size: 1 },
       { path: "CHANGELOG.md", size: 1 },

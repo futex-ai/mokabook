@@ -64,6 +64,18 @@ Export revisions are zero; current-only exports have disabled Changes and a
 null comparison pointer. Repository preview capture uses the same projection
 and finalization. Shell HTML retains its existing bytes apart from the identity.
 
+The browser inventory also publishes `__mokly/client/inspector.js`. The Browse
+adapter adds its deferred script and bounded inert identity map only to owned
+current HTML copies. Generated files and immutable comparison snapshots remain
+byte-unmodified. Local frames retain `allow-same-origin`, with scripts disabled
+and parent-owned highlighting; an explicit cross-origin host uses the
+[frame adapter handshake](../inspector/README.md). The script and maps enter the
+existing ownership/upload inventories and deployment hash without schema changes.
+Repository preview validates the copied consumer resources before adding the
+inspector, then validates the complete export inventory. This preserves the
+portable-source rules without treating the package-owned script as a consumer
+resource or granting consumer documents root-relative resource access.
+
 `paths.ts`, `ownership.ts`, and `transaction.ts` constrain replacement to a
 validated, exclusively reserved output. `destination.ts` retains initial absence
 or exact bigint directory identity and checks it before and after capture.

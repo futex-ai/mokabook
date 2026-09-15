@@ -87,6 +87,7 @@ export async function smokeConsumerPublish(context, root) {
         "404.html",
         "mokly-upload.json",
         "__mokly/catalogue.json",
+        "__mokly/client/inspector.js",
       ])
         assert.ok(
           marker.files.includes(file),

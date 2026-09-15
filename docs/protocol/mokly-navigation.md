@@ -9,8 +9,9 @@ in the completed
 [Whole-document pages](./mokly-pages.md) use the same logical links, IDs,
 source ownership, and collection ancestry as screens and use cases.
 
-The [viewer/frame-adapter extraction](./mokly-frame-adapter.md) is an approved
-target; this document's existing same-origin interactions remain authoritative.
+The [frame adapters](./mokly-frame-adapter.md) are implemented; viewer package
+extraction remains planned. This document's same-origin interactions remain
+authoritative.
 
 ## Scope
 
@@ -267,10 +268,11 @@ sandbox. Consumer-authored targets remain byte-preserved, but the sandbox denies
 their access to the outer shell and to popups. Mokly must not infer product
 navigation from URLs, `data-nav-href`, or visible labels.
 
-### Approved Frame Adapter Boundary
+### Frame Adapter Boundary
 
-The upcoming viewer uses `sameOriginAdapter` for this existing behavior;
-direct `contentDocument` access moves behind the interface. Logical target
+The implemented `sameOriginAdapter` preserves this existing behavior;
+direct `contentDocument` access lives behind the local transport interface.
+The upcoming viewer package exposes the same boundary. Logical target
 parsing, marker/ownership checks, modifier/target classification, canonical
 routes and safe degradation do not change. No adapter gains nested-frame access.
 The optional `postMessageAdapter` requires a separate, nonopaque frame origin

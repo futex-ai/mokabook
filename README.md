@@ -11,7 +11,8 @@ the consumer contract settles.
 
 The upcoming [`@mokly/viewer`](./docs/protocol/mokly-viewer.md) package will let
 React hosts embed the existing Browse shell using a public catalogue read model.
-The public [catalogue read model](./docs/protocol/mokly-catalogue.md) is implemented;
+The public [catalogue read model](./docs/protocol/mokly-catalogue.md) and
+[frame adapters](./docs/protocol/mokly-frame-adapter.md) are implemented;
 viewer extraction remains planned. Local Serve and export appearance and
 interactions remain unchanged.
 
@@ -757,6 +758,10 @@ when the deployed catalogue, assets, or host aliases change, even if the
 comparison files are unchanged. Within one deployment, navigation remains
 progressive. Hosting must revalidate mutable files so that reload can fetch them.
 
+Exports also include an inert `__mokly/client/inspector.js` for explicit
+cross-origin hosts. Current owned copies contain its bounded identity map;
+local scripts stay disabled and comparison snapshots remain byte-unmodified.
+
 Exports include `__mokly/catalogue.json`: versioned public navigation, entry,
 instance, Changes and comparison-pointer data. It shares the shell's deployment
 identity and appears in `.mokly-export-artifact` and publish archives. Serve
@@ -979,7 +984,8 @@ in the [plans index](./plans/README.md).
 - [Instance identity](./docs/protocol/mokly-instances.md),
   [public catalogue](./docs/protocol/mokly-catalogue.md),
   [viewer API](./docs/protocol/mokly-viewer.md), and
-  [frame adapters](./docs/protocol/mokly-frame-adapter.md) — approved viewer target.
+  [frame adapters](./docs/protocol/mokly-frame-adapter.md) — identity, catalogue and
+  adapters are implemented; the viewer package remains planned.
 - [Package ownership boundary](./docs/architecture/package-boundary.md)
 - [Accounting migration inventory](./docs/migration/accounting-framework-inventory.md)
 - [Styled control migration guide](./docs/migration/accounting-link-controls.md)

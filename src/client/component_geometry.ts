@@ -3,6 +3,11 @@ import type { ComponentViewRecord } from "../components/manifest_types.js";
 
 import { uncoveredBoxes } from "./component_occlusion.js";
 import { componentNodeRects } from "./component_range_nodes.js";
+import {
+  authenticateDocumentRanges,
+  type AuthenticatedRanges,
+} from "./document_ranges.js";
+import { localFrameAccess } from "./same_origin_access.js";
 
 export interface ComponentBounds {
   key: string;
@@ -11,17 +16,13 @@ export interface ComponentBounds {
   width: number;
   height: number;
 }
-export interface AuthenticatedRanges {
-  doc: Document;
-  ranges: ReadonlyMap<string, readonly Range[]>;
-}
 export function authenticateRanges(
   frame: HTMLIFrameElement,
   path: string,
   usage: ComponentViewRecord,
 ): AuthenticatedRanges | undefined {
   try {
-    const doc = frame.contentDocument;
+    const doc = localFrameAccess(frame).document();
     const parent = frame.ownerDocument;
     const location = doc?.defaultView?.location;
     if (
@@ -37,38 +38,16 @@ export function authenticateRanges(
       ? path
       : `/static/${path}`;
     if (actual !== expected.replace(/\.html$/, "")) return;
-    const walker = doc.createTreeWalker(doc, 128);
-    const stack: { id: string; node: Node }[] = [];
-    const ranges = new Map<string, Range[]>();
-    let next = 0;
-    let node: Node | null;
-    while ((node = walker.nextNode())) {
-      const text = node.textContent ?? "";
-      if (!text.startsWith("mokly-component:")) continue;
-      const match = /^mokly-component:(start|end):(r-[0-9]+)$/.exec(text);
-      if (!match) return;
-      const record = usage.ranges.find((item) => item.id === match[2]);
-      if (!record) return;
-      if (match[1] === "start") {
-        if (
-          usage.ranges[next++]?.id !== record.id ||
-          record.parentId !== stack.at(-1)?.id
-        )
-          return;
-        stack.push({ id: record.id, node });
-      } else {
-        const start = stack.pop();
-        if (start?.id !== record.id) return;
-        if (record.target.kind !== "instance") continue;
-        const range = doc.createRange();
-        range.setStartAfter(start.node);
-        range.setEndBefore(node);
-        const key = record.target.instanceKey;
-        ranges.set(key, [...(ranges.get(key) ?? []), range]);
-      }
-    }
-    if (stack.length || next !== usage.ranges.length) return;
-    return { doc, ranges };
+    return authenticateDocumentRanges(
+      doc,
+      usage.ranges.map((range) => ({
+        id: range.id,
+        ...(range.parentId ? { parentId: range.parentId } : {}),
+        ...(range.target.kind === "instance"
+          ? { key: range.target.instanceKey }
+          : {}),
+      })),
+    );
   } catch {
     return;
   }
@@ -113,14 +92,17 @@ function clipAncestors(
 }
 /** Read each actual range without inserting wrappers or changing consumer styles. */
 export function rangeBounds(
-  frame: HTMLIFrameElement,
+  frame: Pick<HTMLIFrameElement, "clientWidth" | "clientHeight">,
   authenticated: AuthenticatedRanges,
   keys: ReadonlySet<string>,
+  overlay?: Element,
 ): ComponentBounds[] {
   const { doc, ranges } = authenticated;
   const win = doc.defaultView!;
   const result: ComponentBounds[] = [];
-  const candidates = [...doc.querySelectorAll("body *")];
+  const candidates = [...doc.querySelectorAll("body *")].filter(
+    (node) => !overlay?.contains(node),
+  );
   const rects = new WeakMap<Element, readonly DOMRect[]>();
   for (const [key, values] of ranges) {
     if (!keys.has(key)) continue;

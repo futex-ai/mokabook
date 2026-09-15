@@ -21,6 +21,9 @@ export async function createExampleBaseline(root: string) {
     "tsconfig.json",
     "tsconfig.build.json",
     "scripts/copy-assets.mjs",
+    "scripts/inspector-bundle.mjs",
+    "scripts/inspector-pool.mjs",
+    "scripts/inspector-pool.d.mts",
     "src",
   ])
     await fs.cp(path.join(repositoryRoot, name), path.join(root, name), {

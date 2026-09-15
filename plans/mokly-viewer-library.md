@@ -354,29 +354,123 @@ Tags: ui
 Move frame access behind the `FrameAdapter` interface and add the
 cross-origin path.
 
-- [ ] Define `FrameAdapter` types in `src/client` with mount, list instance
+- [x] Define `FrameAdapter` types in `src/client` with mount, list instance
       boxes, highlight, scroll-to, and hover, click, and navigation
       subscriptions; add a fake adapter for tests.
-- [ ] Extract `sameOriginAdapter` from the existing `contentDocument` modules
+- [x] Extract `sameOriginAdapter` from the existing `contentDocument` modules
       without behavior change; existing browser tests must pass unchanged.
-- [ ] Write the inspector script as a dependency-free IIFE under
+- [x] Write the inspector script as a dependency-free IIFE under
       `src/inspector`, bundled by `scripts/copy-assets.mjs`, with a size
       budget check in `scripts/package-check.mjs`.
-- [ ] Implement message schema validation shared by both sides: channel,
+- [x] Implement message schema validation shared by both sides: channel,
       version, nonce, discriminated `type`, bounded arrays and numbers,
       unknown keys rejected, `event.source` and exact origin checks.
-- [ ] Implement `postMessageAdapter` with the handshake, per-mount nonce,
+- [x] Implement `postMessageAdapter` with the handshake, per-mount nonce,
       exact `frameOrigin`, opaque-origin rejection, and in-frame highlight
       overlay requests.
-- [ ] Embed the script through the Browse document adapter for current
+- [x] Embed the script through the Browse document adapter for current
       published HTML copies only; comparison snapshots remain byte-unmodified.
       Prove the script is inert without a handshake and never touches
       `window.top` or `parent.location`.
-- [ ] Add browser tests with a cross-origin fixture page: handshake, instance
+- [x] Add browser tests with a cross-origin fixture page: handshake, instance
       boxes, highlight, scroll, hover, click, in-frame link navigation,
       rejected messages from wrong origins, wrong sources, and wrong nonces.
 - [ ] Update READMEs, run relevant tests and `cargo xtask check`, commit,
       push, and stop for review.
+
+- [x] Validate compact range parents before numeric conversion; reject broken
+      references rather than converting invalid numbers to null.
+- [x] Exercise the public same-origin interface's pointer subscriptions and
+      pending-operation disposal, alongside the unchanged local shell runtime.
+- [x] Capture disposal-after-response and byte-limited usage-map regressions
+      before fixing their lifecycle/error handling.
+- [x] Preserve body-child selectors by inserting publication metadata into the
+      head; cover the unchanged body structure in a regression.
+- [x] Prove clipping, occlusion and coalesced events across origins; capture and
+      fix text-only range scrolling through nested containers.
+- [x] Cover primary/modified/middle and top/parent/blank/named navigation,
+      runtime outer-window traps and a real five-second pending-request timeout.
+- [x] Validate build-time string/native pooling semantics and enforce the final
+      minified inspector budget after all formatting and implementation changes.
+- [x] Extend the existing Browse target-preservation unit assertions to include
+      the new authenticated link indices without weakening their href/target checks.
+- [x] Validate portable repository-preview resources before inspector injection,
+      retaining full staged-inventory validation afterward; include the build
+      helpers in the isolated example-baseline fixture.
+
+### Milestone 4 implementation notes
+
+Three existing browser assertions (`component_inspector`, `component_workspace`,
+`design_links`) required zero script elements in published Browse frames. The
+required external inspector injection necessarily adds one script tag. Only those
+assertions now require that one package script; generated-document assertions,
+sandbox denial, screenshots and existing interactions retain their requirements.
+The inert map uses a template so it adds no executable script. No mockup changes
+are needed because the local presentation is unchanged.
+The existing `browse_document_adapter` unit test also expected target attributes
+to end the start tag. Its six exact assertions now include the required link
+indices, retaining the original href, target, namespace and degradation checks.
+
+- [x] Prove local shell HTML, generated documents and mobile/desktop screenshots
+      match the pre-milestone capture; retain comparison snapshot bytes exactly.
+- [x] Cover inspector budget, bundle confinement, release inventory, lifecycle
+      failures and current-only metadata injection in focused regressions.
+- [ ] After checks pass, `git add -A`, commit with Conventional Commits and push.
+- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+      against the complete local diff from `origin/main`; record numbered
+      findings with severity, options and recommendations without changing code.
+
+### Milestone 4 verification notes
+
+The frame interfaces and both adapters are implemented in `src/client`; extraction
+into the separate viewer package remains Milestone 5. Local Serve/export retain
+their script-disabled sandbox, parent-owned highlighting and existing controls.
+Current published copies receive a deferred inspector plus an inert, bounded
+range/parent and logical-link map. The map and script are inserted in the head;
+generated files and comparison snapshots receive neither. Oversized maps publish
+an explicit limit state. The frame/export delivery documents and the client,
+inspector, Browse, export and root READMEs describe these boundaries.
+
+Regressions captured invalid compact parent conversion, a resolved reply escaping
+disposal, a byte-limited host map throwing the wrong error, body-selector changes,
+and text-only scrolling inside an inner container before their fixes. Build-helper
+tests also captured strict-directive relocation, native shadowing and delimiter
+collisions. The dependency-free IIFE uses ordinary string/native pooling followed
+by Terser with no unsafe compression flags or runtime decoder. Its final minified,
+uncompressed size is exactly 8,192 bytes, enforced by the package gate.
+
+Focused verification passes 47 Node tests and 14 Chromium tests, with no skips or
+intermittent retries. Browser coverage includes null/multiple roots, clipping,
+occlusion, highlight pixel preservation, text and element scrolling, hover/click,
+Escape, logical targets/modifiers, coalescing, view replacement, disposal, both
+five-second timeouts and rejected origin/source/nonce/schema/size inputs. VM traps
+exercise outer-window confinement through handshake, navigation and disposal.
+The final mobile and desktop screenshots and served shell HTML are byte-identical
+to the saved pre-milestone captures. All 277 generated example HTML hashes match;
+the export regression separately compares every snapshot HTML file with its
+original generated bytes. No comparison or example source files were changed.
+
+The first full gate ran 1,598 Node tests and stopped with 40 failures: one
+existing target-attribute assertion, one isolated example fixture missing the new
+build helpers, and 38 repository-preview tests sharing a portable-resource
+validation failure. Preview now validates copied consumer resources before
+inspector injection; final export validation still checks the complete staged
+inventory. A new regression also proves unowned consumer scripts cannot gain
+root-relative access through that ordering. All six Browse adapter tests, the
+isolated example rebuild, and the 45 publication/preview tests pass after these
+fixes. One focused preview run correctly rejected source edits made concurrently
+with its capture; the independent stable-tree rerun passed both tests.
+
+The final `cargo xtask check` passed all 1,599 Node tests, 290 Chromium tests,
+five packed-consumer scenarios and three Rust tests, plus dependency audits,
+formatting, lint, typechecking, example validation, the package budget gate,
+Clippy and the Rust file-length audit (eight files). No tests were skipped and
+no browser retries or intermittent failures occurred in the final gate. The
+browser suite took 9.5 minutes. The working tree stayed stable during this run.
+All changed source/test files are within 300 lines. Local Markdown links and the
+diff were validated; there are no file deletions against refreshed `origin/main`
+(`87daaa4`). The required post-push review is pending. Milestone 3 notes and
+findings remain byte-unchanged.
 
 ## Milestone 5: Extract the viewer package
 

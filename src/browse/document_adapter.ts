@@ -3,6 +3,7 @@ import { parse } from "parse5";
 import { hasGeneratedOwnershipHeader } from "../build/ownership.js";
 import { validateComponentRanges } from "../components/ranges.js";
 import { MoklyError } from "../errors.js";
+import type { LinkIdentity } from "../inspector/metadata.js";
 import { logicalMarker, parseLogicalMarker } from "../navigation/logical.js";
 import {
   duplicateReservedAttributeName,
@@ -17,6 +18,7 @@ import {
 } from "../navigation/target.js";
 import type { Catalogue } from "../server/catalogue.js";
 
+import { inspectorInsertion, inspectorMarkup } from "./inspector_metadata.js";
 import { expectedPortableHref, trustedDocument } from "./trusted_document.js";
 
 interface HtmlAttribute {
@@ -31,6 +33,7 @@ interface HtmlNode {
   namespaceURI?: string;
   sourceCodeLocation?: {
     startTag?: HtmlSourceLocation;
+    endTag?: HtmlSourceLocation;
   } | null;
   tagName?: string;
 }
@@ -62,6 +65,7 @@ export function adaptBrowseDocument(
   if (trusted.componentView)
     validateComponentRanges(content, trusted.componentView.ranges);
   const replacements: Replacement[] = [];
+  const links: LinkIdentity[] = [];
   const nodes: HtmlNode[] = [];
   let baseTarget: string | undefined;
   let hasBaseHref = false;
@@ -75,6 +79,11 @@ export function adaptBrowseDocument(
       throw invalid(route, `duplicate reserved ${duplicate} metadata`);
     }
     const attributes = attributesOf(node);
+    if (
+      attributes.has("data-mokly-inspector") ||
+      attributes.has("data-mokly-inspector-link")
+    )
+      throw invalid(route, "reserved inspector metadata in consumer output");
     if (
       node.namespaceURI === HTML_NAMESPACE &&
       node.tagName === "base" &&
@@ -139,6 +148,19 @@ export function adaptBrowseDocument(
       continue;
     }
     const serializedTarget = serializeBrowsingTarget(target);
+    const identity = { ...destination, target };
+    let index = links.findIndex(
+      (link) => JSON.stringify(link) === JSON.stringify(identity),
+    );
+    if (index < 0) index = links.push(identity) - 1;
+    replacements.push(
+      insertAttribute(
+        content,
+        route,
+        node,
+        `data-mokly-inspector-link="${index}"`,
+      ),
+    );
     if (serializedTarget) {
       replacements.push(
         insertAttribute(
@@ -150,6 +172,13 @@ export function adaptBrowseDocument(
       );
     }
   }
+  replacements.push(
+    inspectorInsertion(
+      nodes,
+      content.length,
+      inspectorMarkup(trusted.componentView, links),
+    ),
+  );
   return applyReplacements(content, replacements);
 }
 

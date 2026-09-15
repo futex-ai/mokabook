@@ -2,8 +2,8 @@
 
 ## Delivery Status
 
-Approved target. [Viewer library Milestone 4](../../plans/mokly-viewer-library.md)
-implements this contract, followed by package extraction in Milestone 5. Local
+Implemented under [viewer library Milestone 4](../../plans/mokly-viewer-library.md);
+package extraction follows in Milestone 5. Local
 Serve/export keep today's same-origin sandbox and visible behavior. Only an
 explicit cross-origin host uses the new inspector transport.
 
@@ -71,8 +71,10 @@ declare function postMessageAdapter(options: {
 ```
 
 Each mount owns one immediate viewer-created frame and its current URL/usage.
-Validate the URL against the selected public view; no selectors or arbitrary
-documents are accepted. Mount replaces the document with iframe history
+The host supplies the selected catalogue view URL; the adapter confines it to
+current `/static/` HTML paths, the configured origin and a valid logical hash.
+Caller-approved query parameters are retained; no selectors or comparison paths
+are accepted. Mount replaces the document with iframe history
 replacement semantics. A load, view/scheme swap or disposal invalidates the old
 session and its pending work; responses from it never update a new mount.
 
@@ -225,6 +227,20 @@ that document's accepted metadata, so `r-n` comments can be resolved without
 reading a manifest. Bound this map to the limits above and 262,144 UTF-8 bytes;
 oversized maps disable cross-origin inspection explicitly. No private evidence
 or source text is embedded. Unowned files get no inspector/map.
+Repository preview validates portable consumer resources before adaptation;
+the complete export inventory validates the injected package resource afterward.
+
+The inert `template[data-mokly-inspector]` contains JSON with `ranges` and
+`links`, plus optional `error: "limit" | "unavailable"`. Range index `n` denotes
+`r-n`; each tuple is `[instanceKey | null, parentIndex | null]`. Null keys denote
+slots; parents refer only to earlier indices and must match actual nesting.
+Distinct keys derive from these authenticated ranges, including empty pairs.
+Links use `FrameNavigation` without `activation`, with at most 1,024 distinct
+identities. Overflow publishes an explicit error map, never a truncated map.
+Each accepted native link receives `data-mokly-inspector-link="n"`, indexing the
+deduplicated `links` array. Consumer-authored inspector markers and link indices
+are rejected. Both publication nodes are inserted into the head so body child
+positions and authored selectors remain unchanged, including implicit heads.
 
 On request the script draws the existing dimming mask and outlines in-frame;
 host labels and keyboard-accessible instance lists use public catalogue titles
@@ -232,6 +248,12 @@ and returned boxes. Pick reuses Highlight components visuals. Do not clone or
 restyle consumer content. No overlay exists without a highlight/pick request.
 Overlay nodes are excluded from range/occlusion measurements and observers
 must not create a redraw loop. Disposal removes all package-owned overlay nodes.
+The in-frame SVG lives in a shadow root on a host after the body: consumer styles
+cannot restyle its shapes, redraw mutations stay outside observation, and body
+range/occlusion measurements exclude the host. Outgoing fields contain only
+validated ASCII identities/control values and numeric geometry; serialized
+character length therefore equals its UTF-8 byte length. Incoming strings still
+require explicit UTF-8 measurement before parsing.
 
 Generated files and comparison snapshots stay byte-unmodified. Snapshots never
 embed the script or negotiate a session. Local script-disabled

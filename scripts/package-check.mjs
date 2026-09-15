@@ -30,3 +30,11 @@ const bin = await fs.promises.readFile(
 );
 if (!bin.startsWith("#!/usr/bin/env node"))
   throw new Error("built executable lost its shebang");
+
+const inspector = await fs.promises.readFile(
+  path.join(repositoryRoot, "dist/browser/inspector.js"),
+);
+if (inspector.length > 8192)
+  throw new Error(
+    `Inspector exceeds 8,192-byte budget: ${inspector.length} bytes`,
+  );
