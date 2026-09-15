@@ -2,22 +2,24 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { FileLocation } from "../config/file_locations.js";
+import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import {
   isPrivateStaticPath,
   publicPathLocation,
 } from "../config/public_files.js";
-import { isInside, isSafeRepositoryPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError, errorMessage } from "../errors.js";
+
 import { referencedRoutes } from "./asset_references.js";
-import type { GitClient, GitFile } from "./git.js";
+import type { BaselineReader, GitFile } from "./git.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type { ReviewArtifactContent } from "./types.js";
 
 /** Filesystem boundary for current-worktree Review assets. */
 export interface ReviewAssetReader {
   read(route: string): Promise<Uint8Array>;
+  /** Distinguish a new resource from a rejected historical path when supported. */
   readIfExists?(route: string): Promise<Uint8Array | undefined>;
   /** Optional bounded bulk read; every requested route must be present or reject. */
   readMany?(
@@ -90,10 +92,19 @@ export class FileSystemReviewAssetReader implements OptionalReviewAssetReader {
 export class GitReviewAssetReader implements ReviewAssetReader {
   constructor(
     private readonly config: ResolvedConfig,
-    private readonly git: GitClient,
+    private readonly git: BaselineReader,
     private readonly commit: string,
     private readonly mockupsPrefix: string,
   ) {}
+
+  async readIfExists(route: string): Promise<Uint8Array | undefined> {
+    assertPublicStaticRoute(route, this.config);
+    const repoPath = this.mockupsPrefix
+      ? `${this.mockupsPrefix}/${route}`
+      : route;
+    if ((await this.git.fileKind(this.commit, repoPath)) === "missing") return;
+    return this.read(route);
+  }
 
   async read(route: string): Promise<Uint8Array> {
     const files = await this.readMany([route]);
@@ -146,7 +157,10 @@ export class GitReviewAssetReader implements ReviewAssetReader {
       }
       return files;
     } catch (error) {
-      if (error instanceof MoklyError && error.code === "review-invalid") {
+      if (
+        error instanceof MoklyError &&
+        (error.code === "review-invalid" || error.code === "config-invalid")
+      ) {
         throw error;
       }
       throw assetError(
@@ -214,7 +228,7 @@ async function readIndividually(
 }
 
 async function readGitFilesIndividually(
-  git: GitClient,
+  git: BaselineReader,
   commit: string,
   repoPaths: readonly string[],
 ): Promise<ReadonlyMap<string, GitFile>> {

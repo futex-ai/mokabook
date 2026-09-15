@@ -29,6 +29,11 @@ endpoint is provided.
 An absent or dangling historical-manifest alias remains private without
 preventing unrelated public files from loading.
 
+The repository's `.mokly-cache/` is package-private in every mode, including
+physical aliases. Public readers, export, resource references, change evidence
+and watchers exclude it before consumer globs or source-watch exceptions.
+Only the dedicated historical baseline reader may read its completed output.
+
 Reserve basenames ending in `.source.html`, `.source.htm`, `.source.ts`,
 `.source.tsx`, `.source.js`, `.source.jsx`, `.source.mts`, `.source.cts`,
 `.source.mjs`, or `.source.cjs`, matched case-insensitively. Their protection is
@@ -112,7 +117,9 @@ cannot bypass the generation's protected paths.
 
 For v5 or historical page-v4 Review resources, use that baseline's structurally validated
 inventory, entry source paths, and reserved-name rules. Never execute historical
-config or rebuild a Git baseline to refresh its inventory. Historical v2/v3 and component-v4
+config with the current package or rebuild a Git baseline to refresh its
+inventory; a [derived baseline](./mokly-derived-baselines.md) is built once
+by its own commit's tooling and then read like any historical baseline. Historical v2/v3 and component-v4
 readers retain their version-specific source/root safeguards and also deny
 reserved source basenames; they are the only readers allowed to lack v5's
 inventory. Internal manifest paths stay private for every historical schema.

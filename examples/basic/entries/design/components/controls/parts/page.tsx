@@ -1,9 +1,9 @@
 import { MockLink } from "@mokly/mokly";
 
 import type { ArtboardViewport } from "../../../parts/shell.js";
-import { ComponentInfo } from "../../parts/component_info.js";
 import { ComparisonDetails } from "../../parts/comparison_details.js";
 import { actionComparison } from "../../parts/comparison_fixtures.js";
+import { ComponentInfo } from "../../parts/component_info.js";
 import { ComponentLayout } from "../../parts/component_layout.js";
 import { UsedBy } from "../../parts/component_usage.js";
 import { CONTROLS_PAGES } from "../../parts/destinations.js";
@@ -13,6 +13,7 @@ import {
   ComponentCanvas,
   ComponentComparison,
 } from "../../parts/preview.js";
+
 import {
   controlsFixtures,
   isPublished,

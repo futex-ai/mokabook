@@ -6,8 +6,9 @@ import { compileCatalogue } from "../../dist/build/compile.js";
 import { compareReview } from "../../dist/review/compare.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../../dist/review/git.js";
+
 import { changedFixture } from "./changed_fixture.js";
 import { componentEntrySource } from "./component_fixture.js";
 import { validEntrySource, type TestFixture } from "./fixture.js";
@@ -68,7 +69,7 @@ export async function cssAttributionFixture(
     },
   );
   const config = fixture.config;
-  const git = new RepositoryGitClient(new NodeGitCommandRunner(fixture.root));
+  const git = new CommittedRepository(new NodeGitCommandRunner(fixture.root));
   return {
     ...fixture,
     config,

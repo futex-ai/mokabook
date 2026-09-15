@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { BackgroundGeneration } from "../dist/server/demand/generation.js";
+
 import { prepareLiveRuntime } from "../dist/build/live_runtime.js";
 import { loadConfig } from "../dist/config/load.js";
+import { BackgroundGeneration } from "../dist/server/demand/generation.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test(

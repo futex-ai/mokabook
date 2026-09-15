@@ -6,6 +6,7 @@ import type {
   ViewReview,
   ViewResourceEvidence,
 } from "../review/types.js";
+
 import { element } from "./inspector_panels.js";
 
 /** Analysed selectors grouped by the outcome that retained them. */

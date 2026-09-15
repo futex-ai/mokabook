@@ -1,5 +1,6 @@
 /** Strict shared validation for private control edits, separate from renderer execution. */
 import type { CatalogueMetadata } from "../registry/catalogue_index.js";
+
 import { decodeProps, decodeValue } from "./codec.js";
 import { validateControlledValues } from "./controls.js";
 import { exactKeys, plainKeys } from "./data.js";

@@ -1,9 +1,10 @@
 /** HTTP response helpers for served Review artifacts. */
 
-import path from "node:path";
 import type { ServerResponse } from "node:http";
+import path from "node:path";
 
 import { errorMessage } from "../errors.js";
+
 import { readConfinedFile } from "./confined_file.js";
 import { contentType, send } from "./respond.js";
 

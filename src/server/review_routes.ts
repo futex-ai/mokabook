@@ -1,29 +1,30 @@
 /** Lazy comparison snapshots used by the catalogue diff controls. */
-
 import type { ServerResponse } from "node:http";
 
 import { encodeUrlPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
-import type { GitClient } from "../review/git.js";
+import type { ReadOnlyReviewRepository } from "../review/repository.js";
 import { runReview } from "../review/run.js";
 import { RepositorySelectedReview } from "../review/selected.js";
 import type {
   SelectedReviewProvider,
   SelectedReviewSource,
 } from "../review/selection_types.js";
-import { SelectedReviewRoutes } from "./selected_review_routes.js";
+
+import { safeDecodePath, send } from "./respond.js";
 import {
   ReviewGenerationStore,
   type ReviewArtifactProvider,
   type ReviewGeneration,
 } from "./review_generations.js";
+import type { ReviewRepositorySource } from "./review_repository.js";
 import {
   redirectReview,
   sendReviewFailure,
   serveReviewArtifactFile,
 } from "./review_responses.js";
-import { safeDecodePath, send } from "./respond.js";
+import { SelectedReviewRoutes } from "./selected_review_routes.js";
 
 const DIFF_ROUTE = "/__mokly/diffs/";
 const GENERATION_ROUTE = `${DIFF_ROUTE}__generations/`;
@@ -33,23 +34,29 @@ export interface ServedReview extends ReviewArtifactProvider {
   /** Comparison base ref, shown when the comparison cannot be generated. */
   base: string;
   selected?: SelectedReviewProvider;
+  repository?(): ReadOnlyReviewRepository;
 }
 
 /** Serve the configured Git comparison from the consumer's Review engine. */
 export function configuredServedReview(
   config: ResolvedConfig,
   base: string,
-  git?: GitClient,
+  git: ReadOnlyReviewRepository | ReviewRepositorySource,
 ): ServedReview {
+  const repository = () => ("current" in git ? git.current() : git);
   return {
     base,
-    selected: new RepositorySelectedReview(config, git),
+    repository,
+    selected: new RepositorySelectedReview(
+      config,
+      "current" in git ? undefined : git.reader,
+    ),
     async generate(options): Promise<void> {
       await runReview(
         config,
         base,
         config.review.outDir,
-        git,
+        repository(),
         undefined,
         options.changedPathExclusions,
       );

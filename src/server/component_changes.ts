@@ -1,13 +1,11 @@
-import { changedManifestRoutes } from "../registry/changed_routes.js";
-import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
-import { classifyChangedContent } from "./changed_content.js";
-import { generatedViews } from "../components/views.js";
-import { EvidenceAssetReader } from "../review/evidence_assets.js";
-import type { ReviewEvidence } from "../review/selection_types.js";
 import path from "node:path";
 
-import { projectRealPath, toPosixPath } from "../config/paths.js";
+import { generatedViews } from "../components/views.js";
+import { ConfiguredGitCommandRunner } from "../config/git.js";
+import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
+import { changedManifestRoutes } from "../registry/changed_routes.js";
+import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
 import type { Manifest } from "../registry/types.js";
 import { GitReviewAssetReader } from "../review/assets.js";
 import {
@@ -17,13 +15,18 @@ import {
 import { reviewChangedPaths } from "../review/changed_paths.js";
 import { classifyComponents } from "../review/component_classification.js";
 import type { ReviewResultV3 } from "../review/component_types.js";
-import type { ScreenResourceEvidence } from "../review/types.js";
+import { EvidenceAssetReader } from "../review/evidence_assets.js";
+import { CommittedRepository, type GitCommandRunner } from "../review/git.js";
+import { derivedHeadOutputs } from "../review/head_assets.js";
 import {
-  NodeGitCommandRunner,
-  RepositoryGitClient,
-  type GitClient,
-  type GitCommandRunner,
-} from "../review/git.js";
+  baselineReaderForCommit,
+  comparisonNotPrepared,
+} from "../review/repository.js";
+import type { ReadOnlyReviewRepository } from "../review/repository.js";
+import type { ReviewEvidence } from "../review/selection_types.js";
+import type { ScreenResourceEvidence } from "../review/types.js";
+
+import { classifyChangedContent } from "./changed_content.js";
 
 export interface ComponentChangeSnapshot {
   baseline: Manifest;
@@ -37,6 +40,12 @@ export interface ComponentChangeSource {
   read(commit: string): Promise<ComponentChangeSnapshot | undefined>;
 }
 
+/** Background-owned inputs; a prepared commit prevents builds in disposable workers. */
+export interface CatalogueClassificationInputs {
+  readonly commit?: string;
+  readonly outputs?: ReadonlyMap<string, string>;
+}
+
 /** Read-only catalogue classification boundary used outside the HTTP child. */
 export interface CatalogueChangeClassifier {
   read(
@@ -44,6 +53,7 @@ export interface CatalogueChangeClassifier {
     manifest: Manifest,
     base: string,
     signal?: AbortSignal,
+    accepted?: CatalogueClassificationInputs,
   ): Promise<ComponentChangeSnapshot | undefined>;
 }
 
@@ -56,6 +66,7 @@ export class RepositoryCatalogueChangeClassifier implements CatalogueChangeClass
     manifest: Manifest,
     base: string,
     signal?: AbortSignal,
+    accepted?: CatalogueClassificationInputs,
   ): Promise<ComponentChangeSnapshot | undefined> {
     try {
       const source = new RepositoryComponentChanges(
@@ -64,6 +75,7 @@ export class RepositoryCatalogueChangeClassifier implements CatalogueChangeClass
         base,
         signal,
         this.commands,
+        accepted,
       );
       signal?.throwIfAborted();
       const baseline = await source.baseline();
@@ -110,26 +122,36 @@ export class ComponentChangeCache {
 
 /** Production read boundary for a last-good catalogue and its current Git branch point. */
 export class RepositoryComponentChanges implements ComponentChangeSource {
-  private readonly runner: GitCommandRunner;
-  private readonly git: RepositoryGitClient;
+  private readonly runner: ConfiguredGitCommandRunner;
+  private git: ReadOnlyReviewRepository;
   constructor(
     private readonly config: ResolvedConfig,
     private readonly manifest: Manifest,
     private readonly base: string,
-    signal?: AbortSignal,
+    private readonly signal?: AbortSignal,
     commands?: GitCommandRunner,
+    private readonly accepted?: CatalogueClassificationInputs,
   ) {
-    this.runner = commands ?? new NodeGitCommandRunner(config.repoRoot, signal);
-    this.git = new RepositoryGitClient(this.runner);
+    this.runner = new ConfiguredGitCommandRunner(config, signal, commands);
+    this.git = new CommittedRepository(this.runner);
   }
   async baseline(): Promise<string> {
-    if (
-      projectRealPath(
-        (await this.runner.run(["rev-parse", "--show-toplevel"])).trim(),
-      ) !== projectRealPath(this.config.repoRoot)
-    )
-      throw new Error("Comparison requires the configured repository root");
-    return this.git.mergeBase(this.base, "HEAD");
+    await this.runner.requireTopLevel();
+    if (this.accepted?.commit) {
+      this.git = {
+        ...this.git,
+        reader: baselineReaderForCommit(
+          this.config,
+          this.accepted.commit,
+          this.runner,
+          this.signal,
+        ),
+      };
+      return this.accepted.commit;
+    }
+    if (this.config.generatedOutput === "derived")
+      throw comparisonNotPrepared();
+    return this.git.evidence.mergeBase(this.base, "HEAD");
   }
   async read(commit: string): Promise<ComponentChangeSnapshot | undefined> {
     return readCatalogueChanges(
@@ -138,6 +160,7 @@ export class RepositoryComponentChanges implements ComponentChangeSource {
       this.base,
       this.git,
       commit,
+      this.accepted?.outputs,
     );
   }
 }
@@ -147,12 +170,14 @@ export async function readCatalogueChanges(
   config: ResolvedConfig,
   manifest: Manifest,
   base: string,
-  git: GitClient,
+  git: ReadOnlyReviewRepository,
   commit: string,
+  outputs?: ReadonlyMap<string, string>,
 ): Promise<ComponentChangeSnapshot> {
-  const baseline = await readBaseManifest(git, commit, config);
+  outputs = await derivedHeadOutputs(config, manifest, outputs);
+  const baseline = await readBaseManifest(git.reader, commit, config);
   const changedPaths = await reviewChangedPaths(
-    git,
+    git.evidence,
     commit,
     config,
     config.review.outDir,
@@ -160,7 +185,7 @@ export async function readCatalogueChanges(
   const components =
     hasRegisteredComponents(baseline) || hasRegisteredComponents(manifest);
   const prefix = toPosixPath(path.relative(config.repoRoot, config.mockupsDir));
-  const reader = new EvidenceAssetReader(config);
+  const reader = new EvidenceAssetReader(config, outputs);
   const result = components
     ? await classifyComponents({
         before: baseline,
@@ -171,7 +196,7 @@ export async function readCatalogueChanges(
         changedPaths,
         beforeReader: new GitReviewAssetReader(
           baselineResourceConfig(config, baseline),
-          git,
+          git.reader,
           commit,
           prefix,
         ),
@@ -182,7 +207,7 @@ export async function readCatalogueChanges(
     manifest,
     baseline,
     config,
-    git,
+    git.reader,
     commit,
     changedPaths,
     reader,
@@ -209,6 +234,7 @@ export async function readCatalogueChanges(
       baseRef: base,
       changedPaths,
       headDigests: reader.digests,
+      ...(outputs ? { headOutputs: [...outputs] } : {}),
     },
     ...(result ? { result } : {}),
     ...(!components && content.screens.length

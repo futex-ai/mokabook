@@ -2,13 +2,15 @@ import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 
 import { compileCatalogue, type Compilation } from "../build/compile.js";
-import { publicPathLocation } from "../config/public_files.js";
-import { isSafeRepositoryPath } from "../config/paths.js";
 import { loadConfig } from "../config/load.js";
+import { isSafeRepositoryPath } from "../config/paths.js";
+import { publicPathLocation } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import type { OptionalReviewAssetReader } from "../review/assets.js";
-import type { GitClient } from "../review/git.js";
 import { reviewChangedPaths } from "../review/changed_paths.js";
+import type { RepositoryEvidence } from "../review/git.js";
+import type { PreparedReviewRepository } from "../review/prepare.js";
+
 import { exportError } from "./error.js";
 import { capturePublicFiles } from "./public_files.js";
 
@@ -38,24 +40,13 @@ export function capturedAssetReader(
 }
 
 /** Pin branch identity and changed-path evidence for every comparison consumer. */
-export function pinnedGit(
-  git: GitClient,
+export function pinnedEvidence(
   commit: string,
   changed: readonly string[],
-): GitClient {
+): RepositoryEvidence {
   return {
     mergeBase: async () => commit,
     changedPaths: async () => changed,
-    fileExists: (base, name) => git.fileExists(base, name),
-    fileKind: (base, name) => git.fileKind(base, name),
-    readFile: (base, name) => git.readFile(base, name),
-    readFileBytes: (base, name) => git.readFileBytes(base, name),
-    ...(git.readFiles
-      ? {
-          readFiles: (base: string, names: readonly string[]) =>
-            git.readFiles!(base, names),
-        }
-      : {}),
   };
 }
 
@@ -64,22 +55,26 @@ export async function assertInputsUnchanged(
   config: ResolvedConfig,
   compilation: Compilation,
   publicFiles: ReadonlyMap<string, Buffer>,
-  git: GitClient,
-  commit: string,
+  prepared: PreparedReviewRepository | undefined,
   changed: readonly string[],
   exclusions: readonly string[],
 ): Promise<void> {
   const freshConfig = await loadConfig(config.repoRoot, config.configPath);
   const fresh = await compileCatalogue(freshConfig);
   freshConfig.sourceFiles = fresh.manifest.sourceFiles;
-  const publicNow = await capturePublicFiles(freshConfig);
-  const changedNow = await reviewChangedPaths(
-    git,
-    commit,
-    config,
-    config.review.outDir,
-    exclusions,
+  const publicNow = await capturePublicFiles(
+    freshConfig,
+    freshConfig.generatedOutput === "derived" ? fresh.outputs : undefined,
   );
+  const changedNow = prepared
+    ? await reviewChangedPaths(
+        prepared.evidence,
+        prepared.commit,
+        config,
+        config.review.outDir,
+        exclusions,
+      )
+    : [];
   if (
     !isDeepStrictEqual(config, freshConfig) ||
     !isDeepStrictEqual(compilation, fresh) ||
@@ -89,4 +84,5 @@ export async function assertInputsUnchanged(
     throw exportError(
       "Export inputs changed during generation; retry the export.",
     );
+  await prepared?.assertUnchanged();
 }

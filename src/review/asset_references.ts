@@ -7,6 +7,7 @@ import {
   extractHtmlReferences,
   type HtmlReferenceOptions,
 } from "../html_references.js";
+
 import type { ReviewArtifactContent } from "./types.js";
 
 /** Resolve portable local resource references using the snapshot URL rules. */

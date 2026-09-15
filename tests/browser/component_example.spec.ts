@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+
 import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 
 for (const viewport of ["desktop", "mobile"] as const)

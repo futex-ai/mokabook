@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { buildPreview } from "../scripts/preview/catalogue.mjs";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 

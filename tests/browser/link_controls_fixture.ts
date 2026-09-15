@@ -6,6 +6,7 @@ import { promisify } from "node:util";
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
 import { loadConfig } from "../../dist/config/load.js";
+import { committedReviewRepository } from "../../dist/review/repository.js";
 import { runReview } from "../../dist/review/run.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
 import {
@@ -41,7 +42,12 @@ moduleResolution: { aliases: { "react-native": "react-native-web" }, conditions:
       controlSource("Updated Home"),
     );
     await writeCompilation(await compileCatalogue(config), config);
-    await runReview(config, "HEAD", config.review.outDir);
+    await runReview(
+      config,
+      "HEAD",
+      config.review.outDir,
+      committedReviewRepository(config),
+    );
     const server = await startCatalogueServer(config, {
       base: "HEAD",
       port: 0,

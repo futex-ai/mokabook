@@ -1,4 +1,5 @@
 import { COMPONENT_NAVIGATION_STATES } from "../components/parts/navigation_states.js";
+
 import {
   DESTINATIONS as D,
   type ComparisonMode,
@@ -118,6 +119,8 @@ export const NAVIGATION_STATES: Record<DesignDestination, NavigationState> = {
   [D.styleUnresolved]: { all: D.welcome, changes: D.styleUnresolved },
   [D.styleUnnamed]: { all: D.welcome, changes: D.styleUnnamed },
   [D.styleExcluded]: { all: D.styleExcluded, changes: D.empty },
+  [D.preparing]: { all: D.welcome },
+  [D.unavailable]: { all: D.welcome },
 };
 
 /** Open/close preserves the depicted query; a selection closes the picker. */

@@ -95,6 +95,46 @@ test("browser checks support an isolated workspace port", async () => {
   assert.doesNotMatch(browseTest, /127\.0\.0\.1:4517/);
 });
 
+test("PR install caching includes the branch-point lockfile and verification retains full history", async () => {
+  const preview = parse(
+    await fs.promises.readFile(
+      path.join(repositoryRoot, ".github/workflows/preview.yml"),
+      "utf8",
+    ),
+  ) as Workflow;
+  const steps = preview.jobs["deploy-pr"]!.steps;
+  const lockIndex = steps.findIndex(
+    (step) => step.name === "Read baseline dependency lockfile",
+  );
+  const nodeIndex = steps.findIndex((step) =>
+    step.uses?.startsWith("actions/setup-node@"),
+  );
+  const installIndex = steps.findIndex((step) => step.run === "npm ci");
+  assert.ok(
+    lockIndex >= 0 && lockIndex < nodeIndex && nodeIndex < installIndex,
+  );
+  assert.match(steps[lockIndex]!.run!, /git merge-base HEAD origin\/main/);
+  assert.match(
+    steps[lockIndex]!.run!,
+    /git show "\$\{baseline_commit\}:package-lock.json" > .context\/baseline-package-lock.json/,
+  );
+  assert.equal(steps[nodeIndex]!.with?.cache, "npm");
+  assert.deepEqual(
+    String(steps[nodeIndex]!.with?.["cache-dependency-path"])
+      .trim()
+      .split("\n"),
+    ["package-lock.json", ".context/baseline-package-lock.json"],
+  );
+  const ci = parse(
+    await fs.promises.readFile(
+      path.join(repositoryRoot, ".github/workflows/ci.yml"),
+      "utf8",
+    ),
+  ) as Workflow;
+  for (const job of ["minimum-runtime", "release-runtime"])
+    assertFullHistoryCheckout(ci.jobs[job]!);
+});
+
 function assertPinnedActions(workflow: Workflow): void {
   const actions = Object.values(workflow.jobs).flatMap((job) =>
     job.steps.flatMap((step) => (step.uses ? [step.uses] : [])),

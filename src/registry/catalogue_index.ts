@@ -1,7 +1,8 @@
 /** Live routing metadata is deliberately not a publishable manifest. */
 import type { ColorScheme, ResolvedRegistryEntry } from "../authoring/types.js";
-import { MoklyError } from "../errors.js";
 import { validateDependencyDeclarations } from "../components/dependency_validation.js";
+import { MoklyError } from "../errors.js";
+
 import { createManifest } from "./manifest.js";
 import { validateManifestMetadata } from "./manifest_validation.js";
 import type { Manifest, ManifestV5 } from "./types.js";

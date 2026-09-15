@@ -5,9 +5,9 @@ import { parse as parseSelector } from "css-what";
 import { parse } from "parse5";
 
 import { matchesDocument } from "../dist/review/css/document_query.js";
+import { matchCssRules } from "../dist/review/css/match.js";
 import { CssSelectorError } from "../dist/review/css/match_types.js";
 import { CssResourceAnalysis } from "../dist/review/css/resource_analysis.js";
-import { matchCssRules } from "../dist/review/css/match.js";
 
 test("a throwing matcher keeps its resource unresolved and continues classification", () => {
   const analysis = new CssResourceAnalysis(undefined, (diff, documents) => {

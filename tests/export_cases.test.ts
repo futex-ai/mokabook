@@ -3,9 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { exportCatalogue } from "../dist/export/run.js";
 import { validateExportReferences } from "../dist/export/references.js";
+import { exportCatalogue } from "../dist/export/run.js";
 import type { ReviewResult } from "../dist/review/types.js";
+
 import { createExportFixture } from "./helpers/export_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 
@@ -18,6 +19,7 @@ test("a clean HEAD matching origin/main exports only unmodified screens", async 
   ).stdout.trim();
   assert.equal(head, main);
   const result = await exportCatalogue(fixture.config, { outDir: "site" });
+  assert.ok(result.comparisonUrl);
   const review = JSON.parse(
     await fs.promises.readFile(
       path.join(fixture.output, result.comparisonUrl),
@@ -68,6 +70,7 @@ test("ignored-only and shared-impact evidence does not fill exported Changes", a
     "Changed shared guidance\n",
   );
   const result = await exportCatalogue(fixture.config, { outDir: "site" });
+  assert.ok(result.comparisonUrl);
   const review = JSON.parse(
     await fs.promises.readFile(
       path.join(fixture.output, result.comparisonUrl),

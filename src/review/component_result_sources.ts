@@ -1,8 +1,9 @@
-import { variantAddress } from "./component_pairing.js";
 import { generatedViews } from "../components/views.js";
 import type { Manifest } from "../registry/types.js";
+
 import { affectedConsumers } from "./component_affected.js";
 import { address, entryPairs, metadata } from "./component_metadata.js";
+import { variantAddress } from "./component_pairing.js";
 import type { ReviewResultV3 } from "./component_types.js";
 import { snapshotPath } from "./paths.js";
 import { requireEqual, reviewInvalid } from "./result_helpers.js";

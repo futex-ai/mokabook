@@ -69,6 +69,8 @@ contract until their standalone screens are implemented.
 | `design-review-style-unresolved`      | `design/review/impact/stylesheets/unresolved.html` | A style change that can reach anything on the screen      |
 | `design-review-style-unnamed`         | `design/review/impact/stylesheets/unnamed.html`    | The same reach with no style name to list                 |
 | `design-review-style-excluded`        | `design/review/impact/stylesheets/excluded.html`   | Changed stylesheet examined and excluded                  |
+| `design-review-preparing`             | `design/review/availability/preparing.html`        | Changes selected while the comparison is prepared         |
+| `design-review-unavailable`           | `design/review/availability/unavailable.html`      | Changes selected after the comparison could not be made   |
 | `design-page-view`                    | `design/browse/pages/view.html`                    | Complete document in its declared collection              |
 | `design-page-details`                 | `design/browse/pages/details.html`                 | Document metadata and close action                        |
 | `design-page-navigation`              | `design/browse/pages/navigation.html`              | Document with its narrow drawer open                      |
@@ -93,6 +95,9 @@ Additional owning groups keep each new page at no more than five screens:
   out, and shows the plain current preview with no comparison band, no stage
   heading, and the terminal status line. Their evidence contract is
   [CSS evidence in the shell](./mokly-css-evidence-shell.md).
+- `design/review/availability/preparing.html` and `unavailable.html` specify the
+  two Changes states that carry no comparison data yet, keeping the impact group
+  to its own three aggregate outcomes.
 
 Every screen ships one mobile and one desktop variant. Mockup implementation
 notes live in entry descriptions, rationale, and related docs — never inside
@@ -208,14 +213,30 @@ scrollable region scrolls internally:
   JavaScript. The head row is `CATALOGUE` (uppercase, 11px) with a text button
   labelled `Collapse all`; an All/Changes segmented filter (with a monospace
   changed count) is always present in live Serve, followed by the scrollable tree.
-  While detection is pending, an 11px spinner replaces the count in its fixed
-  four-character-wide slot. Selected Changes shows “Checking for changes…” and a
-  spinner in place of rows. A failed check shows an unavailable message and a dash;
-  a completed empty result shows `0` and “No changes found.” The filter and tree
-  origin keep their positions throughout. Reduced-motion settings disable rotation.
+  While a comparison is being prepared or detection is pending, an 11px spinner
+  replaces the count in its fixed four-character-wide slot. Selected Changes
+  shows a spinner in place of rows with one of two messages: “Preparing
+  comparison” above “This takes a moment. You can keep browsing All while it
+  finishes.” before the comparison exists, then “Checking for changes…” while
+  detection runs. Only the preparing state carries a secondary line; it is the
+  one state whose message is a title plus detail, and the one whose spinner
+  aligns to the first line instead of centring on the message. Each count-slot
+  spinner is a status region named after the work it reports, so preparing and
+  checking are distinguishable without opening the sidebar. A failed comparison, whether
+  preparation or detection failed, shows the single unavailable message and a
+  dash, and never names a command, path, or reason; a completed empty result
+  shows `0` and “No changes found.” The filter and tree origin keep their
+  positions throughout, and All stays selectable in every state.
+  Reduced-motion settings disable rotation.
   The drawer below the breakpoint shows the same body. Static exports without
   Changes retain their filter-free layout. The catalogue-navigation component's
-  `loading` variant is the mobile/desktop owning mockup.
+  `loading`, `preparing`, and `unavailable` variants are the mobile/desktop
+  owning mockups for the three non-ready states.
+  `design/review/availability/preparing.html` and `unavailable.html` additionally
+  own the preparing and failed states inside the complete shell, where Changes is
+  selected and the chosen screen stays available. The preparing state exists only
+  for derived baselines; see
+  [derived baselines](./mokly-derived-baselines.md) for when it is published.
   - The tree begins with separate `Pages` and `Components` native disclosures,
     both open by default and both closed by `Collapse all`. Pages contains
     screens, whole-document pages, and use cases; Components contains component

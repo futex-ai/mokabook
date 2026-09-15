@@ -5,12 +5,11 @@ import type {
   ScreenDefinition,
   Viewport,
 } from "../authoring/types.js";
-
-import type { ComponentDefinition } from "../components/types.js";
 import type {
   ComponentResourceOwnership,
   ComponentStyleOwnership,
 } from "../components/manifest_types.js";
+import type { ComponentDefinition } from "../components/types.js";
 
 /** Context passed by the builder to a consumer renderer. */
 export interface RenderInput {

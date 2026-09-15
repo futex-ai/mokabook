@@ -1,6 +1,11 @@
-import { timeAsync, timeSync, timingCounts } from "../diagnostics/timings.js";
-import type { ResolvedConfig } from "../config/types.js";
 import { transformCompatibilityDocuments } from "../compatibility/transform.js";
+import type { ComponentViewRecord } from "../components/manifest_types.js";
+import { validateComponentResources } from "../components/output_validation.js";
+import { componentFragmentRoute } from "../components/paths.js";
+import { validateComponentRanges } from "../components/ranges.js";
+import { rebaseStyleOwnership } from "../components/style_ownership.js";
+import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync, timeSync, timingCounts } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
 import {
   createManifest,
@@ -14,19 +19,15 @@ import type { ManifestV5 } from "../registry/types.js";
 import type { ArtifactView } from "../registry/views.js";
 import { effectiveColorSchemes, VIEWPORTS } from "../registry/views.js";
 import { normalizeSingleDocument } from "../review/ignore.js";
-import { validateHtmlLinks } from "./html_links.js";
-import { validateLogicalFragments } from "./logical_records.js";
+
 import { rememberRuntime } from "./component_runtime.js";
+import { validateHtmlLinks } from "./html_links.js";
 import { loadConsumerGraph, type LoadedGraph } from "./load_graph.js";
-import { renderCooperatively } from "./render_cooperative.js";
-import { validateGeneratedOwnershipHeaders } from "./ownership.js";
+import { validateLogicalFragments } from "./logical_records.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";
-import type { ComponentViewRecord } from "../components/manifest_types.js";
-import { componentFragmentRoute } from "../components/paths.js";
-import { rebaseStyleOwnership } from "../components/style_ownership.js";
-import { validateComponentResources } from "../components/output_validation.js";
-import { validateComponentRanges } from "../components/ranges.js";
+import { validateGeneratedOwnershipHeaders } from "./ownership.js";
 import { renderFragments } from "./render.js";
+import { renderCooperatively } from "./render_cooperative.js";
 
 /** Complete in-memory static compilation result. */
 export interface Compilation {

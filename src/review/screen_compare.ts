@@ -8,6 +8,11 @@ import { MoklyError } from "../errors.js";
 import { dependencyContainsChangedPath } from "../registry/dependency_paths.js";
 import type { ManifestScreen } from "../registry/types.js";
 import { VIEWPORTS } from "../registry/views.js";
+
+import {
+  analysisOwnsStylesheet,
+  assertViewAnalysisScope,
+} from "./css/paths.js";
 import {
   normalizeHistoricalDocument,
   normalizeReviewPair,
@@ -15,10 +20,6 @@ import {
 } from "./ignore.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type { ResourceComparison } from "./resource_comparison.js";
-import {
-  analysisOwnsStylesheet,
-  assertViewAnalysisScope,
-} from "./css/paths.js";
 import {
   aggregateState,
   fragmentForView,

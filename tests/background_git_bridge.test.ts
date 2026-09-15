@@ -5,8 +5,10 @@ import test from "node:test";
 import { setTimeout } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import { MessageChannel, Worker } from "node:worker_threads";
+
 import { BackgroundGitHost } from "../dist/server/demand/git_host.js";
 import { WorkerGitCommandRunner } from "../dist/server/demand/git_worker.js";
+
 import { blockingGit, processExists } from "./helpers/blocking_git.js";
 import {
   createFixture,

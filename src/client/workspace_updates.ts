@@ -1,5 +1,6 @@
 /** Merge catalogue evidence without replacing live previews, props controls, or selections. */
 import type { WorkspaceData } from "../server/shell/workspace_data.js";
+
 import { copyChildren } from "./browse_evidence.js";
 import { captureRegionScrolls, restoreRegionScrolls } from "./browse_state.js";
 import { renderUsage } from "./inspector_panels.js";

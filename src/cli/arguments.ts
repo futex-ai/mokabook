@@ -2,7 +2,7 @@ import { MoklyError } from "../errors.js";
 
 /** Supported user-visible and hidden process commands. */
 export type CliCommand =
-  "__serve-child" | "build" | "check" | "export" | "serve";
+  "__serve-child" | "build" | "check" | "export" | "publish" | "serve";
 
 /** Fully validated CLI arguments. */
 export interface CliArguments {
@@ -10,6 +10,10 @@ export interface CliArguments {
   command: CliCommand;
   config?: string;
   debugTimings?: boolean;
+  endpoint?: string;
+  token?: string;
+  repository?: string;
+  noChanges?: boolean;
   help: boolean;
   out?: string;
   port?: number;
@@ -25,6 +29,7 @@ const COMMANDS = new Set<CliCommand>([
   "build",
   "check",
   "export",
+  "publish",
   "serve",
 ]);
 
@@ -41,22 +46,38 @@ export function parseArguments(argv: readonly string[]): CliArguments {
   }
   const parsed: CliArguments = { command, help: false, version: false };
   while (values.length > 0) {
-    const option = values.shift();
-    if (option === "--help" || option === "-h") parsed.help = true;
-    else if (option === "--version" || option === "-v") parsed.version = true;
-    else if (option === "--debug-timings") parsed.debugTimings = true;
-    else if (option === "--watch") parsed.watch = true;
-    else if (option === "--no-watch") parsed.watch = false;
-    else if (option === "--retained-runtime") parsed.retainedRuntime = true;
-    else if (option === "--strict-port") parsed.strictPort = true;
-    else if (option === "--config") parsed.config = takeValue(option, values);
-    else if (option === "--base") parsed.base = takeValue(option, values);
-    else if (option === "--out") parsed.out = takeValue(option, values);
+    const argument = values.shift()!;
+    const separator = argument.indexOf("=");
+    const option = separator < 0 ? argument : argument.slice(0, separator);
+    const assigned = separator < 0 ? undefined : argument.slice(separator + 1);
+    if (argument === "--help" || argument === "-h") parsed.help = true;
+    else if (argument === "--version" || argument === "-v")
+      parsed.version = true;
+    else if (argument === "--debug-timings") parsed.debugTimings = true;
+    else if (argument === "--watch") parsed.watch = true;
+    else if (argument === "--no-watch") parsed.watch = false;
+    else if (argument === "--retained-runtime") parsed.retainedRuntime = true;
+    else if (argument === "--strict-port") parsed.strictPort = true;
+    else if (option === "--config")
+      parsed.config = takeValue(option, values, assigned);
+    else if (option === "--base")
+      parsed.base = takeValue(option, values, assigned);
+    else if (option === "--out")
+      parsed.out = takeValue(option, values, assigned);
+    else if (option === "--endpoint")
+      parsed.endpoint = takeValue(option, values, assigned);
+    else if (option === "--token")
+      parsed.token = takeValue(option, values, assigned);
+    else if (option === "--repository")
+      parsed.repository = takeValue(option, values, assigned);
+    else if (argument === "--no-changes") parsed.noChanges = true;
     else if (option === "--port")
-      parsed.port = parsePort(takeValue(option, values));
+      parsed.port = parsePort(takeValue(option, values, assigned));
     else if (option === "--update-version")
-      parsed.updateVersion = parseUpdateVersion(takeValue(option, values));
-    else throw new MoklyError("cli-invalid", `unknown option: ${option ?? ""}`);
+      parsed.updateVersion = parseUpdateVersion(
+        takeValue(option, values, assigned),
+      );
+    else throw new MoklyError("cli-invalid", `unknown option: ${argument}`);
   }
   validateCommandOptions(parsed);
   return parsed;
@@ -73,9 +94,13 @@ function parseUpdateVersion(value: string): number {
   return version;
 }
 
-function takeValue(option: string, values: string[]): string {
-  const value = values.shift();
-  if (!value || value.startsWith("-")) {
+function takeValue(
+  option: string,
+  values: string[],
+  assigned?: string,
+): string {
+  const value = assigned ?? values.shift();
+  if (!value || (assigned === undefined && value.startsWith("-"))) {
     throw new MoklyError("cli-invalid", `${option} requires a value`);
   }
   return value;
@@ -98,8 +123,28 @@ function validateCommandOptions(arguments_: CliArguments): void {
       "cli-invalid",
       "--retained-runtime is reserved for the watched server child",
     );
-  if (arguments_.out !== undefined && arguments_.command !== "export")
-    throw new MoklyError("cli-invalid", "--out belongs to export");
+  if (
+    arguments_.out !== undefined &&
+    arguments_.command !== "export" &&
+    arguments_.command !== "publish"
+  )
+    throw new MoklyError("cli-invalid", "--out belongs to export or publish");
+  if (
+    arguments_.command !== "publish" &&
+    (arguments_.endpoint !== undefined ||
+      arguments_.token !== undefined ||
+      arguments_.repository !== undefined ||
+      arguments_.noChanges !== undefined)
+  )
+    throw new MoklyError(
+      "cli-invalid",
+      "--endpoint, --token, --repository and --no-changes belong to publish",
+    );
+  if (arguments_.noChanges && arguments_.base !== undefined)
+    throw new MoklyError(
+      "cli-invalid",
+      "--no-changes cannot be combined with --base",
+    );
   if (arguments_.out?.trim() === "")
     throw new MoklyError("cli-invalid", "--out requires a value");
   if (
@@ -140,6 +185,9 @@ function validateCommandOptions(arguments_: CliArguments): void {
   }
   if (arguments_.command === "build" || arguments_.command === "check") {
     if (arguments_.base !== undefined)
-      throw new MoklyError("cli-invalid", "--base belongs to serve or export");
+      throw new MoklyError(
+        "cli-invalid",
+        "--base belongs to serve, export or publish",
+      );
   }
 }

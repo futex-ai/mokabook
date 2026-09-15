@@ -9,6 +9,7 @@ import {
 } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { isCatalogueId } from "../navigation/logical.js";
+
 import type { RegistryViolation } from "./types.js";
 
 /** Validate metadata, routes, source attribution, and declared paths. */

@@ -9,6 +9,7 @@ import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { isPublicStaticFile } from "../dist/config/public_files.js";
 import { classifyWatchPath } from "../dist/server/watch_events.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 for (const loader of ["dataurl", "base64", "binary", "file", "text"]) {

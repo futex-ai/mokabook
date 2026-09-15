@@ -10,7 +10,8 @@ generated HTML as a prerequisite for Browse. This applies with and without watch
 The live catalogue index is a distinct internal format, not a schema-v5 manifest.
 It describes available views, not completed rendering or usage evidence. A v5
 manifest still requires every view's validated records. Build, Check and Export
-remain exhaustive and produce the same portable, committed artifacts.
+remain exhaustive and produce the same portable artifacts, committed or
+[derived](./mokly-derived-baselines.md) according to `generatedOutput`.
 
 The scale target is command start to searchable navigation and a real selected
 preview visible in under five seconds, cold and warm on the default large fixture.
@@ -100,7 +101,8 @@ artifacts retain Build's bytes and do not create artificial Changes.
 
 Full generated output is committed only through the existing transactional output
 store. It never substitutes for demand rendering of the current generation.
-Git-only baseline changes are observed off the HTTP request path. Ref observation
+Git-only baseline changes are observed off the HTTP request path, as is any
+derived-mode baseline rebuild. Ref observation
 must support worktrees and packed refs. Publication and offline consumers accept
 only exhaustive, validated artifacts, never the live index.
 

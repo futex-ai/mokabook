@@ -11,9 +11,10 @@ import { loadConfig } from "../dist/config/load.js";
 import { copySnapshotDependencies } from "../dist/review/assets.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
 import { runReview } from "../dist/review/run.js";
+
 import {
   createFixture,
   removeFixture,
@@ -93,7 +94,7 @@ export default defineConfig({
     config,
     "HEAD",
     config.review.outDir,
-    new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+    new CommittedRepository(new NodeGitCommandRunner(fixture.root)),
   );
 
   for (const side of ["before", "after"]) {
@@ -161,7 +162,7 @@ export default defineConfig({
         config,
         "HEAD",
         config.review.outDir,
-        new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+        new CommittedRepository(new NodeGitCommandRunner(fixture.root)),
       ),
     /not a public static file/,
   );
@@ -204,7 +205,7 @@ test("Review rejects non-regular base dependency blobs", async (context) => {
         config,
         "HEAD",
         config.review.outDir,
-        new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+        new CommittedRepository(new NodeGitCommandRunner(fixture.root)),
       ),
     /not a regular Git file/,
   );
@@ -236,7 +237,7 @@ test("Review rejects a base pane stored as a Git symlink", async (context) => {
         config,
         "HEAD",
         config.review.outDir,
-        new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+        new CommittedRepository(new NodeGitCommandRunner(fixture.root)),
       ),
     /not a regular Git file/,
   );

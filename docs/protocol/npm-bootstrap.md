@@ -1,14 +1,40 @@
 # One-Time Mokly Registry Bootstrap
 
-This registers the public scoped `@mokly/mokly` package so npm trusted publishing can be
-configured. It is not a supported consumer release. Follow the
-[release contract](./npm-release.md) for all later versions. Never move an
-existing Git tag or reset release-please state to recreate a version.
+The public scoped `@mokly/mokly` package was registered on 14 September 2026 as
+`0.8.0`, the accepted initial consumer release. Registration is complete; do not
+repeat it. Follow the [release contract](./npm-release.md) for all later
+versions. Never move an existing Git tag or reset release-please state to
+recreate a version.
+
+## Completed Registration
+
+The published archive came from reviewed merged commit
+`bf1f5be35f7296a185081b0cb830e068577eb598`. Registry hashes, inventory and npm
+signatures matched the retained archive, and all five registry-consumer smoke
+suites passed.
+
+The publication explicitly requested `--tag bootstrap`, but npm also assigned
+`latest` and rejected both attempts to remove that tag. The maintainer accepted
+`0.8.0` as the initial `latest`. The accepted registration tags are:
+
+```json
+{ "bootstrap": "0.8.0", "latest": "0.8.0" }
+```
+
+Keep `bootstrap` on `0.8.0`; subsequent reviewed releases advance `latest`.
+Do not remove `latest`, republish `0.8.0`, or unpublish the package to undo this
+accepted registration. This was an interactive maintainer publication, not an
+OIDC publication; npm signatures alone do not prove workflow provenance.
+
+Trusted publishing, team access and the package's 2FA requirement are configured.
+GitHub release-token permissions and publishing protections still need to be
+completed and verified before the first automated release.
 
 ## Reviewed Source And Archive
 
-After the migration and review fixes are merged to `main`, but before merging
-the Release Please PR:
+The following records the pre-publication procedure, retained for audit and
+archive reproduction. Registration required merged migration/review fixes on
+`main`, before merging the Release Please PR:
 
 1. Confirm `npm view @mokly/mokly` returns a recognized missing-package response.
    Stop on other lookup errors or if a package already exists; do not overwrite
@@ -51,8 +77,9 @@ removed on success and failure.
 
 ## Registration And Trusted Publishing
 
-Inspect the report's source SHA, package identity, inventory and hashes before
-publishing. From an approved npm maintainer account with 2FA:
+The completed publication used an approved npm maintainer account with 2FA
+after inspection of the report's source SHA, package identity, inventory and
+hashes. These are historical commands; do not repeat the publish command:
 
 ```sh
 npm publish .context/bootstrap-artifact/mokly-mokly-0.8.0.tgz --access public --tag bootstrap --ignore-scripts
@@ -60,18 +87,21 @@ npm view @mokly/mokly@0.8.0 name version dist.integrity dist.shasum
 npm view @mokly/mokly dist-tags --json
 ```
 
-Compare the registry hashes to the retained report. `bootstrap` must identify
-`0.8.0`; do not assign `latest`. Then:
+Registry hashes were compared to the retained report. Both initial tags are
+recorded above; accepting `latest` does not change the reviewed archive or
+release-managed version state. Before the next release:
 
-1. Configure npm trusted publishing on `@mokly/mokly` for GitHub organization `mokly-ai`,
+1. Verify npm trusted publishing on `@mokly/mokly` for GitHub organization `mokly-ai`,
    repository `mokly`, workflow `release.yml`, environment `npm`, allowing the
    workflow's direct `npm publish` action.
-2. Grant the intended `mokly` organization team read/write access to the
-   scoped package with `npm access grant read-write mokly:<team> @mokly/mokly`.
-   Require 2FA and disallow token publishing. Store no npm write token in GitHub.
-3. Verify the [GitHub publishing protections](./npm-github-protections.md).
-4. Merge the breaking Release Please PR. Its new `v0.9.0` tag is the first
-   supported `@mokly/mokly` release and the first version assigned to `latest`.
+2. Verify `mokly:developers` retains read/write access to the scoped package,
+   publishing requires 2FA, and token bypass is disabled. Store no npm write
+   token in GitHub.
+3. Verify the [GitHub publishing protections](./npm-github-protections.md) and
+   the [release token's repository access](./npm-release.md#maintainer-setup).
+4. Review and merge the next Release Please PR only after those prerequisites
+   are satisfied. Its new `vX.Y.Z` tag identifies the next release; the verified
+   trusted publication advances `latest` while `bootstrap` stays on `0.8.0`.
 5. Verify package contents, owner/team access, metadata, provenance, dist-tags,
    `npx --package @mokly/mokly mokly --version`, and a minimal clean build/serve fixture. Only then
    deprecate every `mokabook` version with a move notice; do not unpublish it.

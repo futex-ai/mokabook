@@ -5,9 +5,9 @@ import type { Compilation } from "../dist/build/compile.js";
 import type { GeneratedOutputStore } from "../dist/build/output_store.js";
 import { FileSystemConfigLoader, loadConfig } from "../dist/config/load.js";
 import type { ResolvedConfig } from "../dist/config/types.js";
+import type { CatalogueChangeClassifier } from "../dist/server/component_changes.js";
 import type { CatalogueServerFactory } from "../dist/server/factory.js";
 import type { RunningServer, ServerOptions } from "../dist/server/http.js";
-import type { CatalogueChangeClassifier } from "../dist/server/component_changes.js";
 import { serve } from "../dist/server/serve.js";
 import type {
   ProcessSupervisor,
@@ -17,6 +17,7 @@ import type {
   ConsumerWatcher,
   ConsumerWatcherFactory,
 } from "../dist/server/watcher.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("watched startup attaches the watcher before the initial output write", async (context) => {

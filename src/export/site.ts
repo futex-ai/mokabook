@@ -1,28 +1,29 @@
-import type { Compilation } from "../build/compile.js";
 import { adaptBrowseDocument } from "../browse/document_adapter.js";
+import type { Compilation } from "../build/compile.js";
+import { canonicalJson } from "../components/data.js";
+import type { ResolvedConfig } from "../config/types.js";
 import {
   catalogueViewHref,
   parseStaticDelivery,
   type StaticDelivery,
 } from "../navigation/delivery.js";
+import { changedManifestRoutes } from "../registry/changed_routes.js";
+import { removedManifestEntries } from "../registry/changes.js";
 import type { Manifest } from "../registry/types.js";
+import { parseReviewResult } from "../review/result_validation.js";
 import type { ReviewArtifact } from "../review/types.js";
 import { createCatalogue } from "../server/catalogue.js";
-import { parseReviewResult } from "../review/result_validation.js";
-import { canonicalJson } from "../components/data.js";
 import {
   loadBrowserClientModules,
   loadBrowserNavigationModules,
   loadShellFontAssets,
 } from "../server/client_modules.js";
 import { homePage, notFoundPage, viewPage } from "../server/pages.js";
-import { changedManifestRoutes } from "../registry/changed_routes.js";
-import { removedManifestEntries } from "../registry/changes.js";
-import { SHELL_CSS } from "../server/shell/css.js";
 import type { ShellContext } from "../server/shell/context.js";
-import type { ResolvedConfig } from "../config/types.js";
-import { exportError } from "./error.js";
+import { SHELL_CSS } from "../server/shell/css.js";
+
 import { comparisonContentId } from "./content_id.js";
+import { exportError } from "./error.js";
 import { ExportInventory } from "./inventory.js";
 import { exportResourcePolicy } from "./resource_policy.js";
 import { STAGED_DEPLOYMENT_ID } from "./shell_metadata.js";
@@ -32,7 +33,7 @@ export function assembleExport(
   config: ResolvedConfig,
   compilation: Compilation,
   baseline: Manifest,
-  comparison: ReviewArtifact,
+  comparison: ReviewArtifact | undefined,
   publicFiles: ReadonlyMap<string, Buffer>,
   contentChanges: readonly string[],
 ): {
@@ -61,20 +62,21 @@ export function assembleExport(
       continue;
     idRoutes[entry.id] = catalogueViewHref(entry.route);
   }
-  const comparisonFiles = new Map(comparison.files);
-  if (comparison.result.schemaVersion === 3)
+  const comparisonFiles = new Map(comparison?.files);
+  if (comparison?.result.schemaVersion === 3)
     parseReviewResult(comparison.result);
-  comparisonFiles.set(
-    "review.json",
-    `${comparison.result.schemaVersion === 3 ? canonicalJson(comparison.result, 2) : JSON.stringify(comparison.result, null, 2)}\n`,
-  );
+  if (comparison)
+    comparisonFiles.set(
+      "review.json",
+      `${comparison.result.schemaVersion === 3 ? canonicalJson(comparison.result, 2) : JSON.stringify(comparison.result, null, 2)}\n`,
+    );
   const generation = comparisonContentId(comparisonFiles);
   const prefix = `__mokly/diffs/__generations/${generation}`;
   const delivery = parseStaticDelivery({
     schemaVersion: 2,
     deploymentId: STAGED_DEPLOYMENT_ID,
     canonicalPath: "/",
-    comparisonUrl: `/${prefix}/review.json`,
+    comparisonUrl: comparison ? `/${prefix}/review.json` : null,
     idRoutes,
   });
   if (!delivery)
@@ -108,7 +110,7 @@ export function assembleExport(
     ),
   );
   const changes =
-    comparison.result.schemaVersion === 3
+    comparison?.result.schemaVersion === 3
       ? [
           ...comparison.result.changes.map(
             (item) => (item.after ?? item.before)!.route,
@@ -117,41 +119,46 @@ export function assembleExport(
         ]
       : materialRoutes;
   const context: ShellContext = {
-    base: comparison.result.baseRef,
-    changedRoutes: [
-      ...new Set([...changes, ...removed.map((entry) => entry.route)]),
-    ],
-    comparisons: true,
-    componentChanges: {
-      baseline,
-      ...(comparison.result.schemaVersion === 3
-        ? { result: comparison.result }
-        : {
-            screenEvidence: comparison.result.screens
-              .map(({ route, views }) => ({
-                route,
-                views: views
-                  .filter(
-                    (view) =>
-                      view.reasons?.length || view.excludedResources?.length,
-                  )
-                  .map(
-                    ({
-                      viewport,
-                      colorScheme,
-                      reasons,
-                      excludedResources,
-                    }) => ({
-                      viewport,
-                      colorScheme,
-                      ...(reasons ? { reasons } : {}),
-                      ...(excludedResources ? { excludedResources } : {}),
-                    }),
-                  ),
-              }))
-              .filter((screen) => screen.views.length > 0),
-          }),
-    },
+    base: comparison?.result.baseRef ?? "",
+    ...(comparison
+      ? {
+          changedRoutes: [
+            ...new Set([...changes, ...removed.map((entry) => entry.route)]),
+          ],
+          comparisons: true,
+          componentChanges: {
+            baseline,
+            ...(comparison.result.schemaVersion === 3
+              ? { result: comparison.result }
+              : {
+                  screenEvidence: comparison.result.screens
+                    .map(({ route, views }) => ({
+                      route,
+                      views: views
+                        .filter(
+                          (view) =>
+                            view.reasons?.length ||
+                            view.excludedResources?.length,
+                        )
+                        .map(
+                          ({
+                            viewport,
+                            colorScheme,
+                            reasons,
+                            excludedResources,
+                          }) => ({
+                            viewport,
+                            colorScheme,
+                            ...(reasons ? { reasons } : {}),
+                            ...(excludedResources ? { excludedResources } : {}),
+                          }),
+                        ),
+                    }))
+                    .filter((screen) => screen.views.length > 0),
+                }),
+          },
+        }
+      : { comparisons: false }),
     updateVersion: 0,
     delivery,
   };

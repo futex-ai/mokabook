@@ -3,11 +3,15 @@ import {
   type CatalogueNavigationProps,
 } from "../library/chrome/catalogue-navigation.js";
 import { optional, useDesignInstance } from "../library/composition.js";
+
 import { useDesignNavigation } from "./design_navigation.js";
 import type { DesignDestination } from "./destinations.js";
 import { NAV_TREE } from "./nav_data.js";
 
 export type NavNode = CatalogueNavigationProps["rows"][number];
+export type ChangesStatus = NonNullable<
+  CatalogueNavigationProps["changesStatus"]
+>;
 
 interface NavTreeProps {
   changes?: boolean | undefined;
@@ -15,6 +19,7 @@ interface NavTreeProps {
   activeLabel?: string | undefined;
   changedCount?: number | undefined;
   changedOnly?: boolean | undefined;
+  changesStatus?: ChangesStatus | undefined;
   nodes?: readonly NavNode[] | undefined;
 }
 
@@ -24,6 +29,7 @@ function CatalogueNavigation({
   activeLabel,
   changedCount,
   changedOnly,
+  changesStatus,
   nodes,
   drawer,
 }: NavTreeProps & { drawer: boolean }) {
@@ -36,6 +42,7 @@ function CatalogueNavigation({
       showChanges={changes}
       changedOnly={changedOnly ?? false}
       presentation={drawer ? "drawer" : "responsive"}
+      {...optional("changesStatus", changesStatus)}
       {...optional("activeDestination", activeDestination)}
       {...optional("activeLabel", activeLabel)}
       {...optional("allDestination", navigation.all)}

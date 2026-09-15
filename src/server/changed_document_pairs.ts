@@ -2,8 +2,8 @@
 import type { ColorScheme, Viewport } from "../authoring/types.js";
 import type { Manifest } from "../registry/types.js";
 import { VIEWPORTS } from "../registry/views.js";
-import { fragmentForView, unionColorSchemes } from "../review/screen_views.js";
 import { pageBaselines } from "../review/page_baselines.js";
+import { fragmentForView, unionColorSchemes } from "../review/screen_views.js";
 
 export interface DocumentPair {
   base?: string;

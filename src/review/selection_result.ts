@@ -1,5 +1,6 @@
 /** Project completed ownership evidence onto the one comparison being displayed. */
 import { MoklyError } from "../errors.js";
+
 import type { ReviewResultV3 } from "./component_types.js";
 import { aggregateIgnored } from "./screen_views.js";
 import type { ReviewSelection } from "./selection_types.js";

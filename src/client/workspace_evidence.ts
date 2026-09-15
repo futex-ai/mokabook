@@ -1,10 +1,10 @@
 /** Factual comparison evidence belongs in Details, never in the canvas. */
-import type { WorkspaceData } from "../server/shell/workspace_data.js";
-import type { ReviewResult } from "../review/types.js";
-import { workspaceComparisonEvidence } from "./workspace_evidence_data.js";
-import { element } from "./inspector_panels.js";
-import { entryWording } from "./entry_wording.js";
 import { decodeProps } from "../components/codec.js";
+import type { ReviewResult } from "../review/types.js";
+import type { WorkspaceData } from "../server/shell/workspace_data.js";
+
+import { entryWording } from "./entry_wording.js";
+import { element } from "./inspector_panels.js";
 import { propText } from "./prop_display.js";
 import {
   appendChangedFiles,
@@ -14,6 +14,7 @@ import {
   retainedPaths,
   styleOutcomes,
 } from "./style_evidence.js";
+import { workspaceComparisonEvidence } from "./workspace_evidence_data.js";
 
 /**
  * Merge classification with loaded evidence; loaded details win, preserving

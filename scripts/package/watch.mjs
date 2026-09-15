@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
-import path from "node:path";
 import fs from "node:fs";
+import path from "node:path";
+
 import { startCommand, stopCommand, waitForOutput } from "./command.mjs";
 
 export async function smokeExternalWatch(root) {

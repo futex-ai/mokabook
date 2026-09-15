@@ -15,6 +15,7 @@ export interface TimingEvent {
   elapsedMs: number;
   durationMs?: number;
   status?: "ok" | "error";
+  cacheHit?: boolean;
   counts?: Readonly<Record<string, number>>;
 }
 
@@ -97,6 +98,7 @@ export function timeSync<T>(stage: string, operation: () => T): T {
 export async function timeAsync<T>(
   stage: string,
   operation: () => Promise<T>,
+  metadata?: (result: T) => { readonly cacheHit?: boolean },
 ): Promise<T> {
   const context = storage.getStore();
   if (!context) return operation();
@@ -106,7 +108,13 @@ export async function timeAsync<T>(
     async () => {
       try {
         const result = await operation();
-        span.end("ok");
+        let details: { readonly cacheHit?: boolean } | undefined;
+        try {
+          details = metadata?.(result);
+        } catch {
+          // Diagnostics must not change the operation's outcome.
+        }
+        span.end("ok", details);
         return result;
       } catch (error) {
         span.end("error");
@@ -136,12 +144,13 @@ function begin(context: Context, stage: string) {
   emit(context.session, { ...base, event: "start" });
   return {
     id: base.id,
-    end(status: "ok" | "error") {
+    end(status: "ok" | "error", details?: { readonly cacheHit?: boolean }) {
       const now = context.session.clock();
       emit(context.session, {
         ...base,
         event: "end",
         status,
+        ...details,
         durationMs: milliseconds(now - started),
         elapsedMs: milliseconds(now - context.session.origin),
       });

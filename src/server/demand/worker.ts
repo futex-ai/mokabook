@@ -1,7 +1,8 @@
 /** Consumer execution is isolated from HTTP and terminable on timeout or shutdown. */
 import { parentPort, workerData } from "node:worker_threads";
-import { evaluateBundle } from "../../build/consumer_bundle.js";
+
 import type { ComponentRuntime } from "../../build/component_runtime.js";
+import { evaluateBundle } from "../../build/consumer_bundle.js";
 import { DocumentCompiler } from "../../build/document_compiler.js";
 import { errorMessage } from "../../errors.js";
 

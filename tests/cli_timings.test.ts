@@ -6,6 +6,7 @@ import test from "node:test";
 import { promisify } from "node:util";
 
 import type { TimingEvent } from "../dist/diagnostics/timings.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import {
   createFixture,

@@ -6,13 +6,13 @@ import type { Selector } from "css-what";
 import { cssDocumentOptions } from "./document.js";
 import type { CssDocumentPair } from "./document.js";
 import { matchesDocument } from "./document_query.js";
-import { changedCustomProperties, changedReferences } from "./material.js";
 import { CssSelectorError } from "./match_types.js";
 import type {
   CssAnalysisOutcome,
   CssRuleDelta,
   CssRuleMatchResult,
 } from "./match_types.js";
+import { changedCustomProperties, changedReferences } from "./material.js";
 import { resolveRuleSelectors } from "./nesting.js";
 import { selectorFeatures, staticSelectors } from "./pseudos.js";
 import type { CssRuleDiffResult } from "./types.js";

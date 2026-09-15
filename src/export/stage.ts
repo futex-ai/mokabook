@@ -4,6 +4,7 @@ import path from "node:path";
 import { timeAsync } from "../diagnostics/timings.js";
 import type { StaticDelivery } from "../navigation/delivery.js";
 import type { ReviewArtifactContent } from "../review/types.js";
+
 import { finalizeDeployment } from "./deployment.js";
 import { assertExportActive } from "./error.js";
 import { ExportInventory } from "./inventory.js";
@@ -17,6 +18,9 @@ export async function stageExport(
   shells: ReadonlyMap<string, StaticDelivery>,
   aliases: ReadonlyMap<string, string>,
   signal?: AbortSignal,
+  capture?: (
+    files: ReadonlyMap<string, ReviewArtifactContent>,
+  ) => Promise<void>,
 ): Promise<string> {
   const files = new ExportInventory();
   for (const [name, bytes] of contents) files.add(name, Buffer.from(bytes));
@@ -34,5 +38,6 @@ export async function stageExport(
       await fs.promises.writeFile(target, bytes);
     }
   });
+  await capture?.(files.files);
   return deploymentId;
 }

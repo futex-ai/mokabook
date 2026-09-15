@@ -1,6 +1,8 @@
 /** Navigation leaves the immutable edited-resource bundle for ordinary Browse assets. */
 import path from "node:path";
+
 import { parse } from "parse5";
+
 import { encodeUrlPath, isSafeRepositoryPath } from "../../config/paths.js";
 
 interface Node {

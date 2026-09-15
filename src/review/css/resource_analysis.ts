@@ -1,9 +1,11 @@
 /** Cache parsing and contain per-resource failures during evidence reduction. */
+import type { DependencyReason, ExcludedResource } from "../types.js";
+
 import { analyzeStylesheetChange } from "./analyze.js";
 import { diffCssRules } from "./diff.js";
+import type { CssDocumentPair } from "./document.js";
 import { matchCssRules } from "./match.js";
 import type { CssAnalysisOutcome } from "./match_types.js";
-import type { CssDocumentPair } from "./document.js";
 import { LightningCssRuleParser } from "./rules.js";
 import { isStylesheetPath } from "./stylesheet_path.js";
 import {
@@ -11,7 +13,6 @@ import {
   type CssRuleParser,
   type CssRuleParseResult,
 } from "./types.js";
-import type { DependencyReason, ExcludedResource } from "../types.js";
 
 /** Resource identities and immutable source-side bytes, supplied after confinement. */
 export interface ChangedResource {

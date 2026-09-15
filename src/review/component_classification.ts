@@ -1,5 +1,5 @@
-import { variantAddress, viewPairs } from "./component_pairing.js";
 import path from "node:path";
+
 import { minimatch } from "minimatch";
 
 import { canonicalJson } from "../components/data.js";
@@ -9,13 +9,13 @@ import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
 import { analyzeHierarchy } from "../registry/hierarchy.js";
 import type { Manifest, ManifestEntry } from "../registry/types.js";
+
 import type { ReviewAssetReader } from "./assets.js";
 import { affectedConsumers } from "./component_affected.js";
 import {
   propagateImplementations,
   propagateUseCases,
 } from "./component_change_propagation.js";
-import { validateComponentReviewSources } from "./component_result_sources.js";
 import {
   address,
   ComponentDependencyPolicy,
@@ -24,7 +24,15 @@ import {
   metadata,
   uniqueReasons,
 } from "./component_metadata.js";
+import { variantAddress, viewPairs } from "./component_pairing.js";
+import {
+  exactScreenCssReasons,
+  propagateOwnedCss,
+  resourceImpact,
+  type OwnedCssReason,
+} from "./component_resource_attribution.js";
 import { ComponentMaterialReader } from "./component_resources.js";
+import { validateComponentReviewSources } from "./component_result_sources.js";
 import type {
   ChangedEntry,
   ComponentReview,
@@ -37,20 +45,14 @@ import {
   compareComponentView,
   type ComponentViewContext,
 } from "./component_view.js";
-import { aggregateIgnored, aggregateState } from "./screen_views.js";
-import { ResourceComparison } from "./resource_comparison.js";
-import { CssResourceAnalysis } from "./css/resource_analysis.js";
 import {
   analysisOwnsStylesheet,
   assertViewAnalysisScope,
 } from "./css/paths.js";
+import { CssResourceAnalysis } from "./css/resource_analysis.js";
 import type { CssRuleParser } from "./css/types.js";
-import {
-  exactScreenCssReasons,
-  propagateOwnedCss,
-  resourceImpact,
-  type OwnedCssReason,
-} from "./component_resource_attribution.js";
+import { ResourceComparison } from "./resource_comparison.js";
+import { aggregateIgnored, aggregateState } from "./screen_views.js";
 
 export interface ComponentClassificationInput {
   before: Manifest;
@@ -91,6 +93,7 @@ export async function classifyComponents(
       prefix,
       new CssResourceAnalysis(input.cssParser),
     ),
+    compareResourceBytes: config.generatedOutput === "derived",
   };
   const prefetchBefore = () =>
     context.beforeReader.prefetch(

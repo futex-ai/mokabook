@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { loadConfig } from "../dist/config/load.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("config imports resolve consumer packages from the config location", async (context) => {

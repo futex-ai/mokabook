@@ -1,3 +1,4 @@
+import type { BaselineBuilder } from "../baseline/types.js";
 import { prepareLiveRuntime } from "../build/live_runtime.js";
 import {
   FileSystemGeneratedOutputStore,
@@ -5,15 +6,19 @@ import {
 } from "../build/output_store.js";
 import { FileSystemConfigLoader, type ConfigLoader } from "../config/load.js";
 import type { ResolvedConfig } from "../config/types.js";
-import {
-  NodeCatalogueServerFactory,
-  type CatalogueServerFactory,
-} from "./factory.js";
-import { configuredServedReview } from "./review_routes.js";
+
 import {
   RepositoryCatalogueChangeClassifier,
   type CatalogueChangeClassifier,
 } from "./component_changes.js";
+import { BackgroundGeneration } from "./demand/generation.js";
+import {
+  NodeCatalogueServerFactory,
+  type CatalogueServerFactory,
+} from "./factory.js";
+import { ServedReviewRepository } from "./review_repository.js";
+import { configuredServedReview } from "./review_routes.js";
+import { serveWatched } from "./serve_watched.js";
 import {
   NodeProcessSupervisorFactory,
   type ProcessSupervisorFactory,
@@ -22,8 +27,6 @@ import {
   ChokidarWatcherFactory,
   type ConsumerWatcherFactory,
 } from "./watcher.js";
-import { BackgroundGeneration } from "./demand/generation.js";
-import { serveWatched } from "./serve_watched.js";
 
 /** Public Serve options after CLI validation. */
 export interface ServeOptions {
@@ -41,6 +44,8 @@ export interface RunningServe {
 
 /** Injectable runtime collaborators for Serve orchestration. */
 export interface ServeDependencies {
+  /** Derived-mode rebuilds; Serve constructs the Node builder when absent. */
+  baselineBuilder?: BaselineBuilder;
   changeClassifier?: CatalogueChangeClassifier;
   configLoader: ConfigLoader;
   outputStore: GeneratedOutputStore;
@@ -69,6 +74,7 @@ export async function serve(
     const runtime = await prepareLiveRuntime(config);
     config = runtime.config;
     const base = options.base ?? config.review.base;
+    const repository = new ServedReviewRepository(config);
     const background = new BackgroundGeneration(
       dependencies.outputStore,
       dependencies.changeClassifier ?? DEFAULT_CHANGE_CLASSIFIER,
@@ -83,6 +89,20 @@ export async function serve(
           componentChanges: snapshot ?? null,
           changesStatus: snapshot ? "ready" : "unavailable",
         }),
+      {
+        baselinePrepared: (commit) => {
+          repository.accept(commit);
+          server.publishUpdate({
+            kind: "evidence",
+            ...(commit === null ? { changesStatus: "pending" } : {}),
+          });
+        },
+        baselineStatus: (changesStatus) =>
+          server.publishUpdate({ kind: "evidence", changesStatus }),
+        ...(dependencies.baselineBuilder
+          ? { builder: dependencies.baselineBuilder }
+          : {}),
+      },
     );
     const server = await dependencies.serverFactory.start(config, {
       base,
@@ -91,7 +111,7 @@ export async function serve(
       manifest: runtime.manifest,
       componentRuntime: runtime,
       port: options.port,
-      review: configuredServedReview(config, base),
+      review: configuredServedReview(config, base, repository),
     });
     background.start(runtime, base);
     return {

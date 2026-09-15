@@ -1,7 +1,5 @@
 import { collection, defineCollection, defineRoot } from "@mokly/mokly";
 
-import { pageScreens } from "./page_screens.js";
-import { publicationScreens } from "./publication_screens.js";
 import { formsFilterScreen } from "./browse/states/tags/forms.js";
 import { onboardingPickerScreen } from "./browse/states/tags/onboarding-picker.js";
 import { onboardingFilterScreen } from "./browse/states/tags/onboarding.js";
@@ -11,11 +9,13 @@ import { browseSchemeScreens } from "./browse_scheme_screens.js";
 import { browseStateScreens, browseViewScreens } from "./browse_screens.js";
 import { browseTagScreens } from "./browse_tag_screens.js";
 import { changesScreens } from "./changes_screens.js";
-import { reviewImpactScreens } from "./review_impact_screens.js";
-import { reviewStyleScreens } from "./review_style_screens.js";
 import { componentDesign } from "./components/index.js";
-
+import { pageScreens } from "./page_screens.js";
+import { publicationScreens } from "./publication_screens.js";
+import { reviewAvailabilityScreens } from "./review_availability_screens.js";
+import { reviewImpactScreens } from "./review_impact_screens.js";
 import { reviewOutcomeScreens } from "./review_outcome_screens.js";
+import { reviewStyleScreens } from "./review_style_screens.js";
 
 const DESIGN_DEPENDENCIES = [
   "examples/basic/generated/design-stage.css",
@@ -116,6 +116,14 @@ const designMockups = defineRoot({
           id: "design-review-impact",
           segment: "impact",
           title: "Impact states",
+        }),
+        collection({
+          children: reviewAvailabilityScreens,
+          description:
+            "Changes while the comparison is being prepared and after preparing it fails.",
+          id: "design-review-availability",
+          segment: "availability",
+          title: "Comparison availability",
         }),
       ],
       dependencies: [

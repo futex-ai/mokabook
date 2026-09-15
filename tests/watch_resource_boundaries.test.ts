@@ -6,6 +6,7 @@ import test from "node:test";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { serve } from "../dist/server/serve.js";
 import { discoverWatchResources } from "../dist/server/watch_resources.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 import {

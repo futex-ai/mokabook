@@ -1,9 +1,11 @@
 /** A controllable live generation with real previews and exhaustive usage. */
 import path from "node:path";
+
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { prepareLiveRuntime } from "../../dist/build/live_runtime.js";
 import { loadConfig } from "../../dist/config/load.js";
 import { startCatalogueServer } from "../../dist/server/http.js";
+
 import {
   createFixture,
   removeFixture,

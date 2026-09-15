@@ -10,7 +10,9 @@ import {
   timeAsync,
   type TimingEvent,
 } from "../dist/diagnostics/timings.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { runReview } from "../dist/review/run.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { directoryFiles } from "./helpers/export_fixture.js";
@@ -196,14 +198,26 @@ test(
   async (t) => {
     const fixture = await changedFixture(t);
     const out = fixture.config.review.outDir;
-    const normal = await runReview(fixture.config, "main", out);
+    const normal = await runReview(
+      fixture.config,
+      "main",
+      out,
+      committedReviewRepository(fixture.config),
+    );
     const before = await directoryFiles(out);
     const events: TimingEvent[] = [];
     const timed = await runWithTimings(
       true,
       "test",
       () =>
-        timeAsync("comparison", () => runReview(fixture.config, "main", out)),
+        timeAsync("comparison", () =>
+          runReview(
+            fixture.config,
+            "main",
+            out,
+            committedReviewRepository(fixture.config),
+          ),
+        ),
       { write: (event) => events.push(event) },
     );
     assert.deepEqual(timed, normal);
@@ -216,7 +230,14 @@ test(
         true,
         "test",
         () =>
-          timeAsync("comparison", () => runReview(fixture.config, "main", out)),
+          timeAsync("comparison", () =>
+            runReview(
+              fixture.config,
+              "main",
+              out,
+              committedReviewRepository(fixture.config),
+            ),
+          ),
         { write: (event) => failed.push(event) },
       ),
       /unowned Review directory/,

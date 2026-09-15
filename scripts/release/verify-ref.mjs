@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { runCommand } from "../package/command.mjs";
+
 import { remoteTagCommit, validateTagVersion } from "./context.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { createPackageArchive } from "../package/archive.mjs";
+
 import { writeWorkflowOutput } from "./context.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");

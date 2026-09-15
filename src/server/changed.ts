@@ -1,5 +1,5 @@
 /** Optional changed-route detection powering the Browse changed/all filter. */
-import { projectRealPath } from "../config/paths.js";
+import { compileCatalogue } from "../build/compile.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
 import {
@@ -8,8 +8,8 @@ import {
 } from "../registry/changes.js";
 import { readManifest } from "../registry/manifest.js";
 import type { ManifestV5 } from "../registry/types.js";
-import type { GitClient } from "../review/git.js";
-import { NodeGitCommandRunner, RepositoryGitClient } from "../review/git.js";
+import type { ReadOnlyReviewRepository } from "../review/repository.js";
+
 import {
   readCatalogueChanges,
   type ComponentChangeSnapshot,
@@ -24,11 +24,13 @@ export interface ResolvedCatalogueChanges extends CatalogueChangeSnapshot {
 export async function computeChangedRoutes(
   config: ResolvedConfig,
   base: string,
-  git?: GitClient,
+  git: ReadOnlyReviewRepository,
 ): Promise<readonly string[] | undefined> {
   try {
     return (await computeCatalogueChanges(config, base, git)).changedRoutes;
-  } catch {
+  } catch (error) {
+    if (error instanceof MoklyError && error.code === "config-invalid")
+      throw error;
     return undefined;
   }
 }
@@ -37,29 +39,22 @@ export async function computeChangedRoutes(
 export async function computeCatalogueChanges(
   config: ResolvedConfig,
   base: string,
-  git?: GitClient,
-  manifest: ManifestV5 = readManifest(config),
+  git: ReadOnlyReviewRepository,
+  manifest?: ManifestV5,
 ): Promise<ResolvedCatalogueChanges> {
-  let client = git;
-  if (!client) {
-    const runner = new NodeGitCommandRunner(config.repoRoot);
-    const toplevel = (
-      await runner.run(["rev-parse", "--show-toplevel"])
-    ).trim();
-    if (projectRealPath(toplevel) !== projectRealPath(config.repoRoot))
-      throw new MoklyError(
-        "git-failed",
-        "catalogue is not the root of a Git repository",
-      );
-    client = new RepositoryGitClient(runner);
-  }
-  const commit = await client.mergeBase(base, "HEAD");
+  const compilation =
+    config.generatedOutput === "derived" && !manifest
+      ? await compileCatalogue(config)
+      : undefined;
+  manifest ??= compilation?.manifest ?? readManifest(config);
+  const commit = await git.evidence.mergeBase(base, "HEAD");
   const componentChanges = await readCatalogueChanges(
     config,
     manifest,
     base,
-    client,
+    git,
     commit,
+    compilation?.outputs,
   );
   const { baseline, changedRoutes } = componentChanges;
   const removedEntries = removedManifestEntries(manifest, baseline);

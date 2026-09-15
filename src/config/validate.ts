@@ -1,14 +1,21 @@
+import fs from "node:fs";
 import path from "node:path";
 
 import { MoklyError } from "../errors.js";
-import { resolveInside, validateRelativeRoute } from "./paths.js";
+
+import { isBaselineCachePath } from "./cache_paths.js";
+import {
+  baselineBuildCommands,
+  generatedOutputMode,
+} from "./generated_output.js";
+import { resolveModuleResolution } from "./module_resolution.js";
 import {
   optionalModule,
   requireDirectory,
   validateReviewOut,
   validateSourceRoots,
 } from "./path_validation.js";
-import { resolveModuleResolution } from "./module_resolution.js";
+import { resolveInside, validateRelativeRoute } from "./paths.js";
 import {
   requireString,
   validateColorSchemes,
@@ -36,12 +43,14 @@ export function resolveConfig(
       "legacy configuration was removed; register whole documents with definePage",
     );
   const input = value as unknown as MoklyConfig;
+  const generatedOutput = generatedOutputMode(input.generatedOutput);
   requireString(input.entriesDir, "entriesDir");
   requireString(input.mockupsDir, "mockupsDir");
   if (input.repoRoot !== undefined) requireString(input.repoRoot, "repoRoot");
   const configDir = path.dirname(configPath);
   const repoRoot = path.resolve(configDir, input.repoRoot ?? ".");
   requireDirectory(repoRoot, "repoRoot");
+  const baselineBuild = baselineBuildCommands(input, repoRoot, configPath);
   const entriesDir = resolveInside(
     repoRoot,
     configDir,
@@ -55,7 +64,22 @@ export function resolveConfig(
     "mockupsDir",
   );
   requireDirectory(entriesDir, "entriesDir");
-  requireDirectory(mockupsDir, "mockupsDir");
+  if (generatedOutput === "committed" || fs.existsSync(mockupsDir))
+    requireDirectory(mockupsDir, "mockupsDir");
+  for (const [label, root] of [
+    ["entriesDir", entriesDir],
+    ["mockupsDir", mockupsDir],
+  ])
+    if (isBaselineCachePath(root!, repoRoot))
+      throw new MoklyError(
+        "config-invalid",
+        `${label} must not be inside .mokly-cache`,
+      );
+  if (generatedOutput === "derived" && mockupsDir === repoRoot)
+    throw new MoklyError(
+      "config-invalid",
+      "derived mockupsDir must be a directory below repoRoot",
+    );
   const renderer = optionalModule(
     repoRoot,
     configDir,
@@ -100,6 +124,7 @@ export function resolveConfig(
     repoRoot,
   });
   return {
+    generatedOutput,
     colorSchemes,
     compatibility: {
       readManifestV2: input.compatibility?.readManifestV2 ?? false,
@@ -114,6 +139,7 @@ export function resolveConfig(
     ...(renderer ? { renderer } : {}),
     repoRoot,
     review: {
+      ...(baselineBuild ? { baselineBuild } : {}),
       base: input.review?.base ?? "origin/main",
       outDir: reviewOut,
       sharedImpact: validateStringArray(

@@ -6,6 +6,7 @@ import { renderWorkspaceEvidence } from "../dist/client/workspace_evidence.js";
 import { mergeWorkspaceEvidence } from "../dist/client/workspace_updates.js";
 import { capturePublicFiles } from "../dist/export/public_files.js";
 import { assembleExport } from "../dist/export/site.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import type {
   ScreenReview,
   ViewResourceEvidence,
@@ -20,6 +21,7 @@ import {
   childUpdateMessage,
   parseChildUpdateMessage,
 } from "../dist/server/update_messages.js";
+
 import { cssAttributionFixture } from "./helpers/css_attribution_fixture.js";
 import { FakeMarkupDocument, fakeMarkup } from "./helpers/fake_markup.js";
 
@@ -32,7 +34,11 @@ for (const [name, edit, resource] of [
   test(`screen-only classification delivers ${name} without component results`, async (t) => {
     const fixture = await cssAttributionFixture(t, false);
     await fixture.append(edit, resource);
-    const changes = await computeCatalogueChanges(fixture.config, "main");
+    const changes = await computeCatalogueChanges(
+      fixture.config,
+      "main",
+      committedReviewRepository(fixture.config),
+    );
     const snapshot = changes.componentChanges;
     assert.ok(snapshot);
     assert.equal(snapshot.result, undefined);
@@ -99,7 +105,11 @@ for (const [name, edit, resource] of [
 test("static screen-only shells project evidence from the existing v2 comparison", async (t) => {
   const fixture = await cssAttributionFixture(t, false);
   await fixture.append(".auth { padding: 2px; }");
-  const changes = await computeCatalogueChanges(fixture.config, "main");
+  const changes = await computeCatalogueChanges(
+    fixture.config,
+    "main",
+    committedReviewRepository(fixture.config),
+  );
   const comparison = await fixture.compare();
   const site = assembleExport(
     fixture.config,

@@ -8,12 +8,14 @@ import {
   FileSystemReviewAssetReader,
   GitReviewAssetReader,
 } from "../dist/review/assets.js";
+import { CommittedBaselineReader } from "../dist/review/committed.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
 import { classifyChangedContent } from "../dist/server/changed_content.js";
 import { ChangedResourceGraph } from "../dist/server/changed_resources.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { cssAttributionFixture } from "./helpers/css_attribution_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
@@ -33,20 +35,24 @@ for (const resource of ["image.svg", "unused.css", "shared.css"])
     });
     await fixture.append("\n.auth { color: blue; }", resource);
     const reads: string[] = [];
-    class ObservedGit extends RepositoryGitClient {
+    class ObservedGit extends CommittedBaselineReader {
       override async readFiles(commit: string, paths: readonly string[]) {
         reads.push(...paths);
         return super.readFiles(commit, paths);
       }
     }
-    const git = new ObservedGit(new NodeGitCommandRunner(fixture.root));
+    const runner = new NodeGitCommandRunner(fixture.root);
+    const git = {
+      evidence: new CommittedRepository(runner).evidence,
+      reader: new ObservedGit(runner),
+    };
     const manifest = readManifest(fixture.config);
     await classifyChangedContent(
       manifest,
       manifest,
       fixture.config,
-      git,
-      await git.mergeBase("main", "HEAD"),
+      git.reader,
+      await git.evidence.mergeBase("main", "HEAD"),
       [`mockups/${resource}`],
     );
     const documents = reads.filter((route) => route.endsWith(".html"));
@@ -95,13 +101,13 @@ test("deleted stylesheet resources still retain their consumers", async (t) => {
   const fixture = await cssAttributionFixture(t, false);
   await fs.unlink(path.join(fixture.mockupsDir, "shared.css"));
   const manifest = readManifest(fixture.config);
-  const git = new RepositoryGitClient(new NodeGitCommandRunner(fixture.root));
+  const git = new CommittedRepository(new NodeGitCommandRunner(fixture.root));
   const result = await classifyChangedContent(
     manifest,
     manifest,
     fixture.config,
-    git,
-    await git.mergeBase("main", "HEAD"),
+    git.reader,
+    await git.evidence.mergeBase("main", "HEAD"),
     ["mockups/shared.css"],
   );
   assert.ok(result.changedPaths.includes("mockups/screens/home.mobile.html"));
@@ -131,16 +137,16 @@ test("changed documents retain a removed image without any stylesheet in the dif
   );
   await fs.unlink(path.join(fixture.mockupsDir, "image.svg"));
   await fixture.build();
-  const git = new RepositoryGitClient(new NodeGitCommandRunner(fixture.root));
-  const commit = await git.mergeBase("main", "HEAD");
-  const changedPaths = await git.changedPaths(commit);
+  const git = new CommittedRepository(new NodeGitCommandRunner(fixture.root));
+  const commit = await git.evidence.mergeBase("main", "HEAD");
+  const changedPaths = await git.evidence.changedPaths(commit);
   assert.ok(changedPaths.includes("mockups/image.svg"));
   assert.ok(changedPaths.every((route) => !/\.css$/i.test(route)));
   const result = await classifyChangedContent(
     readManifest(fixture.config),
     baseline,
     fixture.config,
-    git,
+    git.reader,
     commit,
     changedPaths,
   );
@@ -171,13 +177,13 @@ test("moved documents retain changed stylesheets reachable only from their base 
     },
   });
   await fixture.append(".auth { padding: 2px; }", "old/theme.css");
-  const git = new RepositoryGitClient(new NodeGitCommandRunner(fixture.root));
+  const git = new CommittedRepository(new NodeGitCommandRunner(fixture.root));
   const graph = new ChangedResourceGraph(
     new FileSystemReviewAssetReader(fixture.config),
     new GitReviewAssetReader(
       fixture.config,
-      git,
-      await git.mergeBase("main", "HEAD"),
+      git.reader,
+      await git.evidence.mergeBase("main", "HEAD"),
       "mockups",
     ),
     new Set(["old/theme.css"]),

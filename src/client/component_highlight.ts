@@ -1,12 +1,13 @@
 /** Parent-owned masks and selection listeners; consumer DOM remains unchanged. */
 import type { ComponentViewRecord } from "../components/manifest_types.js";
-import { createOverlay } from "./component_overlay.js";
+
 import {
   authenticateRanges,
   rangeBounds,
   visibleFrameBox,
   type ComponentBounds,
 } from "./component_geometry.js";
+import { createOverlay } from "./component_overlay.js";
 
 export interface HighlightFrame {
   frame: HTMLIFrameElement;

@@ -1,12 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
-import { timeAsync, timeSync } from "../diagnostics/timings.js";
 
 import type { ResolvedConfig } from "../config/types.js";
+import { timeAsync, timeSync } from "../diagnostics/timings.js";
 import { MoklyError, errorMessage } from "../errors.js";
+
 import type { Compilation } from "./compile.js";
-import { isOwned, pendingGeneratedOrphanRoutes } from "./ownership.js";
 import { validateGeneratedOutputPaths } from "./output_paths.js";
+import { isOwned, pendingGeneratedOrphanRoutes } from "./ownership.js";
 
 /** Atomically replace owned generated files with rollback on any failure. */
 export async function writeCompilation(
@@ -25,6 +26,7 @@ async function writeMeasured(
   timeSync("output.validate-targets", () =>
     rejectUnsafeTargets(compilation, config),
   );
+  await fs.promises.mkdir(path.dirname(config.mockupsDir), { recursive: true });
   const temporaryRoot = await fs.promises.mkdtemp(
     path.join(path.dirname(config.mockupsDir), ".mokly-write-"),
   );

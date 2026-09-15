@@ -1,13 +1,15 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
-import path from "node:path";
 import http from "node:http";
+import path from "node:path";
 import test from "node:test";
+
 import { compileCatalogue } from "../dist/build/compile.js";
 import { componentRuntime } from "../dist/build/component_runtime.js";
 import { MANIFEST_NAME } from "../dist/registry/manifest.js";
 import { ComponentRenderService } from "../dist/server/controls/service.js";
 import { startCatalogueServer } from "../dist/server/http.js";
+
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 
 test("private controls rerender actual consumer code, keep immutable bundles and never change output", async (t) => {

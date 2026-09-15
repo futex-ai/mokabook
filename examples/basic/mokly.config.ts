@@ -1,16 +1,17 @@
 import { defineConfig } from "@mokly/mokly";
-import {
-  libraryStyleCandidates,
-  withLibraryStyles,
-} from "./entries/design/library/style_files.js";
 
 import {
   designBaseStyles,
   componentLayoutStyles,
   workspaceLayoutStyles,
 } from "./entries/design/components/parts/styles.js";
+import {
+  libraryStyleCandidates,
+  withLibraryStyles,
+} from "./entries/design/library/style_files.js";
 
 export default defineConfig({
+  generatedOutput: "derived",
   colorSchemes: ["light", "dark"],
   entriesDir: "entries",
   mockupsDir: "generated",
@@ -33,6 +34,11 @@ export default defineConfig({
   renderer: "renderer.tsx",
   repoRoot: "../..",
   review: {
+    baselineBuild: [
+      ["npm", "ci"],
+      ["npm", "run", "build"],
+      ["npm", "run", "example:build"],
+    ],
     outDir: ".context/basic-review",
     sharedImpact: [
       "examples/basic/generated/design-review.css",

@@ -1,8 +1,9 @@
-import { useDesignStyle } from "../style_context.js";
 import type { ReactNode } from "react";
-import type { DeviceFrameProps } from "./device-frame.js";
 
 import { CopyIcon, ExpandIcon } from "../../parts/icons.js";
+import { useDesignStyle } from "../style_context.js";
+
+import type { DeviceFrameProps } from "./device-frame.js";
 
 interface FrameLabelProps {
   lightOnly?: boolean | undefined;

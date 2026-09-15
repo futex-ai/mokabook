@@ -2,13 +2,11 @@
 import { createHash } from "node:crypto";
 
 import { MoklyError } from "../errors.js";
-import {
-  FileSystemReviewAssetReader,
-  type LocatedReviewAsset,
-  type ReviewAssetReader,
-} from "./assets.js";
 
-export class EvidenceAssetReader extends FileSystemReviewAssetReader {
+import { type LocatedReviewAsset, type ReviewAssetReader } from "./assets.js";
+import { CompiledReviewAssetReader } from "./head_assets.js";
+
+export class EvidenceAssetReader extends CompiledReviewAssetReader {
   readonly digests: Record<string, string> = Object.create(null);
 
   override async readLocated(route: string): Promise<LocatedReviewAsset> {

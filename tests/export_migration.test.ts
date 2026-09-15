@@ -5,6 +5,7 @@ import test from "node:test";
 
 import { EXPORT_MARKER } from "../dist/export/ownership.js";
 import { exportCatalogue } from "../dist/export/run.js";
+
 import { directoryFiles } from "./helpers/export_fixture.js";
 import { createPreviewComparisonFixture } from "./helpers/preview_comparison_fixture.js";
 

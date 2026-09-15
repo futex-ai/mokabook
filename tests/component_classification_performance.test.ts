@@ -12,9 +12,10 @@ import {
 } from "../dist/review/component_metadata.js";
 import { ComponentMaterialReader } from "../dist/review/component_resources.js";
 import { compareComponentView } from "../dist/review/component_view.js";
+import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import { ResourceComparison } from "../dist/review/resource_comparison.js";
-import type { GitClient } from "../dist/review/git.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
@@ -135,24 +136,30 @@ for (const baseline of ["screens", "components"] as const)
       baseline === "screens" ? validEntrySource() : source,
     );
     const batches: string[][] = [];
-    const git: GitClient = {
+    const git: ReadOnlyReviewRepository = {
       ...fixture.git,
-      readFiles: async (commit, paths) => {
-        batches.push([...paths]);
-        return new Map(
-          await Promise.all(
-            paths.map(
-              async (route) =>
-                [
-                  route,
-                  {
-                    kind: "regular" as const,
-                    bytes: await fixture.git.readFileBytes(commit, route),
-                  },
-                ] as const,
+      reader: {
+        ...fixture.git.reader,
+        readFiles: async (commit, paths) => {
+          batches.push([...paths]);
+          return new Map(
+            await Promise.all(
+              paths.map(
+                async (route) =>
+                  [
+                    route,
+                    {
+                      kind: "regular" as const,
+                      bytes: await fixture.git.reader.readFileBytes(
+                        commit,
+                        route,
+                      ),
+                    },
+                  ] as const,
+              ),
             ),
-          ),
-        );
+          );
+        },
       },
     };
     const expected = await computeChangedRoutes(

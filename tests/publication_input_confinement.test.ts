@@ -8,6 +8,7 @@ import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
 import { isInside } from "../dist/config/paths.js";
 import { buildPreview } from "../scripts/preview/catalogue.mjs";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("publication hashes outside links without reading or traversing their targets", async (context) => {

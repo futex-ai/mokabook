@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+
 import { libraryStyleFiles, type LibraryStyle } from "./style_files.js";
 
 /** A collector belongs to one synchronous render, including transient prop renders. */

@@ -1,7 +1,7 @@
-import { chooseScheme } from "./workspace_actions.js";
 import { expect, test, type Page } from "@playwright/test";
 
 import { startPreviewFixture, type PreviewFixture } from "./preview_fixture.js";
+import { chooseScheme } from "./workspace_actions.js";
 
 let preview: PreviewFixture;
 

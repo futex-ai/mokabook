@@ -1,7 +1,8 @@
-import { MetaRow } from "../../parts/metadata_row.js";
-import { changeStatusBadge } from "../../library/controls/change-status.js";
-import { useDesignInstance } from "../../library/composition.js";
 import { MockLink } from "@mokly/mokly";
+
+import { useDesignInstance } from "../../library/composition.js";
+import { changeStatusBadge } from "../../library/controls/change-status.js";
+import { MetaRow } from "../../parts/metadata_row.js";
 
 import type { ChangeStatus, ComparisonFixture } from "./comparison_fixtures.js";
 

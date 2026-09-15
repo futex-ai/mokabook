@@ -1,5 +1,7 @@
 /** Typed Browse state captured across one automatic watched reload. */
 
+import type { ChangesStatus } from "../server/update_messages.js";
+
 import {
   isNavDisclosureClosed,
   isNavDisclosureKey,
@@ -9,7 +11,6 @@ import {
   selectAndRevealRoute,
 } from "./browse_navigation_state.js";
 import { syncTagChips } from "./tag_filter.js";
-import type { ChangesStatus } from "../server/update_messages.js";
 
 /** Color scheme selection applied to fragment frames and device chrome. */
 export type BrowseColorScheme = "dark" | "light";

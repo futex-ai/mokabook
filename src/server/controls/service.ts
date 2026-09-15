@@ -1,5 +1,6 @@
 /** Local controls own generation, worker admission, and memory lifetime together. */
 import { randomBytes } from "node:crypto";
+
 import type { ComponentRuntime } from "../../build/component_runtime.js";
 import { validateRenderRequest } from "../../components/render_request.js";
 import {
@@ -7,6 +8,7 @@ import {
   type ComponentRenderSuccess,
   type RenderCapability,
 } from "../../components/render_types.js";
+
 import { RenderQueue } from "./queue.js";
 import { RenderStore } from "./store.js";
 import { NodeRenderWorkerFactory } from "./worker_client.js";

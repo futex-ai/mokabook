@@ -2,8 +2,8 @@ import path from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { compareReview } from "../../dist/review/compare.js";
 import { renderReviewArtifact } from "../../dist/review/artifact.js";
+import { compareReview } from "../../dist/review/compare.js";
 import { writeReviewArtifact } from "../../dist/review/write.js";
 import {
   startCatalogueServer,

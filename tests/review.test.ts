@@ -6,24 +6,25 @@ import test from "node:test";
 import { promisify } from "node:util";
 
 import { compileCatalogue } from "../dist/build/compile.js";
+import type { Compilation } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
-import { compareReview } from "../dist/review/compare.js";
+import type { ManifestScreen, ManifestV5 } from "../dist/registry/types.js";
 import { renderReviewArtifact } from "../dist/review/artifact.js";
+import { compareReview } from "../dist/review/compare.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
-  type GitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
 import {
   normalizeReviewPair,
   normalizeSingleDocument,
 } from "../dist/review/ignore.js";
+import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
 import { runReview } from "../dist/review/run.js";
-import { writeReviewArtifact } from "../dist/review/write.js";
 import type { ReviewResult } from "../dist/review/types.js";
-import type { Compilation } from "../dist/build/compile.js";
-import type { ManifestScreen, ManifestV5 } from "../dist/registry/types.js";
+import { writeReviewArtifact } from "../dist/review/write.js";
+
 import {
   createFixture,
   removeFixture,
@@ -58,13 +59,13 @@ test("Review ignore normalizes paired regions and retains malformed content", ()
 });
 
 test("Git failures keep typed operation context", async () => {
-  const git = new RepositoryGitClient({
+  const git = new CommittedRepository({
     run: async () => {
       throw new Error("not a repository");
     },
   });
   await assert.rejects(
-    () => git.mergeBase("origin/main", "HEAD"),
+    () => git.evidence.mergeBase("origin/main", "HEAD"),
     /find merge base of origin\/main and HEAD.*not a repository/,
   );
 });
@@ -118,23 +119,27 @@ test("Review classifies added, removed, and unchanged routes independently", asy
     compilation,
     config,
     {
-      changedPaths: async () => [],
-      fileExists: async (_commit, repoPath) => gitFiles.has(repoPath),
-      fileKind: async (_commit, repoPath) =>
-        gitFiles.has(repoPath) ? "regular" : "missing",
-      readFile: async (_commit, repoPath) => {
-        const content = gitFiles.get(repoPath);
-        if (content === undefined)
-          throw new Error(`missing fake Git path ${repoPath}`);
-        return content;
+      evidence: {
+        changedPaths: async () => [],
+        mergeBase: async () => "a".repeat(40),
       },
-      readFileBytes: async (_commit, repoPath) => {
-        const content = gitFiles.get(repoPath);
-        if (content === undefined)
-          throw new Error(`missing fake Git path ${repoPath}`);
-        return Buffer.from(content);
+      reader: {
+        fileExists: async (_commit, repoPath) => gitFiles.has(repoPath),
+        fileKind: async (_commit, repoPath) =>
+          gitFiles.has(repoPath) ? "regular" : "missing",
+        readFile: async (_commit, repoPath) => {
+          const content = gitFiles.get(repoPath);
+          if (content === undefined)
+            throw new Error(`missing fake Git path ${repoPath}`);
+          return content;
+        },
+        readFileBytes: async (_commit, repoPath) => {
+          const content = gitFiles.get(repoPath);
+          if (content === undefined)
+            throw new Error(`missing fake Git path ${repoPath}`);
+          return Buffer.from(content);
+        },
       },
-      mergeBase: async () => "a".repeat(40),
     },
     "HEAD",
   );
@@ -354,7 +359,7 @@ test("Review compares Git base without checkout and writes deterministic artifac
     config,
     "HEAD",
     config.review.outDir,
-    new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+    new CommittedRepository(new NodeGitCommandRunner(fixture.root)),
   );
   assert.equal(
     result.screens.find((screen) => screen.route === "screens/home.html")
@@ -407,7 +412,7 @@ test("Review reports descendants of directory dependencies", async (context) => 
     config,
     "HEAD",
     config.review.outDir,
-    new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+    new CommittedRepository(new NodeGitCommandRunner(fixture.root)),
   );
 
   assert.ok(
@@ -443,25 +448,29 @@ async function git(cwd: string, arguments_: readonly string[]): Promise<void> {
   await execFileAsync("git", [...arguments_], { cwd });
 }
 
-function fakeGit(files: ReadonlyMap<string, string>): GitClient {
+function fakeGit(files: ReadonlyMap<string, string>): ReadOnlyReviewRepository {
   return {
-    changedPaths: async () => [],
-    fileExists: async (_commit, repoPath) => files.has(repoPath),
-    fileKind: async (_commit, repoPath) =>
-      files.has(repoPath) ? "regular" : "missing",
-    readFile: async (_commit, repoPath) => {
-      const content = files.get(repoPath);
-      if (content === undefined)
-        throw new Error(`missing fake Git path ${repoPath}`);
-      return content;
+    evidence: {
+      changedPaths: async () => [],
+      mergeBase: async () => "a".repeat(40),
     },
-    readFileBytes: async (_commit, repoPath) => {
-      const content = files.get(repoPath);
-      if (content === undefined)
-        throw new Error(`missing fake Git path ${repoPath}`);
-      return Buffer.from(content);
+    reader: {
+      fileExists: async (_commit, repoPath) => files.has(repoPath),
+      fileKind: async (_commit, repoPath) =>
+        files.has(repoPath) ? "regular" : "missing",
+      readFile: async (_commit, repoPath) => {
+        const content = files.get(repoPath);
+        if (content === undefined)
+          throw new Error(`missing fake Git path ${repoPath}`);
+        return content;
+      },
+      readFileBytes: async (_commit, repoPath) => {
+        const content = files.get(repoPath);
+        if (content === undefined)
+          throw new Error(`missing fake Git path ${repoPath}`);
+        return Buffer.from(content);
+      },
     },
-    mergeBase: async () => "a".repeat(40),
   };
 }
 

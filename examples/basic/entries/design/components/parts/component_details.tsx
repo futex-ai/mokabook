@@ -1,15 +1,16 @@
-import { MetaRow } from "../../parts/metadata_row.js";
 import { MockLink } from "@mokly/mokly";
 
-import { ComponentInfo } from "./component_info.js";
+import { MetaRow } from "../../parts/metadata_row.js";
+
+import { ActionPropValues, actionVariants } from "./action_props.js";
 import { ComparisonDetails } from "./comparison_details.js";
 import { componentComparison } from "./comparison_fixtures.js";
+import { ComponentInfo } from "./component_info.js";
 import { UsedBy, AffectedScreens } from "./component_usage.js";
+import { CONTROLS_PAGES } from "./destinations.js";
 import { toolbarPrompt } from "./fixtures.js";
 import { Inspector } from "./inspector.js";
-import { CONTROLS_PAGES } from "./destinations.js";
 import { COMPONENT_BY_STATE } from "./metadata.js";
-import { ActionPropValues, actionVariants } from "./action_props.js";
 
 export type ComponentPageState =
   | "default"

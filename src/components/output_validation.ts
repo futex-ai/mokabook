@@ -2,6 +2,7 @@ import path from "node:path";
 
 import { isPublicStaticFile } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
+
 import { invalidData } from "./data.js";
 import type { ComponentViewRecord } from "./manifest_types.js";
 import { validateResourcePath } from "./validation_helpers.js";

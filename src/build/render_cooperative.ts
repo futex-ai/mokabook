@@ -7,6 +7,7 @@ import {
   VIEWPORTS,
   type ArtifactView,
 } from "../registry/views.js";
+
 import type { LoadedGraph } from "./load_graph.js";
 import { renderFragments } from "./render.js";
 

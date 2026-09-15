@@ -70,7 +70,12 @@ test("watch update parsing rejects incomplete or unsafe IPC values", () => {
 });
 
 test("watch updates preserve explicit Changes loading and terminal states", () => {
-  for (const status of ["pending", "ready", "unavailable"] as const) {
+  for (const status of [
+    "preparing",
+    "pending",
+    "ready",
+    "unavailable",
+  ] as const) {
     const message = childUpdateMessage(
       2,
       status === "ready" ? [] : undefined,
@@ -84,7 +89,12 @@ test("watch updates preserve explicit Changes loading and terminal states", () =
 
 test("watch updates distinguish evidence from content without guessing from Changes status", () => {
   for (const kind of ["content", "evidence"] as const) {
-    for (const status of ["pending", "ready", "unavailable"] as const) {
+    for (const status of [
+      "preparing",
+      "pending",
+      "ready",
+      "unavailable",
+    ] as const) {
       const message = childUpdateMessage(
         2,
         status === "ready" ? [] : undefined,
@@ -95,5 +105,36 @@ test("watch updates distinguish evidence from content without guessing from Chan
       assert.equal(message.kind, kind);
       assert.deepEqual(parseChildUpdateMessage(message), message);
     }
+  }
+});
+
+test("baseline handoffs preserve pinned commits and explicit revocation", () => {
+  for (const commit of ["a".repeat(40), "b".repeat(64), null]) {
+    const message = childUpdateMessage(
+      2,
+      undefined,
+      undefined,
+      "pending",
+      "evidence",
+      commit,
+    );
+    assert.equal(message.baselineCommit, commit);
+    assert.deepEqual(parseChildUpdateMessage(message), message);
+  }
+  for (const baselineCommit of [
+    "HEAD",
+    "../escape",
+    "a".repeat(41),
+    "",
+    12,
+    {},
+  ]) {
+    assert.equal(
+      parseChildUpdateMessage({
+        ...childUpdateMessage(2, undefined),
+        baselineCommit,
+      }),
+      undefined,
+    );
   }
 });

@@ -16,6 +16,7 @@ import type {
 } from "../dist/server/supervisor.js";
 import { classifyWatchPath } from "../dist/server/watch_events.js";
 import { ChokidarWatcherFactory } from "../dist/server/watcher.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("package-owned watch rules precede broad consumer rules", async (context) => {

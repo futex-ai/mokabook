@@ -5,6 +5,7 @@ import test from "node:test";
 
 import { resolveExportOutput } from "../dist/export/paths.js";
 import { exportCatalogue } from "../dist/export/run.js";
+
 import {
   createExportFixture,
   directoryFiles,

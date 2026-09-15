@@ -6,20 +6,22 @@ import {
   FileSystemReviewAssetReader,
   GitReviewAssetReader,
 } from "../dist/review/assets.js";
+import { CommittedBaselineReader } from "../dist/review/committed.js";
 import { classifyComponents } from "../dist/review/component_classification.js";
+import { CssResourceAnalysis } from "../dist/review/css/resource_analysis.js";
+import { LightningCssRuleParser } from "../dist/review/css/rules.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
-import { LightningCssRuleParser } from "../dist/review/css/rules.js";
-import { CssResourceAnalysis } from "../dist/review/css/resource_analysis.js";
+
 import { cssAttributionFixture } from "./helpers/css_attribution_fixture.js";
 
 test("component classification reads base CSS in batches and parses shared source once per side", async (t) => {
   const fixture = await cssAttributionFixture(t, true);
   await fixture.append(".guide { padding: 2px; }");
   const batches: string[][] = [];
-  class ObservedGit extends RepositoryGitClient {
+  class ObservedGit extends CommittedBaselineReader {
     override async readFiles(commit: string, paths: readonly string[]) {
       batches.push([...paths]);
       return super.readFiles(commit, paths);
@@ -32,8 +34,12 @@ test("component classification reads base CSS in batches and parses shared sourc
       return super.readFileBytes(commit, path);
     }
   }
-  const git = new ObservedGit(new NodeGitCommandRunner(fixture.root));
-  const commit = await git.mergeBase("main", "HEAD");
+  const runner = new NodeGitCommandRunner(fixture.root);
+  const git = {
+    evidence: new CommittedRepository(runner).evidence,
+    reader: new ObservedGit(runner),
+  };
+  const commit = await git.evidence.mergeBase("main", "HEAD");
   const compilation = await compileCatalogue(fixture.config);
   const calls: string[] = [];
   const native = new LightningCssRuleParser();
@@ -42,7 +48,7 @@ test("component classification reads base CSS in batches and parses shared sourc
     after: compilation.manifest,
     beforeReader: new GitReviewAssetReader(
       fixture.config,
-      git,
+      git.reader,
       commit,
       "mockups",
     ),

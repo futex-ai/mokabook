@@ -11,6 +11,7 @@ import type {
 } from "../components/prop_types.js";
 import { validateValue } from "../components/props.js";
 import type { ComponentOverride } from "../components/render_types.js";
+
 import { element } from "./inspector_panels.js";
 
 export interface ControlFields {

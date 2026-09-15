@@ -21,10 +21,11 @@ import {
 import { readBaseManifest } from "../dist/review/base_manifest.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { buildPreview } from "../scripts/preview/catalogue.mjs";
+
 import {
   createFixture,
   removeFixture,
@@ -267,10 +268,15 @@ test("the former Mokabook manifest is accepted only from Git history", async (co
     "-qm",
     "test: former Mokabook metadata",
   ]);
-  const git = new RepositoryGitClient(runner);
-  const baseline = await readBaseManifest(git, "HEAD", config);
+  const git = new CommittedRepository(runner);
+  const baseline = await readBaseManifest(git.reader, "HEAD", config);
   assert.deepEqual(baseline, compilation.manifest);
-  const reader = new GitReviewAssetReader(config, git, "HEAD", "mockups");
+  const reader = new GitReviewAssetReader(
+    config,
+    git.reader,
+    "HEAD",
+    "mockups",
+  );
   await assert.rejects(
     reader.read(FORMER_MANIFEST_NAME),
     /not a public static file/,
@@ -329,14 +335,19 @@ for (const schemaVersion of [2, 3, 4, 5]) {
       "-qm",
       "test: historical metadata",
     ]);
-    const git = new RepositoryGitClient(runner);
+    const git = new CommittedRepository(runner);
     config.compatibility.readManifestV2 = schemaVersion === 2;
-    const baseline = await readBaseManifest(git, "HEAD", config);
+    const baseline = await readBaseManifest(git.reader, "HEAD", config);
     assert.equal(
       baseline.schemaVersion,
       schemaVersion === 2 ? 3 : schemaVersion,
     );
-    const reader = new GitReviewAssetReader(config, git, "HEAD", "mockups");
+    const reader = new GitReviewAssetReader(
+      config,
+      git.reader,
+      "HEAD",
+      "mockups",
+    );
     for (const route of [filename, "metadata.json"])
       await assert.rejects(
         reader.read(route),

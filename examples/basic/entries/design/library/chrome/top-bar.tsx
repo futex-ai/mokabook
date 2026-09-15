@@ -3,7 +3,9 @@ import {
   type ComponentProps,
   type ComponentRenderContext,
 } from "@mokly/mokly";
+
 import { DESTINATIONS } from "../../parts/destinations.js";
+import { libraryTags } from "../controls/tag-picker.js";
 import { libraryMetadata } from "../metadata.js";
 import {
   destination,
@@ -12,7 +14,7 @@ import {
   tagRecords,
   text,
 } from "../schemas.js";
-import { libraryTags } from "../controls/tag-picker.js";
+
 import { TopBarView } from "./top-bar.view.js";
 
 const propSchema = {

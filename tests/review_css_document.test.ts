@@ -4,6 +4,7 @@ import test from "node:test";
 import { parse } from "parse5";
 
 import { cssDocumentOptions } from "../src/review/css/document.js";
+
 import { analyze, documents, excluded, kept } from "./helpers/review_css.js";
 
 test("CSS adapter preserves root siblings, text, and ancestor subset semantics", () => {

@@ -1,6 +1,7 @@
+import { optional, useDesignInstance } from "../library/composition.js";
 import { tagChip } from "../library/controls/tag-chip.js";
 import { tagPicker } from "../library/controls/tag-picker.js";
-import { optional, useDesignInstance } from "../library/composition.js";
+
 import { useDesignNavigation } from "./design_navigation.js";
 import { tagTarget, type NavigationState } from "./navigation_states.js";
 import { CATALOGUE_TAGS, type CatalogueTag } from "./tags.js";

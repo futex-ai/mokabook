@@ -29,6 +29,7 @@ when the historical primary file is absent, never when it is invalid.
 
 ## Contracts
 
+- [Catalogue upload v1](./mokly-upload.md) — public CLI and hosted/self-hosted receiver boundary.
 - [Package and authoring contract](./mokly-package.md)
 - [Build and Browse runtime](./mokly-runtime.md)
 - [On-demand Serve](./mokly-on-demand.md)
@@ -41,6 +42,10 @@ when the historical primary file is absent, never when it is invalid.
 - [Breaking page migration](./mokly-page-migration.md)
 - [Optional changes in publication](./mokly-publication.md)
 - [Changes and screen comparisons](./mokly-changes.md)
+- [Derived baselines](./mokly-derived-baselines.md) — approved target:
+  uncommitted generated output with per-commit rebuilt baselines.
+  - [Baseline storage and execution](./mokly-baseline-storage.md) — archive limits,
+    command environments, locking and crash cleanup.
 - [Registered components](./mokly-components.md)
 - [Component runtime prop schema](./mokly-component-props.md)
 - [Current manifest v5 schema](./mokly-component-manifest.md)
@@ -62,6 +67,8 @@ when the historical primary file is absent, never when it is invalid.
   hosting, navigation, and comparison behavior.
 - [Export recovery](./mokly-export-recovery.md) — backup ownership,
   concurrent destination changes, bounded cleanup, and failure reporting.
+- [Export ownership v1](./mokly-export-ownership.md) — public inventory schema
+  and compatibility fixtures for independent upload receivers.
 - [Watched development](./mokly-watch.md)
 - [Catalogue navigation contract](./mokly-navigation.md)
 - [Styled catalogue link controls](./mokly-link-controls.md)

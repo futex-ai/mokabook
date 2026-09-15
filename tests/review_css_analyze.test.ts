@@ -4,6 +4,7 @@ import test from "node:test";
 import { analyzeStylesheetChange } from "../src/review/css/analyze.js";
 import { CssRuleParseError } from "../src/review/css/types.js";
 import type { CssRuleParser } from "../src/review/css/types.js";
+
 import { analyze, documents, excluded, kept } from "./helpers/review_css.js";
 
 test("CSS analysis excludes no-op, whitespace, comments, and unchanged rule moves", () => {

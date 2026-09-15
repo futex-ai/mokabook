@@ -1,5 +1,6 @@
-import { mockLink } from "@mokly/mokly";
 import { renderToStaticMarkup } from "react-dom/server";
+
+import { mockLink } from "@mokly/mokly";
 
 /** Complete example document shared by the page and its shell designs. */
 export function ExampleDocument({

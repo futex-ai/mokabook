@@ -1,4 +1,5 @@
 import { reviewMaterialKey } from "../authoring/review_material.js";
+
 import { encodeProps } from "./codec.js";
 import { canonicalJson, invalidData } from "./data.js";
 import { instanceKey } from "./keys.js";

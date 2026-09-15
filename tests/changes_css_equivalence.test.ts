@@ -3,8 +3,10 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { committedReviewRepository } from "../dist/review/repository.js";
 import type { ViewResourceEvidence } from "../dist/review/types.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
+
 import { cssAttributionFixture } from "./helpers/css_attribution_fixture.js";
 
 for (const scenario of [
@@ -46,7 +48,11 @@ for (const scenario of [
     if (scenario.stylesheet)
       await fixture.append(".auth { padding: 2px; }", scenario.stylesheet);
 
-    const live = await computeCatalogueChanges(fixture.config, "main");
+    const live = await computeCatalogueChanges(
+      fixture.config,
+      "main",
+      committedReviewRepository(fixture.config),
+    );
     const { result } = await fixture.compare();
     assert.equal(result.schemaVersion, 2);
     assert.ok(live.changedRoutes?.includes("screens/home.html"));

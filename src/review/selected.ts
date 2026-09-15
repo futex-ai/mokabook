@@ -3,24 +3,20 @@ import path from "node:path";
 
 import { minimatch } from "minimatch";
 
+import { ConfiguredGitCommandRunner } from "../config/git.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { MoklyError } from "../errors.js";
 import type { ManifestScreen } from "../registry/types.js";
-import {
-  copySnapshotDependencies,
-  FileSystemReviewAssetReader,
-  GitReviewAssetReader,
-} from "./assets.js";
+
+import { copySnapshotDependencies, GitReviewAssetReader } from "./assets.js";
 import { baselineResourceConfig } from "./base_manifest.js";
-import { SelectedAssetReader } from "./evidence_assets.js";
 import { ComponentMaterialReader } from "./component_resources.js";
+import { SelectedAssetReader } from "./evidence_assets.js";
+import type { BaselineReader } from "./git.js";
+import { CompiledReviewAssetReader } from "./head_assets.js";
+import { baselineReaderForCommit } from "./repository.js";
 import { ResourceComparison } from "./resource_comparison.js";
-import {
-  NodeGitCommandRunner,
-  RepositoryGitClient,
-  type GitClient,
-} from "./git.js";
 import { parseReviewResult } from "./result_validation.js";
 import { compareScreen } from "./screen_compare.js";
 import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
@@ -43,7 +39,7 @@ import type {
 export class RepositorySelectedReview implements SelectedReviewProvider {
   constructor(
     private readonly config: ResolvedConfig,
-    private readonly git?: GitClient,
+    private readonly git?: BaselineReader,
   ) {}
 
   async generate(
@@ -51,10 +47,18 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
     selection: ReviewSelection,
     signal: AbortSignal,
   ): Promise<ReviewArtifact> {
+    if (this.config.generatedOutput === "derived" && !source.headOutputs)
+      throw new MoklyError(
+        "review-invalid",
+        "Compiled comparison input is unavailable",
+      );
     const git =
       this.git ??
-      new RepositoryGitClient(
-        new NodeGitCommandRunner(this.config.repoRoot, signal),
+      baselineReaderForCommit(
+        this.config,
+        source.baseCommit,
+        new ConfiguredGitCommandRunner(this.config, signal),
+        signal,
       );
     const before = new SelectedAssetReader(
       new GitReviewAssetReader(
@@ -68,7 +72,10 @@ export class RepositorySelectedReview implements SelectedReviewProvider {
       signal,
     );
     const after = new SelectedAssetReader(
-      new FileSystemReviewAssetReader(this.config),
+      new CompiledReviewAssetReader(
+        this.config,
+        source.headOutputs ? new Map(source.headOutputs) : undefined,
+      ),
       signal,
       source.headDigests,
     );

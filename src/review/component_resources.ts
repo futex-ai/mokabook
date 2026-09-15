@@ -1,9 +1,10 @@
-import { MoklyError } from "../errors.js";
 import { timeAsync } from "../diagnostics/timings.js";
+import { MoklyError } from "../errors.js";
+
 import { referencedRoutes } from "./asset_references.js";
 import type { ReviewAssetReader } from "./assets.js";
-import { ResourceGraph } from "./resource_graph.js";
 import { normalizeResourceDocuments } from "./resource_documents.js";
+import { ResourceGraph } from "./resource_graph.js";
 
 /** One immutable read cache per source side; it never copies or writes snapshots. */
 export class ComponentMaterialReader {

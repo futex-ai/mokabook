@@ -1,14 +1,15 @@
 /** Public `/static/` delivery with Browse-only HTML authentication. */
 
 import fs from "node:fs";
-import { isOwned } from "../build/ownership.js";
 import type { ServerResponse } from "node:http";
 import path from "node:path";
 
 import { adaptBrowseDocument } from "../browse/document_adapter.js";
+import { isOwned } from "../build/ownership.js";
 import { publicFileLocation } from "../config/public_files.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { errorMessage } from "../errors.js";
+
 import type { Catalogue } from "./catalogue.js";
 import { contentType, safeDecodePath, send } from "./respond.js";
 

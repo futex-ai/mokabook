@@ -3,7 +3,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
 
@@ -24,7 +26,14 @@ for (const reference of ["/root.css", "../notes.md", "missing.css"]) {
       path.join(fixture.mockupsDir, "home.css"),
       `@import "${reference}";`,
     );
-    assert.equal(await computeChangedRoutes(fixture.config, "HEAD"), undefined);
+    assert.equal(
+      await computeChangedRoutes(
+        fixture.config,
+        "HEAD",
+        committedReviewRepository(fixture.config),
+      ),
+      undefined,
+    );
   });
 }
 
@@ -50,7 +59,14 @@ for (const replacement of ["outside", "source", "dangling", "directory"]) {
             : "missing.svg",
         image,
       );
-    assert.equal(await computeChangedRoutes(fixture.config, "HEAD"), undefined);
+    assert.equal(
+      await computeChangedRoutes(
+        fixture.config,
+        "HEAD",
+        committedReviewRepository(fixture.config),
+      ),
+      undefined,
+    );
   });
 }
 
@@ -76,7 +92,14 @@ test("Changes validates other resources after finding a changed resource", async
     path.join(fixture.mockupsDir, "z.css"),
     'p { background: url("/invalid.png"); }',
   );
-  assert.equal(await computeChangedRoutes(fixture.config, "HEAD"), undefined);
+  assert.equal(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    undefined,
+  );
 });
 
 for (const state of ["changed", "added"]) {
@@ -99,7 +122,14 @@ for (const state of ["changed", "added"]) {
     await fixture.build();
     await fs.unlink(path.join(fixture.mockupsDir, "image.svg"));
     await fs.symlink("../notes.md", path.join(fixture.mockupsDir, "image.svg"));
-    assert.equal(await computeChangedRoutes(fixture.config, "HEAD"), undefined);
+    assert.equal(
+      await computeChangedRoutes(
+        fixture.config,
+        "HEAD",
+        committedReviewRepository(fixture.config),
+      ),
+      undefined,
+    );
   });
 }
 
@@ -121,7 +151,11 @@ test("Changes rejects resources symlinked into source roots inside mockupsDir", 
     path.join(fixture.mockupsDir, "image.svg"),
   );
   assert.equal(
-    await computeChangedRoutes({ ...fixture.config, entriesDir }, "HEAD"),
+    await computeChangedRoutes(
+      { ...fixture.config, entriesDir },
+      "HEAD",
+      committedReviewRepository({ ...fixture.config, entriesDir }),
+    ),
     undefined,
   );
 });
@@ -144,7 +178,14 @@ test("Changes rejects invalid references inside a changed embedded document", as
     path.join(fixture.mockupsDir, "embedded.html"),
     '<img src="/invalid.png" alt="Image">',
   );
-  assert.equal(await computeChangedRoutes(fixture.config, "HEAD"), undefined);
+  assert.equal(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    undefined,
+  );
 });
 
 test("a removed resource beneath an escaping symlink is not a valid deletion", async (t) => {
@@ -159,7 +200,14 @@ test("a removed resource beneath an escaping symlink is not a valid deletion", a
   );
   await fs.rm(path.join(fixture.mockupsDir, "images"), { recursive: true });
   await fs.symlink("../entries", path.join(fixture.mockupsDir, "images"));
-  assert.equal(await computeChangedRoutes(fixture.config, "HEAD"), undefined);
+  assert.equal(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    undefined,
+  );
 });
 
 test("Changes retains a legitimate deleted resource directory", async (t) => {
@@ -173,8 +221,12 @@ test("Changes retains a legitimate deleted resource directory", async (t) => {
     },
   );
   await fs.rm(path.join(fixture.mockupsDir, "images"), { recursive: true });
-  assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
-    "screens/home.html",
-    "user-flows/tour.html",
-  ]);
+  assert.deepEqual(
+    await computeChangedRoutes(
+      fixture.config,
+      "HEAD",
+      committedReviewRepository(fixture.config),
+    ),
+    ["screens/home.html", "user-flows/tour.html"],
+  );
 });

@@ -4,6 +4,18 @@ import { spawn, type ChildProcess } from "node:child_process";
 const TERMINATION_GRACE_MS = 1000;
 const MAX_OUTPUT_BYTES = 64 * 1024 * 1024;
 
+/** Preserve exit status for commands where a nonzero result has a defined meaning. */
+export class GitProcessError extends Error {
+  constructor(
+    readonly exitCode: number | null,
+    readonly signal: NodeJS.Signals | null,
+    stderr: string,
+  ) {
+    super(`Git exited with ${exitCode ?? signal}: ${stderr}`);
+    this.name = "GitProcessError";
+  }
+}
+
 export async function executeGit(
   cwd: string,
   arguments_: readonly string[],
@@ -55,8 +67,10 @@ export async function executeGit(
       if (failure) reject(failure);
       else if (code !== 0)
         reject(
-          new Error(
-            `Git exited with ${code ?? signalName}: ${Buffer.concat(stderr).toString("utf8")}`,
+          new GitProcessError(
+            code,
+            signalName,
+            Buffer.concat(stderr).toString("utf8"),
           ),
         );
       else resolve(Buffer.concat(stdout));

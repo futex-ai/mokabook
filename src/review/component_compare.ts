@@ -3,13 +3,14 @@ import { generatedViews } from "../components/views.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
 import type { Manifest } from "../registry/types.js";
+
 import {
   copySnapshotDependencies,
   type GitReviewAssetReader,
   type ReviewAssetReader,
 } from "./assets.js";
-import { classifyComponents } from "./component_classification.js";
 import { CompilationAssetReader } from "./compilation_assets.js";
+import { classifyComponents } from "./component_classification.js";
 import { addArtifactFile, snapshotPath } from "./paths.js";
 import type { ReviewArtifact, ReviewArtifactContent } from "./types.js";
 

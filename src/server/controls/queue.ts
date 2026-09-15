@@ -3,6 +3,7 @@ import {
   ComponentRenderError,
   type ComponentRenderRequest,
 } from "../../components/render_types.js";
+
 import type { TransientRender } from "./transient_assets.js";
 import type { RenderWorker, RenderWorkerFactory } from "./worker_client.js";
 

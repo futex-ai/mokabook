@@ -1,6 +1,7 @@
 import { canonicalJson } from "../components/data.js";
 import { generatedViews } from "../components/views.js";
 import type { Manifest } from "../registry/types.js";
+
 import { address, lexical } from "./component_metadata.js";
 import type {
   AffectedConsumer,

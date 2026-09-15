@@ -1,6 +1,6 @@
 import { screen } from "@mokly/mokly";
-import { PreviewWorkspace } from "./components/parts/workspace.js";
 
+import { PreviewWorkspace } from "./components/parts/workspace.js";
 import { DESTINATIONS } from "./parts/destinations.js";
 import { DetailsPanel } from "./parts/details.js";
 import { NavDrawer, NavTree } from "./parts/nav.js";

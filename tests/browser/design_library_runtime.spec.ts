@@ -4,6 +4,7 @@ import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 import { repositoryRoot } from "../helpers/fixture.js";
+
 import { chooseViewport } from "./workspace_actions.js";
 
 for (const viewport of ["desktop", "mobile"] as const) {

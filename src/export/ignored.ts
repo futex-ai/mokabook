@@ -7,9 +7,10 @@ import {
   projectRealPath,
   toPosixPath,
 } from "../config/paths.js";
+
 import { EXPORT_MARKER, parseExportOwnership } from "./ownership.js";
-import { exportReservation, TRANSACTION_MARKER } from "./transaction.js";
 import { isReservationDirectory } from "./reservation.js";
+import { exportReservation, TRANSACTION_MARKER } from "./transaction.js";
 
 /** Recognize proven output/reservations, not unrelated similarly named files. */
 export function isExportIgnoredPath(

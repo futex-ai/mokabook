@@ -1,15 +1,18 @@
+import { isSafeCatalogueRoute } from "../config/paths.js";
+import type { ManifestV5 } from "../registry/types.js";
+
+import type { ComponentChangeSnapshot } from "./component_changes.js";
 import type {
   RuntimeMessage,
   RuntimeStartupMessage,
 } from "./controls/runtime_ipc.js";
-import type { ComponentChangeSnapshot } from "./component_changes.js";
-import type { ManifestV5 } from "../registry/types.js";
 /** Typed watched-server updates crossing the parent/child IPC boundary. */
 
-import { isSafeCatalogueRoute } from "../config/paths.js";
-
-/** Whether live change detection is running, complete, or could not finish. */
-export type ChangesStatus = "pending" | "ready" | "unavailable";
+/**
+ * Live comparison state. `preparing` precedes `pending` only while a derived
+ * baseline is actually rebuilt; a cache hit and committed mode skip it.
+ */
+export type ChangesStatus = "preparing" | "pending" | "ready" | "unavailable";
 
 /** Evidence updates retain the current rendered content and user interactions. */
 export type CatalogueUpdateKind = "content" | "evidence";
@@ -30,6 +33,8 @@ export interface CatalogueUpdate {
 
 /** Parent-to-child update command with an explicit changed-route snapshot. */
 export interface ChildUpdateMessage {
+  /** Omit to retain the reader; null revokes it while the parent prepares. */
+  baselineCommit?: string | null;
   kind?: CatalogueUpdateKind;
   changesStatus?: ChangesStatus;
   changedRoutes: readonly string[] | null;
@@ -85,8 +90,10 @@ export function childUpdateMessage(
   componentChanges?: ComponentChangeSnapshot,
   changesStatus?: ChangesStatus,
   kind?: CatalogueUpdateKind,
+  baselineCommit?: string | null,
 ): ChildUpdateMessage {
   return {
+    ...(baselineCommit !== undefined ? { baselineCommit } : {}),
     ...(kind ? { kind } : {}),
     ...(changesStatus ? { changesStatus } : {}),
     changedRoutes: changedRoutes ? [...changedRoutes] : null,
@@ -108,6 +115,7 @@ export function parseChildUpdateMessage(
     return undefined;
   }
   const candidate = value as {
+    baselineCommit?: unknown;
     kind?: unknown;
     changesStatus?: unknown;
     changedRoutes?: unknown;
@@ -115,6 +123,10 @@ export function parseChildUpdateMessage(
     version?: unknown;
   };
   if (
+    (candidate.baselineCommit !== undefined &&
+      candidate.baselineCommit !== null &&
+      (typeof candidate.baselineCommit !== "string" ||
+        !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(candidate.baselineCommit))) ||
     !Number.isSafeInteger(candidate.version) ||
     (candidate.version as number) <= 0 ||
     !isChangedRoutes(candidate.changedRoutes) ||
@@ -128,6 +140,9 @@ export function parseChildUpdateMessage(
     return undefined;
   }
   return {
+    ...(candidate.baselineCommit !== undefined
+      ? { baselineCommit: candidate.baselineCommit }
+      : {}),
     ...(candidate.kind ? { kind: candidate.kind } : {}),
     ...(candidate.changesStatus
       ? { changesStatus: candidate.changesStatus }
@@ -140,7 +155,12 @@ export function parseChildUpdateMessage(
 }
 
 function isChangesStatus(value: unknown): value is ChangesStatus {
-  return value === "pending" || value === "ready" || value === "unavailable";
+  return (
+    value === "preparing" ||
+    value === "pending" ||
+    value === "ready" ||
+    value === "unavailable"
+  );
 }
 
 function isComponentChanges(

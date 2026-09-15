@@ -1,5 +1,6 @@
 import type { ComponentViewRecord } from "../components/manifest_types.js";
 import { MoklyError } from "../errors.js";
+
 import {
   uniqueReasons,
   type ComponentDependencyPolicy,

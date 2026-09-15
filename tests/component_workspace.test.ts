@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
+import { selectedVariant } from "../dist/client/workspace_variants.js";
 import { compareReview } from "../dist/review/compare.js";
 import { createCatalogue } from "../dist/server/catalogue.js";
 import { catalogueAtBaseline } from "../dist/server/catalogue.js";
 import { workspaceData } from "../dist/server/shell/workspace_data.js";
-import { selectedVariant } from "../dist/client/workspace_variants.js";
+
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 
 test("workspace badges, comparison eligibility and usage use recorded evidence", async (t) => {

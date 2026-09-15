@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 
 import { parseArguments } from "../dist/cli/arguments.js";
 import { HELP } from "../dist/cli/help.js";
+
 import { createExportFixture } from "./helpers/export_fixture.js";
 import { repositoryRoot } from "./helpers/fixture.js";
 
@@ -45,7 +46,7 @@ test("export CLI requires an explicit output and rejects misplaced options", () 
     () => parseArguments(["export", "--out", "site", "extra"]),
     /unknown option/,
   );
-  assert.throws(() => parseArguments(["publish"]), /unknown command/);
+  assert.equal(parseArguments(["publish"]).command, "publish");
   assert.equal(parseArguments(["export", "--help"]).help, true);
   assert.match(HELP, /mokly export --out <path>/);
 });

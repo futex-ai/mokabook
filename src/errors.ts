@@ -1,5 +1,9 @@
+import type { BaselineErrorCode } from "./baseline/errors.js";
+
 /** Stable error codes callers and CLI formatting may branch on. */
+
 export type MoklyErrorCode =
+  | BaselineErrorCode
   | "build-invalid"
   | "cli-invalid"
   | "config-invalid"
@@ -8,7 +12,12 @@ export type MoklyErrorCode =
   | "git-failed"
   | "manifest-invalid"
   | "review-invalid"
-  | "server-failed";
+  | "server-failed"
+  | "upload-failed"
+  | "upload-invalid-bundle"
+  | "upload-too-large"
+  | "upload-unauthorized"
+  | "upload-unsupported-version";
 
 /** Typed user-facing failure from a Mokly boundary. */
 export class MoklyError extends Error {

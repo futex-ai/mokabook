@@ -1,5 +1,3 @@
-import { compareScreen } from "./screen_compare.js";
-import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
 import path from "node:path";
 
 import { minimatch } from "minimatch";
@@ -8,7 +6,9 @@ import type { Compilation } from "../build/compile.js";
 import { toPosixPath } from "../config/paths.js";
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
+import { hasRegisteredComponents } from "../registry/manifest_capabilities.js";
 import type { ManifestScreen, Manifest } from "../registry/types.js";
+
 import {
   copySnapshotDependencies,
   FileSystemReviewAssetReader,
@@ -16,13 +16,14 @@ import {
   type ReviewAssetReader,
 } from "./assets.js";
 import { baselineResourceConfig, readBaseManifest } from "./base_manifest.js";
-import { compareComponentCatalogue } from "./component_compare.js";
 import { reviewChangedPaths } from "./changed_paths.js";
-import type { GitClient } from "./git.js";
-import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
-import { ComponentMaterialReader } from "./component_resources.js";
-import { ResourceComparison } from "./resource_comparison.js";
 import { CompilationAssetReader } from "./compilation_assets.js";
+import { compareComponentCatalogue } from "./component_compare.js";
+import { ComponentMaterialReader } from "./component_resources.js";
+import type { ReadOnlyReviewRepository } from "./repository.js";
+import { ResourceComparison } from "./resource_comparison.js";
+import { compareScreen } from "./screen_compare.js";
+import { aggregateIgnored, fragmentRoutes } from "./screen_views.js";
 import type {
   ReviewArtifact,
   ReviewArtifactContent,
@@ -34,16 +35,16 @@ import type {
 export async function compareReview(
   compilation: Compilation,
   config: ResolvedConfig,
-  git: GitClient,
+  git: ReadOnlyReviewRepository,
   baseRef: string,
   outDir = config.review.outDir,
   assetReader: ReviewAssetReader = new FileSystemReviewAssetReader(config),
   changedPathExclusions: readonly string[] = [],
 ): Promise<ReviewArtifact> {
-  const baseCommit = await git.mergeBase(baseRef, "HEAD");
-  const baseManifest = await readBaseManifest(git, baseCommit, config);
+  const baseCommit = await git.evidence.mergeBase(baseRef, "HEAD");
+  const baseManifest = await readBaseManifest(git.reader, baseCommit, config);
   const changedPaths = await reviewChangedPaths(
-    git,
+    git.evidence,
     baseCommit,
     config,
     outDir,
@@ -54,7 +55,7 @@ export async function compareReview(
   );
   const baseAssetReader = new GitReviewAssetReader(
     baselineResourceConfig(config, baseManifest),
-    git,
+    git.reader,
     baseCommit,
     mockupsPrefix,
   );

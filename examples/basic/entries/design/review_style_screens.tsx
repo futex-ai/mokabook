@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import { screen } from "@mokly/mokly";
-import { PreviewWorkspace } from "./components/parts/workspace.js";
 
+import { screen } from "@mokly/mokly";
+
+import { PreviewWorkspace } from "./components/parts/workspace.js";
 import { CompareGrid, Pane } from "./parts/compare.js";
 import { ComparePage, FramedShot } from "./parts/compare_page.js";
 import { DESTINATIONS, type DesignDestination } from "./parts/destinations.js";

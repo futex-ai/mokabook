@@ -3,19 +3,19 @@
 // one React tree to static HTML, collects react-native-web's atomic styles,
 // and injects them into <head> so @firna/ui controls arrive fully styled.
 
+import { createSharedUiTheme, SharedUiThemeProvider } from "@firna/ui/theme";
 import { createContext, type ReactNode, useContext } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { createSharedUiTheme, SharedUiThemeProvider } from "@firna/ui/theme";
 import { AppRegistry } from "react-native-web";
 
 import type { RenderInput } from "@mokly/mokly";
 
-import { darkTokens, tokens } from "./theme.js";
 import { LibraryHost } from "./entries/design/library/host.js";
 import {
   DesignStyleCollector,
   DesignStyles,
 } from "./entries/design/library/style_context.js";
+import { darkTokens, tokens } from "./theme.js";
 
 const themes = {
   dark: createSharedUiTheme(darkTokens),

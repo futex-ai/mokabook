@@ -3,14 +3,15 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { exportCatalogue } from "../dist/export/run.js";
 import { runExport } from "../dist/cli/export.js";
-import { exportReservation } from "../dist/export/transaction.js";
 import {
   RESERVATION_DIRECTORY,
   isReservationDirectory,
 } from "../dist/export/reservation.js";
+import { exportCatalogue } from "../dist/export/run.js";
+import { exportReservation } from "../dist/export/transaction.js";
 import { classifyWatchPath } from "../dist/server/watch_events.js";
+
 import {
   createExportFixture,
   directoryFiles,

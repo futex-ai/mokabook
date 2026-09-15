@@ -1,6 +1,8 @@
 import { defineComponent, type ComponentProps } from "@mokly/mokly";
+
 import { libraryMetadata } from "../metadata.js";
 import { destination, text } from "../schemas.js";
+
 import { InspectorView } from "./inspector.view.js";
 
 const propSchema = {

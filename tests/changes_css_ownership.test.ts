@@ -8,10 +8,12 @@ import { renderReviewArtifact } from "../dist/review/artifact.js";
 import { compareReview } from "../dist/review/compare.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { parseReviewResult } from "../dist/review/result_validation.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { componentEntrySource } from "./helpers/component_fixture.js";
 
@@ -60,7 +62,11 @@ export default (input) => ({ html: '<html><head><link rel="stylesheet" href="' +
             ? ".actual-only { color: blue; }"
             : ".not-present { color: blue; }",
         );
-        const live = await computeCatalogueChanges(fixture.config, "main");
+        const live = await computeCatalogueChanges(
+          fixture.config,
+          "main",
+          committedReviewRepository(fixture.config),
+        );
         const expected = matches
           ? ["components/action.html", ...(exact ? ["screens/home.html"] : [])]
           : [];
@@ -68,7 +74,7 @@ export default (input) => ({ html: '<html><head><link rel="stylesheet" href="' +
         const artifact = await compareReview(
           await compileCatalogue(fixture.config),
           fixture.config,
-          new RepositoryGitClient(new NodeGitCommandRunner(fixture.root)),
+          new CommittedRepository(new NodeGitCommandRunner(fixture.root)),
           "main",
         );
         const { result } = artifact;
@@ -130,7 +136,11 @@ test("non-CSS declared public dependencies retain their existing file-level poli
       fs.writeFile(path.join(mockupsDir, "asset.svg"), "<svg></svg>"),
   );
   await fs.appendFile(path.join(fixture.mockupsDir, "asset.svg"), "\n");
-  const live = await computeCatalogueChanges(fixture.config, "main");
+  const live = await computeCatalogueChanges(
+    fixture.config,
+    "main",
+    committedReviewRepository(fixture.config),
+  );
   assert.deepEqual(live.changedRoutes, ["components/action.html"]);
   const result = live.componentChanges?.result;
   assert.equal(result?.schemaVersion, 3);

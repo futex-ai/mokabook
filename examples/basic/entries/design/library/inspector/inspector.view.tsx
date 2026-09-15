@@ -1,10 +1,13 @@
-import { MockLink } from "@mokly/mokly";
-import { useDesignStyle } from "../style_context.js";
 import { useId, type CSSProperties } from "react";
+
+import { MockLink } from "@mokly/mokly";
+
 import {
   CloseInspectorIcon,
   InspectorIcon,
 } from "../../components/parts/inspector_icons.js";
+import { useDesignStyle } from "../style_context.js";
+
 import type { InspectorProps } from "./inspector.js";
 
 export function InspectorView({

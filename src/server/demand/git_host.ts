@@ -1,7 +1,9 @@
 /** Own worker-requested Git processes outside the terminable worker's lifetime. */
 import type { MessagePort } from "node:worker_threads";
+
 import { errorMessage } from "../../errors.js";
 import { NodeGitCommandRunner } from "../../review/git.js";
+
 import type { GitCommandReply, GitCommandRequest } from "./git_messages.js";
 
 export class BackgroundGitHost {

@@ -7,6 +7,7 @@ import { ComponentMaterialReader } from "../dist/review/component_resources.js";
 import type { ResourceEvidence } from "../dist/review/css/resource_analysis.js";
 import { ResourceComparison } from "../dist/review/resource_comparison.js";
 import { compareScreen } from "../dist/review/screen_compare.js";
+
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 
 for (const version of [2, 3])

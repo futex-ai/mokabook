@@ -3,7 +3,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
+
 import { cssAttributionFixture } from "./helpers/css_attribution_fixture.js";
 
 for (const components of [false, true]) {
@@ -17,7 +19,11 @@ for (const components of [false, true]) {
         ),
     });
     await fixture.append(".ignored-frame { padding: 2px; }");
-    const live = await computeCatalogueChanges(fixture.config, "main");
+    const live = await computeCatalogueChanges(
+      fixture.config,
+      "main",
+      committedReviewRepository(fixture.config),
+    );
     assert.ok(!live.changedRoutes?.includes("screens/home.html"));
     const { result } = await fixture.compare();
     for (const view of result.screens.find((screen) => screen.id === "home")!
@@ -34,7 +40,11 @@ for (const components of [false, true]) {
         ),
     });
     await fixture.append(".inside-frame { padding: 2px; }");
-    const live = await computeCatalogueChanges(fixture.config, "main");
+    const live = await computeCatalogueChanges(
+      fixture.config,
+      "main",
+      committedReviewRepository(fixture.config),
+    );
     assert.ok(live.changedRoutes?.includes("screens/home.html"));
     const { result } = await fixture.compare();
     for (const view of result.screens.find((screen) => screen.id === "home")!
@@ -63,7 +73,11 @@ for (const components of [false, true]) {
       },
     });
     await fixture.append(".guide { padding: 2px; }", "nested.css");
-    const live = await computeCatalogueChanges(fixture.config, "main");
+    const live = await computeCatalogueChanges(
+      fixture.config,
+      "main",
+      committedReviewRepository(fixture.config),
+    );
     assert.ok(!live.changedRoutes?.includes("screens/home.html"));
     const { result } = await fixture.compare();
     for (const view of result.screens.find((screen) => screen.id === "home")!
@@ -83,7 +97,13 @@ for (const components of [false, true]) {
       "../../notes.md",
       path.join(fixture.mockupsDir, "image.svg"),
     );
-    await assert.rejects(computeCatalogueChanges(fixture.config, "main"));
+    await assert.rejects(
+      computeCatalogueChanges(
+        fixture.config,
+        "main",
+        committedReviewRepository(fixture.config),
+      ),
+    );
     await assert.rejects(fixture.compare());
   });
 }

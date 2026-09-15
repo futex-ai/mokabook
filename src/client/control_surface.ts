@@ -3,6 +3,7 @@ import type {
   WorkspaceData,
   WorkspaceVariant,
 } from "../server/shell/workspace_data.js";
+
 import { element } from "./inspector_panels.js";
 
 export function controlSurface(

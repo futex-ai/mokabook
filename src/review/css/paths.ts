@@ -6,6 +6,7 @@ import { isPrivateStaticPath } from "../../config/public_files.js";
 import type { ResolvedConfig } from "../../config/types.js";
 import { MoklyError } from "../../errors.js";
 import type { ViewReview } from "../types.js";
+
 import { isStylesheetPath } from "./stylesheet_path.js";
 
 /** Only public stylesheets inside the rendered output root can be analysed. */

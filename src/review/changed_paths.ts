@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { isBaselineCachePath } from "../config/cache_paths.js";
 import {
   isInside,
   isSafeRepositoryPath,
@@ -10,11 +11,12 @@ import {
 import type { ResolvedConfig } from "../config/types.js";
 import { timeAsync } from "../diagnostics/timings.js";
 import { MoklyError } from "../errors.js";
-import type { GitClient } from "./git.js";
+
+import type { RepositoryEvidence } from "./git.js";
 
 /** Collect deterministic changes while excluding active and retained output. */
 export async function reviewChangedPaths(
-  git: GitClient,
+  git: RepositoryEvidence,
   commit: string,
   config: ResolvedConfig,
   outDir: string,
@@ -28,10 +30,17 @@ export async function reviewChangedPaths(
         ),
       ),
     ].sort();
-    const changed = await git.changedPaths(commit, excludedPaths);
+    const changed = await git.changedPaths(commit, [
+      ...excludedPaths,
+      ".mokly-cache",
+    ]);
     return [...new Set(changed)]
       .filter(
         (candidate) =>
+          !isBaselineCachePath(
+            path.resolve(config.repoRoot, candidate),
+            config.repoRoot,
+          ) &&
           !excludedPaths.some((excluded) => pathBelongsTo(candidate, excluded)),
       )
       .sort();

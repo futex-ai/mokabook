@@ -5,6 +5,7 @@ import { renderWorkspaceEvidence } from "../dist/client/workspace_evidence.js";
 import { parseReviewResult } from "../dist/review/result_validation.js";
 import type { ReviewResultV2 } from "../dist/review/types.js";
 import type { WorkspaceData } from "../dist/server/shell/workspace_data.js";
+
 import { FakeMarkupDocument, fakeMarkup } from "./helpers/fake_markup.js";
 
 test("loaded v2 details merge with classification, deduplicate selectors and suppress retained exclusions", () => {

@@ -1,15 +1,17 @@
 import assert from "node:assert/strict";
+import path from "node:path";
 import test from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
-import path from "node:path";
-import { runReview } from "../dist/review/run.js";
 import { loadConfig } from "../dist/config/load.js";
 import { renderReviewArtifact } from "../dist/review/artifact.js";
 import { compareReview } from "../dist/review/compare.js";
 import { normalizeReviewPair } from "../dist/review/ignore.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
+import { runReview } from "../dist/review/run.js";
 import type { ReviewArtifact } from "../dist/review/types.js";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 test("Comparison snapshot output cannot overlap generated or authored roots", async (context) => {
@@ -20,7 +22,13 @@ test("Comparison snapshot output cannot overlap generated or authored roots", as
 
   for (const out of ["mockups/review", "entries/review"]) {
     await assert.rejects(
-      () => runReview(config, "HEAD", path.join(fixture.root, out)),
+      () =>
+        runReview(
+          config,
+          "HEAD",
+          path.join(fixture.root, out),
+          committedReviewRepository(config),
+        ),
       /must not overlap/,
     );
   }
@@ -41,22 +49,26 @@ test("Review artifact paths are collision-free for distinct valid routes", async
     compilation,
     config,
     {
-      changedPaths: async () => [],
-      fileExists: async (_commit, repoPath) =>
-        repoPath.endsWith("mokly-manifest.json"),
-      fileKind: async (_commit, repoPath) =>
-        repoPath.endsWith("mokly-manifest.json") ? "regular" : "missing",
-      readFile: async (_commit, repoPath) => {
-        if (repoPath.endsWith("mokly-manifest.json")) return baseManifest;
-        throw new Error(`unexpected Git path ${repoPath}`);
+      evidence: {
+        changedPaths: async () => [],
+        mergeBase: async () => "a".repeat(40),
       },
-      readFileBytes: async (_commit, repoPath) => {
-        if (repoPath.endsWith("mokly-manifest.json")) {
-          return Buffer.from(baseManifest);
-        }
-        throw new Error(`unexpected Git path ${repoPath}`);
+      reader: {
+        fileExists: async (_commit, repoPath) =>
+          repoPath.endsWith("mokly-manifest.json"),
+        fileKind: async (_commit, repoPath) =>
+          repoPath.endsWith("mokly-manifest.json") ? "regular" : "missing",
+        readFile: async (_commit, repoPath) => {
+          if (repoPath.endsWith("mokly-manifest.json")) return baseManifest;
+          throw new Error(`unexpected Git path ${repoPath}`);
+        },
+        readFileBytes: async (_commit, repoPath) => {
+          if (repoPath.endsWith("mokly-manifest.json")) {
+            return Buffer.from(baseManifest);
+          }
+          throw new Error(`unexpected Git path ${repoPath}`);
+        },
       },
-      mergeBase: async () => "a".repeat(40),
     },
     "HEAD",
   );
@@ -147,14 +159,18 @@ test("Review retains marker-bearing pane bytes as portable output", async (conte
     compilation,
     config,
     {
-      changedPaths: async () => [],
-      fileExists: async (_commit, repoPath) =>
-        repoPath.endsWith("mokly-manifest.json"),
-      fileKind: async (_commit, repoPath) =>
-        repoPath.endsWith("mokly-manifest.json") ? "regular" : "missing",
-      readFile: async () => baseManifest,
-      readFileBytes: async () => Buffer.from(baseManifest),
-      mergeBase: async () => "a".repeat(40),
+      evidence: {
+        changedPaths: async () => [],
+        mergeBase: async () => "a".repeat(40),
+      },
+      reader: {
+        fileExists: async (_commit, repoPath) =>
+          repoPath.endsWith("mokly-manifest.json"),
+        fileKind: async (_commit, repoPath) =>
+          repoPath.endsWith("mokly-manifest.json") ? "regular" : "missing",
+        readFile: async () => baseManifest,
+        readFileBytes: async () => Buffer.from(baseManifest),
+      },
     },
     "HEAD",
   );

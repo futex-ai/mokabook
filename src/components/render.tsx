@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { serializeReviewSentinels } from "../renderer/sentinels.js";
 import type { RenderInput, Renderer, RenderResult } from "../renderer/types.js";
+
 import { ComponentCollector } from "./collector.js";
 import { invalidData } from "./data.js";
 import { componentInputs } from "./inputs.js";

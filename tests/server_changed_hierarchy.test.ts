@@ -4,8 +4,9 @@ import test from "node:test";
 
 import { compileCatalogue } from "../dist/build/compile.js";
 import { loadConfig } from "../dist/config/load.js";
-import type { ManifestV5 } from "../dist/registry/types.js";
 import { changedManifestRoutes } from "../dist/registry/changed_routes.js";
+import type { ManifestV5 } from "../dist/registry/types.js";
+
 import {
   createFixture,
   removeFixture,

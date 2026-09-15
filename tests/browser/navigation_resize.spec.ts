@@ -1,8 +1,8 @@
-import { chooseViewport } from "./workspace_actions.js";
 import { expect, test } from "@playwright/test";
 
 import { loadComparison } from "./comparison_actions.js";
 import { comparisonFixture } from "./diffs_fixture.js";
+import { chooseViewport } from "./workspace_actions.js";
 
 let fixture: Awaited<ReturnType<typeof comparisonFixture>>;
 test.beforeAll(async () => {

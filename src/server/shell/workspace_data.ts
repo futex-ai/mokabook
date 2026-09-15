@@ -1,24 +1,25 @@
-import type { RenderCapability } from "../../components/render_types.js";
-/** Serializable, source-derived state shared by the served and published inspector. */
 import type {
   ManifestComponent,
   ManifestComponentVariant,
 } from "../../components/manifest_types.js";
+import type { ComponentWireProps } from "../../components/prop_types.js";
+import type { RenderCapability } from "../../components/render_types.js";
+/** Serializable, source-derived state shared by the served and published inspector. */
 import {
   generatedViews,
   orderedInstances,
   type GeneratedComponentView,
 } from "../../components/views.js";
 import type { ManifestScreen } from "../../registry/types.js";
-import type { ComponentWireProps } from "../../components/prop_types.js";
 import type {
   ChangedEntry,
   ComponentReview,
   ScreenReviewV3,
 } from "../../review/component_types.js";
-import type { Catalogue } from "../catalogue.js";
-import type { ShellContext } from "./context.js";
 import type { ViewResourceEvidence } from "../../review/types.js";
+import type { Catalogue } from "../catalogue.js";
+
+import type { ShellContext } from "./context.js";
 
 export type EntryStatus = "Added" | "Changed" | "Removed" | "Unmodified";
 export interface WorkspaceVariant {

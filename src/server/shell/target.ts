@@ -1,12 +1,12 @@
 /** Resolved route targets shared by the served shell view modules. */
 
+import type { ManifestComponent } from "../../components/manifest_types.js";
 import type {
   ManifestEntry,
   ManifestPage,
   ManifestScreen,
   ManifestUseCase,
 } from "../../registry/types.js";
-import type { ManifestComponent } from "../../components/manifest_types.js";
 
 /** A routed structured entry: a screen or a use case, never a collection. */
 export type RoutedEntry =

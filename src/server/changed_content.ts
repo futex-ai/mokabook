@@ -19,7 +19,7 @@ import {
   type OptionalReviewAssetReader,
 } from "../review/assets.js";
 import { baselineResourceConfig } from "../review/base_manifest.js";
-import type { GitClient } from "../review/git.js";
+import type { BaselineReader } from "../review/git.js";
 import {
   normalizeHistoricalDocument,
   normalizeReviewPair,
@@ -29,6 +29,7 @@ import type {
   ScreenResourceEvidence,
   ViewResourceEvidence,
 } from "../review/types.js";
+
 import { documentPairs, type DocumentPair } from "./changed_document_pairs.js";
 import { ChangedResourceGraph } from "./changed_resources.js";
 
@@ -46,7 +47,7 @@ export async function changedContentPaths(
   manifest: Manifest,
   baseline: Manifest,
   config: ResolvedConfig,
-  git: GitClient,
+  git: BaselineReader,
   commit: string,
   changedPaths: readonly string[],
   headReader: OptionalReviewAssetReader = new FileSystemReviewAssetReader(
@@ -73,7 +74,7 @@ export async function classifyChangedContent(
   manifest: Manifest,
   baseline: Manifest,
   config: ResolvedConfig,
-  git: GitClient,
+  git: BaselineReader,
   commit: string,
   changedPaths: readonly string[],
   headReader: OptionalReviewAssetReader = new FileSystemReviewAssetReader(
@@ -101,8 +102,11 @@ export async function classifyChangedContent(
         : [route];
     }),
   );
-  if (publicChanges.size === 0) return { changedPaths: [], screens: [] };
+  const derived = config.generatedOutput === "derived";
+  if (!derived && publicChanges.size === 0)
+    return { changedPaths: [], screens: [] };
   const pairs = documentPairs(manifest, baseline, publicChanges, documents);
+  if (derived) for (const pair of pairs) pair.changed = true;
   const baseReader = new GitReviewAssetReader(
     baselineResourceConfig(config, baseline),
     git,
@@ -140,15 +144,17 @@ export async function classifyChangedContent(
       const normalized = normalizeReviewPair(before, after, pair.context);
       normalizedDocuments.set(pair.head, normalized.head);
       normalizedBases.set(pair.head, normalized.base);
-      if (normalized.base !== normalized.head) result.add(repoPath(pair.head));
-      else if (pair.base === pair.head) publicChanges.delete(pair.head);
+      if (normalized.base !== normalized.head) {
+        result.add(repoPath(pair.head));
+        if (derived) publicChanges.add(pair.head);
+      } else if (pair.base === pair.head) publicChanges.delete(pair.head);
     }
   };
   await timeAsync("review.compare-screens", async () => {
     for (let offset = 0; offset < changedPairs.length; offset += 32)
       await readBases(changedPairs.slice(offset, offset + 32));
   });
-  if (publicChanges.size === 0)
+  if (!derived && publicChanges.size === 0)
     return { changedPaths: [...result].sort(), screens: [] };
   const screens = new Map<string, ViewResourceEvidence[]>();
   const resources = new ChangedResourceGraph(
@@ -156,6 +162,8 @@ export async function classifyChangedContent(
     baseReader,
     publicChanges,
     normalizedDocuments,
+    undefined,
+    derived,
   );
   await timeAsync("review.compare-screens", async () => {
     for (let offset = 0; offset < pairs.length; offset += 32) {
@@ -195,7 +203,8 @@ export async function classifyChangedContent(
             ? { path: pair.base, html: before }
             : undefined,
         );
-        if (evidence.reasons?.length) result.add(repoPath(pair.head));
+        if (evidence.reasons?.length || evidence.resourceChanged)
+          result.add(repoPath(pair.head));
         if (
           pair.view &&
           (evidence.reasons?.length || evidence.excludedResources?.length)

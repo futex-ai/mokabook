@@ -3,15 +3,17 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 
-import { exportCatalogue } from "../dist/export/run.js";
 import { capturedAssetReader } from "../dist/export/inputs.js";
+import { exportCatalogue } from "../dist/export/run.js";
 import { readManifest } from "../dist/registry/manifest.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
 import { changedContentPaths } from "../dist/server/changed_content.js";
+
 import { changedFixture } from "./helpers/changed_fixture.js";
 import { directoryFiles } from "./helpers/export_fixture.js";
 import { validEntrySource } from "./helpers/fixture.js";
@@ -44,10 +46,14 @@ for (const resource of ["nested.css", "image.svg"]) {
       path.join(fixture.mockupsDir, resource),
       resource.endsWith(".css") ? "\nmain { color: red; }" : "\n",
     );
-    assert.deepEqual(await computeChangedRoutes(fixture.config, "HEAD"), [
-      "screens/home.html",
-      "user-flows/tour.html",
-    ]);
+    assert.deepEqual(
+      await computeChangedRoutes(
+        fixture.config,
+        "HEAD",
+        committedReviewRepository(fixture.config),
+      ),
+      ["screens/home.html", "user-flows/tour.html"],
+    );
     const result = await exportCatalogue(fixture.config, {
       outDir: "site",
       base: "HEAD",
@@ -77,14 +83,14 @@ test("material Changes can use captured documents without reading current file b
     fragment,
     Buffer.from(captured.get(fragment)!.toString().replace("Details", "Next")),
   );
-  const git = new RepositoryGitClient(new NodeGitCommandRunner(fixture.root));
-  const commit = await git.mergeBase("HEAD", "HEAD");
+  const git = new CommittedRepository(new NodeGitCommandRunner(fixture.root));
+  const commit = await git.evidence.mergeBase("HEAD", "HEAD");
   const reads: string[] = [];
   const result = await changedContentPaths(
     manifest,
     manifest,
     fixture.config,
-    git,
+    git.reader,
     commit,
     [`mockups/${fragment}`],
     {

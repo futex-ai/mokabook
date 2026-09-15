@@ -11,15 +11,16 @@ import type {
   OptionalReviewAssetReader,
   ReviewAssetReader,
 } from "../review/assets.js";
-import { ResourceGraph } from "../review/resource_graph.js";
 import { ComponentMaterialReader } from "../review/component_resources.js";
+import type { CssDocumentPair } from "../review/css/document.js";
 import {
   CssResourceAnalysis,
   type ChangedResource,
   type ResourceEvidence,
 } from "../review/css/resource_analysis.js";
 import { isStylesheetPath } from "../review/css/stylesheet_path.js";
-import type { CssDocumentPair } from "../review/css/document.js";
+import { normalizeReviewPair } from "../review/ignore.js";
+import { ResourceGraph } from "../review/resource_graph.js";
 
 /** Cache shared resource edges for one immutable changed-route calculation. */
 export class ChangedResourceGraph {
@@ -33,16 +34,18 @@ export class ChangedResourceGraph {
   readonly #base: ComponentMaterialReader;
   readonly #head: ComponentMaterialReader;
   readonly #baseGraph: ResourceGraph;
+  readonly #byteChanges = new Set<string>();
   readonly #graph = new ResourceGraph({
     readReferences: (route) => this.references(route),
   });
 
   constructor(
     private readonly reader: OptionalReviewAssetReader,
-    baseline: ReviewAssetReader,
+    private readonly baseline: ReviewAssetReader,
     private readonly changed: ReadonlySet<string>,
     private readonly documents: ReadonlyMap<string, string>,
     private readonly css: CssResourceAnalysis = new CssResourceAnalysis(),
+    private readonly compareBytes = false,
   ) {
     this.#base = new ComponentMaterialReader(baseline);
     this.#head = new ComponentMaterialReader({
@@ -101,7 +104,7 @@ export class ChangedResourceGraph {
     source: string,
     document: string,
     before?: { path: string; html: string },
-  ): Promise<ResourceEvidence> {
+  ): Promise<ResourceEvidence & { resourceChanged?: true }> {
     const resources = await this.resources(source, document);
     const changedStylesheet = [...resources].some(
       (route) => isStylesheetPath(route) && this.isChanged(route),
@@ -109,7 +112,7 @@ export class ChangedResourceGraph {
     const changedDocument =
       before && (before.path !== source || before.html !== document);
     const bases =
-      before && (changedStylesheet || changedDocument)
+      before && (this.compareBytes || changedStylesheet || changedDocument)
         ? await this.#baseGraph.collect(
             referencedRoutes(before.path, before.html, {
               resourceHints: false,
@@ -117,7 +120,11 @@ export class ChangedResourceGraph {
           )
         : new Set<string>();
     const all = [...new Set([...bases, ...resources])];
-    const eligible = all.filter((route) => this.isChanged(route));
+    const eligible = all.filter(
+      (route) =>
+        this.changed.has(route) ||
+        this.changed.has(this.#physicalRoutes.get(route) ?? route),
+    );
     const cssPaths = eligible.filter(isStylesheetPath);
     const baseCss = await this.#base.optionalTexts(cssPaths);
     const changes: ChangedResource[] = [];
@@ -165,11 +172,19 @@ export class ChangedResourceGraph {
         ...(head === undefined ? {} : { after: parse(head) }),
       });
     }
-    return this.css.analyze(changes, pairs);
+    return {
+      ...this.css.analyze(changes, pairs),
+      ...(all.some(
+        (route) => this.#byteChanges.has(route) && !eligible.includes(route),
+      )
+        ? { resourceChanged: true as const }
+        : {}),
+    };
   }
 
   private isChanged(route: string): boolean {
     return (
+      this.#byteChanges.has(route) ||
       this.changed.has(route) ||
       this.changed.has(this.#physicalRoutes.get(route) ?? route)
     );
@@ -182,16 +197,32 @@ export class ChangedResourceGraph {
       this.#physicalRoutes.set(route, asset.location.physicalRelativePath);
       const bytes = asset.content;
       if (bytes === undefined) {
-        if (!this.isChanged(route))
+        if (!this.compareBytes && !this.isChanged(route))
           throw new MoklyError(
             "review-invalid",
             `referenced resource is missing: ${route}`,
           );
         await this.#base.prefetch([route]);
         await this.#base.read(route);
+        this.#byteChanges.add(route);
         return [];
       }
       const extension = path.posix.extname(route).toLowerCase();
+      if (this.compareBytes) {
+        const before = this.baseline.readIfExists
+          ? await this.baseline.readIfExists(route)
+          : await this.baseline.read(route);
+        if (before === undefined) this.#byteChanges.add(route);
+        else if ([".html", ".htm"].includes(extension)) {
+          const pair = normalizeReviewPair(
+            Buffer.from(before).toString("utf8"),
+            Buffer.from(bytes).toString("utf8"),
+            route,
+          );
+          if (pair.base !== pair.head) this.#byteChanges.add(route);
+        } else if (!Buffer.from(before).equals(bytes))
+          this.#byteChanges.add(route);
+      }
       if (![".css", ".html", ".htm"].includes(extension)) return [];
       content = Buffer.from(bytes).toString("utf8");
       this.#rawContents.set(route, content);

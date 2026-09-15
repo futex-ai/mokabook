@@ -25,16 +25,19 @@ one `mokly` bin, explicit exports/types, and a restrictive `files` allowlist.
 
 Read the checkout's version from `package.json`; `.release-please-manifest.json`
 tracks release-please's version state, and `package-lock.json` mirrors package
-metadata. Release PRs update these together. The one-time
-[registry bootstrap](./npm-bootstrap.md) registers the new package without changing those release-managed files;
-after it succeeds, neither this document nor consumer export instructions
-require another bootstrap publish.
+metadata. Release PRs update these together. The completed one-time
+[registry bootstrap](./npm-bootstrap.md) registered `@mokly/mokly@0.8.0` without
+changing those release-managed files. It is the accepted initial `latest`
+release and also retains the `bootstrap` tag. Do not repeat the bootstrap
+publication; later reviewed releases advance `latest` through the normal
+release workflow.
 
 `publishConfig` targets the public npm registry with public access. The package
 contains compiled runtime code, declarations, package-owned shell assets,
-README, LICENSE, CHANGELOG, and package metadata only. Source fixtures, tests,
-plans, protocol docs, caches, review artifacts, and generated demo output are
-not published unless a documented runtime requirement proves otherwise.
+README, LICENSE, CHANGELOG, package metadata and `docs/protocol`. The protocol
+documents ship with the exact package version so independent upload receivers
+can implement its documented file boundary. Source fixtures, tests, plans,
+caches, review artifacts and generated demo output are not published.
 
 Runtime dependencies are intentional and minimal. Mokly does not take a
 runtime dependency on `@firna/ui`, Accounting, Juno, Playwright, or a consumer's
@@ -48,6 +51,8 @@ Keep its optional native packages installed: Linux x64 glibc, macOS arm64/x64,
 and Windows x64 binaries cover the CI runners. Its Node floor is below Mokly's
 22.14 floor. The installed Node package has no automatic WASM fallback;
 upstream's separate `lightningcss-wasm` package is not a Mokly dependency.
+Publish uses `tar-stream` to encode finalized export bytes as portable USTAR/PAX
+without invoking a platform tar executable or walking the output again.
 
 ## Local Verification
 
@@ -68,6 +73,8 @@ to npm scripts and includes:
 - local-npx and clean-cache npx-style execution from the packed artifact;
 - consumer exports from the installed CLI, including custom configs/bases,
   cross-platform renderers, registered pages, and the compiled static client graph;
+- installed `publish` uploads with and without comparisons to a local receiver,
+  inspecting the gzip tarball, documented metadata and exact exported bytes;
 - source-tree ESM, declaration, CLI, workspace-resolution, server, Review, and
   watched-runtime regressions;
 - Playwright Browse and Review regressions using Chromium, including isolated
@@ -223,18 +230,27 @@ The repository and release history moved from `futex-ai/mokabook` to
 `mokly-ai/mokly`, but npm package names do not move with GitHub repositories.
 The former unscoped `mokabook` package remains reserved at `0.8.0`; it is not a
 runtime alias or a second publication target. Because npm trusted publishing can
-only be configured after a package exists, the scoped `@mokly/mokly` package needs
-one reviewed bootstrap publication before normal releases can use OIDC.
+only be configured after a package exists, the scoped `@mokly/mokly` package
+required one reviewed bootstrap publication before normal releases could use OIDC.
 The attempted unscoped `mokly` registration was rejected by npm's name-similarity
 policy; it was never published. The scope change does not reset release history
 or rename the `mokly` executable.
 
-Follow the [bootstrap procedure](./npm-bootstrap.md) after the migration and its
-review fixes reach `main`, before merging the Release Please PR. The dedicated
-`scripts/release/bootstrap.mjs` command requires the reviewed full commit SHA,
-builds from a fresh isolated checkout, and records source identity beside the
-archive integrity and inventory. The ordinary `pack.mjs` command does not supply
-this bootstrap source proof.
+Registration completed on 14 September 2026 as `@mokly/mokly@0.8.0`. npm assigned
+both `bootstrap` and `latest` despite the explicit bootstrap tag, and the
+maintainer accepted that initial `latest`. Keep `bootstrap` on `0.8.0`; do not
+remove `latest` or republish to undo registration. The
+[bootstrap record](./npm-bootstrap.md) retains the reviewed source and archive
+procedure. Its dedicated `scripts/release/bootstrap.mjs` command builds a fresh
+isolated checkout of an explicit reviewed full commit SHA and records source
+identity beside the archive hashes; ordinary `pack.mjs` does not supply this
+bootstrap source proof.
+
+The bootstrap used interactive maintainer authentication, not OIDC. Trusted
+publishing is configured, but GitHub release-token permissions and publishing
+protections still need verification, followed by a successful automated release
+and its provenance verification. Accepting initial `latest` does not waive any
+of those requirements or reset release-please state.
 
 ## Maintainer Setup
 

@@ -1,5 +1,6 @@
 /** One bounded component/screen workspace with saved previews and an inspector. */
 import type { Catalogue } from "../catalogue.js";
+
 import type { ShellContext } from "./context.js";
 import { DiffScreen } from "./diffs.js";
 import { ScreenHead, targetHead } from "./head.js";

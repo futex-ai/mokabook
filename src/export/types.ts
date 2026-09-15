@@ -1,11 +1,12 @@
 import type { StaticDelivery } from "../navigation/delivery.js";
 import type { ReviewArtifactContent } from "../review/types.js";
+
 import type { LegacyExportOwnership } from "./ownership.js";
 
 /** Immutable route information available before an adapter finishes staging. */
 export interface ExportRoutes {
   readonly outDir: string;
-  readonly comparisonUrl: string;
+  readonly comparisonUrl: string | null;
   readonly idRoutes: StaticDelivery["idRoutes"];
 }
 
@@ -14,7 +15,7 @@ export interface ExportResult extends ExportRoutes {
   readonly deploymentId: string;
 }
 
-/** Repository-only staging adapter; consumer deployment is outside the CLI. */
+/** Internal staging adapter for repository delivery and upload metadata. */
 export interface ExportAdapter {
   /** Optional stricter config-relative root, pinned for this operation. */
   outputRoot?: string;
@@ -32,6 +33,12 @@ export interface ExportAdapter {
 export interface ExportOptions {
   outDir: string;
   base?: string;
+  /** Omit baseline reads and comparison artifacts; publish uses this capability. */
+  noChanges?: boolean;
+  /** Consume finalized bytes before installation, while the output is reserved. */
+  capture?: (
+    files: ReadonlyMap<string, ReviewArtifactContent>,
+  ) => Promise<void>;
   signal?: AbortSignal;
   adapter?: ExportAdapter;
 }

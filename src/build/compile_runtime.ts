@@ -1,6 +1,6 @@
 /** Exhaustively compile the accepted graph with the ordinary Build pipeline. */
-import type { ComponentRuntime } from "./component_runtime.js";
 import { compileCatalogue, type Compilation } from "./compile.js";
+import type { ComponentRuntime } from "./component_runtime.js";
 import { evaluateBundle, rememberBundle } from "./consumer_bundle.js";
 
 export async function compileRuntime(

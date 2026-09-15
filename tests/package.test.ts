@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
 import { execFile } from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 
+import { parseArguments } from "../dist/cli/arguments.js";
 import {
   collection,
   defineRoot,
@@ -12,7 +13,7 @@ import {
   reviewMaterialKey,
   screen,
 } from "../dist/index.js";
-import { parseArguments } from "../dist/cli/arguments.js";
+
 import { repositoryRoot } from "./helpers/fixture.js";
 
 const execFileAsync = promisify(execFile);
@@ -154,6 +155,10 @@ test("packed package contains only the declared public surface", async () => {
   assert.ok(files.has("dist/index.js"));
   assert.ok(files.has("dist/index.d.ts"));
   assert.ok(files.has("dist/cli/bin.js"));
+  assert.ok(files.has("dist/cli/publish.js"));
+  assert.ok(files.has("docs/protocol/mokly-upload.md"));
+  assert.ok(files.has("docs/protocol/mokly-export-ownership.md"));
+  assert.ok(files.has("docs/protocol/fixtures/export-ownership-v1.json"));
   assert.ok(files.has("README.md"));
   assert.equal(
     [...files].some((file) => file.startsWith("tests/")),

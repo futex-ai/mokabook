@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { renderReviewArtifact } from "../dist/review/artifact.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { parseReviewResult } from "../dist/review/result_validation.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
+
 import { cssAttributionFixture } from "./helpers/css_attribution_fixture.js";
 
 for (const components of [false, true]) {
@@ -16,7 +18,11 @@ for (const components of [false, true]) {
     test(`CSS attribution v${components ? 3 : 2}: ${name} agrees across all views and live membership`, async (t) => {
       const fixture = await cssAttributionFixture(t, components);
       await fixture.append(css);
-      const live = await computeCatalogueChanges(fixture.config, "main");
+      const live = await computeCatalogueChanges(
+        fixture.config,
+        "main",
+        committedReviewRepository(fixture.config),
+      );
       assert.equal(live.changedRoutes?.includes("screens/home.html"), included);
       const artifact = await fixture.compare();
       const screen = artifact.result.screens.find(
@@ -90,7 +96,11 @@ for (const components of [false, true]) {
     test(`CSS attribution v${components ? 3 : 2} preserves ${resource} impact`, async (t) => {
       const fixture = await cssAttributionFixture(t, components);
       await fixture.append("\n", resource);
-      const live = await computeCatalogueChanges(fixture.config, "main");
+      const live = await computeCatalogueChanges(
+        fixture.config,
+        "main",
+        committedReviewRepository(fixture.config),
+      );
       assert.ok(live.changedRoutes?.includes("screens/home.html"));
       const artifact = await fixture.compare();
       for (const view of artifact.result.screens.find(

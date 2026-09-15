@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 
 import { compareReview } from "../dist/review/compare.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import { componentReviewFixture } from "./helpers/component_review_fixture.js";
 import { repositoryRoot, validEntrySource } from "./helpers/fixture.js";

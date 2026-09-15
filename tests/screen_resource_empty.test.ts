@@ -5,8 +5,10 @@ import test from "node:test";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { capturePublicFiles } from "../dist/export/public_files.js";
 import { assembleExport } from "../dist/export/site.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { computeCatalogueChanges } from "../dist/server/changed.js";
 import type { WorkspaceData } from "../dist/server/shell/workspace_data.js";
+
 import { cssAttributionFixture } from "./helpers/css_attribution_fixture.js";
 
 for (const producer of ["live", "export"])
@@ -30,7 +32,11 @@ for (const producer of ["live", "export"])
       },
     });
     await fixture.append(".auth { padding: 2px; }");
-    const changes = await computeCatalogueChanges(fixture.config, "main");
+    const changes = await computeCatalogueChanges(
+      fixture.config,
+      "main",
+      committedReviewRepository(fixture.config),
+    );
     if (producer === "live") {
       assert.deepEqual(
         changes.componentChanges?.screenEvidence?.map(({ route, views }) => ({

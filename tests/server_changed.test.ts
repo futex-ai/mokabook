@@ -7,19 +7,22 @@ import { promisify } from "node:util";
 import { compileCatalogue } from "../dist/build/compile.js";
 import { writeCompilation } from "../dist/build/transaction.js";
 import { loadConfig } from "../dist/config/load.js";
+import { changedManifestRoutes } from "../dist/registry/changed_routes.js";
 import { compareReview } from "../dist/review/compare.js";
 import {
   NodeGitCommandRunner,
-  RepositoryGitClient,
-  type GitClient,
+  CommittedRepository,
 } from "../dist/review/git.js";
-import { changedManifestRoutes } from "../dist/registry/changed_routes.js";
+import type { ReadOnlyReviewRepository } from "../dist/review/repository.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { computeChangedRoutes } from "../dist/server/changed.js";
+
 import {
   createFixture,
   removeFixture,
   validEntrySource,
 } from "./helpers/fixture.js";
+import { nestedRepository } from "./helpers/nested_repository.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -193,7 +196,7 @@ test("branch comparisons exclude commits made only on the base branch", async (c
   await git(fixture.root, ["commit", "-qm", "test: change main details"]);
   await git(fixture.root, ["checkout", "-q", "feature"]);
 
-  const client = new RepositoryGitClient(
+  const client = new CommittedRepository(
     new NodeGitCommandRunner(fixture.root),
   );
   const changed = await computeChangedRoutes(config, "main", client);
@@ -230,10 +233,12 @@ test("directory dependency edits alone leave unchanged routes out of Changes", a
 });
 
 test("changed routes require the config repo root to be the Git top level", async (context) => {
-  const fixture = await createFixture();
-  context.after(() => removeFixture(fixture));
-  const config = await loadConfig(fixture.root);
-  assert.equal(await computeChangedRoutes(config, "HEAD"), undefined);
+  const { config } = await nestedRepository(context);
+  await assert.rejects(
+    () =>
+      computeChangedRoutes(config, "HEAD", committedReviewRepository(config)),
+    { code: "config-invalid" },
+  );
 });
 
 test("changed-route detection degrades to undefined when Git fails", async (context) => {
@@ -242,24 +247,34 @@ test("changed-route detection degrades to undefined when Git fails", async (cont
   const config = await loadConfig(fixture.root);
   const compilation = await compileCatalogue(config);
   await writeCompilation(compilation, config);
-  const failing: GitClient = {
-    changedPaths: () => Promise.reject(new Error("no repository")),
-    fileExists: () => Promise.reject(new Error("no repository")),
-    fileKind: () => Promise.reject(new Error("no repository")),
-    readFile: () => Promise.reject(new Error("no repository")),
-    readFileBytes: () => Promise.reject(new Error("no repository")),
-    mergeBase: () => Promise.reject(new Error("no repository")),
+  const failing: ReadOnlyReviewRepository = {
+    evidence: {
+      changedPaths: () => Promise.reject(new Error("no repository")),
+      mergeBase: () => Promise.reject(new Error("no repository")),
+    },
+    reader: {
+      fileExists: () => Promise.reject(new Error("no repository")),
+      fileKind: () => Promise.reject(new Error("no repository")),
+      readFile: () => Promise.reject(new Error("no repository")),
+      readFileBytes: () => Promise.reject(new Error("no repository")),
+    },
   };
   assert.equal(
     await computeChangedRoutes(config, "origin/main", failing),
     undefined,
   );
-  const succeeding: GitClient = {
+  const succeeding: ReadOnlyReviewRepository = {
     ...failing,
-    changedPaths: () => Promise.resolve(["notes.md"]),
-    fileExists: () => Promise.resolve(true),
-    readFile: () => Promise.resolve(JSON.stringify(compilation.manifest)),
-    mergeBase: () => Promise.resolve("a".repeat(40)),
+    evidence: {
+      ...failing.evidence,
+      changedPaths: () => Promise.resolve(["notes.md"]),
+      mergeBase: () => Promise.resolve("a".repeat(40)),
+    },
+    reader: {
+      ...failing.reader,
+      fileExists: () => Promise.resolve(true),
+      readFile: () => Promise.resolve(JSON.stringify(compilation.manifest)),
+    },
   };
   assert.deepEqual(
     await computeChangedRoutes(config, "origin/main", succeeding),

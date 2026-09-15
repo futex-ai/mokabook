@@ -1,4 +1,5 @@
 import { isSafeRepositoryPath } from "../config/paths.js";
+
 import { invalidData } from "./data.js";
 
 export function sortedStrings(

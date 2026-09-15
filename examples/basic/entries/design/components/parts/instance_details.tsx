@@ -1,9 +1,10 @@
-import { MetaRow } from "../../parts/metadata_row.js";
 import { MockLink } from "@mokly/mokly";
 
-import { PropValues } from "./prop_values.js";
-import { toolbarPrompt } from "./fixtures.js";
+import { MetaRow } from "../../parts/metadata_row.js";
+
 import { footerLabelChange } from "./comparison_fixtures.js";
+import { toolbarPrompt } from "./fixtures.js";
+import { PropValues } from "./prop_values.js";
 import type { ScreenPageState } from "./screen_preview.js";
 
 /** Selected instance data follows the component reached from the usage link. */

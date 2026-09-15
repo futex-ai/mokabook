@@ -1,6 +1,7 @@
 /** DOM rendering for isolated before/after views requested by the user. */
 
 import type { ReviewResult, ViewReview } from "../review/types.js";
+
 import { currentColorScheme, currentViewport } from "./browse_state.js";
 import { entryWording } from "./entry_wording.js";
 import { isStyleOnlyView } from "./style_evidence.js";

@@ -4,6 +4,7 @@ import test from "node:test";
 import { parse } from "parse5";
 
 import type { CssRuleParser } from "../src/review/css/types.js";
+
 import { analyze, documents, excluded, kept } from "./helpers/review_css.js";
 
 test("CSS adapter matches the existing parse5 default tree shape", () => {

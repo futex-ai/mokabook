@@ -5,6 +5,7 @@ import test from "node:test";
 
 import { exportCatalogue } from "../dist/export/run.js";
 import { readManifest } from "../dist/registry/manifest.js";
+import { committedReviewRepository } from "../dist/review/repository.js";
 import { parseReviewResult } from "../dist/review/result_validation.js";
 import {
   ComponentChangeCache,
@@ -12,6 +13,7 @@ import {
 } from "../dist/server/component_changes.js";
 import { startCatalogueServer } from "../dist/server/http.js";
 import { configuredServedReview } from "../dist/server/review_routes.js";
+
 import { cssAttributionFixture } from "./helpers/css_attribution_fixture.js";
 
 for (const components of [false, true])
@@ -34,7 +36,11 @@ for (const components of [false, true])
       port: 0,
       manifest,
       componentChanges: snapshot,
-      review: configuredServedReview(fixture.config, "main"),
+      review: configuredServedReview(
+        fixture.config,
+        "main",
+        committedReviewRepository(fixture.config),
+      ),
     });
     t.after(() => server.close());
     const response = await fetch(
@@ -54,6 +60,7 @@ for (const components of [false, true])
       outDir: "site",
       base: "main",
     });
+    assert.ok(exported.comparisonUrl);
     const saved = parseReviewResult(
       JSON.parse(
         await fs.readFile(

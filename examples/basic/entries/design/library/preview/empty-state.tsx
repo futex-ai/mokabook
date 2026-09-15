@@ -1,7 +1,9 @@
 import { defineComponent, type ComponentProps } from "@mokly/mokly";
+
 import { DESTINATIONS } from "../../parts/destinations.js";
 import { libraryMetadata } from "../metadata.js";
 import { destination, optionalText, text } from "../schemas.js";
+
 import { EmptyStateView } from "./empty-state.view.js";
 
 const propSchema = {

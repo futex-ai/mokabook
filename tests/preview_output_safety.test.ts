@@ -9,6 +9,7 @@ import { loadConfig } from "../dist/config/load.js";
 import type { PublicationOptions } from "../dist/publication/options.js";
 import { NodeGitCommandRunner } from "../dist/review/git.js";
 import { buildPreview } from "../scripts/preview/catalogue.mjs";
+
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
 for (const includeChanges of [false, true]) {

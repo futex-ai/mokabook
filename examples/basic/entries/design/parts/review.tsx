@@ -1,6 +1,6 @@
 import { DESTINATIONS, type DesignDestination } from "./destinations.js";
 import { MiniWelcome } from "./mini_screens.js";
-import { NavTree, type NavNode } from "./nav.js";
+import { NavDrawer, NavTree, type ChangesStatus, type NavNode } from "./nav.js";
 import { BrowserFrame, PhoneFrame } from "./stage.js";
 
 /** Comparison classification states depicted inside a loaded comparison. */
@@ -117,6 +117,18 @@ export function WelcomeShot({
       <MiniWelcome compact />
     </PhoneFrame>
   );
+}
+
+/** Changes keeps its tabs and origin while a comparison is not yet usable. */
+export function AvailabilityNav({
+  drawer = false,
+  status,
+}: {
+  drawer?: boolean;
+  status: ChangesStatus;
+}) {
+  const props = { changedOnly: true, changesStatus: status, nodes: [] };
+  return drawer ? <NavDrawer {...props} /> : <NavTree {...props} />;
 }
 
 /** File evidence belongs in the secondary comparison details. */

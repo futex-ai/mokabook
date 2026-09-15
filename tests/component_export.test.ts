@@ -6,6 +6,7 @@ import { test } from "node:test";
 import { exportCatalogue } from "../dist/export/run.js";
 import { parseReviewResult } from "../dist/review/result_validation.js";
 import type { WorkspaceData } from "../dist/server/shell/workspace_data.js";
+
 import { componentEntrySource } from "./helpers/component_fixture.js";
 import {
   createExportFixture,
@@ -34,6 +35,7 @@ test("static export keeps component Changes, affected screens, saved variants an
     ),
   );
   const exported = await exportCatalogue(fixture.config, { outDir: "site" });
+  assert.ok(exported.comparisonUrl);
   const files = await directoryFiles(fixture.output);
   const result = parseReviewResult(
     JSON.parse(files.get(exported.comparisonUrl.slice(1))!.toString()),
@@ -80,6 +82,7 @@ test("static export retains removed saved variants and baseline component consum
   assert.notEqual(changed, source);
   await fs.writeFile(fixture.entryPath, changed);
   const exported = await exportCatalogue(fixture.config, { outDir: "site" });
+  assert.ok(exported.comparisonUrl);
   const files = await directoryFiles(fixture.output);
   const action = workspace(
     files.get("view/components/action.html")!.toString(),

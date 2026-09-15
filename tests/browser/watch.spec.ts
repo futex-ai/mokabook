@@ -1,5 +1,3 @@
-import { expectFrameSource } from "./workspace_actions.js";
-import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -13,6 +11,9 @@ import {
   repositoryRoot,
   type TestFixture,
 } from "../helpers/fixture.js";
+
+import { chooseScheme, chooseViewport } from "./workspace_actions.js";
+import { expectFrameSource } from "./workspace_actions.js";
 
 const cli = path.join(repositoryRoot, "dist/cli/bin.js");
 

@@ -1,4 +1,5 @@
 import { defineComponent, type ComponentProps } from "@mokly/mokly";
+
 import { libraryMetadata } from "../metadata.js";
 import {
   optionalFlag,
@@ -6,6 +7,7 @@ import {
   scheme,
   schemeDestinations,
 } from "../schemas.js";
+
 import { ViewControlsView } from "./view-controls.view.js";
 
 const propSchema = {

@@ -1,16 +1,17 @@
 /** Inspector content comes solely from the selected render's recorded usage. */
 import { decodeProps } from "../components/codec.js";
-import { orderedInstances } from "../components/views.js";
-import { propText } from "./prop_display.js";
 import type {
   ComponentInstanceRecord,
   ComponentViewRecord,
 } from "../components/manifest_types.js";
 import type { ComponentWireProps } from "../components/prop_types.js";
+import { orderedInstances } from "../components/views.js";
 import type {
   UsageLink,
   WorkspaceData,
 } from "../server/shell/workspace_data.js";
+
+import { propText } from "./prop_display.js";
 
 export interface InspectorSelection {
   usage?: ComponentViewRecord;

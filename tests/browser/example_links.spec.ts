@@ -1,12 +1,13 @@
-import { expectFrameSource } from "./workspace_actions.js";
-import { chooseScheme, chooseViewport } from "./workspace_actions.js";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { expect, test } from "@playwright/test";
 
 import { repositoryRoot } from "../helpers/fixture.js";
+
 import { focusDesignLink } from "./design_test_helpers.js";
+import { chooseScheme, chooseViewport } from "./workspace_actions.js";
+import { expectFrameSource } from "./workspace_actions.js";
 
 for (const viewport of ["mobile", "desktop"] as const) {
   for (const scheme of ["light", "dark"] as const) {

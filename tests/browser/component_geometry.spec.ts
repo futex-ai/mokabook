@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
-import type * as Geometry from "../../dist/client/component_geometry.js";
 
 import { compileCatalogue } from "../../dist/build/compile.js";
 import { writeCompilation } from "../../dist/build/transaction.js";
+import type * as Geometry from "../../dist/client/component_geometry.js";
 import { loadConfig } from "../../dist/config/load.js";
 import {
   startCatalogueServer,

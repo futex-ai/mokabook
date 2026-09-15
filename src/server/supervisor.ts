@@ -1,23 +1,23 @@
 /** Restart supervision retains ownership until each child's cleanup completes. */
 
 import type { ComponentRuntime } from "../build/component_runtime.js";
+import { bindTimings, timeSync } from "../diagnostics/timings.js";
+import { MoklyError } from "../errors.js";
 import type { ManifestV5 } from "../registry/types.js";
 
-import { MoklyError } from "../errors.js";
-import { bindTimings, timeSync } from "../diagnostics/timings.js";
 import { ManagedChild, type ChildShutdownTimings } from "./child_lifecycle.js";
 import { NodeChildFactory, type ChildFactory } from "./child_process.js";
 import type { ComponentChangeSnapshot } from "./component_changes.js";
 import { componentRuntimeMessage } from "./controls/runtime_ipc.js";
 import {
+  parsePreviewObservation,
+  type PreviewObservation,
+} from "./demand/observation.js";
+import {
   childUpdateMessage,
   type ChangesStatus,
   type CatalogueUpdateKind,
 } from "./update_messages.js";
-import {
-  parsePreviewObservation,
-  type PreviewObservation,
-} from "./demand/observation.js";
 
 /** Restartable child interface used by watched Serve. */
 export interface ProcessSupervisor {
@@ -37,6 +37,7 @@ export interface ProcessSupervisor {
     componentChanges?: ComponentChangeSnapshot,
     changesStatus?: ChangesStatus,
     kind?: CatalogueUpdateKind,
+    baselineCommit?: string | null,
   ): void;
   /** Register the watched-runtime handler for a post-readiness child failure. */
   onUnexpectedExit(callback: (error: Error) => void): void;
@@ -200,6 +201,7 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
     componentChanges?: ComponentChangeSnapshot,
     changesStatus?: ChangesStatus,
     kind?: CatalogueUpdateKind,
+    baselineCommit?: string | null,
   ): void {
     const child = this.#child;
     if (!child || child.stopping || child.exited) return;
@@ -211,6 +213,7 @@ export class ReadyProcessSupervisor implements ProcessSupervisor {
         componentChanges,
         changesStatus,
         kind,
+        baselineCommit,
       ),
     );
   }

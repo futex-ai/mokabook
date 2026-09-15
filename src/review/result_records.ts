@@ -1,5 +1,6 @@
 import { decodeProps } from "../components/codec.js";
 import { canonicalJson } from "../components/data.js";
+
 import {
   requireEqual,
   requireOrdered,

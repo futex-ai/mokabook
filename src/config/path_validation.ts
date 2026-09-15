@@ -1,6 +1,9 @@
 import fs from "node:fs";
+import path from "node:path";
 
 import { MoklyError, type MoklyErrorCode } from "../errors.js";
+
+import { MOKLY_CACHE } from "./cache_paths.js";
 import { isInside, projectRealPath, resolveInside } from "./paths.js";
 import { requireString } from "./rules.js";
 
@@ -63,11 +66,15 @@ export function validateReviewOut(
   code: MoklyErrorCode = "config-invalid",
 ): void {
   const { entriesDir, mockupsDir, repoRoot } = boundary;
-  const protectedRoots = [mockupsDir, entriesDir];
+  const protectedRoots = [
+    mockupsDir,
+    entriesDir,
+    path.join(repoRoot, MOKLY_CACHE),
+  ];
   const realRepoRoot = fs.realpathSync(repoRoot);
-  const realReviewOut = projectRealPath(reviewOut);
+  const realReviewOut = configuredRealPath(reviewOut, label, code);
   const realProtectedRoots = protectedRoots.map((root) =>
-    fs.realpathSync(root),
+    configuredRealPath(root, label, code),
   );
   if (
     reviewOut === repoRoot ||
@@ -94,7 +101,7 @@ export function validateReviewOut(
     }
     throw new MoklyError(
       code,
-      `${label} must not overlap repository, mockup, or source roots`,
+      `${label} must not overlap repository, mockup, source, or cache roots`,
     );
   }
 }
@@ -105,7 +112,7 @@ function requireRealInside(
   label: string,
 ): string {
   const realRepoRoot = fs.realpathSync(repoRoot);
-  const realCandidate = fs.realpathSync(candidate);
+  const realCandidate = configuredRealPath(candidate, label);
   if (!isInside(realRepoRoot, realCandidate)) {
     throw new MoklyError(
       "config-invalid",
@@ -113,4 +120,20 @@ function requireRealInside(
     );
   }
   return realCandidate;
+}
+
+function configuredRealPath(
+  candidate: string,
+  label: string,
+  code: MoklyErrorCode = "config-invalid",
+): string {
+  try {
+    return projectRealPath(candidate);
+  } catch (cause) {
+    throw new MoklyError(
+      code,
+      `${label} has an invalid filesystem path: ${candidate}`,
+      { cause },
+    );
+  }
 }

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { generatedViews } from "../dist/components/views.js";
+
 import { designLibraryFixture } from "./helpers/design_library_fixture.js";
 
 test("mixed component design styles retain their actual rendered resource scope", async (t) => {
@@ -10,11 +11,11 @@ test("mixed component design styles retain their actual rendered resource scope"
     ["design-components.css", 32, 15],
     ["design-component-inspection.css", 32, 15],
     ["design-component-details.css", 32, 15],
-    ["design-component-inspector.css", 66, 15],
-    ["design-component-workspace.css", 66, 15],
+    ["design-component-inspector.css", 68, 15],
+    ["design-component-workspace.css", 68, 15],
     ["design-component-view.css", 32, 15],
     ["design-component-controls.css", 11, 15],
-    ["design.css", 66, 15],
+    ["design.css", 68, 15],
     ["design-library.css", 0, 15],
   ] as const)
     await t.test(stylesheet, async () => {

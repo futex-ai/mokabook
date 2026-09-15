@@ -1,3 +1,4 @@
+import { refreshBrowseEvidence } from "./browse_refresh.js";
 import {
   captureBrowseState,
   restoreBrowseState,
@@ -9,7 +10,6 @@ import {
   type ReloadLocation,
   type UpdateEventStream,
 } from "./live_updates.js";
-import { refreshBrowseEvidence } from "./browse_refresh.js";
 
 /** EventSource subset consumed by the browser adapter. */
 export interface BrowserEventSource {

@@ -10,11 +10,12 @@ import {
   selectManifestInput,
 } from "../registry/manifest.js";
 import type { HistoricalManifest } from "../registry/types.js";
-import type { GitClient } from "./git.js";
+
+import type { BaselineReader } from "./git.js";
 
 /** Read the canonical base manifest, falling back only when it is absent. */
 export async function readBaseManifest(
-  git: GitClient,
+  git: BaselineReader,
   commit: string,
   config: ResolvedConfig,
 ): Promise<HistoricalManifest> {
@@ -24,7 +25,7 @@ export async function readBaseManifest(
 }
 
 async function readMeasured(
-  git: GitClient,
+  git: BaselineReader,
   commit: string,
   config: ResolvedConfig,
 ): Promise<HistoricalManifest> {

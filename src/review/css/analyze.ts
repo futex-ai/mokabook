@@ -1,5 +1,6 @@
 /** Compose rule diffing, matching, and conservative reduction for one stylesheet. */
 import { timeSync } from "../../diagnostics/timings.js";
+
 import { diffCssRules } from "./diff.js";
 import type { CssDocumentPair } from "./document.js";
 import { matchCssRules } from "./match.js";

@@ -12,6 +12,7 @@ import {
   catalogueViewHref,
   parseStaticDelivery,
 } from "../../dist/navigation/delivery.js";
+
 import { comparisonMetadata } from "./comparisons.mjs";
 
 /** Only this repository adapter can adopt the previous preview marker. */

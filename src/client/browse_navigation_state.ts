@@ -75,7 +75,10 @@ export function applyNavVisibility(
   }
   doc
     .querySelector("[data-mokly-nav-scroll]")
-    ?.setAttribute("aria-busy", String(waiting && status === "pending"));
+    ?.setAttribute(
+      "aria-busy",
+      String(waiting && (status === "pending" || status === "preparing")),
+    );
   applyGroupVisibility(doc, queryConstrains(query) || changedOnly, disclosure);
 }
 

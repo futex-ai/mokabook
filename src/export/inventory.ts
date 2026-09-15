@@ -1,4 +1,5 @@
 import type { ReviewArtifactContent } from "../review/types.js";
+
 import { ExportPathIndex } from "./path_index.js";
 
 /** A single collision-checked namespace for every deployed file. */

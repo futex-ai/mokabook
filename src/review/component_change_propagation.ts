@@ -1,5 +1,6 @@
 /** Preserve component implementation and use-case propagation after view comparison. */
 import type { Manifest } from "../registry/types.js";
+
 import {
   address,
   uniqueReasons,
