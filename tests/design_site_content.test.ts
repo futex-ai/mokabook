@@ -204,8 +204,7 @@ test("the site layout stylesheet never contains a literal color", async () => {
   );
   assert.doesNotMatch(stylesheet, /#[0-9a-fA-F]{3,8}\b/);
   assert.doesNotMatch(stylesheet, /\b(?:rgba?|hsla?|color-mix|oklch)\(/);
-  // currentcolor and transparent are scheme-neutral CSS keywords, used by the
-  // documentation tree's fade mask; they carry no Folio value of their own.
+  // transparent carries no Folio value; the dotted stage gradient uses it.
   const values = [...stylesheet.matchAll(/^\s*[\w-]+:\s*([^;]+);/gm)].map(
     (match) => match[1] ?? "",
   );
@@ -213,7 +212,7 @@ test("the site layout stylesheet never contains a literal color", async () => {
   for (const value of values) {
     assert.doesNotMatch(
       value,
-      /(?<![\w-])(?:aqua|black|blue|brown|fuchsia|gold|gray|green|grey|lime|maroon|navy|olive|orange|pink|purple|red|silver|teal|violet|white|yellow)(?![\w-])/i,
+      /(?<![\w-])(?:aqua|black|blue|brown|currentColor|fuchsia|gold|gray|green|grey|lime|maroon|navy|olive|orange|pink|purple|red|silver|teal|violet|white|yellow)(?![\w-])/i,
       value,
     );
   }

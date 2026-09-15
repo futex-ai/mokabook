@@ -283,6 +283,16 @@ html {
   border-color: var(--site-folio-line-strong);
 }
 
+.site-code-body {
+  font-family: var(--site-font-mono);
+  font-size: var(--site-small-size);
+  line-height: var(--site-small-line);
+  overflow-x: auto;
+  padding: var(--site-space-4) var(--site-space-5);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* 3 -- Skip link, application band and header ---------------------------- */
 
 .site-skip {
@@ -1326,25 +1336,14 @@ html {
 
 .site-doc-tree {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  height: 100vh;
+  grid-template-rows: auto auto auto;
   padding: var(--site-space-6) 0 var(--site-space-5);
-  position: sticky;
-  top: 0;
 }
 
 .site-doc-tree-scroll {
   display: grid;
   gap: var(--site-space-5);
   margin: var(--site-space-4) 0;
-  mask-image: linear-gradient(
-    to bottom,
-    currentcolor calc(100% - var(--site-space-7)),
-    transparent
-  );
-  overflow-y: auto;
-  scrollbar-color: var(--site-folio-line-strong) transparent;
-  scrollbar-width: thin;
 }
 
 .site-doc-tree .site-version {
@@ -1424,14 +1423,7 @@ html {
 }
 
 .site-doc-disclosure .site-doc-tree {
-  height: auto;
   padding-top: 0;
-  position: static;
-}
-
-.site-doc-disclosure .site-doc-tree-scroll {
-  mask-image: none;
-  overflow: visible;
 }
 
 /* The document: a wide reading measure inside a ruled structure */
