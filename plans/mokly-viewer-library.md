@@ -831,7 +831,7 @@ inspector budget headroom. The final complete gate remains green; these probes
 identify missing behavioral coverage, not a failed gate that was ignored.
 Milestone 6 and release automation remain outside this completed milestone.
 
-## Milestone 6: Release preparation and verification
+## Milestone 6: Release preparation and verification (completed)
 
 Prepare both packages to release together from the merge.
 
@@ -840,9 +840,9 @@ Prepare both packages to release together from the merge.
       `npm-release.md`, publish action, and release fixtures.
 - [x] Extend package checks and smoke tests to pack, install, and exercise
       both tarballs from a clean consumer.
-- [ ] Run `cargo xtask check`; after it passes, `git add -A`, commit with
+- [x] Run `cargo xtask check`; after it passes, `git add -A`, commit with
       Conventional Commits, and push the branch.
-- [ ] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
+- [x] After the push, use [the implementation review prompt](../docs/implementation-review-prompt.md)
       to review the complete local diff against `origin/main`; report
       numbered, severity-rated findings with options and recommendations
       without changing the implementation.
@@ -900,7 +900,70 @@ this milestone. Evidence is retained under `.context/viewer-m6/` in
 `exact-artifacts.log`, `rehearsal.log` and `rehearsed-ci.log`.
 
 Earlier milestone verification notes and findings remain byte-unmodified.
-Post-push review results will be recorded below.
+Implementation commit `926f7d40de391e2ee91860b9bc8088105354abc7` was pushed to
+`calummoore/tianjin-v6` before the following review. No package was published and
+no release tag was created; tag tests use isolated temporary repositories.
+
+### Milestone 6 post-push review
+
+1. **P2 — A later viewer 0.2.0 release will fail the archive regression test.**
+   [release_archives.test.ts:67](../tests/release_archives.test.ts#L67) permanently
+   treats an exact `0.2.0` CLI dependency as invalid, while its fixture copies the
+   repository's current viewer manifest. When release-please advances the viewer
+   to 0.2.0, that dependency becomes the correct pair. An isolated real-tarball
+   probe using CLI 0.11.0/viewer 0.2.0 confirmed the package validator accepts the
+   pair and this assertion fails with `Missing expected rejection.` Doing nothing
+   blocks the required CI gate for that release PR even though its version pair
+   is correct. **A (recommended):** derive the deliberately mismatched exact
+   version from the fixture's viewer version and exercise the archive test with
+   both initial and later release versions. This small version-independent test
+   boundary protects future release PRs without changing the production validator.
+   **B:** freeze both fixture versions independently of the repository manifests;
+   this makes the negative case stable but no longer exercises later release
+   metadata unless a separate version matrix is added.
+
+2. **P2 — A throwing pick-end callback interrupts viewer teardown.**
+   [frames.ts:283](../packages/viewer/src/viewer/frames.ts#L283) emits the host's
+   source-change callback before marking the frame manager disposed or clearing
+   its sessions. If `onPickEnd` throws during source replacement,
+   [runtime.tsx:246](../packages/viewer/src/viewer/runtime.tsx#L246) also exits before
+   disposing its workspace, comparison, resize, slot and scoped event resources.
+   Isolated Chromium probes using both same-origin and postMessage adapters
+   observed one mounted session, zero aborts/unsubscribes/disposals, no remaining
+   viewer DOM, and a hover callback still delivered through the old subscription.
+   Doing nothing leaks the old adapter/runtime resources and permits callbacks
+   after React removes the viewer. **A (recommended):** make teardown exception-safe
+   across both ownership layers, ensuring every cleanup runs while preserving the
+   original host exception. Add throwing-callback source/adapter replacement
+   regressions for both transports. A shared cleanup discipline is warranted
+   because guarding only the pick callback leaves the outer runtime vulnerable;
+   no viewer architecture replacement is needed. **B:** require hosts to catch all
+   callback failures before returning. That reduces local work but leaves the
+   library's documented cleanup guarantee dependent on every embedding host.
+
+The required prompt reviewed the complete **618-file** branch diff at `926f7d4`
+using `git diff origin/main...HEAD`, after its push, against `origin/main`
+(`87daaa424e2d086d94a61d24734932235ad931f1`). The tip-to-tip diff has 617 files;
+main's already released 0.9.0 metadata is preserved. The source tree, index and
+untracked-file inventory were clean when review began. Coverage included release
+selection and tag identity, workspace version/lockfile updates, bootstrap and
+registry guards, both packed manifests/consumers, source/instance capture,
+catalogue privacy/projection, Serve/watch and comparison lifecycle, export
+ownership, vanilla asset delivery, React/frame cleanup, tests and protocol/docs
+alignment. Existing CSS module removals are the prior extraction's split modules;
+Milestone 6 introduces no source, test or feature deletion.
+
+The two findings were confirmed without changing implementation or test files.
+Evidence is in `.context/viewer-m6/review-version-probe.log` and
+`review-callback-probe.log` (one future-version archive probe and two adapter
+lifecycle probes). They identify missing behavioral coverage after the complete
+gate passed; no failed gate or flaky retry was ignored. The seven earlier P2
+implementation findings remain unresolved, and every earlier review record is
+unchanged. All recommendations await the user's decision. Residual verification
+limits are Chromium-only browser coverage, local Node 24 rather than CI's full
+runtime/platform matrix, zero inspector budget headroom, and no live npm/OIDC or
+GitHub protection mutation. Recording this review is a documentation-only
+follow-up; publication and published-package verification remain post-merge.
 
 ## Post-merge follow-up (non-blocking)
 
