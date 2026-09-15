@@ -383,15 +383,18 @@ test("the Product stylesheet extends the shared layout and owns its chrome", asy
   );
 });
 
-test("the depicted version is the workspace package version", async () => {
-  const manifest = JSON.parse(
-    await fs.readFile(path.join(repositoryRoot, "package.json"), "utf8"),
-  ) as { version: string };
+test("the depicted version is the changelog's latest release", async () => {
+  const changelog = await fs.readFile(
+    path.join(repositoryRoot, "CHANGELOG.md"),
+    "utf8",
+  );
+  const latest = /^## \[(\d+\.\d+\.\d+)\]/m.exec(changelog)?.[1];
+  assert.ok(latest);
   for (const id of [HOME, DOCS, CHANGELOG]) {
     const { document } = await designDocument(id, "desktop");
     assert.match(
       textContent(byClass(document, "pd-version")[0]!),
-      new RegExp(`${manifest.version.replace(/\./g, "\\.")}$`),
+      new RegExp(`${latest.replace(/\./g, "\\.")}$`),
       id,
     );
   }
