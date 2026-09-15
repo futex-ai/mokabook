@@ -58,8 +58,14 @@ POST Origin must equal `http://` plus Host exactly and the render token is still
 required. Preview GET/HEAD uses Host and its authenticated render id; it does
 not require the POST token or Origin. Non-loopback hosts and `x-forwarded-*`
 headers grant no access; invalid required authorization returns 403.
-Exclusions and forwarded-port admission are approved targets pending Milestones
-3 and 4 of the [upstreaming plan](../../plans/mokabook-dependency-patch-upstreaming.md).
+Forwarded-port admission is implemented; public exclusions remain an approved
+target pending Milestone 3 of the
+[upstreaming plan](../../plans/mokabook-dependency-patch-upstreaming.md).
+
+`shell/usage_links.ts` deduplicates the shared served/published Affected list
+using complete serialized-link identity, keeping the first occurrence in evidence
+order and serializing each input only once. Distinct usage contexts retain their
+comparison eligibility; deduplication does not alter Changes membership.
 
 Run the server tests with `npm test` and the navigation/comparison smoke tests
 with `npm run test:browser`. `derived_child_repository.test.ts` covers revocation,

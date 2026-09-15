@@ -6,9 +6,9 @@ Local Serve implements temporary prop editing through the registered consumer
 renderer. Published catalogues keep saved variants and read-only controls. The
 [controls mockups](./mokly-component-controls-design.md) and
 [component explorer plan](../../plans/component-explorer.md) describe the same
-shared icon inspector and lifecycle. The forwarded-port admission rule below
-is an approved target for Milestone 4 of the
-[dependency patch upstreaming plan](../../plans/mokabook-dependency-patch-upstreaming.md); runtime implementation is pending.
+shared icon inspector and lifecycle. Forwarded loopback ports follow the
+admission rule below; verification is recorded in Milestone 4 of the
+[dependency patch upstreaming plan](../../plans/mokabook-dependency-patch-upstreaming.md).
 
 ## Scope And User Behavior
 

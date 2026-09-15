@@ -200,8 +200,7 @@ Watched Serve keeps the first resolved port for later child restarts so its URL
 stays stable. Live controls support forwarding through another local port when
 Host is `localhost:<port>` or `127.0.0.1:<port>` with a decimal port from 1 to
 65535 and no leading zero; POST still requires the exact matching HTTP Origin
-and render token. This forwarded-port rule is an approved target awaiting
-implementation; see the [controls contract](./docs/protocol/mokly-component-controls.md).
+and render token. See the [controls contract](./docs/protocol/mokly-component-controls.md).
 
 For slow startup, add `--debug-timings` to any command. It writes structured
 phase timings and aggregate catalogue sizes to stderr while leaving normal

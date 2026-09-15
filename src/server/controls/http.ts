@@ -9,10 +9,15 @@ import { safeDecodePath } from "../respond.js";
 
 import type { ComponentRenderService } from "./service.js";
 
-export function localHost(request: IncomingMessage): string | undefined {
-  const port = request.socket.localPort;
+/** Accept exact loopback Host names with any canonical valid port, including forwarded ports. */
+export function localHost(
+  request: Pick<IncomingMessage, "headers">,
+): string | undefined {
   const host = request.headers.host;
-  return host === `127.0.0.1:${port}` || host === `localhost:${port}`
+  const match = /^(?:localhost|127\.0\.0\.1):([1-9][0-9]{0,4})$/.exec(
+    host ?? "",
+  );
+  return match && match[0] === host && Number(match[1]) <= 65_535
     ? host
     : undefined;
 }

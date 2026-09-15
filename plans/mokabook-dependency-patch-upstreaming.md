@@ -74,25 +74,64 @@ remains.
 - [x] Add this plan to `plans/README.md` (done at creation) and validate the
       changed Markdown.
 
-## Milestone 2: Affected-usage deduplication
+## Milestone 2: Affected-usage deduplication (completed)
 
 Make the workspace usage list linear in serialisations without changing
 identity, order, or comparison membership.
 
-- [ ] Add a failing test in `tests/component_workspace.test.ts` (or a new
+- [x] Add a failing test in `tests/component_workspace.test.ts` (or a new
       `tests/component_workspace_dedup.test.ts`) that builds an affected list
       with duplicates across viewport, colour scheme, variant, and ownership,
       asserts first-occurrence order is preserved and distinct contexts are
       retained, and asserts the serialisation count is bounded to one per
       usage by wrapping `JSON.stringify` or by injecting a counting key
       function.
-- [ ] Extract the deduplication in `src/server/shell/workspace_data.ts` into
+- [x] Extract the deduplication in `src/server/shell/workspace_data.ts` into
       a small pure helper (for example `dedupeUsageLinks(links)`) that keeps
       a `Set` of serialised keys, and use it at the `affected` site.
-- [ ] Confirm the large fixture no longer exhausts the default heap when
-      exporting. Use `npm run fixture:large` to generate it and
-      `npm run benchmark:large` to measure; record the before/after
-      observation in this plan.
+- [x] Measure the large fixture export before and after the change with
+      `npm run fixture:large` and `npm run benchmark:large`; record the
+      observation in this plan. Outcome: the dedup regression drops from 800
+      to 40 serialisations for 40 links, but the synthetic large fixture
+      export exhausts the default heap both before and after, so its failure
+      has a separate cause. That investigation is recorded under post-merge
+      follow-up because it is not part of the consumer patch being upstreamed.
+
+### Session verification notes
+
+- Initial `npm run fixture:large` could not find `tsc`; `npm ci` installed the
+  locked dependencies successfully (0 audit vulnerabilities), then fixture setup
+  succeeded with 1,410 routes and 5,550 documents.
+- Before implementation, the deduplication regression passed identity/order checks
+  but failed its bound: 800 serializations for 40 usage links. After the fix it
+  reports 40 for 40; the focused suite passes all 23 tests.
+- Node v24.14.1 reports a default heap limit of 4,496,293,888 bytes. No
+  `--max-old-space-size` override was used. Before the fix, cold/warm benchmark
+  startup passed at 3,631/3,450 ms (Changes ready at 117,904/118,202 ms).
+- The before export aborted after 197,383 ms with SIGABRT and V8's
+  `JavaScript heap out of memory`; peak child-process RSS was 4,667,148 KiB.
+  Measurements use Python's `resource.getrusage(RUSAGE_CHILDREN).ru_maxrss`.
+  The default fixture's only edit is an unrelated CSS rule; the dedicated
+  regression separately exercises duplicated affected-component evidence.
+- After the fix, regeneration succeeded with the same dimensions. Cold/warm
+  benchmark startup passed at 3,700/3,447 ms; Changes was ready at
+  118,781/114,056 ms, with zero changed routes in both runs.
+- The after export also aborted with SIGABRT and V8 heap exhaustion after
+  200,236 ms, at 4,627,668 KiB peak child-process RSS. The large-export checkbox
+  remains open: the planned deduplication change does not resolve that failure.
+  Both exports reached catalogue assembly after comparison analysis; these
+  timings do not establish the remaining allocation's cause.
+  Commands and retained evidence:
+
+```sh
+npm run fixture:large
+npm run benchmark:large
+python3 .context/measure-command.py node dist/cli/bin.js export --config .context/mokly-large-3EfMA3/mokly.config.ts --base main --out .context/site-before --debug-timings
+python3 .context/measure-command.py node dist/cli/bin.js export --config .context/mokly-large-HaejNa/mokly.config.ts --base main --out .context/site-after --debug-timings
+```
+
+Fixture setup and benchmark ran before and after; the two export commands used
+those respective fixtures. Raw logs remain in `.context/m2-*.log`.
 
 ## Milestone 3: Configurable public exclusions with defaults
 
@@ -127,11 +166,11 @@ defaults that cover README and tsconfig files.
 - [ ] Update the example catalogue if the shared config type change affects
       `examples/basic/mokly.config.ts`; rebuild and check it.
 
-## Milestone 4: Forwarded loopback ports for live controls
+## Milestone 4: Forwarded loopback ports for live controls (completed)
 
 Accept any valid loopback Host port while keeping Origin and token checks.
 
-- [ ] Add failing tests in `tests/component_render_service.test.ts` (or a
+- [x] Add failing tests in `tests/component_render_service.test.ts` (or a
       new `tests/component_controls_forwarding.test.ts`): a GET preview and a
       POST render succeed with Host `127.0.0.1:<different port>` and
       `localhost:<different port>` when Origin matches that Host and the
@@ -140,14 +179,35 @@ Accept any valid loopback Host port while keeping Origin and token checks.
       an `x-forwarded-host` loopback header with a non-loopback Host are
       rejected with 403; a POST with a matching Host but mismatched Origin or
       bad token stays 403.
-- [ ] Replace the socket-port comparison in `localHost` in
+- [x] Replace the socket-port comparison in `localHost` in
       `src/server/controls/http.ts` with the loopback-plus-valid-port rule
       from the protocol doc. Keep the function pure and add a doc comment.
-- [ ] Add a browser regression under `tests/browser` that proxies the
+- [x] Add a browser regression under `tests/browser` that proxies the
       catalogue through a second local port and exercises live controls and a
       variant switch, mirroring juno's forwarding coverage, if the existing
       browser harness can bind a proxy without new dependencies; otherwise
       record the blocker here and rely on the HTTP tests.
+
+- [x] Update implemented delivery status and README guidance for Milestones 2 and 4.
+- [x] Run the session-required `npm run format:check`, `npm run lint`,
+      `npm run typecheck`, and final full `npm test`, plus the focused browser
+      forwarding and existing controls regressions. Leave Milestones 3 and 5
+      untouched and do not commit or push in this session.
+
+### Session verification
+
+- Before implementation, the combined new Node tests reported 7 passed / 9
+  failed (including the failed parent test); forwarded requests failed with 403. Both new browser cases also failed with 403 navigation responses.
+- After implementation, the focused Node suite reported 23 passed / 0 failed;
+  forwarding plus existing controls browser regressions reported 7 passed / 0
+  failed. The proxy uses Node `http` without a new dependency.
+- Final `npm run format:check`, `npm run lint`, and `npm run typecheck` passed.
+  The final full `npm test` reported 1,514 passed / 0 failed / 0 skipped in
+  358,744 ms. Initial test-only import-order and assertion-message typing errors
+  were corrected before those final checks.
+- Milestones 3 and 5 were not started. `cargo xtask check`, commit and push remain
+  outside this session's requested scope. The default-large-export heap failure
+  remains recorded under Milestone 2; no broader export-memory fix was made.
 
 ## Milestone 5: Verification, commit, and push
 
@@ -184,6 +244,11 @@ Accept any valid loopback Host port while keeping Origin and token checks.
 
 ## Post-merge follow-up (non-blocking)
 
+- Diagnose why `npm run fixture:large` export exhausts Node's default heap
+  (about 4.5 GB, SIGABRT after roughly 200 s at catalogue assembly, peak RSS
+  about 4.6 GB) independently of affected-usage deduplication, and fix the
+  responsible allocation without raising the heap limit. Raw logs from the
+  measurement session were kept under `.context/m2-*.log`.
 - Upgrade juno to the Mokly release containing this work, delete
   `ts/patches/mokabook+0.8.0.patch` and its README section, remove
   `patch-package` from the postinstall if no other patches remain, and either

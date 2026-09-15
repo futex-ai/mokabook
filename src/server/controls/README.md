@@ -6,8 +6,13 @@ supplies a capability, token, or rendering endpoint.
 The public authoring API and ordinary renderer remain the integration boundary.
 
 The parent shell sends controlled overrides to
-`POST /__mokly/components/render`. Requests must match the bound loopback
-Host, Origin, shell token, current generation, saved variant and view. The body
+`POST /__mokly/components/render`. Host must be exactly `localhost:<port>` or
+`127.0.0.1:<port>`, with a decimal port from 1 to 65535 and no leading zero.
+Forwarded local ports may differ from the listening socket port. POST requires
+Origin to equal `http://` plus Host exactly, the shell token, current generation,
+saved variant and view. Preview GET/HEAD validates Host and its authenticated
+render id without requiring Origin or the POST token. `x-forwarded-*` headers
+never grant authority. The body
 is strict JSON capped at 64 KiB. Shared schema/codec validation checks every
 merged prop, including fields that cannot be edited.
 
@@ -51,8 +56,8 @@ its immutable bundle, not every linked page.
 
 ```sh
 npm run build
-node --import tsx --test tests/component_render*.test.ts tests/component_controls_watch.test.ts
-npx playwright test tests/browser/component_controls_runtime.spec.ts
+node --import tsx --test tests/component_render*.test.ts tests/component_controls_*.test.ts
+npx playwright test tests/browser/component_controls_runtime.spec.ts tests/browser/component_controls_forwarding.spec.ts
 ```
 
 The test suite covers validation, authority, chunked size limits, immutable

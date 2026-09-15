@@ -2,9 +2,9 @@
 
 ## Delivery Status
 
-Live evidence updates are implemented. The bounded affected-usage deduplication
-contract below is an approved target for Milestone 2 of the
-[dependency patch upstreaming plan](../../plans/mokabook-dependency-patch-upstreaming.md); runtime implementation is pending.
+Live evidence updates and bounded affected-usage deduplication are implemented.
+Deduplication verification is recorded in Milestone 2 of the
+[dependency patch upstreaming plan](../../plans/mokabook-dependency-patch-upstreaming.md).
 
 ## Revisions and publication
 
