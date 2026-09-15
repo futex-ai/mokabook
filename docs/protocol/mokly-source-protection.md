@@ -6,8 +6,6 @@ Implemented for schema-v5 [pages](./mokly-pages.md), screens, and flows.
 The same resolved inventory protects build, runtime, comparisons, and both
 publication options. Verification is tracked in
 [Unified Catalogue Pages](../../plans/unified-catalogue-pages.md).
-Public exclusions below are an approved target for Milestone 3 of the
-[dependency patch upstreaming plan](../../plans/mokabook-dependency-patch-upstreaming.md); runtime implementation is pending.
 
 ## Protected Inputs
 
@@ -175,8 +173,9 @@ reserved source basenames; they are the only readers allowed to lack v5's
 inventory. Internal manifest paths stay private for every historical schema.
 The active resolved config's public exclusions apply to every historical schema,
 matched relative to that baseline's mockups root; never execute historical config
-to obtain exclusions or add them to its source inventory. Historical symlink
-aliases use the baseline reader's validated target paths, not current disk targets.
+to obtain exclusions or add them to its source inventory. Historical paths use the baseline reader's validated file kinds, never current
+disk targets. Git and derived-baseline resource readers reject historical symlinks
+rather than following them.
 Current-side resource reads always use the current validated policy.
 
 ## Acceptance

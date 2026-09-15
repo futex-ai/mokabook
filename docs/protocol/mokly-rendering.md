@@ -3,8 +3,8 @@
 This implemented contract expands the [package contract](./mokly-package.md)
 for the [authoring API](./mokly-authoring.md) and
 [configuration](./mokly-configuration.md). Public-resource eligibility follows
-[source protection](./mokly-source-protection.md), including its approved
-public-exclusion target.
+[source protection](./mokly-source-protection.md), including configured
+public exclusions.
 
 ## Rendering Boundary
 

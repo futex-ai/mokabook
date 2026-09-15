@@ -17,6 +17,7 @@ import type { ResolvedConfig } from "./types.js";
 export function isInternalCatalogueFile(
   candidate: string,
   config: ResolvedConfig,
+  resolveAliases = true,
 ): boolean {
   const internal = [
     MANIFEST_NAME,
@@ -24,21 +25,23 @@ export function isInternalCatalogueFile(
     LEGACY_MANIFEST_NAME,
   ].map((name) => path.join(config.mockupsDir, name));
   if (internal.includes(candidate)) return true;
+  if (!resolveAliases) return false;
   const realCandidate = projectRealPath(candidate);
   return internal.some(
     (file) => fs.existsSync(file) && realCandidate === fs.realpathSync(file),
   );
 }
 
-/** Shared denial policy for generated references, HTTP, export, and Review. */
+/** Shared denial policy; historical readers disable current filesystem aliases. */
 export function isPrivateStaticPath(
   candidate: string,
   config: ResolvedConfig,
+  resolveAliases = true,
 ): boolean {
   return (
-    isBaselineCachePath(candidate, config.repoRoot) ||
-    isInternalCatalogueFile(candidate, config) ||
-    isAuthoringSource(candidate, config)
+    isBaselineCachePath(candidate, config.repoRoot, resolveAliases) ||
+    isInternalCatalogueFile(candidate, config, resolveAliases) ||
+    isAuthoringSource(candidate, config, resolveAliases ? "all" : "none")
   );
 }
 

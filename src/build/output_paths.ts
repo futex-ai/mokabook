@@ -54,7 +54,10 @@ export function validateGeneratedOutputPaths(
     }
     if (
       (route !== MANIFEST_NAME && isInternalCatalogueFile(target, config)) ||
-      isAuthoringSource(target, config) ||
+      isAuthoringSource(
+        target,
+        route === MANIFEST_NAME ? { ...config, publicExclude: [] } : config,
+      ) ||
       authoredRoots.some((root) => isInside(root, target)) ||
       realAuthoredRoots.some((root) => isInside(root, projectedTarget))
     ) {

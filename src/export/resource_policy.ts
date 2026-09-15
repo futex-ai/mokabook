@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import { isReservedSource } from "../build/source_inventory.js";
+import { isAuthoringSource } from "../build/source_inventory.js";
 import {
   isInside,
   isSafeRepositoryPath,
@@ -27,11 +27,16 @@ const PRIVATE_DIRECTORIES = new Set([
 /** Public names cannot identify private modules, hidden paths, or cache trees. */
 export function isExportPublicName(
   name: string,
-  options: { allowBuildDirectories?: boolean } = {},
+  config: ResolvedConfig,
+  options: { allowBuildDirectories?: boolean; resolveAliases?: boolean } = {},
 ): boolean {
   return (
     isSafeRepositoryPath(name) &&
-    !isReservedSource(name) &&
+    !isAuthoringSource(
+      path.resolve(config.mockupsDir, name),
+      config,
+      options.resolveAliases === false ? "none" : "all",
+    ) &&
     name !== MANIFEST_NAME &&
     name !== FORMER_MANIFEST_NAME &&
     name !== LEGACY_MANIFEST_NAME &&
@@ -46,9 +51,10 @@ export function isExportPublicName(
   );
 }
 
-/** The same private-file boundary applies to current and historical resources. */
+/** Snapshot names use lexical policy; current capture additionally resolves aliases. */
 export function exportResourcePolicy(
   config: ResolvedConfig,
+  resolveAliases = true,
 ): (name: string) => boolean {
   const mockups = projectRealPath(config.mockupsDir);
   const packages = config.moduleResolution.packageRoots.map(projectRealPath);
@@ -70,7 +76,7 @@ export function exportResourcePolicy(
     ),
   ].flatMap((file) => (file ? [file, projectRealPath(file)] : []));
   return (name) => {
-    if (!isExportPublicName(name)) return false;
+    if (!isExportPublicName(name, config, { resolveAliases })) return false;
     const candidates = [
       path.resolve(config.mockupsDir, name),
       path.resolve(mockups, name),

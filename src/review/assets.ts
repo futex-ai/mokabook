@@ -91,11 +91,18 @@ export class FileSystemReviewAssetReader implements OptionalReviewAssetReader {
 /** Confined Git implementation for base-commit Review assets. */
 export class GitReviewAssetReader implements ReviewAssetReader {
   constructor(
-    private readonly config: ResolvedConfig,
+    config: ResolvedConfig,
     private readonly git: BaselineReader,
     private readonly commit: string,
     private readonly mockupsPrefix: string,
-  ) {}
+  ) {
+    this.config = {
+      ...config,
+      mockupsDir: path.resolve(config.repoRoot, mockupsPrefix),
+    };
+  }
+
+  private readonly config: ResolvedConfig;
 
   async readIfExists(route: string): Promise<Uint8Array | undefined> {
     assertPublicStaticRoute(route, this.config);
@@ -253,7 +260,7 @@ function assertPublicStaticRoute(
   const candidate = path.resolve(config.mockupsDir, route);
   if (
     !isInside(config.mockupsDir, candidate) ||
-    isPrivateStaticPath(candidate, config)
+    isPrivateStaticPath(candidate, config, false)
   ) {
     throw assetError(route, "not a public static file");
   }

@@ -1,9 +1,7 @@
 # Mokly Configuration Contract
 
 This is the detailed configuration boundary of the
-[package contract](./mokly-package.md). Existing settings are implemented;
-`publicExclude` is an approved target for Milestone 3 of the
-[dependency patch upstreaming plan](../../plans/mokabook-dependency-patch-upstreaming.md).
+[package contract](./mokly-package.md). These settings describe current behavior.
 
 ## Configuration Discovery
 

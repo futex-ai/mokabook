@@ -133,12 +133,12 @@ python3 .context/measure-command.py node dist/cli/bin.js export --config .contex
 Fixture setup and benchmark ran before and after; the two export commands used
 those respective fixtures. Raw logs remain in `.context/m2-*.log`.
 
-## Milestone 3: Configurable public exclusions with defaults
+## Milestone 3: Configurable public exclusions with defaults (completed)
 
 Give consumers a supported way to keep developer files private and ship
 defaults that cover README and tsconfig files.
 
-- [ ] Add failing tests first: `tests/export_resource_policy.test.ts` and
+- [x] Add failing tests first: `tests/export_resource_policy.test.ts` and
       `tests/export_source_inventory.test.ts` cases that `README.md`,
       `nested/readme.md`, `tsconfig.json`, and `nested/tsconfig.mokly.json`
       under `mockupsDir` are excluded from export while `styles.css`,
@@ -149,10 +149,10 @@ defaults that cover README and tsconfig files.
       `tests/config.test.ts` case that a consumer `publicExclude` glob
       extends the defaults and that unsafe globs are rejected with a typed
       config error.
-- [ ] Add `publicExclude?: readonly string[]` to the config input and
+- [x] Add `publicExclude?: readonly string[]` to the config input and
       resolved types in `src/config/types.ts`, validate it in
       `src/config/validate.ts`, and resolve it with the defaults prepended.
-- [ ] Implement the matcher in one place. Extend `isAuthoringSource` in
+- [x] Implement the matcher in one place. Extend `isAuthoringSource` in
       `src/build/source_inventory.ts` (or a sibling `public_exclusions.ts`
       module if the file would exceed the length target) to test the
       candidate and its realpath against the resolved globs relative to
@@ -160,11 +160,37 @@ defaults that cover README and tsconfig files.
       bare names without config, thread the resolved config through the
       export policy and `classifyChangedContent` so they use the same check
       rather than a second name-only regex.
-- [ ] Ensure generated routes are collision-checked against the exclusion
+- [x] Ensure generated routes are collision-checked against the exclusion
       globs in the same place reserved basenames are checked, and add a
       build test for a colliding route.
-- [ ] Update the example catalogue if the shared config type change affects
+- [x] Update the example catalogue if the shared config type change affects
       `examples/basic/mokly.config.ts`; rebuild and check it.
+
+- [x] Apply active exclusions to every historical schema without resolving current
+      disk aliases; retain baseline source inventory and regular-file validation.
+- [x] Update the repository preview adapter's config-aware ownership policy and
+      cover both publication paths, excluded aliases, and authoring watch behavior.
+- [x] Preserve publication with unrelated dangling aliases while referenced invalid
+      aliases still reach resource validation.
+- [x] Remove pending-exclusion wording from README and protocol/module docs.
+- [x] Finish the session's format, lint, typecheck, and complete test-suite checks.
+
+Implementation notes: config and Serve regressions use small sibling test files
+(`config_public_exclusions.test.ts` and `public_exclusions.test.ts`) to respect
+file-length conventions. Defaults and resolved arrays are frozen. The matcher
+lives only in `source_inventory.ts`; historical reads disable current filesystem
+aliases, while Changes resolves exclusion aliases and preserves existing
+fail-closed validation of retargeted source aliases. Historical resource readers
+continue rejecting symlinks. Canonical builder metadata bypasses only public
+globs in collision/ownership checks, retaining all other source protection.
+The example config needed no change; build/check passed for all 278 outputs.
+New unsafe-input tests also cover C1 controls and non-JSON values, retaining typed
+errors. Final verification: `npm test` passed 1,565 tests with zero failures;
+the focused policy/publication suite passed 82/82. `npm run format:check`,
+`npm run lint`, and `npm run typecheck` passed. The first complete suite found
+one dangling-alias regression (1,564 passed, one failed); the final full rerun
+passed after the fix. No work on Milestone 5, commits, or pushes is included
+in this session.
 
 ## Milestone 4: Forwarded loopback ports for live controls (completed)
 
@@ -209,31 +235,41 @@ Accept any valid loopback Host port while keeping Origin and token checks.
   outside this session's requested scope. The default-large-export heap failure
   remains recorded under Milestone 2; no broader export-memory fix was made.
 
-## Milestone 5: Verification, commit, and push
+## Milestone 5: Verification, commit, and push (completed)
 
-- [ ] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
+- [x] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
       `npm test`, `npm run example:build`, `npm run example:check`,
       `npm run test:browser`, and `npm run package:smoke`.
-- [ ] Smoke test: start `npm run dev`, open the catalogue through a forwarded
+- [x] Smoke test: start `npm run dev`, open the catalogue through a forwarded
       port, edit a component prop, and confirm the preview updates; run
       `node dist/cli/bin.js export` on the example and confirm no README or
       tsconfig file appears in the output.
-- [ ] Remove every "approved target", "implementation is pending", and
+- [x] Remove every "approved target", "implementation is pending", and
       "awaiting implementation" marker that Milestone 1 added to `README.md`,
       `docs/protocol/*.md`, `src/export/README.md`, and `src/server/README.md`
       now that the behaviour is implemented; the docs must describe current
       behaviour only.
-- [ ] Run `cargo xtask check`.
-- [ ] Update `CHANGELOG.md` only if release-please does not own it; otherwise
+- [x] Run `cargo xtask check`.
+- [x] Update `CHANGELOG.md` only if release-please does not own it; otherwise
       rely on Conventional Commit messages such as
       `feat(config): add publicExclude`,
       `fix(serve): accept forwarded loopback ports`,
       `perf(workspace): dedupe affected usages linearly`, and
       `docs: recommend sibling mockup layout`.
-- [ ] `git add -A`, commit, and push the branch. Before and after commit,
+- [x] `git add -A`, commit, and push the branch. Before and after commit,
       inspect `git diff --name-status origin/main` and
       `git diff --diff-filter=D --name-status origin/main`; no deletions are
       expected.
+
+Verification record: format, lint, typecheck, `npm test` (1,565 passed),
+`npm run test:browser` (276 passed), `npm run package:smoke`,
+`npm run example:build`, `npm run example:check` (278 files), and
+`cargo xtask check` all passed on the final tree. Smoke tests: an export of
+the example with `README.md`, `tsconfig.test.json`, and `data.json` dropped
+into `generated/` produced 1,148 files with no README or tsconfig and with
+`static/data.json` present; Serve returned 404 for `/static/README.md`, 200
+for `/static/data.json`, 404 (not 403) for a controls preview route with a
+forwarded `Host: localhost:5555`, and 403 for `Host: example.com`.
 
 ## Milestone 6: Review
 

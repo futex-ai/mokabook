@@ -14,9 +14,7 @@ may exist only under examples and test fixtures.
 
 ## Delivery Status
 
-This document describes implemented pre-release package and authoring behavior,
-except `publicExclude`, an approved target for Milestone 3 of the
-[dependency patch upstreaming plan](../../plans/mokabook-dependency-patch-upstreaming.md). The sibling layout is already supported.
+This document describes implemented pre-release package and authoring behavior.
 The catalogue-link implementation and its verification history are recorded in
 the completed
 [in-frame catalogue link navigation plan](../../plans/in-frame-catalogue-link-navigation.md).

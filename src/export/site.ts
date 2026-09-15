@@ -87,7 +87,7 @@ export function assembleExport(
     inventory.add(name, html);
     shells.set(name, descriptor);
   };
-  const isPublic = exportResourcePolicy(config);
+  const isPublic = exportResourcePolicy(config, false);
   for (const [name, bytes] of comparisonFiles) {
     if (
       name.startsWith("snapshots/") &&

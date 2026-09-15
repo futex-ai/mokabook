@@ -434,8 +434,7 @@ another protection rule or public exclusion applies.
 - `publicExclude?: readonly string[]` adds safe POSIX globs matched relative to
   `mockupsDir`. Defaults are `**/README`, `**/README.*`, `**/readme.*`,
   `**/tsconfig.json`, and `**/tsconfig.*.json`, all matched case-insensitively.
-  Consumer globs extend these defaults; `[]` retains them. This field is an
-  approved target awaiting implementation; see the
+  Consumer globs extend these defaults; `[]` retains them. See the
   [configuration contract](./docs/protocol/mokly-configuration.md#public-exclusion-configuration).
 - `colorSchemes` defaults to `["light"]`; `["light", "dark"]` enables dark
   fragments catalogue-wide, with per-screen light-only opt-outs.

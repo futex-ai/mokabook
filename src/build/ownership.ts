@@ -102,7 +102,12 @@ export function isOwned(candidate: string, config: ResolvedConfig): boolean {
   try {
     if (
       !isInside(config.mockupsDir, candidate) ||
-      isAuthoringSource(candidate, config)
+      isAuthoringSource(
+        candidate,
+        candidate === path.join(config.mockupsDir, MANIFEST_NAME)
+          ? { ...config, publicExclude: [] }
+          : config,
+      )
     ) {
       return false;
     }
