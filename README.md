@@ -693,7 +693,8 @@ alone may describe the temporary removal; the helper keeps a bounded wait for
 recovery and reports the last published state if it times out.
 
 `cargo xtask check` is the authoritative local gate. It starts with a live
-dependency audit (`npm run dependencies:check`), then includes formatting,
+dependency audit (`npm run dependencies:check`), then checks commit titles in
+`origin/main..HEAD` against the 50-character limit and includes formatting,
 lint, typechecking, unit/integration tests, the derived example, package
 allowlist and license checks, clean packed ESM/NodeNext/npx/Accounting/Juno
 consumers, Chromium tests, and all Rust checks. It also audits the freshly

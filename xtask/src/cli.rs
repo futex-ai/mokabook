@@ -8,6 +8,7 @@ use clap::{Parser, Subcommand};
 
 use crate::check::{CheckRunner, DefaultCheckRunner};
 use crate::command::{CommandRunner, SystemCommandRunner};
+use crate::commit_title::{CommitTitleAuditor, DefaultCommitTitleAuditor};
 use crate::error::{Error, Result};
 use crate::rust_file_length::{RustFileLengthAuditor, SystemRustFileLengthAuditor};
 
@@ -22,6 +23,12 @@ struct Cli {
 enum Command {
     /// Run every local verification gate.
     Check,
+    /// Enforce the 50-character commit-title limit for branch history.
+    CommitTitleLint {
+        /// Exclude commits reachable from this Git reference.
+        #[arg(long, default_value = "origin/main")]
+        base: String,
+    },
     /// Enforce the 300-line Rust source limit.
     RustFileLengthLint {
         /// Audit every Rust file; retained for workspace command compatibility.
@@ -38,6 +45,7 @@ trait Xtask: Send + Sync {
 
 struct Application {
     check_runner: Arc<dyn CheckRunner>,
+    commit_title_auditor: Arc<dyn CommitTitleAuditor>,
     rust_file_length_auditor: Arc<dyn RustFileLengthAuditor>,
     workspace: PathBuf,
 }
@@ -49,6 +57,7 @@ impl Xtask for Application {
                 self.check_runner.run()?;
                 self.rust_file_length_auditor.run(&self.workspace)
             }
+            Command::CommitTitleLint { base } => self.commit_title_auditor.run(&base),
             Command::RustFileLengthLint { all: _ } => {
                 self.rust_file_length_auditor.run(&self.workspace)
             }
@@ -67,7 +76,8 @@ pub(crate) fn main() -> ExitCode {
     };
     let command_runner: Arc<dyn CommandRunner> = Arc::new(SystemCommandRunner);
     let app: Arc<dyn Xtask> = Arc::new(Application {
-        check_runner: Arc::new(DefaultCheckRunner::new(command_runner)),
+        check_runner: Arc::new(DefaultCheckRunner::new(command_runner.clone())),
+        commit_title_auditor: Arc::new(DefaultCommitTitleAuditor::new(command_runner)),
         rust_file_length_auditor: Arc::new(SystemRustFileLengthAuditor),
         workspace,
     });

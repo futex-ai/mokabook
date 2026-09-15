@@ -23,6 +23,9 @@ per mounted page, cancels superseded work, and replaces a worker after failure
 or a ten-second timeout. The worker evaluates the retained in-memory consumer
 bundle; no independently configured renderer or React graph is loaded. A
 renderer cannot occupy the server's HTTP thread or delay its shutdown.
+Worker failures retain their diagnostic as a server-only detail, logged to stderr
+by the HTTP boundary. Responses keep the generic preview failure message and
+never include resource paths, exclusion globs, or other diagnostic details.
 
 `transient.ts` uses Build's stylesheet selection, renderer, compatibility/link
 transformation, ownership, range, prop, per-view metadata and resource checks.

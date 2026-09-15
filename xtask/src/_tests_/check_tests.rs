@@ -16,6 +16,9 @@ fn check_runs_every_gate_in_order() {
             .next_call(matching!((command) if command.display() == "npm run dependencies:check"))
             .returns(Ok(())),
         CommandRunnerRunMock
+            .next_call(matching!((command) if command.display() == "cargo xtask commit-title-lint"))
+            .returns(Ok(())),
+        CommandRunnerRunMock
             .next_call(matching!((command) if command.display() == "npm run format:check"))
             .returns(Ok(())),
         CommandRunnerRunMock
@@ -69,5 +72,26 @@ fn dependency_check_failure_stops_verification() {
     assert!(matches!(
         runner.run(),
         Err(Error::CommandFailed { command, .. }) if command == "npm run dependencies:check"
+    ));
+}
+
+#[test]
+fn commit_title_failure_stops_verification() {
+    let command_runner = Arc::new(Unimock::new((
+        CommandRunnerRunMock
+            .next_call(matching!((command) if command.display() == "npm run dependencies:check"))
+            .returns(Ok(())),
+        CommandRunnerRunMock
+            .next_call(matching!((command) if command.display() == "cargo xtask commit-title-lint"))
+            .returns(Err(Error::CommandFailed {
+                command: "cargo xtask commit-title-lint".to_owned(),
+                status: "1".to_owned(),
+            })),
+    )));
+    let runner = DefaultCheckRunner::new(command_runner);
+
+    assert!(matches!(
+        runner.run(),
+        Err(Error::CommandFailed { command, .. }) if command == "cargo xtask commit-title-lint"
     ));
 }

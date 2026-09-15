@@ -110,12 +110,10 @@ export function generatedOwnershipDenial(
 ): string | undefined {
   try {
     if (!isInside(config.mockupsDir, candidate)) return "is outside mockupsDir";
-    const denial = isAuthoringSource(
-      candidate,
-      candidate === path.join(config.mockupsDir, MANIFEST_NAME)
-        ? { ...config, publicExclude: Object.freeze([]) }
-        : config,
-    );
+    const denial = isAuthoringSource(candidate, config, "all", {
+      ignorePublicExclusions:
+        candidate === path.join(config.mockupsDir, MANIFEST_NAME),
+    });
     if (denial) return sourceDenialMessage(denial);
     const relative = toPosixPath(path.relative(config.mockupsDir, candidate));
     if (relative === MANIFEST_NAME) return;

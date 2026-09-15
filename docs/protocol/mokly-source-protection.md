@@ -59,12 +59,18 @@ resource fails validation with its referring route. The shared classifier retain
 the denial cause: entries root, reserved basename, listed input, or exclusion
 with its matched glob. Build, ownership, publication, and resource diagnostics
 report that cause; exclusion errors name `publicExclude` and the matched glob.
+Lexical denial precedence is entries root, reserved basename, listed input,
+then exclusion in every alias mode. Full alias resolution additionally checks
+the realpath source index as a fallback, including live retargeted aliases.
+Canonical manifest validation and ownership bypass only public exclusions via
+an explicit classifier option, reusing the index for the accepted `sourceFiles`
+array; absent inventories are not cached.
 Stylesheet and component-resource failures keep their typed validation errors
 and referring routes even when a file's alias cannot be resolved.
 
 ## Public Exclusions
 
-`publicExclude` is a config-owned list of safe repository-relative POSIX globs.
+`publicExclude` is a config-owned list of safe relative POSIX globs.
 Its matching base is `mockupsDir`, not `repoRoot`: a candidate at
 `docs/mockups/generated/notes/private.json` with that generated directory as
 `mockupsDir` is tested as `notes/private.json`. Do not prefix the glob with

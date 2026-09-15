@@ -23,11 +23,10 @@ function isReservedSource(candidate: string): boolean {
 }
 
 interface SourceIndex {
-  inventory: readonly string[] | undefined;
   files: Set<string>;
   aliases: string[];
 }
-const sourceIndexes = new WeakMap<ResolvedConfig, SourceIndex>();
+const sourceIndexes = new WeakMap<readonly string[], SourceIndex>();
 const logicalSourceIndexes = new WeakMap<
   readonly string[],
   ReadonlySet<string>
@@ -36,6 +35,12 @@ const exclusionMatchers = new WeakMap<
   readonly string[],
   readonly Minimatch[]
 >();
+
+/** Classification exceptions for internal generated metadata. */
+export interface SourceClassificationOptions {
+  /** Bypass public globs while retaining every authoring-source protection. */
+  readonly ignorePublicExclusions?: boolean;
+}
 
 /**
  * Return the denial cause, or undefined for a public candidate.
@@ -47,16 +52,18 @@ export function isAuthoringSource(
   candidate: string,
   config: ResolvedConfig,
   aliases: "all" | "exclusions" | "none" = "all",
+  options: SourceClassificationOptions = {},
 ): SourceDenial | undefined {
   if (isInside(config.entriesDir, candidate)) return { kind: "entries" };
   if (isReservedSource(candidate)) return { kind: "reserved" };
-  if (aliases !== "all" && isListedSource(candidate, config))
-    return { kind: "listed" };
-  const logicalExclusion = matchingPublicExclusion(
-    candidate,
-    config.mockupsDir,
-    config.publicExclude,
-  );
+  if (isListedSource(candidate, config)) return { kind: "listed" };
+  const logicalExclusion = options.ignorePublicExclusions
+    ? undefined
+    : matchingPublicExclusion(
+        candidate,
+        config.mockupsDir,
+        config.publicExclude,
+      );
   if (logicalExclusion !== undefined)
     return { kind: "exclusion", glob: logicalExclusion };
   if (aliases === "none") return;
@@ -67,11 +74,13 @@ export function isAuthoringSource(
     if (aliases === "exclusions") return;
     throw error;
   }
-  const physicalExclusion = matchingPublicExclusion(
-    real,
-    projectRealPath(config.mockupsDir),
-    config.publicExclude,
-  );
+  const physicalExclusion = options.ignorePublicExclusions
+    ? undefined
+    : matchingPublicExclusion(
+        real,
+        projectRealPath(config.mockupsDir),
+        config.publicExclude,
+      );
   if (physicalExclusion !== undefined)
     return { kind: "exclusion", glob: physicalExclusion };
   if (aliases === "exclusions") return;
@@ -89,20 +98,20 @@ export function isAuthoringSource(
 
 /** Cache source membership while rechecking live aliases at each lookup. */
 function sourceIndex(config: ResolvedConfig): SourceIndex {
-  let index = sourceIndexes.get(config);
-  if (!index || index.inventory !== config.sourceFiles) {
-    const files = new Set<string>();
-    const sourceAliases: string[] = [];
-    for (const source of config.sourceFiles ?? []) {
-      const logical = path.resolve(config.repoRoot, source);
-      const physical = projectRealPath(logical);
-      files.add(logical);
-      files.add(physical);
-      if (logical !== physical) sourceAliases.push(logical);
-    }
-    index = { inventory: config.sourceFiles, files, aliases: sourceAliases };
-    sourceIndexes.set(config, index);
+  const inventory = config.sourceFiles;
+  const cached = inventory && sourceIndexes.get(inventory);
+  if (cached) return cached;
+  const files = new Set<string>();
+  const sourceAliases: string[] = [];
+  for (const source of inventory ?? []) {
+    const logical = path.resolve(config.repoRoot, source);
+    const physical = projectRealPath(logical);
+    files.add(logical);
+    files.add(physical);
+    if (logical !== physical) sourceAliases.push(logical);
   }
+  const index = { files, aliases: sourceAliases };
+  if (inventory) sourceIndexes.set(inventory, index);
   return index;
 }
 

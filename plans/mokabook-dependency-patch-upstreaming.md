@@ -444,10 +444,10 @@ tests/config_public_exclusions.test.ts tests/watched_child_startup.test.ts`
   `npm test` retry passed 1,578 tests / 0 failed / 0 skipped in 357,321 ms.
   Logs are `.context/m7-ipc-correction-*.log`; the successful full rerun is
   `.context/m7-ipc-correction-npm-test-retry.log`. The generated example has no diff.
-- Per the implementation session's scope, the final checks and commit/push
-  TODOs remain open for the reviewer, including browser tests, package smoke,
-  and `cargo xtask check`. No branch commit or push was made. Milestone 8 was
-  not started.
+- The implementation session left the final checks and commit/push TODOs open,
+  including browser tests, package smoke, and `cargo xtask check`, and did not
+  start Milestone 8. The reviewer session subsequently completed those checks,
+  committed and pushed the branch, and completed the Milestone 8 review.
 
 Reviewer verification on the final tree: format, lint, typecheck,
 `npm test` (1,578 passed), `npm run example:build` and `example:check`
@@ -475,14 +475,14 @@ depends on the alias mode; five commit titles exceed 50 characters; one
 stale session note contradicts the ticked TODOs; and the docs describe glob
 relativity three different ways. Each is awaiting the user's decision.
 
-## Milestone 9: Second-review fixes
+## Milestone 9: Second-review fixes (completed)
 
 Address the six Milestone 8 findings. Finding 4 is handled by adding a
 mechanical commit-title check only; already-pushed history is not rewritten,
 and the PR should be squash-merged with a compliant title. Backend, tooling,
 tests, and docs only.
 
-- [ ] Finding 1 (option B with A): make the render worker in
+- [x] Finding 1 (option B with A): make the render worker in
       `src/server/controls/worker.ts` post `{ ok: false, reason }` with the
       caught error's message instead of a bare `{ ok: false }`; have
       `src/server/controls/worker_client.ts` carry that reason on the typed
@@ -490,7 +490,7 @@ tests, and docs only.
       through the same pattern the watcher uses, while the HTTP body stays
       the generic product message. Add a test that a preview-resource
       exclusion match reaches the server log and does not reach the client.
-- [ ] Finding 2 (option C with D): replace the
+- [x] Finding 2 (option C with D): replace the
       `{ ...config, publicExclude: Object.freeze([]) }` manifest bypass in
       `src/build/output_paths.ts` and `src/build/ownership.ts` with an
       explicit typed option on `isAuthoringSource` (for example
@@ -498,13 +498,13 @@ tests, and docs only.
       through; key `sourceIndexes` on `config.sourceFiles` rather than on
       config identity so spread configs still hit the cache. Add a test that
       the manifest classification does not rebuild the source index.
-- [ ] Finding 3 (option B): run the lexical `isListedSource` check in all
+- [x] Finding 3 (option B): run the lexical `isListedSource` check in all
       three alias modes before the exclusion check so precedence is entries,
       reserved, listed, exclusion everywhere; keep the realpath source-index
       check as the alias fallback in `all` mode. Add a test in
       `tests/source_denials.test.ts` for a file that is both listed and
       excluded, asserting the same `listed` kind in all three modes.
-- [ ] Finding 4 (option D only): add a `commit-title-lint` gate to
+- [x] Finding 4 (option D only): add a `commit-title-lint` gate to
       `cargo xtask check` (new `xtask/src/commit_title.rs`, with tests under
       `xtask/src/_tests_/`) that rejects any commit on `origin/main..HEAD`
       whose first line exceeds 50 characters, and a standalone
@@ -513,20 +513,68 @@ tests, and docs only.
       `--base <ref>` and default to `origin/main`; document in the plan that
       this branch must be squash-merged with a compliant title. Do not
       rewrite pushed history.
-- [ ] Finding 5 (option B): reword the stale final bullet under Milestone 7
+- [x] Finding 5 (option B): reword the stale final bullet under Milestone 7
       "Session verification notes" to say the implementation session left
       the final checks and commit open and the reviewer session completed
       them.
-- [ ] Finding 6 (option A): rename the shape rule to "safe relative POSIX
+- [x] Finding 6 (option A): rename the shape rule to "safe relative POSIX
       glob" in `docs/protocol/mokly-source-protection.md` and
       `docs/protocol/mokly-configuration.md`, matching the `config-invalid`
       error text, and let the separate sentence own the matching base.
-- [ ] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
+- [x] Run `npm run format:check`, `npm run lint`, `npm run typecheck`,
       `npm test`, `npm run example:build`, `npm run example:check`,
-      `npm run test:browser`, `npm run package:smoke`, `cargo fmt --all --
-    --check`, `cargo clippy --workspace --all-targets -- -D warnings`,
+      `npm run test:browser`, `npm run package:smoke`,
+      `cargo fmt --all -- --check`,
+      `cargo clippy --workspace --all-targets -- -D warnings`,
       `cargo test --workspace`, and `cargo xtask check`.
-- [ ] `git add -A`, commit with a title of 50 characters or fewer, and push.
+- [x] `git add -A`, commit with a title of 50 characters or fewer, and push.
+
+### Session verification notes
+
+- The TypeScript regressions failed before implementation: the HTTP request
+  logged no exclusion cause, manifest classification resolved the same source
+  three times instead of once, and `all` mode reported `exclusion` instead of
+  `listed`. The focused command
+  `node --import tsx --test tests/component_render_diagnostics.test.ts tests/source_inventory_cache.test.ts tests/source_denials.test.ts`
+  changed from 4 passed / 3 failed to 7 passed / 0 failed.
+- Rust orchestration tests failed 1 passed / 2 failed before the gate was wired
+  into Check. After correcting test-only command matching, the new auditor tests
+  failed 3 passed / 1 failed because overlong subjects were accepted. Final
+  `cargo test --workspace` passed 8 tests, and formatting and warning-denying
+  Clippy passed. The capture seam preserves typed Git start, exit, and UTF-8
+  failures; subject lengths count Unicode characters, not bytes.
+- This branch must be squash-merged with a Conventional Commit title of 50
+  characters or fewer. `cargo xtask commit-title-lint` correctly rejects its
+  five existing overlong titles (51, 61, 56, 60, and 54 characters); pushed
+  history was not rewritten. `cargo xtask commit-title-lint --base HEAD~0`
+  passes for the empty range; `--base HEAD~1` passes for the latest single
+  commit. The implementation session does not run
+  `cargo xtask check`, whose new title gate would stop at this known history
+  violation; individual checks are run independently instead.
+- Session-required checks passed: `npm run format:check`, `npm run lint`
+  (zero errors), `npm run typecheck`, `npm test` (1,583 passed / 0 failed /
+  0 skipped in 362,982 ms), `cargo fmt --all -- --check`,
+  `cargo clippy --workspace --all-targets -- -D warnings` (zero warnings),
+  and `cargo test --workspace` (8 passed / 0 failed). The npm test entrypoint
+  built the package and generated all 278 example files. The HTTP regression
+  started the real server and worker and submitted a controls render request.
+  `cargo xtask rust-file-length-lint --all` passed for all 10 Rust files;
+  changed Markdown passed formatting and 97 relative-link checks, and
+  `git diff --check` passed. Logs are `.context/m9-*.log`.
+- This implementation session left the final combined-check and commit/push
+  TODOs for the reviewer. No branch commit or push was made, and Milestone 10
+  was not started.
+
+Reviewer verification on the final tree: format, lint, typecheck,
+`npm test` (1,583 passed), `example:check` (278 files), `test:browser`
+(276 passed), `package:check`, `package:smoke`, `dependencies:check` (0
+vulnerabilities), `cargo fmt`, `cargo clippy -D warnings`, `cargo test`
+(8 passed), and `rust-file-length-lint --all` (10 files) all passed
+individually. `cargo xtask check` as a whole stops at its new commit-title
+gate because five earlier commits on this branch exceed 50 characters; that
+is the intended behaviour and the blocker recorded above. The gate passes
+for `--base HEAD~1`, and will pass on `main` once this branch is
+squash-merged with a compliant title.
 
 ## Milestone 10: Review
 

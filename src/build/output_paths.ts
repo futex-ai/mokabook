@@ -57,12 +57,9 @@ export function validateGeneratedOutputPaths(
         `generated route targets internal catalogue metadata: ${route}`,
       );
     }
-    const denial = isAuthoringSource(
-      target,
-      route === MANIFEST_NAME
-        ? { ...config, publicExclude: Object.freeze([]) }
-        : config,
-    );
+    const denial = isAuthoringSource(target, config, "all", {
+      ignorePublicExclusions: route === MANIFEST_NAME,
+    });
     if (denial) {
       throw new MoklyError(
         "build-invalid",

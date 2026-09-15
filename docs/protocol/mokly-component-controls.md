@@ -150,6 +150,9 @@ combinations, and validate unset operations against optional controlled props.
 Use structured error codes for invalid input, unknown entry, stale generation,
 render failure, and temporary capacity limits. Map them to 400, 404, 409, 422,
 and 429 respectively; oversized bodies return 413 and unsupported methods 405.
+Worker failures carry their caught message as server-only detail, written to
+stderr at the HTTP boundary; the response retains the generic preview failure
+message without resource paths, exclusion causes, or other internal details.
 
 When controls are active, every Serve request requires Host to be exactly
 `localhost:<port>` or `127.0.0.1:<port>`, where `<port>` contains only decimal

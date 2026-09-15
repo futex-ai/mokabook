@@ -10,6 +10,22 @@ import { loadConfig } from "../dist/config/load.js";
 
 import { createFixture, removeFixture } from "./helpers/fixture.js";
 
+for (const aliases of ["all", "exclusions", "none"] as const) {
+  test(`listed inputs take precedence over public exclusions in ${aliases} mode`, async (t) => {
+    const fixture = await createFixture();
+    t.after(() => removeFixture(fixture));
+    const candidate = path.join(fixture.mockupsDir, "README.md");
+    await fs.writeFile(candidate, "An imported authoring input");
+    const config = {
+      ...(await loadConfig(fixture.root)),
+      sourceFiles: ["mockups/README.md"],
+    };
+    assert.deepEqual(isAuthoringSource(candidate, config, aliases), {
+      kind: "listed",
+    });
+  });
+}
+
 test("source policy identifies entries, reserved names, listed inputs and matched exclusion globs", async (t) => {
   const fixture = await createFixture(undefined, {
     extraConfig: 'publicExclude: ["internal/**"],',

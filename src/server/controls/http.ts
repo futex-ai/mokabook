@@ -96,6 +96,8 @@ export async function handleControls(
             "render-failed",
             "The preview could not be rendered. Try again or reset the props.",
           );
+    if (failure.detail !== undefined)
+      process.stderr.write(`${failure.detail}\n`);
     if (!response.destroyed)
       json(
         response,

@@ -194,8 +194,8 @@ the transferred entries, without prepending defaults again. Missing, non-array
 or unsafe values reject the startup message. Repeated globs are harmless and
 do not fail config.
 
-Validate the array and each string at config load. A safe repository-relative
-POSIX glob is nonempty and contains no absolute/drive/UNC prefix, backslash,
+Validate the array and each string at config load. A safe relative POSIX glob
+is nonempty and contains no absolute/drive/UNC prefix, backslash,
 colon, NUL/control character, or empty, `.` or `..` path segment. Reject
 whitespace-only strings, leading `!` negation, and leading `#` comment syntax.
 Use the repository's minimatch glob syntax; any brace-expanded alternative must
