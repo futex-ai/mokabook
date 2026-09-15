@@ -1,6 +1,8 @@
 import { defineCollection } from "@mokly/mokly";
 
-import { variantScreens } from "../scaffold.js";
+import { productChangelogScreen } from "./changelog.js";
+import { productDocsScreen } from "./docs.js";
+import { productHomeScreen } from "./home.js";
 
 /** The Product direction: home, documentation and changelog. */
 export const productMockups = [
@@ -17,5 +19,7 @@ export const productMockups = [
     relatedDocs: ["docs/protocol/site-directions.md"],
     title: "Product",
   }),
-  ...variantScreens("product"),
+  productHomeScreen,
+  productDocsScreen,
+  productChangelogScreen,
 ];
